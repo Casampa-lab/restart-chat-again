@@ -281,6 +281,69 @@ export type Database = {
         }
         Relationships: []
       }
+      intervencoes_sv: {
+        Row: {
+          codigo_placa: string | null
+          created_at: string
+          data_intervencao: string
+          dimensoes: string | null
+          estado_conservacao: string
+          id: string
+          km_referencia: number
+          lado: string
+          lote_id: string
+          material: string | null
+          observacao: string | null
+          quantidade: number
+          rodovia_id: string
+          tipo_intervencao: string
+          tipo_placa: string
+          tipo_suporte: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          codigo_placa?: string | null
+          created_at?: string
+          data_intervencao: string
+          dimensoes?: string | null
+          estado_conservacao: string
+          id?: string
+          km_referencia: number
+          lado: string
+          lote_id: string
+          material?: string | null
+          observacao?: string | null
+          quantidade?: number
+          rodovia_id: string
+          tipo_intervencao: string
+          tipo_placa: string
+          tipo_suporte?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          codigo_placa?: string | null
+          created_at?: string
+          data_intervencao?: string
+          dimensoes?: string | null
+          estado_conservacao?: string
+          id?: string
+          km_referencia?: number
+          lado?: string
+          lote_id?: string
+          material?: string | null
+          observacao?: string | null
+          quantidade?: number
+          rodovia_id?: string
+          tipo_intervencao?: string
+          tipo_placa?: string
+          tipo_suporte?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lotes: {
         Row: {
           contrato: string | null
