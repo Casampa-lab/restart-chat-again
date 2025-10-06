@@ -64,6 +64,12 @@ const Index = () => {
           <div className="flex items-center justify-between gap-4">
             <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-16 object-contain" />
             <div className="flex items-center gap-2">
+              {isAdmin && (
+                <Button variant="outline" size="sm" onClick={() => navigate("/ncs-coordenador")}>
+                  <ClipboardList className="mr-2 h-4 w-4" />
+                  NCs por Lote
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={() => navigate("/minhas-ncs")}>
                 <ClipboardList className="mr-2 h-4 w-4" />
                 Minhas NCs
