@@ -406,21 +406,22 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
             />
           </div>
 
-          {/* KM Referência */}
+          {/* km Referência */}
           <div className="space-y-2">
-            <Label htmlFor="km_referencia">KM Referência (opcional)</Label>
+            <Label htmlFor="km_referencia">km Referência (opcional)</Label>
             <Input
               id="km_referencia"
               type="number"
               step="0.001"
-              placeholder="Ex: 145.500"
               value={formData.km_referencia}
-              onChange={(e) =>
-                setFormData({ ...formData, km_referencia: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, km_referencia: e.target.value })}
+              placeholder="Ex: 123.456"
             />
             <p className="text-xs text-muted-foreground">
-              GPS é obrigatório. KM é opcional e apenas para referência.
+              (apenas referência visual)
+            </p>
+            <p className="text-xs text-muted-foreground">
+              GPS é obrigatório. km é opcional e apenas para referência.
             </p>
           </div>
 

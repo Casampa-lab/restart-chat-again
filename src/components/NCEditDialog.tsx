@@ -249,9 +249,9 @@ const NCEditDialog = ({ ncId, open, onOpenChange, onSaved }: NCEditDialogProps) 
             </div>
           </div>
 
-          {/* KM Referência */}
+          {/* km Referência */}
           <div className="space-y-2">
-            <Label htmlFor="edit_km_referencia">KM Referência</Label>
+            <Label htmlFor="edit_km_referencia">km Referência</Label>
             <Input
               id="edit_km_referencia"
               type="number"

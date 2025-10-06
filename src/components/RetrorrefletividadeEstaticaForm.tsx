@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 
 interface RetrorrefletividadeEstaticaFormProps {
   loteId: string;
@@ -27,6 +27,7 @@ const TIPOS_DISPOSITIVO = [
 
 const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: RetrorrefletividadeEstaticaFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
   const [formData, setFormData] = useState({
     data_medicao: new Date().toISOString().split('T')[0],
     km_referencia: "",
@@ -36,7 +37,45 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
     valor_medido: "",
     valor_minimo: "",
     observacao: "",
+    latitude: "",
+    longitude: "",
   });
+
+  const capturarCoordenadas = () => {
+    setIsCapturing(true);
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFormData({
+            ...formData,
+            latitude: position.coords.latitude.toString(),
+            longitude: position.coords.longitude.toString(),
+          });
+          toast({
+            title: "Coordenadas capturadas!",
+            description: `Localização: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
+          });
+          setIsCapturing(false);
+        },
+        (error) => {
+          toast({
+            title: "Erro ao capturar localização",
+            description: "Verifique se você permitiu acesso à localização",
+            variant: "destructive",
+          });
+          setIsCapturing(false);
+        }
+      );
+    } else {
+      toast({
+        title: "Geolocalização não suportada",
+        description: "Seu navegador não suporta geolocalização",
+        variant: "destructive",
+      });
+      setIsCapturing(false);
+    }
+  };
 
   const situacao = formData.valor_medido && formData.valor_minimo
     ? parseFloat(formData.valor_medido) >= parseFloat(formData.valor_minimo)
@@ -100,6 +139,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
         valor_medido: "",
         valor_minimo: "",
         observacao: "",
+        latitude: "",
+        longitude: "",
       });
     } catch (error) {
       console.error("Erro ao salvar medição:", error);
@@ -138,7 +179,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="km_referencia">KM de Referência *</Label>
+              <Label htmlFor="km_referencia">km de Referência *</Label>
               <Input
                 id="km_referencia"
                 type="number"
@@ -150,6 +191,37 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                 placeholder="0.000"
                 required
               />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label>Coordenadas GPS</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={capturarCoordenadas}
+                  disabled={isCapturing}
+                >
+                  {isCapturing ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <MapPin className="mr-2 h-4 w-4" />
+                  )}
+                  Capturar Localização
+                </Button>
+                <Input
+                  placeholder="Latitude"
+                  value={formData.latitude}
+                  onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                  className="flex-1"
+                />
+                <Input
+                  placeholder="Longitude"
+                  value={formData.longitude}
+                  onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                  className="flex-1"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

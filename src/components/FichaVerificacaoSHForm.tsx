@@ -310,13 +310,13 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId }: FichaVerificacaoSH
                       />
                     </div>
                     <div>
-                      <Label>KM</Label>
+                      <Label>km</Label>
                       <Input
                         type="number"
                         step="0.001"
                         value={item.km}
                         onChange={(e) => handleUpdateItem(index, 'km', e.target.value)}
-                        placeholder="KM"
+                        placeholder="km"
                       />
                     </div>
                   </div>

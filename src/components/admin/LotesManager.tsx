@@ -282,21 +282,20 @@ const LotesManager = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="km_inicial">KM Inicial</Label>
+                  <Label htmlFor="km_inicial">km Inicial</Label>
                   <Input
                     id="km_inicial"
                     type="number"
                     step="0.001"
-                    placeholder="Ex: 100.000"
                     value={novaRodovia.km_inicial}
                     onChange={(e) =>
                       setNovaRodovia({ ...novaRodovia, km_inicial: e.target.value })
                     }
+                    placeholder="0.000"
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="km_final">KM Final</Label>
+                  <Label htmlFor="km_final">km Final</Label>
                   <Input
                     id="km_final"
                     type="number"
@@ -335,7 +334,7 @@ const LotesManager = () => {
                         <div className="flex items-center gap-4">
                           <Badge variant="outline">{rodovia.codigo}</Badge>
                           <span className="text-sm text-muted-foreground">
-                            KM {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}
+                            km {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}
                           </span>
                         </div>
                         <Button

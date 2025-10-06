@@ -20,19 +20,20 @@ interface RegistroNCFormProps {
 }
 
 const formSchema = z.object({
+  numero_registro: z.string().min(1, "Número do registro é obrigatório"),
   data_registro: z.string().min(1, "Data é obrigatória"),
-  km_inicial: z.string().min(1, "KM inicial é obrigatório"),
-  km_final: z.string().min(1, "KM final é obrigatório"),
+  natureza: z.enum(["S.H.", "S.V.", "D.S.", "Outra"]),
+  natureza_outra: z.string().optional(),
+  grau: z.enum(["Leve", "Média", "Grave", "Gravíssima"]),
+  problema_identificado: z.string().min(1, "Problema identificado é obrigatório"),
+  tipo_obra: z.enum(["Execução", "Manutenção"]),
+  km_inicial: z.string().min(1, "km inicial é obrigatório"),
+  km_final: z.string().min(1, "km final é obrigatório"),
   snv: z.string().optional(),
   supervisora: z.string().min(1, "Supervisora é obrigatória"),
   contrato_supervisora: z.string().optional(),
   construtora: z.string().min(1, "Construtora é obrigatória"),
   contrato_construtora: z.string().optional(),
-  tipo_obra: z.enum(["Execução", "Manutenção"]),
-  natureza: z.enum(["S.H.", "S.V.", "D.S.", "Outra"]),
-  natureza_outra: z.string().optional(),
-  grau: z.enum(["Leve", "Média", "Grave", "Gravíssima"]),
-  problema_identificado: z.string().min(1, "Problema identificado é obrigatório"),
   comentarios_supervisora: z.string().optional(),
   comentarios_executora: z.string().optional(),
 });
@@ -220,9 +221,14 @@ export function RegistroNCForm({ loteId, rodoviaId }: RegistroNCFormProps) {
                 name="km_inicial"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>KM Inicial</FormLabel>
+                    <FormLabel>km Inicial</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.001" {...field} />
+                      <Input
+                        type="number"
+                        step="0.001"
+                        placeholder="0.000"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -234,7 +240,7 @@ export function RegistroNCForm({ loteId, rodoviaId }: RegistroNCFormProps) {
                 name="km_final"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>KM Final</FormLabel>
+                    <FormLabel>km Final</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.001" {...field} />
                     </FormControl>
@@ -540,13 +546,13 @@ export function RegistroNCForm({ loteId, rodoviaId }: RegistroNCFormProps) {
                         />
                       </div>
                       <div>
-                        <Label>KM</Label>
+                        <Label>km</Label>
                         <Input
                           type="number"
                           step="0.001"
                           value={foto.km}
                           onChange={(e) => handleUpdateFoto(index, 'km', e.target.value)}
-                          placeholder="KM"
+                          placeholder="km"
                         />
                       </div>
                     </div>

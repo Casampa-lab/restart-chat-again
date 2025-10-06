@@ -324,7 +324,7 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId }: FichaVerificacaoSV
                       />
                     </div>
                     <div>
-                      <Label>KM</Label>
+                      <Label>km</Label>
                       <Input
                         type="number"
                         step="0.001"

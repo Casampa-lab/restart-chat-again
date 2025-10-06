@@ -10,12 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
-  km_referencia: z.string().min(1, "KM de referência é obrigatório"),
+  km_referencia: z.string().min(1, "km de referência é obrigatório"),
   tipo_intervencao: z.string().min(1, "Tipo de intervenção é obrigatório"),
   tipo_placa: z.string().min(1, "Tipo de placa é obrigatório"),
   codigo_placa: z.string().optional(),
@@ -38,6 +39,32 @@ interface IntervencoesSVFormProps {
 const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [coordenadas, setCoordenadas] = useState({ latitude: "", longitude: "" });
+
+  const capturarCoordenadas = () => {
+    setIsCapturing(true);
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCoordenadas({
+            latitude: position.coords.latitude.toString(),
+            longitude: position.coords.longitude.toString(),
+          });
+          toast.success(`Coordenadas capturadas: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+          setIsCapturing(false);
+        },
+        (error) => {
+          toast.error("Erro ao capturar localização. Verifique as permissões.");
+          setIsCapturing(false);
+        }
+      );
+    } else {
+      toast.error("Geolocalização não suportada pelo navegador");
+      setIsCapturing(false);
+    }
+  };
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -125,7 +152,7 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
                 name="km_referencia"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>KM de Referência *</FormLabel>
+                    <FormLabel>km de Referência *</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -138,6 +165,42 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
                   </FormItem>
                 )}
               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 md:col-span-2">
+              <div className="space-y-2">
+                <Label>Coordenadas GPS</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={capturarCoordenadas}
+                    disabled={isCapturing}
+                  >
+                    {isCapturing ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <MapPin className="mr-2 h-4 w-4" />
+                    )}
+                    Capturar Localização
+                  </Button>
+                  <Input
+                    placeholder="Latitude"
+                    value={coordenadas.latitude}
+                    onChange={(e) => setCoordenadas({ ...coordenadas, latitude: e.target.value })}
+                    className="flex-1"
+                  />
+                  <Input
+                    placeholder="Longitude"
+                    value={coordenadas.longitude}
+                    onChange={(e) => setCoordenadas({ ...coordenadas, longitude: e.target.value })}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
 
               <FormField
                 control={form.control}

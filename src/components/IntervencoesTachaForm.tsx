@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Loader2, MapPin } from "lucide-react";
 
 interface IntervencoesTachaFormProps {
   loteId: string;
@@ -16,8 +19,8 @@ interface IntervencoesTachaFormProps {
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
-  km_inicial: z.string().min(1, "KM inicial é obrigatório"),
-  km_final: z.string().min(1, "KM final é obrigatório"),
+  km_inicial: z.string().min(1, "km inicial é obrigatório"),
+  km_final: z.string().min(1, "km final é obrigatório"),
   tipo_intervencao: z.string().min(1, "Tipo de intervenção é obrigatório"),
   tipo_tacha: z.string().min(1, "Tipo de tacha é obrigatório"),
   cor: z.string().min(1, "Cor é obrigatória"),
@@ -29,6 +32,53 @@ const formSchema = z.object({
 });
 
 export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFormProps) {
+  const [isCapturingInicial, setIsCapturingInicial] = useState(false);
+  const [isCapturingFinal, setIsCapturingFinal] = useState(false);
+  const [coordenadas, setCoordenadas] = useState({
+    latitude_inicial: "",
+    longitude_inicial: "",
+    latitude_final: "",
+    longitude_final: "",
+  });
+
+  const capturarCoordenadas = (tipo: 'inicial' | 'final') => {
+    if (tipo === 'inicial') setIsCapturingInicial(true);
+    else setIsCapturingFinal(true);
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          if (tipo === 'inicial') {
+            setCoordenadas({
+              ...coordenadas,
+              latitude_inicial: position.coords.latitude.toString(),
+              longitude_inicial: position.coords.longitude.toString(),
+            });
+            toast.success(`Ponto inicial: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+            setIsCapturingInicial(false);
+          } else {
+            setCoordenadas({
+              ...coordenadas,
+              latitude_final: position.coords.latitude.toString(),
+              longitude_final: position.coords.longitude.toString(),
+            });
+            toast.success(`Ponto final: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+            setIsCapturingFinal(false);
+          }
+        },
+        (error) => {
+          toast.error("Erro ao capturar localização. Verifique as permissões.");
+          if (tipo === 'inicial') setIsCapturingInicial(false);
+          else setIsCapturingFinal(false);
+        }
+      );
+    } else {
+      toast.error("Geolocalização não suportada pelo navegador");
+      if (tipo === 'inicial') setIsCapturingInicial(false);
+      else setIsCapturingFinal(false);
+    }
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
@@ -124,7 +174,7 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
             name="km_inicial"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>KM Inicial</FormLabel>
+                <FormLabel>km Inicial</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.001" placeholder="Ex: 10.500" {...field} />
                 </FormControl>
@@ -138,7 +188,7 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
             name="km_final"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>KM Final</FormLabel>
+                <FormLabel>km Final</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.001" placeholder="Ex: 10.800" {...field} />
                 </FormControl>
@@ -146,6 +196,68 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
               </FormItem>
             )}
           />
+
+          <div className="md:col-span-2 space-y-2">
+            <Label>Coordenadas GPS do Ponto Inicial</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => capturarCoordenadas('inicial')}
+                disabled={isCapturingInicial}
+              >
+                {isCapturingInicial ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <MapPin className="mr-2 h-4 w-4" />
+                )}
+                Capturar Ponto Inicial
+              </Button>
+              <Input
+                placeholder="Latitude"
+                value={coordenadas.latitude_inicial}
+                onChange={(e) => setCoordenadas({ ...coordenadas, latitude_inicial: e.target.value })}
+                className="flex-1"
+              />
+              <Input
+                placeholder="Longitude"
+                value={coordenadas.longitude_inicial}
+                onChange={(e) => setCoordenadas({ ...coordenadas, longitude_inicial: e.target.value })}
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div className="md:col-span-2 space-y-2">
+            <Label>Coordenadas GPS do Ponto Final</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => capturarCoordenadas('final')}
+                disabled={isCapturingFinal}
+              >
+                {isCapturingFinal ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <MapPin className="mr-2 h-4 w-4" />
+                )}
+                Capturar Ponto Final
+              </Button>
+              <Input
+                placeholder="Latitude"
+                value={coordenadas.latitude_final}
+                onChange={(e) => setCoordenadas({ ...coordenadas, latitude_final: e.target.value })}
+                className="flex-1"
+              />
+              <Input
+                placeholder="Longitude"
+                value={coordenadas.longitude_final}
+                onChange={(e) => setCoordenadas({ ...coordenadas, longitude_final: e.target.value })}
+                className="flex-1"
+              />
+            </div>
+          </div>
 
           <FormField
             control={form.control}

@@ -424,13 +424,18 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                     control={form.control}
                     name="km"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>KM</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.001" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          placeholder="km"
+                          type="number"
+                          step="0.001"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormLabel>km</FormLabel>
+                      <FormMessage />
+                    </FormItem>
                     )}
                   />
                   <FormField
