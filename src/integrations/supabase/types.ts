@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      destinatarios_email: {
+        Row: {
+          ativo: boolean
+          created_at: string | null
+          email: string
+          id: string
+          nome: string
+          tipo: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string | null
+          email: string
+          id?: string
+          nome: string
+          tipo: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
       empresas: {
         Row: {
           cnpj: string
