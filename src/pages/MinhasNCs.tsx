@@ -217,11 +217,11 @@ const MinhasNCs = () => {
                         <TableCell>
                           {nc.enviado_coordenador ? (
                             <Badge variant="outline" className="bg-green-50">
-                              Enviado
+                              Enviada
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="bg-yellow-50">
-                              Pendente
+                              Não enviada
                             </Badge>
                           )}
                         </TableCell>
