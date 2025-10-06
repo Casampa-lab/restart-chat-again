@@ -6,6 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Download } from "lucide-react";
+import { 
+  exportFrentesLiberadas,
+  exportNaoConformidades,
+  exportRetrorrefletividadeEstatica,
+  exportRetrorrefletividadeDinamica,
+  exportDefensas,
+  exportIntervencoesSH,
+  exportIntervencoesInscricoes,
+  exportIntervencoesSV,
+  exportIntervencoesTacha,
+  exportFichasVerificacao,
+  exportFichasPlaca,
+  exportRegistroNC
+} from "@/lib/excelExport";
+import { toast } from "sonner";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
 import logoGoverno from "@/assets/logo-governo.png";
 
@@ -36,6 +51,64 @@ const CoordenacaoFiscalizacao = () => {
 
     checkAdmin();
   }, [user]);
+
+  const handleDownload = async (type: string) => {
+    try {
+      switch (type) {
+        case 'frentes':
+          await exportFrentesLiberadas();
+          toast.success('Planilha de Frentes Liberadas baixada com sucesso!');
+          break;
+        case 'ncs':
+          await exportNaoConformidades();
+          toast.success('Planilha de NCs baixada com sucesso!');
+          break;
+        case 'retro-estatica':
+          await exportRetrorrefletividadeEstatica();
+          toast.success('Planilha de Retrorrefletividade Estática baixada com sucesso!');
+          break;
+        case 'retro-dinamica':
+          await exportRetrorrefletividadeDinamica();
+          toast.success('Planilha de Retrorrefletividade Dinâmica baixada com sucesso!');
+          break;
+        case 'defensas':
+          await exportDefensas();
+          toast.success('Planilha de Defensas baixada com sucesso!');
+          break;
+        case 'int-sh':
+          await exportIntervencoesSH();
+          toast.success('Planilha de Intervenções SH baixada com sucesso!');
+          break;
+        case 'int-inscricoes':
+          await exportIntervencoesInscricoes();
+          toast.success('Planilha de Intervenções Inscrições baixada com sucesso!');
+          break;
+        case 'int-sv':
+          await exportIntervencoesSV();
+          toast.success('Planilha de Intervenções SV baixada com sucesso!');
+          break;
+        case 'int-tacha':
+          await exportIntervencoesTacha();
+          toast.success('Planilha de Intervenções Tachas baixada com sucesso!');
+          break;
+        case 'fichas-verificacao':
+          await exportFichasVerificacao();
+          toast.success('Planilha de Fichas de Verificação baixada com sucesso!');
+          break;
+        case 'fichas-placa':
+          await exportFichasPlaca();
+          toast.success('Planilha de Fichas de Placa baixada com sucesso!');
+          break;
+        case 'registro-nc':
+          await exportRegistroNC();
+          toast.success('Planilha de Registro NC baixada com sucesso!');
+          break;
+      }
+    } catch (error) {
+      console.error('Erro ao baixar planilha:', error);
+      toast.error('Erro ao baixar planilha. Tente novamente.');
+    }
+  };
 
   if (authLoading) {
     return (
@@ -116,6 +189,7 @@ const CoordenacaoFiscalizacao = () => {
                     size="lg"
                     variant="secondary"
                     className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow ml-4"
+                    onClick={() => handleDownload('frentes')}
                   >
                     <Download className="mr-2 h-5 w-5" />
                     Baixar Planilha
@@ -140,6 +214,7 @@ const CoordenacaoFiscalizacao = () => {
                     size="lg"
                     variant="secondary"
                     className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow ml-4"
+                    onClick={() => handleDownload('ncs')}
                   >
                     <Download className="mr-2 h-5 w-5" />
                     Baixar Planilha
@@ -174,6 +249,10 @@ const CoordenacaoFiscalizacao = () => {
                     size="lg"
                     variant="secondary"
                     className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={async () => {
+                      await handleDownload('retro-estatica');
+                      await handleDownload('retro-dinamica');
+                    }}
                   >
                     <Download className="mr-2 h-5 w-5" />
                     Baixar Planilhas
@@ -198,6 +277,7 @@ const CoordenacaoFiscalizacao = () => {
                     size="lg"
                     variant="secondary"
                     className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow ml-4"
+                    onClick={() => handleDownload('defensas')}
                   >
                     <Download className="mr-2 h-5 w-5" />
                     Baixar Planilha
@@ -248,6 +328,12 @@ const CoordenacaoFiscalizacao = () => {
                     size="lg"
                     variant="secondary"
                     className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={async () => {
+                      await handleDownload('int-sh');
+                      await handleDownload('int-inscricoes');
+                      await handleDownload('int-sv');
+                      await handleDownload('int-tacha');
+                    }}
                   >
                     <Download className="mr-2 h-5 w-5" />
                     Baixar Planilhas
@@ -290,6 +376,11 @@ const CoordenacaoFiscalizacao = () => {
                     size="lg"
                     variant="secondary"
                     className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={async () => {
+                      await handleDownload('fichas-verificacao');
+                      await handleDownload('fichas-placa');
+                      await handleDownload('registro-nc');
+                    }}
                   >
                     <Download className="mr-2 h-5 w-5" />
                     Baixar Planilhas
