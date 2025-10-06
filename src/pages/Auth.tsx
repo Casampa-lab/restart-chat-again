@@ -18,7 +18,6 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Carrega o último e-mail usado
     const lastEmail = localStorage.getItem("lastEmail");
     if (lastEmail) {
       setEmail(lastEmail);
@@ -86,62 +85,62 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAuth} className="space-y-4">
-            {!isLogin && (
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="nome">Nome Completo</Label>
+                  <Input
+                    id="nome"
+                    type="text"
+                    placeholder="Seu nome"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    required={!isLogin}
+                  />
+                </div>
+              )}
+              
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome Completo</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="nome"
-                  type="text"
-                  placeholder="Seu nome"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  required={!isLogin}
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
-            )}
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={12}
-              />
-              {!isLogin && (
-                <p className="text-xs text-muted-foreground">
-                  Mínimo de 12 caracteres. Use letras maiúsculas, minúsculas, números e símbolos.
-                </p>
-              )}
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={12}
+                />
+                {!isLogin && (
+                  <p className="text-xs text-muted-foreground">
+                    Mínimo de 12 caracteres. Use letras maiúsculas, minúsculas, números e símbolos.
+                  </p>
+                )}
+              </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Processando..." : isLogin ? "Entrar" : "Cadastrar"}
-            </Button>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Processando..." : isLogin ? "Entrar" : "Cadastrar"}
+              </Button>
 
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin ? "Não tem conta? Cadastre-se" : "Já tem conta? Entre"}
-            </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => setIsLogin(!isLogin)}
+              >
+                {isLogin ? "Não tem conta? Cadastre-se" : "Já tem conta? Entre"}
+              </Button>
             </form>
           </CardContent>
         </Card>
