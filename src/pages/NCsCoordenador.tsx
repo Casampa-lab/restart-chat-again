@@ -191,7 +191,7 @@ const NCsCoordenador = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={() => navigate("/")}>
+            <Button variant="navigation" onClick={() => navigate("/")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar
             </Button>

@@ -100,7 +100,7 @@ const MinhasIntervencoesSV = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 p-6">
       <div className="container mx-auto space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate("/")}>
+          <Button variant="navigation" size="sm" onClick={() => navigate("/")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar
           </Button>

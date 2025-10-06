@@ -109,7 +109,7 @@ export default function MeusRegistrosNC() {
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto space-y-4">
         <Button
-          variant="ghost"
+          variant="navigation"
           onClick={() => navigate("/")}
           className="mb-4"
         >

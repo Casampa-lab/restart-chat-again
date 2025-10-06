@@ -140,7 +140,7 @@ export default function MinhasFichasPlaca() {
   if (selectedFicha) {
     return (
       <div className="container mx-auto p-6 space-y-6">
-        <Button variant="outline" onClick={() => setSelectedFicha(null)}>
+        <Button variant="navigation" onClick={() => setSelectedFicha(null)}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>
@@ -268,7 +268,7 @@ export default function MinhasFichasPlaca() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Minhas Fichas de Placa</h1>
-        <Button variant="outline" onClick={() => navigate('/')}>
+        <Button variant="navigation" onClick={() => navigate('/')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>

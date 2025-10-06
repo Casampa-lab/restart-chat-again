@@ -102,9 +102,8 @@ const Index = () => {
                 </Button>
               )}
               <Button 
-                variant="outline" 
+                variant="navigation" 
                 size="lg"
-                className="font-semibold border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary shadow-md transition-all"
                 onClick={handleSignOut}
               >
                 <LogOut className="mr-2 h-5 w-5" />
