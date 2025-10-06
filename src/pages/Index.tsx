@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkSession } from "@/hooks/useWorkSession";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogOut, MapPin, Briefcase } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
@@ -15,6 +16,24 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, signOut } = useAuth();
   const { activeSession, loading: sessionLoading } = useWorkSession(user?.id);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      setIsAdmin(!!data);
+    };
+
+    checkAdmin();
+  }, [user]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -44,8 +63,14 @@ const Index = () => {
               <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-12 object-contain" />
               <img src={logoGoverno} alt="Governo Federal" className="h-10 object-contain hidden sm:block" />
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <img src={logoConsol} alt="Consol Engenheiros" className="h-10 object-contain hidden md:block" />
+              {isAdmin && (
+                <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Admin
+                </Button>
+              )}
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Sair
