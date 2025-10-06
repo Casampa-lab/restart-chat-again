@@ -6,12 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, MapPinned, Gauge } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, MapPinned, Gauge, ShieldAlert } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
 import RetrorrefletividadeEstaticaForm from "@/components/RetrorrefletividadeEstaticaForm";
 import RetrorrefletividadeDinamicaForm from "@/components/RetrorrefletividadeDinamicaForm";
+import DefensasForm from "@/components/DefensasForm";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
 import logoGoverno from "@/assets/logo-governo.png";
 
@@ -90,6 +91,10 @@ const Index = () => {
                 <Gauge className="mr-2 h-4 w-4" />
                 Retro Dinâmica
               </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-defensas")}>
+                <ShieldAlert className="mr-2 h-4 w-4" />
+                Defensas
+              </Button>
               {isAdmin && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-4 w-4" />
@@ -152,21 +157,37 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Tabs defaultValue="ncs" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="ncs">2.3 - NCs</TabsTrigger>
-                <TabsTrigger value="frentes">2.2 - Frentes</TabsTrigger>
-                <TabsTrigger value="retro-est">3.1.3.1 - Est</TabsTrigger>
-                <TabsTrigger value="retro-din">3.1.3.2 - Din</TabsTrigger>
+            <Tabs defaultValue="frentes" className="w-full">
+              <TabsList className="grid w-full grid-cols-5 h-auto">
+                <TabsTrigger value="frentes" className="flex flex-col h-auto py-3 whitespace-normal">
+                  <span className="font-semibold">2.2</span>
+                  <span className="text-xs">Frentes Liberadas</span>
+                </TabsTrigger>
+                <TabsTrigger value="ncs" className="flex flex-col h-auto py-3 whitespace-normal">
+                  <span className="font-semibold">2.3</span>
+                  <span className="text-xs">Não Conformidades</span>
+                </TabsTrigger>
+                <TabsTrigger value="retro-est" className="flex flex-col h-auto py-3 whitespace-normal">
+                  <span className="font-semibold">3.1.3.1</span>
+                  <span className="text-xs">Retro Estática</span>
+                </TabsTrigger>
+                <TabsTrigger value="retro-din" className="flex flex-col h-auto py-3 whitespace-normal">
+                  <span className="font-semibold">3.1.3.2</span>
+                  <span className="text-xs">Retro Dinâmica</span>
+                </TabsTrigger>
+                <TabsTrigger value="defensas" className="flex flex-col h-auto py-3 whitespace-normal">
+                  <span className="font-semibold">3.1.4</span>
+                  <span className="text-xs">Defensas</span>
+                </TabsTrigger>
               </TabsList>
-              <TabsContent value="ncs" className="mt-6">
-                <NaoConformidadeForm
+              <TabsContent value="frentes" className="mt-6">
+                <FrenteLiberadaForm
                   loteId={activeSession.lote_id}
                   rodoviaId={activeSession.rodovia_id}
                 />
               </TabsContent>
-              <TabsContent value="frentes" className="mt-6">
-                <FrenteLiberadaForm
+              <TabsContent value="ncs" className="mt-6">
+                <NaoConformidadeForm
                   loteId={activeSession.lote_id}
                   rodoviaId={activeSession.rodovia_id}
                 />
@@ -179,6 +200,12 @@ const Index = () => {
               </TabsContent>
               <TabsContent value="retro-din" className="mt-6">
                 <RetrorrefletividadeDinamicaForm
+                  loteId={activeSession.lote_id}
+                  rodoviaId={activeSession.rodovia_id}
+                />
+              </TabsContent>
+              <TabsContent value="defensas" className="mt-6">
+                <DefensasForm
                   loteId={activeSession.lote_id}
                   rodoviaId={activeSession.rodovia_id}
                 />

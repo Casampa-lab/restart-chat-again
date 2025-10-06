@@ -56,22 +56,16 @@ export const PLANILHAS: Record<string, Planilha> = {
     tabela: 'retrorrefletividade_dinamica'
   },
 
-  // A implementar
-  '3.1.2': {
-    codigo: '3.1.2',
-    nome: 'SERVIÇOS INSPECIONADOS',
-    categoria: 'inspecao',
-    implementado: false,
-    descricao: 'Registro de serviços inspecionados em campo'
-  },
-  
   '3.1.4': {
     codigo: '3.1.4',
     nome: 'DEFENSAS',
     categoria: 'seguranca',
-    implementado: false,
-    descricao: 'Inspeção e controle de defensas metálicas'
+    implementado: true,
+    descricao: 'Inspeção e controle de defensas metálicas',
+    tabela: 'defensas'
   },
+
+  // A implementar
 
   '3.1.5-inscricoes': {
     codigo: '3.1.5',

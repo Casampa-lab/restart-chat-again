@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      defensas: {
+        Row: {
+          created_at: string
+          data_inspecao: string
+          estado_conservacao: string
+          extensao_metros: number
+          id: string
+          km_final: number
+          km_inicial: number
+          lado: string
+          lote_id: string
+          necessita_intervencao: boolean
+          nivel_risco: string | null
+          observacao: string | null
+          rodovia_id: string
+          tipo_avaria: string | null
+          tipo_defensa: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_inspecao: string
+          estado_conservacao: string
+          extensao_metros: number
+          id?: string
+          km_final: number
+          km_inicial: number
+          lado: string
+          lote_id: string
+          necessita_intervencao?: boolean
+          nivel_risco?: string | null
+          observacao?: string | null
+          rodovia_id: string
+          tipo_avaria?: string | null
+          tipo_defensa: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_inspecao?: string
+          estado_conservacao?: string
+          extensao_metros?: number
+          id?: string
+          km_final?: number
+          km_inicial?: number
+          lado?: string
+          lote_id?: string
+          necessita_intervencao?: boolean
+          nivel_risco?: string | null
+          observacao?: string | null
+          rodovia_id?: string
+          tipo_avaria?: string | null
+          tipo_defensa?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       destinatarios_email: {
         Row: {
           ativo: boolean
