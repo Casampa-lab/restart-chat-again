@@ -69,7 +69,12 @@ const Index = () => {
       <header className="bg-background border-b sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
-            <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-16 object-contain" />
+            <img 
+              src={logoBrLegal} 
+              alt="BR-LEGAL 2" 
+              className="h-16 object-contain cursor-pointer hover:opacity-80 transition-opacity" 
+              onClick={() => navigate("/")}
+            />
             <div className="flex items-center gap-2 flex-wrap">
               {isAdmin && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/ncs-coordenador")}>
