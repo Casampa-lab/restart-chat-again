@@ -68,7 +68,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-16 object-contain" />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {isAdmin && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/ncs-coordenador")}>
                   <ClipboardList className="mr-2 h-4 w-4" />
@@ -81,15 +81,15 @@ const Index = () => {
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/minhas-frentes-liberadas")}>
                 <MapPinned className="mr-2 h-4 w-4" />
-                Frentes Liberadas
+                Frentes
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/minhas-retrorrefletividades")}>
                 <Gauge className="mr-2 h-4 w-4" />
-                Retro Estática
+                Retro Est
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/minhas-retrorrefletividades-dinamicas")}>
                 <Gauge className="mr-2 h-4 w-4" />
-                Retro Dinâmica
+                Retro Din
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/minhas-defensas")}>
                 <ShieldAlert className="mr-2 h-4 w-4" />
@@ -159,24 +159,24 @@ const Index = () => {
 
             <Tabs defaultValue="frentes" className="w-full">
               <TabsList className="grid w-full grid-cols-5 h-auto">
-                <TabsTrigger value="frentes" className="flex flex-col h-auto py-3 whitespace-normal">
-                  <span className="font-semibold">2.2</span>
+                <TabsTrigger value="frentes" className="flex flex-col py-3 px-2">
+                  <span className="text-xs font-semibold">2.2</span>
                   <span className="text-xs">Frentes Liberadas</span>
                 </TabsTrigger>
-                <TabsTrigger value="ncs" className="flex flex-col h-auto py-3 whitespace-normal">
-                  <span className="font-semibold">2.3</span>
+                <TabsTrigger value="ncs" className="flex flex-col py-3 px-2">
+                  <span className="text-xs font-semibold">2.3</span>
                   <span className="text-xs">Não Conformidades</span>
                 </TabsTrigger>
-                <TabsTrigger value="retro-est" className="flex flex-col h-auto py-3 whitespace-normal">
-                  <span className="font-semibold">3.1.3.1</span>
+                <TabsTrigger value="retro-est" className="flex flex-col py-3 px-2">
+                  <span className="text-xs font-semibold">3.1.3.1</span>
                   <span className="text-xs">Retro Estática</span>
                 </TabsTrigger>
-                <TabsTrigger value="retro-din" className="flex flex-col h-auto py-3 whitespace-normal">
-                  <span className="font-semibold">3.1.3.2</span>
+                <TabsTrigger value="retro-din" className="flex flex-col py-3 px-2">
+                  <span className="text-xs font-semibold">3.1.3.2</span>
                   <span className="text-xs">Retro Dinâmica</span>
                 </TabsTrigger>
-                <TabsTrigger value="defensas" className="flex flex-col h-auto py-3 whitespace-normal">
-                  <span className="font-semibold">3.1.4</span>
+                <TabsTrigger value="defensas" className="flex flex-col py-3 px-2">
+                  <span className="text-xs font-semibold">3.1.4</span>
                   <span className="text-xs">Defensas</span>
                 </TabsTrigger>
               </TabsList>

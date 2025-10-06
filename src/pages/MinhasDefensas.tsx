@@ -12,8 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
 import logoGoverno from "@/assets/logo-governo.png";
@@ -124,7 +123,7 @@ const MinhasDefensas = () => {
           <CardHeader>
             <CardTitle>3.1.4 - Minhas Inspeções de Defensas</CardTitle>
             <CardDescription>
-              Histórico de inspeções de defensas metálicas registradas
+              Histórico de inspeções de defensas registradas
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -146,8 +145,8 @@ const MinhasDefensas = () => {
                       <TableHead>Extensão</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead>Avaria</TableHead>
-                      <TableHead>Risco</TableHead>
                       <TableHead>Intervenção</TableHead>
+                      <TableHead>Risco</TableHead>
                       <TableHead>Observação</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -166,38 +165,25 @@ const MinhasDefensas = () => {
                         <TableCell className="max-w-xs truncate">{defensa.tipo_defensa}</TableCell>
                         <TableCell>{defensa.extensao_metros.toFixed(1)}m</TableCell>
                         <TableCell>
-                          <Badge variant={
-                            defensa.estado_conservacao === "Ótimo" || defensa.estado_conservacao === "Bom" 
-                              ? "default" 
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                            ["Ótimo", "Bom"].includes(defensa.estado_conservacao)
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
                               : defensa.estado_conservacao === "Regular"
-                              ? "secondary"
-                              : "destructive"
-                          }>
+                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100"
+                              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
+                          }`}>
                             {defensa.estado_conservacao}
-                          </Badge>
+                          </span>
                         </TableCell>
                         <TableCell>{defensa.tipo_avaria || "-"}</TableCell>
                         <TableCell>
-                          {defensa.nivel_risco && (
-                            <Badge variant={
-                              defensa.nivel_risco === "Baixo" 
-                                ? "default" 
-                                : defensa.nivel_risco === "Médio"
-                                ? "secondary"
-                                : "destructive"
-                            }>
-                              {defensa.nivel_risco}
-                            </Badge>
-                          )}
-                          {!defensa.nivel_risco && "-"}
-                        </TableCell>
-                        <TableCell>
                           {defensa.necessita_intervencao ? (
-                            <Badge variant="destructive">SIM</Badge>
+                            <XCircle className="h-5 w-5 text-red-500" />
                           ) : (
-                            <Badge variant="outline">Não</Badge>
+                            <CheckCircle2 className="h-5 w-5 text-green-500" />
                           )}
                         </TableCell>
+                        <TableCell>{defensa.nivel_risco || "-"}</TableCell>
                         <TableCell className="max-w-xs truncate">
                           {defensa.observacao || "-"}
                         </TableCell>

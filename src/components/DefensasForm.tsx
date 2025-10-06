@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -15,23 +15,21 @@ interface DefensasFormProps {
   rodoviaId: string;
 }
 
-const LADOS = ["Direito", "Esquerdo", "Canteiro Central"];
+const LADOS = ["Direito", "Esquerdo", "Ambos"];
 const TIPOS_DEFENSA = [
   "Defensa Metálica Simples",
   "Defensa Metálica Dupla",
   "Defensa New Jersey",
   "Defensa Tipo F",
-  "Tela de Proteção",
   "Outros"
 ];
 const ESTADOS_CONSERVACAO = ["Ótimo", "Bom", "Regular", "Ruim", "Péssimo"];
 const TIPOS_AVARIA = [
+  "Deformação",
   "Corrosão",
-  "Amassamento",
-  "Ausência de Elementos",
+  "Falta de Elementos",
   "Fixação Comprometida",
-  "Desalinhamento",
-  "Falta de Terminal",
+  "Pintura Deteriorada",
   "Outros"
 ];
 const NIVEIS_RISCO = ["Baixo", "Médio", "Alto", "Crítico"];
@@ -129,9 +127,9 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>3.1.4 - Defensas</CardTitle>
+        <CardTitle>3.1.4 - Inspeção de Defensas</CardTitle>
         <CardDescription>
-          Inspeção e controle de defensas metálicas e dispositivos de contenção
+          Registro de inspeção e controle de defensas metálicas
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -270,7 +268,7 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione (se houver)" />
+                  <SelectValue placeholder="Selecione o tipo de avaria" />
                 </SelectTrigger>
                 <SelectContent>
                   {TIPOS_AVARIA.map((tipo) => (
@@ -304,11 +302,11 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
             </div>
 
             <div className="space-y-2 flex items-center gap-2 pt-8">
-              <Switch
+              <Checkbox
                 id="necessita_intervencao"
                 checked={formData.necessita_intervencao}
                 onCheckedChange={(checked) =>
-                  setFormData({ ...formData, necessita_intervencao: checked })
+                  setFormData({ ...formData, necessita_intervencao: checked as boolean })
                 }
               />
               <Label htmlFor="necessita_intervencao" className="cursor-pointer">
