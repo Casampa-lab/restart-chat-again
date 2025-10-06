@@ -26,9 +26,16 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verificar se a API key está configurada
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY não configurada");
+      throw new Error("RESEND_API_KEY não está configurada");
+    }
+
     const ncData: NCEmailRequest = await req.json();
     
     console.log("Enviando email para NC:", ncData.numero_nc);
+    console.log("Dados recebidos:", JSON.stringify(ncData));
 
     // Buscar destinatários ativos do banco
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -63,54 +70,60 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Enviando para ${emails.length} destinatários:`, emails);
 
     // Enviar email usando API direta do Resend
+    const emailPayload = {
+      from: "DNIT - Não Conformidades <onboarding@resend.dev>",
+      to: emails,
+      subject: `Nova Não Conformidade: ${ncData.numero_nc}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #1e40af;">Nova Não Conformidade Registrada</h2>
+          
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Número NC:</strong> ${ncData.numero_nc}</p>
+            <p><strong>Empresa:</strong> ${ncData.empresa}</p>
+            <p><strong>Tipo:</strong> ${ncData.tipo_nc}</p>
+            <p><strong>Problema:</strong> ${ncData.problema_identificado}</p>
+            <p><strong>Data:</strong> ${new Date(ncData.data_ocorrencia).toLocaleDateString('pt-BR')}</p>
+            <p><strong>Rodovia:</strong> ${ncData.rodovia}</p>
+            <p><strong>KM:</strong> ${ncData.km_referencia}</p>
+          </div>
+          
+          ${ncData.observacao ? `
+            <div style="margin: 20px 0;">
+              <h3 style="color: #374151;">Observações:</h3>
+              <p style="color: #6b7280;">${ncData.observacao}</p>
+            </div>
+          ` : ''}
+          
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
+          
+          <p style="color: #9ca3af; font-size: 12px;">
+            Este é um email automático do Sistema de Registro de Não Conformidades do DNIT.
+          </p>
+        </div>
+      `,
+    };
+
+    console.log("Payload do email:", JSON.stringify(emailPayload));
+
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        from: "DNIT - Não Conformidades <onboarding@resend.dev>",
-        to: emails,
-        subject: `Nova Não Conformidade: ${ncData.numero_nc}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #1e40af;">Nova Não Conformidade Registrada</h2>
-            
-            <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p><strong>Número NC:</strong> ${ncData.numero_nc}</p>
-              <p><strong>Empresa:</strong> ${ncData.empresa}</p>
-              <p><strong>Tipo:</strong> ${ncData.tipo_nc}</p>
-              <p><strong>Problema:</strong> ${ncData.problema_identificado}</p>
-              <p><strong>Data:</strong> ${new Date(ncData.data_ocorrencia).toLocaleDateString('pt-BR')}</p>
-              <p><strong>Rodovia:</strong> ${ncData.rodovia}</p>
-              <p><strong>KM:</strong> ${ncData.km_referencia}</p>
-            </div>
-            
-            ${ncData.observacao ? `
-              <div style="margin: 20px 0;">
-                <h3 style="color: #374151;">Observações:</h3>
-                <p style="color: #6b7280;">${ncData.observacao}</p>
-              </div>
-            ` : ''}
-            
-            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
-            
-            <p style="color: #9ca3af; font-size: 12px;">
-              Este é um email automático do Sistema de Registro de Não Conformidades do DNIT.
-            </p>
-          </div>
-        `,
-      }),
+      body: JSON.stringify(emailPayload),
     });
 
+    console.log("Status da resposta:", emailResponse.status);
+    const emailData = await emailResponse.json();
+    console.log("Resposta completa:", JSON.stringify(emailData));
+
     if (!emailResponse.ok) {
-      const errorData = await emailResponse.json();
-      throw new Error(`Erro ao enviar email: ${JSON.stringify(errorData)}`);
+      throw new Error(`Erro ao enviar email: ${JSON.stringify(emailData)}`);
     }
 
-    const emailData = await emailResponse.json();
-    console.log("Email enviado com sucesso:", emailData);
+    console.log("Email enviado com sucesso:", emailData.id);
 
     return new Response(JSON.stringify({ 
       success: true, 
