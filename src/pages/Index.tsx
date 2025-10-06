@@ -70,29 +70,44 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/5 to-secondary/5">
-      <header className="bg-background border-b sticky top-0 z-10">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+      <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <img 
               src={logoBrLegal} 
               alt="BR-LEGAL 2" 
-              className="h-16 object-contain cursor-pointer hover:opacity-80 transition-opacity" 
+              className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" 
               onClick={() => navigate("/")}
             />
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button variant="outline" size="sm" onClick={() => navigate("/coordenacao-fiscalizacao")}>
-                <ClipboardList className="mr-2 h-4 w-4" />
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button 
+                variant="secondary" 
+                size="lg"
+                className="font-semibold shadow-md hover:shadow-lg transition-shadow"
+                onClick={() => navigate("/coordenacao-fiscalizacao")}
+              >
+                <ClipboardList className="mr-2 h-5 w-5" />
                 Coordenação/Fiscalização
               </Button>
               {isAdmin && (
-                <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
-                  <Settings className="mr-2 h-4 w-4" />
+                <Button 
+                  variant="default"
+                  size="lg"
+                  className="font-semibold bg-accent text-accent-foreground shadow-md hover:shadow-lg transition-shadow hover:bg-accent/90"
+                  onClick={() => navigate("/admin")}
+                >
+                  <Settings className="mr-2 h-5 w-5" />
                   Admin
                 </Button>
               )}
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4" />
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="font-semibold border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary shadow-md transition-all"
+                onClick={handleSignOut}
+              >
+                <LogOut className="mr-2 h-5 w-5" />
                 Sair
               </Button>
             </div>
@@ -103,44 +118,44 @@ const Index = () => {
       <main className="flex-1 container mx-auto px-4 py-6 space-y-6">
         {activeSession ? (
           <>
-            <Card className="bg-primary text-primary-foreground">
+            <Card className="bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-elevated border-0">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5" />
+                    <CardTitle className="flex items-center gap-2 text-2xl">
+                      <MapPin className="h-6 w-6" />
                       Sessão de Trabalho Ativa
                     </CardTitle>
-                    <CardDescription className="text-primary-foreground/80">
+                    <CardDescription className="text-primary-foreground/90 text-base mt-1">
                       Seus dados estão sendo coletados para este lote e rodovia
                     </CardDescription>
                   </div>
                   <Button 
-                    variant="secondary" 
-                    size="sm"
+                    variant="default"
+                    size="lg"
                     onClick={endSession}
-                    className="shrink-0"
+                    className="shrink-0 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-md"
                   >
-                    <ArrowLeftRight className="h-4 w-4 mr-2" />
+                    <ArrowLeftRight className="h-5 w-5 mr-2" />
                     Trocar
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Briefcase className="h-4 w-4" />
-                  <span className="font-semibold">Lote:</span>
-                  <span>{activeSession.lote?.numero}</span>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-3 text-lg">
+                  <Briefcase className="h-5 w-5" />
+                  <span className="font-bold">Lote:</span>
+                  <span className="font-semibold">{activeSession.lote?.numero}</span>
                   {activeSession.lote?.empresa?.nome && (
-                    <span className="ml-2 text-sm opacity-80">
+                    <span className="ml-2 opacity-90">
                       ({activeSession.lote.empresa.nome})
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span className="font-semibold">Rodovia:</span>
-                  <span>
+                <div className="flex items-center gap-3 text-lg">
+                  <MapPin className="h-5 w-5" />
+                  <span className="font-bold">Rodovia:</span>
+                  <span className="font-semibold">
                     {activeSession.rodovia?.codigo}
                   </span>
                 </div>
@@ -148,53 +163,53 @@ const Index = () => {
             </Card>
 
             <Tabs defaultValue="frentes" className="w-full">
-              <TabsList className="grid w-full grid-cols-12 h-auto">
-                <TabsTrigger value="frentes" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">2.2</span>
+              <TabsList className="grid w-full grid-cols-12 h-auto bg-muted p-2 gap-1">
+                <TabsTrigger value="frentes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">2.2</span>
                   <span className="text-xs">Frentes</span>
                 </TabsTrigger>
-                <TabsTrigger value="ncs" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">2.3</span>
+                <TabsTrigger value="ncs" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">2.3</span>
                   <span className="text-xs">NCs</span>
                 </TabsTrigger>
-                <TabsTrigger value="retro-est" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">3.1.3.1</span>
+                <TabsTrigger value="retro-est" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">3.1.3.1</span>
                   <span className="text-xs">R. Est</span>
                 </TabsTrigger>
-                <TabsTrigger value="retro-din" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">3.1.3.2</span>
+                <TabsTrigger value="retro-din" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">3.1.3.2</span>
                   <span className="text-xs">R. Din</span>
                 </TabsTrigger>
-                <TabsTrigger value="defensas" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">3.1.4</span>
+                <TabsTrigger value="defensas" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">3.1.4</span>
                   <span className="text-xs">Defensas</span>
                 </TabsTrigger>
-                <TabsTrigger value="int-sh" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">3.1.5</span>
+                <TabsTrigger value="int-sh" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">3.1.5</span>
                   <span className="text-xs">Int. SH</span>
                 </TabsTrigger>
-                <TabsTrigger value="int-insc" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">3.1.5</span>
+                <TabsTrigger value="int-insc" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">3.1.5</span>
                   <span className="text-xs">Int. Insc</span>
                 </TabsTrigger>
-                <TabsTrigger value="int-sv" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">3.1.5</span>
+                <TabsTrigger value="int-sv" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">3.1.5</span>
                   <span className="text-xs">Int. SV</span>
                 </TabsTrigger>
-                <TabsTrigger value="int-tacha" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">3.1.5</span>
+                <TabsTrigger value="int-tacha" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">3.1.5</span>
                   <span className="text-xs">Int. Tacha</span>
                 </TabsTrigger>
-                <TabsTrigger value="registro-nc" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">3.1.18</span>
+                <TabsTrigger value="registro-nc" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">3.1.18</span>
                   <span className="text-xs">Reg. NC</span>
                 </TabsTrigger>
-                <TabsTrigger value="ficha-verif" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">3.1.19</span>
+                <TabsTrigger value="ficha-verif" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">3.1.19</span>
                   <span className="text-xs">Ficha Verif</span>
                 </TabsTrigger>
-                <TabsTrigger value="ficha-placa" className="flex flex-col py-3 px-1">
-                  <span className="text-xs font-semibold">3.1.20</span>
+                <TabsTrigger value="ficha-placa" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">3.1.20</span>
                   <span className="text-xs">Ficha Placa</span>
                 </TabsTrigger>
               </TabsList>

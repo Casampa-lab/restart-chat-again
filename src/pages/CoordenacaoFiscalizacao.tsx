@@ -46,18 +46,23 @@ const CoordenacaoFiscalizacao = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/5 to-secondary/5">
-      <header className="bg-background border-b sticky top-0 z-10">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+      <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <img 
               src={logoBrLegal} 
               alt="BR-LEGAL 2" 
-              className="h-16 object-contain cursor-pointer hover:opacity-80 transition-opacity" 
+              className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" 
               onClick={() => navigate("/")}
             />
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="font-semibold border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary shadow-md transition-all"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
               Voltar
             </Button>
           </div>
@@ -65,63 +70,67 @@ const CoordenacaoFiscalizacao = () => {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Coordenação e Fiscalização</CardTitle>
-            <CardDescription>
+        <Card className="shadow-elevated border-2 border-primary/20">
+          <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
+            <CardTitle className="text-3xl text-primary">Coordenação e Fiscalização</CardTitle>
+            <CardDescription className="text-lg">
               Acesse todas as listagens e registros do sistema
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="ncs-lote" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-2 h-auto">
+          <CardContent className="pt-6">
+            <Tabs defaultValue={isAdmin ? "ncs-lote" : "minhas-ncs"} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-2 h-auto bg-muted p-2">
                 {isAdmin && (
-                  <TabsTrigger value="ncs-lote" className="whitespace-normal">
+                  <TabsTrigger value="ncs-lote" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                     NCs por Lote
                   </TabsTrigger>
                 )}
-                <TabsTrigger value="minhas-ncs" className="whitespace-normal">
+                <TabsTrigger value="minhas-ncs" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Minhas NCs
                 </TabsTrigger>
-                <TabsTrigger value="frentes" className="whitespace-normal">
+                <TabsTrigger value="frentes" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Frentes Liberadas
                 </TabsTrigger>
-                <TabsTrigger value="retro-est" className="whitespace-normal">
+                <TabsTrigger value="retro-est" className="whitespace-normal py-4 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Retrorrefletividade Estática
                 </TabsTrigger>
-                <TabsTrigger value="retro-din" className="whitespace-normal">
+                <TabsTrigger value="retro-din" className="whitespace-normal py-4 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Retrorrefletividade Dinâmica
                 </TabsTrigger>
-                <TabsTrigger value="defensas" className="whitespace-normal">
+                <TabsTrigger value="defensas" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Defensas
                 </TabsTrigger>
-                <TabsTrigger value="int-sh" className="whitespace-normal">
+                <TabsTrigger value="int-sh" className="whitespace-normal py-4 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Intervenções SH
                 </TabsTrigger>
-                <TabsTrigger value="int-inscricoes" className="whitespace-normal">
+                <TabsTrigger value="int-inscricoes" className="whitespace-normal py-4 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Intervenções Inscrições
                 </TabsTrigger>
-                <TabsTrigger value="int-sv" className="whitespace-normal">
+                <TabsTrigger value="int-sv" className="whitespace-normal py-4 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Intervenções SV
                 </TabsTrigger>
-                <TabsTrigger value="int-tacha" className="whitespace-normal">
+                <TabsTrigger value="int-tacha" className="whitespace-normal py-4 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Intervenções Tacha
                 </TabsTrigger>
-                <TabsTrigger value="registro-nc" className="whitespace-normal">
+                <TabsTrigger value="registro-nc" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Registro NC
                 </TabsTrigger>
-                <TabsTrigger value="fichas-verif" className="whitespace-normal">
+                <TabsTrigger value="fichas-verif" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Fichas Verificação
                 </TabsTrigger>
-                <TabsTrigger value="fichas-placa" className="whitespace-normal">
+                <TabsTrigger value="fichas-placa" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Fichas Placa
                 </TabsTrigger>
               </TabsList>
 
               {isAdmin && (
                 <TabsContent value="ncs-lote" className="mt-6">
-                  <div className="text-center py-4">
-                    <Button onClick={() => navigate("/ncs-coordenador")}>
+                  <div className="text-center py-8">
+                    <Button 
+                      size="lg"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/ncs-coordenador")}
+                    >
                       Acessar NCs por Lote
                     </Button>
                   </div>
@@ -129,96 +138,150 @@ const CoordenacaoFiscalizacao = () => {
               )}
 
               <TabsContent value="minhas-ncs" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/minhas-ncs")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-ncs")}
+                  >
                     Acessar Minhas NCs
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="frentes" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/minhas-frentes-liberadas")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-frentes-liberadas")}
+                  >
                     Acessar Frentes Liberadas
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="retro-est" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/minhas-retrorrefletividades")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-retrorrefletividades")}
+                  >
                     Acessar Retrorrefletividade Estática
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="retro-din" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/minhas-retrorrefletividades-dinamicas")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-retrorrefletividades-dinamicas")}
+                  >
                     Acessar Retrorrefletividade Dinâmica
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="defensas" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/minhas-defensas")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-defensas")}
+                  >
                     Acessar Defensas
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="int-sh" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/minhas-intervencoes-sh")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-intervencoes-sh")}
+                  >
                     Acessar Intervenções em SH
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="int-inscricoes" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/minhas-intervencoes-inscricoes")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-intervencoes-inscricoes")}
+                  >
                     Acessar Intervenções em Inscrições
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="int-sv" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/minhas-intervencoes-sv")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-intervencoes-sv")}
+                  >
                     Acessar Intervenções em SV
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="int-tacha" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/minhas-intervencoes-tacha")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-intervencoes-tacha")}
+                  >
                     Acessar Intervenções em Tacha
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="registro-nc" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/meus-registros-nc")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/meus-registros-nc")}
+                  >
                     Acessar Registro de NC
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="fichas-verif" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/minhas-fichas-verificacao")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-fichas-verificacao")}
+                  >
                     Acessar Fichas de Verificação
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="fichas-placa" className="mt-6">
-                <div className="text-center py-4">
-                  <Button onClick={() => navigate("/minhas-fichas-placa")}>
+                <div className="text-center py-8">
+                  <Button 
+                    size="lg"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-fichas-placa")}
+                  >
                     Acessar Fichas de Placa
                   </Button>
                 </div>
