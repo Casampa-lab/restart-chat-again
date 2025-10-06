@@ -106,7 +106,7 @@ export type Database = {
           data_atendimento: string | null
           data_ocorrencia: string
           data_sincronizacao: string | null
-          descricao_problema: string
+          descricao_problema: string | null
           empresa: string
           id: string
           km_referencia: number | null
@@ -129,7 +129,7 @@ export type Database = {
           data_atendimento?: string | null
           data_ocorrencia: string
           data_sincronizacao?: string | null
-          descricao_problema: string
+          descricao_problema?: string | null
           empresa: string
           id?: string
           km_referencia?: number | null
@@ -152,7 +152,7 @@ export type Database = {
           data_atendimento?: string | null
           data_ocorrencia?: string
           data_sincronizacao?: string | null
-          descricao_problema?: string
+          descricao_problema?: string | null
           empresa?: string
           id?: string
           km_referencia?: number | null
