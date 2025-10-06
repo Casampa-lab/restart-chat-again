@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import logoBrLegal from "@/assets/logo-brlegal2.png";
+import logoGoverno from "@/assets/logo-governo.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -62,13 +64,19 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">BR-LEGAL 2</CardTitle>
-          <CardDescription className="text-center">
-            {isLogin ? "Entre com suas credenciais" : "Crie sua conta"}
-          </CardDescription>
-        </CardHeader>
+      <div className="w-full max-w-md space-y-6">
+        <div className="flex flex-col items-center gap-4">
+          <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-20 object-contain" />
+          <img src={logoGoverno} alt="Governo Federal" className="h-12 object-contain" />
+        </div>
+        
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Sistema de Coleta de Dados</CardTitle>
+            <CardDescription className="text-center">
+              {isLogin ? "Entre com suas credenciais" : "Crie sua conta"}
+            </CardDescription>
+          </CardHeader>
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
             {!isLogin && (
@@ -125,6 +133,7 @@ const Auth = () => {
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };

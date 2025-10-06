@@ -7,6 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { LogOut, MapPin, Briefcase } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
+import logoBrLegal from "@/assets/logo-brlegal2.png";
+import logoGoverno from "@/assets/logo-governo.png";
+import logoConsol from "@/assets/logo-consol.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -35,12 +38,20 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5">
       <header className="bg-background border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-primary">BR-LEGAL 2</h1>
-          <Button variant="ghost" size="sm" onClick={handleSignOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Sair
-          </Button>
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 flex-1">
+              <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-12 object-contain" />
+              <img src={logoGoverno} alt="Governo Federal" className="h-10 object-contain hidden sm:block" />
+            </div>
+            <div className="flex items-center gap-4">
+              <img src={logoConsol} alt="Consol Engenheiros" className="h-10 object-contain hidden md:block" />
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </Button>
+            </div>
+          </div>
         </div>
       </header>
 
