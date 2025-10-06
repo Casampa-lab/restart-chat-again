@@ -15,7 +15,7 @@ import logoConsol from "@/assets/logo-consol.jpg";
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, signOut } = useAuth();
-  const { activeSession, loading: sessionLoading } = useWorkSession(user?.id);
+  const { activeSession, loading: sessionLoading, refreshSession } = useWorkSession(user?.id);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -34,6 +34,10 @@ const Index = () => {
 
     checkAdmin();
   }, [user]);
+
+  const handleSessionStarted = () => {
+    refreshSession(); // Recarrega a sessão após criação
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -120,7 +124,7 @@ const Index = () => {
             />
           </>
         ) : (
-          <SessionSelector userId={user?.id} />
+          <SessionSelector userId={user?.id} onSessionStarted={handleSessionStarted} />
         )}
       </main>
     </div>

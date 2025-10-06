@@ -23,7 +23,12 @@ interface Rodovia {
   nome: string;
 }
 
-const SessionSelector = ({ userId }: { userId: string | undefined }) => {
+interface SessionSelectorProps {
+  userId: string | undefined;
+  onSessionStarted: () => void;
+}
+
+const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => {
   const [lotes, setLotes] = useState<Lote[]>([]);
   const [rodovias, setRodovias] = useState<Rodovia[]>([]);
   const [selectedLote, setSelectedLote] = useState<string>("");
@@ -82,7 +87,7 @@ const SessionSelector = ({ userId }: { userId: string | undefined }) => {
     setLoading(true);
     try {
       await startSession(selectedLote, selectedRodovia);
-      // A página será atualizada automaticamente pelo hook
+      onSessionStarted(); // Notifica o componente pai que a sessão foi criada
     } catch (error) {
       console.error(error);
     } finally {
