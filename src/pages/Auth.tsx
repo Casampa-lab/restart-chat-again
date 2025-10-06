@@ -122,8 +122,13 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={12}
               />
+              {!isLogin && (
+                <p className="text-xs text-muted-foreground">
+                  Mínimo de 12 caracteres. Use letras maiúsculas, minúsculas, números e símbolos.
+                </p>
+              )}
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>

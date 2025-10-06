@@ -10,6 +10,7 @@ import EmpresasManager from "@/components/admin/EmpresasManager";
 import LotesManager from "@/components/admin/LotesManager";
 import RodoviasManager from "@/components/admin/RodoviasManager";
 import { DestinatariosManager } from "@/components/admin/DestinatariosManager";
+import { CoordinatorAssignmentsManager } from "@/components/admin/CoordinatorAssignmentsManager";
 import logoGoverno from "@/assets/logo-governo.png";
 
 const Admin = () => {
@@ -85,10 +86,11 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="empresas" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="empresas">Empresas</TabsTrigger>
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
+            <TabsTrigger value="coordinators">Coordenadores</TabsTrigger>
             <TabsTrigger value="destinatarios">Emails</TabsTrigger>
           </TabsList>
 
@@ -102,6 +104,10 @@ const Admin = () => {
 
           <TabsContent value="rodovias">
             <RodoviasManager />
+          </TabsContent>
+
+          <TabsContent value="coordinators">
+            <CoordinatorAssignmentsManager />
           </TabsContent>
 
           <TabsContent value="destinatarios">

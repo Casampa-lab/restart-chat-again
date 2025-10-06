@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      coordinator_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          lote_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lote_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lote_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coordinator_assignments_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       defensas: {
         Row: {
           created_at: string
@@ -1394,6 +1423,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      coordinator_has_lot_access: {
+        Args: { _lote_id: string; _user_id: string }
+        Returns: boolean
+      }
       generate_nc_number: {
         Args: Record<PropertyKey, never>
         Returns: string
