@@ -13,8 +13,6 @@ interface Rodovia {
   codigo: string;
   nome: string;
   uf: string;
-  km_inicial: number;
-  km_final: number;
 }
 
 const RodoviasManager = () => {
@@ -23,8 +21,6 @@ const RodoviasManager = () => {
   const [formData, setFormData] = useState({
     codigo: "",
     uf: "",
-    km_inicial: "",
-    km_final: "",
   });
 
   useEffect(() => {
@@ -54,14 +50,12 @@ const RodoviasManager = () => {
         codigo: formData.codigo,
         nome: formData.codigo, // Nome igual ao código
         uf: formData.uf || null,
-        km_inicial: formData.km_inicial ? parseFloat(formData.km_inicial) : null,
-        km_final: formData.km_final ? parseFloat(formData.km_final) : null,
       });
 
       if (error) throw error;
 
       toast.success("Rodovia cadastrada com sucesso!");
-      setFormData({ codigo: "", uf: "", km_inicial: "", km_final: "" });
+      setFormData({ codigo: "", uf: "" });
       loadRodovias();
     } catch (error: any) {
       toast.error("Erro ao cadastrar rodovia: " + error.message);
@@ -90,11 +84,13 @@ const RodoviasManager = () => {
       <Card>
         <CardHeader>
           <CardTitle>Cadastrar Nova Rodovia</CardTitle>
-          <CardDescription>Adicione rodovias do programa BR-LEGAL</CardDescription>
+          <CardDescription>
+            Adicione rodovias do programa BR-LEGAL (KMs serão definidos por lote)
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="codigo">Código *</Label>
                 <Input
@@ -118,32 +114,6 @@ const RodoviasManager = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="km_inicial">KM Inicial</Label>
-                <Input
-                  id="km_inicial"
-                  type="number"
-                  step="0.001"
-                  value={formData.km_inicial}
-                  onChange={(e) => setFormData({ ...formData, km_inicial: e.target.value })}
-                  placeholder="Ex: 0.000"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="km_final">KM Final</Label>
-                <Input
-                  id="km_final"
-                  type="number"
-                  step="0.001"
-                  value={formData.km_final}
-                  onChange={(e) => setFormData({ ...formData, km_final: e.target.value })}
-                  placeholder="Ex: 150.000"
-                />
-              </div>
-            </div>
-
             <Button type="submit" disabled={loading}>
               <Plus className="mr-2 h-4 w-4" />
               Cadastrar Rodovia
@@ -155,6 +125,9 @@ const RodoviasManager = () => {
       <Card>
         <CardHeader>
           <CardTitle>Rodovias Cadastradas</CardTitle>
+          <CardDescription>
+            KMs específicos são configurados ao vincular rodovia ao lote
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -162,8 +135,6 @@ const RodoviasManager = () => {
               <TableRow>
                 <TableHead>Código</TableHead>
                 <TableHead>UF</TableHead>
-                <TableHead>KM Inicial</TableHead>
-                <TableHead>KM Final</TableHead>
                 <TableHead className="w-24">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -172,8 +143,6 @@ const RodoviasManager = () => {
                 <TableRow key={rodovia.id}>
                   <TableCell className="font-medium">{rodovia.codigo}</TableCell>
                   <TableCell>{rodovia.uf || "-"}</TableCell>
-                  <TableCell>{rodovia.km_inicial?.toFixed(3) || "-"}</TableCell>
-                  <TableCell>{rodovia.km_final?.toFixed(3) || "-"}</TableCell>
                   <TableCell>
                     <Button
                       variant="ghost"
@@ -187,7 +156,7 @@ const RodoviasManager = () => {
               ))}
               {rodovias.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={3} className="text-center text-muted-foreground">
                     Nenhuma rodovia cadastrada
                   </TableCell>
                 </TableRow>

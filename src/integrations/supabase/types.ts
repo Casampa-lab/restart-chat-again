@@ -70,16 +70,22 @@ export type Database = {
       lotes_rodovias: {
         Row: {
           id: string
+          km_final: number | null
+          km_inicial: number | null
           lote_id: string
           rodovia_id: string
         }
         Insert: {
           id?: string
+          km_final?: number | null
+          km_inicial?: number | null
           lote_id: string
           rodovia_id: string
         }
         Update: {
           id?: string
+          km_final?: number | null
+          km_inicial?: number | null
           lote_id?: string
           rodovia_id?: string
         }
@@ -219,8 +225,6 @@ export type Database = {
           codigo: string
           created_at: string | null
           id: string
-          km_final: number | null
-          km_inicial: number | null
           nome: string
           uf: string | null
         }
@@ -228,8 +232,6 @@ export type Database = {
           codigo: string
           created_at?: string | null
           id?: string
-          km_final?: number | null
-          km_inicial?: number | null
           nome: string
           uf?: string | null
         }
@@ -237,8 +239,6 @@ export type Database = {
           codigo?: string
           created_at?: string | null
           id?: string
-          km_final?: number | null
-          km_inicial?: number | null
           nome?: string
           uf?: string | null
         }
