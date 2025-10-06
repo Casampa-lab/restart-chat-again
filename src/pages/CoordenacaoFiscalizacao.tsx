@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
 import logoGoverno from "@/assets/logo-governo.png";
 
@@ -77,24 +77,222 @@ const CoordenacaoFiscalizacao = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            <Tabs defaultValue="ncs-lote" className="w-full">
-              <TabsList className="grid w-full grid-cols-1 gap-2 h-auto bg-muted p-2">
+            <Tabs defaultValue="frentes" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2 h-auto bg-muted p-2">
+                <TabsTrigger value="frentes" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
+                  Frentes Liberadas
+                </TabsTrigger>
                 <TabsTrigger value="ncs-lote" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
-                  NCs por Lote
+                  NCs
+                </TabsTrigger>
+                <TabsTrigger value="retrorrefletividades" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
+                  Retrorrefletividades
+                </TabsTrigger>
+                <TabsTrigger value="defensas" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
+                  Defensas
+                </TabsTrigger>
+                <TabsTrigger value="intervencoes" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
+                  Intervenções
+                </TabsTrigger>
+                <TabsTrigger value="fichas" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
+                  Fichas
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="ncs-lote" className="mt-6">
-                <div className="text-center py-8">
+              <TabsContent value="frentes" className="mt-6">
+                <div className="text-center py-8 space-y-4">
                   <Button 
                     size="lg"
+                    variant="default"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-frentes-liberadas")}
+                  >
+                    Visualizar Frentes Liberadas
+                  </Button>
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow ml-4"
+                  >
+                    <Download className="mr-2 h-5 w-5" />
+                    Baixar Planilha
+                  </Button>
+                  <p className="text-muted-foreground mt-4">
+                    Visualize e baixe as frentes liberadas registradas
+                  </p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="ncs-lote" className="mt-6">
+                <div className="text-center py-8 space-y-4">
+                  <Button 
+                    size="lg"
+                    variant="default"
                     className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
                     onClick={() => navigate("/ncs-coordenador")}
                   >
                     Acessar NCs por Lote
                   </Button>
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow ml-4"
+                  >
+                    <Download className="mr-2 h-5 w-5" />
+                    Baixar Planilha
+                  </Button>
                   <p className="text-muted-foreground mt-4">
                     Visualize e gerencie todas as não conformidades organizadas por lote
+                  </p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="retrorrefletividades" className="mt-6">
+                <div className="text-center py-8 space-y-4">
+                  <div className="space-x-4">
+                    <Button 
+                      size="lg"
+                      variant="default"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/minhas-retrorrefletividades")}
+                    >
+                      Estática
+                    </Button>
+                    <Button 
+                      size="lg"
+                      variant="default"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/minhas-retrorrefletividades-dinamicas")}
+                    >
+                      Dinâmica
+                    </Button>
+                  </div>
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                  >
+                    <Download className="mr-2 h-5 w-5" />
+                    Baixar Planilhas
+                  </Button>
+                  <p className="text-muted-foreground mt-4">
+                    Visualize e baixe os dados de retrorrefletividade estática e dinâmica
+                  </p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="defensas" className="mt-6">
+                <div className="text-center py-8 space-y-4">
+                  <Button 
+                    size="lg"
+                    variant="default"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-defensas")}
+                  >
+                    Visualizar Defensas
+                  </Button>
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow ml-4"
+                  >
+                    <Download className="mr-2 h-5 w-5" />
+                    Baixar Planilha
+                  </Button>
+                  <p className="text-muted-foreground mt-4">
+                    Visualize e baixe os dados de inspeção de defensas
+                  </p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="intervencoes" className="mt-6">
+                <div className="text-center py-8 space-y-4">
+                  <div className="space-x-4 mb-4">
+                    <Button 
+                      size="lg"
+                      variant="default"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/minhas-intervencoes-sh")}
+                    >
+                      SH
+                    </Button>
+                    <Button 
+                      size="lg"
+                      variant="default"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/minhas-intervencoes-inscricoes")}
+                    >
+                      Inscrições
+                    </Button>
+                    <Button 
+                      size="lg"
+                      variant="default"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/minhas-intervencoes-sv")}
+                    >
+                      SV
+                    </Button>
+                    <Button 
+                      size="lg"
+                      variant="default"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/minhas-intervencoes-tacha")}
+                    >
+                      Tachas
+                    </Button>
+                  </div>
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                  >
+                    <Download className="mr-2 h-5 w-5" />
+                    Baixar Planilhas
+                  </Button>
+                  <p className="text-muted-foreground mt-4">
+                    Visualize e baixe os dados de intervenções em sinalização
+                  </p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="fichas" className="mt-6">
+                <div className="text-center py-8 space-y-4">
+                  <div className="space-x-4 mb-4">
+                    <Button 
+                      size="lg"
+                      variant="default"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/minhas-fichas-verificacao")}
+                    >
+                      Verificação
+                    </Button>
+                    <Button 
+                      size="lg"
+                      variant="default"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/minhas-fichas-placa")}
+                    >
+                      Placa
+                    </Button>
+                    <Button 
+                      size="lg"
+                      variant="default"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/meus-registros-nc")}
+                    >
+                      Registro NC
+                    </Button>
+                  </div>
+                  <Button 
+                    size="lg"
+                    variant="secondary"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                  >
+                    <Download className="mr-2 h-5 w-5" />
+                    Baixar Planilhas
+                  </Button>
+                  <p className="text-muted-foreground mt-4">
+                    Visualize e baixe as fichas de verificação e cadastro
                   </p>
                 </div>
               </TabsContent>

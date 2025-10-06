@@ -241,7 +241,7 @@ const Index = () => {
                       className="shadow-md hover:shadow-lg transition-shadow"
                     >
                       <Eye className="mr-2 h-4 w-4" />
-                      Ver minhas NCs
+                      Ver meus registros
                     </Button>
                   </div>
                   <NaoConformidadeForm
