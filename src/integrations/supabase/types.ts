@@ -167,6 +167,63 @@ export type Database = {
         }
         Relationships: []
       }
+      intervencoes_sh: {
+        Row: {
+          area_m2: number
+          cor: string
+          created_at: string
+          data_intervencao: string
+          espessura_cm: number | null
+          id: string
+          km_final: number
+          km_inicial: number
+          lote_id: string
+          material_utilizado: string | null
+          observacao: string | null
+          rodovia_id: string
+          tipo_demarcacao: string
+          tipo_intervencao: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          area_m2: number
+          cor: string
+          created_at?: string
+          data_intervencao: string
+          espessura_cm?: number | null
+          id?: string
+          km_final: number
+          km_inicial: number
+          lote_id: string
+          material_utilizado?: string | null
+          observacao?: string | null
+          rodovia_id: string
+          tipo_demarcacao: string
+          tipo_intervencao: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          area_m2?: number
+          cor?: string
+          created_at?: string
+          data_intervencao?: string
+          espessura_cm?: number | null
+          id?: string
+          km_final?: number
+          km_inicial?: number
+          lote_id?: string
+          material_utilizado?: string | null
+          observacao?: string | null
+          rodovia_id?: string
+          tipo_demarcacao?: string
+          tipo_intervencao?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lotes: {
         Row: {
           contrato: string | null

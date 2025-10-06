@@ -13,6 +13,7 @@ import MinhasFrentesLiberadas from "./pages/MinhasFrentesLiberadas";
 import MinhasRetrorrefletividades from "./pages/MinhasRetrorrefletividades";
 import MinhasRetrorrefletividadesDinamicas from "./pages/MinhasRetrorrefletividadesDinamicas";
 import MinhasDefensas from "./pages/MinhasDefensas";
+import MinhasIntervencoesSH from "./pages/MinhasIntervencoesSH";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/minhas-retrorrefletividades" element={<MinhasRetrorrefletividades />} />
           <Route path="/minhas-retrorrefletividades-dinamicas" element={<MinhasRetrorrefletividadesDinamicas />} />
           <Route path="/minhas-defensas" element={<MinhasDefensas />} />
+          <Route path="/minhas-intervencoes-sh" element={<MinhasIntervencoesSH />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

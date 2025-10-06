@@ -65,22 +65,22 @@ export const PLANILHAS: Record<string, Planilha> = {
     tabela: 'defensas'
   },
 
-  // A implementar
+  '3.1.5-sh': {
+    codigo: '3.1.5',
+    nome: 'INTERVENÇÕES REALIZADAS - SH',
+    categoria: 'intervencoes',
+    implementado: true,
+    descricao: 'Registro de intervenções realizadas em sinalização horizontal',
+    tabela: 'intervencoes_sh'
+  },
 
+  // A implementar
   '3.1.5-inscricoes': {
     codigo: '3.1.5',
     nome: 'INTERVENÇÕES REALIZADAS - INSCRIÇÕES NOS PAVIMENTOS',
     categoria: 'intervencoes',
     implementado: false,
     descricao: 'Registro de intervenções realizadas em inscrições no pavimento'
-  },
-
-  '3.1.5-sh': {
-    codigo: '3.1.5',
-    nome: 'INTERVENÇÕES REALIZADAS - SH',
-    categoria: 'intervencoes',
-    implementado: false,
-    descricao: 'Registro de intervenções realizadas em sinalização horizontal'
   },
 
   '3.1.5-sv': {
