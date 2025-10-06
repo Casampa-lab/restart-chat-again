@@ -120,11 +120,11 @@ const Auth = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={12}
+                  minLength={6}
                 />
                 {!isLogin && (
                   <p className="text-xs text-muted-foreground">
-                    Mínimo de 12 caracteres. Use letras maiúsculas, minúsculas, números e símbolos.
+                    Mínimo de 6 caracteres.
                   </p>
                 )}
               </div>
