@@ -97,8 +97,9 @@ export const PLANILHAS: Record<string, Planilha> = {
     codigo: '3.1.5',
     nome: 'INTERVENÇÕES REALIZADAS - TACHA',
     categoria: 'intervencoes',
-    implementado: false,
-    descricao: 'Registro de intervenções realizadas em tachas refletivas'
+    implementado: true,
+    descricao: 'Registro de intervenções realizadas em tachas refletivas',
+    tabela: 'intervencoes_tacha'
   },
 
   '3.1.18': {

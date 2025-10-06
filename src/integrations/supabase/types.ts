@@ -344,6 +344,66 @@ export type Database = {
         }
         Relationships: []
       }
+      intervencoes_tacha: {
+        Row: {
+          cor: string
+          created_at: string
+          data_intervencao: string
+          estado_conservacao: string | null
+          id: string
+          km_final: number
+          km_inicial: number
+          lado: string
+          lote_id: string
+          material: string | null
+          observacao: string | null
+          quantidade: number
+          rodovia_id: string
+          tipo_intervencao: string
+          tipo_tacha: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cor: string
+          created_at?: string
+          data_intervencao: string
+          estado_conservacao?: string | null
+          id?: string
+          km_final: number
+          km_inicial: number
+          lado: string
+          lote_id: string
+          material?: string | null
+          observacao?: string | null
+          quantidade?: number
+          rodovia_id: string
+          tipo_intervencao: string
+          tipo_tacha: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cor?: string
+          created_at?: string
+          data_intervencao?: string
+          estado_conservacao?: string | null
+          id?: string
+          km_final?: number
+          km_inicial?: number
+          lado?: string
+          lote_id?: string
+          material?: string | null
+          observacao?: string | null
+          quantidade?: number
+          rodovia_id?: string
+          tipo_intervencao?: string
+          tipo_tacha?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lotes: {
         Row: {
           contrato: string | null

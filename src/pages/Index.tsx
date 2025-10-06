@@ -16,6 +16,7 @@ import DefensasForm from "@/components/DefensasForm";
 import IntervencoesSHForm from "@/components/IntervencoesSHForm";
 import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm";
 import IntervencoesSVForm from "@/components/IntervencoesSVForm";
+import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
 import logoGoverno from "@/assets/logo-governo.png";
 
@@ -115,6 +116,10 @@ const Index = () => {
                 <PaintBucket className="mr-2 h-4 w-4" />
                 Interv. SV
               </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-intervencoes-tacha")}>
+                <PaintBucket className="mr-2 h-4 w-4" />
+                Interv. Tacha
+              </Button>
               {isAdmin && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-4 w-4" />
@@ -178,7 +183,7 @@ const Index = () => {
             </Card>
 
             <Tabs defaultValue="frentes" className="w-full">
-              <TabsList className="grid w-full grid-cols-8 h-auto">
+              <TabsList className="grid w-full grid-cols-9 h-auto">
                 <TabsTrigger value="frentes" className="flex flex-col py-3 px-1">
                   <span className="text-xs font-semibold">2.2</span>
                   <span className="text-xs">Frentes</span>
@@ -210,6 +215,10 @@ const Index = () => {
                 <TabsTrigger value="int-sv" className="flex flex-col py-3 px-1">
                   <span className="text-xs font-semibold">3.1.5</span>
                   <span className="text-xs">Int. SV</span>
+                </TabsTrigger>
+                <TabsTrigger value="int-tacha" className="flex flex-col py-3 px-1">
+                  <span className="text-xs font-semibold">3.1.5</span>
+                  <span className="text-xs">Int. Tacha</span>
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="frentes" className="mt-6">
@@ -256,6 +265,12 @@ const Index = () => {
               </TabsContent>
               <TabsContent value="int-sv" className="mt-6">
                 <IntervencoesSVForm
+                  loteId={activeSession.lote_id}
+                  rodoviaId={activeSession.rodovia_id}
+                />
+              </TabsContent>
+              <TabsContent value="int-tacha" className="mt-6">
+                <IntervencoesTachaForm
                   loteId={activeSession.lote_id}
                   rodoviaId={activeSession.rodovia_id}
                 />
