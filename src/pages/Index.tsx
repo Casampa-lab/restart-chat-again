@@ -104,9 +104,10 @@ const Index = () => {
                 </Button>
               )}
               <Button 
-                variant="navigation" 
+                variant="destructive" 
                 size="lg"
                 onClick={handleSignOut}
+                className="font-semibold shadow-md hover:shadow-lg transition-shadow"
               >
                 <LogOut className="mr-2 h-5 w-5" />
                 Sair

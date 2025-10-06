@@ -57,9 +57,10 @@ const CoordenacaoFiscalizacao = () => {
               onClick={() => navigate("/")}
             />
             <Button 
-              variant="navigation" 
+              variant="default" 
               size="lg"
               onClick={() => navigate("/")}
+              className="font-semibold shadow-md hover:shadow-lg transition-shadow bg-accent text-accent-foreground hover:bg-accent/90"
             >
               <ArrowLeft className="mr-2 h-5 w-5" />
               Voltar
