@@ -70,10 +70,14 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/5 to-secondary/5">
-      <header className="bg-background border-b">
+      <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
-            <h1 className="text-2xl font-bold text-primary">Administração</h1>
+            <div className="flex items-center gap-4">
+              <div className="bg-white/95 rounded-lg px-4 py-2 shadow-md">
+                <h1 className="text-2xl font-bold text-primary">Administração</h1>
+              </div>
+            </div>
             <Button 
               variant="default" 
               size="lg"
