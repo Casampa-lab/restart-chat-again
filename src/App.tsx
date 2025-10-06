@@ -19,6 +19,7 @@ import MinhasIntervencoesSV from "./pages/MinhasIntervencoesSV";
 import MinhasIntervencoesTacha from "./pages/MinhasIntervencoesTacha";
 import MeusRegistrosNC from "./pages/MeusRegistrosNC";
 import MinhasFichasVerificacao from "./pages/MinhasFichasVerificacao";
+import MinhasFichasPlaca from "./pages/MinhasFichasPlaca";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/minhas-intervencoes-tacha" element={<MinhasIntervencoesTacha />} />
           <Route path="/meus-registros-nc" element={<MeusRegistrosNC />} />
           <Route path="/minhas-fichas-verificacao" element={<MinhasFichasVerificacao />} />
+          <Route path="/minhas-fichas-placa" element={<MinhasFichasPlaca />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

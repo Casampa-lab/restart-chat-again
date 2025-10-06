@@ -124,8 +124,9 @@ export const PLANILHAS: Record<string, Planilha> = {
     codigo: '3.1.20',
     nome: 'FICHA DE PLACA',
     categoria: 'sinalizacao',
-    implementado: false,
-    descricao: 'Ficha de registro e controle de placas de sinalização'
+    implementado: true,
+    descricao: 'Ficha de registro e controle de placas de sinalização',
+    tabela: 'ficha_placa'
   },
 };
 

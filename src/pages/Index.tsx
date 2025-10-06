@@ -19,6 +19,7 @@ import IntervencoesSVForm from "@/components/IntervencoesSVForm";
 import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
 import { RegistroNCForm } from "@/components/RegistroNCForm";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
+import { FichaPlacaForm } from "@/components/FichaPlacaForm";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
 import logoGoverno from "@/assets/logo-governo.png";
 
@@ -130,6 +131,10 @@ const Index = () => {
                 <ClipboardList className="mr-2 h-4 w-4" />
                 Fichas Verif.
               </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-fichas-placa")}>
+                <ClipboardList className="mr-2 h-4 w-4" />
+                Fichas Placa
+              </Button>
               {isAdmin && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-4 w-4" />
@@ -193,7 +198,7 @@ const Index = () => {
             </Card>
 
             <Tabs defaultValue="frentes" className="w-full">
-              <TabsList className="grid w-full grid-cols-11 h-auto">
+              <TabsList className="grid w-full grid-cols-12 h-auto">
                 <TabsTrigger value="frentes" className="flex flex-col py-3 px-1">
                   <span className="text-xs font-semibold">2.2</span>
                   <span className="text-xs">Frentes</span>
@@ -237,6 +242,10 @@ const Index = () => {
                 <TabsTrigger value="ficha-verif" className="flex flex-col py-3 px-1">
                   <span className="text-xs font-semibold">3.1.19</span>
                   <span className="text-xs">Ficha Verif</span>
+                </TabsTrigger>
+                <TabsTrigger value="ficha-placa" className="flex flex-col py-3 px-1">
+                  <span className="text-xs font-semibold">3.1.20</span>
+                  <span className="text-xs">Ficha Placa</span>
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="frentes" className="mt-6">
@@ -301,6 +310,12 @@ const Index = () => {
               </TabsContent>
               <TabsContent value="ficha-verif" className="mt-6">
                 <FichaVerificacaoForm
+                  loteId={activeSession.lote_id}
+                  rodoviaId={activeSession.rodovia_id}
+                />
+              </TabsContent>
+              <TabsContent value="ficha-placa" className="mt-6">
+                <FichaPlacaForm
                   loteId={activeSession.lote_id}
                   rodoviaId={activeSession.rodovia_id}
                 />

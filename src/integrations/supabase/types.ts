@@ -122,6 +122,208 @@ export type Database = {
         }
         Relationships: []
       }
+      ficha_placa: {
+        Row: {
+          altura_m: number | null
+          area_m2: number | null
+          br: string | null
+          codigo: string | null
+          created_at: string
+          data_implantacao: string | null
+          data_vistoria: string
+          descricao: string | null
+          dimensoes_mm: string | null
+          distancia_m: number | null
+          foto_base_url: string | null
+          foto_frontal_url: string | null
+          foto_identificacao_url: string | null
+          foto_lateral_url: string | null
+          foto_posterior_url: string | null
+          id: string
+          km: number | null
+          lado: string | null
+          latitude: number | null
+          longitude: number | null
+          lote_id: string
+          modelo: string | null
+          pelicula: string | null
+          qtde_suporte: number | null
+          retrorrefletividade: number | null
+          rodovia_id: string
+          snv: string | null
+          substrato: string | null
+          suporte: string | null
+          tipo: string | null
+          uf: string | null
+          updated_at: string
+          user_id: string
+          velocidade: string | null
+        }
+        Insert: {
+          altura_m?: number | null
+          area_m2?: number | null
+          br?: string | null
+          codigo?: string | null
+          created_at?: string
+          data_implantacao?: string | null
+          data_vistoria: string
+          descricao?: string | null
+          dimensoes_mm?: string | null
+          distancia_m?: number | null
+          foto_base_url?: string | null
+          foto_frontal_url?: string | null
+          foto_identificacao_url?: string | null
+          foto_lateral_url?: string | null
+          foto_posterior_url?: string | null
+          id?: string
+          km?: number | null
+          lado?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          lote_id: string
+          modelo?: string | null
+          pelicula?: string | null
+          qtde_suporte?: number | null
+          retrorrefletividade?: number | null
+          rodovia_id: string
+          snv?: string | null
+          substrato?: string | null
+          suporte?: string | null
+          tipo?: string | null
+          uf?: string | null
+          updated_at?: string
+          user_id: string
+          velocidade?: string | null
+        }
+        Update: {
+          altura_m?: number | null
+          area_m2?: number | null
+          br?: string | null
+          codigo?: string | null
+          created_at?: string
+          data_implantacao?: string | null
+          data_vistoria?: string
+          descricao?: string | null
+          dimensoes_mm?: string | null
+          distancia_m?: number | null
+          foto_base_url?: string | null
+          foto_frontal_url?: string | null
+          foto_identificacao_url?: string | null
+          foto_lateral_url?: string | null
+          foto_posterior_url?: string | null
+          id?: string
+          km?: number | null
+          lado?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          lote_id?: string
+          modelo?: string | null
+          pelicula?: string | null
+          qtde_suporte?: number | null
+          retrorrefletividade?: number | null
+          rodovia_id?: string
+          snv?: string | null
+          substrato?: string | null
+          suporte?: string | null
+          tipo?: string | null
+          uf?: string | null
+          updated_at?: string
+          user_id?: string
+          velocidade?: string | null
+        }
+        Relationships: []
+      }
+      ficha_placa_danos: {
+        Row: {
+          created_at: string
+          data_ocorrencia: string
+          ficha_placa_id: string
+          id: string
+          observacao: string | null
+          problema: string
+          solucao: string | null
+          vandalismo: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          data_ocorrencia: string
+          ficha_placa_id: string
+          id?: string
+          observacao?: string | null
+          problema: string
+          solucao?: string | null
+          vandalismo?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          data_ocorrencia?: string
+          ficha_placa_id?: string
+          id?: string
+          observacao?: string | null
+          problema?: string
+          solucao?: string | null
+          vandalismo?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_placa_danos_ficha_placa_id_fkey"
+            columns: ["ficha_placa_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_placa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ficha_placa_intervencoes: {
+        Row: {
+          created_at: string
+          data_intervencao: string
+          ficha_placa_id: string
+          id: string
+          motivo: string
+          pelicula: string | null
+          placa_recuperada: boolean | null
+          retro_fundo: number | null
+          retro_orla_legenda: number | null
+          substrato: string | null
+          suporte: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_intervencao: string
+          ficha_placa_id: string
+          id?: string
+          motivo: string
+          pelicula?: string | null
+          placa_recuperada?: boolean | null
+          retro_fundo?: number | null
+          retro_orla_legenda?: number | null
+          substrato?: string | null
+          suporte?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_intervencao?: string
+          ficha_placa_id?: string
+          id?: string
+          motivo?: string
+          pelicula?: string | null
+          placa_recuperada?: boolean | null
+          retro_fundo?: number | null
+          retro_orla_legenda?: number | null
+          substrato?: string | null
+          suporte?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_placa_intervencoes_ficha_placa_id_fkey"
+            columns: ["ficha_placa_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_placa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ficha_verificacao: {
         Row: {
           contrato: string | null
