@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 
 interface RetrorrefletividadeDinamicaFormProps {
   loteId: string;
@@ -29,6 +29,8 @@ const CONDICOES_CLIMATICAS = ["Seco", "Úmido", "Chuva Leve", "Chuva Forte"];
 
 const RetrorrefletividadeDinamicaForm = ({ loteId, rodoviaId }: RetrorrefletividadeDinamicaFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isCapturingInicial, setIsCapturingInicial] = useState(false);
+  const [isCapturingFinal, setIsCapturingFinal] = useState(false);
   const [formData, setFormData] = useState({
     data_medicao: new Date().toISOString().split('T')[0],
     km_inicial: "",
@@ -41,6 +43,10 @@ const RetrorrefletividadeDinamicaForm = ({ loteId, rodoviaId }: Retrorrefletivid
     velocidade_medicao: "",
     condicao_climatica: "",
     observacao: "",
+    latitude_inicial: "",
+    longitude_inicial: "",
+    latitude_final: "",
+    longitude_final: "",
   });
 
   const situacao = formData.valor_medido && formData.valor_minimo
@@ -48,6 +54,58 @@ const RetrorrefletividadeDinamicaForm = ({ loteId, rodoviaId }: Retrorrefletivid
       ? "Conforme"
       : "Não Conforme"
     : "";
+
+  const capturarCoordenadas = (tipo: 'inicial' | 'final') => {
+    if (tipo === 'inicial') setIsCapturingInicial(true);
+    else setIsCapturingFinal(true);
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          if (tipo === 'inicial') {
+            setFormData({
+              ...formData,
+              latitude_inicial: position.coords.latitude.toString(),
+              longitude_inicial: position.coords.longitude.toString(),
+            });
+            toast({
+              title: "Coordenadas capturadas!",
+              description: `Ponto inicial: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
+            });
+            setIsCapturingInicial(false);
+          } else {
+            setFormData({
+              ...formData,
+              latitude_final: position.coords.latitude.toString(),
+              longitude_final: position.coords.longitude.toString(),
+            });
+            toast({
+              title: "Coordenadas capturadas!",
+              description: `Ponto final: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
+            });
+            setIsCapturingFinal(false);
+          }
+        },
+        (error) => {
+          toast({
+            title: "Erro ao capturar localização",
+            description: "Verifique se você permitiu acesso à localização",
+            variant: "destructive",
+          });
+          if (tipo === 'inicial') setIsCapturingInicial(false);
+          else setIsCapturingFinal(false);
+        }
+      );
+    } else {
+      toast({
+        title: "Geolocalização não suportada",
+        description: "Seu navegador não suporta geolocalização",
+        variant: "destructive",
+      });
+      if (tipo === 'inicial') setIsCapturingInicial(false);
+      else setIsCapturingFinal(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +169,10 @@ const RetrorrefletividadeDinamicaForm = ({ loteId, rodoviaId }: Retrorrefletivid
         velocidade_medicao: "",
         condicao_climatica: "",
         observacao: "",
+        latitude_inicial: "",
+        longitude_inicial: "",
+        latitude_final: "",
+        longitude_final: "",
       });
     } catch (error) {
       console.error("Erro ao salvar medição:", error);
@@ -163,7 +225,7 @@ const RetrorrefletividadeDinamicaForm = ({ loteId, rodoviaId }: Retrorrefletivid
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="km_inicial">KM Inicial *</Label>
+              <Label htmlFor="km_inicial">km Inicial *</Label>
               <Input
                 id="km_inicial"
                 type="number"
@@ -178,7 +240,7 @@ const RetrorrefletividadeDinamicaForm = ({ loteId, rodoviaId }: Retrorrefletivid
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="km_final">KM Final *</Label>
+              <Label htmlFor="km_final">km Final *</Label>
               <Input
                 id="km_final"
                 type="number"
@@ -190,6 +252,68 @@ const RetrorrefletividadeDinamicaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                 placeholder="0.000"
                 required
               />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label>Coordenadas GPS do Ponto Inicial</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => capturarCoordenadas('inicial')}
+                  disabled={isCapturingInicial}
+                >
+                  {isCapturingInicial ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <MapPin className="mr-2 h-4 w-4" />
+                  )}
+                  Capturar Ponto Inicial
+                </Button>
+                <Input
+                  placeholder="Latitude"
+                  value={formData.latitude_inicial}
+                  onChange={(e) => setFormData({ ...formData, latitude_inicial: e.target.value })}
+                  className="flex-1"
+                />
+                <Input
+                  placeholder="Longitude"
+                  value={formData.longitude_inicial}
+                  onChange={(e) => setFormData({ ...formData, longitude_inicial: e.target.value })}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label>Coordenadas GPS do Ponto Final</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => capturarCoordenadas('final')}
+                  disabled={isCapturingFinal}
+                >
+                  {isCapturingFinal ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <MapPin className="mr-2 h-4 w-4" />
+                  )}
+                  Capturar Ponto Final
+                </Button>
+                <Input
+                  placeholder="Latitude"
+                  value={formData.latitude_final}
+                  onChange={(e) => setFormData({ ...formData, latitude_final: e.target.value })}
+                  className="flex-1"
+                />
+                <Input
+                  placeholder="Longitude"
+                  value={formData.longitude_final}
+                  onChange={(e) => setFormData({ ...formData, longitude_final: e.target.value })}
+                  className="flex-1"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
