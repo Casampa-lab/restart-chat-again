@@ -83,9 +83,9 @@ const Auth = () => {
             <CardDescription className="text-center">
               {isLogin ? "Entre com suas credenciais" : "Crie sua conta"}
             </CardDescription>
-          </CardHeader>
-        <CardContent>
-          <form onSubmit={handleAuth} className="space-y-4">
+        </CardHeader>
+          <CardContent>
+            <form onSubmit={handleAuth} className="space-y-4">
             {!isLogin && (
               <div className="space-y-2">
                 <Label htmlFor="nome">Nome Completo</Label>
@@ -142,13 +142,13 @@ const Auth = () => {
             >
               {isLogin ? "Não tem conta? Cadastre-se" : "Já tem conta? Entre"}
             </Button>
-          </form>
-        </CardContent>
-      </Card>
+            </form>
+          </CardContent>
+        </Card>
 
-      <div className="flex justify-center mt-6">
-        <img src={logoGoverno} alt="Governo Federal" className="h-12 object-contain" />
-      </div>
+        <div className="flex justify-center">
+          <img src={logoGoverno} alt="Governo Federal" className="h-12 object-contain" />
+        </div>
       </div>
     </div>
   );
