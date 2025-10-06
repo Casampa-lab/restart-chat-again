@@ -12,6 +12,7 @@ import RodoviasManager from "@/components/admin/RodoviasManager";
 import { DestinatariosManager } from "@/components/admin/DestinatariosManager";
 import { CoordinatorAssignmentsManager } from "@/components/admin/CoordinatorAssignmentsManager";
 import logoGoverno from "@/assets/logo-governo.png";
+import logoBrLegal from "@/assets/logo-brlegal2.png";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -73,10 +74,13 @@ const Admin = () => {
       <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-white/95 rounded-lg px-4 py-2 shadow-md">
-                <h1 className="text-2xl font-bold text-primary">Administração</h1>
-              </div>
+            <div className="bg-white/95 rounded-lg px-4 py-2 shadow-md">
+              <img 
+                src={logoBrLegal} 
+                alt="BR-LEGAL 2" 
+                className="h-20 object-contain cursor-pointer hover:scale-105 transition-transform" 
+                onClick={() => navigate("/")}
+              />
             </div>
             <Button 
               variant="default" 
