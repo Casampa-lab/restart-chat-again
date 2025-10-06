@@ -136,8 +136,6 @@ const MinhasNCs = () => {
 
   const getSituacaoColor = (situacao: string) => {
     switch (situacao) {
-      case "Pendente": return "bg-yellow-500";
-      case "Em Andamento": return "bg-blue-500";
       case "Atendida": return "bg-green-500";
       case "Não Atendida": return "bg-red-500";
       default: return "bg-gray-500";

@@ -35,8 +35,6 @@ export const PROBLEMAS_POR_TIPO: Record<string, string[]> = {
 };
 
 export const SITUACOES_NC = [
-  "Pendente",
-  "Em Andamento",
   "Atendida",
   "Não Atendida",
 ] as const;
