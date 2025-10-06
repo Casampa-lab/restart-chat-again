@@ -34,8 +34,9 @@ export const PLANILHAS: Record<string, Planilha> = {
     codigo: '2.2',
     nome: 'FRENTE LIBERADA DAS RODOVIAS',
     categoria: 'outros',
-    implementado: false,
-    descricao: 'Registro de frentes liberadas para trabalho nas rodovias'
+    implementado: true,
+    descricao: 'Registro de frentes liberadas para trabalho nas rodovias',
+    tabela: 'frentes_liberadas'
   },
   
   '3.1.2': {

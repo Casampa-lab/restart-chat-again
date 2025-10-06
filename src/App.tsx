@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import MinhasNCs from "./pages/MinhasNCs";
 import NCsCoordenador from "./pages/NCsCoordenador";
+import MinhasFrentesLiberadas from "./pages/MinhasFrentesLiberadas";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/minhas-ncs" element={<MinhasNCs />} />
           <Route path="/ncs-coordenador" element={<NCsCoordenador />} />
+          <Route path="/minhas-frentes-liberadas" element={<MinhasFrentesLiberadas />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

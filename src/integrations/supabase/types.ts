@@ -62,6 +62,51 @@ export type Database = {
         }
         Relationships: []
       }
+      frentes_liberadas: {
+        Row: {
+          created_at: string
+          data_liberacao: string
+          id: string
+          km_final: number
+          km_inicial: number
+          lote_id: string
+          observacao: string | null
+          responsavel: string
+          rodovia_id: string
+          tipo_servico: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_liberacao: string
+          id?: string
+          km_final: number
+          km_inicial: number
+          lote_id: string
+          observacao?: string | null
+          responsavel: string
+          rodovia_id: string
+          tipo_servico: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_liberacao?: string
+          id?: string
+          km_final?: number
+          km_inicial?: number
+          lote_id?: string
+          observacao?: string | null
+          responsavel?: string
+          rodovia_id?: string
+          tipo_servico?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lotes: {
         Row: {
           contrato: string | null
