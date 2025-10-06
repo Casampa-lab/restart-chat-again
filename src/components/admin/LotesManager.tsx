@@ -203,7 +203,7 @@ const LotesManager = () => {
                       htmlFor={rodovia.id}
                       className="text-sm cursor-pointer flex-1"
                     >
-                      {rodovia.codigo} - {rodovia.nome}
+                      {rodovia.codigo}
                     </label>
                   </div>
                 ))}
