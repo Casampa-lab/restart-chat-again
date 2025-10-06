@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { Save } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 interface FrenteLiberadaFormProps {
   loteId: string;
@@ -14,7 +14,7 @@ interface FrenteLiberadaFormProps {
 }
 
 const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     data_liberacao: new Date().toISOString().split('T')[0],
     km_inicial: "",
@@ -24,36 +24,25 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
     observacao: "",
   });
 
-  const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    
+    if (!formData.km_inicial || !formData.km_final || !formData.tipo_servico || !formData.responsavel) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
-        toast.error("Erro: Usuário não autenticado");
-        return;
-      }
-
-      // Validações básicas
-      if (!formData.km_inicial || !formData.km_final) {
-        toast.error("Preencha os KMs inicial e final");
-        return;
-      }
-
-      if (parseFloat(formData.km_final) <= parseFloat(formData.km_inicial)) {
-        toast.error("KM final deve ser maior que KM inicial");
-        return;
-      }
-
-      if (!formData.tipo_servico || !formData.responsavel) {
-        toast.error("Preencha todos os campos obrigatórios");
-        return;
+        throw new Error("Usuário não autenticado");
       }
 
       const { error } = await supabase
@@ -72,9 +61,12 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
 
       if (error) throw error;
 
-      toast.success("Frente liberada registrada com sucesso!");
-      
-      // Limpar formulário
+      toast({
+        title: "Sucesso!",
+        description: "Frente liberada registrada com sucesso",
+      });
+
+      // Reset form
       setFormData({
         data_liberacao: new Date().toISOString().split('T')[0],
         km_inicial: "",
@@ -85,9 +77,13 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
       });
     } catch (error) {
       console.error("Erro ao salvar frente liberada:", error);
-      toast.error("Erro ao salvar frente liberada");
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar frente liberada. Tente novamente.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -96,7 +92,7 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
       <CardHeader>
         <CardTitle>2.2 - Frente Liberada das Rodovias</CardTitle>
         <CardDescription>
-          Registro de frentes liberadas para trabalho
+          Registro de frentes liberadas para trabalho nas rodovias
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -108,7 +104,9 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
                 id="data_liberacao"
                 type="date"
                 value={formData.data_liberacao}
-                onChange={(e) => handleChange("data_liberacao", e.target.value)}
+                onChange={(e) =>
+                  setFormData({ ...formData, data_liberacao: e.target.value })
+                }
                 required
               />
             </div>
@@ -118,7 +116,9 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
               <Input
                 id="responsavel"
                 value={formData.responsavel}
-                onChange={(e) => handleChange("responsavel", e.target.value)}
+                onChange={(e) =>
+                  setFormData({ ...formData, responsavel: e.target.value })
+                }
                 placeholder="Nome do responsável"
                 required
               />
@@ -131,8 +131,10 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
                 type="number"
                 step="0.001"
                 value={formData.km_inicial}
-                onChange={(e) => handleChange("km_inicial", e.target.value)}
-                placeholder="Ex: 123.456"
+                onChange={(e) =>
+                  setFormData({ ...formData, km_inicial: e.target.value })
+                }
+                placeholder="0.000"
                 required
               />
             </div>
@@ -144,19 +146,23 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
                 type="number"
                 step="0.001"
                 value={formData.km_final}
-                onChange={(e) => handleChange("km_final", e.target.value)}
-                placeholder="Ex: 125.678"
+                onChange={(e) =>
+                  setFormData({ ...formData, km_final: e.target.value })
+                }
+                placeholder="0.000"
                 required
               />
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="tipo_servico">Tipo de Serviço Liberado *</Label>
+              <Label htmlFor="tipo_servico">Tipo de Serviço *</Label>
               <Input
                 id="tipo_servico"
                 value={formData.tipo_servico}
-                onChange={(e) => handleChange("tipo_servico", e.target.value)}
-                placeholder="Ex: Sinalização Horizontal, Recuperação de Pavimento, etc."
+                onChange={(e) =>
+                  setFormData({ ...formData, tipo_servico: e.target.value })
+                }
+                placeholder="Ex: Conservação Rodoviária, Sinalização, etc."
                 required
               />
             </div>
@@ -166,16 +172,18 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
               <Textarea
                 id="observacao"
                 value={formData.observacao}
-                onChange={(e) => handleChange("observacao", e.target.value)}
-                placeholder="Observações adicionais (opcional)"
+                onChange={(e) =>
+                  setFormData({ ...formData, observacao: e.target.value })
+                }
+                placeholder="Observações adicionais sobre a frente liberada"
                 rows={3}
               />
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            <Save className="mr-2 h-4 w-4" />
-            {isSubmitting ? "Salvando..." : "Salvar Frente Liberada"}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Salvar Frente Liberada
           </Button>
         </form>
       </CardContent>

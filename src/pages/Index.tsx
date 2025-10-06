@@ -37,7 +37,7 @@ const Index = () => {
   }, [user]);
 
   const handleSessionStarted = () => {
-    refreshSession(); // Recarrega a sessão após criação
+    refreshSession();
   };
 
   useEffect(() => {

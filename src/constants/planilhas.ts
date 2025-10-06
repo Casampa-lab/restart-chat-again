@@ -20,6 +20,15 @@ export interface Planilha {
 
 export const PLANILHAS: Record<string, Planilha> = {
   // Implementado
+  '2.2': {
+    codigo: '2.2',
+    nome: 'FRENTE LIBERADA DAS RODOVIAS',
+    categoria: 'outros',
+    implementado: true,
+    descricao: 'Registro de frentes liberadas para trabalho nas rodovias',
+    tabela: 'frentes_liberadas'
+  },
+
   '2.3': {
     codigo: '2.3',
     nome: 'CONTROLE DE NÃO-CONFORMIDADE',
@@ -30,15 +39,6 @@ export const PLANILHAS: Record<string, Planilha> = {
   },
 
   // A implementar
-  '2.2': {
-    codigo: '2.2',
-    nome: 'FRENTE LIBERADA DAS RODOVIAS',
-    categoria: 'outros',
-    implementado: true,
-    descricao: 'Registro de frentes liberadas para trabalho nas rodovias',
-    tabela: 'frentes_liberadas'
-  },
-  
   '3.1.2': {
     codigo: '3.1.2',
     nome: 'SERVIÇOS INSPECIONADOS',
