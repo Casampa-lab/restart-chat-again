@@ -342,18 +342,6 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="data_atendimento">Data de Atendimento</Label>
-              <Input
-                id="data_atendimento"
-                type="date"
-                value={formData.data_atendimento}
-                onChange={(e) =>
-                  setFormData({ ...formData, data_atendimento: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="data_notificacao">Data da Notificação</Label>
               <Input
                 id="data_notificacao"
@@ -361,6 +349,18 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
                 value={formData.data_notificacao}
                 onChange={(e) =>
                   setFormData({ ...formData, data_notificacao: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="data_atendimento">Data de Atendimento</Label>
+              <Input
+                id="data_atendimento"
+                type="date"
+                value={formData.data_atendimento}
+                onChange={(e) =>
+                  setFormData({ ...formData, data_atendimento: e.target.value })
                 }
               />
             </div>
