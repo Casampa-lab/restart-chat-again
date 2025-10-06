@@ -59,16 +59,12 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/5 to-secondary/5">
       <header className="bg-background border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 flex-1">
-              <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-12 object-contain" />
-              <img src={logoGoverno} alt="Governo Federal" className="h-10 object-contain hidden sm:block" />
-            </div>
+            <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-16 object-contain" />
             <div className="flex items-center gap-2">
-              <img src={logoConsol} alt="Consol Engenheiros" className="h-10 object-contain hidden md:block" />
               {isAdmin && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-4 w-4" />
@@ -84,7 +80,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
+      <main className="flex-1 container mx-auto px-4 py-6 space-y-6">
         {activeSession ? (
           <>
             <Card className="bg-primary text-primary-foreground">
@@ -127,6 +123,19 @@ const Index = () => {
           <SessionSelector userId={user?.id} onSessionStarted={handleSessionStarted} />
         )}
       </main>
+
+      <footer className="bg-background border-t mt-auto">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-6">
+              <img src={logoGoverno} alt="Governo Federal - Ministério dos Transportes" className="h-12 object-contain" />
+            </div>
+            <div className="flex items-center gap-4">
+              <img src={logoConsol} alt="Consol Engenheiros Consultores" className="h-10 object-contain" />
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

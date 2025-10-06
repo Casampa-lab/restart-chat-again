@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import EmpresasManager from "@/components/admin/EmpresasManager";
 import LotesManager from "@/components/admin/LotesManager";
 import RodoviasManager from "@/components/admin/RodoviasManager";
+import logoGoverno from "@/assets/logo-governo.png";
+import logoConsol from "@/assets/logo-consol.jpg";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -66,20 +68,22 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/5 to-secondary/5">
       <header className="bg-background border-b">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar
-            </Button>
-            <h1 className="text-2xl font-bold text-primary">Administração</h1>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Voltar
+              </Button>
+              <h1 className="text-2xl font-bold text-primary">Administração</h1>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="empresas" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="empresas">Empresas</TabsTrigger>
@@ -100,6 +104,15 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      <footer className="bg-background border-t mt-auto">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <img src={logoGoverno} alt="Governo Federal - Ministério dos Transportes" className="h-12 object-contain" />
+            <img src={logoConsol} alt="Consol Engenheiros Consultores" className="h-10 object-contain" />
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
