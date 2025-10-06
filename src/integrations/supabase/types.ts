@@ -122,6 +122,272 @@ export type Database = {
         }
         Relationships: []
       }
+      ficha_verificacao: {
+        Row: {
+          contrato: string | null
+          created_at: string
+          data_verificacao: string
+          empresa: string | null
+          id: string
+          lote_id: string
+          rodovia_id: string
+          snv: string | null
+          tipo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contrato?: string | null
+          created_at?: string
+          data_verificacao: string
+          empresa?: string | null
+          id?: string
+          lote_id: string
+          rodovia_id: string
+          snv?: string | null
+          tipo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contrato?: string | null
+          created_at?: string
+          data_verificacao?: string
+          empresa?: string | null
+          id?: string
+          lote_id?: string
+          rodovia_id?: string
+          snv?: string | null
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ficha_verificacao_itens: {
+        Row: {
+          afastamento_conforme: boolean | null
+          afastamento_m: number | null
+          afastamento_obs: string | null
+          altura_conforme: boolean | null
+          altura_m: number | null
+          altura_obs: string | null
+          created_at: string
+          data_imp_verso: boolean | null
+          data_imp_verso_conforme: boolean | null
+          data_imp_verso_obs: string | null
+          data_implantacao: string | null
+          data_implantacao_conforme: boolean | null
+          data_implantacao_obs: string | null
+          dimensoes_conforme: boolean | null
+          dimensoes_m: string | null
+          dimensoes_obs: string | null
+          ficha_id: string
+          foto_url: string
+          id: string
+          km: number | null
+          largura_cm: number | null
+          largura_conforme: boolean | null
+          largura_obs: string | null
+          latitude: number | null
+          letra_conforme: boolean | null
+          letra_mm: number | null
+          letra_obs: string | null
+          longitude: number | null
+          marcas: string | null
+          marcas_conforme: boolean | null
+          marcas_obs: string | null
+          material: string | null
+          material_conforme: boolean | null
+          material_obs: string | null
+          ordem: number
+          pelicula: string | null
+          pelicula_conforme: boolean | null
+          pelicula_obs: string | null
+          qtde_suporte: number | null
+          qtde_suporte_conforme: boolean | null
+          qtde_suporte_obs: string | null
+          retro_bd: number | null
+          retro_bd_conforme: boolean | null
+          retro_bd_obs: string | null
+          retro_be: number | null
+          retro_be_conforme: boolean | null
+          retro_be_obs: string | null
+          retro_e: number | null
+          retro_e_conforme: boolean | null
+          retro_e_obs: string | null
+          retro_sv: number | null
+          retro_sv_conforme: boolean | null
+          retro_sv_obs: string | null
+          sentido: string | null
+          substrato: string | null
+          substrato_conforme: boolean | null
+          substrato_obs: string | null
+          suporte: string | null
+          suporte_conforme: boolean | null
+          suporte_obs: string | null
+          tachas: string | null
+          tachas_conforme: boolean | null
+          tachas_obs: string | null
+          tipo_placa: string | null
+          tipo_placa_conforme: boolean | null
+          tipo_placa_obs: string | null
+          velocidade: string | null
+          velocidade_conforme: boolean | null
+          velocidade_obs: string | null
+        }
+        Insert: {
+          afastamento_conforme?: boolean | null
+          afastamento_m?: number | null
+          afastamento_obs?: string | null
+          altura_conforme?: boolean | null
+          altura_m?: number | null
+          altura_obs?: string | null
+          created_at?: string
+          data_imp_verso?: boolean | null
+          data_imp_verso_conforme?: boolean | null
+          data_imp_verso_obs?: string | null
+          data_implantacao?: string | null
+          data_implantacao_conforme?: boolean | null
+          data_implantacao_obs?: string | null
+          dimensoes_conforme?: boolean | null
+          dimensoes_m?: string | null
+          dimensoes_obs?: string | null
+          ficha_id: string
+          foto_url: string
+          id?: string
+          km?: number | null
+          largura_cm?: number | null
+          largura_conforme?: boolean | null
+          largura_obs?: string | null
+          latitude?: number | null
+          letra_conforme?: boolean | null
+          letra_mm?: number | null
+          letra_obs?: string | null
+          longitude?: number | null
+          marcas?: string | null
+          marcas_conforme?: boolean | null
+          marcas_obs?: string | null
+          material?: string | null
+          material_conforme?: boolean | null
+          material_obs?: string | null
+          ordem: number
+          pelicula?: string | null
+          pelicula_conforme?: boolean | null
+          pelicula_obs?: string | null
+          qtde_suporte?: number | null
+          qtde_suporte_conforme?: boolean | null
+          qtde_suporte_obs?: string | null
+          retro_bd?: number | null
+          retro_bd_conforme?: boolean | null
+          retro_bd_obs?: string | null
+          retro_be?: number | null
+          retro_be_conforme?: boolean | null
+          retro_be_obs?: string | null
+          retro_e?: number | null
+          retro_e_conforme?: boolean | null
+          retro_e_obs?: string | null
+          retro_sv?: number | null
+          retro_sv_conforme?: boolean | null
+          retro_sv_obs?: string | null
+          sentido?: string | null
+          substrato?: string | null
+          substrato_conforme?: boolean | null
+          substrato_obs?: string | null
+          suporte?: string | null
+          suporte_conforme?: boolean | null
+          suporte_obs?: string | null
+          tachas?: string | null
+          tachas_conforme?: boolean | null
+          tachas_obs?: string | null
+          tipo_placa?: string | null
+          tipo_placa_conforme?: boolean | null
+          tipo_placa_obs?: string | null
+          velocidade?: string | null
+          velocidade_conforme?: boolean | null
+          velocidade_obs?: string | null
+        }
+        Update: {
+          afastamento_conforme?: boolean | null
+          afastamento_m?: number | null
+          afastamento_obs?: string | null
+          altura_conforme?: boolean | null
+          altura_m?: number | null
+          altura_obs?: string | null
+          created_at?: string
+          data_imp_verso?: boolean | null
+          data_imp_verso_conforme?: boolean | null
+          data_imp_verso_obs?: string | null
+          data_implantacao?: string | null
+          data_implantacao_conforme?: boolean | null
+          data_implantacao_obs?: string | null
+          dimensoes_conforme?: boolean | null
+          dimensoes_m?: string | null
+          dimensoes_obs?: string | null
+          ficha_id?: string
+          foto_url?: string
+          id?: string
+          km?: number | null
+          largura_cm?: number | null
+          largura_conforme?: boolean | null
+          largura_obs?: string | null
+          latitude?: number | null
+          letra_conforme?: boolean | null
+          letra_mm?: number | null
+          letra_obs?: string | null
+          longitude?: number | null
+          marcas?: string | null
+          marcas_conforme?: boolean | null
+          marcas_obs?: string | null
+          material?: string | null
+          material_conforme?: boolean | null
+          material_obs?: string | null
+          ordem?: number
+          pelicula?: string | null
+          pelicula_conforme?: boolean | null
+          pelicula_obs?: string | null
+          qtde_suporte?: number | null
+          qtde_suporte_conforme?: boolean | null
+          qtde_suporte_obs?: string | null
+          retro_bd?: number | null
+          retro_bd_conforme?: boolean | null
+          retro_bd_obs?: string | null
+          retro_be?: number | null
+          retro_be_conforme?: boolean | null
+          retro_be_obs?: string | null
+          retro_e?: number | null
+          retro_e_conforme?: boolean | null
+          retro_e_obs?: string | null
+          retro_sv?: number | null
+          retro_sv_conforme?: boolean | null
+          retro_sv_obs?: string | null
+          sentido?: string | null
+          substrato?: string | null
+          substrato_conforme?: boolean | null
+          substrato_obs?: string | null
+          suporte?: string | null
+          suporte_conforme?: boolean | null
+          suporte_obs?: string | null
+          tachas?: string | null
+          tachas_conforme?: boolean | null
+          tachas_obs?: string | null
+          tipo_placa?: string | null
+          tipo_placa_conforme?: boolean | null
+          tipo_placa_obs?: string | null
+          velocidade?: string | null
+          velocidade_conforme?: boolean | null
+          velocidade_obs?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_verificacao_itens_ficha_id_fkey"
+            columns: ["ficha_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_verificacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       frentes_liberadas: {
         Row: {
           created_at: string

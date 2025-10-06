@@ -115,8 +115,9 @@ export const PLANILHAS: Record<string, Planilha> = {
     codigo: '3.1.19',
     nome: 'FICHA DE VERIFICAÇÃO',
     categoria: 'inspecao',
-    implementado: false,
-    descricao: 'Ficha de verificação de serviços e condições'
+    implementado: true,
+    descricao: 'Ficha de verificação de serviços e condições (SH e SV)',
+    tabela: 'ficha_verificacao'
   },
 
   '3.1.20': {

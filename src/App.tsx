@@ -18,6 +18,7 @@ import MinhasIntervencoesInscricoes from "./pages/MinhasIntervencoesInscricoes";
 import MinhasIntervencoesSV from "./pages/MinhasIntervencoesSV";
 import MinhasIntervencoesTacha from "./pages/MinhasIntervencoesTacha";
 import MeusRegistrosNC from "./pages/MeusRegistrosNC";
+import MinhasFichasVerificacao from "./pages/MinhasFichasVerificacao";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/minhas-intervencoes-sv" element={<MinhasIntervencoesSV />} />
           <Route path="/minhas-intervencoes-tacha" element={<MinhasIntervencoesTacha />} />
           <Route path="/meus-registros-nc" element={<MeusRegistrosNC />} />
+          <Route path="/minhas-fichas-verificacao" element={<MinhasFichasVerificacao />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
