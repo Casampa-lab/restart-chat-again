@@ -120,6 +120,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
           valor_minimo: parseFloat(formData.valor_minimo),
           situacao: situacao,
           observacao: formData.observacao || null,
+          latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+          longitude: formData.longitude ? parseFloat(formData.longitude) : null,
         });
 
       if (error) throw error;

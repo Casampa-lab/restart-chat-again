@@ -116,6 +116,10 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
         estado_conservacao: values.estado_conservacao || null,
         material: values.material || null,
         observacao: values.observacao || null,
+        latitude_inicial: coordenadas.latitude_inicial ? parseFloat(coordenadas.latitude_inicial) : null,
+        longitude_inicial: coordenadas.longitude_inicial ? parseFloat(coordenadas.longitude_inicial) : null,
+        latitude_final: coordenadas.latitude_final ? parseFloat(coordenadas.latitude_final) : null,
+        longitude_final: coordenadas.longitude_final ? parseFloat(coordenadas.longitude_final) : null,
       });
 
       if (error) throw error;

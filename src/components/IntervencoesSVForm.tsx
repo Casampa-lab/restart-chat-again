@@ -108,6 +108,8 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
         estado_conservacao: values.estado_conservacao,
         quantidade: parseInt(values.quantidade),
         observacao: values.observacao || null,
+        latitude: coordenadas.latitude ? parseFloat(coordenadas.latitude) : null,
+        longitude: coordenadas.longitude ? parseFloat(coordenadas.longitude) : null,
       });
 
       if (error) throw error;

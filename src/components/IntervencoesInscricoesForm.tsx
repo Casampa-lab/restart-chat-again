@@ -155,6 +155,10 @@ const IntervencoesInscricoesForm = ({ loteId, rodoviaId }: IntervencoesInscricoe
           area_m2: parseFloat(formData.area_m2),
           material_utilizado: formData.material_utilizado || null,
           observacao: formData.observacao || null,
+          latitude_inicial: formData.latitude_inicial ? parseFloat(formData.latitude_inicial) : null,
+          longitude_inicial: formData.longitude_inicial ? parseFloat(formData.longitude_inicial) : null,
+          latitude_final: formData.latitude_final ? parseFloat(formData.latitude_final) : null,
+          longitude_final: formData.longitude_final ? parseFloat(formData.longitude_final) : null,
         });
 
       if (error) throw error;
