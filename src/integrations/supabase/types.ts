@@ -592,6 +592,131 @@ export type Database = {
         }
         Relationships: []
       }
+      registro_nc: {
+        Row: {
+          comentarios_executora: string | null
+          comentarios_supervisora: string | null
+          construtora: string
+          contrato_construtora: string | null
+          contrato_supervisora: string | null
+          created_at: string
+          data_registro: string
+          grau: string
+          id: string
+          km_final: number
+          km_inicial: number
+          lote_id: string
+          natureza: string
+          natureza_outra: string | null
+          numero_registro: string
+          problema_identificado: string
+          rodovia_id: string
+          snv: string | null
+          supervisora: string
+          tipo_obra: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comentarios_executora?: string | null
+          comentarios_supervisora?: string | null
+          construtora: string
+          contrato_construtora?: string | null
+          contrato_supervisora?: string | null
+          created_at?: string
+          data_registro: string
+          grau: string
+          id?: string
+          km_final: number
+          km_inicial: number
+          lote_id: string
+          natureza: string
+          natureza_outra?: string | null
+          numero_registro: string
+          problema_identificado: string
+          rodovia_id: string
+          snv?: string | null
+          supervisora: string
+          tipo_obra: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comentarios_executora?: string | null
+          comentarios_supervisora?: string | null
+          construtora?: string
+          contrato_construtora?: string | null
+          contrato_supervisora?: string | null
+          created_at?: string
+          data_registro?: string
+          grau?: string
+          id?: string
+          km_final?: number
+          km_inicial?: number
+          lote_id?: string
+          natureza?: string
+          natureza_outra?: string | null
+          numero_registro?: string
+          problema_identificado?: string
+          rodovia_id?: string
+          snv?: string | null
+          supervisora?: string
+          tipo_obra?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      registro_nc_fotos: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          foto_url: string
+          id: string
+          km: number | null
+          latitude: number | null
+          longitude: number | null
+          ordem: number
+          registro_nc_id: string
+          sentido: string | null
+          snv: string | null
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          foto_url: string
+          id?: string
+          km?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          ordem: number
+          registro_nc_id: string
+          sentido?: string | null
+          snv?: string | null
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          foto_url?: string
+          id?: string
+          km?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          ordem?: number
+          registro_nc_id?: string
+          sentido?: string | null
+          snv?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registro_nc_fotos_registro_nc_id_fkey"
+            columns: ["registro_nc_id"]
+            isOneToOne: false
+            referencedRelation: "registro_nc"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       retrorrefletividade_dinamica: {
         Row: {
           condicao_climatica: string | null
@@ -801,6 +926,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_nc_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

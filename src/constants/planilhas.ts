@@ -106,8 +106,9 @@ export const PLANILHAS: Record<string, Planilha> = {
     codigo: '3.1.18',
     nome: 'REGISTRO DE NÃO CONFORMIDADE',
     categoria: 'inspecao',
-    implementado: false,
-    descricao: 'Registro detalhado de não conformidades'
+    implementado: true,
+    descricao: 'Registro detalhado de não conformidades com fotos',
+    tabela: 'registro_nc'
   },
 
   '3.1.19': {
