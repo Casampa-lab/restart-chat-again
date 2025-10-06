@@ -115,7 +115,7 @@ export type Database = {
           lote_id: string
           numero_nc: string
           observacao: string | null
-          prazo_atendimento: string | null
+          prazo_atendimento: number | null
           problema_identificado: string | null
           rodovia_id: string
           sincronizado_sharepoint: boolean | null
@@ -138,7 +138,7 @@ export type Database = {
           lote_id: string
           numero_nc: string
           observacao?: string | null
-          prazo_atendimento?: string | null
+          prazo_atendimento?: number | null
           problema_identificado?: string | null
           rodovia_id: string
           sincronizado_sharepoint?: boolean | null
@@ -161,7 +161,7 @@ export type Database = {
           lote_id?: string
           numero_nc?: string
           observacao?: string | null
-          prazo_atendimento?: string | null
+          prazo_atendimento?: number | null
           problema_identificado?: string | null
           rodovia_id?: string
           sincronizado_sharepoint?: boolean | null

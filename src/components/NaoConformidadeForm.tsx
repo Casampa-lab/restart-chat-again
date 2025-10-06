@@ -129,7 +129,7 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
         problema_identificado: formData.problema_identificado,
         descricao_problema: formData.descricao_problema || null,
         empresa: empresaNome,
-        prazo_atendimento: formData.prazo_atendimento || null,
+        prazo_atendimento: formData.prazo_atendimento ? parseInt(formData.prazo_atendimento) : null,
         situacao: formData.situacao,
         data_atendimento: formData.data_atendimento || null,
         observacao: formData.observacao || null,
@@ -303,10 +303,12 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
           {/* Linha 3: Prazo, Situação e Data Atendimento */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="prazo_atendimento">Prazo de Atendimento</Label>
+              <Label htmlFor="prazo_atendimento">Prazo de Atendimento (dias)</Label>
               <Input
                 id="prazo_atendimento"
-                type="date"
+                type="number"
+                min="1"
+                placeholder="Ex: 15"
                 value={formData.prazo_atendimento}
                 onChange={(e) =>
                   setFormData({ ...formData, prazo_atendimento: e.target.value })
