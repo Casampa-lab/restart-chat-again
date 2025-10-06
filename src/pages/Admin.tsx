@@ -11,7 +11,6 @@ import LotesManager from "@/components/admin/LotesManager";
 import RodoviasManager from "@/components/admin/RodoviasManager";
 import { DestinatariosManager } from "@/components/admin/DestinatariosManager";
 import logoGoverno from "@/assets/logo-governo.png";
-import logoConsol from "@/assets/logo-consol.jpg";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -115,7 +114,9 @@ const Admin = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <img src={logoGoverno} alt="Governo Federal - Ministério dos Transportes" className="h-12 object-contain" />
-            <img src={logoConsol} alt="Consol Engenheiros Consultores" className="h-10 object-contain" />
+            <p className="text-sm text-muted-foreground">
+              Críticas e sugestões: <a href="mailto:cassia.sampaio@dnit.gov.br" className="text-primary hover:underline">cassia.sampaio@dnit.gov.br</a>
+            </p>
           </div>
         </div>
       </footer>
