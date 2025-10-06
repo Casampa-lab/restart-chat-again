@@ -295,6 +295,69 @@ export type Database = {
         }
         Relationships: []
       }
+      retrorrefletividade_dinamica: {
+        Row: {
+          condicao_climatica: string | null
+          cor: string
+          created_at: string
+          data_medicao: string
+          faixa: string
+          id: string
+          km_final: number
+          km_inicial: number
+          lote_id: string
+          observacao: string | null
+          rodovia_id: string
+          situacao: string
+          tipo_demarcacao: string
+          updated_at: string
+          user_id: string
+          valor_medido: number
+          valor_minimo: number
+          velocidade_medicao: number | null
+        }
+        Insert: {
+          condicao_climatica?: string | null
+          cor: string
+          created_at?: string
+          data_medicao: string
+          faixa: string
+          id?: string
+          km_final: number
+          km_inicial: number
+          lote_id: string
+          observacao?: string | null
+          rodovia_id: string
+          situacao: string
+          tipo_demarcacao: string
+          updated_at?: string
+          user_id: string
+          valor_medido: number
+          valor_minimo: number
+          velocidade_medicao?: number | null
+        }
+        Update: {
+          condicao_climatica?: string | null
+          cor?: string
+          created_at?: string
+          data_medicao?: string
+          faixa?: string
+          id?: string
+          km_final?: number
+          km_inicial?: number
+          lote_id?: string
+          observacao?: string | null
+          rodovia_id?: string
+          situacao?: string
+          tipo_demarcacao?: string
+          updated_at?: string
+          user_id?: string
+          valor_medido?: number
+          valor_minimo?: number
+          velocidade_medicao?: number | null
+        }
+        Relationships: []
+      }
       retrorrefletividade_estatica: {
         Row: {
           codigo_dispositivo: string | null

@@ -11,6 +11,7 @@ import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
 import RetrorrefletividadeEstaticaForm from "@/components/RetrorrefletividadeEstaticaForm";
+import RetrorrefletividadeDinamicaForm from "@/components/RetrorrefletividadeDinamicaForm";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
 import logoGoverno from "@/assets/logo-governo.png";
 
@@ -83,7 +84,11 @@ const Index = () => {
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/minhas-retrorrefletividades")}>
                 <Gauge className="mr-2 h-4 w-4" />
-                Retrorrefletividade
+                Retro Estática
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-retrorrefletividades-dinamicas")}>
+                <Gauge className="mr-2 h-4 w-4" />
+                Retro Dinâmica
               </Button>
               {isAdmin && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
@@ -148,10 +153,11 @@ const Index = () => {
             </Card>
 
             <Tabs defaultValue="ncs" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="ncs">2.3 - NCs</TabsTrigger>
                 <TabsTrigger value="frentes">2.2 - Frentes</TabsTrigger>
-                <TabsTrigger value="retro">3.1.3.1 - Retro</TabsTrigger>
+                <TabsTrigger value="retro-est">3.1.3.1 - Est</TabsTrigger>
+                <TabsTrigger value="retro-din">3.1.3.2 - Din</TabsTrigger>
               </TabsList>
               <TabsContent value="ncs" className="mt-6">
                 <NaoConformidadeForm
@@ -165,8 +171,14 @@ const Index = () => {
                   rodoviaId={activeSession.rodovia_id}
                 />
               </TabsContent>
-              <TabsContent value="retro" className="mt-6">
+              <TabsContent value="retro-est" className="mt-6">
                 <RetrorrefletividadeEstaticaForm
+                  loteId={activeSession.lote_id}
+                  rodoviaId={activeSession.rodovia_id}
+                />
+              </TabsContent>
+              <TabsContent value="retro-din" className="mt-6">
+                <RetrorrefletividadeDinamicaForm
                   loteId={activeSession.lote_id}
                   rodoviaId={activeSession.rodovia_id}
                 />
