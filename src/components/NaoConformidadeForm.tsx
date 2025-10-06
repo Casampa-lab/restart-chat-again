@@ -53,8 +53,9 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
 
         if (error) throw error;
         
-        const loteInfo = data as unknown as LoteInfo;
-        setEmpresaNome(loteInfo.empresa.nome);
+        if (data && (data as any).empresas) {
+          setEmpresaNome((data as any).empresas.nome);
+        }
       } catch (error: any) {
         console.error("Erro ao buscar empresa do lote:", error);
         toast.error("Erro ao carregar informações do lote");

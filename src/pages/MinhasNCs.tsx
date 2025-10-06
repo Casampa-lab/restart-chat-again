@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeft, Send, Eye, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import NCEditDialog from "@/components/NCEditDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +43,8 @@ const MinhasNCs = () => {
   const [selectedNCs, setSelectedNCs] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ncToDelete, setNcToDelete] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [ncToEdit, setNcToEdit] = useState<string | null>(null);
 
   const loadNCs = async () => {
     try {
@@ -227,9 +230,13 @@ const MinhasNCs = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => {/* TODO: Implementar visualização detalhada */}}
+                              onClick={() => {
+                                setNcToEdit(nc.id);
+                                setEditDialogOpen(true);
+                              }}
+                              disabled={nc.enviado_coordenador}
                             >
-                              <Eye className="h-4 w-4" />
+                              <Edit className="h-4 w-4" />
                             </Button>
                             {!nc.enviado_coordenador && (
                               <Button
@@ -254,6 +261,13 @@ const MinhasNCs = () => {
           </CardContent>
         </Card>
       </div>
+
+      <NCEditDialog
+        ncId={ncToEdit}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSaved={loadNCs}
+      />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
