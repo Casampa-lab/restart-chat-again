@@ -1,0 +1,434 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
+  public: {
+    Tables: {
+      empresas: {
+        Row: {
+          cnpj: string
+          created_at: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          cnpj: string
+          created_at?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          cnpj?: string
+          created_at?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
+      lotes: {
+        Row: {
+          contrato: string | null
+          created_at: string | null
+          empresa_id: string
+          id: string
+          numero: string
+        }
+        Insert: {
+          contrato?: string | null
+          created_at?: string | null
+          empresa_id: string
+          id?: string
+          numero: string
+        }
+        Update: {
+          contrato?: string | null
+          created_at?: string | null
+          empresa_id?: string
+          id?: string
+          numero?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lotes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lotes_rodovias: {
+        Row: {
+          id: string
+          lote_id: string
+          rodovia_id: string
+        }
+        Insert: {
+          id?: string
+          lote_id: string
+          rodovia_id: string
+        }
+        Update: {
+          id?: string
+          lote_id?: string
+          rodovia_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lotes_rodovias_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lotes_rodovias_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nao_conformidades: {
+        Row: {
+          created_at: string | null
+          data_ocorrencia: string
+          data_sincronizacao: string | null
+          empresa: string
+          id: string
+          km_referencia: number | null
+          latitude: number
+          longitude: number
+          lote_id: string
+          numero_nc: string
+          prazo: string | null
+          problema: string
+          rodovia_id: string
+          sincronizado_sharepoint: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          data_ocorrencia: string
+          data_sincronizacao?: string | null
+          empresa: string
+          id?: string
+          km_referencia?: number | null
+          latitude: number
+          longitude: number
+          lote_id: string
+          numero_nc: string
+          prazo?: string | null
+          problema: string
+          rodovia_id: string
+          sincronizado_sharepoint?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          data_ocorrencia?: string
+          data_sincronizacao?: string | null
+          empresa?: string
+          id?: string
+          km_referencia?: number | null
+          latitude?: number
+          longitude?: number
+          lote_id?: string
+          numero_nc?: string
+          prazo?: string | null
+          problema?: string
+          rodovia_id?: string
+          sincronizado_sharepoint?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nao_conformidades_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nao_conformidades_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          nome: string
+          telefone: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          nome: string
+          telefone?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+        }
+        Relationships: []
+      }
+      rodovias: {
+        Row: {
+          codigo: string
+          created_at: string | null
+          id: string
+          km_final: number | null
+          km_inicial: number | null
+          nome: string
+          uf: string | null
+        }
+        Insert: {
+          codigo: string
+          created_at?: string | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          nome: string
+          uf?: string | null
+        }
+        Update: {
+          codigo?: string
+          created_at?: string | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          nome?: string
+          uf?: string | null
+        }
+        Relationships: []
+      }
+      sessoes_trabalho: {
+        Row: {
+          ativa: boolean | null
+          data_fim: string | null
+          data_inicio: string | null
+          id: string
+          lote_id: string
+          rodovia_id: string
+          user_id: string
+        }
+        Insert: {
+          ativa?: boolean | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          id?: string
+          lote_id: string
+          rodovia_id: string
+          user_id: string
+        }
+        Update: {
+          ativa?: boolean | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          id?: string
+          lote_id?: string
+          rodovia_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessoes_trabalho_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessoes_trabalho_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+    }
+    Enums: {
+      app_role: "admin" | "coordenador" | "tecnico"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      app_role: ["admin", "coordenador", "tecnico"],
+    },
+  },
+} as const
