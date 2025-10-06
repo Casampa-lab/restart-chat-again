@@ -73,13 +73,16 @@ const Admin = () => {
       <header className="bg-background border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <Button variant="navigation" size="sm" onClick={() => navigate("/")}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Voltar
-              </Button>
-              <h1 className="text-2xl font-bold text-primary">Administração</h1>
-            </div>
+            <h1 className="text-2xl font-bold text-primary">Administração</h1>
+            <Button 
+              variant="default" 
+              size="lg"
+              onClick={() => navigate("/")}
+              className="font-semibold shadow-md hover:shadow-lg transition-shadow bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Voltar
+            </Button>
           </div>
         </div>
       </header>
