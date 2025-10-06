@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
@@ -215,76 +215,220 @@ const Index = () => {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="frentes" className="mt-6">
-                <FrenteLiberadaForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/minhas-frentes-liberadas")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver meus registros
+                    </Button>
+                  </div>
+                  <FrenteLiberadaForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="ncs" className="mt-6">
-                <NaoConformidadeForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/minhas-ncs")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver minhas NCs
+                    </Button>
+                  </div>
+                  <NaoConformidadeForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="retro-est" className="mt-6">
-                <RetrorrefletividadeEstaticaForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/minhas-retrorrefletividades")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver meus registros
+                    </Button>
+                  </div>
+                  <RetrorrefletividadeEstaticaForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="retro-din" className="mt-6">
-                <RetrorrefletividadeDinamicaForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/minhas-retrorrefletividades-dinamicas")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver meus registros
+                    </Button>
+                  </div>
+                  <RetrorrefletividadeDinamicaForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="defensas" className="mt-6">
-                <DefensasForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/minhas-defensas")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver meus registros
+                    </Button>
+                  </div>
+                  <DefensasForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="int-sh" className="mt-6">
-                <IntervencoesSHForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/minhas-intervencoes-sh")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver meus registros
+                    </Button>
+                  </div>
+                  <IntervencoesSHForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="int-insc" className="mt-6">
-                <IntervencoesInscricoesForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/minhas-intervencoes-inscricoes")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver meus registros
+                    </Button>
+                  </div>
+                  <IntervencoesInscricoesForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="int-sv" className="mt-6">
-                <IntervencoesSVForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/minhas-intervencoes-sv")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver meus registros
+                    </Button>
+                  </div>
+                  <IntervencoesSVForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="int-tacha" className="mt-6">
-                <IntervencoesTachaForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/minhas-intervencoes-tacha")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver meus registros
+                    </Button>
+                  </div>
+                  <IntervencoesTachaForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="registro-nc" className="mt-6">
-                <RegistroNCForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/meus-registros-nc")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver meus registros
+                    </Button>
+                  </div>
+                  <RegistroNCForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="ficha-verif" className="mt-6">
-                <FichaVerificacaoForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/minhas-fichas-verificacao")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver minhas fichas
+                    </Button>
+                  </div>
+                  <FichaVerificacaoForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="ficha-placa" className="mt-6">
-                <FichaPlacaForm
-                  loteId={activeSession.lote_id}
-                  rodoviaId={activeSession.rodovia_id}
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate("/minhas-fichas-placa")}
+                      className="shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver minhas fichas
+                    </Button>
+                  </div>
+                  <FichaPlacaForm
+                    loteId={activeSession.lote_id}
+                    rodoviaId={activeSession.rodovia_id}
+                  />
+                </div>
               </TabsContent>
             </Tabs>
           </>
