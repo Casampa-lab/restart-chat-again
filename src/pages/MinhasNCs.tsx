@@ -67,6 +67,7 @@ const MinhasNCs = () => {
           lotes(numero)
         `)
         .eq("user_id", user.id)
+        .eq("deleted", false)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -120,7 +121,7 @@ const MinhasNCs = () => {
     try {
       const { error } = await supabase
         .from("nao_conformidades")
-        .delete()
+        .update({ deleted: true })
         .eq("id", ncToDelete);
 
       if (error) throw error;
@@ -256,6 +257,7 @@ const MinhasNCs = () => {
                                 setEditDialogOpen(true);
                               }}
                               disabled={nc.enviado_coordenador}
+                              title={nc.enviado_coordenador ? "Não é possível editar NCs já enviadas" : "Editar NC"}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -266,6 +268,7 @@ const MinhasNCs = () => {
                                 setNcToDelete(nc.id);
                                 setDeleteDialogOpen(true);
                               }}
+                              title="Excluir NC (não remove do banco)"
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>

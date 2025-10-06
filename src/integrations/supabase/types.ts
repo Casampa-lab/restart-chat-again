@@ -140,6 +140,7 @@ export type Database = {
           data_notificacao: string | null
           data_ocorrencia: string
           data_sincronizacao: string | null
+          deleted: boolean
           descricao_problema: string | null
           empresa: string
           enviado_coordenador: boolean | null
@@ -165,6 +166,7 @@ export type Database = {
           data_notificacao?: string | null
           data_ocorrencia: string
           data_sincronizacao?: string | null
+          deleted?: boolean
           descricao_problema?: string | null
           empresa: string
           enviado_coordenador?: boolean | null
@@ -190,6 +192,7 @@ export type Database = {
           data_notificacao?: string | null
           data_ocorrencia?: string
           data_sincronizacao?: string | null
+          deleted?: boolean
           descricao_problema?: string | null
           empresa?: string
           enviado_coordenador?: boolean | null
