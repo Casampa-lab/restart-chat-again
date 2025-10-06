@@ -73,11 +73,6 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
       <div className="w-full max-w-md space-y-6">
-        <div className="flex flex-col items-center gap-4">
-          <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-20 object-contain" />
-          <img src={logoGoverno} alt="Governo Federal" className="h-12 object-contain" />
-        </div>
-        
         <Card className="w-full">
           <CardHeader>
             <CardTitle className="text-2xl text-center">Sistema de Coleta de Dados</CardTitle>
@@ -146,6 +141,11 @@ const Auth = () => {
           </form>
         </CardContent>
       </Card>
+
+      <div className="flex flex-col items-center gap-4 mt-6">
+        <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-20 object-contain" />
+        <img src={logoGoverno} alt="Governo Federal" className="h-12 object-contain" />
+      </div>
       </div>
     </div>
   );
