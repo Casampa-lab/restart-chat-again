@@ -104,10 +104,12 @@ export type Database = {
         Row: {
           created_at: string | null
           data_atendimento: string | null
+          data_notificacao: string | null
           data_ocorrencia: string
           data_sincronizacao: string | null
           descricao_problema: string | null
           empresa: string
+          enviado_coordenador: boolean | null
           id: string
           km_referencia: number | null
           latitude: number
@@ -127,10 +129,12 @@ export type Database = {
         Insert: {
           created_at?: string | null
           data_atendimento?: string | null
+          data_notificacao?: string | null
           data_ocorrencia: string
           data_sincronizacao?: string | null
           descricao_problema?: string | null
           empresa: string
+          enviado_coordenador?: boolean | null
           id?: string
           km_referencia?: number | null
           latitude: number
@@ -150,10 +154,12 @@ export type Database = {
         Update: {
           created_at?: string | null
           data_atendimento?: string | null
+          data_notificacao?: string | null
           data_ocorrencia?: string
           data_sincronizacao?: string | null
           descricao_problema?: string | null
           empresa?: string
+          enviado_coordenador?: boolean | null
           id?: string
           km_referencia?: number | null
           latitude?: number

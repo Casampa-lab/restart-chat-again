@@ -5,7 +5,7 @@ import { useWorkSession } from "@/hooks/useWorkSession";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogOut, MapPin, Briefcase, Settings } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
@@ -65,6 +65,10 @@ const Index = () => {
           <div className="flex items-center justify-between gap-4">
             <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-16 object-contain" />
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-ncs")}>
+                <ClipboardList className="mr-2 h-4 w-4" />
+                Minhas NCs
+              </Button>
               {isAdmin && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-4 w-4" />

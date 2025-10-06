@@ -36,6 +36,7 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
     prazo_atendimento: "",
     situacao: "Pendente",
     data_atendimento: "",
+    data_notificacao: "",
     observacao: "",
     km_referencia: "",
   });
@@ -132,6 +133,7 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
         prazo_atendimento: formData.prazo_atendimento ? parseInt(formData.prazo_atendimento) : null,
         situacao: formData.situacao,
         data_atendimento: formData.data_atendimento || null,
+        data_notificacao: formData.data_notificacao || null,
         observacao: formData.observacao || null,
         latitude: location.lat,
         longitude: location.lng,
@@ -152,6 +154,7 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
         prazo_atendimento: "",
         situacao: "Pendente",
         data_atendimento: "",
+        data_notificacao: "",
         observacao: "",
         km_referencia: "",
       });
@@ -300,8 +303,8 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
             />
           </div>
 
-          {/* Linha 3: Prazo, Situação e Data Atendimento */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Linha 3: Prazo, Situação, Data Atendimento e Data Notificação */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label htmlFor="prazo_atendimento">Prazo de Atendimento (dias)</Label>
               <Input
@@ -346,6 +349,18 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
                 value={formData.data_atendimento}
                 onChange={(e) =>
                   setFormData({ ...formData, data_atendimento: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="data_notificacao">Data da Notificação</Label>
+              <Input
+                id="data_notificacao"
+                type="date"
+                value={formData.data_notificacao}
+                onChange={(e) =>
+                  setFormData({ ...formData, data_notificacao: e.target.value })
                 }
               />
             </div>
