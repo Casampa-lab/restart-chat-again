@@ -128,13 +128,13 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
               <SelectTrigger id="rodovia">
                 <SelectValue placeholder="Selecione a rodovia" />
               </SelectTrigger>
-              <SelectContent>
-                {rodovias.map((rodovia) => (
-                  <SelectItem key={rodovia.id} value={rodovia.id}>
-                    {rodovia.codigo} - {rodovia.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+                <SelectContent>
+                  {rodovias.map((rodovia) => (
+                    <SelectItem key={rodovia.id} value={rodovia.id}>
+                      {rodovia.codigo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
             </Select>
           </div>
         )}

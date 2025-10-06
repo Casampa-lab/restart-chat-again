@@ -22,7 +22,6 @@ const RodoviasManager = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     codigo: "",
-    nome: "",
     uf: "",
     km_inicial: "",
     km_final: "",
@@ -53,7 +52,7 @@ const RodoviasManager = () => {
     try {
       const { error } = await supabase.from("rodovias").insert({
         codigo: formData.codigo,
-        nome: formData.nome,
+        nome: formData.codigo, // Nome igual ao código
         uf: formData.uf || null,
         km_inicial: formData.km_inicial ? parseFloat(formData.km_inicial) : null,
         km_final: formData.km_final ? parseFloat(formData.km_final) : null,
@@ -62,7 +61,7 @@ const RodoviasManager = () => {
       if (error) throw error;
 
       toast.success("Rodovia cadastrada com sucesso!");
-      setFormData({ codigo: "", nome: "", uf: "", km_inicial: "", km_final: "" });
+      setFormData({ codigo: "", uf: "", km_inicial: "", km_final: "" });
       loadRodovias();
     } catch (error: any) {
       toast.error("Erro ao cadastrar rodovia: " + error.message);
@@ -95,25 +94,14 @@ const RodoviasManager = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="codigo">Código</Label>
+                <Label htmlFor="codigo">Código *</Label>
                 <Input
                   id="codigo"
                   value={formData.codigo}
                   onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
                   placeholder="Ex: BR-040"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2 lg:col-span-2">
-                <Label htmlFor="nome">Nome</Label>
-                <Input
-                  id="nome"
-                  value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  placeholder="Ex: Rodovia Washington Luís"
                   required
                 />
               </div>
@@ -173,7 +161,6 @@ const RodoviasManager = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Código</TableHead>
-                <TableHead>Nome</TableHead>
                 <TableHead>UF</TableHead>
                 <TableHead>KM Inicial</TableHead>
                 <TableHead>KM Final</TableHead>
@@ -184,7 +171,6 @@ const RodoviasManager = () => {
               {rodovias.map((rodovia) => (
                 <TableRow key={rodovia.id}>
                   <TableCell className="font-medium">{rodovia.codigo}</TableCell>
-                  <TableCell>{rodovia.nome}</TableCell>
                   <TableCell>{rodovia.uf || "-"}</TableCell>
                   <TableCell>{rodovia.km_inicial?.toFixed(3) || "-"}</TableCell>
                   <TableCell>{rodovia.km_final?.toFixed(3) || "-"}</TableCell>
@@ -201,7 +187,7 @@ const RodoviasManager = () => {
               ))}
               {rodovias.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground">
                     Nenhuma rodovia cadastrada
                   </TableCell>
                 </TableRow>
