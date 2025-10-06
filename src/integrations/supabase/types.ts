@@ -103,8 +103,10 @@ export type Database = {
       nao_conformidades: {
         Row: {
           created_at: string | null
+          data_atendimento: string | null
           data_ocorrencia: string
           data_sincronizacao: string | null
+          descricao_problema: string
           empresa: string
           id: string
           km_referencia: number | null
@@ -112,17 +114,22 @@ export type Database = {
           longitude: number
           lote_id: string
           numero_nc: string
-          prazo: string | null
-          problema: string
+          observacao: string | null
+          prazo_atendimento: string | null
+          problema_identificado: string | null
           rodovia_id: string
           sincronizado_sharepoint: boolean | null
+          situacao: string | null
+          tipo_nc: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          data_atendimento?: string | null
           data_ocorrencia: string
           data_sincronizacao?: string | null
+          descricao_problema: string
           empresa: string
           id?: string
           km_referencia?: number | null
@@ -130,17 +137,22 @@ export type Database = {
           longitude: number
           lote_id: string
           numero_nc: string
-          prazo?: string | null
-          problema: string
+          observacao?: string | null
+          prazo_atendimento?: string | null
+          problema_identificado?: string | null
           rodovia_id: string
           sincronizado_sharepoint?: boolean | null
+          situacao?: string | null
+          tipo_nc?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
+          data_atendimento?: string | null
           data_ocorrencia?: string
           data_sincronizacao?: string | null
+          descricao_problema?: string
           empresa?: string
           id?: string
           km_referencia?: number | null
@@ -148,10 +160,13 @@ export type Database = {
           longitude?: number
           lote_id?: string
           numero_nc?: string
-          prazo?: string | null
-          problema?: string
+          observacao?: string | null
+          prazo_atendimento?: string | null
+          problema_identificado?: string | null
           rodovia_id?: string
           sincronizado_sharepoint?: boolean | null
+          situacao?: string | null
+          tipo_nc?: string | null
           updated_at?: string | null
           user_id?: string
         }

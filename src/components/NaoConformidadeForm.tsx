@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { MapPin, Save } from "lucide-react";
+import { TIPOS_NC, PROBLEMAS_POR_TIPO, SITUACOES_NC, type TipoNC } from "@/constants/naoConformidades";
 
 interface NaoConformidadeFormProps {
   loteId: string;
@@ -28,8 +30,13 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
   const [formData, setFormData] = useState({
     data_ocorrencia: new Date().toISOString().split("T")[0],
     numero_nc: "",
-    problema: "",
-    prazo: "",
+    tipo_nc: "",
+    problema_identificado: "",
+    descricao_problema: "",
+    prazo_atendimento: "",
+    situacao: "Pendente",
+    data_atendimento: "",
+    observacao: "",
     km_referencia: "",
   });
 
@@ -85,11 +92,23 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
     getCurrentLocation();
   }, []);
 
+  // Resetar problema quando tipo_nc mudar
+  useEffect(() => {
+    if (formData.tipo_nc) {
+      setFormData(prev => ({ ...prev, problema_identificado: "" }));
+    }
+  }, [formData.tipo_nc]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!location) {
       toast.error("Aguarde a captura do GPS ou clique em 'Capturar GPS Agora'");
+      return;
+    }
+
+    if (!formData.tipo_nc || !formData.problema_identificado) {
+      toast.error("Selecione o Tipo de NC e o Problema");
       return;
     }
 
@@ -106,9 +125,14 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
         rodovia_id: rodoviaId,
         data_ocorrencia: formData.data_ocorrencia,
         numero_nc: formData.numero_nc,
-        problema: formData.problema,
-        empresa: empresaNome, // Empresa vem automaticamente do lote
-        prazo: formData.prazo || null,
+        tipo_nc: formData.tipo_nc,
+        problema_identificado: formData.problema_identificado,
+        descricao_problema: formData.descricao_problema || null,
+        empresa: empresaNome,
+        prazo_atendimento: formData.prazo_atendimento || null,
+        situacao: formData.situacao,
+        data_atendimento: formData.data_atendimento || null,
+        observacao: formData.observacao || null,
         latitude: location.lat,
         longitude: location.lng,
         km_referencia: formData.km_referencia ? parseFloat(formData.km_referencia) : null,
@@ -122,8 +146,13 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
       setFormData({
         data_ocorrencia: new Date().toISOString().split("T")[0],
         numero_nc: "",
-        problema: "",
-        prazo: "",
+        tipo_nc: "",
+        problema_identificado: "",
+        descricao_problema: "",
+        prazo_atendimento: "",
+        situacao: "Pendente",
+        data_atendimento: "",
+        observacao: "",
         km_referencia: "",
       });
       
@@ -135,6 +164,10 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
       setLoading(false);
     }
   };
+
+  const problemasDisponiveis = formData.tipo_nc 
+    ? PROBLEMAS_POR_TIPO[formData.tipo_nc as TipoNC] || []
+    : [];
 
   return (
     <Card>
@@ -149,6 +182,7 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* GPS Status */}
           <div className="bg-muted p-4 rounded-lg space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -174,9 +208,10 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
             )}
           </div>
 
+          {/* Linha 1: Data e Número NC */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="data_ocorrencia">Data da Ocorrência</Label>
+              <Label htmlFor="data_ocorrencia">Data da Ocorrência *</Label>
               <Input
                 id="data_ocorrencia"
                 type="date"
@@ -189,7 +224,7 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="numero_nc">Número NC</Label>
+              <Label htmlFor="numero_nc">Número NC *</Label>
               <Input
                 id="numero_nc"
                 type="text"
@@ -203,32 +238,132 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
             </div>
           </div>
 
+          {/* Linha 2: Tipo de NC e Problema (Cascateado) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="tipo_nc">Tipo de NC *</Label>
+              <Select
+                value={formData.tipo_nc}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, tipo_nc: value })
+                }
+                required
+              >
+                <SelectTrigger id="tipo_nc">
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(TIPOS_NC).map((tipo) => (
+                    <SelectItem key={tipo} value={tipo}>
+                      {tipo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="problema_identificado">Problema Identificado *</Label>
+              <Select
+                value={formData.problema_identificado}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, problema_identificado: value })
+                }
+                disabled={!formData.tipo_nc}
+                required
+              >
+                <SelectTrigger id="problema_identificado">
+                  <SelectValue placeholder={formData.tipo_nc ? "Selecione o problema" : "Primeiro selecione o tipo"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {problemasDisponiveis.map((problema) => (
+                    <SelectItem key={problema} value={problema}>
+                      {problema}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Descrição do Problema */}
           <div className="space-y-2">
-            <Label htmlFor="problema">Descrição do Problema</Label>
+            <Label htmlFor="descricao_problema">Descrição Detalhada (opcional)</Label>
             <Textarea
-              id="problema"
-              placeholder="Descreva o problema encontrado..."
-              value={formData.problema}
+              id="descricao_problema"
+              placeholder="Descreva detalhes adicionais do problema..."
+              value={formData.descricao_problema}
               onChange={(e) =>
-                setFormData({ ...formData, problema: e.target.value })
+                setFormData({ ...formData, descricao_problema: e.target.value })
               }
-              required
-              rows={4}
+              rows={3}
             />
           </div>
 
+          {/* Linha 3: Prazo, Situação e Data Atendimento */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="prazo_atendimento">Prazo de Atendimento</Label>
+              <Input
+                id="prazo_atendimento"
+                type="date"
+                value={formData.prazo_atendimento}
+                onChange={(e) =>
+                  setFormData({ ...formData, prazo_atendimento: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="situacao">Situação *</Label>
+              <Select
+                value={formData.situacao}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, situacao: value })
+                }
+                required
+              >
+                <SelectTrigger id="situacao">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SITUACOES_NC.map((situacao) => (
+                    <SelectItem key={situacao} value={situacao}>
+                      {situacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="data_atendimento">Data de Atendimento</Label>
+              <Input
+                id="data_atendimento"
+                type="date"
+                value={formData.data_atendimento}
+                onChange={(e) =>
+                  setFormData({ ...formData, data_atendimento: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          {/* Observação */}
           <div className="space-y-2">
-            <Label htmlFor="prazo">Prazo para Correção</Label>
-            <Input
-              id="prazo"
-              type="date"
-              value={formData.prazo}
+            <Label htmlFor="observacao">Observação</Label>
+            <Textarea
+              id="observacao"
+              placeholder="Observações adicionais..."
+              value={formData.observacao}
               onChange={(e) =>
-                setFormData({ ...formData, prazo: e.target.value })
+                setFormData({ ...formData, observacao: e.target.value })
               }
+              rows={3}
             />
           </div>
 
+          {/* KM Referência */}
           <div className="space-y-2">
             <Label htmlFor="km_referencia">KM Referência (opcional)</Label>
             <Input
