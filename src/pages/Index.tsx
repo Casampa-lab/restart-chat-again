@@ -5,7 +5,7 @@ import { useWorkSession } from "@/hooks/useWorkSession";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
@@ -15,7 +15,7 @@ import logoConsol from "@/assets/logo-consol.jpg";
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, signOut } = useAuth();
-  const { activeSession, loading: sessionLoading, refreshSession } = useWorkSession(user?.id);
+  const { activeSession, loading: sessionLoading, refreshSession, endSession } = useWorkSession(user?.id);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -89,13 +89,26 @@ const Index = () => {
           <>
             <Card className="bg-primary text-primary-foreground">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Sessão de Trabalho Ativa
-                </CardTitle>
-                <CardDescription className="text-primary-foreground/80">
-                  Seus dados estão sendo coletados para este lote e rodovia
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5" />
+                      Sessão de Trabalho Ativa
+                    </CardTitle>
+                    <CardDescription className="text-primary-foreground/80">
+                      Seus dados estão sendo coletados para este lote e rodovia
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={endSession}
+                    className="shrink-0"
+                  >
+                    <ArrowLeftRight className="h-4 w-4 mr-2" />
+                    Trocar
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-center gap-2">
