@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import CoordenacaoFiscalizacao from "./pages/CoordenacaoFiscalizacao";
 import MinhasNCs from "./pages/MinhasNCs";
 import NCsCoordenador from "./pages/NCsCoordenador";
 import MinhasFrentesLiberadas from "./pages/MinhasFrentesLiberadas";
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/coordenacao-fiscalizacao" element={<CoordenacaoFiscalizacao />} />
           <Route path="/minhas-ncs" element={<MinhasNCs />} />
           <Route path="/ncs-coordenador" element={<NCsCoordenador />} />
           <Route path="/minhas-frentes-liberadas" element={<MinhasFrentesLiberadas />} />

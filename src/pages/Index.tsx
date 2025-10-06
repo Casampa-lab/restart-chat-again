@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, MapPinned, Gauge, ShieldAlert, PaintBucket, Stamp } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
@@ -81,59 +81,9 @@ const Index = () => {
               onClick={() => navigate("/")}
             />
             <div className="flex items-center gap-2 flex-wrap">
-              {isAdmin && (
-                <Button variant="outline" size="sm" onClick={() => navigate("/ncs-coordenador")}>
-                  <ClipboardList className="mr-2 h-4 w-4" />
-                  NCs por Lote
-                </Button>
-              )}
-              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-ncs")}>
+              <Button variant="outline" size="sm" onClick={() => navigate("/coordenacao-fiscalizacao")}>
                 <ClipboardList className="mr-2 h-4 w-4" />
-                Minhas NCs
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-frentes-liberadas")}>
-                <MapPinned className="mr-2 h-4 w-4" />
-                Frentes
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-retrorrefletividades")}>
-                <Gauge className="mr-2 h-4 w-4" />
-                Retro Est
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-retrorrefletividades-dinamicas")}>
-                <Gauge className="mr-2 h-4 w-4" />
-                Retro Din
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-defensas")}>
-                <ShieldAlert className="mr-2 h-4 w-4" />
-                Defensas
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-intervencoes-sh")}>
-                <PaintBucket className="mr-2 h-4 w-4" />
-                Interv. SH
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-intervencoes-inscricoes")}>
-                <Stamp className="mr-2 h-4 w-4" />
-                Inscrições
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-intervencoes-sv")}>
-                <PaintBucket className="mr-2 h-4 w-4" />
-                Interv. SV
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-intervencoes-tacha")}>
-                <PaintBucket className="mr-2 h-4 w-4" />
-                Interv. Tacha
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/meus-registros-nc")}>
-                <ClipboardList className="mr-2 h-4 w-4" />
-                Registro NC
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-fichas-verificacao")}>
-                <ClipboardList className="mr-2 h-4 w-4" />
-                Fichas Verif.
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-fichas-placa")}>
-                <ClipboardList className="mr-2 h-4 w-4" />
-                Fichas Placa
+                Coordenação/Fiscalização
               </Button>
               {isAdmin && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
