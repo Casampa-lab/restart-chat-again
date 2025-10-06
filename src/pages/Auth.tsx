@@ -83,7 +83,7 @@ const Auth = () => {
             <CardDescription className="text-center">
               {isLogin ? "Entre com suas credenciais" : "Crie sua conta"}
             </CardDescription>
-        </CardHeader>
+          </CardHeader>
           <CardContent>
             <form onSubmit={handleAuth} className="space-y-4">
             {!isLogin && (
