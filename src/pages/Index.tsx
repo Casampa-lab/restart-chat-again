@@ -6,10 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, MapPinned } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, MapPinned, Gauge } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
+import RetrorrefletividadeEstaticaForm from "@/components/RetrorrefletividadeEstaticaForm";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
 import logoGoverno from "@/assets/logo-governo.png";
 
@@ -80,6 +81,10 @@ const Index = () => {
                 <MapPinned className="mr-2 h-4 w-4" />
                 Frentes Liberadas
               </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-retrorrefletividades")}>
+                <Gauge className="mr-2 h-4 w-4" />
+                Retrorrefletividade
+              </Button>
               {isAdmin && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-4 w-4" />
@@ -143,9 +148,10 @@ const Index = () => {
             </Card>
 
             <Tabs defaultValue="ncs" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="ncs">2.3 - Não Conformidades</TabsTrigger>
-                <TabsTrigger value="frentes">2.2 - Frentes Liberadas</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="ncs">2.3 - NCs</TabsTrigger>
+                <TabsTrigger value="frentes">2.2 - Frentes</TabsTrigger>
+                <TabsTrigger value="retro">3.1.3.1 - Retro</TabsTrigger>
               </TabsList>
               <TabsContent value="ncs" className="mt-6">
                 <NaoConformidadeForm
@@ -155,6 +161,12 @@ const Index = () => {
               </TabsContent>
               <TabsContent value="frentes" className="mt-6">
                 <FrenteLiberadaForm
+                  loteId={activeSession.lote_id}
+                  rodoviaId={activeSession.rodovia_id}
+                />
+              </TabsContent>
+              <TabsContent value="retro" className="mt-6">
+                <RetrorrefletividadeEstaticaForm
                   loteId={activeSession.lote_id}
                   rodoviaId={activeSession.rodovia_id}
                 />

@@ -295,6 +295,60 @@ export type Database = {
         }
         Relationships: []
       }
+      retrorrefletividade_estatica: {
+        Row: {
+          codigo_dispositivo: string | null
+          created_at: string
+          data_medicao: string
+          id: string
+          km_referencia: number
+          lado: string
+          lote_id: string
+          observacao: string | null
+          rodovia_id: string
+          situacao: string
+          tipo_dispositivo: string
+          updated_at: string
+          user_id: string
+          valor_medido: number
+          valor_minimo: number
+        }
+        Insert: {
+          codigo_dispositivo?: string | null
+          created_at?: string
+          data_medicao: string
+          id?: string
+          km_referencia: number
+          lado: string
+          lote_id: string
+          observacao?: string | null
+          rodovia_id: string
+          situacao: string
+          tipo_dispositivo: string
+          updated_at?: string
+          user_id: string
+          valor_medido: number
+          valor_minimo: number
+        }
+        Update: {
+          codigo_dispositivo?: string | null
+          created_at?: string
+          data_medicao?: string
+          id?: string
+          km_referencia?: number
+          lado?: string
+          lote_id?: string
+          observacao?: string | null
+          rodovia_id?: string
+          situacao?: string
+          tipo_dispositivo?: string
+          updated_at?: string
+          user_id?: string
+          valor_medido?: number
+          valor_minimo?: number
+        }
+        Relationships: []
+      }
       rodovias: {
         Row: {
           codigo: string

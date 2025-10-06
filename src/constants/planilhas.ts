@@ -38,6 +38,15 @@ export const PLANILHAS: Record<string, Planilha> = {
     tabela: 'nao_conformidades'
   },
 
+  '3.1.3.1': {
+    codigo: '3.1.3.1',
+    nome: 'RETRORREFLETIVIDADE ESTÁTICA',
+    categoria: 'sinalizacao',
+    implementado: true,
+    descricao: 'Medição de retrorrefletividade estática da sinalização',
+    tabela: 'retrorrefletividade_estatica'
+  },
+
   // A implementar
   '3.1.2': {
     codigo: '3.1.2',
@@ -45,14 +54,6 @@ export const PLANILHAS: Record<string, Planilha> = {
     categoria: 'inspecao',
     implementado: false,
     descricao: 'Registro de serviços inspecionados em campo'
-  },
-  
-  '3.1.3.1': {
-    codigo: '3.1.3.1',
-    nome: 'RETRORREFLETIVIDADE ESTÁTICA',
-    categoria: 'sinalizacao',
-    implementado: false,
-    descricao: 'Medição de retrorrefletividade estática da sinalização'
   },
   
   '3.1.3.2': {
