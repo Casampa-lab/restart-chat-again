@@ -17,21 +17,20 @@ interface IntervencoesInscricoesFormProps {
 const TIPOS_INTERVENCAO = [
   "Pintura Nova",
   "Repintura",
-  "Reforço",
   "Implantação",
   "Recuperação",
   "Manutenção"
 ];
 
 const TIPOS_INSCRICAO = [
-  "Faixa de Pedestre",
-  "Linha de Retenção",
+  "Passagem de Pedestre",
+  "Faixa Zebrada",
   "Área de Conflito",
+  "Parada de Ônibus",
+  "Área de Estacionamento",
   "Ciclofaixa",
   "Ciclovia",
-  "Área de Estacionamento",
-  "Legenda",
-  "Símbolo",
+  "Área de Canalização",
   "Outros"
 ];
 
@@ -104,7 +103,7 @@ const IntervencoesInscricoesForm = ({ loteId, rodoviaId }: IntervencoesInscricoe
 
       toast({
         title: "Sucesso!",
-        description: "Intervenção em inscrição registrada com sucesso",
+        description: "Intervenção em inscrições registrada com sucesso",
       });
 
       // Reset form
@@ -135,9 +134,9 @@ const IntervencoesInscricoesForm = ({ loteId, rodoviaId }: IntervencoesInscricoe
   return (
     <Card>
       <CardHeader>
-        <CardTitle>3.1.5 - Intervenções - Inscrições nos Pavimentos</CardTitle>
+        <CardTitle>3.1.5 - Intervenções Realizadas - Inscrições</CardTitle>
         <CardDescription>
-          Registro de intervenções realizadas em inscrições no pavimento
+          Registro de intervenções em inscrições nos pavimentos
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -268,14 +267,14 @@ const IntervencoesInscricoesForm = ({ loteId, rodoviaId }: IntervencoesInscricoe
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="dimensoes">Dimensões</Label>
+              <Label htmlFor="dimensoes">Dimensões (Ex: 3x2m)</Label>
               <Input
                 id="dimensoes"
                 value={formData.dimensoes}
                 onChange={(e) =>
                   setFormData({ ...formData, dimensoes: e.target.value })
                 }
-                placeholder="Ex: 3,50m x 2,00m"
+                placeholder="Ex: 3x2m, 10x1,5m"
               />
             </div>
 

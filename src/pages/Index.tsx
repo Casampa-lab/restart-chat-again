@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, MapPinned, Gauge, ShieldAlert, PaintBucket } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, MapPinned, Gauge, ShieldAlert, PaintBucket, Stamp } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
@@ -100,6 +100,10 @@ const Index = () => {
               <Button variant="outline" size="sm" onClick={() => navigate("/minhas-intervencoes-sh")}>
                 <PaintBucket className="mr-2 h-4 w-4" />
                 Interv. SH
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-intervencoes-inscricoes")}>
+                <Stamp className="mr-2 h-4 w-4" />
+                Inscrições
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/minhas-intervencoes-inscricoes")}>
                 <PaintBucket className="mr-2 h-4 w-4" />
