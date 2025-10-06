@@ -13,19 +13,48 @@ interface NaoConformidadeFormProps {
   rodoviaId: string;
 }
 
+interface LoteInfo {
+  empresa: {
+    nome: string;
+  };
+}
+
 const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) => {
   const [loading, setLoading] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [empresaNome, setEmpresaNome] = useState<string>("");
   
   const [formData, setFormData] = useState({
     data_ocorrencia: new Date().toISOString().split("T")[0],
     numero_nc: "",
     problema: "",
-    empresa: "",
     prazo: "",
     km_referencia: "",
   });
+
+  // Buscar empresa do lote automaticamente
+  useEffect(() => {
+    const loadEmpresaDoLote = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("lotes")
+          .select("empresas(nome)")
+          .eq("id", loteId)
+          .single();
+
+        if (error) throw error;
+        
+        const loteInfo = data as unknown as LoteInfo;
+        setEmpresaNome(loteInfo.empresa.nome);
+      } catch (error: any) {
+        console.error("Erro ao buscar empresa do lote:", error);
+        toast.error("Erro ao carregar informações do lote");
+      }
+    };
+
+    loadEmpresaDoLote();
+  }, [loteId]);
 
   const getCurrentLocation = () => {
     setGpsLoading(true);
@@ -78,7 +107,7 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
         data_ocorrencia: formData.data_ocorrencia,
         numero_nc: formData.numero_nc,
         problema: formData.problema,
-        empresa: formData.empresa,
+        empresa: empresaNome, // Empresa vem automaticamente do lote
         prazo: formData.prazo || null,
         latitude: location.lat,
         longitude: location.lng,
@@ -94,7 +123,6 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
         data_ocorrencia: new Date().toISOString().split("T")[0],
         numero_nc: "",
         problema: "",
-        empresa: "",
         prazo: "",
         km_referencia: "",
       });
@@ -116,7 +144,7 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
           Registro de Não-Conformidade
         </CardTitle>
         <CardDescription>
-          Planilha 2.3 - Os dados serão salvos com a localização GPS atual
+          Planilha 2.3 - Empresa: {empresaNome || "Carregando..."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -189,32 +217,16 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="empresa">Empresa</Label>
-              <Input
-                id="empresa"
-                type="text"
-                placeholder="Nome da empresa"
-                value={formData.empresa}
-                onChange={(e) =>
-                  setFormData({ ...formData, empresa: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="prazo">Prazo</Label>
-              <Input
-                id="prazo"
-                type="date"
-                value={formData.prazo}
-                onChange={(e) =>
-                  setFormData({ ...formData, prazo: e.target.value })
-                }
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="prazo">Prazo para Correção</Label>
+            <Input
+              id="prazo"
+              type="date"
+              value={formData.prazo}
+              onChange={(e) =>
+                setFormData({ ...formData, prazo: e.target.value })
+              }
+            />
           </div>
 
           <div className="space-y-2">
