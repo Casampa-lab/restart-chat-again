@@ -18,6 +18,12 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Carrega o último e-mail usado
+    const lastEmail = localStorage.getItem("lastEmail");
+    if (lastEmail) {
+      setEmail(lastEmail);
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate("/");
@@ -37,6 +43,7 @@ const Auth = () => {
         });
 
         if (error) throw error;
+        localStorage.setItem("lastEmail", email);
         toast.success("Login realizado com sucesso!");
         navigate("/");
       } else {
@@ -52,6 +59,7 @@ const Auth = () => {
         });
 
         if (error) throw error;
+        localStorage.setItem("lastEmail", email);
         toast.success("Conta criada! Faça login para continuar.");
         setIsLogin(true);
       }
