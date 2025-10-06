@@ -79,8 +79,9 @@ export const PLANILHAS: Record<string, Planilha> = {
     codigo: '3.1.5',
     nome: 'INTERVENÇÕES REALIZADAS - INSCRIÇÕES NOS PAVIMENTOS',
     categoria: 'intervencoes',
-    implementado: false,
-    descricao: 'Registro de intervenções realizadas em inscrições no pavimento'
+    implementado: true,
+    descricao: 'Registro de intervenções realizadas em inscrições no pavimento',
+    tabela: 'intervencoes_inscricoes'
   },
 
   '3.1.5-sv': {

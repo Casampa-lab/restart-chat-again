@@ -14,6 +14,7 @@ import RetrorrefletividadeEstaticaForm from "@/components/RetrorrefletividadeEst
 import RetrorrefletividadeDinamicaForm from "@/components/RetrorrefletividadeDinamicaForm";
 import DefensasForm from "@/components/DefensasForm";
 import IntervencoesSHForm from "@/components/IntervencoesSHForm";
+import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
 import logoGoverno from "@/assets/logo-governo.png";
 
@@ -100,6 +101,10 @@ const Index = () => {
                 <PaintBucket className="mr-2 h-4 w-4" />
                 Interv. SH
               </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/minhas-intervencoes-inscricoes")}>
+                <PaintBucket className="mr-2 h-4 w-4" />
+                Interv. Insc
+              </Button>
               {isAdmin && (
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-4 w-4" />
@@ -163,30 +168,34 @@ const Index = () => {
             </Card>
 
             <Tabs defaultValue="frentes" className="w-full">
-              <TabsList className="grid w-full grid-cols-6 h-auto">
-                <TabsTrigger value="frentes" className="flex flex-col py-3 px-2">
+              <TabsList className="grid w-full grid-cols-7 h-auto">
+                <TabsTrigger value="frentes" className="flex flex-col py-3 px-1">
                   <span className="text-xs font-semibold">2.2</span>
-                  <span className="text-xs">Frentes Liberadas</span>
+                  <span className="text-xs">Frentes</span>
                 </TabsTrigger>
-                <TabsTrigger value="ncs" className="flex flex-col py-3 px-2">
+                <TabsTrigger value="ncs" className="flex flex-col py-3 px-1">
                   <span className="text-xs font-semibold">2.3</span>
-                  <span className="text-xs">Não Conformidades</span>
+                  <span className="text-xs">NCs</span>
                 </TabsTrigger>
-                <TabsTrigger value="retro-est" className="flex flex-col py-3 px-2">
+                <TabsTrigger value="retro-est" className="flex flex-col py-3 px-1">
                   <span className="text-xs font-semibold">3.1.3.1</span>
-                  <span className="text-xs">Retro Estática</span>
+                  <span className="text-xs">R. Est</span>
                 </TabsTrigger>
-                <TabsTrigger value="retro-din" className="flex flex-col py-3 px-2">
+                <TabsTrigger value="retro-din" className="flex flex-col py-3 px-1">
                   <span className="text-xs font-semibold">3.1.3.2</span>
-                  <span className="text-xs">Retro Dinâmica</span>
+                  <span className="text-xs">R. Din</span>
                 </TabsTrigger>
-                <TabsTrigger value="defensas" className="flex flex-col py-3 px-2">
+                <TabsTrigger value="defensas" className="flex flex-col py-3 px-1">
                   <span className="text-xs font-semibold">3.1.4</span>
                   <span className="text-xs">Defensas</span>
                 </TabsTrigger>
-                <TabsTrigger value="int-sh" className="flex flex-col py-3 px-2">
+                <TabsTrigger value="int-sh" className="flex flex-col py-3 px-1">
                   <span className="text-xs font-semibold">3.1.5</span>
-                  <span className="text-xs">Interv. SH</span>
+                  <span className="text-xs">Int. SH</span>
+                </TabsTrigger>
+                <TabsTrigger value="int-insc" className="flex flex-col py-3 px-1">
+                  <span className="text-xs font-semibold">3.1.5</span>
+                  <span className="text-xs">Int. Insc</span>
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="frentes" className="mt-6">
@@ -221,6 +230,12 @@ const Index = () => {
               </TabsContent>
               <TabsContent value="int-sh" className="mt-6">
                 <IntervencoesSHForm
+                  loteId={activeSession.lote_id}
+                  rodoviaId={activeSession.rodovia_id}
+                />
+              </TabsContent>
+              <TabsContent value="int-insc" className="mt-6">
+                <IntervencoesInscricoesForm
                   loteId={activeSession.lote_id}
                   rodoviaId={activeSession.rodovia_id}
                 />
