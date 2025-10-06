@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import EmpresasManager from "@/components/admin/EmpresasManager";
 import LotesManager from "@/components/admin/LotesManager";
 import RodoviasManager from "@/components/admin/RodoviasManager";
+import { DestinatariosManager } from "@/components/admin/DestinatariosManager";
 import logoGoverno from "@/assets/logo-governo.png";
 import logoConsol from "@/assets/logo-consol.jpg";
 
@@ -85,10 +86,11 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="empresas" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="empresas">Empresas</TabsTrigger>
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
+            <TabsTrigger value="destinatarios">Emails</TabsTrigger>
           </TabsList>
 
           <TabsContent value="empresas">
@@ -101,6 +103,10 @@ const Admin = () => {
 
           <TabsContent value="rodovias">
             <RodoviasManager />
+          </TabsContent>
+
+          <TabsContent value="destinatarios">
+            <DestinatariosManager />
           </TabsContent>
         </Tabs>
       </main>

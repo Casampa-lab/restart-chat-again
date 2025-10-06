@@ -143,7 +143,32 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
 
       if (error) throw error;
 
-      toast.success("Não-conformidade registrada com sucesso!");
+      // Enviar email para coordenadores/fiscais
+      try {
+        const { data: rodovia } = await supabase
+          .from("rodovias")
+          .select("codigo, nome")
+          .eq("id", rodoviaId)
+          .single();
+
+        await supabase.functions.invoke("send-nc-email", {
+          body: {
+            numero_nc: formData.numero_nc,
+            empresa: empresaNome,
+            tipo_nc: formData.tipo_nc,
+            problema_identificado: formData.problema_identificado,
+            data_ocorrencia: formData.data_ocorrencia,
+            rodovia: rodovia ? `${rodovia.codigo} - ${rodovia.nome}` : "N/A",
+            km_referencia: formData.km_referencia || "N/A",
+            observacao: formData.observacao || "",
+          },
+        });
+        
+        toast.success("Não-conformidade registrada e emails enviados!");
+      } catch (emailError: any) {
+        console.error("Erro ao enviar email:", emailError);
+        toast.warning("NC registrada, mas houve erro ao enviar emails");
+      }
       
       // Reset form
       setFormData({
