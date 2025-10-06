@@ -45,6 +45,7 @@ const MinhasNCs = () => {
   const [ncToDelete, setNcToDelete] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [ncToEdit, setNcToEdit] = useState<string | null>(null);
+  const [showEnviadas, setShowEnviadas] = useState(true);
 
   const loadNCs = async () => {
     try {
@@ -142,6 +143,10 @@ const MinhasNCs = () => {
     }
   };
 
+  const filteredNCs = showEnviadas 
+    ? ncs 
+    : ncs.filter(nc => !nc.enviado_coordenador);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -150,12 +155,28 @@ const MinhasNCs = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar
           </Button>
-          {selectedNCs.size > 0 && (
-            <Button onClick={handleEnviarSelecionadas}>
-              <Send className="mr-2 h-4 w-4" />
-              Enviar {selectedNCs.size} NC(s) ao Coordenador
-            </Button>
-          )}
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <label htmlFor="show-enviadas" className="text-sm cursor-pointer">
+                Mostrar NCs enviadas
+              </label>
+              <input
+                type="checkbox"
+                id="show-enviadas"
+                checked={showEnviadas}
+                onChange={(e) => setShowEnviadas(e.target.checked)}
+                className="h-4 w-4 cursor-pointer"
+              />
+            </div>
+            
+            {selectedNCs.size > 0 && (
+              <Button onClick={handleEnviarSelecionadas}>
+                <Send className="mr-2 h-4 w-4" />
+                Enviar {selectedNCs.size} NC(s) ao Coordenador
+              </Button>
+            )}
+          </div>
         </div>
 
         <Card>
@@ -168,9 +189,11 @@ const MinhasNCs = () => {
           <CardContent>
             {loading ? (
               <p className="text-center text-muted-foreground py-8">Carregando...</p>
-            ) : ncs.length === 0 ? (
+            ) : filteredNCs.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                Nenhuma NC cadastrada ainda
+                {showEnviadas 
+                  ? "Nenhuma NC cadastrada ainda"
+                  : "Nenhuma NC não enviada"}
               </p>
             ) : (
               <div className="overflow-x-auto">
@@ -190,7 +213,7 @@ const MinhasNCs = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {ncs.map((nc) => (
+                    {filteredNCs.map((nc) => (
                       <TableRow key={nc.id}>
                         <TableCell>
                           <input
