@@ -109,8 +109,8 @@ const Admin = () => {
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
             <TabsTrigger value="assinaturas">Assinaturas</TabsTrigger>
-            <TabsTrigger value="coordinators">Coordenadores</TabsTrigger>
-            <TabsTrigger value="destinatarios">Emails</TabsTrigger>
+            <TabsTrigger value="coordinators">Atribuir</TabsTrigger>
+            <TabsTrigger value="destinatarios">Destinatários</TabsTrigger>
           </TabsList>
 
           <TabsContent value="empresas">
