@@ -213,12 +213,13 @@ const MinhasFrentesLiberadas = () => {
               />
             </div>
             
-            {selectedFrentes.size > 0 && (
-              <Button onClick={handleEnviarSelecionadas}>
-                <Send className="mr-2 h-4 w-4" />
-                Enviar {selectedFrentes.size} ao Coordenador
-              </Button>
-            )}
+            <Button 
+              onClick={handleEnviarSelecionadas}
+              disabled={selectedFrentes.size === 0}
+            >
+              <Send className="mr-2 h-4 w-4" />
+              Enviar {selectedFrentes.size > 0 ? selectedFrentes.size : ''} ao Coordenador
+            </Button>
           </div>
 
         <Card>
