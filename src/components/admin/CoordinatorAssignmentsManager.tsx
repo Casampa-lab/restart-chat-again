@@ -42,17 +42,27 @@ export const CoordinatorAssignmentsManager = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Load coordinators
+      // Load coordinators - first get coordinator user_ids, then fetch profiles
       const { data: rolesData, error: rolesError } = await supabase
         .from("user_roles")
-        .select("user_id, profiles!inner(id, nome)")
+        .select("user_id")
         .eq("role", "coordenador");
 
       if (rolesError) throw rolesError;
 
-      const coordinatorsData = rolesData.map((item: any) => ({
-        id: item.user_id,
-        nome: item.profiles.nome,
+      const coordinatorIds = rolesData.map(r => r.user_id);
+      
+      // Now fetch profiles for these coordinators
+      const { data: profilesData, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, nome")
+        .in("id", coordinatorIds);
+
+      if (profilesError) throw profilesError;
+
+      const coordinatorsData = profilesData.map((profile: any) => ({
+        id: profile.id,
+        nome: profile.nome,
       }));
       setCoordinators(coordinatorsData);
 
