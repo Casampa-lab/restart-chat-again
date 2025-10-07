@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, CheckCircle2, XCircle, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, Send, Trash2, Pencil } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +27,23 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Defensa {
   id: string;
@@ -58,6 +74,8 @@ const MinhasDefensas = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [defensaToDelete, setDefensaToDelete] = useState<string | null>(null);
   const [showEnviadas, setShowEnviadas] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [defensaToEdit, setDefensaToEdit] = useState<Defensa | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -180,7 +198,46 @@ const MinhasDefensas = () => {
     }
   };
 
-  const filteredDefensas = showEnviadas 
+  const handleEdit = async () => {
+    if (!defensaToEdit) return;
+
+    try {
+      const { error } = await supabase
+        .from("defensas")
+        .update({
+          data_inspecao: defensaToEdit.data_inspecao,
+          km_inicial: defensaToEdit.km_inicial,
+          km_final: defensaToEdit.km_final,
+          lado: defensaToEdit.lado,
+          tipo_defensa: defensaToEdit.tipo_defensa,
+          extensao_metros: defensaToEdit.extensao_metros,
+          estado_conservacao: defensaToEdit.estado_conservacao,
+          tipo_avaria: defensaToEdit.tipo_avaria,
+          necessita_intervencao: defensaToEdit.necessita_intervencao,
+          nivel_risco: defensaToEdit.nivel_risco,
+          observacao: defensaToEdit.observacao,
+        })
+        .eq("id", defensaToEdit.id);
+
+      if (error) throw error;
+
+      toast.success("Inspeção atualizada com sucesso!");
+      
+      const { data: defensasData } = await supabase
+        .from("defensas")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("data_inspecao", { ascending: false });
+      setDefensas(defensasData || []);
+    } catch (error: any) {
+      toast.error("Erro ao atualizar inspeção: " + error.message);
+    } finally {
+      setEditDialogOpen(false);
+      setDefensaToEdit(null);
+    }
+  };
+
+  const filteredDefensas = showEnviadas
     ? defensas 
     : defensas.filter(d => !d.enviado_coordenador);
 
@@ -320,17 +377,30 @@ const MinhasDefensas = () => {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setDefensaToDelete(defensa.id);
-                              setDeleteDialogOpen(true);
-                            }}
-                            title="Excluir inspeção"
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setDefensaToEdit(defensa);
+                                setEditDialogOpen(true);
+                              }}
+                              title="Editar inspeção"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setDefensaToDelete(defensa.id);
+                                setDeleteDialogOpen(true);
+                              }}
+                              title="Excluir inspeção"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -357,6 +427,118 @@ const MinhasDefensas = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Inspeção de Defensa</DialogTitle>
+          </DialogHeader>
+          {defensaToEdit && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Data da Inspeção</Label>
+                  <Input
+                    type="date"
+                    value={defensaToEdit.data_inspecao}
+                    onChange={(e) => setDefensaToEdit({...defensaToEdit, data_inspecao: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Lado</Label>
+                  <Select value={defensaToEdit.lado} onValueChange={(value) => setDefensaToEdit({...defensaToEdit, lado: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Direito">Direito</SelectItem>
+                      <SelectItem value="Esquerdo">Esquerdo</SelectItem>
+                      <SelectItem value="Ambos">Ambos</SelectItem>
+                      <SelectItem value="Canteiro Central">Canteiro Central</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>KM Inicial</Label>
+                  <Input
+                    type="number"
+                    step="0.001"
+                    value={defensaToEdit.km_inicial}
+                    onChange={(e) => setDefensaToEdit({...defensaToEdit, km_inicial: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label>KM Final</Label>
+                  <Input
+                    type="number"
+                    step="0.001"
+                    value={defensaToEdit.km_final}
+                    onChange={(e) => setDefensaToEdit({...defensaToEdit, km_final: parseFloat(e.target.value)})}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Tipo de Defensa</Label>
+                <Input
+                  value={defensaToEdit.tipo_defensa}
+                  onChange={(e) => setDefensaToEdit({...defensaToEdit, tipo_defensa: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label>Extensão (metros)</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={defensaToEdit.extensao_metros}
+                  onChange={(e) => setDefensaToEdit({...defensaToEdit, extensao_metros: parseFloat(e.target.value)})}
+                />
+              </div>
+              <div>
+                <Label>Estado de Conservação</Label>
+                <Select value={defensaToEdit.estado_conservacao} onValueChange={(value) => setDefensaToEdit({...defensaToEdit, estado_conservacao: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Ótimo">Ótimo</SelectItem>
+                    <SelectItem value="Bom">Bom</SelectItem>
+                    <SelectItem value="Regular">Regular</SelectItem>
+                    <SelectItem value="Ruim">Ruim</SelectItem>
+                    <SelectItem value="Péssimo">Péssimo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Tipo de Avaria</Label>
+                <Input
+                  value={defensaToEdit.tipo_avaria || ""}
+                  onChange={(e) => setDefensaToEdit({...defensaToEdit, tipo_avaria: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label>Nível de Risco</Label>
+                <Input
+                  value={defensaToEdit.nivel_risco || ""}
+                  onChange={(e) => setDefensaToEdit({...defensaToEdit, nivel_risco: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label>Observação</Label>
+                <Textarea
+                  value={defensaToEdit.observacao || ""}
+                  onChange={(e) => setDefensaToEdit({...defensaToEdit, observacao: e.target.value})}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleEdit}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <footer className="bg-background border-t mt-auto">
         <div className="container mx-auto px-4 py-4">

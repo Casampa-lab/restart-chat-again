@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Loader2, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Send, Trash2, Pencil } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +19,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface FrenteLiberada {
   id: string;
@@ -44,6 +53,8 @@ const MinhasFrentesLiberadas = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [frenteToDelete, setFrenteToDelete] = useState<string | null>(null);
   const [showEnviadas, setShowEnviadas] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [frenteToEdit, setFrenteToEdit] = useState<FrenteLiberada | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -128,7 +139,35 @@ const MinhasFrentesLiberadas = () => {
     }
   };
 
-  const filteredFrentes = showEnviadas 
+  const handleEdit = async () => {
+    if (!frenteToEdit) return;
+
+    try {
+      const { error } = await supabase
+        .from("frentes_liberadas")
+        .update({
+          data_liberacao: frenteToEdit.data_liberacao,
+          km_inicial: frenteToEdit.km_inicial,
+          km_final: frenteToEdit.km_final,
+          tipo_servico: frenteToEdit.tipo_servico,
+          responsavel: frenteToEdit.responsavel,
+          observacao: frenteToEdit.observacao,
+        })
+        .eq("id", frenteToEdit.id);
+
+      if (error) throw error;
+
+      toast.success("Frente atualizada com sucesso!");
+      await loadFrentes();
+    } catch (error: any) {
+      toast.error("Erro ao atualizar frente: " + error.message);
+    } finally {
+      setEditDialogOpen(false);
+      setFrenteToEdit(null);
+    }
+  };
+
+  const filteredFrentes = showEnviadas
     ? frentes 
     : frentes.filter(f => !f.enviado_coordenador);
 
@@ -244,17 +283,30 @@ const MinhasFrentesLiberadas = () => {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setFrenteToDelete(frente.id);
-                              setDeleteDialogOpen(true);
-                            }}
-                            title="Excluir frente"
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setFrenteToEdit(frente);
+                                setEditDialogOpen(true);
+                              }}
+                              title="Editar frente"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setFrenteToDelete(frente.id);
+                                setDeleteDialogOpen(true);
+                              }}
+                              title="Excluir frente"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -281,6 +333,71 @@ const MinhasFrentesLiberadas = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Frente Liberada</DialogTitle>
+          </DialogHeader>
+          {frenteToEdit && (
+            <div className="space-y-4">
+              <div>
+                <Label>Data de Liberação</Label>
+                <Input
+                  type="date"
+                  value={frenteToEdit.data_liberacao}
+                  onChange={(e) => setFrenteToEdit({...frenteToEdit, data_liberacao: e.target.value})}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>KM Inicial</Label>
+                  <Input
+                    type="number"
+                    step="0.001"
+                    value={frenteToEdit.km_inicial}
+                    onChange={(e) => setFrenteToEdit({...frenteToEdit, km_inicial: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label>KM Final</Label>
+                  <Input
+                    type="number"
+                    step="0.001"
+                    value={frenteToEdit.km_final}
+                    onChange={(e) => setFrenteToEdit({...frenteToEdit, km_final: parseFloat(e.target.value)})}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Tipo de Serviço</Label>
+                <Input
+                  value={frenteToEdit.tipo_servico}
+                  onChange={(e) => setFrenteToEdit({...frenteToEdit, tipo_servico: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label>Responsável</Label>
+                <Input
+                  value={frenteToEdit.responsavel}
+                  onChange={(e) => setFrenteToEdit({...frenteToEdit, responsavel: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label>Observações</Label>
+                <Textarea
+                  value={frenteToEdit.observacao || ""}
+                  onChange={(e) => setFrenteToEdit({...frenteToEdit, observacao: e.target.value})}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleEdit}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <footer className="bg-background border-t mt-auto">
         <div className="container mx-auto px-4 py-4">
