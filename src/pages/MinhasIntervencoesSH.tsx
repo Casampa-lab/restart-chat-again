@@ -12,7 +12,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Send, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
 
@@ -31,6 +43,7 @@ interface IntervencaoSH {
   observacao: string | null;
   lote_id: string;
   rodovia_id: string;
+  enviado_coordenador: boolean;
 }
 
 const MinhasIntervencoesSH = () => {
@@ -40,6 +53,10 @@ const MinhasIntervencoesSH = () => {
   const [loading, setLoading] = useState(true);
   const [lotes, setLotes] = useState<Record<string, string>>({});
   const [rodovias, setRodovias] = useState<Record<string, string>>({});
+  const [selectedIntervencoes, setSelectedIntervencoes] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [intervencaoToDelete, setIntervencaoToDelete] = useState<string | null>(null);
+  const [showEnviadas, setShowEnviadas] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -95,6 +112,75 @@ const MinhasIntervencoesSH = () => {
     loadData();
   }, [user]);
 
+  const handleToggleSelect = (id: string) => {
+    const newSelection = new Set(selectedIntervencoes);
+    if (newSelection.has(id)) {
+      newSelection.delete(id);
+    } else {
+      newSelection.add(id);
+    }
+    setSelectedIntervencoes(newSelection);
+  };
+
+  const handleEnviarSelecionadas = async () => {
+    if (selectedIntervencoes.size === 0) {
+      toast.error("Selecione pelo menos uma intervenção para enviar");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("intervencoes_sh")
+        .update({ enviado_coordenador: true })
+        .in("id", Array.from(selectedIntervencoes));
+
+      if (error) throw error;
+
+      toast.success(`${selectedIntervencoes.size} intervenção(ões) enviada(s) ao coordenador!`);
+      setSelectedIntervencoes(new Set());
+      
+      const { data: intervencoesData } = await supabase
+        .from("intervencoes_sh")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("data_intervencao", { ascending: false });
+      setIntervencoes(intervencoesData || []);
+    } catch (error: any) {
+      toast.error("Erro ao enviar intervenções: " + error.message);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!intervencaoToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from("intervencoes_sh")
+        .delete()
+        .eq("id", intervencaoToDelete);
+
+      if (error) throw error;
+
+      toast.success("Intervenção excluída com sucesso!");
+      
+      const { data: intervencoesData } = await supabase
+        .from("intervencoes_sh")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("data_intervencao", { ascending: false });
+      setIntervencoes(intervencoesData || []);
+    } catch (error: any) {
+      toast.error("Erro ao excluir intervenção: " + error.message);
+    } finally {
+      setDeleteDialogOpen(false);
+      setIntervencaoToDelete(null);
+    }
+  };
+
+  const filteredIntervencoes = showEnviadas 
+    ? intervencoes 
+    : intervencoes.filter(i => !i.enviado_coordenador);
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -118,6 +204,29 @@ const MinhasIntervencoesSH = () => {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <label htmlFor="show-enviadas" className="text-sm cursor-pointer">
+                Mostrar intervenções enviadas
+              </label>
+              <input
+                type="checkbox"
+                id="show-enviadas"
+                checked={showEnviadas}
+                onChange={(e) => setShowEnviadas(e.target.checked)}
+                className="h-4 w-4 cursor-pointer"
+              />
+            </div>
+            
+            {selectedIntervencoes.size > 0 && (
+              <Button onClick={handleEnviarSelecionadas}>
+                <Send className="mr-2 h-4 w-4" />
+                Enviar {selectedIntervencoes.size} ao Coordenador
+              </Button>
+            )}
+          </div>
+
         <Card>
           <CardHeader>
             <CardTitle>3.1.5 - Minhas Intervenções em Sinalização Horizontal</CardTitle>
@@ -126,15 +235,18 @@ const MinhasIntervencoesSH = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {intervencoes.length === 0 ? (
+            {filteredIntervencoes.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                Nenhuma intervenção registrada ainda.
+                {showEnviadas 
+                  ? "Nenhuma intervenção registrada ainda."
+                  : "Nenhuma intervenção não enviada"}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">Sel.</TableHead>
                       <TableHead>Data</TableHead>
                       <TableHead>Lote</TableHead>
                       <TableHead>Rodovia</TableHead>
@@ -145,12 +257,22 @@ const MinhasIntervencoesSH = () => {
                       <TableHead>Área (m²)</TableHead>
                       <TableHead>Espessura</TableHead>
                       <TableHead>Material</TableHead>
-                      <TableHead>Observação</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {intervencoes.map((intervencao) => (
+                    {filteredIntervencoes.map((intervencao) => (
                       <TableRow key={intervencao.id}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedIntervencoes.has(intervencao.id)}
+                            onChange={() => handleToggleSelect(intervencao.id)}
+                            disabled={intervencao.enviado_coordenador}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                        </TableCell>
                         <TableCell>
                           {format(new Date(intervencao.data_intervencao), "dd/MM/yyyy")}
                         </TableCell>
@@ -165,8 +287,29 @@ const MinhasIntervencoesSH = () => {
                         <TableCell>{intervencao.area_m2.toFixed(2)}</TableCell>
                         <TableCell>{intervencao.espessura_cm ? `${intervencao.espessura_cm} cm` : "-"}</TableCell>
                         <TableCell>{intervencao.material_utilizado || "-"}</TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {intervencao.observacao || "-"}
+                        <TableCell>
+                          {intervencao.enviado_coordenador ? (
+                            <Badge variant="outline" className="bg-green-50">
+                              Enviada
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-yellow-50">
+                              Não enviada
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setIntervencaoToDelete(intervencao.id);
+                              setDeleteDialogOpen(true);
+                            }}
+                            title="Excluir intervenção"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -176,7 +319,23 @@ const MinhasIntervencoesSH = () => {
             )}
           </CardContent>
         </Card>
+        </div>
       </main>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta intervenção? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <footer className="bg-background border-t mt-auto">
         <div className="container mx-auto px-4 py-4">
