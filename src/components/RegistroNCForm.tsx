@@ -54,8 +54,9 @@ export function RegistroNCForm({ loteId, rodoviaId }: RegistroNCFormProps) {
   const [uploading, setUploading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema),
     defaultValues: {
+      numero_registro: "",
       data_registro: new Date().toISOString().split('T')[0],
       km_inicial: "",
       km_final: "",
