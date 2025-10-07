@@ -254,7 +254,7 @@ export const SupervisoraManager = () => {
                       setUsarLogoCustomizado(checked);
                     }}
                     disabled={!logoPreview}
-                    className="scale-150 data-[state=checked]:bg-primary"
+                    className="scale-125 data-[state=checked]:bg-primary"
                   />
                   <span className="text-xs font-medium text-muted-foreground">
                     {usarLogoCustomizado ? "Ligado" : "Desligado"}
