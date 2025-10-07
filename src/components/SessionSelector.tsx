@@ -121,7 +121,7 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
             <SelectContent>
               {lotes.map((lote) => (
                 <SelectItem key={lote.id} value={lote.id}>
-                  Lote {lote.numero} - {lote.empresas.nome}
+                  Lote {lote.numero}{lote.empresas?.nome ? ` - ${lote.empresas.nome}` : ''}
                 </SelectItem>
               ))}
             </SelectContent>
