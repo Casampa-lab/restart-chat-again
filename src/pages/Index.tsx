@@ -73,15 +73,12 @@ const Index = () => {
   };
 
   if (authLoading || sessionLoading) {
-    console.log("⏳ Loading... authLoading:", authLoading, "sessionLoading:", sessionLoading);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
-
-  console.log("✅ Index renderizado - user:", user?.email, "activeSession:", activeSession);
 
   // Determinar qual logo usar
   const logoToDisplay = supervisora?.usar_logo_customizado && supervisora?.logo_url 
@@ -187,7 +184,7 @@ const Index = () => {
                   <span className="font-semibold">{activeSession.lote?.numero}</span>
                   {activeSession.lote?.empresa?.nome && (
                     <span className="ml-2 opacity-90">
-                      ({activeSession.lote.empresa.nome})
+                      ({activeSession.lote?.empresa?.nome})
                     </span>
                   )}
                 </div>

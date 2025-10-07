@@ -51,33 +51,14 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
 
   const loadLotes = async () => {
     try {
-      console.log("🔍 Carregando lotes...");
       const { data, error } = await supabase
         .from("lotes")
         .select("*, empresas(nome)")
         .order("numero");
 
-      if (error) {
-        console.error("❌ Erro ao carregar lotes:", error);
-        throw error;
-      }
-      
-      console.log("✅ Lotes carregados:", data);
-      console.log("📊 Estrutura dos dados:", JSON.stringify(data, null, 2));
-      
-      // Filtrar lotes válidos
-      const validLotes = (data || []).filter(lote => {
-        const isValid = lote && lote.id && lote.numero;
-        if (!isValid) {
-          console.warn("⚠️ Lote inválido encontrado:", lote);
-        }
-        return isValid;
-      });
-      
-      console.log("✅ Lotes válidos:", validLotes.length);
-      setLotes(validLotes);
+      if (error) throw error;
+      setLotes(data || []);
     } catch (error: any) {
-      console.error("❌ Erro catch:", error);
       toast.error("Erro ao carregar lotes: " + error.message);
     }
   };
