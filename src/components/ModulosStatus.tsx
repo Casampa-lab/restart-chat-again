@@ -1,0 +1,141 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Route, Construction, Building2, Wrench, BarChart3, FileText, Check, Clock } from "lucide-react";
+
+interface Modulo {
+  codigo: string;
+  nome: string;
+  descricao: string;
+  icone: string;
+  status: "disponivel" | "desenvolvimento";
+}
+
+const MODULOS_INFO: Modulo[] = [
+  {
+    codigo: "sinalizacao",
+    nome: "Sinalização Rodoviária",
+    descricao: "Gestão completa de sinalização horizontal e vertical",
+    icone: "Route",
+    status: "disponivel"
+  },
+  {
+    codigo: "pavimentacao",
+    nome: "Pavimentação",
+    descricao: "Controle de qualidade e manutenção de pavimentos",
+    icone: "Construction",
+    status: "desenvolvimento"
+  },
+  {
+    codigo: "obras-arte",
+    nome: "Obras de Arte",
+    descricao: "Gestão de pontes, viadutos e obras especiais",
+    icone: "Building2",
+    status: "desenvolvimento"
+  },
+  {
+    codigo: "manutencao",
+    nome: "Manutenção Rodoviária",
+    descricao: "Registro e acompanhamento de manutenções",
+    icone: "Wrench",
+    status: "desenvolvimento"
+  },
+  {
+    codigo: "dashboards",
+    nome: "Dashboards Avançados",
+    descricao: "Análises e visualizações consolidadas",
+    icone: "BarChart3",
+    status: "desenvolvimento"
+  },
+  {
+    codigo: "relatorios",
+    nome: "Relatórios Customizados",
+    descricao: "Geração de relatórios personalizados",
+    icone: "FileText",
+    status: "desenvolvimento"
+  }
+];
+
+const ICON_MAP: Record<string, any> = {
+  Route,
+  Construction,
+  Building2,
+  Wrench,
+  BarChart3,
+  FileText
+};
+
+export const ModulosStatus = () => {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold">Módulos do Sistema</h2>
+        <p className="text-muted-foreground">Funcionalidades disponíveis e em desenvolvimento</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {MODULOS_INFO.map((modulo) => {
+          const IconComponent = ICON_MAP[modulo.icone];
+          const isDisponivel = modulo.status === "disponivel";
+
+          return (
+            <Card 
+              key={modulo.codigo} 
+              className={`relative overflow-hidden transition-all ${
+                isDisponivel 
+                  ? "border-primary/50 shadow-md hover:shadow-lg" 
+                  : "opacity-60 border-dashed"
+              }`}
+            >
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="p-3 rounded-lg bg-primary/10">
+                    <IconComponent className="h-6 w-6 text-primary" />
+                  </div>
+                  <Badge 
+                    variant={isDisponivel ? "default" : "secondary"}
+                    className="flex items-center gap-1"
+                  >
+                    {isDisponivel ? (
+                      <>
+                        <Check className="h-3 w-3" />
+                        Disponível
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="h-3 w-3" />
+                        Em Desenvolvimento
+                      </>
+                    )}
+                  </Badge>
+                </div>
+                <CardTitle className="mt-4">{modulo.nome}</CardTitle>
+                <CardDescription>{modulo.descricao}</CardDescription>
+              </CardHeader>
+              {isDisponivel && (
+                <CardContent>
+                  <div className="flex items-center gap-2 text-sm text-primary font-medium">
+                    <Check className="h-4 w-4" />
+                    <span>Acesso completo</span>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          );
+        })}
+      </div>
+
+      <Card className="bg-muted/50 border-dashed">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Próximos Lançamentos
+          </CardTitle>
+          <CardDescription>
+            Estamos desenvolvendo novos módulos para ampliar as funcionalidades do sistema. 
+            Você será notificado assim que novos módulos forem lançados.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    </div>
+  );
+};

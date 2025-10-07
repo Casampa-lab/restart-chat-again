@@ -1,0 +1,63 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { ModulosStatus } from "@/components/ModulosStatus";
+import logoConsol from "@/assets/logo-consol.jpg";
+import logoGoverno from "@/assets/logo-governo.png";
+
+const Modulos = () => {
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+      <header className="bg-primary shadow-lg sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="bg-white/95 rounded-lg px-3 py-2 shadow-md">
+                <img 
+                  src={logoConsol} 
+                  alt="Sistema de Supervisão" 
+                  className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" 
+                  onClick={() => navigate("/")}
+                />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-primary-foreground">Módulos do Sistema</h1>
+                <p className="text-sm text-primary-foreground/80">Funcionalidades Disponíveis</p>
+              </div>
+            </div>
+            <Button 
+              variant="default" 
+              size="lg"
+              onClick={() => navigate("/")}
+              className="font-semibold shadow-md hover:shadow-lg transition-shadow bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Voltar
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 container mx-auto px-4 py-6">
+        <ModulosStatus />
+      </main>
+
+      <footer className="bg-background border-t mt-auto">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <img src={logoGoverno} alt="Governo Federal - Ministério dos Transportes" className="h-12 object-contain" />
+            <p className="text-sm text-muted-foreground">
+              Sistema de Supervisão Rodoviária - Gestão Integrada
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default Modulos;

@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
@@ -90,6 +90,15 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
+              <Button 
+                variant="secondary" 
+                size="lg"
+                className="font-semibold shadow-md hover:shadow-lg transition-shadow"
+                onClick={() => navigate("/modulos")}
+              >
+                <Boxes className="mr-2 h-5 w-5" />
+                Módulos
+              </Button>
               <Button 
                 variant="secondary" 
                 size="lg"
