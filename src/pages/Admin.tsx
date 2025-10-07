@@ -103,18 +103,26 @@ const Admin = () => {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-6">
-        <Tabs defaultValue="empresas" className="w-full">
+        <Tabs defaultValue="destinatarios" className="w-full">
           <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="destinatarios">Supervisora</TabsTrigger>
             <TabsTrigger value="empresas">Executoras</TabsTrigger>
+            <TabsTrigger value="coordinators">Atribuir</TabsTrigger>
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
             <TabsTrigger value="assinaturas">Assinaturas</TabsTrigger>
-            <TabsTrigger value="coordinators">Atribuir</TabsTrigger>
-            <TabsTrigger value="destinatarios">Supervisora</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="destinatarios">
+            <SupervisoraManager />
+          </TabsContent>
 
           <TabsContent value="empresas">
             <EmpresasManager />
+          </TabsContent>
+
+          <TabsContent value="coordinators">
+            <CoordinatorAssignmentsManager />
           </TabsContent>
 
           <TabsContent value="lotes">
@@ -127,14 +135,6 @@ const Admin = () => {
 
           <TabsContent value="assinaturas">
             <AssinaturasManager />
-          </TabsContent>
-
-          <TabsContent value="coordinators">
-            <CoordinatorAssignmentsManager />
-          </TabsContent>
-
-          <TabsContent value="destinatarios">
-            <SupervisoraManager />
           </TabsContent>
         </Tabs>
       </main>
