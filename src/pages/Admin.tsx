@@ -13,7 +13,7 @@ import { DestinatariosManager } from "@/components/admin/DestinatariosManager";
 import { CoordinatorAssignmentsManager } from "@/components/admin/CoordinatorAssignmentsManager";
 import { AssinaturasManager } from "@/components/admin/AssinaturasManager";
 
-import logoConsol from "@/assets/logo-consol.jpg";
+import logoRodoviaSuperv from "@/assets/logo-rodoviasuper.png";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -78,8 +78,8 @@ const Admin = () => {
             <div className="flex items-center gap-4">
               <div className="bg-white/95 rounded-lg px-3 py-2 shadow-md">
                 <img 
-                  src={logoConsol} 
-                  alt="Sistema de Supervisão" 
+                  src={logoRodoviaSuperv} 
+                  alt="RodoviaSUPERV - Sistema de Supervisão" 
                   className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" 
                   onClick={() => navigate("/")}
                 />
