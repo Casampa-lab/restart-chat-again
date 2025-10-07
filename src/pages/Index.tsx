@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkSession } from "@/hooks/useWorkSession";
+import { useSupervisora } from "@/hooks/useSupervisora";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, signOut } = useAuth();
   const { activeSession, loading: sessionLoading, refreshSession, endSession } = useWorkSession(user?.id);
+  const { data: supervisora } = useSupervisora();
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('activeTab') || 'frentes';
@@ -78,6 +80,14 @@ const Index = () => {
     );
   }
 
+  // Determinar qual logo usar
+  const logoToDisplay = supervisora?.usar_logo_customizado && supervisora?.logo_url 
+    ? supervisora.logo_url 
+    : logoRodoviaSuperv;
+  const logoAlt = supervisora?.usar_logo_customizado && supervisora?.logo_url
+    ? `${supervisora.nome_empresa} - Sistema de Supervisão`
+    : "RodoviaSUPERV - Sistema de Supervisão";
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10">
       <header className="bg-primary shadow-lg sticky top-0 z-10">
@@ -86,8 +96,8 @@ const Index = () => {
             <div className="flex items-center gap-4">
               <div className="bg-white/95 rounded-lg px-3 py-2 shadow-md">
                 <img 
-                  src={logoRodoviaSuperv} 
-                  alt="RodoviaSUPERV - Sistema de Supervisão" 
+                  src={logoToDisplay} 
+                  alt={logoAlt} 
                   className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" 
                   onClick={() => navigate("/")}
                 />

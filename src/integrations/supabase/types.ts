@@ -1692,6 +1692,7 @@ export type Database = {
           logo_url: string | null
           nome_empresa: string
           updated_at: string | null
+          usar_logo_customizado: boolean | null
         }
         Insert: {
           contrato: string
@@ -1700,6 +1701,7 @@ export type Database = {
           logo_url?: string | null
           nome_empresa: string
           updated_at?: string | null
+          usar_logo_customizado?: boolean | null
         }
         Update: {
           contrato?: string
@@ -1708,6 +1710,7 @@ export type Database = {
           logo_url?: string | null
           nome_empresa?: string
           updated_at?: string | null
+          usar_logo_customizado?: boolean | null
         }
         Relationships: []
       }
