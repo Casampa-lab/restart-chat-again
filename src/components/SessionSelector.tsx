@@ -51,14 +51,21 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
 
   const loadLotes = async () => {
     try {
+      console.log("🔍 Carregando lotes...");
       const { data, error } = await supabase
         .from("lotes")
         .select("*, empresas(nome)")
         .order("numero");
 
-      if (error) throw error;
+      if (error) {
+        console.error("❌ Erro ao carregar lotes:", error);
+        throw error;
+      }
+      
+      console.log("✅ Lotes carregados:", data);
       setLotes(data || []);
     } catch (error: any) {
+      console.error("❌ Erro catch:", error);
       toast.error("Erro ao carregar lotes: " + error.message);
     }
   };
