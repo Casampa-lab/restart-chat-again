@@ -154,6 +154,8 @@ export const SupervisoraManager = () => {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
+    
+    console.log('Estado atual do switch no momento do submit:', usarLogoCustomizado);
     saveMutation.mutate();
   };
 
@@ -243,7 +245,10 @@ export const SupervisoraManager = () => {
                 <Switch
                   id="usar-logo"
                   checked={usarLogoCustomizado}
-                  onCheckedChange={setUsarLogoCustomizado}
+                  onCheckedChange={(checked) => {
+                    console.log('Switch alterado para:', checked);
+                    setUsarLogoCustomizado(checked);
+                  }}
                   disabled={!logoPreview}
                 />
               </div>
