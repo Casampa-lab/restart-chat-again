@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Camera, X } from "lucide-react";
+import { TODAS_PLACAS } from "@/constants/codigosPlacas";
 
 interface FichaVerificacaoSVFormProps {
   loteId: string;
@@ -592,11 +594,22 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId }: FichaVerificacaoSV
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
                     <div>
-                      <Label>Tipo Placa</Label>
-                      <Input
+                      <Label>Código do Dispositivo (3.1.3.1)</Label>
+                      <Select
                         value={item.tipo_placa}
-                        onChange={(e) => handleUpdateItem(index, 'tipo_placa', e.target.value)}
-                      />
+                        onValueChange={(value) => handleUpdateItem(index, 'tipo_placa', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o código da placa" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px]">
+                          {TODAS_PLACAS.map((placa) => (
+                            <SelectItem key={placa.codigo} value={placa.codigo}>
+                              {placa.codigo} - {placa.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox
