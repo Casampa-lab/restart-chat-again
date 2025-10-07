@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Camera, X } from "lucide-react";
+import { Camera, X, MapPin } from "lucide-react";
 import { TODAS_PLACAS } from "@/constants/codigosPlacas";
 
 interface FichaVerificacaoSVFormProps {

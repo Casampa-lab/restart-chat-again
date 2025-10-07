@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Camera, X } from "lucide-react";
+import { Camera, X, MapPin } from "lucide-react";
 
 interface FichaVerificacaoSHFormProps {
   loteId: string;

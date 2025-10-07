@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, X, Loader2 } from "lucide-react";
+import { Plus, X, Loader2, MapPin } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const fichaPlacaSchema = z.object({
@@ -69,7 +69,6 @@ type DanoFormValues = z.infer<typeof danoSchema>;
 type IntervencaoFormValues = z.infer<typeof intervencaoSchema>;
 
 export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormProps) {
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photos, setPhotos] = useState<{
     identificacao?: File;
@@ -126,7 +125,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
     setDanos([...danos, data]);
     danoForm.reset({ vandalismo: false });
     setShowDanoForm(false);
-    toast({ title: "Dano adicionado com sucesso" });
+    toast.success("Dano adicionado com sucesso");
   };
 
   const removeDano = (index: number) => {
@@ -137,7 +136,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
     setIntervencoes([...intervencoes, data]);
     intervencaoForm.reset({ placa_recuperada: false });
     setShowIntervencaoForm(false);
-    toast({ title: "Intervenção adicionada com sucesso" });
+    toast.success("Intervenção adicionada com sucesso");
   };
 
   const removeIntervencao = (index: number) => {
@@ -234,9 +233,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
         if (intervencoesError) throw intervencoesError;
       }
 
-      toast({
-        title: "Ficha de placa registrada com sucesso!",
-      });
+      toast.success("Ficha de placa registrada com sucesso!");
 
       form.reset();
       setPhotos({});
@@ -244,11 +241,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
       setIntervencoes([]);
       onSuccess?.();
     } catch (error: any) {
-      toast({
-        title: "Erro ao salvar ficha de placa",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error("Erro ao salvar ficha de placa: " + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -497,16 +490,16 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                         toast.error("Geolocalização não suportada");
                         return;
                       }
-                      toast.loading("Capturando localização...");
+                      const loadingToast = toast.loading("Capturando localização...");
                       navigator.geolocation.getCurrentPosition(
                         (position) => {
                           form.setValue("latitude", position.coords.latitude.toFixed(6));
                           form.setValue("longitude", position.coords.longitude.toFixed(6));
-                          toast.dismiss();
+                          toast.dismiss(loadingToast);
                           toast.success("Localização capturada!");
                         },
                         (error) => {
-                          toast.dismiss();
+                          toast.dismiss(loadingToast);
                           toast.error("Erro ao capturar: " + error.message);
                         },
                         { enableHighAccuracy: true, timeout: 10000 }
