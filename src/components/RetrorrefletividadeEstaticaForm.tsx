@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, MapPin } from "lucide-react";
+import { TODAS_PLACAS } from "@/constants/codigosPlacas";
 
 interface RetrorrefletividadeEstaticaFormProps {
   loteId: string;
@@ -272,14 +273,23 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
 
             <div className="space-y-2">
               <Label htmlFor="codigo_dispositivo">Código do Dispositivo</Label>
-              <Input
-                id="codigo_dispositivo"
+              <Select
                 value={formData.codigo_dispositivo}
-                onChange={(e) =>
-                  setFormData({ ...formData, codigo_dispositivo: e.target.value })
+                onValueChange={(value) =>
+                  setFormData({ ...formData, codigo_dispositivo: value })
                 }
-                placeholder="Ex: R-1, A-21, etc."
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o código da placa" />
+                </SelectTrigger>
+                <SelectContent className="max-h-[300px]">
+                  {TODAS_PLACAS.map((placa) => (
+                    <SelectItem key={placa.codigo} value={placa.codigo}>
+                      {placa.codigo} - {placa.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
