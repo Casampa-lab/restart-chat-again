@@ -115,10 +115,10 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
 
       if (error) throw error;
 
-      toast.success("Intervenção em SV registrada com sucesso!");
+      toast.success("Intervenção em SV salva com sucesso!");
       form.reset();
     } catch (error: any) {
-      toast.error("Erro ao registrar intervenção: " + error.message);
+      toast.error("Erro ao salvar intervenção: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -433,10 +433,10 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Registrando...
+                  Salvando...
                 </>
               ) : (
-                "Registrar Intervenção"
+                "Salvar Intervenção"
               )}
             </Button>
           </form>

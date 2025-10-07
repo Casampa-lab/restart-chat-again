@@ -124,10 +124,10 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
 
       if (error) throw error;
 
-      toast.success("Intervenção em tacha registrada com sucesso!");
+      toast.success("Intervenção em tacha salva com sucesso!");
       form.reset();
     } catch (error: any) {
-      toast.error("Erro ao registrar intervenção: " + error.message);
+      toast.error("Erro ao salvar intervenção: " + error.message);
     }
   };
 
@@ -403,7 +403,7 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
           )}
         />
 
-        <Button type="submit" className="w-full">Registrar Intervenção</Button>
+        <Button type="submit" className="w-full">Salvar Intervenção</Button>
       </form>
     </Form>
   );

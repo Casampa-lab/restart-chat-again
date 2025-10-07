@@ -245,7 +245,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
       onSuccess?.();
     } catch (error: any) {
       toast({
-        title: "Erro ao registrar ficha de placa",
+        title: "Erro ao salvar ficha de placa",
         description: error.message,
         variant: "destructive",
       });
@@ -951,7 +951,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
 
           <Button type="submit" disabled={isSubmitting} className="w-full">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Registrar Ficha de Placa
+            Salvar Ficha de Placa
           </Button>
         </form>
       </Form>
