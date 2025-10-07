@@ -23,6 +23,8 @@ export const useSupervisora = () => {
       if (error) throw error;
       return data as SupervisoraConfig | null;
     },
-    staleTime: 5 * 60 * 1000, // Cache por 5 minutos
+    staleTime: 0, // Sempre buscar dados atualizados
+    refetchOnMount: true, // Atualizar ao montar componente
+    refetchOnWindowFocus: true, // Atualizar quando a janela receber foco
   });
 };

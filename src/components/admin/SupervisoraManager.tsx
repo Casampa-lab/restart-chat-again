@@ -102,17 +102,19 @@ export const SupervisoraManager = () => {
         logoUrl = publicUrl;
       }
 
+      const payload = {
+        nome_empresa: nomeEmpresa,
+        contrato: contrato,
+        logo_url: logoUrl,
+        usar_logo_customizado: usarLogoCustomizado,
+      };
+
       // Inserir ou atualizar registro
       if (supervisora) {
         // Atualizar
         const { error } = await supabase
           .from("supervisora")
-          .update({
-            nome_empresa: nomeEmpresa,
-            contrato: contrato,
-            logo_url: logoUrl,
-            usar_logo_customizado: usarLogoCustomizado,
-          })
+          .update(payload)
           .eq("id", supervisora.id);
 
         if (error) throw error;
@@ -120,20 +122,32 @@ export const SupervisoraManager = () => {
         // Inserir novo
         const { error } = await supabase
           .from("supervisora")
-          .insert({
-            nome_empresa: nomeEmpresa,
-            contrato: contrato,
-            logo_url: logoUrl,
-            usar_logo_customizado: usarLogoCustomizado,
-          });
+          .insert(payload);
 
         if (error) throw error;
       }
+
+      return payload;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Invalidar todas as queries relacionadas
       queryClient.invalidateQueries({ queryKey: ["supervisora"] });
+      
+      // Forçar atualização do estado local
+      setNomeEmpresa(data.nome_empresa);
+      setContrato(data.contrato);
+      setUsarLogoCustomizado(data.usar_logo_customizado);
+      if (data.logo_url) {
+        setLogoPreview(data.logo_url);
+      }
+      
       setLogoFile(null);
       toast.success("Informações da supervisora salvas com sucesso!");
+      
+      // Recarregar a página após 500ms para garantir que o logo seja atualizado
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     },
     onError: (error: any) => {
       toast.error(error.message || "Erro ao salvar informações");
