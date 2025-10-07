@@ -110,7 +110,7 @@ const Admin = () => {
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
             <TabsTrigger value="assinaturas">Assinaturas</TabsTrigger>
             <TabsTrigger value="coordinators">Atribuir</TabsTrigger>
-            <TabsTrigger value="destinatarios">Destinatários</TabsTrigger>
+            <TabsTrigger value="destinatarios">Nomes</TabsTrigger>
           </TabsList>
 
           <TabsContent value="empresas">
