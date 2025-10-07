@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, MapPin } from "lucide-react";
+import { Plus, Trash2, MapPin, Pencil } from "lucide-react";
 
 interface Empresa {
   id: string;
@@ -48,6 +49,7 @@ const LotesManager = () => {
   const [rodovias, setRodovias] = useState<Rodovia[]>([]);
   const [rodoviasVinculadas, setRodoviasVinculadas] = useState<RodoviaComKm[]>([]);
   const [loading, setLoading] = useState(false);
+  const [editingLote, setEditingLote] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     numero: "",
     empresa_id: "",
@@ -172,6 +174,93 @@ const LotesManager = () => {
       loadData();
     } catch (error: any) {
       toast.error("Erro ao cadastrar lote: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = async (lote: LoteComRodovias) => {
+    setEditingLote(lote.id);
+    setFormData({
+      numero: lote.numero,
+      empresa_id: lote.id, // Will need to fetch empresa_id
+      contrato: lote.contrato || "",
+    });
+
+    // Carregar rodovias vinculadas ao lote
+    const { data: lotesRodoviasData, error } = await supabase
+      .from("lotes_rodovias")
+      .select("rodovia_id, km_inicial, km_final, rodovias(id, codigo)")
+      .eq("lote_id", lote.id);
+
+    if (error) {
+      toast.error("Erro ao carregar rodovias: " + error.message);
+      return;
+    }
+
+    const rodoviasFormatted = lotesRodoviasData.map((lr: any) => ({
+      rodovia_id: lr.rodovia_id,
+      codigo: lr.rodovias.codigo,
+      km_inicial: lr.km_inicial?.toString() || "",
+      km_final: lr.km_final?.toString() || "",
+    }));
+
+    setRodoviasVinculadas(rodoviasFormatted);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!editingLote) return;
+
+    if (rodoviasVinculadas.length === 0) {
+      toast.error("Adicione pelo menos uma rodovia ao lote");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Atualizar lote
+      const { error: loteError } = await supabase
+        .from("lotes")
+        .update({
+          numero: formData.numero,
+          contrato: formData.contrato || null,
+        })
+        .eq("id", editingLote);
+
+      if (loteError) throw loteError;
+
+      // Remover rodovias antigas
+      const { error: deleteError } = await supabase
+        .from("lotes_rodovias")
+        .delete()
+        .eq("lote_id", editingLote);
+
+      if (deleteError) throw deleteError;
+
+      // Inserir novas rodovias
+      const lotesRodovias = rodoviasVinculadas.map((rodovia) => ({
+        lote_id: editingLote,
+        rodovia_id: rodovia.rodovia_id,
+        km_inicial: rodovia.km_inicial ? parseFloat(rodovia.km_inicial) : null,
+        km_final: rodovia.km_final ? parseFloat(rodovia.km_final) : null,
+      }));
+
+      const { error: vinculoError } = await supabase
+        .from("lotes_rodovias")
+        .insert(lotesRodovias);
+
+      if (vinculoError) throw vinculoError;
+
+      toast.success("Lote atualizado com sucesso!");
+      setEditingLote(null);
+      setFormData({ numero: "", empresa_id: "", contrato: "" });
+      setRodoviasVinculadas([]);
+      loadData();
+    } catch (error: any) {
+      toast.error("Erro ao atualizar lote: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -397,13 +486,22 @@ const LotesManager = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(lote.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(lote)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(lote.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -418,6 +516,160 @@ const LotesManager = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Dialog para editar lote */}
+      <Dialog open={!!editingLote} onOpenChange={(open) => !open && setEditingLote(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Lote</DialogTitle>
+            <DialogDescription>
+              Atualize as informações do lote e suas rodovias
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdate} className="space-y-6">
+            {/* Dados básicos do lote */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-numero">Número do Lote *</Label>
+                <Input
+                  id="edit-numero"
+                  value={formData.numero}
+                  onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
+                  placeholder="Ex: 01"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-contrato">Número do Contrato</Label>
+                <Input
+                  id="edit-contrato"
+                  value={formData.contrato}
+                  onChange={(e) => setFormData({ ...formData, contrato: e.target.value })}
+                  placeholder="Ex: 123/2024"
+                />
+              </div>
+            </div>
+
+            {/* Adicionar rodovias */}
+            <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
+              <Label className="text-base font-semibold flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                Rodovias do Lote
+              </Label>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-rodovia">Rodovia</Label>
+                  <Select
+                    value={novaRodovia.rodovia_id}
+                    onValueChange={(value) =>
+                      setNovaRodovia({ ...novaRodovia, rodovia_id: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rodovias
+                        .filter(
+                          (r) => !rodoviasVinculadas.find((rv) => rv.rodovia_id === r.id)
+                        )
+                        .map((rodovia) => (
+                          <SelectItem key={rodovia.id} value={rodovia.id}>
+                            {rodovia.codigo}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-km_inicial">km Inicial</Label>
+                  <Input
+                    id="edit-km_inicial"
+                    type="number"
+                    step="0.001"
+                    value={novaRodovia.km_inicial}
+                    onChange={(e) =>
+                      setNovaRodovia({ ...novaRodovia, km_inicial: e.target.value })
+                    }
+                    placeholder="0.000"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-km_final">km Final</Label>
+                  <Input
+                    id="edit-km_final"
+                    type="number"
+                    step="0.001"
+                    placeholder="Ex: 200.000"
+                    value={novaRodovia.km_final}
+                    onChange={(e) =>
+                      setNovaRodovia({ ...novaRodovia, km_final: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="flex items-end">
+                  <Button
+                    type="button"
+                    onClick={adicionarRodovia}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Adicionar
+                  </Button>
+                </div>
+              </div>
+
+              {/* Lista de rodovias adicionadas */}
+              {rodoviasVinculadas.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm">Rodovias Adicionadas:</Label>
+                  <div className="space-y-2">
+                    {rodoviasVinculadas.map((rodovia) => (
+                      <div
+                        key={rodovia.rodovia_id}
+                        className="flex items-center justify-between p-3 bg-background rounded border"
+                      >
+                        <div className="flex items-center gap-4">
+                          <Badge variant="outline">{rodovia.codigo}</Badge>
+                          <span className="text-sm text-muted-foreground">
+                            km {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removerRodovia(rodovia.rodovia_id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditingLote(null)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={loading}>
+                Salvar Alterações
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
