@@ -114,7 +114,7 @@ const Index = () => {
                 onClick={() => navigate("/coordenacao-fiscalizacao")}
               >
                 <ClipboardList className="mr-2 h-5 w-5" />
-                Coordenação/Fiscalização
+                Gestão
               </Button>
               {isAdmin && (
                 <Button 

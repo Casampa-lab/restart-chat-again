@@ -147,7 +147,7 @@ const CoordenacaoFiscalizacao = () => {
       <main className="flex-1 container mx-auto px-4 py-6">
         <Card className="shadow-elevated border-2 border-primary/20">
           <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
-            <CardTitle className="text-3xl text-primary">Coordenação e Fiscalização</CardTitle>
+            <CardTitle className="text-3xl text-primary">Gestão</CardTitle>
             <CardDescription className="text-lg">
               Acesse todas as listagens e registros do sistema
             </CardDescription>
