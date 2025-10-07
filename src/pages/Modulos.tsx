@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, LogOut } from "lucide-react";
 import { ModulosStatus } from "@/components/ModulosStatus";
 import logoRodoviaSuperv from "@/assets/logo-rodoviasuper.png";
 
@@ -9,6 +9,11 @@ import logoRodoviaSuperv from "@/assets/logo-rodoviasuper.png";
 const Modulos = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10">
@@ -29,15 +34,26 @@ const Modulos = () => {
                 <p className="text-sm text-primary-foreground/80">Funcionalidades Disponíveis</p>
               </div>
             </div>
-            <Button 
-              variant="default" 
-              size="lg"
-              onClick={() => navigate("/")}
-              className="font-semibold shadow-md hover:shadow-lg transition-shadow bg-accent text-accent-foreground hover:bg-accent/90"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Voltar
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="default" 
+                size="lg"
+                onClick={() => navigate("/")}
+                className="font-semibold shadow-md hover:shadow-lg transition-shadow bg-accent text-accent-foreground hover:bg-accent/90"
+              >
+                <ArrowLeft className="mr-2 h-5 w-5" />
+                Voltar
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="lg"
+                onClick={handleSignOut}
+                className="font-semibold shadow-md hover:shadow-lg transition-shadow"
+              >
+                <LogOut className="mr-2 h-5 w-5" />
+                SAIR
+              </Button>
+            </div>
           </div>
         </div>
       </header>
