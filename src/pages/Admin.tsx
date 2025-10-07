@@ -12,7 +12,7 @@ import RodoviasManager from "@/components/admin/RodoviasManager";
 import { DestinatariosManager } from "@/components/admin/DestinatariosManager";
 import { CoordinatorAssignmentsManager } from "@/components/admin/CoordinatorAssignmentsManager";
 import { AssinaturasManager } from "@/components/admin/AssinaturasManager";
-import logoGoverno from "@/assets/logo-governo.png";
+
 import logoConsol from "@/assets/logo-consol.jpg";
 
 const Admin = () => {
@@ -141,8 +141,7 @@ const Admin = () => {
 
       <footer className="bg-background border-t mt-auto">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <img src={logoGoverno} alt="Governo Federal - Ministério dos Transportes" className="h-12 object-contain" />
+          <div className="flex items-center justify-center">
             <p className="text-sm text-muted-foreground">
               Críticas e sugestões: <a href="mailto:cassia.sampaio@dnit.gov.br" className="text-primary hover:underline">cassia.sampaio@dnit.gov.br</a>
             </p>

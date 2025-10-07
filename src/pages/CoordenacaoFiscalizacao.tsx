@@ -22,7 +22,7 @@ import {
 } from "@/lib/excelExport";
 import { toast } from "sonner";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
-import logoGoverno from "@/assets/logo-governo.png";
+
 
 const CoordenacaoFiscalizacao = () => {
   const navigate = useNavigate();
@@ -398,7 +398,6 @@ const CoordenacaoFiscalizacao = () => {
       <footer className="bg-background border-t mt-auto">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col items-center justify-center gap-4">
-            <img src={logoGoverno} alt="Governo Federal - Ministério dos Transportes" className="h-16 object-contain" />
             <p className="text-sm text-muted-foreground text-center">
               Críticas e sugestões: <a href="mailto:cassia.sampaio@dnit.gov.br" className="text-primary hover:underline">cassia.sampaio@dnit.gov.br</a>
             </p>

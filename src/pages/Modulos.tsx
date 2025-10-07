@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { ModulosStatus } from "@/components/ModulosStatus";
 import logoConsol from "@/assets/logo-consol.jpg";
-import logoGoverno from "@/assets/logo-governo.png";
+
 
 const Modulos = () => {
   const navigate = useNavigate();
@@ -48,8 +48,7 @@ const Modulos = () => {
 
       <footer className="bg-background border-t mt-auto">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <img src={logoGoverno} alt="Governo Federal - Ministério dos Transportes" className="h-12 object-contain" />
+          <div className="flex items-center justify-center">
             <p className="text-sm text-muted-foreground">
               Sistema de Supervisão Rodoviária - Gestão Integrada
             </p>

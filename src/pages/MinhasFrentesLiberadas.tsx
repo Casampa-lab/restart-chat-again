@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
-import logoGoverno from "@/assets/logo-governo.png";
+
 
 interface FrenteLiberada {
   id: string;
@@ -132,8 +132,7 @@ const MinhasFrentesLiberadas = () => {
 
       <footer className="bg-background border-t mt-auto">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <img src={logoGoverno} alt="Governo Federal" className="h-12 object-contain" />
+          <div className="flex items-center justify-center">
             <p className="text-sm text-muted-foreground">
               Críticas e sugestões: <a href="mailto:cassia.sampaio@dnit.gov.br" className="text-primary hover:underline">cassia.sampaio@dnit.gov.br</a>
             </p>

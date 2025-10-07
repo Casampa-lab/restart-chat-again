@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import logoGoverno from "@/assets/logo-governo.png";
+
 
 interface NaoConformidade {
   id: string;
@@ -179,7 +179,6 @@ const NCsCoordenador = () => {
       <header className="bg-background border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-center gap-8">
-            <img src={logoGoverno} alt="Governo Federal - Ministério dos Transportes" className="h-16 object-contain" />
             <div className="text-center">
               <h1 className="text-2xl font-bold">Sistema de Registro de Não Conformidades</h1>
               <p className="text-sm text-muted-foreground">Coordenador/Fiscal - Visualização por Lote</p>
@@ -280,8 +279,7 @@ const NCsCoordenador = () => {
 
       <footer className="bg-background border-t mt-auto">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <img src={logoGoverno} alt="Governo Federal - Ministério dos Transportes" className="h-12 object-contain" />
+          <div className="flex items-center justify-center">
             <p className="text-sm text-muted-foreground">
               Críticas e sugestões: <a href="mailto:cassia.sampaio@dnit.gov.br" className="text-primary hover:underline">cassia.sampaio@dnit.gov.br</a>
             </p>
