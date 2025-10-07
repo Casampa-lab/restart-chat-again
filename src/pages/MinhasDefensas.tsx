@@ -12,7 +12,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, Send, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import logoBrLegal from "@/assets/logo-brlegal2.png";
 
@@ -32,6 +44,7 @@ interface Defensa {
   observacao: string | null;
   lote_id: string;
   rodovia_id: string;
+  enviado_coordenador: boolean;
 }
 
 const MinhasDefensas = () => {
@@ -41,6 +54,10 @@ const MinhasDefensas = () => {
   const [loading, setLoading] = useState(true);
   const [lotes, setLotes] = useState<Record<string, string>>({});
   const [rodovias, setRodovias] = useState<Record<string, string>>({});
+  const [selectedDefensas, setSelectedDefensas] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [defensaToDelete, setDefensaToDelete] = useState<string | null>(null);
+  const [showEnviadas, setShowEnviadas] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -96,6 +113,77 @@ const MinhasDefensas = () => {
     loadData();
   }, [user]);
 
+  const handleToggleSelect = (id: string) => {
+    const newSelection = new Set(selectedDefensas);
+    if (newSelection.has(id)) {
+      newSelection.delete(id);
+    } else {
+      newSelection.add(id);
+    }
+    setSelectedDefensas(newSelection);
+  };
+
+  const handleEnviarSelecionadas = async () => {
+    if (selectedDefensas.size === 0) {
+      toast.error("Selecione pelo menos uma inspeção para enviar");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("defensas")
+        .update({ enviado_coordenador: true })
+        .in("id", Array.from(selectedDefensas));
+
+      if (error) throw error;
+
+      toast.success(`${selectedDefensas.size} inspeção(ões) enviada(s) ao coordenador!`);
+      setSelectedDefensas(new Set());
+      
+      // Reload data
+      const { data: defensasData } = await supabase
+        .from("defensas")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("data_inspecao", { ascending: false });
+      setDefensas(defensasData || []);
+    } catch (error: any) {
+      toast.error("Erro ao enviar inspeções: " + error.message);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!defensaToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from("defensas")
+        .delete()
+        .eq("id", defensaToDelete);
+
+      if (error) throw error;
+
+      toast.success("Inspeção excluída com sucesso!");
+      
+      // Reload data
+      const { data: defensasData } = await supabase
+        .from("defensas")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("data_inspecao", { ascending: false });
+      setDefensas(defensasData || []);
+    } catch (error: any) {
+      toast.error("Erro ao excluir inspeção: " + error.message);
+    } finally {
+      setDeleteDialogOpen(false);
+      setDefensaToDelete(null);
+    }
+  };
+
+  const filteredDefensas = showEnviadas 
+    ? defensas 
+    : defensas.filter(d => !d.enviado_coordenador);
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -119,6 +207,29 @@ const MinhasDefensas = () => {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <label htmlFor="show-enviadas" className="text-sm cursor-pointer">
+                Mostrar inspeções enviadas
+              </label>
+              <input
+                type="checkbox"
+                id="show-enviadas"
+                checked={showEnviadas}
+                onChange={(e) => setShowEnviadas(e.target.checked)}
+                className="h-4 w-4 cursor-pointer"
+              />
+            </div>
+            
+            {selectedDefensas.size > 0 && (
+              <Button onClick={handleEnviarSelecionadas}>
+                <Send className="mr-2 h-4 w-4" />
+                Enviar {selectedDefensas.size} ao Coordenador
+              </Button>
+            )}
+          </div>
+
         <Card>
           <CardHeader>
             <CardTitle>3.1.4 - Minhas Inspeções de Defensas</CardTitle>
@@ -127,15 +238,18 @@ const MinhasDefensas = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {defensas.length === 0 ? (
+            {filteredDefensas.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                Nenhuma inspeção registrada ainda.
+                {showEnviadas 
+                  ? "Nenhuma inspeção registrada ainda."
+                  : "Nenhuma inspeção não enviada"}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">Sel.</TableHead>
                       <TableHead>Data</TableHead>
                       <TableHead>Lote</TableHead>
                       <TableHead>Rodovia</TableHead>
@@ -147,12 +261,22 @@ const MinhasDefensas = () => {
                       <TableHead>Avaria</TableHead>
                       <TableHead>Intervenção</TableHead>
                       <TableHead>Risco</TableHead>
-                      <TableHead>Observação</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {defensas.map((defensa) => (
+                    {filteredDefensas.map((defensa) => (
                       <TableRow key={defensa.id}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedDefensas.has(defensa.id)}
+                            onChange={() => handleToggleSelect(defensa.id)}
+                            disabled={defensa.enviado_coordenador}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                        </TableCell>
                         <TableCell>
                           {format(new Date(defensa.data_inspecao), "dd/MM/yyyy")}
                         </TableCell>
@@ -184,8 +308,29 @@ const MinhasDefensas = () => {
                           )}
                         </TableCell>
                         <TableCell>{defensa.nivel_risco || "-"}</TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {defensa.observacao || "-"}
+                        <TableCell>
+                          {defensa.enviado_coordenador ? (
+                            <Badge variant="outline" className="bg-green-50">
+                              Enviada
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-yellow-50">
+                              Não enviada
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setDefensaToDelete(defensa.id);
+                              setDeleteDialogOpen(true);
+                            }}
+                            title="Excluir inspeção"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -195,7 +340,23 @@ const MinhasDefensas = () => {
             )}
           </CardContent>
         </Card>
+        </div>
       </main>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta inspeção? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <footer className="bg-background border-t mt-auto">
         <div className="container mx-auto px-4 py-4">

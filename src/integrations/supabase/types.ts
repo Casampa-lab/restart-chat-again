@@ -137,6 +137,7 @@ export type Database = {
         Row: {
           created_at: string
           data_inspecao: string
+          enviado_coordenador: boolean | null
           estado_conservacao: string
           extensao_metros: number
           id: string
@@ -156,6 +157,7 @@ export type Database = {
         Insert: {
           created_at?: string
           data_inspecao: string
+          enviado_coordenador?: boolean | null
           estado_conservacao: string
           extensao_metros: number
           id?: string
@@ -175,6 +177,7 @@ export type Database = {
         Update: {
           created_at?: string
           data_inspecao?: string
+          enviado_coordenador?: boolean | null
           estado_conservacao?: string
           extensao_metros?: number
           id?: string
@@ -253,6 +256,7 @@ export type Database = {
           descricao: string | null
           dimensoes_mm: string | null
           distancia_m: number | null
+          enviado_coordenador: boolean | null
           foto_base_url: string | null
           foto_frontal_url: string | null
           foto_identificacao_url: string | null
@@ -289,6 +293,7 @@ export type Database = {
           descricao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
+          enviado_coordenador?: boolean | null
           foto_base_url?: string | null
           foto_frontal_url?: string | null
           foto_identificacao_url?: string | null
@@ -325,6 +330,7 @@ export type Database = {
           descricao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
+          enviado_coordenador?: boolean | null
           foto_base_url?: string | null
           foto_frontal_url?: string | null
           foto_identificacao_url?: string | null
@@ -449,6 +455,7 @@ export type Database = {
           created_at: string
           data_verificacao: string
           empresa: string | null
+          enviado_coordenador: boolean | null
           id: string
           lote_id: string
           rodovia_id: string
@@ -462,6 +469,7 @@ export type Database = {
           created_at?: string
           data_verificacao: string
           empresa?: string | null
+          enviado_coordenador?: boolean | null
           id?: string
           lote_id: string
           rodovia_id: string
@@ -475,6 +483,7 @@ export type Database = {
           created_at?: string
           data_verificacao?: string
           empresa?: string | null
+          enviado_coordenador?: boolean | null
           id?: string
           lote_id?: string
           rodovia_id?: string
@@ -713,6 +722,7 @@ export type Database = {
         Row: {
           created_at: string
           data_liberacao: string
+          enviado_coordenador: boolean | null
           id: string
           km_final: number
           km_inicial: number
@@ -731,6 +741,7 @@ export type Database = {
         Insert: {
           created_at?: string
           data_liberacao: string
+          enviado_coordenador?: boolean | null
           id?: string
           km_final: number
           km_inicial: number
@@ -749,6 +760,7 @@ export type Database = {
         Update: {
           created_at?: string
           data_liberacao?: string
+          enviado_coordenador?: boolean | null
           id?: string
           km_final?: number
           km_inicial?: number
@@ -773,6 +785,7 @@ export type Database = {
           created_at: string
           data_intervencao: string
           dimensoes: string | null
+          enviado_coordenador: boolean | null
           id: string
           km_final: number
           km_inicial: number
@@ -795,6 +808,7 @@ export type Database = {
           created_at?: string
           data_intervencao: string
           dimensoes?: string | null
+          enviado_coordenador?: boolean | null
           id?: string
           km_final: number
           km_inicial: number
@@ -817,6 +831,7 @@ export type Database = {
           created_at?: string
           data_intervencao?: string
           dimensoes?: string | null
+          enviado_coordenador?: boolean | null
           id?: string
           km_final?: number
           km_inicial?: number
@@ -841,6 +856,7 @@ export type Database = {
           cor: string
           created_at: string
           data_intervencao: string
+          enviado_coordenador: boolean | null
           espessura_cm: number | null
           id: string
           km_final: number
@@ -863,6 +879,7 @@ export type Database = {
           cor: string
           created_at?: string
           data_intervencao: string
+          enviado_coordenador?: boolean | null
           espessura_cm?: number | null
           id?: string
           km_final: number
@@ -885,6 +902,7 @@ export type Database = {
           cor?: string
           created_at?: string
           data_intervencao?: string
+          enviado_coordenador?: boolean | null
           espessura_cm?: number | null
           id?: string
           km_final?: number
@@ -910,6 +928,7 @@ export type Database = {
           created_at: string
           data_intervencao: string
           dimensoes: string | null
+          enviado_coordenador: boolean | null
           estado_conservacao: string
           id: string
           km_referencia: number
@@ -932,6 +951,7 @@ export type Database = {
           created_at?: string
           data_intervencao: string
           dimensoes?: string | null
+          enviado_coordenador?: boolean | null
           estado_conservacao: string
           id?: string
           km_referencia: number
@@ -954,6 +974,7 @@ export type Database = {
           created_at?: string
           data_intervencao?: string
           dimensoes?: string | null
+          enviado_coordenador?: boolean | null
           estado_conservacao?: string
           id?: string
           km_referencia?: number
@@ -978,6 +999,7 @@ export type Database = {
           cor: string
           created_at: string
           data_intervencao: string
+          enviado_coordenador: boolean | null
           estado_conservacao: string | null
           id: string
           km_final: number
@@ -1001,6 +1023,7 @@ export type Database = {
           cor: string
           created_at?: string
           data_intervencao: string
+          enviado_coordenador?: boolean | null
           estado_conservacao?: string | null
           id?: string
           km_final: number
@@ -1024,6 +1047,7 @@ export type Database = {
           cor?: string
           created_at?: string
           data_intervencao?: string
+          enviado_coordenador?: boolean | null
           estado_conservacao?: string | null
           id?: string
           km_final?: number
@@ -1331,6 +1355,7 @@ export type Database = {
           contrato_supervisora: string | null
           created_at: string
           data_registro: string
+          enviado_coordenador: boolean | null
           grau: string
           id: string
           km_final: number
@@ -1355,6 +1380,7 @@ export type Database = {
           contrato_supervisora?: string | null
           created_at?: string
           data_registro: string
+          enviado_coordenador?: boolean | null
           grau: string
           id?: string
           km_final: number
@@ -1379,6 +1405,7 @@ export type Database = {
           contrato_supervisora?: string | null
           created_at?: string
           data_registro?: string
+          enviado_coordenador?: boolean | null
           grau?: string
           id?: string
           km_final?: number
@@ -1453,6 +1480,7 @@ export type Database = {
           cor: string
           created_at: string
           data_medicao: string
+          enviado_coordenador: boolean | null
           faixa: string
           id: string
           km_final: number
@@ -1477,6 +1505,7 @@ export type Database = {
           cor: string
           created_at?: string
           data_medicao: string
+          enviado_coordenador?: boolean | null
           faixa: string
           id?: string
           km_final: number
@@ -1501,6 +1530,7 @@ export type Database = {
           cor?: string
           created_at?: string
           data_medicao?: string
+          enviado_coordenador?: boolean | null
           faixa?: string
           id?: string
           km_final?: number
@@ -1527,6 +1557,7 @@ export type Database = {
           codigo_dispositivo: string | null
           created_at: string
           data_medicao: string
+          enviado_coordenador: boolean | null
           id: string
           km_referencia: number
           lado: string
@@ -1546,6 +1577,7 @@ export type Database = {
           codigo_dispositivo?: string | null
           created_at?: string
           data_medicao: string
+          enviado_coordenador?: boolean | null
           id?: string
           km_referencia: number
           lado: string
@@ -1565,6 +1597,7 @@ export type Database = {
           codigo_dispositivo?: string | null
           created_at?: string
           data_medicao?: string
+          enviado_coordenador?: boolean | null
           id?: string
           km_referencia?: number
           lado?: string
