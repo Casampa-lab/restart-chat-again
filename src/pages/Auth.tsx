@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import logoBrLegal from "@/assets/logo-brlegal2.png";
+import logoRodoviaSuperv from "@/assets/logo-rodoviasuper.png";
 
 
 const Auth = () => {
@@ -73,7 +73,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="flex justify-center">
-          <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-20 object-contain" />
+          <img src={logoRodoviaSuperv} alt="RodoviaSUPERV" className="h-20 object-contain" />
         </div>
         
         <Card className="w-full">
