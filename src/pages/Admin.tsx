@@ -12,7 +12,6 @@ import LotesManager from "@/components/admin/LotesManager";
 import RodoviasManager from "@/components/admin/RodoviasManager";
 import { SupervisoraManager } from "@/components/admin/SupervisoraManager";
 import { CoordinatorAssignmentsManager } from "@/components/admin/CoordinatorAssignmentsManager";
-import { AssinaturasManager } from "@/components/admin/AssinaturasManager";
 
 import logoRodoviaSuperv from "@/assets/logo-rodoviasuper.png";
 
@@ -96,7 +95,7 @@ const Admin = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-primary-foreground">Painel Administrativo</h1>
-                <p className="text-sm text-primary-foreground/80">Gestão de Assinaturas e Configurações</p>
+                <p className="text-sm text-primary-foreground/80">Gestão de Empresas e Configurações</p>
               </div>
             </div>
             <Button 
@@ -114,13 +113,12 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="destinatarios" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="destinatarios">Supervisora</TabsTrigger>
             <TabsTrigger value="empresas">Executoras</TabsTrigger>
             <TabsTrigger value="coordinators">Atribuir</TabsTrigger>
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
-            <TabsTrigger value="assinaturas">Assinaturas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="destinatarios">
@@ -141,10 +139,6 @@ const Admin = () => {
 
           <TabsContent value="rodovias">
             <RodoviasManager />
-          </TabsContent>
-
-          <TabsContent value="assinaturas">
-            <AssinaturasManager />
           </TabsContent>
         </Tabs>
       </main>
