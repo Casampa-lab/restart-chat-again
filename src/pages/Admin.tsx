@@ -11,8 +11,9 @@ import LotesManager from "@/components/admin/LotesManager";
 import RodoviasManager from "@/components/admin/RodoviasManager";
 import { DestinatariosManager } from "@/components/admin/DestinatariosManager";
 import { CoordinatorAssignmentsManager } from "@/components/admin/CoordinatorAssignmentsManager";
+import { AssinaturasManager } from "@/components/admin/AssinaturasManager";
 import logoGoverno from "@/assets/logo-governo.png";
-import logoBrLegal from "@/assets/logo-brlegal2.png";
+import logoConsol from "@/assets/logo-consol.jpg";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -74,13 +75,19 @@ const Admin = () => {
       <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
-            <div className="bg-white/95 rounded-lg px-4 py-2 shadow-md">
-              <img 
-                src={logoBrLegal} 
-                alt="BR-LEGAL 2" 
-                className="h-20 object-contain cursor-pointer hover:scale-105 transition-transform" 
-                onClick={() => navigate("/")}
-              />
+            <div className="flex items-center gap-4">
+              <div className="bg-white/95 rounded-lg px-3 py-2 shadow-md">
+                <img 
+                  src={logoConsol} 
+                  alt="Sistema de Supervisão" 
+                  className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" 
+                  onClick={() => navigate("/")}
+                />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-primary-foreground">Painel Administrativo</h1>
+                <p className="text-sm text-primary-foreground/80">Gestão de Assinaturas e Configurações</p>
+              </div>
             </div>
             <Button 
               variant="default" 
@@ -97,10 +104,11 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="empresas" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="empresas">Empresas</TabsTrigger>
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
+            <TabsTrigger value="assinaturas">Assinaturas</TabsTrigger>
             <TabsTrigger value="coordinators">Coordenadores</TabsTrigger>
             <TabsTrigger value="destinatarios">Emails</TabsTrigger>
           </TabsList>
@@ -115,6 +123,10 @@ const Admin = () => {
 
           <TabsContent value="rodovias">
             <RodoviasManager />
+          </TabsContent>
+
+          <TabsContent value="assinaturas">
+            <AssinaturasManager />
           </TabsContent>
 
           <TabsContent value="coordinators">

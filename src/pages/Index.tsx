@@ -20,8 +20,9 @@ import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
 import { RegistroNCForm } from "@/components/RegistroNCForm";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
-import logoBrLegal from "@/assets/logo-brlegal2.png";
+import logoConsol from "@/assets/logo-consol.jpg";
 import logoGoverno from "@/assets/logo-governo.png";
+import logoDnit from "@/assets/logo-dnit.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -74,13 +75,19 @@ const Index = () => {
       <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
-            <div className="bg-white/95 rounded-lg px-4 py-2 shadow-md">
-              <img 
-                src={logoBrLegal} 
-                alt="BR-LEGAL 2" 
-                className="h-20 object-contain cursor-pointer hover:scale-105 transition-transform" 
-                onClick={() => navigate("/")}
-              />
+            <div className="flex items-center gap-4">
+              <div className="bg-white/95 rounded-lg px-3 py-2 shadow-md">
+                <img 
+                  src={logoConsol} 
+                  alt="Sistema de Supervisão" 
+                  className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" 
+                  onClick={() => navigate("/")}
+                />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-primary-foreground">Sistema de Supervisão Rodoviária</h1>
+                <p className="text-sm text-primary-foreground/80">Gestão Integrada de Rodovias</p>
+              </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               <Button 

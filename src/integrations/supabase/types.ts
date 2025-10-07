@@ -14,6 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
+      assinatura_modulos: {
+        Row: {
+          assinatura_id: string
+          ativo: boolean | null
+          created_at: string | null
+          id: string
+          modulo_id: string
+        }
+        Insert: {
+          assinatura_id: string
+          ativo?: boolean | null
+          created_at?: string | null
+          id?: string
+          modulo_id: string
+        }
+        Update: {
+          assinatura_id?: string
+          ativo?: boolean | null
+          created_at?: string | null
+          id?: string
+          modulo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assinatura_modulos_assinatura_id_fkey"
+            columns: ["assinatura_id"]
+            isOneToOne: false
+            referencedRelation: "assinaturas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assinatura_modulos_modulo_id_fkey"
+            columns: ["modulo_id"]
+            isOneToOne: false
+            referencedRelation: "modulos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assinaturas: {
+        Row: {
+          created_at: string | null
+          data_fim: string | null
+          data_inicio: string | null
+          empresa_id: string
+          id: string
+          plano_id: string
+          status: Database["public"]["Enums"]["subscription_status"] | null
+          trial_ate: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          empresa_id: string
+          id?: string
+          plano_id: string
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          trial_ate?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          empresa_id?: string
+          id?: string
+          plano_id?: string
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          trial_ate?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assinaturas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: true
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assinaturas_plano_id_fkey"
+            columns: ["plano_id"]
+            isOneToOne: false
+            referencedRelation: "planos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coordinator_assignments: {
         Row: {
           created_at: string
@@ -1026,6 +1116,42 @@ export type Database = {
           },
         ]
       }
+      modulos: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          created_at: string | null
+          descricao: string | null
+          icone: string | null
+          id: string
+          nome: string
+          ordem: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          created_at?: string | null
+          descricao?: string | null
+          icone?: string | null
+          id?: string
+          nome: string
+          ordem?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          created_at?: string | null
+          descricao?: string | null
+          icone?: string | null
+          id?: string
+          nome?: string
+          ordem?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       nao_conformidades: {
         Row: {
           created_at: string | null
@@ -1122,26 +1248,79 @@ export type Database = {
           },
         ]
       }
+      planos: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          descricao: string | null
+          id: string
+          max_modulos: number | null
+          max_usuarios: number | null
+          nome: string
+          preco_mensal: number | null
+          recursos: Json | null
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          max_modulos?: number | null
+          max_usuarios?: number | null
+          nome: string
+          preco_mensal?: number | null
+          recursos?: Json | null
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          max_modulos?: number | null
+          max_usuarios?: number | null
+          nome?: string
+          preco_mensal?: number | null
+          recursos?: Json | null
+          tier?: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
+          empresa_id: string | null
           id: string
           nome: string
           telefone: string | null
         }
         Insert: {
           created_at?: string | null
+          empresa_id?: string | null
           id: string
           nome: string
           telefone?: string | null
         }
         Update: {
           created_at?: string | null
+          empresa_id?: string | null
           id?: string
           nome?: string
           telefone?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       registro_nc: {
         Row: {
@@ -1510,9 +1689,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      user_has_module_access: {
+        Args: { _modulo_codigo: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "coordenador" | "tecnico"
+      plan_tier: "basico" | "profissional" | "enterprise"
+      subscription_status: "ativa" | "suspensa" | "cancelada" | "trial"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1641,6 +1826,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "coordenador", "tecnico"],
+      plan_tier: ["basico", "profissional", "enterprise"],
+      subscription_status: ["ativa", "suspensa", "cancelada", "trial"],
     },
   },
 } as const
