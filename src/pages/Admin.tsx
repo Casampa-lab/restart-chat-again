@@ -105,7 +105,7 @@ const Admin = () => {
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="empresas" className="w-full">
           <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="empresas">Empresas</TabsTrigger>
+            <TabsTrigger value="empresas">Executoras</TabsTrigger>
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
             <TabsTrigger value="assinaturas">Assinaturas</TabsTrigger>
