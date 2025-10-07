@@ -84,24 +84,35 @@ export const CoordinatorAssignmentsManager = () => {
       // Load assignments
       const { data: assignmentsData, error: assignmentsError } = await supabase
         .from("coordinator_assignments")
-        .select(`
-          id,
-          user_id,
-          lote_id,
-          profiles!inner(nome),
-          lotes!inner(numero)
-        `)
+        .select("id, user_id, lote_id, created_at")
         .order("created_at", { ascending: false });
 
       if (assignmentsError) throw assignmentsError;
 
-      const assignmentsFormatted = assignmentsData.map((item: any) => ({
-        id: item.id,
-        user_id: item.user_id,
-        lote_id: item.lote_id,
-        coordinator_nome: item.profiles.nome,
-        lote_numero: item.lotes.numero,
-      }));
+      // Manually fetch coordinator names and lote numbers
+      const assignmentsFormatted = await Promise.all(
+        assignmentsData.map(async (assignment: any) => {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("nome")
+            .eq("id", assignment.user_id)
+            .single();
+
+          const { data: lote } = await supabase
+            .from("lotes")
+            .select("numero")
+            .eq("id", assignment.lote_id)
+            .single();
+
+          return {
+            id: assignment.id,
+            user_id: assignment.user_id,
+            lote_id: assignment.lote_id,
+            coordinator_nome: profile?.nome || "N/A",
+            lote_numero: lote?.numero || "N/A",
+          };
+        })
+      );
       setAssignments(assignmentsFormatted);
     } catch (error: any) {
       console.error("Erro ao carregar dados:", error);
