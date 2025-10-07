@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
+import { TODAS_PLACAS } from "@/constants/codigosPlacas";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
@@ -261,9 +262,20 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Código da Placa</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: R-1, A-1, etc." {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o código da placa" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-[300px]">
+                        {TODAS_PLACAS.map((placa) => (
+                          <SelectItem key={placa.codigo} value={placa.codigo}>
+                            {placa.codigo} - {placa.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
