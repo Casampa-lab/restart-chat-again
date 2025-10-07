@@ -73,6 +73,8 @@ export const SupervisoraManager = () => {
       setUploading(true);
       let logoUrl = supervisora?.logo_url || null;
 
+      console.log('Estado do switch antes de salvar:', usarLogoCustomizado);
+
       // Upload do logo se houver arquivo novo
       if (logoFile) {
         const fileExt = logoFile.name.split('.').pop();
@@ -108,6 +110,8 @@ export const SupervisoraManager = () => {
         logo_url: logoUrl,
         usar_logo_customizado: usarLogoCustomizado,
       };
+
+      console.log('Payload que será enviado:', payload);
 
       // Inserir ou atualizar registro
       if (supervisora) {
