@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Route, Construction, Building2, Wrench, BarChart3, FileText, Check, Clock } from "lucide-react";
+import { Route, Radio, Scale, MonitorPlay, BarChart3, FileText, Check, Clock } from "lucide-react";
 
 interface Modulo {
   codigo: string;
@@ -19,24 +19,24 @@ const MODULOS_INFO: Modulo[] = [
     status: "disponivel"
   },
   {
-    codigo: "pavimentacao",
-    nome: "Pavimentação",
-    descricao: "Controle de qualidade e manutenção de pavimentos",
-    icone: "Construction",
+    codigo: "radares",
+    nome: "Radares",
+    descricao: "Monitoramento e gestão de radares de velocidade",
+    icone: "Radio",
     status: "desenvolvimento"
   },
   {
-    codigo: "obras-arte",
-    nome: "Obras de Arte",
-    descricao: "Gestão de pontes, viadutos e obras especiais",
-    icone: "Building2",
+    codigo: "pesagem",
+    nome: "Pesagem",
+    descricao: "Controle de balanças e pesagem de veículos",
+    icone: "Scale",
     status: "desenvolvimento"
   },
   {
-    codigo: "manutencao",
-    nome: "Manutenção Rodoviária",
-    descricao: "Registro e acompanhamento de manutenções",
-    icone: "Wrench",
+    codigo: "paineis-mensagem",
+    nome: "Painéis de Mensagem",
+    descricao: "Gestão de painéis eletrônicos de mensagem",
+    icone: "MonitorPlay",
     status: "desenvolvimento"
   },
   {
@@ -57,9 +57,9 @@ const MODULOS_INFO: Modulo[] = [
 
 const ICON_MAP: Record<string, any> = {
   Route,
-  Construction,
-  Building2,
-  Wrench,
+  Radio,
+  Scale,
+  MonitorPlay,
   BarChart3,
   FileText
 };
