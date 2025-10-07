@@ -29,6 +29,9 @@ const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { activeSession, loading: sessionLoading, refreshSession, endSession } = useWorkSession(user?.id);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('activeTab') || 'frentes';
+  });
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -60,6 +63,11 @@ const Index = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate("/auth");
+  };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    localStorage.setItem('activeTab', value);
   };
 
   if (authLoading || sessionLoading) {
@@ -180,7 +188,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Tabs defaultValue="frentes" className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-12 h-auto bg-muted p-2 gap-1">
                 <TabsTrigger value="frentes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs font-bold">2.2</span>
