@@ -134,24 +134,11 @@ export const SupervisoraManager = () => {
       return payload;
     },
     onSuccess: (data) => {
-      // Invalidar todas as queries relacionadas
-      queryClient.invalidateQueries({ queryKey: ["supervisora"] });
-      
-      // Forçar atualização do estado local
-      setNomeEmpresa(data.nome_empresa);
-      setContrato(data.contrato);
-      setUsarLogoCustomizado(data.usar_logo_customizado);
-      if (data.logo_url) {
-        setLogoPreview(data.logo_url);
-      }
-      
       setLogoFile(null);
       toast.success("Informações da supervisora salvas com sucesso!");
       
-      // Recarregar a página após 500ms para garantir que o logo seja atualizado
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      // Invalidar queries para forçar atualização
+      queryClient.invalidateQueries({ queryKey: ["supervisora"] });
     },
     onError: (error: any) => {
       toast.error(error.message || "Erro ao salvar informações");
