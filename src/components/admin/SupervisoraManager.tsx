@@ -233,24 +233,33 @@ export const SupervisoraManager = () => {
                 </p>
               </div>
 
-              <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
-                <div className="space-y-1">
-                  <Label htmlFor="usar-logo" className="text-base font-medium">
-                    Substituir Logo Padrão
+              <div className="flex items-center justify-between p-6 border-2 rounded-lg bg-primary/5 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="usar-logo" className="text-lg font-semibold cursor-pointer">
+                    ⚙️ Substituir Logo Padrão
                   </Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground max-w-md">
                     Quando ativado, o logo da supervisora substitui o logo "RodoviaSUPERV" nos cabeçalhos do sistema
                   </p>
+                  <p className="text-xs font-medium text-primary">
+                    {usarLogoCustomizado ? "✓ Ativo - Logo customizado será usado" : "Desativado - Logo padrão será usado"}
+                  </p>
                 </div>
-                <Switch
-                  id="usar-logo"
-                  checked={usarLogoCustomizado}
-                  onCheckedChange={(checked) => {
-                    console.log('Switch alterado para:', checked);
-                    setUsarLogoCustomizado(checked);
-                  }}
-                  disabled={!logoPreview}
-                />
+                <div className="flex flex-col items-center gap-2">
+                  <Switch
+                    id="usar-logo"
+                    checked={usarLogoCustomizado}
+                    onCheckedChange={(checked) => {
+                      console.log('Switch alterado para:', checked);
+                      setUsarLogoCustomizado(checked);
+                    }}
+                    disabled={!logoPreview}
+                    className="scale-150 data-[state=checked]:bg-primary"
+                  />
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {usarLogoCustomizado ? "Ligado" : "Desligado"}
+                  </span>
+                </div>
               </div>
             </div>
 
