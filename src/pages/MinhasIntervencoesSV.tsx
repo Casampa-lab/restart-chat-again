@@ -5,7 +5,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Loader2, Trash2, Send } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2, Send, Pencil } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import {
@@ -51,6 +68,8 @@ const MinhasIntervencoesSV = () => {
   const [showEnviadas, setShowEnviadas] = useState(true);
   const [lotes, setLotes] = useState<Record<string, string>>({});
   const [rodovias, setRodovias] = useState<Record<string, string>>({});
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [intervencaoToEdit, setIntervencaoToEdit] = useState<IntervencaoSV | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -137,6 +156,40 @@ const MinhasIntervencoesSV = () => {
       toast.error("Erro ao excluir intervenção: " + error.message);
     } finally {
       setDeleteId(null);
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!intervencaoToEdit) return;
+
+    try {
+      const { error } = await supabase
+        .from("intervencoes_sv")
+        .update({
+          data_intervencao: intervencaoToEdit.data_intervencao,
+          km_referencia: intervencaoToEdit.km_referencia,
+          tipo_intervencao: intervencaoToEdit.tipo_intervencao,
+          tipo_placa: intervencaoToEdit.tipo_placa,
+          codigo_placa: intervencaoToEdit.codigo_placa,
+          lado: intervencaoToEdit.lado,
+          dimensoes: intervencaoToEdit.dimensoes,
+          material: intervencaoToEdit.material,
+          tipo_suporte: intervencaoToEdit.tipo_suporte,
+          estado_conservacao: intervencaoToEdit.estado_conservacao,
+          quantidade: intervencaoToEdit.quantidade,
+          observacao: intervencaoToEdit.observacao,
+        })
+        .eq("id", intervencaoToEdit.id);
+
+      if (error) throw error;
+
+      toast.success("Intervenção atualizada com sucesso!");
+      fetchIntervencoes();
+    } catch (error: any) {
+      toast.error("Erro ao atualizar intervenção: " + error.message);
+    } finally {
+      setEditDialogOpen(false);
+      setIntervencaoToEdit(null);
     }
   };
 
@@ -263,14 +316,27 @@ const MinhasIntervencoesSV = () => {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeleteId(intervencao.id)}
-                            title="Excluir intervenção"
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setIntervencaoToEdit(intervencao);
+                                setEditDialogOpen(true);
+                              }}
+                              title="Editar intervenção"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteId(intervencao.id)}
+                              title="Excluir intervenção"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -307,6 +373,127 @@ const MinhasIntervencoesSV = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Intervenção em Sinalização Vertical</DialogTitle>
+          </DialogHeader>
+          {intervencaoToEdit && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Data da Intervenção</Label>
+                  <Input
+                    type="date"
+                    value={intervencaoToEdit.data_intervencao}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, data_intervencao: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>KM Referência</Label>
+                  <Input
+                    type="number"
+                    step="0.001"
+                    value={intervencaoToEdit.km_referencia}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, km_referencia: parseFloat(e.target.value)})}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Tipo Intervenção</Label>
+                  <Input
+                    value={intervencaoToEdit.tipo_intervencao}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, tipo_intervencao: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Tipo Placa</Label>
+                  <Input
+                    value={intervencaoToEdit.tipo_placa}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, tipo_placa: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Código Placa</Label>
+                  <Input
+                    value={intervencaoToEdit.codigo_placa || ""}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, codigo_placa: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Lado</Label>
+                  <Select value={intervencaoToEdit.lado} onValueChange={(value) => setIntervencaoToEdit({...intervencaoToEdit, lado: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Direito">Direito</SelectItem>
+                      <SelectItem value="Esquerdo">Esquerdo</SelectItem>
+                      <SelectItem value="Ambos">Ambos</SelectItem>
+                      <SelectItem value="Canteiro Central">Canteiro Central</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>Dimensões</Label>
+                  <Input
+                    value={intervencaoToEdit.dimensoes || ""}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, dimensoes: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Material</Label>
+                  <Input
+                    value={intervencaoToEdit.material || ""}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, material: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Tipo Suporte</Label>
+                  <Input
+                    value={intervencaoToEdit.tipo_suporte || ""}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, tipo_suporte: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Estado de Conservação</Label>
+                  <Input
+                    value={intervencaoToEdit.estado_conservacao}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, estado_conservacao: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Quantidade</Label>
+                  <Input
+                    type="number"
+                    value={intervencaoToEdit.quantidade}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, quantidade: parseInt(e.target.value)})}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Observação</Label>
+                <Textarea
+                  value={intervencaoToEdit.observacao || ""}
+                  onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, observacao: e.target.value})}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleEdit}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

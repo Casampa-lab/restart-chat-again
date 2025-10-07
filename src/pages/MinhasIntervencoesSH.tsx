@@ -12,7 +12,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Pencil } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,6 +74,8 @@ const MinhasIntervencoesSH = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [intervencaoToDelete, setIntervencaoToDelete] = useState<string | null>(null);
   const [showEnviadas, setShowEnviadas] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [intervencaoToEdit, setIntervencaoToEdit] = useState<IntervencaoSH | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -174,6 +193,44 @@ const MinhasIntervencoesSH = () => {
     } finally {
       setDeleteDialogOpen(false);
       setIntervencaoToDelete(null);
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!intervencaoToEdit) return;
+
+    try {
+      const { error } = await supabase
+        .from("intervencoes_sh")
+        .update({
+          data_intervencao: intervencaoToEdit.data_intervencao,
+          km_inicial: intervencaoToEdit.km_inicial,
+          km_final: intervencaoToEdit.km_final,
+          tipo_intervencao: intervencaoToEdit.tipo_intervencao,
+          tipo_demarcacao: intervencaoToEdit.tipo_demarcacao,
+          cor: intervencaoToEdit.cor,
+          espessura_cm: intervencaoToEdit.espessura_cm,
+          area_m2: intervencaoToEdit.area_m2,
+          material_utilizado: intervencaoToEdit.material_utilizado,
+          observacao: intervencaoToEdit.observacao,
+        })
+        .eq("id", intervencaoToEdit.id);
+
+      if (error) throw error;
+
+      toast.success("Intervenção atualizada com sucesso!");
+      
+      const { data: intervencoesData } = await supabase
+        .from("intervencoes_sh")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("data_intervencao", { ascending: false });
+      setIntervencoes(intervencoesData || []);
+    } catch (error: any) {
+      toast.error("Erro ao atualizar intervenção: " + error.message);
+    } finally {
+      setEditDialogOpen(false);
+      setIntervencaoToEdit(null);
     }
   };
 
@@ -299,17 +356,30 @@ const MinhasIntervencoesSH = () => {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setIntervencaoToDelete(intervencao.id);
-                              setDeleteDialogOpen(true);
-                            }}
-                            title="Excluir intervenção"
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setIntervencaoToEdit(intervencao);
+                                setEditDialogOpen(true);
+                              }}
+                              title="Editar intervenção"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setIntervencaoToDelete(intervencao.id);
+                                setDeleteDialogOpen(true);
+                              }}
+                              title="Excluir intervenção"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -336,6 +406,107 @@ const MinhasIntervencoesSH = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Intervenção em Sinalização Horizontal</DialogTitle>
+          </DialogHeader>
+          {intervencaoToEdit && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Data da Intervenção</Label>
+                  <Input
+                    type="date"
+                    value={intervencaoToEdit.data_intervencao}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, data_intervencao: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Tipo Intervenção</Label>
+                  <Input
+                    value={intervencaoToEdit.tipo_intervencao}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, tipo_intervencao: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>KM Inicial</Label>
+                  <Input
+                    type="number"
+                    step="0.001"
+                    value={intervencaoToEdit.km_inicial}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, km_inicial: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label>KM Final</Label>
+                  <Input
+                    type="number"
+                    step="0.001"
+                    value={intervencaoToEdit.km_final}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, km_final: parseFloat(e.target.value)})}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Tipo de Demarcação</Label>
+                <Input
+                  value={intervencaoToEdit.tipo_demarcacao}
+                  onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, tipo_demarcacao: e.target.value})}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>Cor</Label>
+                  <Input
+                    value={intervencaoToEdit.cor}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, cor: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Área (m²)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={intervencaoToEdit.area_m2}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, area_m2: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label>Espessura (cm)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={intervencaoToEdit.espessura_cm || ""}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, espessura_cm: e.target.value ? parseFloat(e.target.value) : null})}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Material Utilizado</Label>
+                <Input
+                  value={intervencaoToEdit.material_utilizado || ""}
+                  onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, material_utilizado: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label>Observação</Label>
+                <Textarea
+                  value={intervencaoToEdit.observacao || ""}
+                  onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, observacao: e.target.value})}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleEdit}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <footer className="bg-background border-t mt-auto">
         <div className="container mx-auto px-4 py-4">
