@@ -1684,6 +1684,33 @@ export type Database = {
           },
         ]
       }
+      supervisora: {
+        Row: {
+          contrato: string
+          created_at: string | null
+          id: string
+          logo_url: string | null
+          nome_empresa: string
+          updated_at: string | null
+        }
+        Insert: {
+          contrato: string
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          nome_empresa: string
+          updated_at?: string | null
+        }
+        Update: {
+          contrato?: string
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          nome_empresa?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

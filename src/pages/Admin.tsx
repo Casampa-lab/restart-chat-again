@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import EmpresasManager from "@/components/admin/EmpresasManager";
 import LotesManager from "@/components/admin/LotesManager";
 import RodoviasManager from "@/components/admin/RodoviasManager";
-import { DestinatariosManager } from "@/components/admin/DestinatariosManager";
+import { SupervisoraManager } from "@/components/admin/SupervisoraManager";
 import { CoordinatorAssignmentsManager } from "@/components/admin/CoordinatorAssignmentsManager";
 import { AssinaturasManager } from "@/components/admin/AssinaturasManager";
 
@@ -134,7 +134,7 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="destinatarios">
-            <DestinatariosManager />
+            <SupervisoraManager />
           </TabsContent>
         </Tabs>
       </main>
