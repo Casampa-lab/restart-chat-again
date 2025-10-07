@@ -12,9 +12,9 @@ interface Lote {
   id: string;
   numero: string;
   empresa_id: string;
-  empresas: {
+  empresas?: {
     nome: string;
-  };
+  } | null;
 }
 
 interface Rodovia {
@@ -131,11 +131,17 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
               <SelectValue placeholder="Selecione o lote" />
             </SelectTrigger>
             <SelectContent>
-              {lotes.map((lote) => (
-                <SelectItem key={lote.id} value={lote.id}>
-                  Lote {lote.numero}{lote.empresas?.nome ? ` - ${lote.empresas.nome}` : ''}
+              {lotes && lotes.length > 0 ? (
+                lotes.map((lote) => (
+                  <SelectItem key={lote.id} value={lote.id}>
+                    Lote {lote.numero}{lote.empresas?.nome ? ` - ${lote.empresas.nome}` : ''}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="no-lotes" disabled>
+                  Nenhum lote disponível
                 </SelectItem>
-              ))}
+              )}
             </SelectContent>
           </Select>
         </div>
