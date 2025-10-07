@@ -487,6 +487,37 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                     )}
                   />
                 </CardContent>
+                <div className="px-6 pb-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (!navigator.geolocation) {
+                        toast.error("Geolocalização não suportada");
+                        return;
+                      }
+                      toast.loading("Capturando localização...");
+                      navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                          form.setValue("latitude", position.coords.latitude.toFixed(6));
+                          form.setValue("longitude", position.coords.longitude.toFixed(6));
+                          toast.dismiss();
+                          toast.success("Localização capturada!");
+                        },
+                        (error) => {
+                          toast.dismiss();
+                          toast.error("Erro ao capturar: " + error.message);
+                        },
+                        { enableHighAccuracy: true, timeout: 10000 }
+                      );
+                    }}
+                    className="w-full"
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Capturar Localização
+                  </Button>
+                </div>
               </Card>
             </TabsContent>
 

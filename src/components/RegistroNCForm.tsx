@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Camera, X } from "lucide-react";
+import { Camera, X, MapPin } from "lucide-react";
 
 interface RegistroNCFormProps {
   loteId: string;
@@ -108,6 +108,33 @@ export function RegistroNCForm({ loteId, rodoviaId }: RegistroNCFormProps) {
     const newFotos = [...fotos];
     (newFotos[index][field] as string) = value;
     setFotos(newFotos);
+  };
+
+  const handleCaptureFotoLocation = (index: number) => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocalização não suportada pelo navegador");
+      return;
+    }
+
+    toast.loading("Capturando localização...");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const newFotos = [...fotos];
+        newFotos[index].latitude = position.coords.latitude.toFixed(6);
+        newFotos[index].longitude = position.coords.longitude.toFixed(6);
+        setFotos(newFotos);
+        toast.dismiss();
+        toast.success(`Localização capturada: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+      },
+      (error) => {
+        toast.dismiss();
+        toast.error("Erro ao capturar localização: " + error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+      }
+    );
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -587,6 +614,16 @@ export function RegistroNCForm({ loteId, rodoviaId }: RegistroNCFormProps) {
                         />
                       </div>
                     </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCaptureFotoLocation(index)}
+                      className="w-full"
+                    >
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Capturar Localização
+                    </Button>
                     <div>
                       <Label>Descrição</Label>
                       <Textarea

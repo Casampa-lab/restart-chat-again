@@ -97,6 +97,33 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId }: FichaVerificacaoSH
     setItens(newItens);
   };
 
+  const handleCaptureItemLocation = (index: number) => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocalização não suportada pelo navegador");
+      return;
+    }
+
+    toast.loading("Capturando localização...");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const newItens = [...itens];
+        newItens[index].latitude = position.coords.latitude.toFixed(6);
+        newItens[index].longitude = position.coords.longitude.toFixed(6);
+        setItens(newItens);
+        toast.dismiss();
+        toast.success(`Localização capturada: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+      },
+      (error) => {
+        toast.dismiss();
+        toast.error("Erro ao capturar localização: " + error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+      }
+    );
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -320,6 +347,15 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId }: FichaVerificacaoSH
                       />
                     </div>
                   </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCaptureItemLocation(index)}
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Capturar Localização
+                  </Button>
 
                   {/* Largura */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
