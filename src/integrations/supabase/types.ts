@@ -626,6 +626,10 @@ export type Database = {
           id: string
           km_final: number
           km_inicial: number
+          latitude_final: number | null
+          latitude_inicial: number | null
+          longitude_final: number | null
+          longitude_inicial: number | null
           lote_id: string
           observacao: string | null
           responsavel: string
@@ -640,6 +644,10 @@ export type Database = {
           id?: string
           km_final: number
           km_inicial: number
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
           lote_id: string
           observacao?: string | null
           responsavel: string
@@ -654,6 +662,10 @@ export type Database = {
           id?: string
           km_final?: number
           km_inicial?: number
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
           lote_id?: string
           observacao?: string | null
           responsavel?: string
