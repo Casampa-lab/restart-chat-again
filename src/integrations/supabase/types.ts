@@ -229,20 +229,31 @@ export type Database = {
           created_at: string | null
           id: string
           nome: string
+          supervisora_id: string | null
         }
         Insert: {
           cnpj: string
           created_at?: string | null
           id?: string
           nome: string
+          supervisora_id?: string | null
         }
         Update: {
           cnpj?: string
           created_at?: string | null
           id?: string
           nome?: string
+          supervisora_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "empresas_supervisora_id_fkey"
+            columns: ["supervisora_id"]
+            isOneToOne: false
+            referencedRelation: "supervisoras"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_placa: {
         Row: {
@@ -1320,6 +1331,7 @@ export type Database = {
           empresa_id: string | null
           id: string
           nome: string
+          supervisora_id: string | null
           telefone: string | null
         }
         Insert: {
@@ -1327,6 +1339,7 @@ export type Database = {
           empresa_id?: string | null
           id: string
           nome: string
+          supervisora_id?: string | null
           telefone?: string | null
         }
         Update: {
@@ -1334,6 +1347,7 @@ export type Database = {
           empresa_id?: string | null
           id?: string
           nome?: string
+          supervisora_id?: string | null
           telefone?: string | null
         }
         Relationships: [
@@ -1342,6 +1356,13 @@ export type Database = {
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_supervisora_id_fkey"
+            columns: ["supervisora_id"]
+            isOneToOne: false
+            referencedRelation: "supervisoras"
             referencedColumns: ["id"]
           },
         ]
@@ -1705,6 +1726,33 @@ export type Database = {
         }
         Update: {
           contrato?: string
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          nome_empresa?: string
+          updated_at?: string | null
+          usar_logo_customizado?: boolean | null
+        }
+        Relationships: []
+      }
+      supervisoras: {
+        Row: {
+          created_at: string | null
+          id: string
+          logo_url: string | null
+          nome_empresa: string
+          updated_at: string | null
+          usar_logo_customizado: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          nome_empresa: string
+          updated_at?: string | null
+          usar_logo_customizado?: boolean | null
+        }
+        Update: {
           created_at?: string | null
           id?: string
           logo_url?: string | null
