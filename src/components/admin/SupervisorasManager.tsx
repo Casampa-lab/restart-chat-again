@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 interface Supervisora {
   id: string;
   nome_empresa: string;
+  contrato: string | null;
   logo_url: string | null;
   usar_logo_customizado: boolean;
   codigo_convite: string | null;
@@ -26,6 +27,7 @@ export const SupervisorasManager = () => {
   const [editingSupervisora, setEditingSupervisora] = useState<Supervisora | null>(null);
   const [formData, setFormData] = useState({
     nome_empresa: "",
+    contrato: "",
     usar_logo_customizado: false,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -86,6 +88,11 @@ export const SupervisorasManager = () => {
       return;
     }
 
+    if (!formData.contrato.trim()) {
+      toast.error("Número do contrato é obrigatório");
+      return;
+    }
+
     try {
       setUploading(true);
       let logoUrl = editingSupervisora?.logo_url || null;
@@ -113,6 +120,7 @@ export const SupervisorasManager = () => {
           .from("supervisoras")
           .update({
             nome_empresa: formData.nome_empresa,
+            contrato: formData.contrato,
             logo_url: logoUrl,
             usar_logo_customizado: formData.usar_logo_customizado,
           })
@@ -126,6 +134,7 @@ export const SupervisorasManager = () => {
           .from("supervisoras")
           .insert({
             nome_empresa: formData.nome_empresa,
+            contrato: formData.contrato,
             logo_url: logoUrl,
             usar_logo_customizado: formData.usar_logo_customizado,
           });
@@ -200,6 +209,7 @@ export const SupervisorasManager = () => {
     setEditingSupervisora(supervisora);
     setFormData({
       nome_empresa: supervisora.nome_empresa,
+      contrato: supervisora.contrato || "",
       usar_logo_customizado: supervisora.usar_logo_customizado,
     });
     setIsDialogOpen(true);
@@ -208,7 +218,7 @@ export const SupervisorasManager = () => {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingSupervisora(null);
-    setFormData({ nome_empresa: "", usar_logo_customizado: false });
+    setFormData({ nome_empresa: "", contrato: "", usar_logo_customizado: false });
     setLogoFile(null);
   };
 
@@ -229,7 +239,7 @@ export const SupervisorasManager = () => {
             <DialogTrigger asChild>
               <Button onClick={() => {
                 setEditingSupervisora(null);
-                setFormData({ nome_empresa: "", usar_logo_customizado: false });
+                setFormData({ nome_empresa: "", contrato: "", usar_logo_customizado: false });
               }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Nova Supervisora
@@ -253,6 +263,16 @@ export const SupervisorasManager = () => {
                     value={formData.nome_empresa}
                     onChange={(e) => setFormData({ ...formData, nome_empresa: e.target.value })}
                     placeholder="Ex: DNIT Regional SP"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="contrato">Número do Contrato *</Label>
+                  <Input
+                    id="contrato"
+                    value={formData.contrato}
+                    onChange={(e) => setFormData({ ...formData, contrato: e.target.value })}
+                    placeholder="Ex: Contrato N° 123/2024"
                   />
                 </div>
 
@@ -320,6 +340,7 @@ export const SupervisorasManager = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
+                <TableHead>Contrato</TableHead>
                 <TableHead className="text-center">Logo</TableHead>
                 <TableHead className="text-center">Logo Ativo</TableHead>
                 <TableHead>Código Convite</TableHead>
@@ -332,6 +353,9 @@ export const SupervisorasManager = () => {
                 <TableRow key={supervisora.id}>
                   <TableCell className="font-medium">
                     {supervisora.nome_empresa}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {supervisora.contrato || "—"}
                   </TableCell>
                   <TableCell className="text-center">
                     {supervisora.logo_url ? (

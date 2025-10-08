@@ -1738,6 +1738,7 @@ export type Database = {
       supervisoras: {
         Row: {
           codigo_convite: string | null
+          contrato: string | null
           created_at: string | null
           id: string
           logo_url: string | null
@@ -1747,6 +1748,7 @@ export type Database = {
         }
         Insert: {
           codigo_convite?: string | null
+          contrato?: string | null
           created_at?: string | null
           id?: string
           logo_url?: string | null
@@ -1756,6 +1758,7 @@ export type Database = {
         }
         Update: {
           codigo_convite?: string | null
+          contrato?: string | null
           created_at?: string | null
           id?: string
           logo_url?: string | null
