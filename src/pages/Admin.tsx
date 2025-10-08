@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import EmpresasManager from "@/components/admin/EmpresasManager";
 import LotesManager from "@/components/admin/LotesManager";
 import RodoviasManager from "@/components/admin/RodoviasManager";
-import { SupervisoraManager } from "@/components/admin/SupervisoraManager";
 import { SupervisorasManager } from "@/components/admin/SupervisorasManager";
 import { UsuariosManager } from "@/components/admin/UsuariosManager";
 import { CoordinatorAssignmentsManager } from "@/components/admin/CoordinatorAssignmentsManager";
@@ -115,10 +114,9 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="supervisoras" className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="supervisoras">Supervisoras</TabsTrigger>
             <TabsTrigger value="usuarios">Usuários</TabsTrigger>
-            <TabsTrigger value="destinatarios">Config</TabsTrigger>
             <TabsTrigger value="empresas">Executoras</TabsTrigger>
             <TabsTrigger value="coordinators">Atribuir</TabsTrigger>
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
@@ -131,10 +129,6 @@ const Admin = () => {
 
           <TabsContent value="usuarios">
             <UsuariosManager />
-          </TabsContent>
-
-          <TabsContent value="destinatarios">
-            <SupervisoraManager />
           </TabsContent>
 
           <TabsContent value="empresas">
