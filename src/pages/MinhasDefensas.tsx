@@ -544,7 +544,7 @@ const MinhasDefensas = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-center">
             <p className="text-sm text-muted-foreground">
-              Críticas e sugestões: <a href="mailto:contato@rodoviasuperv.com.br" className="text-primary hover:underline">contato@rodoviasuperv.com.br</a>
+              Críticas e sugestões: <a href="mailto:operavia.online@gmail.com" className="text-primary hover:underline">operavia.online@gmail.com</a>
             </p>
           </div>
         </div>
