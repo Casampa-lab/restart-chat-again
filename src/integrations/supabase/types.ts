@@ -1737,6 +1737,7 @@ export type Database = {
       }
       supervisoras: {
         Row: {
+          codigo_convite: string | null
           created_at: string | null
           id: string
           logo_url: string | null
@@ -1745,6 +1746,7 @@ export type Database = {
           usar_logo_customizado: boolean | null
         }
         Insert: {
+          codigo_convite?: string | null
           created_at?: string | null
           id?: string
           logo_url?: string | null
@@ -1753,6 +1755,7 @@ export type Database = {
           usar_logo_customizado?: boolean | null
         }
         Update: {
+          codigo_convite?: string | null
           created_at?: string | null
           id?: string
           logo_url?: string | null
@@ -1788,6 +1791,10 @@ export type Database = {
       coordinator_has_lot_access: {
         Args: { _lote_id: string; _user_id: string }
         Returns: boolean
+      }
+      generate_codigo_convite: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       generate_nc_number: {
         Args: Record<PropertyKey, never>
