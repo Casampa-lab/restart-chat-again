@@ -219,15 +219,14 @@ const MinhasRetrorrefletividades = () => {
     }
   };
 
-  const filteredMedicoesHorizontal = (showEnviadas
+  // Filter base medicoes
+  const baseMedicoes = showEnviadas
     ? medicoes
-    : medicoes.filter(m => !m.enviado_coordenador)
-  ).filter(m => (m as any).tipo_sinalizacao === 'Horizontal');
+    : medicoes.filter(m => !m.enviado_coordenador);
 
-  const filteredMedicoesVertical = (showEnviadas
-    ? medicoes
-    : medicoes.filter(m => !m.enviado_coordenador)
-  ).filter(m => (m as any).tipo_sinalizacao === 'Vertical');
+  // Split into horizontal and vertical
+  const filteredMedicoesHorizontal = baseMedicoes.filter(m => (m as any).tipo_sinalizacao === 'Horizontal');
+  const filteredMedicoesVertical = baseMedicoes.filter(m => (m as any).tipo_sinalizacao === 'Vertical');
 
   if (authLoading || loading) {
     return (
