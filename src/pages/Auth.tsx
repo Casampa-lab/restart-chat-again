@@ -103,16 +103,15 @@ const Auth = () => {
   };
   return <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4 overflow-y-auto">
       <div className="w-full max-w-md space-y-6">
-        <div className="flex justify-center">
-          <img src={logoOperaVia} alt="OperaVia" className="h-20 object-contain" />
+        <div className="flex flex-col items-center gap-2 bg-card rounded-xl p-6 shadow-lg">
+          <img src={logoOperaVia} alt="OperaVia" className="h-32 object-contain" />
         </div>
         
         <Card className="w-full">
           <CardHeader>
-            <CardTitle className="text-2xl text-center"></CardTitle>
-            <CardDescription className="text-center">
-
-Sistema Nacional de Supervisão de Operação Rodoviária</CardDescription>
+            <CardTitle className="text-xl text-center text-primary font-bold">
+              Sistema Nacional de Supervisão de Operação Rodoviária
+            </CardTitle>
             <CardDescription className="text-center">
               {isLogin ? "Entre com suas credenciais" : "Crie sua conta"}
             </CardDescription>
