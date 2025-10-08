@@ -37,6 +37,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 interface Retrorrefletividade {
@@ -218,9 +219,15 @@ const MinhasRetrorrefletividades = () => {
     }
   };
 
-  const filteredMedicoes = showEnviadas
+  const filteredMedicoesHorizontal = (showEnviadas
     ? medicoes
-    : medicoes.filter(m => !m.enviado_coordenador);
+    : medicoes.filter(m => !m.enviado_coordenador)
+  ).filter(m => (m as any).tipo_sinalizacao === 'Horizontal');
+
+  const filteredMedicoesVertical = (showEnviadas
+    ? medicoes
+    : medicoes.filter(m => !m.enviado_coordenador)
+  ).filter(m => (m as any).tipo_sinalizacao === 'Vertical');
 
   if (authLoading || loading) {
     return (
@@ -277,35 +284,151 @@ const MinhasRetrorrefletividades = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {filteredMedicoes.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {showEnviadas 
-                  ? "Nenhuma medição registrada ainda."
-                  : "Nenhuma medição não enviada"}
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">Sel.</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Lote</TableHead>
-                      <TableHead>Rodovia</TableHead>
-                      <TableHead>KM</TableHead>
-                      <TableHead>Lado</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Código</TableHead>
-                      <TableHead>Fundo</TableHead>
-                      <TableHead>Legenda</TableHead>
-                      <TableHead>Situação</TableHead>
-                      <TableHead>Observação</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredMedicoes.map((medicao) => (
+            <Tabs defaultValue="horizontal" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="horizontal">Sinalização Horizontal</TabsTrigger>
+                <TabsTrigger value="vertical">Sinalização Vertical</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="horizontal">
+                {filteredMedicoesHorizontal.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {showEnviadas 
+                      ? "Nenhuma medição horizontal registrada ainda."
+                      : "Nenhuma medição horizontal não enviada"}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12">Sel.</TableHead>
+                          <TableHead>Data</TableHead>
+                          <TableHead>Lote</TableHead>
+                          <TableHead>Rodovia</TableHead>
+                          <TableHead>KM</TableHead>
+                          <TableHead>Posição</TableHead>
+                          <TableHead>Cor</TableHead>
+                          <TableHead>Média</TableHead>
+                          <TableHead>Valor Mín</TableHead>
+                          <TableHead>Situação</TableHead>
+                          <TableHead>Observação</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredMedicoesHorizontal.map((medicao) => {
+                          const medicaoData = medicao as any;
+                          return (
+                            <TableRow key={medicao.id}>
+                              <TableCell>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedMedicoes.has(medicao.id)}
+                                  onChange={() => handleToggleSelect(medicao.id)}
+                                  disabled={medicao.enviado_coordenador}
+                                  className="h-4 w-4 rounded border-gray-300"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                {format(new Date(medicao.data_medicao), "dd/MM/yyyy")}
+                              </TableCell>
+                              <TableCell>{lotes[medicao.lote_id] || "-"}</TableCell>
+                              <TableCell>{rodovias[medicao.rodovia_id] || "-"}</TableCell>
+                              <TableCell>{medicao.km_referencia.toFixed(3)}</TableCell>
+                              <TableCell>{medicaoData.posicao_horizontal || "-"}</TableCell>
+                              <TableCell>{medicaoData.cor_horizontal || "-"}</TableCell>
+                              <TableCell>{medicaoData.valor_medido_horizontal?.toFixed(1) || "-"}</TableCell>
+                              <TableCell>{medicaoData.valor_minimo_horizontal?.toFixed(1) || "-"}</TableCell>
+                              <TableCell>
+                                <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                  medicaoData.situacao_horizontal === "Conforme"
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
+                                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
+                                }`}>
+                                  {medicaoData.situacao_horizontal}
+                                </span>
+                              </TableCell>
+                              <TableCell className="max-w-xs truncate">
+                                {medicao.observacao || "-"}
+                              </TableCell>
+                              <TableCell>
+                                {medicao.enviado_coordenador ? (
+                                  <Badge variant="outline" className="bg-green-50">
+                                    Enviada
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="bg-yellow-50">
+                                    Não enviada
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex gap-2 justify-end">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setMedicaoToEdit(medicao);
+                                      setEditDialogOpen(true);
+                                    }}
+                                    title="Editar medição"
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setMedicaoToDelete(medicao.id);
+                                      setDeleteDialogOpen(true);
+                                    }}
+                                    title="Excluir medição"
+                                  >
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="vertical">
+                {filteredMedicoesVertical.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {showEnviadas 
+                      ? "Nenhuma medição vertical registrada ainda."
+                      : "Nenhuma medição vertical não enviada"}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12">Sel.</TableHead>
+                          <TableHead>Data</TableHead>
+                          <TableHead>Lote</TableHead>
+                          <TableHead>Rodovia</TableHead>
+                          <TableHead>KM</TableHead>
+                          <TableHead>Lado</TableHead>
+                          <TableHead>Tipo</TableHead>
+                          <TableHead>Código</TableHead>
+                          <TableHead>Fundo</TableHead>
+                          <TableHead>Legenda</TableHead>
+                          <TableHead>Situação</TableHead>
+                          <TableHead>Observação</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredMedicoesVertical.map((medicao) => (
                       <TableRow key={medicao.id}>
                         <TableCell>
                           <input
@@ -414,10 +537,12 @@ const MinhasRetrorrefletividades = () => {
                 </Table>
               </div>
             )}
-          </CardContent>
-        </Card>
-        </div>
-      </main>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+    </div>
+  </main>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

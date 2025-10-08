@@ -9,7 +9,8 @@ import { ArrowLeft, Download } from "lucide-react";
 import {
   exportFrentesLiberadas,
   exportNaoConformidades,
-  exportRetrorrefletividadeEstatica,
+  exportRetrorrefletividadeEstaticaHorizontal,
+  exportRetrorrefletividadeEstaticaVertical,
   exportRetrorrefletividadeDinamica,
   exportDefensas,
   exportIntervencoesSH,
@@ -63,9 +64,13 @@ const CoordenacaoFiscalizacao = () => {
           await exportNaoConformidades();
           toast.success('Planilha de NCs baixada com sucesso!');
           break;
-        case 'retro-estatica':
-          await exportRetrorrefletividadeEstatica();
-          toast.success('Planilha de Retrorrefletividade Estática baixada com sucesso!');
+        case 'retro-estatica-horizontal':
+          await exportRetrorrefletividadeEstaticaHorizontal();
+          toast.success('Planilha de Retrorrefletividade Horizontal baixada com sucesso!');
+          break;
+        case 'retro-estatica-vertical':
+          await exportRetrorrefletividadeEstaticaVertical();
+          toast.success('Planilha de Retrorrefletividade Vertical baixada com sucesso!');
           break;
         case 'retro-dinamica':
           await exportRetrorrefletividadeDinamica();
@@ -250,7 +255,8 @@ const CoordenacaoFiscalizacao = () => {
                     variant="secondary"
                     className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
                     onClick={async () => {
-                      await handleDownload('retro-estatica');
+                      await handleDownload('retro-estatica-horizontal');
+                      await handleDownload('retro-estatica-vertical');
                       await handleDownload('retro-dinamica');
                     }}
                   >

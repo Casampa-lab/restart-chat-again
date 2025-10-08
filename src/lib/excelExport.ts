@@ -130,31 +130,34 @@ export const exportNaoConformidades = async () => {
   }
 };
 
-// Exportar Retrorrefletividade Estática
-export const exportRetrorrefletividadeEstatica = async () => {
+// Exportar Retrorrefletividade Estática - Horizontal
+export const exportRetrorrefletividadeEstaticaHorizontal = async () => {
   try {
     const { data, error } = await supabase
       .from('retrorrefletividade_estatica')
       .select('*')
+      .eq('tipo_sinalizacao', 'Horizontal')
       .order('data_medicao', { ascending: false });
 
     if (error) throw error;
 
     const { lotesMap, rodoviasMap } = await fetchRelatedData();
 
-    // Criar dados com base no tipo de sinalização
-    const dataRows = (data || []).map(item => {
-      const lote = lotesMap.get(item.lote_id);
-      const rodovia = rodoviasMap.get(item.rodovia_id);
-      const itemData = item as any;
-      
-      if (itemData.tipo_sinalizacao === 'Horizontal') {
+    const wsData = [
+      ['3.1.3.1 - RETRORREFLETIVIDADE ESTÁTICA - SINALIZAÇÃO HORIZONTAL'],
+      [],
+      ['Data', 'Lote', 'Rodovia', 'km', 'Posição', 'Cor', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10', 'Média', 'Valor Mín', 'Situação', 'Observação'],
+      ...(data || []).map(item => {
+        const lote = lotesMap.get(item.lote_id);
+        const rodovia = rodoviasMap.get(item.rodovia_id);
+        const itemData = item as any;
         return [
           formatDate(item.data_medicao),
           lote?.numero || '',
           rodovia?.codigo || '',
           formatNumber(item.km_referencia),
-          'Horizontal',
+          itemData.posicao_horizontal || '',
+          itemData.cor_horizontal || '',
           formatNumber(itemData.leitura_horizontal_1),
           formatNumber(itemData.leitura_horizontal_2),
           formatNumber(itemData.leitura_horizontal_3),
@@ -170,86 +173,84 @@ export const exportRetrorrefletividadeEstatica = async () => {
           itemData.situacao_horizontal || '',
           item.observacao || ''
         ];
-      } else {
+      })
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 19 } }];
+    ws['!cols'] = [
+      { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 15 }, { wch: 10 },
+      { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
+      { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
+      { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 40 }
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Retro Horizontal');
+    XLSX.writeFile(wb, `Retrorrefletividade_Horizontal_${new Date().toISOString().split('T')[0]}.xlsx`);
+  } catch (error) {
+    console.error('Erro ao exportar retrorrefletividade horizontal:', error);
+    throw error;
+  }
+};
+
+// Exportar Retrorrefletividade Estática - Vertical
+export const exportRetrorrefletividadeEstaticaVertical = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('retrorrefletividade_estatica')
+      .select('*')
+      .eq('tipo_sinalizacao', 'Vertical')
+      .order('data_medicao', { ascending: false });
+
+    if (error) throw error;
+
+    const { lotesMap, rodoviasMap } = await fetchRelatedData();
+
+    const wsData = [
+      ['3.1.3.1 - RETRORREFLETIVIDADE ESTÁTICA - SINALIZAÇÃO VERTICAL'],
+      [],
+      ['Data', 'Lote', 'Rodovia', 'km', 'Lado', 'Dispositivo', 'Código', 'Cor Fundo', 'Valor Fundo', 'Mín Fundo', 'Sit. Fundo', 'Cor Legenda', 'Valor Legenda', 'Mín Legenda', 'Sit. Legenda', 'Situação Geral', 'Observação'],
+      ...(data || []).map(item => {
+        const lote = lotesMap.get(item.lote_id);
+        const rodovia = rodoviasMap.get(item.rodovia_id);
+        const itemData = item as any;
         return [
           formatDate(item.data_medicao),
           lote?.numero || '',
           rodovia?.codigo || '',
           formatNumber(item.km_referencia),
-          'Vertical',
           item.lado || '',
           item.tipo_dispositivo || '',
           item.codigo_dispositivo || '',
+          itemData.cor_fundo || '',
           formatNumber(item.valor_medido_fundo),
           formatNumber(item.valor_minimo_fundo),
           item.situacao_fundo || '',
+          itemData.cor_legenda || '',
           formatNumber(item.valor_medido_legenda),
           formatNumber(item.valor_minimo_legenda),
           item.situacao_legenda || '',
-          itemData.situacao_geral || '',
+          item.situacao || '',
           item.observacao || ''
         ];
-      }
-    });
-
-    // Criar cabeçalhos com base no tipo predominante ou ambos
-    const hasHorizontal = (data || []).some(item => (item as any).tipo_sinalizacao === 'Horizontal');
-    const hasVertical = (data || []).some(item => (item as any).tipo_sinalizacao === 'Vertical');
-
-    let wsData;
-    if (hasHorizontal && !hasVertical) {
-      wsData = [
-        ['3.1.3.1 - RETRORREFLETIVIDADE ESTÁTICA - SINALIZAÇÃO HORIZONTAL'],
-        [],
-        ['Data', 'Lote', 'Rodovia', 'km', 'Tipo', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10', 'Média', 'Valor Mín', 'Situação', 'Observação'],
-        ...dataRows
-      ];
-    } else if (hasVertical && !hasHorizontal) {
-      wsData = [
-        ['3.1.3.1 - RETRORREFLETIVIDADE ESTÁTICA - SINALIZAÇÃO VERTICAL'],
-        [],
-        ['Data', 'Lote', 'Rodovia', 'km', 'Tipo', 'Lado', 'Dispositivo', 'Código', 'Valor Fundo', 'Mín Fundo', 'Sit. Fundo', 'Valor Legenda', 'Mín Legenda', 'Sit. Legenda', 'Situação Geral', 'Observação'],
-        ...dataRows
-      ];
-    } else {
-      wsData = [
-        ['3.1.3.1 - RETRORREFLETIVIDADE ESTÁTICA'],
-        [],
-        ['Data', 'Lote', 'Rodovia', 'km', 'Tipo', 'Dados (varia conforme tipo)'],
-        ...dataRows
-      ];
-    }
+      })
+    ];
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    
-    // Ajustar merges e colunas conforme o tipo
-    if (hasHorizontal && !hasVertical) {
-      ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 18 } }];
-      ws['!cols'] = [
-        { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 12 },
-        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
-        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
-        { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 40 }
-      ];
-    } else if (hasVertical && !hasHorizontal) {
-      ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 15 } }];
-      ws['!cols'] = [
-        { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 12 },
-        { wch: 12 }, { wch: 20 }, { wch: 15 }, { wch: 12 }, { wch: 12 },
-        { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 40 }
-      ];
-    } else {
-      ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }];
-      ws['!cols'] = [
-        { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 12 }, { wch: 50 }
-      ];
-    }
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 16 } }];
+    ws['!cols'] = [
+      { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 12 },
+      { wch: 20 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+      { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, 
+      { wch: 15 }, { wch: 40 }
+    ];
 
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Retro Estática');
-    XLSX.writeFile(wb, `Retrorrefletividade_Estatica_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, 'Retro Vertical');
+    XLSX.writeFile(wb, `Retrorrefletividade_Vertical_${new Date().toISOString().split('T')[0]}.xlsx`);
   } catch (error) {
-    console.error('Erro ao exportar retrorrefletividade estática:', error);
+    console.error('Erro ao exportar retrorrefletividade vertical:', error);
     throw error;
   }
 };
