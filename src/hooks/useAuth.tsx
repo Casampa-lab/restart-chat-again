@@ -28,20 +28,21 @@ export const useAuth = () => {
   }, []);
 
   const signOut = async () => {
-    console.log("useAuth signOut: iniciando limpeza");
+    console.log("useAuth signOut: iniciando limpeza completa");
     
-    // Limpar estado imediatamente, independente do resultado da API
-    setUser(null);
-    setSession(null);
-    setLoading(false);
-    
-    // Tentar fazer logout no servidor (pode falhar se sessão já expirou)
     try {
-      await supabase.auth.signOut({ scope: 'local' }); // Apenas local, não global
+      // Fazer logout no servidor (modo local)
+      await supabase.auth.signOut({ scope: 'local' });
       console.log("useAuth signOut: logout local concluído");
     } catch (error) {
-      console.log("useAuth signOut: erro ignorado (sessão já inválida)", error);
+      console.log("useAuth signOut: erro ignorado", error);
     }
+    
+    // Forçar limpeza do estado local independente do resultado
+    setUser(null);
+    setSession(null);
+    
+    console.log("useAuth signOut: estado limpo");
   };
 
   return { user, session, loading, signOut };
