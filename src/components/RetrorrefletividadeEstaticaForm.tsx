@@ -232,6 +232,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
       const dadosInsert = formData.tipo_sinalizacao === "Horizontal"
         ? {
             ...dadosBase,
+            posicao_horizontal: formData.posicao_horizontal || null,
+            cor_horizontal: formData.cor_horizontal || null,
             valor_medido_horizontal: parseFloat(formData.valor_medido_horizontal),
             valor_minimo_horizontal: parseFloat(formData.valor_minimo_horizontal),
             situacao_horizontal: situacaoHorizontal,
