@@ -1084,23 +1084,35 @@ export type Database = {
         Row: {
           contrato: string | null
           created_at: string | null
+          email_executora: string | null
+          email_fiscal_execucao: string | null
           empresa_id: string
           id: string
+          nome_fiscal_execucao: string | null
           numero: string
+          responsavel_executora: string | null
         }
         Insert: {
           contrato?: string | null
           created_at?: string | null
+          email_executora?: string | null
+          email_fiscal_execucao?: string | null
           empresa_id: string
           id?: string
+          nome_fiscal_execucao?: string | null
           numero: string
+          responsavel_executora?: string | null
         }
         Update: {
           contrato?: string | null
           created_at?: string | null
+          email_executora?: string | null
+          email_fiscal_execucao?: string | null
           empresa_id?: string
           id?: string
+          nome_fiscal_execucao?: string | null
           numero?: string
+          responsavel_executora?: string | null
         }
         Relationships: [
           {

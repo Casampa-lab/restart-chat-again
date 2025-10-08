@@ -36,6 +36,10 @@ interface Lote {
   id: string;
   numero: string;
   contrato: string;
+  responsavel_executora?: string;
+  email_executora?: string;
+  nome_fiscal_execucao?: string;
+  email_fiscal_execucao?: string;
   empresas: { nome: string };
 }
 
@@ -58,6 +62,10 @@ const LotesManager = () => {
     numero: "",
     empresa_id: "",
     contrato: "",
+    responsavel_executora: "",
+    email_executora: "",
+    nome_fiscal_execucao: "",
+    email_fiscal_execucao: "",
   });
   const [novaRodovia, setNovaRodovia] = useState({
     rodovia_id: "",
@@ -168,6 +176,10 @@ const LotesManager = () => {
           numero: formData.numero,
           empresa_id: formData.empresa_id,
           contrato: formData.contrato || null,
+          responsavel_executora: formData.responsavel_executora || null,
+          email_executora: formData.email_executora || null,
+          nome_fiscal_execucao: formData.nome_fiscal_execucao || null,
+          email_fiscal_execucao: formData.email_fiscal_execucao || null,
         })
         .select()
         .single();
@@ -193,7 +205,15 @@ const LotesManager = () => {
       if (vinculoError) throw vinculoError;
 
       toast.success("Lote cadastrado com sucesso!");
-      setFormData({ numero: "", empresa_id: "", contrato: "" });
+      setFormData({ 
+        numero: "", 
+        empresa_id: "", 
+        contrato: "",
+        responsavel_executora: "",
+        email_executora: "",
+        nome_fiscal_execucao: "",
+        email_fiscal_execucao: "",
+      });
       setRodoviasVinculadas([]);
       loadData();
     } catch (error: any) {
@@ -203,12 +223,16 @@ const LotesManager = () => {
     }
   };
 
-  const handleEdit = async (lote: LoteComRodovias) => {
+  const handleEdit = async (lote: any) => {
     setEditingLote(lote.id);
     setFormData({
       numero: lote.numero,
       empresa_id: lote.id, // Will need to fetch empresa_id
       contrato: lote.contrato || "",
+      responsavel_executora: lote.responsavel_executora || "",
+      email_executora: lote.email_executora || "",
+      nome_fiscal_execucao: lote.nome_fiscal_execucao || "",
+      email_fiscal_execucao: lote.email_fiscal_execucao || "",
     });
 
     // Carregar rodovias vinculadas ao lote
@@ -255,6 +279,10 @@ const LotesManager = () => {
         .update({
           numero: formData.numero,
           contrato: formData.contrato || null,
+          responsavel_executora: formData.responsavel_executora || null,
+          email_executora: formData.email_executora || null,
+          nome_fiscal_execucao: formData.nome_fiscal_execucao || null,
+          email_fiscal_execucao: formData.email_fiscal_execucao || null,
         })
         .eq("id", editingLote);
 
@@ -288,7 +316,15 @@ const LotesManager = () => {
 
       toast.success("Lote atualizado com sucesso!");
       setEditingLote(null);
-      setFormData({ numero: "", empresa_id: "", contrato: "" });
+      setFormData({ 
+        numero: "", 
+        empresa_id: "", 
+        contrato: "",
+        responsavel_executora: "",
+        email_executora: "",
+        nome_fiscal_execucao: "",
+        email_fiscal_execucao: "",
+      });
       setRodoviasVinculadas([]);
       loadData();
     } catch (error: any) {
@@ -365,6 +401,51 @@ const LotesManager = () => {
                   value={formData.contrato}
                   onChange={(e) => setFormData({ ...formData, contrato: e.target.value })}
                   placeholder="Ex: 123/2024"
+                />
+              </div>
+            </div>
+
+            {/* Informações de Contatos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="responsavel_executora">Responsável da Executora</Label>
+                <Input
+                  id="responsavel_executora"
+                  value={formData.responsavel_executora}
+                  onChange={(e) => setFormData({ ...formData, responsavel_executora: e.target.value })}
+                  placeholder="Nome do responsável"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email_executora">E-mail da Executora</Label>
+                <Input
+                  id="email_executora"
+                  type="email"
+                  value={formData.email_executora}
+                  onChange={(e) => setFormData({ ...formData, email_executora: e.target.value })}
+                  placeholder="email@executora.com"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nome_fiscal_execucao">Nome do Fiscal de Execução (UL)</Label>
+                <Input
+                  id="nome_fiscal_execucao"
+                  value={formData.nome_fiscal_execucao}
+                  onChange={(e) => setFormData({ ...formData, nome_fiscal_execucao: e.target.value })}
+                  placeholder="Nome do fiscal"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email_fiscal_execucao">E-mail do Fiscal de Execução</Label>
+                <Input
+                  id="email_fiscal_execucao"
+                  type="email"
+                  value={formData.email_fiscal_execucao}
+                  onChange={(e) => setFormData({ ...formData, email_fiscal_execucao: e.target.value })}
+                  placeholder="email@fiscal.com"
                 />
               </div>
             </div>
@@ -682,6 +763,51 @@ const LotesManager = () => {
                   value={formData.contrato}
                   onChange={(e) => setFormData({ ...formData, contrato: e.target.value })}
                   placeholder="Ex: 123/2024"
+                />
+              </div>
+            </div>
+
+            {/* Informações de Contatos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-responsavel_executora">Responsável da Executora</Label>
+                <Input
+                  id="edit-responsavel_executora"
+                  value={formData.responsavel_executora}
+                  onChange={(e) => setFormData({ ...formData, responsavel_executora: e.target.value })}
+                  placeholder="Nome do responsável"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-email_executora">E-mail da Executora</Label>
+                <Input
+                  id="edit-email_executora"
+                  type="email"
+                  value={formData.email_executora}
+                  onChange={(e) => setFormData({ ...formData, email_executora: e.target.value })}
+                  placeholder="email@executora.com"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-nome_fiscal_execucao">Nome do Fiscal de Execução (UL)</Label>
+                <Input
+                  id="edit-nome_fiscal_execucao"
+                  value={formData.nome_fiscal_execucao}
+                  onChange={(e) => setFormData({ ...formData, nome_fiscal_execucao: e.target.value })}
+                  placeholder="Nome do fiscal"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-email_fiscal_execucao">E-mail do Fiscal de Execução</Label>
+                <Input
+                  id="edit-email_fiscal_execucao"
+                  type="email"
+                  value={formData.email_fiscal_execucao}
+                  onChange={(e) => setFormData({ ...formData, email_fiscal_execucao: e.target.value })}
+                  placeholder="email@fiscal.com"
                 />
               </div>
             </div>
