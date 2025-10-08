@@ -35,12 +35,30 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
     lado: "",
     tipo_dispositivo: "",
     codigo_dispositivo: "",
+    leitura1: "",
+    leitura2: "",
+    leitura3: "",
+    leitura4: "",
+    leitura5: "",
     valor_medido: "",
     valor_minimo: "",
     observacao: "",
     latitude: "",
     longitude: "",
   });
+
+  // Calcula a média das leituras automaticamente
+  const calcularMedia = (l1: string, l2: string, l3: string, l4: string, l5: string) => {
+    const leituras = [l1, l2, l3, l4, l5]
+      .filter(l => l !== "" && !isNaN(parseFloat(l)))
+      .map(l => parseFloat(l));
+    
+    if (leituras.length === 0) return "";
+    
+    const soma = leituras.reduce((acc, val) => acc + val, 0);
+    const media = soma / leituras.length;
+    return media.toFixed(1);
+  };
 
   const capturarCoordenadas = () => {
     setIsCapturing(true);
@@ -139,6 +157,11 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
         lado: "",
         tipo_dispositivo: "",
         codigo_dispositivo: "",
+        leitura1: "",
+        leitura2: "",
+        leitura3: "",
+        leitura4: "",
+        leitura5: "",
         valor_medido: "",
         valor_minimo: "",
         observacao: "",
@@ -292,17 +315,137 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
               </Select>
             </div>
 
+            <div className="md:col-span-2 space-y-4 p-4 border rounded-lg bg-muted/50">
+              <div className="space-y-2">
+                <Label className="text-base font-semibold">Leituras de Retrorrefletividade</Label>
+                <p className="text-sm text-muted-foreground">
+                  Digite até 5 leituras. A média será calculada automaticamente.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="leitura1">Leitura 1</Label>
+                  <Input
+                    id="leitura1"
+                    type="number"
+                    step="0.1"
+                    value={formData.leitura1}
+                    onChange={(e) => {
+                      const novoFormData = { ...formData, leitura1: e.target.value };
+                      const media = calcularMedia(
+                        novoFormData.leitura1,
+                        novoFormData.leitura2,
+                        novoFormData.leitura3,
+                        novoFormData.leitura4,
+                        novoFormData.leitura5
+                      );
+                      setFormData({ ...novoFormData, valor_medido: media });
+                    }}
+                    placeholder="0.0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="leitura2">Leitura 2</Label>
+                  <Input
+                    id="leitura2"
+                    type="number"
+                    step="0.1"
+                    value={formData.leitura2}
+                    onChange={(e) => {
+                      const novoFormData = { ...formData, leitura2: e.target.value };
+                      const media = calcularMedia(
+                        novoFormData.leitura1,
+                        novoFormData.leitura2,
+                        novoFormData.leitura3,
+                        novoFormData.leitura4,
+                        novoFormData.leitura5
+                      );
+                      setFormData({ ...novoFormData, valor_medido: media });
+                    }}
+                    placeholder="0.0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="leitura3">Leitura 3</Label>
+                  <Input
+                    id="leitura3"
+                    type="number"
+                    step="0.1"
+                    value={formData.leitura3}
+                    onChange={(e) => {
+                      const novoFormData = { ...formData, leitura3: e.target.value };
+                      const media = calcularMedia(
+                        novoFormData.leitura1,
+                        novoFormData.leitura2,
+                        novoFormData.leitura3,
+                        novoFormData.leitura4,
+                        novoFormData.leitura5
+                      );
+                      setFormData({ ...novoFormData, valor_medido: media });
+                    }}
+                    placeholder="0.0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="leitura4">Leitura 4</Label>
+                  <Input
+                    id="leitura4"
+                    type="number"
+                    step="0.1"
+                    value={formData.leitura4}
+                    onChange={(e) => {
+                      const novoFormData = { ...formData, leitura4: e.target.value };
+                      const media = calcularMedia(
+                        novoFormData.leitura1,
+                        novoFormData.leitura2,
+                        novoFormData.leitura3,
+                        novoFormData.leitura4,
+                        novoFormData.leitura5
+                      );
+                      setFormData({ ...novoFormData, valor_medido: media });
+                    }}
+                    placeholder="0.0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="leitura5">Leitura 5</Label>
+                  <Input
+                    id="leitura5"
+                    type="number"
+                    step="0.1"
+                    value={formData.leitura5}
+                    onChange={(e) => {
+                      const novoFormData = { ...formData, leitura5: e.target.value };
+                      const media = calcularMedia(
+                        novoFormData.leitura1,
+                        novoFormData.leitura2,
+                        novoFormData.leitura3,
+                        novoFormData.leitura4,
+                        novoFormData.leitura5
+                      );
+                      setFormData({ ...novoFormData, valor_medido: media });
+                    }}
+                    placeholder="0.0"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="valor_medido">Valor Medido (cd/lx/m²) *</Label>
+              <Label htmlFor="valor_medido">Valor Medido - Média (cd/lx/m²) *</Label>
               <Input
                 id="valor_medido"
                 type="number"
                 step="0.1"
                 value={formData.valor_medido}
-                onChange={(e) =>
-                  setFormData({ ...formData, valor_medido: e.target.value })
-                }
-                placeholder="0.0"
+                readOnly
+                className="bg-muted"
+                placeholder="Calculado automaticamente"
                 required
               />
             </div>
