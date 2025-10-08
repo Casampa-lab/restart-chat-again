@@ -111,7 +111,8 @@ const Auth = () => {
           
           <Card className="w-full">
             <CardHeader>
-              <CardTitle className="text-2xl text-center">Sistema Nacional de Supervisão</CardTitle>
+              <CardTitle className="text-2xl text-center">Sistema de Supervisão de
+ Operações Rodoviárias</CardTitle>
               <CardDescription className="text-center">
                 {isLogin ? "Entre com suas credenciais" : "Crie sua conta"}
               </CardDescription>
