@@ -75,12 +75,12 @@ const NCsCoordenador = () => {
         .select("role")
         .eq("user_id", user.id);
 
-      const hasCoordOrFiscalRole = roles?.some(r => 
-        r.role === "admin"
+      const hasCoordOrAdminRole = roles?.some(r => 
+        r.role === "admin" || r.role === "coordenador"
       );
 
-      if (!hasCoordOrFiscalRole) {
-        toast.error("Acesso negado: apenas coordenadores e fiscais");
+      if (!hasCoordOrAdminRole) {
+        toast.error("Acesso negado: apenas coordenadores e administradores");
         navigate("/");
       }
     } catch (error: any) {

@@ -28,7 +28,7 @@ import logoOperaVia from "@/assets/logo-operavia.jpg";
 const CoordenacaoFiscalizacao = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -37,20 +37,20 @@ const CoordenacaoFiscalizacao = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    const checkAdmin = async () => {
+    const checkAdminOrCoordinator = async () => {
       if (!user) return;
 
       const { data } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
-        .eq("role", "admin")
+        .in("role", ["admin", "coordenador"])
         .maybeSingle();
 
-      setIsAdmin(!!data);
+      setIsAdminOrCoordinator(!!data);
     };
 
-    checkAdmin();
+    checkAdminOrCoordinator();
   }, [user]);
 
   const handleDownload = async (type: string) => {

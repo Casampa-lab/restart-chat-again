@@ -29,26 +29,26 @@ const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { activeSession, loading: sessionLoading, refreshSession, endSession } = useWorkSession(user?.id);
   const { data: supervisora } = useSupervisora();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('activeTab') || 'frentes';
   });
 
   useEffect(() => {
-    const checkAdmin = async () => {
+    const checkAdminOrCoordinator = async () => {
       if (!user) return;
 
       const { data } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
-        .eq("role", "admin")
+        .in("role", ["admin", "coordenador"])
         .maybeSingle();
 
-      setIsAdmin(!!data);
+      setIsAdminOrCoordinator(!!data);
     };
 
-    checkAdmin();
+    checkAdminOrCoordinator();
   }, [user]);
 
   const handleSessionStarted = () => {
@@ -125,7 +125,7 @@ const Index = () => {
                 <ClipboardList className="mr-2 h-5 w-5" />
                 Gestão
               </Button>
-              {isAdmin && (
+              {isAdminOrCoordinator && (
                 <Button 
                   variant="default"
                   size="lg"

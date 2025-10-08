@@ -19,11 +19,11 @@ const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { data: supervisora } = useSupervisora();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAdmin = async () => {
+    const checkAdminOrCoordinator = async () => {
       if (!user) {
         navigate("/auth");
         return;
@@ -34,18 +34,18 @@ const Admin = () => {
           .from("user_roles")
           .select("role")
           .eq("user_id", user.id)
-          .eq("role", "admin")
+          .in("role", ["admin", "coordenador"])
           .maybeSingle();
 
         if (error) throw error;
 
         if (!data) {
-          toast.error("Acesso negado. Apenas administradores podem acessar esta área.");
+          toast.error("Acesso negado. Apenas administradores e coordenadores podem acessar esta área.");
           navigate("/");
           return;
         }
 
-        setIsAdmin(true);
+        setIsAdminOrCoordinator(true);
       } catch (error: any) {
         toast.error("Erro ao verificar permissões: " + error.message);
         navigate("/");
@@ -55,7 +55,7 @@ const Admin = () => {
     };
 
     if (!authLoading) {
-      checkAdmin();
+      checkAdminOrCoordinator();
     }
   }, [user, authLoading, navigate]);
 
@@ -67,7 +67,7 @@ const Admin = () => {
     );
   }
 
-  if (!isAdmin) {
+  if (!isAdminOrCoordinator) {
     return null;
   }
 
