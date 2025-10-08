@@ -63,7 +63,7 @@ export const UsuariosManager = () => {
           id,
           nome,
           supervisora_id,
-          supervisoras!inner(nome_empresa)
+          supervisoras(nome_empresa)
         `)
         .order("nome");
 
@@ -128,6 +128,29 @@ export const UsuariosManager = () => {
     setIsDialogOpen(true);
   };
 
+  const handleDesvincular = async (profileId: string) => {
+    if (!confirm("Tem certeza que deseja desvincular este usuário da supervisora?")) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ supervisora_id: null })
+        .eq("id", profileId);
+
+      if (error) throw error;
+
+      toast.success("Usuário desvinculado com sucesso!");
+      await loadProfiles();
+    } catch (error: any) {
+      toast.error("Erro ao desvincular: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingProfile(null);
@@ -186,13 +209,27 @@ export const UsuariosManager = () => {
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(profile)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(profile)}
+                      title="Vincular/Editar supervisora"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    {profile.supervisora_id && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDesvincular(profile.id)}
+                        title="Desvincular supervisora"
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
