@@ -14,7 +14,7 @@ import { SupervisorasManager } from "@/components/admin/SupervisorasManager";
 import { UsuariosManager } from "@/components/admin/UsuariosManager";
 import { CoordinatorAssignmentsManager } from "@/components/admin/CoordinatorAssignmentsManager";
 
-import logoRodoviaSuperv from "@/assets/logo-rodoviasuper.png";
+import logoOperaVia from "@/assets/logo-operavia.jpg";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -75,10 +75,10 @@ const Admin = () => {
   // Determinar qual logo usar
   const logoToDisplay = supervisora?.usar_logo_customizado && supervisora?.logo_url 
     ? supervisora.logo_url 
-    : logoRodoviaSuperv;
+    : logoOperaVia;
   const logoAlt = supervisora?.usar_logo_customizado && supervisora?.logo_url
     ? `${supervisora.nome_empresa} - Sistema de Supervisão`
-    : "RodoviaSUPERV - Sistema de Supervisão";
+    : "OperaVia - Sistema Nacional de Supervisão de Operação Rodoviária";
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/5 to-secondary/5">
@@ -153,7 +153,7 @@ const Admin = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-center">
             <p className="text-sm text-muted-foreground">
-              Críticas e sugestões: <a href="mailto:contato@rodoviasuperv.com.br" className="text-primary hover:underline">contato@rodoviasuperv.com.br</a>
+              Críticas e sugestões: <a href="mailto:operavia.online@gmail.com" className="text-primary hover:underline">operavia.online@gmail.com</a>
             </p>
           </div>
         </div>

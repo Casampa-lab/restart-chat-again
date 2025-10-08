@@ -174,7 +174,7 @@ const MinhasNCs = () => {
             {selectedNCs.size > 0 && (
               <Button onClick={handleEnviarSelecionadas}>
                 <Send className="mr-2 h-4 w-4" />
-                Enviar {selectedNCs.size} NC(s) ao Coordenador
+                Enviar {selectedNCs.size} ao Coordenador
               </Button>
             )}
           </div>

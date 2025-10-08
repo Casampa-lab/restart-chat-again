@@ -22,9 +22,7 @@ import { RegistroNCForm } from "@/components/RegistroNCForm";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
 import { toast } from "sonner";
-import logoRodoviaSuperv from "@/assets/logo-rodoviasuper.png";
-
-import logoDnit from "@/assets/logo-dnit.jpg";
+import logoOperaVia from "@/assets/logo-operavia.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -84,10 +82,10 @@ const Index = () => {
   // Determinar qual logo usar
   const logoToDisplay = supervisora?.usar_logo_customizado && supervisora?.logo_url 
     ? supervisora.logo_url 
-    : logoRodoviaSuperv;
+    : logoOperaVia;
   const logoAlt = supervisora?.usar_logo_customizado && supervisora?.logo_url
     ? `${supervisora.nome_empresa} - Sistema de Supervisão`
-    : "RodoviaSUPERV - Sistema de Supervisão";
+    : "OperaVia - Sistema Nacional de Supervisão de Operação Rodoviária";
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10">
@@ -104,8 +102,8 @@ const Index = () => {
                 />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-primary-foreground">Sistema de Supervisão Rodoviária</h1>
-                <p className="text-sm text-primary-foreground/80">Gestão Integrada de Rodovias</p>
+                <h1 className="text-xl font-bold text-primary-foreground">OperaVia</h1>
+                <p className="text-sm text-primary-foreground/80">Sistema Nacional de Supervisão de Operação Rodoviária</p>
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
@@ -507,7 +505,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col items-center justify-center gap-4">
             <p className="text-sm text-muted-foreground text-center">
-              Críticas e sugestões: <a href="mailto:contato@rodoviasuperv.com.br" className="text-primary hover:underline">contato@rodoviasuperv.com.br</a>
+              Críticas e sugestões: <a href="mailto:operavia.online@gmail.com" className="text-primary hover:underline">operavia.online@gmail.com</a>
             </p>
           </div>
         </div>

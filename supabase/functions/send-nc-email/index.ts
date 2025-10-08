@@ -71,7 +71,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Enviar email usando API direta do Resend
     const emailPayload = {
-      from: "DNIT - Não Conformidades <onboarding@resend.dev>",
+      from: "OperaVia - Não Conformidades <operavia.online@gmail.com>",
       to: emails,
       subject: `Nova Não Conformidade: ${ncData.numero_nc}`,
       html: `

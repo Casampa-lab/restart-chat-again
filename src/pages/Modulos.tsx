@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, LogOut } from "lucide-react";
 import { ModulosStatus } from "@/components/ModulosStatus";
-import logoRodoviaSuperv from "@/assets/logo-rodoviasuper.png";
+import logoOperaVia from "@/assets/logo-operavia.jpg";
 
 
 const Modulos = () => {
@@ -23,8 +23,8 @@ const Modulos = () => {
             <div className="flex items-center gap-4">
               <div className="bg-white/95 rounded-lg px-3 py-2 shadow-md">
                 <img 
-                  src={logoRodoviaSuperv} 
-                  alt="RodoviaSUPERV - Sistema de Supervisão" 
+                  src={logoOperaVia} 
+                  alt="OperaVia - Sistema Nacional de Supervisão de Operação Rodoviária" 
                   className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" 
                   onClick={() => navigate("/")}
                 />

@@ -21,7 +21,7 @@ import {
   exportRegistroNC
 } from "@/lib/excelExport";
 import { toast } from "sonner";
-import logoBrLegal from "@/assets/logo-brlegal2.png";
+import logoOperaVia from "@/assets/logo-operavia.jpg";
 
 
 const CoordenacaoFiscalizacao = () => {
@@ -125,8 +125,8 @@ const CoordenacaoFiscalizacao = () => {
           <div className="flex items-center justify-between gap-4">
             <div className="bg-white/95 rounded-lg px-4 py-2 shadow-md">
               <img 
-                src={logoBrLegal} 
-                alt="BR-LEGAL 2" 
+                src={logoOperaVia} 
+                alt="OperaVia" 
                 className="h-20 object-contain cursor-pointer hover:scale-105 transition-transform" 
                 onClick={() => navigate("/")}
               />

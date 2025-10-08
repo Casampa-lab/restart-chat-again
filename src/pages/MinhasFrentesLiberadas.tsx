@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import logoBrLegal from "@/assets/logo-brlegal2.png";
+import logoOperaVia from "@/assets/logo-operavia.jpg";
 import {
   Dialog,
   DialogContent,
@@ -188,7 +188,7 @@ const MinhasFrentesLiberadas = () => {
       <header className="bg-background border-b sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
-            <img src={logoBrLegal} alt="BR-LEGAL 2" className="h-16 object-contain" />
+            <img src={logoOperaVia} alt="OperaVia" className="h-16 object-contain" />
             <Button variant="navigation" size="sm" onClick={() => navigate("/")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar
