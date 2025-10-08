@@ -330,81 +330,6 @@ const NaoConformidadeForm = ({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* GPS Status - Condicional baseado no tipo */}
-          {!formData.tipo_nc && (
-            <div className="bg-muted p-4 rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                Selecione o Tipo de NC primeiro para capturar as coordenadas GPS
-              </p>
-            </div>
-          )}
-          
-          {formData.tipo_nc && !isExtensao && (
-            <div className="bg-muted p-4 rounded-lg space-y-2">
-              <div className="flex items-center gap-2">
-                <Label>Coordenadas GPS (Pontual) *</Label>
-              </div>
-              <div className="flex gap-2 items-center">
-                <Button type="button" variant="outline" onClick={getCurrentLocation} disabled={gpsLoading}>
-                  {gpsLoading ? <>
-                      <MapPin className="mr-2 h-4 w-4 animate-pulse" />
-                      Capturando...
-                    </> : <>
-                      <MapPin className="mr-2 h-4 w-4" />
-                      Capturar GPS
-                    </>}
-                </Button>
-                {location ? <p className="text-sm text-muted-foreground">
-                    Lat: {location.lat.toFixed(6)}, Lng: {location.lng.toFixed(6)}
-                  </p> : <p className="text-sm text-muted-foreground">Clique no botão para capturar a localização</p>}
-              </div>
-            </div>
-          )}
-
-          {formData.tipo_nc && isExtensao && (
-            <div className="bg-muted p-4 rounded-lg space-y-4">
-              <Label>Coordenadas GPS (Extensão) *</Label>
-              
-              {/* GPS Início */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Início</Label>
-                <div className="flex gap-2 items-center">
-                  <Button type="button" variant="outline" onClick={getCurrentLocationInicio} disabled={gpsLoadingInicio}>
-                    {gpsLoadingInicio ? <>
-                        <MapPin className="mr-2 h-4 w-4 animate-pulse" />
-                        Capturando...
-                      </> : <>
-                        <MapPin className="mr-2 h-4 w-4" />
-                        Capturar GPS Início
-                      </>}
-                  </Button>
-                  {locationInicio ? <p className="text-sm text-muted-foreground">
-                      Lat: {locationInicio.lat.toFixed(6)}, Lng: {locationInicio.lng.toFixed(6)}
-                    </p> : <p className="text-sm text-muted-foreground">Capturar localização inicial</p>}
-                </div>
-              </div>
-
-              {/* GPS Fim */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Fim</Label>
-                <div className="flex gap-2 items-center">
-                  <Button type="button" variant="outline" onClick={getCurrentLocationFim} disabled={gpsLoadingFim}>
-                    {gpsLoadingFim ? <>
-                        <MapPin className="mr-2 h-4 w-4 animate-pulse" />
-                        Capturando...
-                      </> : <>
-                        <MapPin className="mr-2 h-4 w-4" />
-                        Capturar GPS Fim
-                      </>}
-                  </Button>
-                  {locationFim ? <p className="text-sm text-muted-foreground">
-                      Lat: {locationFim.lat.toFixed(6)}, Lng: {locationFim.lng.toFixed(6)}
-                    </p> : <p className="text-sm text-muted-foreground">Capturar localização final</p>}
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Linha 1: Data e Número NC */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -567,6 +492,110 @@ const NaoConformidadeForm = ({
                 ...formData,
                 km_final: e.target.value
               })} placeholder="Ex: 125.500" />
+              </div>
+            </div>
+          )}
+
+          {/* GPS Status - Condicional baseado no tipo */}
+          {!formData.tipo_nc && (
+            <div className="bg-muted p-4 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                Selecione o Tipo de NC primeiro para capturar as coordenadas GPS
+              </p>
+            </div>
+          )}
+          
+          {formData.tipo_nc && !isExtensao && (
+            <div className="space-y-2">
+              <Label>Coordenadas GPS *</Label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <Button type="button" variant="outline" onClick={getCurrentLocation} disabled={gpsLoading} className="w-full">
+                  {gpsLoading ? <>
+                      <MapPin className="mr-2 h-4 w-4 animate-pulse" />
+                      Capturando...
+                    </> : <>
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Capturar Localização
+                    </>}
+                </Button>
+                <Input 
+                  type="text" 
+                  placeholder="Latitude" 
+                  value={location ? location.lat.toFixed(6) : ""} 
+                  disabled 
+                  className="bg-muted"
+                />
+                <Input 
+                  type="text" 
+                  placeholder="Longitude" 
+                  value={location ? location.lng.toFixed(6) : ""} 
+                  disabled 
+                  className="bg-muted"
+                />
+              </div>
+            </div>
+          )}
+
+          {formData.tipo_nc && isExtensao && (
+            <div className="space-y-4">
+              {/* GPS Início */}
+              <div className="space-y-2">
+                <Label>Coordenadas GPS Início *</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <Button type="button" variant="outline" onClick={getCurrentLocationInicio} disabled={gpsLoadingInicio} className="w-full">
+                    {gpsLoadingInicio ? <>
+                        <MapPin className="mr-2 h-4 w-4 animate-pulse" />
+                        Capturando...
+                      </> : <>
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Capturar Início
+                      </>}
+                  </Button>
+                  <Input 
+                    type="text" 
+                    placeholder="Latitude Inicial" 
+                    value={locationInicio ? locationInicio.lat.toFixed(6) : ""} 
+                    disabled 
+                    className="bg-muted"
+                  />
+                  <Input 
+                    type="text" 
+                    placeholder="Longitude Inicial" 
+                    value={locationInicio ? locationInicio.lng.toFixed(6) : ""} 
+                    disabled 
+                    className="bg-muted"
+                  />
+                </div>
+              </div>
+
+              {/* GPS Fim */}
+              <div className="space-y-2">
+                <Label>Coordenadas GPS Fim *</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <Button type="button" variant="outline" onClick={getCurrentLocationFim} disabled={gpsLoadingFim} className="w-full">
+                    {gpsLoadingFim ? <>
+                        <MapPin className="mr-2 h-4 w-4 animate-pulse" />
+                        Capturando...
+                      </> : <>
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Capturar Fim
+                      </>}
+                  </Button>
+                  <Input 
+                    type="text" 
+                    placeholder="Latitude Final" 
+                    value={locationFim ? locationFim.lat.toFixed(6) : ""} 
+                    disabled 
+                    className="bg-muted"
+                  />
+                  <Input 
+                    type="text" 
+                    placeholder="Longitude Final" 
+                    value={locationFim ? locationFim.lng.toFixed(6) : ""} 
+                    disabled 
+                    className="bg-muted"
+                  />
+                </div>
               </div>
             </div>
           )}
