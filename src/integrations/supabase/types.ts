@@ -1576,6 +1576,8 @@ export type Database = {
       retrorrefletividade_estatica: {
         Row: {
           codigo_dispositivo: string | null
+          cor_fundo: string | null
+          cor_legenda: string | null
           created_at: string
           data_medicao: string
           enviado_coordenador: boolean | null
@@ -1588,14 +1590,22 @@ export type Database = {
           observacao: string | null
           rodovia_id: string
           situacao: string
+          situacao_fundo: string | null
+          situacao_legenda: string | null
           tipo_dispositivo: string
           updated_at: string
           user_id: string
           valor_medido: number
+          valor_medido_fundo: number | null
+          valor_medido_legenda: number | null
           valor_minimo: number
+          valor_minimo_fundo: number | null
+          valor_minimo_legenda: number | null
         }
         Insert: {
           codigo_dispositivo?: string | null
+          cor_fundo?: string | null
+          cor_legenda?: string | null
           created_at?: string
           data_medicao: string
           enviado_coordenador?: boolean | null
@@ -1608,14 +1618,22 @@ export type Database = {
           observacao?: string | null
           rodovia_id: string
           situacao: string
+          situacao_fundo?: string | null
+          situacao_legenda?: string | null
           tipo_dispositivo: string
           updated_at?: string
           user_id: string
           valor_medido: number
+          valor_medido_fundo?: number | null
+          valor_medido_legenda?: number | null
           valor_minimo: number
+          valor_minimo_fundo?: number | null
+          valor_minimo_legenda?: number | null
         }
         Update: {
           codigo_dispositivo?: string | null
+          cor_fundo?: string | null
+          cor_legenda?: string | null
           created_at?: string
           data_medicao?: string
           enviado_coordenador?: boolean | null
@@ -1628,11 +1646,17 @@ export type Database = {
           observacao?: string | null
           rodovia_id?: string
           situacao?: string
+          situacao_fundo?: string | null
+          situacao_legenda?: string | null
           tipo_dispositivo?: string
           updated_at?: string
           user_id?: string
           valor_medido?: number
+          valor_medido_fundo?: number | null
+          valor_medido_legenda?: number | null
           valor_minimo?: number
+          valor_minimo_fundo?: number | null
+          valor_minimo_legenda?: number | null
         }
         Relationships: []
       }
