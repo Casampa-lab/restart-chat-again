@@ -90,10 +90,6 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
     );
   };
 
-  useEffect(() => {
-    getCurrentLocation();
-  }, []);
-
   // Resetar problema quando tipo_nc mudar
   useEffect(() => {
     if (formData.tipo_nc) {
@@ -105,7 +101,7 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
     e.preventDefault();
 
     if (!location) {
-      toast.error("Aguarde a captura do GPS ou clique em 'Capturar GPS Agora'");
+      toast.error("Capture a localização GPS antes de salvar");
       return;
     }
 
@@ -185,8 +181,8 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
         km_referencia: "",
       });
       
-      // Recapturar GPS para próximo registro
-      getCurrentLocation();
+      // Limpar localização para o próximo registro
+      setLocation(null);
     } catch (error: any) {
       toast.error("Erro ao salvar: " + error.message);
     } finally {
@@ -213,28 +209,36 @@ const NaoConformidadeForm = ({ loteId, rodoviaId }: NaoConformidadeFormProps) =>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* GPS Status */}
           <div className="bg-muted p-4 rounded-lg space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-primary" />
-                <span className="font-semibold">Localização GPS:</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <Label>Coordenadas GPS *</Label>
+            </div>
+            <div className="flex gap-2 items-center">
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
                 onClick={getCurrentLocation}
                 disabled={gpsLoading}
               >
-                {gpsLoading ? "Capturando..." : "Atualizar GPS"}
+                {gpsLoading ? (
+                  <>
+                    <MapPin className="mr-2 h-4 w-4 animate-pulse" />
+                    Capturando...
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Capturar GPS
+                  </>
+                )}
               </Button>
+              {location ? (
+                <p className="text-sm text-muted-foreground">
+                  Lat: {location.lat.toFixed(6)}, Lng: {location.lng.toFixed(6)}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">Clique no botão para capturar a localização</p>
+              )}
             </div>
-            {location ? (
-              <p className="text-sm text-muted-foreground">
-                Lat: {location.lat.toFixed(6)}, Lng: {location.lng.toFixed(6)}
-              </p>
-            ) : (
-              <p className="text-sm text-destructive">Aguardando localização GPS...</p>
-            )}
           </div>
 
           {/* Linha 1: Data e Número NC */}
