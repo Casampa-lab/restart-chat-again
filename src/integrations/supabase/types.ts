@@ -1328,6 +1328,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          email: string | null
           empresa_id: string | null
           id: string
           nome: string
@@ -1336,6 +1337,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          email?: string | null
           empresa_id?: string | null
           id: string
           nome: string
@@ -1344,6 +1346,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          email?: string | null
           empresa_id?: string | null
           id?: string
           nome?: string
