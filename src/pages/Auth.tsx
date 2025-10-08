@@ -166,15 +166,18 @@ const Auth = () => {
         </div>
       </div>
       
-      <footer className="bg-background border-t mt-auto">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col items-center justify-center gap-4">
-            <p className="text-sm text-muted-foreground text-center">
-              Críticas e sugestões: <a href="mailto:operavia.online@gmail.com" className="text-primary hover:underline font-weight-semibold">operavia.online@gmail.com</a>
+      <div className="container mx-auto px-4 pb-6">
+        <Card className="bg-card shadow-lg border-primary/20 max-w-md mx-auto">
+          <CardContent className="py-4">
+            <p className="text-sm text-center">
+              <span className="font-semibold text-foreground">Contato:</span>{" "}
+              <a href="mailto:operavia.online@gmail.com" className="text-primary hover:underline font-medium">
+                operavia.online@gmail.com
+              </a>
             </p>
-          </div>
-        </div>
-      </footer>
+          </CardContent>
+        </Card>
+      </div>
     </div>;
 };
 export default Auth;
