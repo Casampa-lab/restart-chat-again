@@ -46,8 +46,18 @@ interface Retrorrefletividade {
   lado: string;
   tipo_dispositivo: string;
   codigo_dispositivo: string | null;
-  valor_medido: number;
-  valor_minimo: number;
+  // Campos legados (antes IN 03/2025)
+  valor_medido: number | null;
+  valor_minimo: number | null;
+  // Novos campos separados por cor de película (IN 03/2025)
+  cor_fundo: string | null;
+  valor_medido_fundo: number | null;
+  valor_minimo_fundo: number | null;
+  situacao_fundo: string | null;
+  cor_legenda: string | null;
+  valor_medido_legenda: number | null;
+  valor_minimo_legenda: number | null;
+  situacao_legenda: string | null;
   situacao: string;
   observacao: string | null;
   lote_id: string;
@@ -286,8 +296,8 @@ const MinhasRetrorrefletividades = () => {
                       <TableHead>Lado</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead>Código</TableHead>
-                      <TableHead>Medido</TableHead>
-                      <TableHead>Mínimo</TableHead>
+                      <TableHead>Fundo</TableHead>
+                      <TableHead>Legenda</TableHead>
                       <TableHead>Situação</TableHead>
                       <TableHead>Observação</TableHead>
                       <TableHead>Status</TableHead>
@@ -315,8 +325,40 @@ const MinhasRetrorrefletividades = () => {
                         <TableCell>{medicao.lado}</TableCell>
                         <TableCell className="max-w-xs truncate">{medicao.tipo_dispositivo}</TableCell>
                         <TableCell>{medicao.codigo_dispositivo || "-"}</TableCell>
-                        <TableCell>{medicao.valor_medido.toFixed(1)}</TableCell>
-                        <TableCell>{medicao.valor_minimo.toFixed(1)}</TableCell>
+                        <TableCell className="text-xs">
+                          {medicao.valor_medido_fundo !== null ? (
+                            <div className="space-y-1">
+                              <div className="font-medium">{medicao.cor_fundo || 'N/A'}</div>
+                              <div className="text-muted-foreground">
+                                {medicao.valor_medido_fundo.toFixed(1)} / {medicao.valor_minimo_fundo?.toFixed(1) || 'N/A'}
+                              </div>
+                              <div className={`text-xs ${medicao.situacao_fundo === 'Conforme' ? 'text-green-600' : 'text-red-600'}`}>
+                                {medicao.situacao_fundo}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-muted-foreground">
+                              {medicao.valor_medido !== null ? medicao.valor_medido.toFixed(1) : '-'}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          {medicao.valor_medido_legenda !== null ? (
+                            <div className="space-y-1">
+                              <div className="font-medium">{medicao.cor_legenda || 'N/A'}</div>
+                              <div className="text-muted-foreground">
+                                {medicao.valor_medido_legenda.toFixed(1)} / {medicao.valor_minimo_legenda?.toFixed(1) || 'N/A'}
+                              </div>
+                              <div className={`text-xs ${medicao.situacao_legenda === 'Conforme' ? 'text-green-600' : 'text-red-600'}`}>
+                                {medicao.situacao_legenda}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-muted-foreground">
+                              {medicao.valor_minimo !== null ? medicao.valor_minimo.toFixed(1) : '-'}
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 rounded text-xs font-semibold ${
                             medicao.situacao === "Conforme"
