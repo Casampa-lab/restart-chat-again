@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Building2, Upload, Users } from "lucide-react";
+import { Pencil, Plus, Trash2, Building2, Upload, Users, Copy, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 interface Supervisora {
@@ -15,6 +15,7 @@ interface Supervisora {
   nome_empresa: string;
   logo_url: string | null;
   usar_logo_customizado: boolean;
+  codigo_convite: string | null;
   created_at: string;
 }
 
@@ -47,6 +48,35 @@ export const SupervisorasManager = () => {
       toast.error("Erro ao carregar supervisoras: " + error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyCodigo = (codigo: string) => {
+    navigator.clipboard.writeText(codigo);
+    toast.success("Código copiado!");
+  };
+
+  const handleGerarNovoCodigo = async (id: string, nome: string) => {
+    if (!confirm(`Gerar novo código de convite para "${nome}"? O código anterior ficará inválido.`)) {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc("generate_codigo_convite");
+      
+      if (error) throw error;
+
+      const { error: updateError } = await supabase
+        .from("supervisoras")
+        .update({ codigo_convite: data })
+        .eq("id", id);
+
+      if (updateError) throw updateError;
+
+      toast.success("Novo código gerado!");
+      loadSupervisoras();
+    } catch (error: any) {
+      toast.error("Erro ao gerar código: " + error.message);
     }
   };
 
@@ -258,6 +288,7 @@ export const SupervisorasManager = () => {
                 <TableHead>Nome</TableHead>
                 <TableHead className="text-center">Logo</TableHead>
                 <TableHead className="text-center">Logo Ativo</TableHead>
+                <TableHead>Código Convite</TableHead>
                 <TableHead className="text-center">Usuários</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -281,6 +312,41 @@ export const SupervisorasManager = () => {
                   </TableCell>
                   <TableCell className="text-center">
                     {supervisora.usar_logo_customizado ? "✓" : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {supervisora.codigo_convite ? (
+                        <>
+                          <code className="text-sm font-mono bg-muted px-2 py-1 rounded">
+                            {supervisora.codigo_convite}
+                          </code>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCopyCodigo(supervisora.codigo_convite!)}
+                            title="Copiar código"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleGerarNovoCodigo(supervisora.id, supervisora.nome_empresa)}
+                            title="Gerar novo código"
+                          >
+                            <RefreshCw className="h-4 w-4" />
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleGerarNovoCodigo(supervisora.id, supervisora.nome_empresa)}
+                        >
+                          Gerar Código
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="text-center">
                     <Button

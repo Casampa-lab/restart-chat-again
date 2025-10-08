@@ -15,6 +15,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nome, setNome] = useState("");
+  const [codigoConvite, setCodigoConvite] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -53,6 +54,7 @@ const Auth = () => {
             emailRedirectTo: `${window.location.origin}/`,
             data: {
               nome: nome,
+              codigo_convite: codigoConvite || undefined,
             },
           },
         });
@@ -86,17 +88,34 @@ const Auth = () => {
           <CardContent>
             <form onSubmit={handleAuth} className="space-y-4">
               {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="nome">Nome Completo</Label>
-                  <Input
-                    id="nome"
-                    type="text"
-                    placeholder="Seu nome"
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    required={!isLogin}
-                  />
-                </div>
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="nome">Nome Completo</Label>
+                    <Input
+                      id="nome"
+                      type="text"
+                      placeholder="Seu nome"
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                      required={!isLogin}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="codigo">Código de Convite (opcional)</Label>
+                    <Input
+                      id="codigo"
+                      type="text"
+                      placeholder="Ex: ABC12345"
+                      value={codigoConvite}
+                      onChange={(e) => setCodigoConvite(e.target.value.toUpperCase())}
+                      maxLength={8}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Se você recebeu um código da sua supervisora, digite aqui.
+                    </p>
+                  </div>
+                </>
               )}
               
               <div className="space-y-2">
