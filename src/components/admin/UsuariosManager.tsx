@@ -103,6 +103,51 @@ export const UsuariosManager = () => {
 
     setLoading(true);
     try {
+      // Verificar limites por supervisora
+      if (selectedSupervisora) {
+        const { data: existingUsers } = await supabase
+          .from("profiles")
+          .select(`
+            id,
+            user_roles!inner(role)
+          `)
+          .eq("supervisora_id", selectedSupervisora);
+
+        const currentRoleCounts = existingUsers?.reduce((acc: any, user: any) => {
+          const userRole = user.user_roles?.[0]?.role;
+          if (userRole) {
+            acc[userRole] = (acc[userRole] || 0) + 1;
+          }
+          return acc;
+        }, {});
+
+        // Verificar se está mudando a supervisora ou o role
+        const isChangingSupervisora = editingProfile.supervisora_id !== selectedSupervisora;
+        const currentUserRole = editingProfile.user_roles?.[0]?.role;
+        const isChangingRole = currentUserRole !== selectedRole;
+
+        // Se estiver adicionando um novo usuário nessa supervisora OU mudando o role
+        if (isChangingSupervisora || isChangingRole) {
+          // Ajustar contagem: remover o role antigo se existir na mesma supervisora
+          if (!isChangingSupervisora && currentUserRole) {
+            currentRoleCounts[currentUserRole] = Math.max(0, (currentRoleCounts[currentUserRole] || 0) - 1);
+          }
+
+          // Limites: 5 técnicos, 1 coordenador
+          if (selectedRole === "tecnico" && (currentRoleCounts?.tecnico || 0) >= 5) {
+            toast.error("Esta supervisora já atingiu o limite de 5 técnicos de campo");
+            setLoading(false);
+            return;
+          }
+
+          if (selectedRole === "coordenador" && (currentRoleCounts?.coordenador || 0) >= 1) {
+            toast.error("Esta supervisora já possui 1 coordenador. Apenas 1 coordenador é permitido por supervisora");
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
       // Atualizar supervisora
       const { error: profileError } = await supabase
         .from("profiles")

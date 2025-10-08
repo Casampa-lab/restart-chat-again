@@ -29,6 +29,18 @@ const Auth = () => {
         navigate("/");
       }
     });
+
+    // Inicializar admin na primeira vez
+    const initAdmin = async () => {
+      try {
+        await supabase.functions.invoke('init-admin');
+      } catch (error) {
+        // Silenciar erro - admin pode já existir
+        console.log('Admin initialization:', error);
+      }
+    };
+
+    initAdmin();
   }, [navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
