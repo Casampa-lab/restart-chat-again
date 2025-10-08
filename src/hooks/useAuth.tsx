@@ -28,21 +28,21 @@ export const useAuth = () => {
   }, []);
 
   const signOut = async () => {
-    console.log("useAuth signOut: iniciando limpeza completa");
-    
-    try {
-      // Fazer logout no servidor (modo local)
-      await supabase.auth.signOut({ scope: 'local' });
-      console.log("useAuth signOut: logout local concluído");
-    } catch (error) {
-      console.log("useAuth signOut: erro ignorado", error);
-    }
-    
-    // Forçar limpeza do estado local independente do resultado
+    // Limpar estado imediatamente
     setUser(null);
     setSession(null);
+    setLoading(false);
     
-    console.log("useAuth signOut: estado limpo");
+    try {
+      // Fazer logout global para limpar tudo
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (error) {
+      // Ignorar erros - estado já foi limpo
+      console.log("signOut error (ignored):", error);
+    }
+    
+    // Forçar limpeza completa do localStorage
+    localStorage.removeItem('sb-cfdnrbyeuqtrjzzjyuon-auth-token');
   };
 
   return { user, session, loading, signOut };

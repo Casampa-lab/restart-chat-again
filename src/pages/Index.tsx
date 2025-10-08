@@ -62,22 +62,11 @@ const Index = () => {
   }, [user, authLoading, navigate]);
 
   const handleSignOut = async () => {
-    console.log("handleSignOut: iniciando logout");
     try {
-      // Limpar estado local primeiro
-      setIsAdminOrCoordinator(false);
-      console.log("handleSignOut: estado local limpo");
-      
-      // Fazer logout no Supabase
       await signOut();
-      console.log("handleSignOut: signOut concluído");
-      
-      // Forçar navegação imediata
-      navigate("/auth", { replace: true });
-      console.log("handleSignOut: navegação executada");
+      // O redirecionamento será feito automaticamente pelo useEffect que monitora user
     } catch (error: any) {
-      console.error("handleSignOut: erro capturado", error);
-      // Forçar redirecionamento mesmo com erro
+      console.error("Erro ao fazer logout:", error);
       navigate("/auth", { replace: true });
     }
   };

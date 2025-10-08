@@ -36,17 +36,12 @@ const Auth = () => {
 
     checkSession();
 
-    // Listener apenas para login, não para outras mudanças
+    // Listener apenas para mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth.tsx: evento de auth", event, { hasSession: !!session });
-      
-      // Apenas navegar para / se for explicitamente um login bem-sucedido
       if (event === 'SIGNED_IN' && session) {
-        console.log("Auth.tsx: login detectado, navegando para /");
         navigate("/");
       }
-      
-      // Não fazer nada no SIGNED_OUT - deixar o usuário na página de login
+      // SIGNED_OUT não precisa fazer nada - usuário já está em /auth
     });
 
     // Inicializar admin na primeira vez
