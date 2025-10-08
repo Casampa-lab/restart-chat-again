@@ -64,10 +64,17 @@ const Index = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
+      // Limpar estado local
+      setIsAdminOrCoordinator(false);
       navigate("/auth", { replace: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao fazer logout:", error);
-      toast.error("Erro ao sair. Tente novamente.");
+      // Se for erro de sessão ausente, apenas redirecionar
+      if (error?.message === "Auth session missing!") {
+        navigate("/auth", { replace: true });
+      } else {
+        toast.error("Erro ao sair. Tente novamente.");
+      }
     }
   };
 

@@ -30,10 +30,16 @@ export const useAuth = () => {
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    } catch (error) {
-      console.error("Erro no signOut:", error);
-      throw error;
+      // Ignorar erro se a sessão já não existe (objetivo do logout alcançado)
+      if (error && error.message !== "Auth session missing!") {
+        throw error;
+      }
+    } catch (error: any) {
+      // Se não for erro de sessão ausente, relançar
+      if (error?.message !== "Auth session missing!") {
+        console.error("Erro no signOut:", error);
+        throw error;
+      }
     }
   };
 
