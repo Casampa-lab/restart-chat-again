@@ -14,6 +14,7 @@ interface Supervisora {
   id: string;
   nome_empresa: string;
   contrato: string | null;
+  email_prefixo: string | null;
   logo_url: string | null;
   usar_logo_customizado: boolean;
   codigo_convite: string | null;
@@ -28,6 +29,7 @@ export const SupervisorasManager = () => {
   const [formData, setFormData] = useState({
     nome_empresa: "",
     contrato: "",
+    email_prefixo: "",
     usar_logo_customizado: false,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -121,6 +123,7 @@ export const SupervisorasManager = () => {
           .update({
             nome_empresa: formData.nome_empresa,
             contrato: formData.contrato,
+            email_prefixo: formData.email_prefixo || null,
             logo_url: logoUrl,
             usar_logo_customizado: formData.usar_logo_customizado,
           })
@@ -135,6 +138,7 @@ export const SupervisorasManager = () => {
           .insert({
             nome_empresa: formData.nome_empresa,
             contrato: formData.contrato,
+            email_prefixo: formData.email_prefixo || null,
             logo_url: logoUrl,
             usar_logo_customizado: formData.usar_logo_customizado,
           });
@@ -210,6 +214,7 @@ export const SupervisorasManager = () => {
     setFormData({
       nome_empresa: supervisora.nome_empresa,
       contrato: supervisora.contrato || "",
+      email_prefixo: supervisora.email_prefixo || "",
       usar_logo_customizado: supervisora.usar_logo_customizado,
     });
     setIsDialogOpen(true);
@@ -218,7 +223,7 @@ export const SupervisorasManager = () => {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingSupervisora(null);
-    setFormData({ nome_empresa: "", contrato: "", usar_logo_customizado: false });
+    setFormData({ nome_empresa: "", contrato: "", email_prefixo: "", usar_logo_customizado: false });
     setLogoFile(null);
   };
 
@@ -239,7 +244,7 @@ export const SupervisorasManager = () => {
             <DialogTrigger asChild>
               <Button onClick={() => {
                 setEditingSupervisora(null);
-                setFormData({ nome_empresa: "", contrato: "", usar_logo_customizado: false });
+                setFormData({ nome_empresa: "", contrato: "", email_prefixo: "", usar_logo_customizado: false });
               }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Nova Supervisora
@@ -274,6 +279,32 @@ export const SupervisorasManager = () => {
                     onChange={(e) => setFormData({ ...formData, contrato: e.target.value })}
                     placeholder="Ex: Contrato N° 123/2024"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email_prefixo">Prefixo de Email</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="email_prefixo"
+                      value={formData.email_prefixo}
+                      onChange={(e) => {
+                        // Remove caracteres especiais e converte para minúsculas
+                        const value = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '');
+                        setFormData({ ...formData, email_prefixo: value });
+                      }}
+                      placeholder="Ex: brlegal"
+                      maxLength={20}
+                      className="flex-1"
+                    />
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      @operavia.online
+                    </span>
+                  </div>
+                  {formData.email_prefixo && (
+                    <p className="text-sm text-muted-foreground">
+                      Email de envio: <strong>{formData.email_prefixo}@operavia.online</strong>
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -341,6 +372,7 @@ export const SupervisorasManager = () => {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Contrato</TableHead>
+                <TableHead>Email de Envio</TableHead>
                 <TableHead className="text-center">Logo</TableHead>
                 <TableHead className="text-center">Logo Ativo</TableHead>
                 <TableHead>Código Convite</TableHead>
@@ -356,6 +388,15 @@ export const SupervisorasManager = () => {
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {supervisora.contrato || "—"}
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {supervisora.email_prefixo ? (
+                      <code className="text-xs bg-muted px-2 py-1 rounded">
+                        {supervisora.email_prefixo}@operavia.online
+                      </code>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
                     {supervisora.logo_url ? (

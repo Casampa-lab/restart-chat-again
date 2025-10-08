@@ -1857,6 +1857,7 @@ export type Database = {
           codigo_convite: string | null
           contrato: string | null
           created_at: string | null
+          email_prefixo: string | null
           id: string
           logo_url: string | null
           nome_empresa: string
@@ -1867,6 +1868,7 @@ export type Database = {
           codigo_convite?: string | null
           contrato?: string | null
           created_at?: string | null
+          email_prefixo?: string | null
           id?: string
           logo_url?: string | null
           nome_empresa: string
@@ -1877,6 +1879,7 @@ export type Database = {
           codigo_convite?: string | null
           contrato?: string | null
           created_at?: string | null
+          email_prefixo?: string | null
           id?: string
           logo_url?: string | null
           nome_empresa?: string
