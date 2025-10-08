@@ -40,11 +40,12 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
   const [isCapturing, setIsCapturing] = useState(false);
   const [formData, setFormData] = useState({
     data_medicao: new Date().toISOString().split('T')[0],
+    tipo_sinalizacao: "",
     km_referencia: "",
     lado: "",
     tipo_dispositivo: "",
     codigo_dispositivo: "",
-    // Leituras película fundo
+    // Leituras película fundo (Vertical)
     cor_fundo: "",
     leitura_fundo_1: "",
     leitura_fundo_2: "",
@@ -53,7 +54,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
     leitura_fundo_5: "",
     valor_medido_fundo: "",
     valor_minimo_fundo: "",
-    // Leituras película legenda/orla
+    // Leituras película legenda/orla (Vertical)
     cor_legenda: "",
     leitura_legenda_1: "",
     leitura_legenda_2: "",
@@ -62,14 +63,43 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
     leitura_legenda_5: "",
     valor_medido_legenda: "",
     valor_minimo_legenda: "",
+    // Leituras sinalização horizontal (10 leituras por km)
+    leitura_horizontal_1: "",
+    leitura_horizontal_2: "",
+    leitura_horizontal_3: "",
+    leitura_horizontal_4: "",
+    leitura_horizontal_5: "",
+    leitura_horizontal_6: "",
+    leitura_horizontal_7: "",
+    leitura_horizontal_8: "",
+    leitura_horizontal_9: "",
+    leitura_horizontal_10: "",
+    valor_medido_horizontal: "",
+    valor_minimo_horizontal: "",
     observacao: "",
     latitude: "",
     longitude: "",
   });
 
-  // Calcula a média das leituras automaticamente
+  // Calcula a média das leituras automaticamente (5 leituras para vertical)
   const calcularMedia = (l1: string, l2: string, l3: string, l4: string, l5: string) => {
     const leituras = [l1, l2, l3, l4, l5]
+      .filter(l => l !== "" && !isNaN(parseFloat(l)))
+      .map(l => parseFloat(l));
+    
+    if (leituras.length === 0) return "";
+    
+    const soma = leituras.reduce((acc, val) => acc + val, 0);
+    const media = soma / leituras.length;
+    return media.toFixed(1);
+  };
+
+  // Calcula a média das 10 leituras para horizontal
+  const calcularMediaHorizontal = (
+    l1: string, l2: string, l3: string, l4: string, l5: string,
+    l6: string, l7: string, l8: string, l9: string, l10: string
+  ) => {
+    const leituras = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10]
       .filter(l => l !== "" && !isNaN(parseFloat(l)))
       .map(l => parseFloat(l));
     
@@ -128,22 +158,50 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
       : "Não Conforme"
     : "";
 
-  const situacaoGeral = situacaoFundo && situacaoLegenda
-    ? (situacaoFundo === "Conforme" && situacaoLegenda === "Conforme" ? "Conforme" : "Não Conforme")
+  const situacaoHorizontal = formData.valor_medido_horizontal && formData.valor_minimo_horizontal
+    ? parseFloat(formData.valor_medido_horizontal) >= parseFloat(formData.valor_minimo_horizontal)
+      ? "Conforme"
+      : "Não Conforme"
     : "";
+
+  const situacaoGeral = formData.tipo_sinalizacao === "Horizontal"
+    ? situacaoHorizontal
+    : (situacaoFundo && situacaoLegenda
+      ? (situacaoFundo === "Conforme" && situacaoLegenda === "Conforme" ? "Conforme" : "Não Conforme")
+      : "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.km_referencia || !formData.lado || !formData.tipo_dispositivo || 
-        !formData.valor_medido_fundo || !formData.valor_minimo_fundo ||
-        !formData.valor_medido_legenda || !formData.valor_minimo_legenda) {
+    if (!formData.tipo_sinalizacao) {
       toast({
         title: "Erro",
-        description: "Preencha todos os campos obrigatórios",
+        description: "Selecione o tipo de sinalização",
         variant: "destructive",
       });
       return;
+    }
+
+    if (formData.tipo_sinalizacao === "Horizontal") {
+      if (!formData.km_referencia || !formData.valor_medido_horizontal || !formData.valor_minimo_horizontal) {
+        toast({
+          title: "Erro",
+          description: "Preencha todos os campos obrigatórios para Sinalização Horizontal",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else {
+      if (!formData.km_referencia || !formData.lado || !formData.tipo_dispositivo || 
+          !formData.valor_medido_fundo || !formData.valor_minimo_fundo ||
+          !formData.valor_medido_legenda || !formData.valor_minimo_legenda) {
+        toast({
+          title: "Erro",
+          description: "Preencha todos os campos obrigatórios para Sinalização Vertical",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -155,30 +213,44 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
         throw new Error("Usuário não autenticado");
       }
 
+      const dadosBase = {
+        user_id: user.id,
+        lote_id: loteId,
+        rodovia_id: rodoviaId,
+        data_medicao: formData.data_medicao,
+        km_referencia: parseFloat(formData.km_referencia),
+        tipo_sinalizacao: formData.tipo_sinalizacao,
+        situacao: situacaoGeral,
+        observacao: formData.observacao || null,
+        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
+      };
+
+      const dadosInsert = formData.tipo_sinalizacao === "Horizontal"
+        ? {
+            ...dadosBase,
+            valor_medido_horizontal: parseFloat(formData.valor_medido_horizontal),
+            valor_minimo_horizontal: parseFloat(formData.valor_minimo_horizontal),
+            situacao_horizontal: situacaoHorizontal,
+          }
+        : {
+            ...dadosBase,
+            lado: formData.lado,
+            tipo_dispositivo: formData.tipo_dispositivo,
+            codigo_dispositivo: formData.codigo_dispositivo || null,
+            cor_fundo: formData.cor_fundo || null,
+            valor_medido_fundo: parseFloat(formData.valor_medido_fundo),
+            valor_minimo_fundo: parseFloat(formData.valor_minimo_fundo),
+            situacao_fundo: situacaoFundo,
+            cor_legenda: formData.cor_legenda || null,
+            valor_medido_legenda: parseFloat(formData.valor_medido_legenda),
+            valor_minimo_legenda: parseFloat(formData.valor_minimo_legenda),
+            situacao_legenda: situacaoLegenda,
+          };
+
       const { error } = await supabase
         .from("retrorrefletividade_estatica")
-        .insert({
-          user_id: user.id,
-          lote_id: loteId,
-          rodovia_id: rodoviaId,
-          data_medicao: formData.data_medicao,
-          km_referencia: parseFloat(formData.km_referencia),
-          lado: formData.lado,
-          tipo_dispositivo: formData.tipo_dispositivo,
-          codigo_dispositivo: formData.codigo_dispositivo || null,
-          cor_fundo: formData.cor_fundo || null,
-          valor_medido_fundo: parseFloat(formData.valor_medido_fundo),
-          valor_minimo_fundo: parseFloat(formData.valor_minimo_fundo),
-          situacao_fundo: situacaoFundo,
-          cor_legenda: formData.cor_legenda || null,
-          valor_medido_legenda: parseFloat(formData.valor_medido_legenda),
-          valor_minimo_legenda: parseFloat(formData.valor_minimo_legenda),
-          situacao_legenda: situacaoLegenda,
-          situacao: situacaoGeral,
-          observacao: formData.observacao || null,
-          latitude: formData.latitude ? parseFloat(formData.latitude) : null,
-          longitude: formData.longitude ? parseFloat(formData.longitude) : null,
-        });
+        .insert(dadosInsert);
 
       if (error) throw error;
 
@@ -190,6 +262,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
       // Reset form
       setFormData({
         data_medicao: new Date().toISOString().split('T')[0],
+        tipo_sinalizacao: "",
         km_referencia: "",
         lado: "",
         tipo_dispositivo: "",
@@ -210,6 +283,18 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
         leitura_legenda_5: "",
         valor_medido_legenda: "",
         valor_minimo_legenda: "",
+        leitura_horizontal_1: "",
+        leitura_horizontal_2: "",
+        leitura_horizontal_3: "",
+        leitura_horizontal_4: "",
+        leitura_horizontal_5: "",
+        leitura_horizontal_6: "",
+        leitura_horizontal_7: "",
+        leitura_horizontal_8: "",
+        leitura_horizontal_9: "",
+        leitura_horizontal_10: "",
+        valor_medido_horizontal: "",
+        valor_minimo_horizontal: "",
         observacao: "",
         latitude: "",
         longitude: "",
@@ -249,6 +334,28 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                 required
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tipo_sinalizacao">Tipo de Sinalização *</Label>
+              <Select
+                value={formData.tipo_sinalizacao}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, tipo_sinalizacao: value })
+                }
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Horizontal">Sinalização Horizontal</SelectItem>
+                  <SelectItem value="Vertical">Sinalização Vertical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <div className="space-y-2">
               <Label htmlFor="km_referencia">km de Referência *</Label>
