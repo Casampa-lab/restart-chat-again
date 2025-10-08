@@ -63,18 +63,20 @@ const Index = () => {
 
   const handleSignOut = async () => {
     try {
-      await signOut();
-      // Limpar estado local
+      // Limpar estado local primeiro
       setIsAdminOrCoordinator(false);
-      navigate("/auth", { replace: true });
+      
+      // Fazer logout no Supabase
+      await signOut();
+      
+      // O redirecionamento será feito pelo useEffect que detecta user = null
     } catch (error: any) {
       console.error("Erro ao fazer logout:", error);
-      // Se for erro de sessão ausente, apenas redirecionar
-      if (error?.message === "Auth session missing!") {
-        navigate("/auth", { replace: true });
-      } else {
-        toast.error("Erro ao sair. Tente novamente.");
+      // Se houver erro, forçar redirecionamento
+      if (error?.message !== "Auth session missing!") {
+        toast.error("Erro ao sair. Redirecionando...");
       }
+      navigate("/auth", { replace: true });
     }
   };
 

@@ -19,15 +19,29 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Recuperar último email usado
     const lastEmail = localStorage.getItem("lastEmail");
     if (lastEmail) {
       setEmail(lastEmail);
     }
+  }, []);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         navigate("/");
       }
+    };
+
+    checkSession();
+
+    // Listener para mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        navigate("/");
+      }
+      // Não fazer nada no SIGNED_OUT - deixar o usuário na página de login
     });
 
     // Inicializar admin na primeira vez
@@ -41,6 +55,10 @@ const Auth = () => {
     };
 
     initAdmin();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
