@@ -184,7 +184,6 @@ const NaoConformidadeForm = ({
     }
   };
   const problemasDisponiveis = formData.tipo_nc ? PROBLEMAS_POR_TIPO[formData.tipo_nc as TipoNC] || [] : [];
-  
   const handleNotificar = () => {
     if (!formData.data_notificacao) {
       toast.error("Preencha a Data da Notificação primeiro");
@@ -202,7 +201,6 @@ const NaoConformidadeForm = ({
     const diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24));
     return diferencaDias;
   };
-
   return <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -343,10 +341,7 @@ const NaoConformidadeForm = ({
               ...formData,
               situacao: value
             })} required>
-                <SelectTrigger 
-                  id="situacao" 
-                  className={formData.situacao !== "Atendida" ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20" : ""}
-                >
+                <SelectTrigger id="situacao" className={formData.situacao !== "Atendida" ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20" : ""}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -366,13 +361,8 @@ const NaoConformidadeForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label>Diferença (dias)</Label>
-              <Input 
-                type="text" 
-                value={calcularDiferencaDias() !== null ? `${calcularDiferencaDias()} dias` : "—"} 
-                disabled 
-                className="bg-muted"
-              />
+              <Label>Prazo de Execução (dias)</Label>
+              <Input type="text" value={calcularDiferencaDias() !== null ? `${calcularDiferencaDias()} dias` : "—"} disabled className="bg-muted" />
             </div>
           </div>
 
