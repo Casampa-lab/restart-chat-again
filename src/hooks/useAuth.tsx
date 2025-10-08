@@ -28,23 +28,19 @@ export const useAuth = () => {
   }, []);
 
   const signOut = async () => {
-    console.log("useAuth signOut: iniciando");
+    console.log("useAuth signOut: iniciando limpeza");
+    
+    // Limpar estado imediatamente, independente do resultado da API
+    setUser(null);
+    setSession(null);
+    setLoading(false);
+    
+    // Tentar fazer logout no servidor (pode falhar se sessão já expirou)
     try {
-      const { error } = await supabase.auth.signOut();
-      console.log("useAuth signOut: resultado", { error });
-      
-      // Ignorar erro se a sessão já não existe (objetivo do logout alcançado)
-      if (error && error.message !== "Auth session missing!") {
-        console.error("useAuth signOut: erro não ignorável", error);
-        throw error;
-      }
-      console.log("useAuth signOut: concluído com sucesso");
-    } catch (error: any) {
-      // Se não for erro de sessão ausente, relançar
-      if (error?.message !== "Auth session missing!") {
-        console.error("useAuth signOut: erro capturado", error);
-        throw error;
-      }
+      await supabase.auth.signOut({ scope: 'local' }); // Apenas local, não global
+      console.log("useAuth signOut: logout local concluído");
+    } catch (error) {
+      console.log("useAuth signOut: erro ignorado (sessão já inválida)", error);
     }
   };
 
