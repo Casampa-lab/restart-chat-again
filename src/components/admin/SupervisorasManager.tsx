@@ -144,18 +144,52 @@ export const SupervisorasManager = () => {
   };
 
   const handleDelete = async (id: string, nome: string) => {
-    if (!confirm(`Deseja realmente excluir "${nome}"? Isso pode afetar dados vinculados.`)) {
-      return;
-    }
-
     try {
+      // Verificar se há empresas vinculadas
+      const { data: empresas, error: checkError } = await supabase
+        .from("empresas")
+        .select("id, nome")
+        .eq("supervisora_id", id);
+
+      if (checkError) throw checkError;
+
+      if (empresas && empresas.length > 0) {
+        const empresasNomes = empresas.map(e => e.nome).join(", ");
+        toast.error(
+          `Não é possível excluir "${nome}" pois existem ${empresas.length} empresa(s) vinculada(s): ${empresasNomes}. Desvincule ou exclua as empresas primeiro.`,
+          { duration: 6000 }
+        );
+        return;
+      }
+
+      // Verificar se há usuários vinculados
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("supervisora_id", id);
+
+      if (profilesError) throw profilesError;
+
+      if (profiles && profiles.length > 0) {
+        toast.error(
+          `Não é possível excluir "${nome}" pois existem ${profiles.length} usuário(s) vinculado(s). Desvincule os usuários primeiro na aba "Usuários".`,
+          { duration: 6000 }
+        );
+        return;
+      }
+
+      // Confirmar exclusão
+      if (!confirm(`Deseja realmente excluir "${nome}"? Esta ação não pode ser desfeita.`)) {
+        return;
+      }
+
       const { error } = await supabase
         .from("supervisoras")
         .delete()
         .eq("id", id);
 
       if (error) throw error;
-      toast.success("Supervisora excluída!");
+      toast.success("Supervisora excluída com sucesso!");
       loadSupervisoras();
     } catch (error: any) {
       toast.error("Erro ao excluir: " + error.message);
