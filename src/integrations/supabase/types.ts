@@ -1577,6 +1577,7 @@ export type Database = {
         Row: {
           codigo_dispositivo: string | null
           cor_fundo: string | null
+          cor_horizontal: string | null
           cor_legenda: string | null
           created_at: string
           data_medicao: string
@@ -1585,9 +1586,20 @@ export type Database = {
           km_referencia: number
           lado: string | null
           latitude: number | null
+          leitura_horizontal_1: number | null
+          leitura_horizontal_10: number | null
+          leitura_horizontal_2: number | null
+          leitura_horizontal_3: number | null
+          leitura_horizontal_4: number | null
+          leitura_horizontal_5: number | null
+          leitura_horizontal_6: number | null
+          leitura_horizontal_7: number | null
+          leitura_horizontal_8: number | null
+          leitura_horizontal_9: number | null
           longitude: number | null
           lote_id: string
           observacao: string | null
+          posicao_horizontal: string | null
           rodovia_id: string
           situacao: string
           situacao_fundo: string | null
@@ -1609,6 +1621,7 @@ export type Database = {
         Insert: {
           codigo_dispositivo?: string | null
           cor_fundo?: string | null
+          cor_horizontal?: string | null
           cor_legenda?: string | null
           created_at?: string
           data_medicao: string
@@ -1617,9 +1630,20 @@ export type Database = {
           km_referencia: number
           lado?: string | null
           latitude?: number | null
+          leitura_horizontal_1?: number | null
+          leitura_horizontal_10?: number | null
+          leitura_horizontal_2?: number | null
+          leitura_horizontal_3?: number | null
+          leitura_horizontal_4?: number | null
+          leitura_horizontal_5?: number | null
+          leitura_horizontal_6?: number | null
+          leitura_horizontal_7?: number | null
+          leitura_horizontal_8?: number | null
+          leitura_horizontal_9?: number | null
           longitude?: number | null
           lote_id: string
           observacao?: string | null
+          posicao_horizontal?: string | null
           rodovia_id: string
           situacao: string
           situacao_fundo?: string | null
@@ -1641,6 +1665,7 @@ export type Database = {
         Update: {
           codigo_dispositivo?: string | null
           cor_fundo?: string | null
+          cor_horizontal?: string | null
           cor_legenda?: string | null
           created_at?: string
           data_medicao?: string
@@ -1649,9 +1674,20 @@ export type Database = {
           km_referencia?: number
           lado?: string | null
           latitude?: number | null
+          leitura_horizontal_1?: number | null
+          leitura_horizontal_10?: number | null
+          leitura_horizontal_2?: number | null
+          leitura_horizontal_3?: number | null
+          leitura_horizontal_4?: number | null
+          leitura_horizontal_5?: number | null
+          leitura_horizontal_6?: number | null
+          leitura_horizontal_7?: number | null
+          leitura_horizontal_8?: number | null
+          leitura_horizontal_9?: number | null
           longitude?: number | null
           lote_id?: string
           observacao?: string | null
+          posicao_horizontal?: string | null
           rodovia_id?: string
           situacao?: string
           situacao_fundo?: string | null
