@@ -693,70 +693,173 @@ const LotesManager = () => {
                 Rodovias do Lote
               </Label>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-rodovia">Rodovia</Label>
-                  <Select
-                    value={novaRodovia.rodovia_id}
-                    onValueChange={(value) =>
-                      setNovaRodovia({ ...novaRodovia, rodovia_id: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {rodovias
-                        .filter(
-                          (r) => !rodoviasVinculadas.find((rv) => rv.rodovia_id === r.id)
-                        )
-                        .map((rodovia) => (
-                          <SelectItem key={rodovia.id} value={rodovia.id}>
-                            {rodovia.codigo}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-rodovia">Rodovia</Label>
+                    <Select
+                      value={novaRodovia.rodovia_id}
+                      onValueChange={(value) =>
+                        setNovaRodovia({ ...novaRodovia, rodovia_id: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {rodovias
+                          .filter(
+                            (r) => !rodoviasVinculadas.find((rv) => rv.rodovia_id === r.id)
+                          )
+                          .map((rodovia) => (
+                            <SelectItem key={rodovia.id} value={rodovia.id}>
+                              {rodovia.codigo}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="edit-km_inicial">km Inicial</Label>
-                  <Input
-                    id="edit-km_inicial"
-                    type="number"
-                    step="0.001"
-                    value={novaRodovia.km_inicial}
-                    onChange={(e) =>
-                      setNovaRodovia({ ...novaRodovia, km_inicial: e.target.value })
-                    }
-                    placeholder="0.000"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-km_final">km Final</Label>
-                  <Input
-                    id="edit-km_final"
-                    type="number"
-                    step="0.001"
-                    placeholder="Ex: 200.000"
-                    value={novaRodovia.km_final}
-                    onChange={(e) =>
-                      setNovaRodovia({ ...novaRodovia, km_final: e.target.value })
-                    }
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* KM Inicial e Coordenadas */}
+                  <div className="space-y-3 p-3 border rounded-lg bg-background/50">
+                    <Label className="text-sm font-semibold">KM Inicial</Label>
+                    <div className="space-y-2">
+                      <Input
+                        type="number"
+                        step="0.001"
+                        value={novaRodovia.km_inicial}
+                        onChange={(e) =>
+                          setNovaRodovia({ ...novaRodovia, km_inicial: e.target.value })
+                        }
+                        placeholder="0.000"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          value={novaRodovia.latitude_inicial}
+                          onChange={(e) =>
+                            setNovaRodovia({ ...novaRodovia, latitude_inicial: e.target.value })
+                          }
+                          placeholder="Latitude"
+                        />
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          value={novaRodovia.longitude_inicial}
+                          onChange={(e) =>
+                            setNovaRodovia({ ...novaRodovia, longitude_inicial: e.target.value })
+                          }
+                          placeholder="Longitude"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                              (position) => {
+                                setNovaRodovia({
+                                  ...novaRodovia,
+                                  latitude_inicial: position.coords.latitude.toString(),
+                                  longitude_inicial: position.coords.longitude.toString(),
+                                });
+                                toast.success("Localização capturada!");
+                              },
+                              (error) => {
+                                toast.error("Erro ao capturar localização: " + error.message);
+                              }
+                            );
+                          } else {
+                            toast.error("Geolocalização não suportada");
+                          }
+                        }}
+                      >
+                        <Navigation className="mr-2 h-3 w-3" />
+                        Capturar GPS
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* KM Final e Coordenadas */}
+                  <div className="space-y-3 p-3 border rounded-lg bg-background/50">
+                    <Label className="text-sm font-semibold">KM Final</Label>
+                    <div className="space-y-2">
+                      <Input
+                        type="number"
+                        step="0.001"
+                        value={novaRodovia.km_final}
+                        onChange={(e) =>
+                          setNovaRodovia({ ...novaRodovia, km_final: e.target.value })
+                        }
+                        placeholder="200.000"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          value={novaRodovia.latitude_final}
+                          onChange={(e) =>
+                            setNovaRodovia({ ...novaRodovia, latitude_final: e.target.value })
+                          }
+                          placeholder="Latitude"
+                        />
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          value={novaRodovia.longitude_final}
+                          onChange={(e) =>
+                            setNovaRodovia({ ...novaRodovia, longitude_final: e.target.value })
+                          }
+                          placeholder="Longitude"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                              (position) => {
+                                setNovaRodovia({
+                                  ...novaRodovia,
+                                  latitude_final: position.coords.latitude.toString(),
+                                  longitude_final: position.coords.longitude.toString(),
+                                });
+                                toast.success("Localização capturada!");
+                              },
+                              (error) => {
+                                toast.error("Erro ao capturar localização: " + error.message);
+                              }
+                            );
+                          } else {
+                            toast.error("Geolocalização não suportada");
+                          }
+                        }}
+                      >
+                        <Navigation className="mr-2 h-3 w-3" />
+                        Capturar GPS
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-end">
-                  <Button
-                    type="button"
-                    onClick={adicionarRodovia}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Adicionar
-                  </Button>
-                </div>
+                <Button
+                  type="button"
+                  onClick={adicionarRodovia}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Adicionar Rodovia ao Lote
+                </Button>
               </div>
 
               {/* Lista de rodovias adicionadas */}
