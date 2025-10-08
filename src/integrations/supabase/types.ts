@@ -743,7 +743,7 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           observacao: string | null
-          responsavel: string
+          portaria_aprovacao_projeto: string
           rodovia_id: string
           tipo_servico: string
           updated_at: string
@@ -762,7 +762,7 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           observacao?: string | null
-          responsavel: string
+          portaria_aprovacao_projeto: string
           rodovia_id: string
           tipo_servico: string
           updated_at?: string
@@ -781,7 +781,7 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           observacao?: string | null
-          responsavel?: string
+          portaria_aprovacao_projeto?: string
           rodovia_id?: string
           tipo_servico?: string
           updated_at?: string

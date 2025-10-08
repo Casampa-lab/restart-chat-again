@@ -74,7 +74,7 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
     km_inicial: "",
     km_final: "",
     tipo_servico: "",
-    responsavel: "",
+    portaria_aprovacao_projeto: "",
     observacao: "",
     latitude_inicial: "",
     longitude_inicial: "",
@@ -85,7 +85,7 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.km_inicial || !formData.km_final || !formData.tipo_servico || !formData.responsavel) {
+    if (!formData.km_inicial || !formData.km_final || !formData.tipo_servico || !formData.portaria_aprovacao_projeto) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",
@@ -113,7 +113,7 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
           km_inicial: parseFloat(formData.km_inicial),
           km_final: parseFloat(formData.km_final),
           tipo_servico: formData.tipo_servico,
-          responsavel: formData.responsavel,
+          portaria_aprovacao_projeto: formData.portaria_aprovacao_projeto,
           observacao: formData.observacao || null,
           latitude_inicial: formData.latitude_inicial ? parseFloat(formData.latitude_inicial) : null,
           longitude_inicial: formData.longitude_inicial ? parseFloat(formData.longitude_inicial) : null,
@@ -134,7 +134,7 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
         km_inicial: "",
         km_final: "",
         tipo_servico: "",
-        responsavel: "",
+        portaria_aprovacao_projeto: "",
         observacao: "",
         latitude_inicial: "",
         longitude_inicial: "",
@@ -178,14 +178,14 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="responsavel">Responsável pela Liberação *</Label>
+              <Label htmlFor="portaria_aprovacao_projeto">Portaria de Aprovação de Projeto *</Label>
               <Input
-                id="responsavel"
-                value={formData.responsavel}
+                id="portaria_aprovacao_projeto"
+                value={formData.portaria_aprovacao_projeto}
                 onChange={(e) =>
-                  setFormData({ ...formData, responsavel: e.target.value })
+                  setFormData({ ...formData, portaria_aprovacao_projeto: e.target.value })
                 }
-                placeholder="Nome do responsável"
+                placeholder="Número da portaria"
                 required
               />
             </div>

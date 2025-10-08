@@ -36,7 +36,7 @@ interface FrenteLiberada {
   km_inicial: number;
   km_final: number;
   tipo_servico: string;
-  responsavel: string;
+  portaria_aprovacao_projeto: string;
   observacao: string | null;
   created_at: string;
   rodovia_id: string;
@@ -150,7 +150,7 @@ const MinhasFrentesLiberadas = () => {
           km_inicial: frenteToEdit.km_inicial,
           km_final: frenteToEdit.km_final,
           tipo_servico: frenteToEdit.tipo_servico,
-          responsavel: frenteToEdit.responsavel,
+          portaria_aprovacao_projeto: frenteToEdit.portaria_aprovacao_projeto,
           observacao: frenteToEdit.observacao,
         })
         .eq("id", frenteToEdit.id);
@@ -246,7 +246,7 @@ const MinhasFrentesLiberadas = () => {
                       <TableHead>KM Inicial</TableHead>
                       <TableHead>KM Final</TableHead>
                       <TableHead>Tipo de Serviço</TableHead>
-                      <TableHead>Responsável</TableHead>
+                      <TableHead>Portaria</TableHead>
                       <TableHead>Observações</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -268,7 +268,7 @@ const MinhasFrentesLiberadas = () => {
                         <TableCell>{frente.km_inicial.toFixed(3)}</TableCell>
                         <TableCell>{frente.km_final.toFixed(3)}</TableCell>
                         <TableCell>{frente.tipo_servico}</TableCell>
-                        <TableCell>{frente.responsavel}</TableCell>
+                        <TableCell>{frente.portaria_aprovacao_projeto}</TableCell>
                         <TableCell className="max-w-xs truncate">
                           {frente.observacao || "-"}
                         </TableCell>
@@ -378,10 +378,10 @@ const MinhasFrentesLiberadas = () => {
                 />
               </div>
               <div>
-                <Label>Responsável</Label>
+                <Label>Portaria de Aprovação de Projeto</Label>
                 <Input
-                  value={frenteToEdit.responsavel}
-                  onChange={(e) => setFrenteToEdit({...frenteToEdit, responsavel: e.target.value})}
+                  value={frenteToEdit.portaria_aprovacao_projeto}
+                  onChange={(e) => setFrenteToEdit({...frenteToEdit, portaria_aprovacao_projeto: e.target.value})}
                 />
               </div>
               <div>
