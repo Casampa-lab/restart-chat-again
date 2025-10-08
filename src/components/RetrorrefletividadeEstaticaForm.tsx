@@ -45,6 +45,9 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
     lado: "",
     tipo_dispositivo: "",
     codigo_dispositivo: "",
+    // Campos específicos para Sinalização Horizontal
+    posicao_horizontal: "",
+    cor_horizontal: "",
     // Leituras película fundo (Vertical)
     cor_fundo: "",
     leitura_fundo_1: "",
@@ -267,6 +270,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
         lado: "",
         tipo_dispositivo: "",
         codigo_dispositivo: "",
+        posicao_horizontal: "",
+        cor_horizontal: "",
         cor_fundo: "",
         leitura_fundo_1: "",
         leitura_fundo_2: "",
@@ -873,6 +878,47 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     <p className="text-sm text-green-700 dark:text-green-300">
                       Digite as 10 leituras estáticas por km. A média será calculada automaticamente.
                     </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="posicao_horizontal">Posição *</Label>
+                      <Select
+                        value={formData.posicao_horizontal}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, posicao_horizontal: value })
+                        }
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a posição" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Bordo Esquerdo">Bordo Esquerdo</SelectItem>
+                          <SelectItem value="Eixo">Eixo</SelectItem>
+                          <SelectItem value="Bordo Direito">Bordo Direito</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cor_horizontal">Cor *</Label>
+                      <Select
+                        value={formData.cor_horizontal}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, cor_horizontal: value })
+                        }
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a cor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Amarela">Amarela</SelectItem>
+                          <SelectItem value="Branca">Branca</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
