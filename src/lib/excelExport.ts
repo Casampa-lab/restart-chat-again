@@ -43,7 +43,7 @@ export const exportFrentesLiberadas = async () => {
     const wsData = [
       ['2.2 - FRENTES LIBERADAS PARA EXECUÇÃO'],
       [],
-      ['Data', 'Lote', 'Empresa', 'Rodovia', 'Tipo de Serviço', 'km Inicial', 'km Final', 'Portaria de Aprovação', 'Observação'],
+      ['Data', 'Lote', 'Empresa', 'Rodovia', 'Extensão Contratada (km)', 'km Inicial', 'km Final', 'Portaria de Aprovação', 'Observação'],
       ...(data || []).map(item => {
         const lote = lotesMap.get(item.lote_id);
         const empresa = lote ? empresasMap.get(lote.empresa_id) : null;
@@ -53,7 +53,7 @@ export const exportFrentesLiberadas = async () => {
           lote?.numero || '',
           empresa?.nome || '',
           rodovia ? `${rodovia.codigo} - ${rodovia.nome}` : '',
-          item.tipo_servico || '',
+          formatNumber(item.extensao_contratada),
           formatNumber(item.km_inicial),
           formatNumber(item.km_final),
           item.portaria_aprovacao_projeto || '',

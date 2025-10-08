@@ -73,7 +73,7 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
     data_liberacao: new Date().toISOString().split('T')[0],
     km_inicial: "",
     km_final: "",
-    tipo_servico: "",
+    extensao_contratada: "",
     portaria_aprovacao_projeto: "",
     observacao: "",
     latitude_inicial: "",
@@ -85,7 +85,7 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.km_inicial || !formData.km_final || !formData.tipo_servico || !formData.portaria_aprovacao_projeto) {
+    if (!formData.km_inicial || !formData.km_final || !formData.extensao_contratada || !formData.portaria_aprovacao_projeto) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",
@@ -112,7 +112,7 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
           data_liberacao: formData.data_liberacao,
           km_inicial: parseFloat(formData.km_inicial),
           km_final: parseFloat(formData.km_final),
-          tipo_servico: formData.tipo_servico,
+          extensao_contratada: parseFloat(formData.extensao_contratada),
           portaria_aprovacao_projeto: formData.portaria_aprovacao_projeto,
           observacao: formData.observacao || null,
           latitude_inicial: formData.latitude_inicial ? parseFloat(formData.latitude_inicial) : null,
@@ -133,7 +133,7 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
         data_liberacao: new Date().toISOString().split('T')[0],
         km_inicial: "",
         km_final: "",
-        tipo_servico: "",
+        extensao_contratada: "",
         portaria_aprovacao_projeto: "",
         observacao: "",
         latitude_inicial: "",
@@ -283,14 +283,16 @@ const FrenteLiberadaForm = ({ loteId, rodoviaId }: FrenteLiberadaFormProps) => {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="tipo_servico">Tipo de Serviço *</Label>
+              <Label htmlFor="extensao_contratada">Extensão Contratada (km) *</Label>
               <Input
-                id="tipo_servico"
-                value={formData.tipo_servico}
+                id="extensao_contratada"
+                type="number"
+                step="0.001"
+                value={formData.extensao_contratada}
                 onChange={(e) =>
-                  setFormData({ ...formData, tipo_servico: e.target.value })
+                  setFormData({ ...formData, extensao_contratada: e.target.value })
                 }
-                placeholder="Ex: Conservação Rodoviária, Sinalização, etc."
+                placeholder="0.000"
                 required
               />
             </div>

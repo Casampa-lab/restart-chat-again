@@ -35,7 +35,7 @@ interface FrenteLiberada {
   data_liberacao: string;
   km_inicial: number;
   km_final: number;
-  tipo_servico: string;
+  extensao_contratada: number;
   portaria_aprovacao_projeto: string;
   observacao: string | null;
   created_at: string;
@@ -149,7 +149,7 @@ const MinhasFrentesLiberadas = () => {
           data_liberacao: frenteToEdit.data_liberacao,
           km_inicial: frenteToEdit.km_inicial,
           km_final: frenteToEdit.km_final,
-          tipo_servico: frenteToEdit.tipo_servico,
+          extensao_contratada: frenteToEdit.extensao_contratada,
           portaria_aprovacao_projeto: frenteToEdit.portaria_aprovacao_projeto,
           observacao: frenteToEdit.observacao,
         })
@@ -245,7 +245,7 @@ const MinhasFrentesLiberadas = () => {
                       <TableHead>Data Liberação</TableHead>
                       <TableHead>KM Inicial</TableHead>
                       <TableHead>KM Final</TableHead>
-                      <TableHead>Tipo de Serviço</TableHead>
+                      <TableHead>Extensão (km)</TableHead>
                       <TableHead>Portaria</TableHead>
                       <TableHead>Observações</TableHead>
                       <TableHead>Status</TableHead>
@@ -267,7 +267,7 @@ const MinhasFrentesLiberadas = () => {
                         <TableCell>{formatDate(frente.data_liberacao)}</TableCell>
                         <TableCell>{frente.km_inicial.toFixed(3)}</TableCell>
                         <TableCell>{frente.km_final.toFixed(3)}</TableCell>
-                        <TableCell>{frente.tipo_servico}</TableCell>
+                        <TableCell>{frente.extensao_contratada.toFixed(3)}</TableCell>
                         <TableCell>{frente.portaria_aprovacao_projeto}</TableCell>
                         <TableCell className="max-w-xs truncate">
                           {frente.observacao || "-"}
@@ -371,10 +371,12 @@ const MinhasFrentesLiberadas = () => {
                 </div>
               </div>
               <div>
-                <Label>Tipo de Serviço</Label>
+                <Label>Extensão Contratada (km)</Label>
                 <Input
-                  value={frenteToEdit.tipo_servico}
-                  onChange={(e) => setFrenteToEdit({...frenteToEdit, tipo_servico: e.target.value})}
+                  type="number"
+                  step="0.001"
+                  value={frenteToEdit.extensao_contratada}
+                  onChange={(e) => setFrenteToEdit({...frenteToEdit, extensao_contratada: parseFloat(e.target.value)})}
                 />
               </div>
               <div>

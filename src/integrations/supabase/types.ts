@@ -734,6 +734,7 @@ export type Database = {
           created_at: string
           data_liberacao: string
           enviado_coordenador: boolean | null
+          extensao_contratada: number | null
           id: string
           km_final: number
           km_inicial: number
@@ -745,7 +746,6 @@ export type Database = {
           observacao: string | null
           portaria_aprovacao_projeto: string
           rodovia_id: string
-          tipo_servico: string
           updated_at: string
           user_id: string
         }
@@ -753,6 +753,7 @@ export type Database = {
           created_at?: string
           data_liberacao: string
           enviado_coordenador?: boolean | null
+          extensao_contratada?: number | null
           id?: string
           km_final: number
           km_inicial: number
@@ -764,7 +765,6 @@ export type Database = {
           observacao?: string | null
           portaria_aprovacao_projeto: string
           rodovia_id: string
-          tipo_servico: string
           updated_at?: string
           user_id: string
         }
@@ -772,6 +772,7 @@ export type Database = {
           created_at?: string
           data_liberacao?: string
           enviado_coordenador?: boolean | null
+          extensao_contratada?: number | null
           id?: string
           km_final?: number
           km_inicial?: number
@@ -783,7 +784,6 @@ export type Database = {
           observacao?: string | null
           portaria_aprovacao_projeto?: string
           rodovia_id?: string
-          tipo_servico?: string
           updated_at?: string
           user_id?: string
         }
