@@ -142,35 +142,108 @@ export const exportRetrorrefletividadeEstatica = async () => {
 
     const { lotesMap, rodoviasMap } = await fetchRelatedData();
 
-    const wsData = [
-      ['3.1.3.1 - RETRORREFLETIVIDADE ESTÁTICA'],
-      [],
-      ['Data', 'Lote', 'Rodovia', 'km', 'Lado', 'Tipo Dispositivo', 'Código', 'Valor Medido', 'Valor Mínimo', 'Situação', 'Observação'],
-      ...(data || []).map(item => {
-        const lote = lotesMap.get(item.lote_id);
-        const rodovia = rodoviasMap.get(item.rodovia_id);
+    // Criar dados com base no tipo de sinalização
+    const dataRows = (data || []).map(item => {
+      const lote = lotesMap.get(item.lote_id);
+      const rodovia = rodoviasMap.get(item.rodovia_id);
+      const itemData = item as any;
+      
+      if (itemData.tipo_sinalizacao === 'Horizontal') {
         return [
           formatDate(item.data_medicao),
           lote?.numero || '',
           rodovia?.codigo || '',
           formatNumber(item.km_referencia),
+          'Horizontal',
+          formatNumber(itemData.leitura_horizontal_1),
+          formatNumber(itemData.leitura_horizontal_2),
+          formatNumber(itemData.leitura_horizontal_3),
+          formatNumber(itemData.leitura_horizontal_4),
+          formatNumber(itemData.leitura_horizontal_5),
+          formatNumber(itemData.leitura_horizontal_6),
+          formatNumber(itemData.leitura_horizontal_7),
+          formatNumber(itemData.leitura_horizontal_8),
+          formatNumber(itemData.leitura_horizontal_9),
+          formatNumber(itemData.leitura_horizontal_10),
+          formatNumber(itemData.valor_medido_horizontal),
+          formatNumber(itemData.valor_minimo_horizontal),
+          itemData.situacao_horizontal || '',
+          item.observacao || ''
+        ];
+      } else {
+        return [
+          formatDate(item.data_medicao),
+          lote?.numero || '',
+          rodovia?.codigo || '',
+          formatNumber(item.km_referencia),
+          'Vertical',
           item.lado || '',
           item.tipo_dispositivo || '',
           item.codigo_dispositivo || '',
-          formatNumber(item.valor_medido),
-          formatNumber(item.valor_minimo),
-          item.situacao || '',
+          formatNumber(item.valor_medido_fundo),
+          formatNumber(item.valor_minimo_fundo),
+          item.situacao_fundo || '',
+          formatNumber(item.valor_medido_legenda),
+          formatNumber(item.valor_minimo_legenda),
+          item.situacao_legenda || '',
+          itemData.situacao_geral || '',
           item.observacao || ''
         ];
-      })
-    ];
+      }
+    });
+
+    // Criar cabeçalhos com base no tipo predominante ou ambos
+    const hasHorizontal = (data || []).some(item => (item as any).tipo_sinalizacao === 'Horizontal');
+    const hasVertical = (data || []).some(item => (item as any).tipo_sinalizacao === 'Vertical');
+
+    let wsData;
+    if (hasHorizontal && !hasVertical) {
+      wsData = [
+        ['3.1.3.1 - RETRORREFLETIVIDADE ESTÁTICA - SINALIZAÇÃO HORIZONTAL'],
+        [],
+        ['Data', 'Lote', 'Rodovia', 'km', 'Tipo', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10', 'Média', 'Valor Mín', 'Situação', 'Observação'],
+        ...dataRows
+      ];
+    } else if (hasVertical && !hasHorizontal) {
+      wsData = [
+        ['3.1.3.1 - RETRORREFLETIVIDADE ESTÁTICA - SINALIZAÇÃO VERTICAL'],
+        [],
+        ['Data', 'Lote', 'Rodovia', 'km', 'Tipo', 'Lado', 'Dispositivo', 'Código', 'Valor Fundo', 'Mín Fundo', 'Sit. Fundo', 'Valor Legenda', 'Mín Legenda', 'Sit. Legenda', 'Situação Geral', 'Observação'],
+        ...dataRows
+      ];
+    } else {
+      wsData = [
+        ['3.1.3.1 - RETRORREFLETIVIDADE ESTÁTICA'],
+        [],
+        ['Data', 'Lote', 'Rodovia', 'km', 'Tipo', 'Dados (varia conforme tipo)'],
+        ...dataRows
+      ];
+    }
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 10 } }];
-    ws['!cols'] = [
-      { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 12 },
-      { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 40 }
-    ];
+    
+    // Ajustar merges e colunas conforme o tipo
+    if (hasHorizontal && !hasVertical) {
+      ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 18 } }];
+      ws['!cols'] = [
+        { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 12 },
+        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
+        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
+        { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 40 }
+      ];
+    } else if (hasVertical && !hasHorizontal) {
+      ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 15 } }];
+      ws['!cols'] = [
+        { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 12 },
+        { wch: 12 }, { wch: 20 }, { wch: 15 }, { wch: 12 }, { wch: 12 },
+        { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 40 }
+      ];
+    } else {
+      ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }];
+      ws['!cols'] = [
+        { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 12 }, { wch: 50 }
+      ];
+    }
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Retro Estática');
