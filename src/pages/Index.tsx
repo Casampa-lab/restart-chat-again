@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
@@ -21,6 +21,7 @@ import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
 import { RegistroNCForm } from "@/components/RegistroNCForm";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
+import { toast } from "sonner";
 import logoRodoviaSuperv from "@/assets/logo-rodoviasuper.png";
 
 import logoDnit from "@/assets/logo-dnit.jpg";
@@ -152,6 +153,36 @@ const Index = () => {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-6 space-y-6">
+        {supervisora?.codigo_convite && (
+          <Card className="bg-accent/10 border-accent/20 shadow-md">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-medium text-muted-foreground">Código de Convite da Supervisora</h3>
+                  <code className="text-2xl font-bold font-mono bg-accent/20 px-4 py-2 rounded-md inline-block">
+                    {supervisora.codigo_convite}
+                  </code>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Compartilhe este código com novos usuários para que eles possam se cadastrar vinculados à {supervisora.nome_empresa}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => {
+                    navigator.clipboard.writeText(supervisora.codigo_convite!);
+                    toast.success("Código copiado!");
+                  }}
+                  className="shrink-0"
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copiar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {activeSession ? (
           <>
             <Card className="bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-elevated border-0">

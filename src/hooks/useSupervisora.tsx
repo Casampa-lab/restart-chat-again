@@ -7,6 +7,7 @@ export interface SupervisoraConfig {
   nome_empresa: string;
   logo_url: string | null;
   usar_logo_customizado: boolean;
+  codigo_convite: string | null;
   created_at: string;
   updated_at: string;
 }
