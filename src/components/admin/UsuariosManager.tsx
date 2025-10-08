@@ -2,13 +2,12 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { UserPlus, Users, Pencil, X } from "lucide-react";
+import { Users, Pencil, X } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 interface Profile {
   id: string;
@@ -20,12 +19,16 @@ interface Profile {
   user_roles?: Array<{ role: string }>;
 }
 
-type AppRole = 'admin' | 'coordenador' | 'tecnico' | null;
-
 interface Supervisora {
   id: string;
   nome_empresa: string;
 }
+
+const roles = [
+  { value: "tecnico", label: "Técnico de Campo" },
+  { value: "coordenador", label: "Coordenador" },
+  { value: "admin", label: "Administrador" },
+];
 
 export const UsuariosManager = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -34,7 +37,7 @@ export const UsuariosManager = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [selectedSupervisora, setSelectedSupervisora] = useState("");
-  const [selectedRole, setSelectedRole] = useState<AppRole>(null);
+  const [selectedRole, setSelectedRole] = useState("");
 
   useEffect(() => {
     loadSupervisoras();
@@ -57,7 +60,7 @@ export const UsuariosManager = () => {
 
   const loadProfiles = async () => {
     try {
-      const { data: profilesData, error } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select(`
           id,
@@ -69,17 +72,18 @@ export const UsuariosManager = () => {
 
       if (error) throw error;
       
-      // Buscar roles separadamente
+      // Buscar roles separadamente para cada profile
       const profilesWithRoles = await Promise.all(
-        (profilesData || []).map(async (profile) => {
-          const { data: rolesData } = await supabase
+        (data || []).map(async (profile) => {
+          const { data: roleData } = await supabase
             .from("user_roles")
             .select("role")
-            .eq("user_id", profile.id);
+            .eq("user_id", profile.id)
+            .limit(1);
           
           return {
             ...profile,
-            user_roles: rolesData || [],
+            user_roles: roleData || []
           };
         })
       );
@@ -92,39 +96,33 @@ export const UsuariosManager = () => {
 
   const handleSalvar = async () => {
     if (!editingProfile) return;
+    if (!selectedRole) {
+      toast.error("Selecione um perfil");
+      return;
+    }
 
     setLoading(true);
     try {
       // Atualizar supervisora
-      if (selectedSupervisora !== (editingProfile.supervisora_id || "")) {
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({ supervisora_id: selectedSupervisora || null })
-          .eq("id", editingProfile.id);
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ supervisora_id: selectedSupervisora || null })
+        .eq("id", editingProfile.id);
 
-        if (profileError) throw profileError;
-      }
+      if (profileError) throw profileError;
 
-      // Atualizar role
-      const currentRole = editingProfile.user_roles?.[0]?.role || null;
-      if (selectedRole !== currentRole) {
-        // Remover role anterior se existir
-        if (currentRole) {
-          await supabase
-            .from("user_roles")
-            .delete()
-            .eq("user_id", editingProfile.id);
-        }
+      // Remover role existente
+      await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", editingProfile.id);
 
-        // Adicionar novo role se selecionado
-        if (selectedRole) {
-          const { error: roleError } = await supabase
-            .from("user_roles")
-            .insert({ user_id: editingProfile.id, role: selectedRole });
+      // Inserir novo role
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .insert([{ user_id: editingProfile.id, role: selectedRole as any }]);
 
-          if (roleError) throw roleError;
-        }
-      }
+      if (roleError) throw roleError;
 
       toast.success("Usuário atualizado com sucesso!");
       handleCloseDialog();
@@ -139,7 +137,7 @@ export const UsuariosManager = () => {
   const handleEdit = (profile: Profile) => {
     setEditingProfile(profile);
     setSelectedSupervisora(profile.supervisora_id || "");
-    setSelectedRole((profile.user_roles?.[0]?.role as AppRole) || null);
+    setSelectedRole(profile.user_roles?.[0]?.role || "");
     setIsDialogOpen(true);
   };
 
@@ -150,19 +148,13 @@ export const UsuariosManager = () => {
 
     setLoading(true);
     try {
-      console.log("Desvinculando usuário:", profileId);
-      
       const { error } = await supabase
         .from("profiles")
         .update({ supervisora_id: null })
         .eq("id", profileId);
 
-      if (error) {
-        console.error("Erro ao desvincular:", error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log("Desvinculação bem-sucedida, recarregando profiles...");
       toast.success("Usuário desvinculado com sucesso!");
       await loadProfiles();
     } catch (error: any) {
@@ -176,7 +168,7 @@ export const UsuariosManager = () => {
     setIsDialogOpen(false);
     setEditingProfile(null);
     setSelectedSupervisora("");
-    setSelectedRole(null);
+    setSelectedRole("");
   };
 
   const getRoleName = (profile: Profile) => {
@@ -192,12 +184,6 @@ export const UsuariosManager = () => {
     return roleNames[role] || role;
   };
 
-  const roleOptions = [
-    { value: "tecnico", label: "Técnico de Campo" },
-    { value: "coordenador", label: "Coordenador" },
-    { value: "admin", label: "Administrador" },
-  ];
-
   return (
     <Card>
       <CardHeader>
@@ -208,7 +194,7 @@ export const UsuariosManager = () => {
               Usuários do Sistema
             </CardTitle>
             <CardDescription>
-              Vincule usuários às supervisoras para controle de acesso
+              Gerencie perfis e vincule usuários às supervisoras
             </CardDescription>
           </div>
         </div>
@@ -286,18 +272,18 @@ export const UsuariosManager = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="role">Perfil</Label>
+                  <Label htmlFor="role">Perfil *</Label>
                   <Select
-                    value={selectedRole || ""}
-                    onValueChange={(value) => setSelectedRole(value as AppRole)}
+                    value={selectedRole}
+                    onValueChange={setSelectedRole}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o perfil" />
                     </SelectTrigger>
                     <SelectContent>
-                      {roleOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                      {roles.map((role) => (
+                        <SelectItem key={role.value} value={role.value}>
+                          {role.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -311,7 +297,7 @@ export const UsuariosManager = () => {
                     onValueChange={setSelectedSupervisora}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione a supervisora" />
+                      <SelectValue placeholder="Selecione a supervisora (opcional)" />
                     </SelectTrigger>
                     <SelectContent>
                       {supervisoras.map((sup) => (
@@ -329,7 +315,7 @@ export const UsuariosManager = () => {
               <Button variant="outline" onClick={handleCloseDialog}>
                 Cancelar
               </Button>
-              <Button onClick={handleSalvar} disabled={loading}>
+              <Button onClick={handleSalvar} disabled={loading || !selectedRole}>
                 {loading ? "Salvando..." : "Salvar"}
               </Button>
             </DialogFooter>
