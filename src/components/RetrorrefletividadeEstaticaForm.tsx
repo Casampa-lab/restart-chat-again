@@ -25,6 +25,15 @@ const TIPOS_DISPOSITIVO = [
   "Demarcação Horizontal",
   "Outros"
 ];
+const CORES_PELICULA = [
+  "Branco",
+  "Vermelho",
+  "Verde",
+  "Azul",
+  "Amarelo",
+  "Marrom",
+  "Lima limão"
+];
 
 const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: RetrorrefletividadeEstaticaFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -363,12 +372,21 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
 
               <div className="space-y-2">
                 <Label htmlFor="cor_fundo">Cor da Película Fundo</Label>
-                <Input
-                  id="cor_fundo"
+                <Select
                   value={formData.cor_fundo}
-                  onChange={(e) => setFormData({ ...formData, cor_fundo: e.target.value })}
-                  placeholder="Ex: Azul, Verde, Amarelo, Branco, etc."
-                />
+                  onValueChange={(value) => setFormData({ ...formData, cor_fundo: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a cor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CORES_PELICULA.map((cor) => (
+                      <SelectItem key={cor} value={cor}>
+                        {cor}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -539,12 +557,21 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
 
               <div className="space-y-2">
                 <Label htmlFor="cor_legenda">Cor da Película Legenda/Orla</Label>
-                <Input
-                  id="cor_legenda"
+                <Select
                   value={formData.cor_legenda}
-                  onChange={(e) => setFormData({ ...formData, cor_legenda: e.target.value })}
-                  placeholder="Ex: Branco, Preto, Amarelo, etc."
-                />
+                  onValueChange={(value) => setFormData({ ...formData, cor_legenda: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a cor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CORES_PELICULA.map((cor) => (
+                      <SelectItem key={cor} value={cor}>
+                        {cor}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
