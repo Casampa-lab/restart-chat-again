@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'BR-LEGAL 2',
   webDir: 'dist',
   server: {
-    url: 'https://1e47e2c7-2608-4fcc-bff7-6fa229db4803.lovableproject.com?forceHideBadge=true',
+    url: 'https://1e47e2c7-2608-4fcc-bff7-6fa229db4803.lovableproject.com?forceHideBadge=true&v=' + Date.now(),
     cleartext: true
   },
   plugins: {
