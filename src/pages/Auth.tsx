@@ -84,7 +84,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4 overflow-y-auto">
       <div className="w-full max-w-md space-y-6">
         <div className="flex justify-center">
           <img src={logoOperaVia} alt="OperaVia" className="h-20 object-contain" />

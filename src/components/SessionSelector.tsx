@@ -111,7 +111,7 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
             <SelectTrigger id="lote">
               <SelectValue placeholder="Selecione o lote" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-popover">
               {lotes && lotes.length > 0 ? (
                 lotes.map((lote) => (
                   <SelectItem key={lote.id} value={lote.id}>
@@ -134,7 +134,7 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
               <SelectTrigger id="rodovia">
                 <SelectValue placeholder="Selecione a rodovia" />
               </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover">
                   {rodovias.map((rodovia) => (
                     <SelectItem key={rodovia.id} value={rodovia.id}>
                       {rodovia.codigo}
