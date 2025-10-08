@@ -62,8 +62,13 @@ const Index = () => {
   }, [user, authLoading, navigate]);
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth");
+    try {
+      await signOut();
+      navigate("/auth", { replace: true });
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      toast.error("Erro ao sair. Tente novamente.");
+    }
   };
 
   const handleTabChange = (value: string) => {
