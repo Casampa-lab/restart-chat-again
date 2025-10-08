@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { MapPin, Save, Bell, Camera, X } from "lucide-react";
 import { TIPOS_NC, PROBLEMAS_POR_TIPO, SITUACOES_NC, type TipoNC } from "@/constants/naoConformidades";
+import { generateNCPDF } from "@/lib/pdfGenerator";
 
 interface FotoData {
   arquivo: File | null;
@@ -459,12 +460,164 @@ const NaoConformidadeForm = ({
   const isExtensao = formData.tipo_nc === TIPOS_NC.SINALIZACAO_HORIZONTAL || 
                      formData.tipo_nc === TIPOS_NC.DISPOSITIVOS_SEGURANCA;
   
-  const handleNotificar = () => {
+  const handleNotificar = async () => {
     if (!formData.data_notificacao) {
       toast.error("Preencha a Data da Notificação primeiro");
       return;
     }
-    toast.info("Funcionalidade de notificação por e-mail será implementada em breve");
+
+    if (!formData.numero_nc) {
+      toast.error("Salve a NC antes de notificar");
+      return;
+    }
+
+    const loadingToast = toast.loading("Gerando relatório e enviando notificação...");
+    
+    try {
+      // Buscar ID da NC salva
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data: ncSalva, error: ncError } = await supabase
+        .from("nao_conformidades")
+        .select("id")
+        .eq("numero_nc", formData.numero_nc)
+        .eq("user_id", user.id)
+        .single();
+
+      if (ncError || !ncSalva) {
+        throw new Error("NC não encontrada. Salve a NC primeiro.");
+      }
+
+      // Buscar todos os dados necessários para o PDF
+      const { data: ncCompleta, error: ncCompletaError } = await supabase
+        .from("nao_conformidades")
+        .select(`
+          *,
+          rodovias(codigo, uf),
+          lotes(
+            numero,
+            contrato,
+            responsavel_executora,
+            email_executora,
+            nome_fiscal_execucao,
+            email_fiscal_execucao
+          )
+        `)
+        .eq("id", ncSalva.id)
+        .single();
+
+      if (ncCompletaError || !ncCompleta) {
+        throw new Error("Erro ao buscar dados da NC");
+      }
+
+      // Buscar fotos
+      const { data: fotos, error: fotosError } = await supabase
+        .from("nao_conformidades_fotos")
+        .select("*")
+        .eq("nc_id", ncSalva.id)
+        .order("ordem");
+
+      if (fotosError) {
+        console.error("Erro ao buscar fotos:", fotosError);
+      }
+
+      // Buscar dados da supervisora
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("supervisora_id")
+        .eq("id", user.id)
+        .single();
+
+      let supervisoraData = { nome_empresa: "Supervisora", contrato: "N/A" };
+      if (profile?.supervisora_id) {
+        const { data: supervisora } = await supabase
+          .from("supervisoras")
+          .select("nome_empresa")
+          .eq("id", profile.supervisora_id)
+          .single();
+        
+        if (supervisora) {
+          supervisoraData.nome_empresa = supervisora.nome_empresa;
+        }
+      }
+
+      // Preparar dados para o PDF
+      const pdfData = {
+        numero_nc: ncCompleta.numero_nc,
+        data_ocorrencia: ncCompleta.data_ocorrencia,
+        tipo_nc: ncCompleta.tipo_nc,
+        problema_identificado: ncCompleta.problema_identificado,
+        descricao_problema: ncCompleta.descricao_problema || "",
+        observacao: ncCompleta.observacao || "",
+        km_inicial: ncCompleta.km_inicial,
+        km_final: ncCompleta.km_final,
+        km_referencia: ncCompleta.km_referencia,
+        rodovia: {
+          codigo: (ncCompleta as any).rodovias?.codigo || "N/A",
+          uf: (ncCompleta as any).rodovias?.uf || "N/A",
+        },
+        lote: {
+          numero: (ncCompleta as any).lotes?.numero || "N/A",
+          contrato: (ncCompleta as any).lotes?.contrato || "N/A",
+          responsavel_executora: (ncCompleta as any).lotes?.responsavel_executora || "N/A",
+          email_executora: (ncCompleta as any).lotes?.email_executora || "",
+          nome_fiscal_execucao: (ncCompleta as any).lotes?.nome_fiscal_execucao || "N/A",
+          email_fiscal_execucao: (ncCompleta as any).lotes?.email_fiscal_execucao || "",
+        },
+        empresa: {
+          nome: ncCompleta.empresa,
+        },
+        supervisora: supervisoraData,
+        fotos: fotos || [],
+        natureza: ncCompleta.tipo_nc, // Usando tipo_nc como natureza
+        grau: "Média", // Pode ser adicionado ao formulário posteriormente
+        tipo_obra: "Manutenção", // Pode ser adicionado ao formulário posteriormente
+        comentarios_supervisora: "",
+        comentarios_executora: "",
+      };
+
+      // Gerar PDF
+      const pdfBlob = await generateNCPDF(pdfData);
+      
+      // Converter blob para base64
+      const reader = new FileReader();
+      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(pdfBlob);
+      });
+
+      // Enviar email com PDF via edge function
+      const { data: emailResult, error: emailError } = await supabase.functions.invoke(
+        "send-nc-notification",
+        {
+          body: {
+            nc_id: ncSalva.id,
+            pdf_base64: pdfBase64,
+          },
+        }
+      );
+
+      if (emailError) throw emailError;
+
+      toast.dismiss(loadingToast);
+      toast.success("Notificação enviada com sucesso!");
+      
+      // Atualizar a data de notificação
+      setFormData({
+        ...formData,
+        data_notificacao: new Date().toISOString().split("T")[0],
+      });
+
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+      console.error("Erro ao notificar:", error);
+      toast.error("Erro ao enviar notificação: " + error.message);
+    }
   };
 
   // Calcular diferença de dias entre Data de Atendimento e Data da Notificação

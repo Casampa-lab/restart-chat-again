@@ -1213,6 +1213,9 @@ export type Database = {
       }
       nao_conformidades: {
         Row: {
+          comentarios_executora: string | null
+          comentarios_supervisora: string | null
+          contrato_supervisora: string | null
           created_at: string | null
           data_atendimento: string | null
           data_notificacao: string | null
@@ -1222,6 +1225,7 @@ export type Database = {
           descricao_problema: string | null
           empresa: string
           enviado_coordenador: boolean | null
+          grau: string | null
           id: string
           km_final: number | null
           km_inicial: number | null
@@ -1233,6 +1237,7 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          natureza: string | null
           numero_nc: string
           observacao: string | null
           prazo_atendimento: number | null
@@ -1241,10 +1246,14 @@ export type Database = {
           sincronizado_sharepoint: boolean | null
           situacao: string | null
           tipo_nc: string | null
+          tipo_obra: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          comentarios_executora?: string | null
+          comentarios_supervisora?: string | null
+          contrato_supervisora?: string | null
           created_at?: string | null
           data_atendimento?: string | null
           data_notificacao?: string | null
@@ -1254,6 +1263,7 @@ export type Database = {
           descricao_problema?: string | null
           empresa: string
           enviado_coordenador?: boolean | null
+          grau?: string | null
           id?: string
           km_final?: number | null
           km_inicial?: number | null
@@ -1265,6 +1275,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          natureza?: string | null
           numero_nc: string
           observacao?: string | null
           prazo_atendimento?: number | null
@@ -1273,10 +1284,14 @@ export type Database = {
           sincronizado_sharepoint?: boolean | null
           situacao?: string | null
           tipo_nc?: string | null
+          tipo_obra?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          comentarios_executora?: string | null
+          comentarios_supervisora?: string | null
+          contrato_supervisora?: string | null
           created_at?: string | null
           data_atendimento?: string | null
           data_notificacao?: string | null
@@ -1286,6 +1301,7 @@ export type Database = {
           descricao_problema?: string | null
           empresa?: string
           enviado_coordenador?: boolean | null
+          grau?: string | null
           id?: string
           km_final?: number | null
           km_inicial?: number | null
@@ -1297,6 +1313,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          natureza?: string | null
           numero_nc?: string
           observacao?: string | null
           prazo_atendimento?: number | null
@@ -1305,6 +1322,7 @@ export type Database = {
           sincronizado_sharepoint?: boolean | null
           situacao?: string | null
           tipo_nc?: string | null
+          tipo_obra?: string | null
           updated_at?: string | null
           user_id?: string
         }
