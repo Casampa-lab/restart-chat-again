@@ -396,6 +396,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="leitura_fundo_1"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.leitura_fundo_1}
                     onChange={(e) => {
                       const novoFormData = { ...formData, leitura_fundo_1: e.target.value };
@@ -408,7 +410,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                       );
                       setFormData({ ...novoFormData, valor_medido_fundo: media });
                     }}
-                    placeholder="0.0"
+                    placeholder="10.0 - 2000.0"
                   />
                 </div>
 
@@ -418,6 +420,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="leitura_fundo_2"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.leitura_fundo_2}
                     onChange={(e) => {
                       const novoFormData = { ...formData, leitura_fundo_2: e.target.value };
@@ -430,7 +434,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                       );
                       setFormData({ ...novoFormData, valor_medido_fundo: media });
                     }}
-                    placeholder="0.0"
+                    placeholder="10.0 - 2000.0"
                   />
                 </div>
 
@@ -440,6 +444,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="leitura_fundo_3"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.leitura_fundo_3}
                     onChange={(e) => {
                       const novoFormData = { ...formData, leitura_fundo_3: e.target.value };
@@ -452,7 +458,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                       );
                       setFormData({ ...novoFormData, valor_medido_fundo: media });
                     }}
-                    placeholder="0.0"
+                    placeholder="10.0 - 2000.0"
                   />
                 </div>
 
@@ -462,6 +468,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="leitura_fundo_4"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.leitura_fundo_4}
                     onChange={(e) => {
                       const novoFormData = { ...formData, leitura_fundo_4: e.target.value };
@@ -474,7 +482,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                       );
                       setFormData({ ...novoFormData, valor_medido_fundo: media });
                     }}
-                    placeholder="0.0"
+                    placeholder="10.0 - 2000.0"
                   />
                 </div>
 
@@ -484,6 +492,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="leitura_fundo_5"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.leitura_fundo_5}
                     onChange={(e) => {
                       const novoFormData = { ...formData, leitura_fundo_5: e.target.value };
@@ -496,7 +506,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                       );
                       setFormData({ ...novoFormData, valor_medido_fundo: media });
                     }}
-                    placeholder="0.0"
+                    placeholder="10.0 - 2000.0"
                   />
                 </div>
               </div>
@@ -522,11 +532,13 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="valor_minimo_fundo"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.valor_minimo_fundo}
                     onChange={(e) =>
                       setFormData({ ...formData, valor_minimo_fundo: e.target.value })
                     }
-                    placeholder="0.0"
+                    placeholder="10.0 - 2000.0"
                     required
                   />
                 </div>
@@ -581,6 +593,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="leitura_legenda_1"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.leitura_legenda_1}
                     onChange={(e) => {
                       const novoFormData = { ...formData, leitura_legenda_1: e.target.value };
@@ -593,7 +607,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                       );
                       setFormData({ ...novoFormData, valor_medido_legenda: media });
                     }}
-                    placeholder="0.0"
+                    placeholder="10.0 - 2000.0"
                   />
                 </div>
 
@@ -603,6 +617,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="leitura_legenda_2"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.leitura_legenda_2}
                     onChange={(e) => {
                       const novoFormData = { ...formData, leitura_legenda_2: e.target.value };
@@ -615,7 +631,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                       );
                       setFormData({ ...novoFormData, valor_medido_legenda: media });
                     }}
-                    placeholder="0.0"
+                    placeholder="10.0 - 2000.0"
                   />
                 </div>
 
@@ -625,6 +641,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="leitura_legenda_3"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.leitura_legenda_3}
                     onChange={(e) => {
                       const novoFormData = { ...formData, leitura_legenda_3: e.target.value };
@@ -637,7 +655,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                       );
                       setFormData({ ...novoFormData, valor_medido_legenda: media });
                     }}
-                    placeholder="0.0"
+                    placeholder="10.0 - 2000.0"
                   />
                 </div>
 
@@ -647,6 +665,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="leitura_legenda_4"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.leitura_legenda_4}
                     onChange={(e) => {
                       const novoFormData = { ...formData, leitura_legenda_4: e.target.value };
@@ -659,7 +679,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                       );
                       setFormData({ ...novoFormData, valor_medido_legenda: media });
                     }}
-                    placeholder="0.0"
+                    placeholder="10.0 - 2000.0"
                   />
                 </div>
 
@@ -669,6 +689,8 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="leitura_legenda_5"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.leitura_legenda_5}
                     onChange={(e) => {
                       const novoFormData = { ...formData, leitura_legenda_5: e.target.value };
@@ -681,7 +703,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                       );
                       setFormData({ ...novoFormData, valor_medido_legenda: media });
                     }}
-                    placeholder="0.0"
+                    placeholder="10.0 - 2000.0"
                   />
                 </div>
               </div>
@@ -707,11 +729,11 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
                     id="valor_minimo_legenda"
                     type="number"
                     step="0.1"
+                    min="10"
+                    max="2000"
                     value={formData.valor_minimo_legenda}
-                    onChange={(e) =>
-                      setFormData({ ...formData, valor_minimo_legenda: e.target.value })
-                    }
-                    placeholder="0.0"
+                    onChange={(e) => setFormData({ ...formData, valor_minimo_legenda: e.target.value })}
+                    placeholder="10.0 - 2000.0"
                     required
                   />
                 </div>
