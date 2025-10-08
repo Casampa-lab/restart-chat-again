@@ -67,23 +67,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { data: supervisoraData, error: supervisoraError } = await supabase
       .from('supervisoras')
-      .select('nome_empresa')
+      .select('nome_empresa, email_envio')
       .eq('id', profileData.supervisora_id)
       .single();
 
     if (supervisoraError) {
       throw new Error('Erro ao buscar dados da supervisora');
-    }
-
-    // Buscar coordenadores da supervisora
-    const { data: coordenadores, error: coordError } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('supervisora_id', profileData.supervisora_id)
-      .not('email', 'is', null);
-
-    if (coordError) {
-      console.error('Erro ao buscar coordenadores:', coordError);
     }
 
     // Buscar coordenadores através da tabela user_roles
@@ -141,6 +130,11 @@ const handler = async (req: Request): Promise<Response> => {
       ? `${ncData.km_inicial} ao ${ncData.km_final}`
       : ncData.km_referencia || 'N/A';
 
+    // Determinar email de envio (usa o configurado na supervisora ou padrão)
+    const emailFrom = supervisoraData.email_envio 
+      ? `${supervisoraData.nome_empresa} <${supervisoraData.email_envio}>`
+      : `${supervisoraData.nome_empresa} <noreply@operavia.online>`;
+
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #1e40af;">Notificação de Não Conformidade</h2>
@@ -177,7 +171,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Enviar email via Resend
     const emailPayload: any = {
-      from: `${supervisoraData.nome_empresa} <operavia.online@gmail.com>`,
+      from: emailFrom,
       to: destinatarios,
       subject: `Não Conformidade: ${ncData.numero_nc} - ${ncData.rodovias?.codigo}`,
       html: emailHtml,

@@ -15,6 +15,7 @@ interface Supervisora {
   nome_empresa: string;
   contrato: string | null;
   email_prefixo: string | null;
+  email_envio: string | null;
   logo_url: string | null;
   usar_logo_customizado: boolean;
   codigo_convite: string | null;
@@ -30,6 +31,7 @@ export const SupervisorasManager = () => {
     nome_empresa: "",
     contrato: "",
     email_prefixo: "",
+    email_envio: "",
     usar_logo_customizado: false,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -124,6 +126,7 @@ export const SupervisorasManager = () => {
             nome_empresa: formData.nome_empresa,
             contrato: formData.contrato,
             email_prefixo: formData.email_prefixo || null,
+            email_envio: formData.email_envio || null,
             logo_url: logoUrl,
             usar_logo_customizado: formData.usar_logo_customizado,
           })
@@ -139,6 +142,7 @@ export const SupervisorasManager = () => {
             nome_empresa: formData.nome_empresa,
             contrato: formData.contrato,
             email_prefixo: formData.email_prefixo || null,
+            email_envio: formData.email_envio || null,
             logo_url: logoUrl,
             usar_logo_customizado: formData.usar_logo_customizado,
           });
@@ -215,6 +219,7 @@ export const SupervisorasManager = () => {
       nome_empresa: supervisora.nome_empresa,
       contrato: supervisora.contrato || "",
       email_prefixo: supervisora.email_prefixo || "",
+      email_envio: supervisora.email_envio || "",
       usar_logo_customizado: supervisora.usar_logo_customizado,
     });
     setIsDialogOpen(true);
@@ -223,7 +228,13 @@ export const SupervisorasManager = () => {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingSupervisora(null);
-    setFormData({ nome_empresa: "", contrato: "", email_prefixo: "", usar_logo_customizado: false });
+    setFormData({ 
+      nome_empresa: "", 
+      contrato: "", 
+      email_prefixo: "", 
+      email_envio: "",
+      usar_logo_customizado: false 
+    });
     setLogoFile(null);
   };
 
@@ -244,7 +255,13 @@ export const SupervisorasManager = () => {
             <DialogTrigger asChild>
               <Button onClick={() => {
                 setEditingSupervisora(null);
-                setFormData({ nome_empresa: "", contrato: "", email_prefixo: "", usar_logo_customizado: false });
+                setFormData({ 
+                  nome_empresa: "", 
+                  contrato: "", 
+                  email_prefixo: "", 
+                  email_envio: "",
+                  usar_logo_customizado: false 
+                });
               }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Nova Supervisora
@@ -302,9 +319,23 @@ export const SupervisorasManager = () => {
                   </div>
                   {formData.email_prefixo && (
                     <p className="text-sm text-muted-foreground">
-                      Email de envio: <strong>{formData.email_prefixo}@operavia.online</strong>
+                      Email de usuários: <strong>{formData.email_prefixo}@operavia.online</strong>
                     </p>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email_envio">Email de Envio (Remetente das Notificações)</Label>
+                  <Input
+                    id="email_envio"
+                    type="email"
+                    value={formData.email_envio}
+                    onChange={(e) => setFormData({ ...formData, email_envio: e.target.value })}
+                    placeholder="Ex: noreply@supervisora.com.br"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Este email será usado como remetente nas notificações de NC
+                  </p>
                 </div>
 
                 <div className="space-y-2">

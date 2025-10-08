@@ -1919,6 +1919,7 @@ export type Database = {
           codigo_convite: string | null
           contrato: string | null
           created_at: string | null
+          email_envio: string | null
           email_prefixo: string | null
           id: string
           logo_url: string | null
@@ -1930,6 +1931,7 @@ export type Database = {
           codigo_convite?: string | null
           contrato?: string | null
           created_at?: string | null
+          email_envio?: string | null
           email_prefixo?: string | null
           id?: string
           logo_url?: string | null
@@ -1941,6 +1943,7 @@ export type Database = {
           codigo_convite?: string | null
           contrato?: string | null
           created_at?: string | null
+          email_envio?: string | null
           email_prefixo?: string | null
           id?: string
           logo_url?: string | null
