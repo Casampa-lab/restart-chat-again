@@ -109,7 +109,7 @@ const Auth = () => {
         
         <Card className="w-full">
           <CardHeader>
-            <CardTitle className="text-2xl text-center">OperaVia</CardTitle>
+            <CardTitle className="text-2xl text-center"></CardTitle>
             <CardDescription className="text-center">
               Sistema Nacional de Supervisão de Operação Rodoviária
             </CardDescription>
