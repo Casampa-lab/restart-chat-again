@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { UserPlus, Users, Pencil, X } from "lucide-react";
+import { UserPlus, Users, Pencil, X, Trash2 } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -163,6 +163,32 @@ export const UsuariosManager = () => {
     }
   };
 
+  const handleDelete = async (profileId: string, profileName: string) => {
+    if (!confirm(`Tem certeza que deseja DELETAR o usuário "${profileName}"? Esta ação não pode ser desfeita!`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      console.log("Deletando usuário:", profileId);
+      
+      const { error } = await supabase.auth.admin.deleteUser(profileId);
+
+      if (error) {
+        console.error("Erro ao deletar:", error);
+        throw error;
+      }
+
+      console.log("Usuário deletado com sucesso, recarregando profiles...");
+      toast.success("Usuário deletado com sucesso!");
+      await loadProfiles();
+    } catch (error: any) {
+      toast.error("Erro ao deletar: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingProfile(null);
@@ -241,6 +267,15 @@ export const UsuariosManager = () => {
                         <X className="h-4 w-4" />
                       </Button>
                     )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(profile.id, profile.nome)}
+                      title="Deletar usuário"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
