@@ -14,6 +14,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [nome, setNome] = useState("");
   const [codigoConvite, setCodigoConvite] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     // Recuperar último email usado
@@ -101,67 +102,79 @@ const Auth = () => {
       setLoading(false);
     }
   };
-  return <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4 overflow-y-auto">
-      <div className="w-full max-w-md space-y-6">
-        <div className="flex flex-col items-center gap-2 bg-card rounded-xl p-8 shadow-lg">
-          <img src={logoOperaVia} alt="OperaVia" className="h-48 w-48 object-contain" />
-        </div>
-        
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-xl text-center text-primary font-bold">
-              Sistema Nacional de Supervisão de Operação Rodoviária
-            </CardTitle>
-            <CardDescription className="text-center">
-              {isLogin ? "Entre com suas credenciais" : "Crie sua conta"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleAuth} className="space-y-4">
-              {!isLogin && <>
-                  <div className="space-y-2">
+  return <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-primary/10 to-secondary/10 overflow-y-auto">
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-6">
+          <div className="flex flex-col items-center gap-2 bg-card rounded-xl p-8 shadow-lg">
+            <img src={logoOperaVia} alt="OperaVia" className="h-48 w-48 object-contain" />
+          </div>
+          
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle className="text-2xl text-center">Sistema Nacional de Supervisão</CardTitle>
+              <CardDescription className="text-center">
+                {isLogin ? "Entre com suas credenciais" : "Crie sua conta"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAuth} className="space-y-4">
+                {!isLogin && <div className="space-y-2">
                     <Label htmlFor="nome">Nome Completo</Label>
-                    <Input id="nome" type="text" placeholder="Seu nome" value={nome} onChange={e => setNome(e.target.value)} required={!isLogin} />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="codigo">Código de Convite (opcional)</Label>
-                    <Input id="codigo" type="text" placeholder="Ex: ABC12345" value={codigoConvite} onChange={e => setCodigoConvite(e.target.value.toUpperCase())} maxLength={8} />
+                    <Input id="nome" type="text" value={nome} onChange={e => setNome(e.target.value)} required={!isLogin} />
+                  </div>}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="senha">Senha</Label>
+                  <Input id="senha" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+                </div>
+                {!isLogin && <div className="space-y-2">
+                    <Label htmlFor="codigoConvite">Código de Convite (opcional)</Label>
+                    <Input id="codigoConvite" type="text" value={codigoConvite} onChange={e => setCodigoConvite(e.target.value.toUpperCase())} placeholder="Digite o código de convite se tiver" />
                     <p className="text-xs text-muted-foreground">
-                      Se você recebeu um código da sua supervisora, digite aqui.
+                      Se você tem um código de convite de uma supervisora, digite-o aqui
                     </p>
-                  </div>
-                </>}
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
+                  </div>}
+                {!isLogin && <div className="space-y-2">
+                    <Label htmlFor="telefone">Telefone (opcional)</Label>
+                    <Input id="telefone" type="tel" value={telefone} onChange={e => setTelefone(e.target.value)} placeholder="(00) 00000-0000" />
+                  </div>}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? <div className="flex items-center justify-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      <span>Processando...</span>
+                    </div> : isLogin ? "Entrar" : "Cadastrar"}
+                </Button>
+              </form>
+              <div className="mt-4 text-center text-sm">
+                {isLogin ? <>
+                    Não tem uma conta?{" "}
+                    <button onClick={() => setIsLogin(false)} className="text-primary hover:underline font-medium">
+                      Cadastre-se
+                    </button>
+                  </> : <>
+                    Já tem uma conta?{" "}
+                    <button onClick={() => setIsLogin(true)} className="text-primary hover:underline font-medium">
+                      Faça login
+                    </button>
+                  </>}
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
-                {!isLogin && <p className="text-xs text-muted-foreground">
-                    Mínimo de 6 caracteres.
-                  </p>}
-              </div>
-
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Processando..." : isLogin ? "Entrar" : "Cadastrar"}
-              </Button>
-
-              <Button type="button" variant="ghost" className="w-full" onClick={() => setIsLogin(!isLogin)}>
-                {isLogin ? "Não tem conta? Cadastre-se" : "Já tem conta? Entre"}
-              </Button>
-
-              {isLogin && <Button type="button" variant="link" className="w-full text-sm text-muted-foreground" onClick={() => navigate("/reset-admin-password")}>
-                  Esqueceu a senha? (Apenas Admin)
-                </Button>}
-            </form>
-          </CardContent>
-        </Card>
-
+            </CardContent>
+          </Card>
+        </div>
       </div>
+      
+      <footer className="bg-background border-t mt-auto">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <p className="text-sm text-muted-foreground text-center">
+              Críticas e sugestões: <a href="mailto:operavia.online@gmail.com" className="text-primary hover:underline font-weight-semibold">operavia.online@gmail.com</a>
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>;
 };
 export default Auth;
