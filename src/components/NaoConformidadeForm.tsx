@@ -24,10 +24,25 @@ const NaoConformidadeForm = ({
 }: NaoConformidadeFormProps) => {
   const [loading, setLoading] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsLoadingInicio, setGpsLoadingInicio] = useState(false);
+  const [gpsLoadingFim, setGpsLoadingFim] = useState(false);
+  
+  // Localização para NC pontual (Sinalização Vertical)
   const [location, setLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
+  
+  // Localizações para NC de extensão (Sinalização Horizontal e Dispositivos de Segurança)
+  const [locationInicio, setLocationInicio] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [locationFim, setLocationFim] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  
   const [empresaNome, setEmpresaNome] = useState<string>("");
   const [formData, setFormData] = useState({
     data_ocorrencia: new Date().toISOString().split("T")[0],
@@ -40,7 +55,9 @@ const NaoConformidadeForm = ({
     data_atendimento: "",
     data_notificacao: "",
     observacao: "",
-    km_referencia: ""
+    km_referencia: "",
+    km_inicial: "",
+    km_final: ""
   });
 
   // Buscar empresa do lote automaticamente
@@ -87,6 +104,56 @@ const NaoConformidadeForm = ({
     });
   };
 
+  const getCurrentLocationInicio = () => {
+    setGpsLoadingInicio(true);
+    if (!navigator.geolocation) {
+      toast.error("GPS não disponível neste dispositivo");
+      setGpsLoadingInicio(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(position => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      setLocationInicio({
+        lat,
+        lng
+      });
+      toast.success("Localização inicial capturada!");
+      setGpsLoadingInicio(false);
+    }, error => {
+      toast.error("Erro ao obter GPS inicial: " + error.message);
+      setGpsLoadingInicio(false);
+    }, {
+      enableHighAccuracy: true,
+      timeout: 10000
+    });
+  };
+
+  const getCurrentLocationFim = () => {
+    setGpsLoadingFim(true);
+    if (!navigator.geolocation) {
+      toast.error("GPS não disponível neste dispositivo");
+      setGpsLoadingFim(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(position => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      setLocationFim({
+        lat,
+        lng
+      });
+      toast.success("Localização final capturada!");
+      setGpsLoadingFim(false);
+    }, error => {
+      toast.error("Erro ao obter GPS final: " + error.message);
+      setGpsLoadingFim(false);
+    }, {
+      enableHighAccuracy: true,
+      timeout: 10000
+    });
+  };
+
   // Resetar problema quando tipo_nc mudar
   useEffect(() => {
     if (formData.tipo_nc) {
@@ -98,14 +165,28 @@ const NaoConformidadeForm = ({
   }, [formData.tipo_nc]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!location) {
-      toast.error("Capture a localização GPS antes de salvar");
-      return;
-    }
+    
     if (!formData.tipo_nc || !formData.problema_identificado) {
       toast.error("Selecione o Tipo de NC e o Problema");
       return;
     }
+
+    const isExtensao = formData.tipo_nc === TIPOS_NC.SINALIZACAO_HORIZONTAL || 
+                       formData.tipo_nc === TIPOS_NC.DISPOSITIVOS_SEGURANCA;
+    
+    // Validar GPS conforme o tipo
+    if (isExtensao) {
+      if (!locationInicio || !locationFim) {
+        toast.error("Capture as localizações GPS de início e fim antes de salvar");
+        return;
+      }
+    } else {
+      if (!location) {
+        toast.error("Capture a localização GPS antes de salvar");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const {
@@ -114,9 +195,8 @@ const NaoConformidadeForm = ({
         }
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
-      const {
-        error
-      } = await supabase.from("nao_conformidades").insert({
+      
+      const baseData = {
         user_id: user.id,
         lote_id: loteId,
         rodovia_id: rodoviaId,
@@ -131,10 +211,38 @@ const NaoConformidadeForm = ({
         data_atendimento: formData.data_atendimento || null,
         data_notificacao: formData.data_notificacao || null,
         observacao: formData.observacao || null,
-        latitude: location.lat,
-        longitude: location.lng,
-        km_referencia: formData.km_referencia ? parseFloat(formData.km_referencia) : null
-      });
+      };
+
+      // Adicionar campos conforme o tipo de NC
+      const insertData = isExtensao 
+        ? {
+            ...baseData,
+            km_inicial: formData.km_inicial ? parseFloat(formData.km_inicial) : null,
+            km_final: formData.km_final ? parseFloat(formData.km_final) : null,
+            latitude_inicial: locationInicio!.lat,
+            longitude_inicial: locationInicio!.lng,
+            latitude_final: locationFim!.lat,
+            longitude_final: locationFim!.lng,
+            latitude: null,
+            longitude: null,
+            km_referencia: null
+          }
+        : {
+            ...baseData,
+            latitude: location!.lat,
+            longitude: location!.lng,
+            km_referencia: formData.km_referencia ? parseFloat(formData.km_referencia) : null,
+            km_inicial: null,
+            km_final: null,
+            latitude_inicial: null,
+            longitude_inicial: null,
+            latitude_final: null,
+            longitude_final: null
+          };
+
+      const {
+        error
+      } = await supabase.from("nao_conformidades").insert(insertData);
       if (error) throw error;
 
       // Enviar email para coordenadores/fiscais
@@ -172,11 +280,15 @@ const NaoConformidadeForm = ({
         data_atendimento: "",
         data_notificacao: "",
         observacao: "",
-        km_referencia: ""
+        km_referencia: "",
+        km_inicial: "",
+        km_final: ""
       });
 
-      // Limpar localização para o próximo registro
+      // Limpar localizações para o próximo registro
       setLocation(null);
+      setLocationInicio(null);
+      setLocationFim(null);
     } catch (error: any) {
       toast.error("Erro ao salvar: " + error.message);
     } finally {
@@ -184,6 +296,11 @@ const NaoConformidadeForm = ({
     }
   };
   const problemasDisponiveis = formData.tipo_nc ? PROBLEMAS_POR_TIPO[formData.tipo_nc as TipoNC] || [] : [];
+  
+  // Determinar se é NC de extensão ou pontual
+  const isExtensao = formData.tipo_nc === TIPOS_NC.SINALIZACAO_HORIZONTAL || 
+                     formData.tipo_nc === TIPOS_NC.DISPOSITIVOS_SEGURANCA;
+  
   const handleNotificar = () => {
     if (!formData.data_notificacao) {
       toast.error("Preencha a Data da Notificação primeiro");
@@ -213,26 +330,80 @@ const NaoConformidadeForm = ({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* GPS Status */}
-          <div className="bg-muted p-4 rounded-lg space-y-2">
-            <div className="flex items-center gap-2">
-              <Label>Coordenadas GPS *</Label>
+          {/* GPS Status - Condicional baseado no tipo */}
+          {!formData.tipo_nc && (
+            <div className="bg-muted p-4 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                Selecione o Tipo de NC primeiro para capturar as coordenadas GPS
+              </p>
             </div>
-            <div className="flex gap-2 items-center">
-              <Button type="button" variant="outline" onClick={getCurrentLocation} disabled={gpsLoading}>
-                {gpsLoading ? <>
-                    <MapPin className="mr-2 h-4 w-4 animate-pulse" />
-                    Capturando...
-                  </> : <>
-                    <MapPin className="mr-2 h-4 w-4" />
-                    Capturar GPS
-                  </>}
-              </Button>
-              {location ? <p className="text-sm text-muted-foreground">
-                  Lat: {location.lat.toFixed(6)}, Lng: {location.lng.toFixed(6)}
-                </p> : <p className="text-sm text-muted-foreground">Clique no botão para capturar a localização</p>}
+          )}
+          
+          {formData.tipo_nc && !isExtensao && (
+            <div className="bg-muted p-4 rounded-lg space-y-2">
+              <div className="flex items-center gap-2">
+                <Label>Coordenadas GPS (Pontual) *</Label>
+              </div>
+              <div className="flex gap-2 items-center">
+                <Button type="button" variant="outline" onClick={getCurrentLocation} disabled={gpsLoading}>
+                  {gpsLoading ? <>
+                      <MapPin className="mr-2 h-4 w-4 animate-pulse" />
+                      Capturando...
+                    </> : <>
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Capturar GPS
+                    </>}
+                </Button>
+                {location ? <p className="text-sm text-muted-foreground">
+                    Lat: {location.lat.toFixed(6)}, Lng: {location.lng.toFixed(6)}
+                  </p> : <p className="text-sm text-muted-foreground">Clique no botão para capturar a localização</p>}
+              </div>
             </div>
-          </div>
+          )}
+
+          {formData.tipo_nc && isExtensao && (
+            <div className="bg-muted p-4 rounded-lg space-y-4">
+              <Label>Coordenadas GPS (Extensão) *</Label>
+              
+              {/* GPS Início */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Início</Label>
+                <div className="flex gap-2 items-center">
+                  <Button type="button" variant="outline" onClick={getCurrentLocationInicio} disabled={gpsLoadingInicio}>
+                    {gpsLoadingInicio ? <>
+                        <MapPin className="mr-2 h-4 w-4 animate-pulse" />
+                        Capturando...
+                      </> : <>
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Capturar GPS Início
+                      </>}
+                  </Button>
+                  {locationInicio ? <p className="text-sm text-muted-foreground">
+                      Lat: {locationInicio.lat.toFixed(6)}, Lng: {locationInicio.lng.toFixed(6)}
+                    </p> : <p className="text-sm text-muted-foreground">Capturar localização inicial</p>}
+                </div>
+              </div>
+
+              {/* GPS Fim */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Fim</Label>
+                <div className="flex gap-2 items-center">
+                  <Button type="button" variant="outline" onClick={getCurrentLocationFim} disabled={gpsLoadingFim}>
+                    {gpsLoadingFim ? <>
+                        <MapPin className="mr-2 h-4 w-4 animate-pulse" />
+                        Capturando...
+                      </> : <>
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Capturar GPS Fim
+                      </>}
+                  </Button>
+                  {locationFim ? <p className="text-sm text-muted-foreground">
+                      Lat: {locationFim.lat.toFixed(6)}, Lng: {locationFim.lng.toFixed(6)}
+                    </p> : <p className="text-sm text-muted-foreground">Capturar localização final</p>}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Linha 1: Data e Número NC */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -366,22 +537,46 @@ const NaoConformidadeForm = ({
             </div>
           </div>
 
-          {/* km Referência */}
-          <div className="space-y-2">
-            <Label htmlFor="km_referencia">km Referência (opcional)</Label>
-            <Input id="km_referencia" type="number" step="0.001" value={formData.km_referencia} onChange={e => setFormData({
-            ...formData,
-            km_referencia: e.target.value
-          })} placeholder="Ex: 123.456" />
-            <p className="text-xs text-muted-foreground">
-              (apenas referência visual)
-            </p>
-            <p className="text-xs text-muted-foreground">
-              GPS é obrigatório. km é opcional e apenas para referência.
-            </p>
-          </div>
+          {/* km - Condicional baseado no tipo */}
+          {formData.tipo_nc && !isExtensao && (
+            <div className="space-y-2">
+              <Label htmlFor="km_referencia">km Referência (opcional)</Label>
+              <Input id="km_referencia" type="number" step="0.001" value={formData.km_referencia} onChange={e => setFormData({
+              ...formData,
+              km_referencia: e.target.value
+            })} placeholder="Ex: 123.456" />
+              <p className="text-xs text-muted-foreground">
+                GPS é obrigatório. km é opcional e apenas para referência.
+              </p>
+            </div>
+          )}
 
-          <Button type="submit" className="w-full" size="lg" disabled={loading || !location}>
+          {formData.tipo_nc && isExtensao && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="km_inicial">km Inicial (opcional)</Label>
+                <Input id="km_inicial" type="number" step="0.001" value={formData.km_inicial} onChange={e => setFormData({
+                ...formData,
+                km_inicial: e.target.value
+              })} placeholder="Ex: 123.000" />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="km_final">km Final (opcional)</Label>
+                <Input id="km_final" type="number" step="0.001" value={formData.km_final} onChange={e => setFormData({
+                ...formData,
+                km_final: e.target.value
+              })} placeholder="Ex: 125.500" />
+              </div>
+            </div>
+          )}
+
+          <Button 
+            type="submit" 
+            className="w-full" 
+            size="lg" 
+            disabled={loading || (isExtensao ? (!locationInicio || !locationFim) : !location)}
+          >
             <Save className="mr-2 h-5 w-5" />
             {loading ? "Salvando..." : "Salvar Não-Conformidade"}
           </Button>

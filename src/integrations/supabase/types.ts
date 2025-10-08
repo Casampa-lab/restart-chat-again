@@ -1211,9 +1211,15 @@ export type Database = {
           empresa: string
           enviado_coordenador: boolean | null
           id: string
+          km_final: number | null
+          km_inicial: number | null
           km_referencia: number | null
-          latitude: number
-          longitude: number
+          latitude: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          longitude: number | null
+          longitude_final: number | null
+          longitude_inicial: number | null
           lote_id: string
           numero_nc: string
           observacao: string | null
@@ -1237,9 +1243,15 @@ export type Database = {
           empresa: string
           enviado_coordenador?: boolean | null
           id?: string
+          km_final?: number | null
+          km_inicial?: number | null
           km_referencia?: number | null
-          latitude: number
-          longitude: number
+          latitude?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
           lote_id: string
           numero_nc: string
           observacao?: string | null
@@ -1263,9 +1275,15 @@ export type Database = {
           empresa?: string
           enviado_coordenador?: boolean | null
           id?: string
+          km_final?: number | null
+          km_inicial?: number | null
           km_referencia?: number | null
-          latitude?: number
-          longitude?: number
+          latitude?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
           lote_id?: string
           numero_nc?: string
           observacao?: string | null
