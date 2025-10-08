@@ -292,7 +292,7 @@ export const SupervisorasManager = () => {
                         const value = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '');
                         setFormData({ ...formData, email_prefixo: value });
                       }}
-                      placeholder="supervisora"
+                      placeholder="Ex: supervisora"
                       maxLength={20}
                       className="flex-1"
                     />
