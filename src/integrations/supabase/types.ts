@@ -1325,6 +1325,50 @@ export type Database = {
           },
         ]
       }
+      nao_conformidades_fotos: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          foto_url: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          nc_id: string
+          ordem: number
+          sentido: string | null
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          foto_url: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          nc_id: string
+          ordem: number
+          sentido?: string | null
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          foto_url?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          nc_id?: string
+          ordem?: number
+          sentido?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nao_conformidades_fotos_nc_id_fkey"
+            columns: ["nc_id"]
+            isOneToOne: false
+            referencedRelation: "nao_conformidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planos: {
         Row: {
           ativo: boolean | null

@@ -7,8 +7,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { MapPin, Save, Bell } from "lucide-react";
+import { MapPin, Save, Bell, Camera, X } from "lucide-react";
 import { TIPOS_NC, PROBLEMAS_POR_TIPO, SITUACOES_NC, type TipoNC } from "@/constants/naoConformidades";
+
+interface FotoData {
+  arquivo: File | null;
+  url: string;
+  latitude: number | null;
+  longitude: number | null;
+  sentido: string;
+  descricao: string;
+  uploading: boolean;
+}
 interface NaoConformidadeFormProps {
   loteId: string;
   rodoviaId: string;
@@ -59,6 +69,14 @@ const NaoConformidadeForm = ({
     km_inicial: "",
     km_final: ""
   });
+
+  // Estado para as 4 fotos
+  const [fotos, setFotos] = useState<FotoData[]>([
+    { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+    { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+    { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+    { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+  ]);
 
   // Buscar empresa do lote automaticamente
   useEffect(() => {
@@ -163,6 +181,92 @@ const NaoConformidadeForm = ({
       }));
     }
   }, [formData.tipo_nc]);
+
+  // Função para capturar foto com GPS
+  const handleFotoChange = async (index: number, file: File) => {
+    if (!navigator.geolocation) {
+      toast.error("GPS não disponível neste dispositivo");
+      return;
+    }
+
+    // Capturar GPS
+    setFotos(prev => {
+      const newFotos = [...prev];
+      newFotos[index] = { ...newFotos[index], uploading: true };
+      return newFotos;
+    });
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const url = URL.createObjectURL(file);
+
+        setFotos(prev => {
+          const newFotos = [...prev];
+          newFotos[index] = {
+            ...newFotos[index],
+            arquivo: file,
+            url,
+            latitude: lat,
+            longitude: lng,
+            uploading: false,
+          };
+          return newFotos;
+        });
+
+        toast.success(`Foto ${index + 1} anexada com GPS capturado!`);
+      },
+      (error) => {
+        toast.error("Erro ao capturar GPS: " + error.message);
+        setFotos(prev => {
+          const newFotos = [...prev];
+          newFotos[index] = { ...newFotos[index], uploading: false };
+          return newFotos;
+        });
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  // Atualizar sentido da foto
+  const handleSentidoChange = (index: number, sentido: string) => {
+    setFotos(prev => {
+      const newFotos = [...prev];
+      newFotos[index] = { ...newFotos[index], sentido };
+      return newFotos;
+    });
+  };
+
+  // Atualizar descrição da foto
+  const handleDescricaoChange = (index: number, descricao: string) => {
+    setFotos(prev => {
+      const newFotos = [...prev];
+      newFotos[index] = { ...newFotos[index], descricao };
+      return newFotos;
+    });
+  };
+
+  // Remover foto
+  const handleRemoverFoto = (index: number) => {
+    setFotos(prev => {
+      const newFotos = [...prev];
+      if (newFotos[index].url) {
+        URL.revokeObjectURL(newFotos[index].url);
+      }
+      newFotos[index] = {
+        arquivo: null,
+        url: "",
+        latitude: null,
+        longitude: null,
+        sentido: "",
+        descricao: "",
+        uploading: false,
+      };
+      return newFotos;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -241,9 +345,57 @@ const NaoConformidadeForm = ({
           };
 
       const {
+        data: ncData,
         error
-      } = await supabase.from("nao_conformidades").insert(insertData);
+      } = await supabase.from("nao_conformidades").insert(insertData).select().single();
       if (error) throw error;
+
+      // Upload das fotos
+      const fotosParaSalvar = fotos.filter(f => f.arquivo !== null);
+      if (fotosParaSalvar.length > 0) {
+        toast.info(`Fazendo upload de ${fotosParaSalvar.length} foto(s)...`);
+        
+        for (let i = 0; i < fotosParaSalvar.length; i++) {
+          const foto = fotosParaSalvar[i];
+          const fotoIndex = fotos.indexOf(foto);
+          
+          try {
+            // Upload da foto para o storage
+            const fileExt = foto.arquivo!.name.split('.').pop();
+            const fileName = `${ncData.id}_foto${fotoIndex + 1}_${Date.now()}.${fileExt}`;
+            const filePath = `${user.id}/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+              .from('nc-photos')
+              .upload(filePath, foto.arquivo!);
+
+            if (uploadError) throw uploadError;
+
+            // Obter URL pública
+            const { data: { publicUrl } } = supabase.storage
+              .from('nc-photos')
+              .getPublicUrl(filePath);
+
+            // Salvar registro da foto no banco
+            const { error: fotoError } = await supabase
+              .from('nao_conformidades_fotos')
+              .insert({
+                nc_id: ncData.id,
+                foto_url: publicUrl,
+                latitude: foto.latitude,
+                longitude: foto.longitude,
+                sentido: foto.sentido || null,
+                descricao: foto.descricao || null,
+                ordem: fotoIndex + 1,
+              });
+
+            if (fotoError) throw fotoError;
+          } catch (fotoErr: any) {
+            console.error(`Erro ao salvar foto ${fotoIndex + 1}:`, fotoErr);
+            toast.error(`Erro ao salvar foto ${fotoIndex + 1}`);
+          }
+        }
+      }
 
       // Enviar email para coordenadores/fiscais
       try {
@@ -285,10 +437,16 @@ const NaoConformidadeForm = ({
         km_final: ""
       });
 
-      // Limpar localizações para o próximo registro
+      // Limpar localizações e fotos para o próximo registro
       setLocation(null);
       setLocationInicio(null);
       setLocationFim(null);
+      setFotos([
+        { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+        { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+        { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+        { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+      ]);
     } catch (error: any) {
       toast.error("Erro ao salvar: " + error.message);
     } finally {
@@ -565,6 +723,113 @@ const NaoConformidadeForm = ({
             ...formData,
             observacao: e.target.value
           })} rows={3} />
+          </div>
+
+          {/* Seção de Fotos */}
+          <div className="space-y-4 border-t pt-4">
+            <div className="flex items-center gap-2">
+              <Camera className="h-5 w-5" />
+              <Label className="text-base font-semibold">Anexar Fotos (até 4 fotos)</Label>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Cada foto captura automaticamente as coordenadas GPS. Você pode adicionar o sentido da via e uma descrição.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {fotos.map((foto, index) => (
+                <Card key={index} className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-semibold">Foto {index + 1}</Label>
+                    {foto.arquivo && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoverFoto(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+
+                  {!foto.arquivo ? (
+                    <div className="space-y-2">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFotoChange(index, file);
+                        }}
+                        disabled={foto.uploading}
+                        className="cursor-pointer"
+                      />
+                      {foto.uploading && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                          <MapPin className="h-4 w-4 animate-pulse" />
+                          Capturando GPS...
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <img
+                        src={foto.url}
+                        alt={`Foto ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-md"
+                      />
+                      
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="font-semibold">Lat:</span>{" "}
+                          {foto.latitude?.toFixed(6)}
+                        </div>
+                        <div>
+                          <span className="font-semibold">Lng:</span>{" "}
+                          {foto.longitude?.toFixed(6)}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`sentido-${index}`} className="text-sm">
+                          Sentido
+                        </Label>
+                        <Select
+                          value={foto.sentido}
+                          onValueChange={(value) => handleSentidoChange(index, value)}
+                        >
+                          <SelectTrigger id={`sentido-${index}`}>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Norte">Norte</SelectItem>
+                            <SelectItem value="Sul">Sul</SelectItem>
+                            <SelectItem value="Leste">Leste</SelectItem>
+                            <SelectItem value="Oeste">Oeste</SelectItem>
+                            <SelectItem value="Crescente">Crescente</SelectItem>
+                            <SelectItem value="Decrescente">Decrescente</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`descricao-${index}`} className="text-sm">
+                          Descrição
+                        </Label>
+                        <Textarea
+                          id={`descricao-${index}`}
+                          placeholder="Descrição da foto..."
+                          value={foto.descricao}
+                          onChange={(e) => handleDescricaoChange(index, e.target.value)}
+                          rows={2}
+                          className="text-sm"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
           </div>
 
           {/* Linha 4: Situação, Data de Atendimento e Diferença de Dias */}
