@@ -1583,7 +1583,7 @@ export type Database = {
           enviado_coordenador: boolean | null
           id: string
           km_referencia: number
-          lado: string
+          lado: string | null
           latitude: number | null
           longitude: number | null
           lote_id: string
@@ -1591,15 +1591,19 @@ export type Database = {
           rodovia_id: string
           situacao: string
           situacao_fundo: string | null
+          situacao_horizontal: string | null
           situacao_legenda: string | null
-          tipo_dispositivo: string
+          tipo_dispositivo: string | null
+          tipo_sinalizacao: string | null
           updated_at: string
           user_id: string
           valor_medido: number | null
           valor_medido_fundo: number | null
+          valor_medido_horizontal: number | null
           valor_medido_legenda: number | null
           valor_minimo: number | null
           valor_minimo_fundo: number | null
+          valor_minimo_horizontal: number | null
           valor_minimo_legenda: number | null
         }
         Insert: {
@@ -1611,7 +1615,7 @@ export type Database = {
           enviado_coordenador?: boolean | null
           id?: string
           km_referencia: number
-          lado: string
+          lado?: string | null
           latitude?: number | null
           longitude?: number | null
           lote_id: string
@@ -1619,15 +1623,19 @@ export type Database = {
           rodovia_id: string
           situacao: string
           situacao_fundo?: string | null
+          situacao_horizontal?: string | null
           situacao_legenda?: string | null
-          tipo_dispositivo: string
+          tipo_dispositivo?: string | null
+          tipo_sinalizacao?: string | null
           updated_at?: string
           user_id: string
           valor_medido?: number | null
           valor_medido_fundo?: number | null
+          valor_medido_horizontal?: number | null
           valor_medido_legenda?: number | null
           valor_minimo?: number | null
           valor_minimo_fundo?: number | null
+          valor_minimo_horizontal?: number | null
           valor_minimo_legenda?: number | null
         }
         Update: {
@@ -1639,7 +1647,7 @@ export type Database = {
           enviado_coordenador?: boolean | null
           id?: string
           km_referencia?: number
-          lado?: string
+          lado?: string | null
           latitude?: number | null
           longitude?: number | null
           lote_id?: string
@@ -1647,15 +1655,19 @@ export type Database = {
           rodovia_id?: string
           situacao?: string
           situacao_fundo?: string | null
+          situacao_horizontal?: string | null
           situacao_legenda?: string | null
-          tipo_dispositivo?: string
+          tipo_dispositivo?: string | null
+          tipo_sinalizacao?: string | null
           updated_at?: string
           user_id?: string
           valor_medido?: number | null
           valor_medido_fundo?: number | null
+          valor_medido_horizontal?: number | null
           valor_medido_legenda?: number | null
           valor_minimo?: number | null
           valor_minimo_fundo?: number | null
+          valor_minimo_horizontal?: number | null
           valor_minimo_legenda?: number | null
         }
         Relationships: []

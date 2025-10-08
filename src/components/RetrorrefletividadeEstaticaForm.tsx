@@ -355,538 +355,638 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {formData.tipo_sinalizacao && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="km_referencia">km de Referência *</Label>
+                <Input
+                  id="km_referencia"
+                  type="number"
+                  step="0.001"
+                  value={formData.km_referencia}
+                  onChange={(e) =>
+                    setFormData({ ...formData, km_referencia: e.target.value })
+                  }
+                  placeholder="0.000"
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="km_referencia">km de Referência *</Label>
-              <Input
-                id="km_referencia"
-                type="number"
-                step="0.001"
-                value={formData.km_referencia}
-                onChange={(e) =>
-                  setFormData({ ...formData, km_referencia: e.target.value })
-                }
-                placeholder="0.000"
-                required
-              />
-            </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label>Coordenadas GPS</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={capturarCoordenadas}
+                    disabled={isCapturing}
+                  >
+                    {isCapturing ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <MapPin className="mr-2 h-4 w-4" />
+                    )}
+                    Capturar Localização
+                  </Button>
+                  <Input
+                    placeholder="Latitude"
+                    value={formData.latitude}
+                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                    className="flex-1"
+                  />
+                  <Input
+                    placeholder="Longitude"
+                    value={formData.longitude}
+                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label>Coordenadas GPS</Label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={capturarCoordenadas}
-                  disabled={isCapturing}
-                >
-                  {isCapturing ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <MapPin className="mr-2 h-4 w-4" />
+              {formData.tipo_sinalizacao === "Vertical" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="lado">Lado *</Label>
+                    <Select
+                      value={formData.lado}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, lado: value })
+                      }
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o lado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LADOS.map((lado) => (
+                          <SelectItem key={lado} value={lado}>
+                            {lado}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tipo_dispositivo">Tipo de Dispositivo *</Label>
+                    <Select
+                      value={formData.tipo_dispositivo}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, tipo_dispositivo: value })
+                      }
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIPOS_DISPOSITIVO.map((tipo) => (
+                          <SelectItem key={tipo} value={tipo}>
+                            {tipo}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="codigo_dispositivo">Código do Dispositivo</Label>
+                    <Select
+                      value={formData.codigo_dispositivo}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, codigo_dispositivo: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o código da placa" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {TODAS_PLACAS.map((placa) => (
+                          <SelectItem key={placa.codigo} value={placa.codigo}>
+                            {placa.codigo} - {placa.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Película Fundo */}
+                  <div className="md:col-span-2 space-y-4 p-4 border rounded-lg bg-blue-50 dark:bg-blue-950">
+                    <div className="space-y-2">
+                      <Label className="text-base font-semibold text-blue-900 dark:text-blue-100">Película FUNDO</Label>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        Digite até 5 leituras da película de fundo. A média será calculada automaticamente.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cor_fundo">Cor da Película Fundo</Label>
+                      <Select
+                        value={formData.cor_fundo}
+                        onValueChange={(value) => setFormData({ ...formData, cor_fundo: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a cor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CORES_PELICULA.map((cor) => (
+                            <SelectItem key={cor} value={cor}>
+                              {cor}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="leitura_fundo_1">Leitura 1</Label>
+                        <Input
+                          id="leitura_fundo_1"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.leitura_fundo_1}
+                          onChange={(e) => {
+                            const novoFormData = { ...formData, leitura_fundo_1: e.target.value };
+                            const media = calcularMedia(
+                              novoFormData.leitura_fundo_1,
+                              novoFormData.leitura_fundo_2,
+                              novoFormData.leitura_fundo_3,
+                              novoFormData.leitura_fundo_4,
+                              novoFormData.leitura_fundo_5
+                            );
+                            setFormData({ ...novoFormData, valor_medido_fundo: media });
+                          }}
+                          placeholder="10.0 - 2000.0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="leitura_fundo_2">Leitura 2</Label>
+                        <Input
+                          id="leitura_fundo_2"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.leitura_fundo_2}
+                          onChange={(e) => {
+                            const novoFormData = { ...formData, leitura_fundo_2: e.target.value };
+                            const media = calcularMedia(
+                              novoFormData.leitura_fundo_1,
+                              novoFormData.leitura_fundo_2,
+                              novoFormData.leitura_fundo_3,
+                              novoFormData.leitura_fundo_4,
+                              novoFormData.leitura_fundo_5
+                            );
+                            setFormData({ ...novoFormData, valor_medido_fundo: media });
+                          }}
+                          placeholder="10.0 - 2000.0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="leitura_fundo_3">Leitura 3</Label>
+                        <Input
+                          id="leitura_fundo_3"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.leitura_fundo_3}
+                          onChange={(e) => {
+                            const novoFormData = { ...formData, leitura_fundo_3: e.target.value };
+                            const media = calcularMedia(
+                              novoFormData.leitura_fundo_1,
+                              novoFormData.leitura_fundo_2,
+                              novoFormData.leitura_fundo_3,
+                              novoFormData.leitura_fundo_4,
+                              novoFormData.leitura_fundo_5
+                            );
+                            setFormData({ ...novoFormData, valor_medido_fundo: media });
+                          }}
+                          placeholder="10.0 - 2000.0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="leitura_fundo_4">Leitura 4</Label>
+                        <Input
+                          id="leitura_fundo_4"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.leitura_fundo_4}
+                          onChange={(e) => {
+                            const novoFormData = { ...formData, leitura_fundo_4: e.target.value };
+                            const media = calcularMedia(
+                              novoFormData.leitura_fundo_1,
+                              novoFormData.leitura_fundo_2,
+                              novoFormData.leitura_fundo_3,
+                              novoFormData.leitura_fundo_4,
+                              novoFormData.leitura_fundo_5
+                            );
+                            setFormData({ ...novoFormData, valor_medido_fundo: media });
+                          }}
+                          placeholder="10.0 - 2000.0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="leitura_fundo_5">Leitura 5</Label>
+                        <Input
+                          id="leitura_fundo_5"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.leitura_fundo_5}
+                          onChange={(e) => {
+                            const novoFormData = { ...formData, leitura_fundo_5: e.target.value };
+                            const media = calcularMedia(
+                              novoFormData.leitura_fundo_1,
+                              novoFormData.leitura_fundo_2,
+                              novoFormData.leitura_fundo_3,
+                              novoFormData.leitura_fundo_4,
+                              novoFormData.leitura_fundo_5
+                            );
+                            setFormData({ ...novoFormData, valor_medido_fundo: media });
+                          }}
+                          placeholder="10.0 - 2000.0"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="valor_medido_fundo">Média Fundo (cd/lx/m²) *</Label>
+                        <Input
+                          id="valor_medido_fundo"
+                          type="number"
+                          step="0.1"
+                          value={formData.valor_medido_fundo}
+                          readOnly
+                          className="bg-muted"
+                          placeholder="Calculado automaticamente"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="valor_minimo_fundo">Valor Mínimo Fundo (cd/lx/m²) *</Label>
+                        <Input
+                          id="valor_minimo_fundo"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.valor_minimo_fundo}
+                          onChange={(e) =>
+                            setFormData({ ...formData, valor_minimo_fundo: e.target.value })
+                          }
+                          placeholder="10.0 - 2000.0"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {situacaoFundo && (
+                      <div className="space-y-2">
+                        <Label>Situação Fundo</Label>
+                        <div className={`p-3 rounded-md font-semibold ${
+                          situacaoFundo === "Conforme" 
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 
+                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
+                        }`}>
+                          {situacaoFundo}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Película Legenda/Orla */}
+                  <div className="md:col-span-2 space-y-4 p-4 border rounded-lg bg-amber-50 dark:bg-amber-950">
+                    <div className="space-y-2">
+                      <Label className="text-base font-semibold text-amber-900 dark:text-amber-100">Película LEGENDA/ORLA</Label>
+                      <p className="text-sm text-amber-700 dark:text-amber-300">
+                        Digite até 5 leituras da película de legenda/orla. A média será calculada automaticamente.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cor_legenda">Cor da Película Legenda/Orla</Label>
+                      <Select
+                        value={formData.cor_legenda}
+                        onValueChange={(value) => setFormData({ ...formData, cor_legenda: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a cor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CORES_PELICULA.map((cor) => (
+                            <SelectItem key={cor} value={cor}>
+                              {cor}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="leitura_legenda_1">Leitura 1</Label>
+                        <Input
+                          id="leitura_legenda_1"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.leitura_legenda_1}
+                          onChange={(e) => {
+                            const novoFormData = { ...formData, leitura_legenda_1: e.target.value };
+                            const media = calcularMedia(
+                              novoFormData.leitura_legenda_1,
+                              novoFormData.leitura_legenda_2,
+                              novoFormData.leitura_legenda_3,
+                              novoFormData.leitura_legenda_4,
+                              novoFormData.leitura_legenda_5
+                            );
+                            setFormData({ ...novoFormData, valor_medido_legenda: media });
+                          }}
+                          placeholder="10.0 - 2000.0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="leitura_legenda_2">Leitura 2</Label>
+                        <Input
+                          id="leitura_legenda_2"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.leitura_legenda_2}
+                          onChange={(e) => {
+                            const novoFormData = { ...formData, leitura_legenda_2: e.target.value };
+                            const media = calcularMedia(
+                              novoFormData.leitura_legenda_1,
+                              novoFormData.leitura_legenda_2,
+                              novoFormData.leitura_legenda_3,
+                              novoFormData.leitura_legenda_4,
+                              novoFormData.leitura_legenda_5
+                            );
+                            setFormData({ ...novoFormData, valor_medido_legenda: media });
+                          }}
+                          placeholder="10.0 - 2000.0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="leitura_legenda_3">Leitura 3</Label>
+                        <Input
+                          id="leitura_legenda_3"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.leitura_legenda_3}
+                          onChange={(e) => {
+                            const novoFormData = { ...formData, leitura_legenda_3: e.target.value };
+                            const media = calcularMedia(
+                              novoFormData.leitura_legenda_1,
+                              novoFormData.leitura_legenda_2,
+                              novoFormData.leitura_legenda_3,
+                              novoFormData.leitura_legenda_4,
+                              novoFormData.leitura_legenda_5
+                            );
+                            setFormData({ ...novoFormData, valor_medido_legenda: media });
+                          }}
+                          placeholder="10.0 - 2000.0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="leitura_legenda_4">Leitura 4</Label>
+                        <Input
+                          id="leitura_legenda_4"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.leitura_legenda_4}
+                          onChange={(e) => {
+                            const novoFormData = { ...formData, leitura_legenda_4: e.target.value };
+                            const media = calcularMedia(
+                              novoFormData.leitura_legenda_1,
+                              novoFormData.leitura_legenda_2,
+                              novoFormData.leitura_legenda_3,
+                              novoFormData.leitura_legenda_4,
+                              novoFormData.leitura_legenda_5
+                            );
+                            setFormData({ ...novoFormData, valor_medido_legenda: media });
+                          }}
+                          placeholder="10.0 - 2000.0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="leitura_legenda_5">Leitura 5</Label>
+                        <Input
+                          id="leitura_legenda_5"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.leitura_legenda_5}
+                          onChange={(e) => {
+                            const novoFormData = { ...formData, leitura_legenda_5: e.target.value };
+                            const media = calcularMedia(
+                              novoFormData.leitura_legenda_1,
+                              novoFormData.leitura_legenda_2,
+                              novoFormData.leitura_legenda_3,
+                              novoFormData.leitura_legenda_4,
+                              novoFormData.leitura_legenda_5
+                            );
+                            setFormData({ ...novoFormData, valor_medido_legenda: media });
+                          }}
+                          placeholder="10.0 - 2000.0"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="valor_medido_legenda">Média Legenda/Orla (cd/lx/m²) *</Label>
+                        <Input
+                          id="valor_medido_legenda"
+                          type="number"
+                          step="0.1"
+                          value={formData.valor_medido_legenda}
+                          readOnly
+                          className="bg-muted"
+                          placeholder="Calculado automaticamente"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="valor_minimo_legenda">Valor Mínimo Legenda/Orla (cd/lx/m²) *</Label>
+                        <Input
+                          id="valor_minimo_legenda"
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData.valor_minimo_legenda}
+                          onChange={(e) => setFormData({ ...formData, valor_minimo_legenda: e.target.value })}
+                          placeholder="10.0 - 2000.0"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {situacaoLegenda && (
+                      <div className="space-y-2">
+                        <Label>Situação Legenda/Orla</Label>
+                        <div className={`p-3 rounded-md font-semibold ${
+                          situacaoLegenda === "Conforme" 
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 
+                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
+                        }`}>
+                          {situacaoLegenda}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {formData.tipo_sinalizacao === "Horizontal" && (
+                <div className="md:col-span-2 space-y-4 p-4 border rounded-lg bg-green-50 dark:bg-green-950">
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold text-green-900 dark:text-green-100">
+                      Leituras Sinalização Horizontal
+                    </Label>
+                    <p className="text-sm text-green-700 dark:text-green-300">
+                      Digite as 10 leituras estáticas por km. A média será calculada automaticamente.
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                      <div key={num} className="space-y-2">
+                        <Label htmlFor={`leitura_horizontal_${num}`}>Leitura {num}</Label>
+                        <Input
+                          id={`leitura_horizontal_${num}`}
+                          type="number"
+                          step="0.1"
+                          min="10"
+                          max="2000"
+                          value={formData[`leitura_horizontal_${num}` as keyof typeof formData]}
+                          onChange={(e) => {
+                            const novoFormData = { 
+                              ...formData, 
+                              [`leitura_horizontal_${num}`]: e.target.value 
+                            };
+                            const media = calcularMediaHorizontal(
+                              novoFormData.leitura_horizontal_1,
+                              novoFormData.leitura_horizontal_2,
+                              novoFormData.leitura_horizontal_3,
+                              novoFormData.leitura_horizontal_4,
+                              novoFormData.leitura_horizontal_5,
+                              novoFormData.leitura_horizontal_6,
+                              novoFormData.leitura_horizontal_7,
+                              novoFormData.leitura_horizontal_8,
+                              novoFormData.leitura_horizontal_9,
+                              novoFormData.leitura_horizontal_10
+                            );
+                            setFormData({ ...novoFormData, valor_medido_horizontal: media });
+                          }}
+                          placeholder="10.0 - 2000.0"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="valor_medido_horizontal">Média (cd/lx/m²) *</Label>
+                      <Input
+                        id="valor_medido_horizontal"
+                        type="number"
+                        step="0.1"
+                        value={formData.valor_medido_horizontal}
+                        readOnly
+                        className="bg-muted"
+                        placeholder="Calculado automaticamente"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="valor_minimo_horizontal">Valor Mínimo (cd/lx/m²) *</Label>
+                      <Input
+                        id="valor_minimo_horizontal"
+                        type="number"
+                        step="0.1"
+                        min="10"
+                        max="2000"
+                        value={formData.valor_minimo_horizontal}
+                        onChange={(e) =>
+                          setFormData({ ...formData, valor_minimo_horizontal: e.target.value })
+                        }
+                        placeholder="10.0 - 2000.0"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {situacaoHorizontal && (
+                    <div className="space-y-2">
+                      <Label>Situação</Label>
+                      <div className={`p-3 rounded-md font-semibold ${
+                        situacaoHorizontal === "Conforme" 
+                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 
+                          : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
+                      }`}>
+                        {situacaoHorizontal}
+                      </div>
+                    </div>
                   )}
-                  Capturar Localização
-                </Button>
-                <Input
-                  placeholder="Latitude"
-                  value={formData.latitude}
-                  onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                  className="flex-1"
-                />
-                <Input
-                  placeholder="Longitude"
-                  value={formData.longitude}
-                  onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                  className="flex-1"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="lado">Lado *</Label>
-              <Select
-                value={formData.lado}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, lado: value })
-                }
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o lado" />
-                </SelectTrigger>
-                <SelectContent>
-                  {LADOS.map((lado) => (
-                    <SelectItem key={lado} value={lado}>
-                      {lado}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="tipo_dispositivo">Tipo de Dispositivo *</Label>
-              <Select
-                value={formData.tipo_dispositivo}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, tipo_dispositivo: value })
-                }
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIPOS_DISPOSITIVO.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>
-                      {tipo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="codigo_dispositivo">Código do Dispositivo</Label>
-              <Select
-                value={formData.codigo_dispositivo}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, codigo_dispositivo: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o código da placa" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[300px]">
-                  {TODAS_PLACAS.map((placa) => (
-                    <SelectItem key={placa.codigo} value={placa.codigo}>
-                      {placa.codigo} - {placa.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Película Fundo */}
-            <div className="md:col-span-2 space-y-4 p-4 border rounded-lg bg-blue-50 dark:bg-blue-950">
-              <div className="space-y-2">
-                <Label className="text-base font-semibold text-blue-900 dark:text-blue-100">Película FUNDO</Label>
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Digite até 5 leituras da película de fundo. A média será calculada automaticamente.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cor_fundo">Cor da Película Fundo</Label>
-                <Select
-                  value={formData.cor_fundo}
-                  onValueChange={(value) => setFormData({ ...formData, cor_fundo: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a cor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CORES_PELICULA.map((cor) => (
-                      <SelectItem key={cor} value={cor}>
-                        {cor}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="leitura_fundo_1">Leitura 1</Label>
-                  <Input
-                    id="leitura_fundo_1"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.leitura_fundo_1}
-                    onChange={(e) => {
-                      const novoFormData = { ...formData, leitura_fundo_1: e.target.value };
-                      const media = calcularMedia(
-                        novoFormData.leitura_fundo_1,
-                        novoFormData.leitura_fundo_2,
-                        novoFormData.leitura_fundo_3,
-                        novoFormData.leitura_fundo_4,
-                        novoFormData.leitura_fundo_5
-                      );
-                      setFormData({ ...novoFormData, valor_medido_fundo: media });
-                    }}
-                    placeholder="10.0 - 2000.0"
-                  />
                 </div>
+              )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="leitura_fundo_2">Leitura 2</Label>
-                  <Input
-                    id="leitura_fundo_2"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.leitura_fundo_2}
-                    onChange={(e) => {
-                      const novoFormData = { ...formData, leitura_fundo_2: e.target.value };
-                      const media = calcularMedia(
-                        novoFormData.leitura_fundo_1,
-                        novoFormData.leitura_fundo_2,
-                        novoFormData.leitura_fundo_3,
-                        novoFormData.leitura_fundo_4,
-                        novoFormData.leitura_fundo_5
-                      );
-                      setFormData({ ...novoFormData, valor_medido_fundo: media });
-                    }}
-                    placeholder="10.0 - 2000.0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="leitura_fundo_3">Leitura 3</Label>
-                  <Input
-                    id="leitura_fundo_3"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.leitura_fundo_3}
-                    onChange={(e) => {
-                      const novoFormData = { ...formData, leitura_fundo_3: e.target.value };
-                      const media = calcularMedia(
-                        novoFormData.leitura_fundo_1,
-                        novoFormData.leitura_fundo_2,
-                        novoFormData.leitura_fundo_3,
-                        novoFormData.leitura_fundo_4,
-                        novoFormData.leitura_fundo_5
-                      );
-                      setFormData({ ...novoFormData, valor_medido_fundo: media });
-                    }}
-                    placeholder="10.0 - 2000.0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="leitura_fundo_4">Leitura 4</Label>
-                  <Input
-                    id="leitura_fundo_4"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.leitura_fundo_4}
-                    onChange={(e) => {
-                      const novoFormData = { ...formData, leitura_fundo_4: e.target.value };
-                      const media = calcularMedia(
-                        novoFormData.leitura_fundo_1,
-                        novoFormData.leitura_fundo_2,
-                        novoFormData.leitura_fundo_3,
-                        novoFormData.leitura_fundo_4,
-                        novoFormData.leitura_fundo_5
-                      );
-                      setFormData({ ...novoFormData, valor_medido_fundo: media });
-                    }}
-                    placeholder="10.0 - 2000.0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="leitura_fundo_5">Leitura 5</Label>
-                  <Input
-                    id="leitura_fundo_5"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.leitura_fundo_5}
-                    onChange={(e) => {
-                      const novoFormData = { ...formData, leitura_fundo_5: e.target.value };
-                      const media = calcularMedia(
-                        novoFormData.leitura_fundo_1,
-                        novoFormData.leitura_fundo_2,
-                        novoFormData.leitura_fundo_3,
-                        novoFormData.leitura_fundo_4,
-                        novoFormData.leitura_fundo_5
-                      );
-                      setFormData({ ...novoFormData, valor_medido_fundo: media });
-                    }}
-                    placeholder="10.0 - 2000.0"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="valor_medido_fundo">Média Fundo (cd/lx/m²) *</Label>
-                  <Input
-                    id="valor_medido_fundo"
-                    type="number"
-                    step="0.1"
-                    value={formData.valor_medido_fundo}
-                    readOnly
-                    className="bg-muted"
-                    placeholder="Calculado automaticamente"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="valor_minimo_fundo">Valor Mínimo Fundo (cd/lx/m²) *</Label>
-                  <Input
-                    id="valor_minimo_fundo"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.valor_minimo_fundo}
-                    onChange={(e) =>
-                      setFormData({ ...formData, valor_minimo_fundo: e.target.value })
-                    }
-                    placeholder="10.0 - 2000.0"
-                    required
-                  />
-                </div>
-              </div>
-
-              {situacaoFundo && (
-                <div className="space-y-2">
-                  <Label>Situação Fundo</Label>
-                  <div className={`p-3 rounded-md font-semibold ${
-                    situacaoFundo === "Conforme" 
+              {/* Situação Geral */}
+              {situacaoGeral && (
+                <div className="md:col-span-2 space-y-2">
+                  <Label className="text-base font-semibold">Situação Geral da Medição</Label>
+                  <div className={`p-4 rounded-md font-semibold text-lg ${
+                    situacaoGeral === "Conforme" 
                       ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 
                       : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
                   }`}>
-                    {situacaoFundo}
+                    {situacaoGeral}
                   </div>
                 </div>
               )}
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="observacao">Observações</Label>
+                <Textarea
+                  id="observacao"
+                  value={formData.observacao}
+                  onChange={(e) =>
+                    setFormData({ ...formData, observacao: e.target.value })
+                  }
+                  placeholder="Observações sobre a medição"
+                  rows={3}
+                />
+              </div>
             </div>
-
-            {/* Película Legenda/Orla */}
-            <div className="md:col-span-2 space-y-4 p-4 border rounded-lg bg-amber-50 dark:bg-amber-950">
-              <div className="space-y-2">
-                <Label className="text-base font-semibold text-amber-900 dark:text-amber-100">Película LEGENDA/ORLA</Label>
-                <p className="text-sm text-amber-700 dark:text-amber-300">
-                  Digite até 5 leituras da película de legenda/orla. A média será calculada automaticamente.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cor_legenda">Cor da Película Legenda/Orla</Label>
-                <Select
-                  value={formData.cor_legenda}
-                  onValueChange={(value) => setFormData({ ...formData, cor_legenda: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a cor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CORES_PELICULA.map((cor) => (
-                      <SelectItem key={cor} value={cor}>
-                        {cor}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="leitura_legenda_1">Leitura 1</Label>
-                  <Input
-                    id="leitura_legenda_1"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.leitura_legenda_1}
-                    onChange={(e) => {
-                      const novoFormData = { ...formData, leitura_legenda_1: e.target.value };
-                      const media = calcularMedia(
-                        novoFormData.leitura_legenda_1,
-                        novoFormData.leitura_legenda_2,
-                        novoFormData.leitura_legenda_3,
-                        novoFormData.leitura_legenda_4,
-                        novoFormData.leitura_legenda_5
-                      );
-                      setFormData({ ...novoFormData, valor_medido_legenda: media });
-                    }}
-                    placeholder="10.0 - 2000.0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="leitura_legenda_2">Leitura 2</Label>
-                  <Input
-                    id="leitura_legenda_2"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.leitura_legenda_2}
-                    onChange={(e) => {
-                      const novoFormData = { ...formData, leitura_legenda_2: e.target.value };
-                      const media = calcularMedia(
-                        novoFormData.leitura_legenda_1,
-                        novoFormData.leitura_legenda_2,
-                        novoFormData.leitura_legenda_3,
-                        novoFormData.leitura_legenda_4,
-                        novoFormData.leitura_legenda_5
-                      );
-                      setFormData({ ...novoFormData, valor_medido_legenda: media });
-                    }}
-                    placeholder="10.0 - 2000.0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="leitura_legenda_3">Leitura 3</Label>
-                  <Input
-                    id="leitura_legenda_3"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.leitura_legenda_3}
-                    onChange={(e) => {
-                      const novoFormData = { ...formData, leitura_legenda_3: e.target.value };
-                      const media = calcularMedia(
-                        novoFormData.leitura_legenda_1,
-                        novoFormData.leitura_legenda_2,
-                        novoFormData.leitura_legenda_3,
-                        novoFormData.leitura_legenda_4,
-                        novoFormData.leitura_legenda_5
-                      );
-                      setFormData({ ...novoFormData, valor_medido_legenda: media });
-                    }}
-                    placeholder="10.0 - 2000.0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="leitura_legenda_4">Leitura 4</Label>
-                  <Input
-                    id="leitura_legenda_4"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.leitura_legenda_4}
-                    onChange={(e) => {
-                      const novoFormData = { ...formData, leitura_legenda_4: e.target.value };
-                      const media = calcularMedia(
-                        novoFormData.leitura_legenda_1,
-                        novoFormData.leitura_legenda_2,
-                        novoFormData.leitura_legenda_3,
-                        novoFormData.leitura_legenda_4,
-                        novoFormData.leitura_legenda_5
-                      );
-                      setFormData({ ...novoFormData, valor_medido_legenda: media });
-                    }}
-                    placeholder="10.0 - 2000.0"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="leitura_legenda_5">Leitura 5</Label>
-                  <Input
-                    id="leitura_legenda_5"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.leitura_legenda_5}
-                    onChange={(e) => {
-                      const novoFormData = { ...formData, leitura_legenda_5: e.target.value };
-                      const media = calcularMedia(
-                        novoFormData.leitura_legenda_1,
-                        novoFormData.leitura_legenda_2,
-                        novoFormData.leitura_legenda_3,
-                        novoFormData.leitura_legenda_4,
-                        novoFormData.leitura_legenda_5
-                      );
-                      setFormData({ ...novoFormData, valor_medido_legenda: media });
-                    }}
-                    placeholder="10.0 - 2000.0"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="valor_medido_legenda">Média Legenda/Orla (cd/lx/m²) *</Label>
-                  <Input
-                    id="valor_medido_legenda"
-                    type="number"
-                    step="0.1"
-                    value={formData.valor_medido_legenda}
-                    readOnly
-                    className="bg-muted"
-                    placeholder="Calculado automaticamente"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="valor_minimo_legenda">Valor Mínimo Legenda/Orla (cd/lx/m²) *</Label>
-                  <Input
-                    id="valor_minimo_legenda"
-                    type="number"
-                    step="0.1"
-                    min="10"
-                    max="2000"
-                    value={formData.valor_minimo_legenda}
-                    onChange={(e) => setFormData({ ...formData, valor_minimo_legenda: e.target.value })}
-                    placeholder="10.0 - 2000.0"
-                    required
-                  />
-                </div>
-              </div>
-
-              {situacaoLegenda && (
-                <div className="space-y-2">
-                  <Label>Situação Legenda/Orla</Label>
-                  <div className={`p-3 rounded-md font-semibold ${
-                    situacaoLegenda === "Conforme" 
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 
-                      : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
-                  }`}>
-                    {situacaoLegenda}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Situação Geral */}
-            {situacaoGeral && (
-              <div className="md:col-span-2 space-y-2">
-                <Label className="text-base font-semibold">Situação Geral da Placa</Label>
-                <div className={`p-4 rounded-md font-semibold text-lg ${
-                  situacaoGeral === "Conforme" 
-                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 
-                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
-                }`}>
-                  {situacaoGeral}
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="observacao">Observações</Label>
-              <Textarea
-                id="observacao"
-                value={formData.observacao}
-                onChange={(e) =>
-                  setFormData({ ...formData, observacao: e.target.value })
-                }
-                placeholder="Observações sobre a medição"
-                rows={3}
-              />
-            </div>
-          </div>
+          )}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
