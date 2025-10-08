@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { UserPlus, Users, Pencil } from "lucide-react";
+import { UserPlus, Users, Pencil, X } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -105,16 +105,22 @@ export const UsuariosManager = () => {
 
     setLoading(true);
     try {
+      console.log("Vinculando usuário:", editingProfile.id, "à supervisora:", selectedSupervisora);
+      
       const { error } = await supabase
         .from("profiles")
         .update({ supervisora_id: selectedSupervisora })
         .eq("id", editingProfile.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao vincular:", error);
+        throw error;
+      }
 
+      console.log("Vinculação bem-sucedida, recarregando profiles...");
       toast.success("Usuário vinculado com sucesso!");
       handleCloseDialog();
-      await loadProfiles(); // Aguardar reload
+      await loadProfiles();
     } catch (error: any) {
       toast.error("Erro ao vincular: " + error.message);
     } finally {
@@ -135,13 +141,19 @@ export const UsuariosManager = () => {
 
     setLoading(true);
     try {
+      console.log("Desvinculando usuário:", profileId);
+      
       const { error } = await supabase
         .from("profiles")
         .update({ supervisora_id: null })
         .eq("id", profileId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao desvincular:", error);
+        throw error;
+      }
 
+      console.log("Desvinculação bem-sucedida, recarregando profiles...");
       toast.success("Usuário desvinculado com sucesso!");
       await loadProfiles();
     } catch (error: any) {
@@ -226,7 +238,7 @@ export const UsuariosManager = () => {
                         title="Desvincular supervisora"
                         className="text-destructive hover:text-destructive"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        <X className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
