@@ -1117,6 +1117,10 @@ export type Database = {
           id: string
           km_final: number | null
           km_inicial: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          longitude_final: number | null
+          longitude_inicial: number | null
           lote_id: string
           rodovia_id: string
         }
@@ -1124,6 +1128,10 @@ export type Database = {
           id?: string
           km_final?: number | null
           km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
           lote_id: string
           rodovia_id: string
         }
@@ -1131,6 +1139,10 @@ export type Database = {
           id?: string
           km_final?: number | null
           km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
           lote_id?: string
           rodovia_id?: string
         }

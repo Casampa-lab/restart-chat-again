@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, MapPin, Pencil } from "lucide-react";
+import { Plus, Trash2, MapPin, Pencil, Navigation } from "lucide-react";
 
 interface Empresa {
   id: string;
@@ -26,6 +26,10 @@ interface RodoviaComKm {
   codigo: string;
   km_inicial: string;
   km_final: string;
+  latitude_inicial: string;
+  longitude_inicial: string;
+  latitude_final: string;
+  longitude_final: string;
 }
 
 interface Lote {
@@ -59,6 +63,10 @@ const LotesManager = () => {
     rodovia_id: "",
     km_inicial: "",
     km_final: "",
+    latitude_inicial: "",
+    longitude_inicial: "",
+    latitude_final: "",
+    longitude_final: "",
   });
 
   useEffect(() => {
@@ -120,10 +128,22 @@ const LotesManager = () => {
         codigo: rodovia.codigo,
         km_inicial: novaRodovia.km_inicial,
         km_final: novaRodovia.km_final,
+        latitude_inicial: novaRodovia.latitude_inicial,
+        longitude_inicial: novaRodovia.longitude_inicial,
+        latitude_final: novaRodovia.latitude_final,
+        longitude_final: novaRodovia.longitude_final,
       },
     ]);
 
-    setNovaRodovia({ rodovia_id: "", km_inicial: "", km_final: "" });
+    setNovaRodovia({ 
+      rodovia_id: "", 
+      km_inicial: "", 
+      km_final: "",
+      latitude_inicial: "",
+      longitude_inicial: "",
+      latitude_final: "",
+      longitude_final: "",
+    });
   };
 
   const removerRodovia = (rodoviaId: string) => {
@@ -160,6 +180,10 @@ const LotesManager = () => {
         rodovia_id: rodovia.rodovia_id,
         km_inicial: rodovia.km_inicial ? parseFloat(rodovia.km_inicial) : null,
         km_final: rodovia.km_final ? parseFloat(rodovia.km_final) : null,
+        latitude_inicial: rodovia.latitude_inicial ? parseFloat(rodovia.latitude_inicial) : null,
+        longitude_inicial: rodovia.longitude_inicial ? parseFloat(rodovia.longitude_inicial) : null,
+        latitude_final: rodovia.latitude_final ? parseFloat(rodovia.latitude_final) : null,
+        longitude_final: rodovia.longitude_final ? parseFloat(rodovia.longitude_final) : null,
       }));
 
       const { error: vinculoError } = await supabase
@@ -190,7 +214,7 @@ const LotesManager = () => {
     // Carregar rodovias vinculadas ao lote
     const { data: lotesRodoviasData, error } = await supabase
       .from("lotes_rodovias")
-      .select("rodovia_id, km_inicial, km_final, rodovias(id, codigo)")
+      .select("rodovia_id, km_inicial, km_final, latitude_inicial, longitude_inicial, latitude_final, longitude_final, rodovias(id, codigo)")
       .eq("lote_id", lote.id);
 
     if (error) {
@@ -203,6 +227,10 @@ const LotesManager = () => {
       codigo: lr.rodovias.codigo,
       km_inicial: lr.km_inicial?.toString() || "",
       km_final: lr.km_final?.toString() || "",
+      latitude_inicial: lr.latitude_inicial?.toString() || "",
+      longitude_inicial: lr.longitude_inicial?.toString() || "",
+      latitude_final: lr.latitude_final?.toString() || "",
+      longitude_final: lr.longitude_final?.toString() || "",
     }));
 
     setRodoviasVinculadas(rodoviasFormatted);
@@ -246,6 +274,10 @@ const LotesManager = () => {
         rodovia_id: rodovia.rodovia_id,
         km_inicial: rodovia.km_inicial ? parseFloat(rodovia.km_inicial) : null,
         km_final: rodovia.km_final ? parseFloat(rodovia.km_final) : null,
+        latitude_inicial: rodovia.latitude_inicial ? parseFloat(rodovia.latitude_inicial) : null,
+        longitude_inicial: rodovia.longitude_inicial ? parseFloat(rodovia.longitude_inicial) : null,
+        latitude_final: rodovia.latitude_final ? parseFloat(rodovia.latitude_final) : null,
+        longitude_final: rodovia.longitude_final ? parseFloat(rodovia.longitude_final) : null,
       }));
 
       const { error: vinculoError } = await supabase
@@ -344,70 +376,173 @@ const LotesManager = () => {
                 Rodovias do Lote
               </Label>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="space-y-2">
-                  <Label htmlFor="rodovia">Rodovia</Label>
-                  <Select
-                    value={novaRodovia.rodovia_id}
-                    onValueChange={(value) =>
-                      setNovaRodovia({ ...novaRodovia, rodovia_id: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {rodovias
-                        .filter(
-                          (r) => !rodoviasVinculadas.find((rv) => rv.rodovia_id === r.id)
-                        )
-                        .map((rodovia) => (
-                          <SelectItem key={rodovia.id} value={rodovia.id}>
-                            {rodovia.codigo}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="rodovia">Rodovia</Label>
+                    <Select
+                      value={novaRodovia.rodovia_id}
+                      onValueChange={(value) =>
+                        setNovaRodovia({ ...novaRodovia, rodovia_id: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {rodovias
+                          .filter(
+                            (r) => !rodoviasVinculadas.find((rv) => rv.rodovia_id === r.id)
+                          )
+                          .map((rodovia) => (
+                            <SelectItem key={rodovia.id} value={rodovia.id}>
+                              {rodovia.codigo}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="km_inicial">km Inicial</Label>
-                  <Input
-                    id="km_inicial"
-                    type="number"
-                    step="0.001"
-                    value={novaRodovia.km_inicial}
-                    onChange={(e) =>
-                      setNovaRodovia({ ...novaRodovia, km_inicial: e.target.value })
-                    }
-                    placeholder="0.000"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="km_final">km Final</Label>
-                  <Input
-                    id="km_final"
-                    type="number"
-                    step="0.001"
-                    placeholder="Ex: 200.000"
-                    value={novaRodovia.km_final}
-                    onChange={(e) =>
-                      setNovaRodovia({ ...novaRodovia, km_final: e.target.value })
-                    }
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* KM Inicial e Coordenadas */}
+                  <div className="space-y-3 p-3 border rounded-lg bg-background/50">
+                    <Label className="text-sm font-semibold">KM Inicial</Label>
+                    <div className="space-y-2">
+                      <Input
+                        type="number"
+                        step="0.001"
+                        value={novaRodovia.km_inicial}
+                        onChange={(e) =>
+                          setNovaRodovia({ ...novaRodovia, km_inicial: e.target.value })
+                        }
+                        placeholder="0.000"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          value={novaRodovia.latitude_inicial}
+                          onChange={(e) =>
+                            setNovaRodovia({ ...novaRodovia, latitude_inicial: e.target.value })
+                          }
+                          placeholder="Latitude"
+                        />
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          value={novaRodovia.longitude_inicial}
+                          onChange={(e) =>
+                            setNovaRodovia({ ...novaRodovia, longitude_inicial: e.target.value })
+                          }
+                          placeholder="Longitude"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                              (position) => {
+                                setNovaRodovia({
+                                  ...novaRodovia,
+                                  latitude_inicial: position.coords.latitude.toString(),
+                                  longitude_inicial: position.coords.longitude.toString(),
+                                });
+                                toast.success("Localização capturada!");
+                              },
+                              (error) => {
+                                toast.error("Erro ao capturar localização: " + error.message);
+                              }
+                            );
+                          } else {
+                            toast.error("Geolocalização não suportada");
+                          }
+                        }}
+                      >
+                        <Navigation className="mr-2 h-3 w-3" />
+                        Capturar GPS
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* KM Final e Coordenadas */}
+                  <div className="space-y-3 p-3 border rounded-lg bg-background/50">
+                    <Label className="text-sm font-semibold">KM Final</Label>
+                    <div className="space-y-2">
+                      <Input
+                        type="number"
+                        step="0.001"
+                        value={novaRodovia.km_final}
+                        onChange={(e) =>
+                          setNovaRodovia({ ...novaRodovia, km_final: e.target.value })
+                        }
+                        placeholder="200.000"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          value={novaRodovia.latitude_final}
+                          onChange={(e) =>
+                            setNovaRodovia({ ...novaRodovia, latitude_final: e.target.value })
+                          }
+                          placeholder="Latitude"
+                        />
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          value={novaRodovia.longitude_final}
+                          onChange={(e) =>
+                            setNovaRodovia({ ...novaRodovia, longitude_final: e.target.value })
+                          }
+                          placeholder="Longitude"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                              (position) => {
+                                setNovaRodovia({
+                                  ...novaRodovia,
+                                  latitude_final: position.coords.latitude.toString(),
+                                  longitude_final: position.coords.longitude.toString(),
+                                });
+                                toast.success("Localização capturada!");
+                              },
+                              (error) => {
+                                toast.error("Erro ao capturar localização: " + error.message);
+                              }
+                            );
+                          } else {
+                            toast.error("Geolocalização não suportada");
+                          }
+                        }}
+                      >
+                        <Navigation className="mr-2 h-3 w-3" />
+                        Capturar GPS
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-end">
-                  <Button
-                    type="button"
-                    onClick={adicionarRodovia}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Adicionar
-                  </Button>
-                </div>
+                <Button
+                  type="button"
+                  onClick={adicionarRodovia}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Adicionar Rodovia ao Lote
+                </Button>
               </div>
 
               {/* Lista de rodovias adicionadas */}
