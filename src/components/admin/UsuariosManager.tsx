@@ -63,7 +63,7 @@ export const UsuariosManager = () => {
           id,
           nome,
           supervisora_id,
-          supervisoras(nome_empresa)
+          supervisoras!inner(nome_empresa)
         `)
         .order("nome");
 
@@ -93,6 +93,7 @@ export const UsuariosManager = () => {
       setProfiles(profilesWithDetails);
     } catch (error: any) {
       toast.error("Erro ao carregar usuários: " + error.message);
+      console.error("Erro detalhado:", error);
     }
   };
 
@@ -112,8 +113,8 @@ export const UsuariosManager = () => {
       if (error) throw error;
 
       toast.success("Usuário vinculado com sucesso!");
-      loadProfiles();
       handleCloseDialog();
+      await loadProfiles(); // Aguardar reload
     } catch (error: any) {
       toast.error("Erro ao vincular: " + error.message);
     } finally {
