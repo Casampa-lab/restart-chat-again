@@ -1595,10 +1595,10 @@ export type Database = {
           tipo_dispositivo: string
           updated_at: string
           user_id: string
-          valor_medido: number
+          valor_medido: number | null
           valor_medido_fundo: number | null
           valor_medido_legenda: number | null
-          valor_minimo: number
+          valor_minimo: number | null
           valor_minimo_fundo: number | null
           valor_minimo_legenda: number | null
         }
@@ -1623,10 +1623,10 @@ export type Database = {
           tipo_dispositivo: string
           updated_at?: string
           user_id: string
-          valor_medido: number
+          valor_medido?: number | null
           valor_medido_fundo?: number | null
           valor_medido_legenda?: number | null
-          valor_minimo: number
+          valor_minimo?: number | null
           valor_minimo_fundo?: number | null
           valor_minimo_legenda?: number | null
         }
@@ -1651,10 +1651,10 @@ export type Database = {
           tipo_dispositivo?: string
           updated_at?: string
           user_id?: string
-          valor_medido?: number
+          valor_medido?: number | null
           valor_medido_fundo?: number | null
           valor_medido_legenda?: number | null
-          valor_minimo?: number
+          valor_minimo?: number | null
           valor_minimo_fundo?: number | null
           valor_minimo_legenda?: number | null
         }
