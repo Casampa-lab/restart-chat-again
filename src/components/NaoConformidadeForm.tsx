@@ -282,8 +282,8 @@ const NaoConformidadeForm = ({
           })} rows={3} />
           </div>
 
-          {/* Linha 3: Prazo, Situação, Data Atendimento e Data Notificação */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Linha 3: Prazo de Atendimento e Data da Notificação */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="prazo_atendimento">Prazo de Atendimento (dias)</Label>
               <Input id="prazo_atendimento" type="number" min="1" placeholder="Ex: 15" value={formData.prazo_atendimento} onChange={e => setFormData({
@@ -293,12 +293,37 @@ const NaoConformidadeForm = ({
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="data_notificacao">Data da Notificação</Label>
+              <div className="flex gap-2">
+                <Input id="data_notificacao" type="date" value={formData.data_notificacao} onChange={e => setFormData({
+                ...formData,
+                data_notificacao: e.target.value
+              })} />
+                <Button type="button" variant="outline" onClick={() => toast.info("Funcionalidade de notificação será implementada em breve")}>
+                  Notificar
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Observação */}
+          <div className="space-y-2">
+            <Label htmlFor="observacao">Observação</Label>
+            <Textarea id="observacao" placeholder="Observações adicionais..." value={formData.observacao} onChange={e => setFormData({
+            ...formData,
+            observacao: e.target.value
+          })} rows={3} />
+          </div>
+
+          {/* Linha 4: Situação, Data de Atendimento e Diferença de Dias */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
               <Label htmlFor="situacao">Situação *</Label>
               <Select value={formData.situacao} onValueChange={value => setFormData({
               ...formData,
               situacao: value
             })} required>
-                <SelectTrigger id="situacao">
+                <SelectTrigger id="situacao" className={formData.situacao !== "Atendida" ? "border-orange-500 bg-orange-50" : ""}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -310,29 +335,26 @@ const NaoConformidadeForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="data_notificacao">Data da Notificação</Label>
-              <Input id="data_notificacao" type="date" value={formData.data_notificacao} onChange={e => setFormData({
-              ...formData,
-              data_notificacao: e.target.value
-            })} />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="data_atendimento">Data de Atendimento</Label>
               <Input id="data_atendimento" type="date" value={formData.data_atendimento} onChange={e => setFormData({
               ...formData,
               data_atendimento: e.target.value
             })} />
             </div>
-          </div>
 
-          {/* Observação */}
-          <div className="space-y-2">
-            <Label htmlFor="observacao">Observação</Label>
-            <Textarea id="observacao" placeholder="Observações adicionais..." value={formData.observacao} onChange={e => setFormData({
-            ...formData,
-            observacao: e.target.value
-          })} rows={3} />
+            <div className="space-y-2">
+              <Label>Diferença (dias)</Label>
+              <Input 
+                type="text" 
+                value={
+                  formData.data_atendimento && formData.data_notificacao
+                    ? Math.floor((new Date(formData.data_atendimento).getTime() - new Date(formData.data_notificacao).getTime()) / (1000 * 60 * 60 * 24))
+                    : "-"
+                }
+                disabled
+                className="bg-muted"
+              />
+            </div>
           </div>
 
           {/* km Referência */}
