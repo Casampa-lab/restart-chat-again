@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { MapPin, Save } from "lucide-react";
+import { MapPin, Save, Bell } from "lucide-react";
 import { TIPOS_NC, PROBLEMAS_POR_TIPO, SITUACOES_NC, type TipoNC } from "@/constants/naoConformidades";
 interface NaoConformidadeFormProps {
   loteId: string;
@@ -184,6 +184,25 @@ const NaoConformidadeForm = ({
     }
   };
   const problemasDisponiveis = formData.tipo_nc ? PROBLEMAS_POR_TIPO[formData.tipo_nc as TipoNC] || [] : [];
+  
+  const handleNotificar = () => {
+    if (!formData.data_notificacao) {
+      toast.error("Preencha a Data da Notificação primeiro");
+      return;
+    }
+    toast.info("Funcionalidade de notificação por e-mail será implementada em breve");
+  };
+
+  // Calcular diferença de dias entre Data de Atendimento e Data da Notificação
+  const calcularDiferencaDias = () => {
+    if (!formData.data_atendimento || !formData.data_notificacao) return null;
+    const dataAtendimento = new Date(formData.data_atendimento);
+    const dataNotificacao = new Date(formData.data_notificacao);
+    const diferencaMs = dataAtendimento.getTime() - dataNotificacao.getTime();
+    const diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24));
+    return diferencaDias;
+  };
+
   return <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -282,8 +301,8 @@ const NaoConformidadeForm = ({
           })} rows={3} />
           </div>
 
-          {/* Linha 3: Prazo, Situação, Data Atendimento e Data Notificação */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Linha 3: Prazo de Atendimento e Data da Notificação com Botão */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="prazo_atendimento">Prazo de Atendimento (dias)</Label>
               <Input id="prazo_atendimento" type="number" min="1" placeholder="Ex: 15" value={formData.prazo_atendimento} onChange={e => setFormData({
@@ -293,36 +312,17 @@ const NaoConformidadeForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="situacao">Situação *</Label>
-              <Select value={formData.situacao} onValueChange={value => setFormData({
-              ...formData,
-              situacao: value
-            })} required>
-                <SelectTrigger id="situacao">
-                  <SelectValue className="text-base text-amber-500" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SITUACOES_NC.map(situacao => <SelectItem key={situacao} value={situacao}>
-                      {situacao}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="data_notificacao">Data da Notificação</Label>
-              <Input id="data_notificacao" type="date" value={formData.data_notificacao} onChange={e => setFormData({
-              ...formData,
-              data_notificacao: e.target.value
-            })} />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="data_atendimento">Data de Atendimento</Label>
-              <Input id="data_atendimento" type="date" value={formData.data_atendimento} onChange={e => setFormData({
-              ...formData,
-              data_atendimento: e.target.value
-            })} />
+              <div className="flex gap-2">
+                <Input id="data_notificacao" type="date" value={formData.data_notificacao} onChange={e => setFormData({
+                ...formData,
+                data_notificacao: e.target.value
+              })} />
+                <Button type="button" variant="outline" onClick={handleNotificar}>
+                  <Bell className="h-4 w-4 mr-1" />
+                  NOTIFICAR
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -333,6 +333,47 @@ const NaoConformidadeForm = ({
             ...formData,
             observacao: e.target.value
           })} rows={3} />
+          </div>
+
+          {/* Linha 4: Situação, Data de Atendimento e Diferença de Dias */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="situacao">Situação *</Label>
+              <Select value={formData.situacao} onValueChange={value => setFormData({
+              ...formData,
+              situacao: value
+            })} required>
+                <SelectTrigger 
+                  id="situacao" 
+                  className={formData.situacao !== "Atendida" ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20" : ""}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SITUACOES_NC.map(situacao => <SelectItem key={situacao} value={situacao}>
+                      {situacao}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="data_atendimento">Data de Atendimento</Label>
+              <Input id="data_atendimento" type="date" value={formData.data_atendimento} onChange={e => setFormData({
+              ...formData,
+              data_atendimento: e.target.value
+            })} />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Diferença (dias)</Label>
+              <Input 
+                type="text" 
+                value={calcularDiferencaDias() !== null ? `${calcularDiferencaDias()} dias` : "—"} 
+                disabled 
+                className="bg-muted"
+              />
+            </div>
           </div>
 
           {/* km Referência */}
