@@ -22,6 +22,7 @@ import MeusRegistrosNC from "./pages/MeusRegistrosNC";
 import MinhasFichasVerificacao from "./pages/MinhasFichasVerificacao";
 import MinhasFichasPlaca from "./pages/MinhasFichasPlaca";
 import Modulos from "./pages/Modulos";
+import ResetAdminPassword from "./pages/ResetAdminPassword";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
           <Route path="/minhas-fichas-verificacao" element={<MinhasFichasVerificacao />} />
           <Route path="/minhas-fichas-placa" element={<MinhasFichasPlaca />} />
           <Route path="/modulos" element={<Modulos />} />
+          <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
