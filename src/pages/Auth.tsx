@@ -193,6 +193,17 @@ const Auth = () => {
               >
                 {isLogin ? "Não tem conta? Cadastre-se" : "Já tem conta? Entre"}
               </Button>
+
+              {isLogin && (
+                <Button
+                  type="button"
+                  variant="link"
+                  className="w-full text-sm text-muted-foreground"
+                  onClick={() => navigate("/reset-admin-password")}
+                >
+                  Esqueceu a senha? (Apenas Admin)
+                </Button>
+              )}
             </form>
           </CardContent>
         </Card>
