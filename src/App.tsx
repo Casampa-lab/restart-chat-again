@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
 import CoordenacaoFiscalizacao from "./pages/CoordenacaoFiscalizacao";
 import MinhasNCs from "./pages/MinhasNCs";
@@ -36,6 +37,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/coordenacao-fiscalizacao" element={<CoordenacaoFiscalizacao />} />
           <Route path="/minhas-ncs" element={<MinhasNCs />} />
