@@ -681,6 +681,11 @@ const NaoConformidadeForm = ({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Primeira Etapa - Notificação */}
+          <div className="border-b pb-2 mb-4">
+            <h3 className="text-base font-semibold">Primeira Etapa - Notificação</h3>
+          </div>
+
           {/* Linha 1: Data e Número NC */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -1002,8 +1007,6 @@ const NaoConformidadeForm = ({
 
           {/* Prazo de Atendimento e Data da Notificação - APÓS AS FOTOS */}
           <div className="border-t pt-4 space-y-4">
-            <h3 className="text-base font-semibold">Primeira Etapa - Notificação</h3>
-            
             <div className="space-y-2">
               <Label htmlFor="prazo_atendimento">Prazo de Atendimento (dias)</Label>
               <Input id="prazo_atendimento" type="number" min="1" placeholder="Ex: 15" value={formData.prazo_atendimento} onChange={e => setFormData({
