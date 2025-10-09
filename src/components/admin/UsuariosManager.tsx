@@ -105,45 +105,52 @@ export const UsuariosManager = () => {
     try {
       // Verificar limites por supervisora
       if (selectedSupervisora) {
-        const { data: existingUsers } = await supabase
+        // Buscar todos os profiles da supervisora
+        const { data: existingProfiles } = await supabase
           .from("profiles")
-          .select(`
-            id,
-            user_roles!inner(role)
-          `)
+          .select("id")
           .eq("supervisora_id", selectedSupervisora);
 
-        const currentRoleCounts = existingUsers?.reduce((acc: any, user: any) => {
-          const userRole = user.user_roles?.[0]?.role;
-          if (userRole) {
-            acc[userRole] = (acc[userRole] || 0) + 1;
-          }
-          return acc;
-        }, {});
+        if (existingProfiles && existingProfiles.length > 0) {
+          // Buscar os roles de todos os usuários da supervisora
+          const userIds = existingProfiles.map(p => p.id);
+          const { data: existingRoles } = await supabase
+            .from("user_roles")
+            .select("user_id, role")
+            .in("user_id", userIds);
 
-        // Verificar se está mudando a supervisora ou o role
-        const isChangingSupervisora = editingProfile.supervisora_id !== selectedSupervisora;
-        const currentUserRole = editingProfile.user_roles?.[0]?.role;
-        const isChangingRole = currentUserRole !== selectedRole;
+          const currentRoleCounts = existingRoles?.reduce((acc: any, userRole: any) => {
+            const role = userRole.role;
+            if (role) {
+              acc[role] = (acc[role] || 0) + 1;
+            }
+            return acc;
+          }, {}) || {};
 
-        // Se estiver adicionando um novo usuário nessa supervisora OU mudando o role
-        if (isChangingSupervisora || isChangingRole) {
-          // Ajustar contagem: remover o role antigo se existir na mesma supervisora
-          if (!isChangingSupervisora && currentUserRole) {
-            currentRoleCounts[currentUserRole] = Math.max(0, (currentRoleCounts[currentUserRole] || 0) - 1);
-          }
+          // Verificar se está mudando a supervisora ou o role
+          const isChangingSupervisora = editingProfile.supervisora_id !== selectedSupervisora;
+          const currentUserRole = editingProfile.user_roles?.[0]?.role;
+          const isChangingRole = currentUserRole !== selectedRole;
 
-          // Limites: 5 técnicos, 1 coordenador
-          if (selectedRole === "tecnico" && (currentRoleCounts?.tecnico || 0) >= 5) {
-            toast.error("Esta supervisora já atingiu o limite de 5 técnicos de campo");
-            setLoading(false);
-            return;
-          }
+          // Se estiver adicionando um novo usuário nessa supervisora OU mudando o role
+          if (isChangingSupervisora || isChangingRole) {
+            // Ajustar contagem: remover o role antigo se existir na mesma supervisora
+            if (!isChangingSupervisora && currentUserRole) {
+              currentRoleCounts[currentUserRole] = Math.max(0, (currentRoleCounts[currentUserRole] || 0) - 1);
+            }
 
-          if (selectedRole === "coordenador" && (currentRoleCounts?.coordenador || 0) >= 1) {
-            toast.error("Esta supervisora já possui 1 coordenador. Apenas 1 coordenador é permitido por supervisora");
-            setLoading(false);
-            return;
+            // Limites: 5 técnicos, 1 coordenador
+            if (selectedRole === "tecnico" && (currentRoleCounts?.tecnico || 0) >= 5) {
+              toast.error("Esta supervisora já atingiu o limite de 5 técnicos de campo");
+              setLoading(false);
+              return;
+            }
+
+            if (selectedRole === "coordenador" && (currentRoleCounts?.coordenador || 0) >= 1) {
+              toast.error("Esta supervisora já possui 1 coordenador. Apenas 1 coordenador é permitido por supervisora");
+              setLoading(false);
+              return;
+            }
           }
         }
       }
