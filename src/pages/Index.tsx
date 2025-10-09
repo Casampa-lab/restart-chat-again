@@ -240,16 +240,13 @@ const Index = () => {
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-11 h-auto bg-muted p-2 gap-1">
                 <TabsTrigger value="frentes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">2.2</span>
-                  <span className="text-xs">Frentes</span>
+                  <span className="text-xs">Frente de Serviço</span>
                 </TabsTrigger>
                 <TabsTrigger value="ncs" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">2.3</span>
-                  <span className="text-xs">NCs</span>
+                  <span className="text-xs">Não Conformidade</span>
                 </TabsTrigger>
                 <TabsTrigger value="retrorrefletividade" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">3.1.3</span>
-                  <span className="text-xs">Retroref.</span>
+                  <span className="text-xs">Retrorefletividade</span>
                 </TabsTrigger>
                 <TabsTrigger value="defensas" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs font-bold">3.1.4</span>
