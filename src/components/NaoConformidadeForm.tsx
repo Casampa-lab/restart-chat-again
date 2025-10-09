@@ -461,28 +461,138 @@ const NaoConformidadeForm = ({
                      formData.tipo_nc === TIPOS_NC.DISPOSITIVOS_SEGURANCA;
   
   const handleNotificar = async () => {
+    // Validações básicas
+    if (!formData.tipo_nc || !formData.problema_identificado) {
+      toast.error("Selecione o Tipo de NC e o Problema");
+      return;
+    }
+
     if (!formData.data_notificacao) {
       toast.error("Preencha a Data da Notificação primeiro");
       return;
     }
 
-    if (!formData.numero_nc) {
-      toast.error("Salve a NC antes de notificar");
-      return;
+    const isExtensaoNotif = formData.tipo_nc === TIPOS_NC.SINALIZACAO_HORIZONTAL || 
+                            formData.tipo_nc === TIPOS_NC.DISPOSITIVOS_SEGURANCA;
+    
+    // Validar GPS conforme o tipo
+    if (isExtensaoNotif) {
+      if (!locationInicio || !locationFim) {
+        toast.error("Capture as localizações GPS de início e fim antes de notificar");
+        return;
+      }
+    } else {
+      if (!location) {
+        toast.error("Capture a localização GPS antes de notificar");
+        return;
+      }
     }
 
-    const loadingToast = toast.loading("Gerando relatório e enviando notificação...");
+    const loadingToast = toast.loading("Salvando e gerando relatório...");
     
     try {
-      // Buscar ID da NC salva
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      // SALVAR A NC com Situação "Não Atendida" e sem Data de Atendimento
+      const baseData = {
+        user_id: user.id,
+        lote_id: loteId,
+        rodovia_id: rodoviaId,
+        data_ocorrencia: formData.data_ocorrencia,
+        numero_nc: formData.numero_nc,
+        tipo_nc: formData.tipo_nc,
+        problema_identificado: formData.problema_identificado,
+        descricao_problema: formData.descricao_problema || null,
+        empresa: empresaNome,
+        prazo_atendimento: formData.prazo_atendimento ? parseInt(formData.prazo_atendimento) : null,
+        situacao: "Não Atendida", // Forçar como Não Atendida
+        data_atendimento: null, // Deixar vazio
+        data_notificacao: formData.data_notificacao,
+        observacao: formData.observacao || null,
+      };
+
+      // Adicionar campos conforme o tipo de NC
+      const insertData = isExtensaoNotif 
+        ? {
+            ...baseData,
+            km_inicial: formData.km_inicial ? parseFloat(formData.km_inicial) : null,
+            km_final: formData.km_final ? parseFloat(formData.km_final) : null,
+            latitude_inicial: locationInicio!.lat,
+            longitude_inicial: locationInicio!.lng,
+            latitude_final: locationFim!.lat,
+            longitude_final: locationFim!.lng,
+            latitude: null,
+            longitude: null,
+            km_referencia: null
+          }
+        : {
+            ...baseData,
+            latitude: location!.lat,
+            longitude: location!.lng,
+            km_referencia: formData.km_referencia ? parseFloat(formData.km_referencia) : null,
+            km_inicial: null,
+            km_final: null,
+            latitude_inicial: null,
+            longitude_inicial: null,
+            latitude_final: null,
+            longitude_final: null
+          };
+
+      const { data: ncData, error: insertError } = await supabase
+        .from("nao_conformidades")
+        .insert(insertData)
+        .select()
+        .single();
+      
+      if (insertError) throw insertError;
+
+      // Upload das fotos
+      const fotosParaSalvar = fotos.filter(f => f.arquivo !== null);
+      if (fotosParaSalvar.length > 0) {
+        for (let i = 0; i < fotosParaSalvar.length; i++) {
+          const foto = fotosParaSalvar[i];
+          const fotoIndex = fotos.indexOf(foto);
+          
+          try {
+            const fileExt = foto.arquivo!.name.split('.').pop();
+            const fileName = `${ncData.id}_foto${fotoIndex + 1}_${Date.now()}.${fileExt}`;
+            const filePath = `${user.id}/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+              .from('nc-photos')
+              .upload(filePath, foto.arquivo!);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+              .from('nc-photos')
+              .getPublicUrl(filePath);
+
+            const { error: fotoError } = await supabase
+              .from('nao_conformidades_fotos')
+              .insert({
+                nc_id: ncData.id,
+                foto_url: publicUrl,
+                latitude: foto.latitude,
+                longitude: foto.longitude,
+                sentido: foto.sentido || null,
+                descricao: foto.descricao || null,
+                ordem: fotoIndex + 1,
+              });
+
+            if (fotoError) throw fotoError;
+          } catch (fotoErr: any) {
+            console.error(`Erro ao salvar foto ${fotoIndex + 1}:`, fotoErr);
+          }
+        }
+      }
+
+      // Buscar NC salva com dados completos
       const { data: ncSalva, error: ncError } = await supabase
         .from("nao_conformidades")
         .select("id")
-        .eq("numero_nc", formData.numero_nc)
-        .eq("user_id", user.id)
+        .eq("id", ncData.id)
         .single();
 
       if (ncError || !ncSalva) {
@@ -512,7 +622,7 @@ const NaoConformidadeForm = ({
       }
 
       // Buscar fotos
-      const { data: fotos, error: fotosError } = await supabase
+      const { data: fotosBanco, error: fotosError } = await supabase
         .from("nao_conformidades_fotos")
         .select("*")
         .eq("nc_id", ncSalva.id)
@@ -569,7 +679,7 @@ const NaoConformidadeForm = ({
           nome: ncCompleta.empresa,
         },
         supervisora: supervisoraData,
-        fotos: fotos || [],
+        fotos: fotosBanco || [],
         natureza: ncCompleta.tipo_nc, // Usando tipo_nc como natureza
         grau: "Média", // Pode ser adicionado ao formulário posteriormente
         tipo_obra: "Manutenção", // Pode ser adicionado ao formulário posteriormente
@@ -605,18 +715,40 @@ const NaoConformidadeForm = ({
       if (emailError) throw emailError;
 
       toast.dismiss(loadingToast);
-      toast.success("Notificação enviada com sucesso!");
+      toast.success("NC registrada e notificação enviada com sucesso!");
       
-      // Atualizar a data de notificação
+      // Reset completo do formulário após notificar
       setFormData({
-        ...formData,
-        data_notificacao: new Date().toISOString().split("T")[0],
+        data_ocorrencia: new Date().toISOString().split("T")[0],
+        numero_nc: "",
+        tipo_nc: "",
+        problema_identificado: "",
+        descricao_problema: "",
+        prazo_atendimento: "",
+        situacao: "Não Atendida",
+        data_atendimento: "",
+        data_notificacao: "",
+        observacao: "",
+        km_referencia: "",
+        km_inicial: "",
+        km_final: ""
       });
+
+      // Limpar localizações e fotos para o próximo registro
+      setLocation(null);
+      setLocationInicio(null);
+      setLocationFim(null);
+      setFotos([
+        { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+        { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+        { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+        { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
+      ]);
 
     } catch (error: any) {
       toast.dismiss(loadingToast);
       console.error("Erro ao notificar:", error);
-      toast.error("Erro ao enviar notificação: " + error.message);
+      toast.error("Erro ao salvar e notificar: " + error.message);
     }
   };
 
