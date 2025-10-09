@@ -374,19 +374,15 @@ const Index = () => {
                   <Tabs defaultValue="sh" className="w-full">
                     <TabsList className="grid w-full grid-cols-4">
                       <TabsTrigger value="sh">
-                        <span className="text-xs font-bold mr-2">3.1.5.1</span>
-                        SH
-                      </TabsTrigger>
-                      <TabsTrigger value="inscricoes">
-                        <span className="text-xs font-bold mr-2">3.1.5.2</span>
-                        Inscrições
+                        Marcas Longitudinais
                       </TabsTrigger>
                       <TabsTrigger value="sv">
-                        <span className="text-xs font-bold mr-2">3.1.5.3</span>
-                        SV
+                        Marcas Transversais
+                      </TabsTrigger>
+                      <TabsTrigger value="inscricoes">
+                        Setas, Símbolos e Legendas
                       </TabsTrigger>
                       <TabsTrigger value="tacha">
-                        <span className="text-xs font-bold mr-2">3.1.5.4</span>
                         Tachas
                       </TabsTrigger>
                     </TabsList>
