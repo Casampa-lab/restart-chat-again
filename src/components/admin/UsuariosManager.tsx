@@ -7,8 +7,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Users, Pencil, X } from "lucide-react";
+import { Users, Pencil, X, Trash2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { deleteUser } from "@/lib/deleteUser";
 
 interface Profile {
   id: string;
@@ -241,6 +242,23 @@ export const UsuariosManager = () => {
     }
   };
 
+  const handleDelete = async (profileId: string, userName: string) => {
+    if (!confirm(`Tem certeza que deseja DELETAR PERMANENTEMENTE o usuário ${userName}? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await deleteUser(profileId);
+      toast.success("Usuário deletado com sucesso!");
+      await loadProfiles();
+    } catch (error: any) {
+      toast.error("Erro ao deletar: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingProfile(null);
@@ -319,6 +337,15 @@ export const UsuariosManager = () => {
                         <X className="h-4 w-4" />
                       </Button>
                     )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(profile.id, profile.nome)}
+                      title="Deletar usuário permanentemente"
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
