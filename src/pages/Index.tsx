@@ -249,7 +249,6 @@ const Index = () => {
                   <span className="text-xs">Retrorefletividade</span>
                 </TabsTrigger>
                 <TabsTrigger value="defensas" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">3.1.4</span>
                   <span className="text-xs">Defensas</span>
                 </TabsTrigger>
                 <TabsTrigger value="int-sh" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
