@@ -114,14 +114,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Montar lista de destinatários
     const destinatarios: string[] = [];
+    const copias: string[] = [];
     
-    // Email principal: responsável da executora
+    // Email principal: responsável da executora (se existir)
     if (ncData.lotes?.email_executora) {
       destinatarios.push(ncData.lotes.email_executora);
     }
-
-    // Cópias
-    const copias: string[] = [];
     
     // Fiscal da execução
     if (ncData.lotes?.email_fiscal_execucao) {
@@ -131,14 +129,19 @@ const handler = async (req: Request): Promise<Response> => {
     // Coordenadores da supervisora
     if (coordEmails && coordEmails.length > 0) {
       coordEmails.forEach(coord => {
-        if (coord.email && !copias.includes(coord.email)) {
-          copias.push(coord.email);
+        if (coord.email) {
+          // Se não temos destinatário principal, primeiro coordenador vai como principal
+          if (destinatarios.length === 0) {
+            destinatarios.push(coord.email);
+          } else if (!copias.includes(coord.email)) {
+            copias.push(coord.email);
+          }
         }
       });
     }
 
-    if (destinatarios.length === 0 && copias.length === 0) {
-      throw new Error('Nenhum destinatário encontrado para enviar o email');
+    if (destinatarios.length === 0) {
+      throw new Error('Nenhum destinatário encontrado. Configure o email da executora no cadastro do lote ou adicione coordenadores.');
     }
 
     console.log('Destinatários:', destinatarios);
