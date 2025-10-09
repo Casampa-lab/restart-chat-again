@@ -618,6 +618,16 @@ const NaoConformidadeForm = ({
       toast.dismiss(loadingToast);
       toast.success("NC registrada e notificação enviada com sucesso!");
       
+      // Fazer download do PDF automaticamente
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `NC_${ncCompleta.numero_nc}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
       // Reset completo do formulário após notificar
       setFormData({
         data_ocorrencia: new Date().toISOString().split("T")[0],
