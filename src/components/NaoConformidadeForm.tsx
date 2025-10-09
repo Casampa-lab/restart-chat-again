@@ -389,7 +389,7 @@ const NaoConformidadeForm = ({
       }
     }
 
-    const loadingToast = toast.loading("Salvando e gerando relatório...");
+    const loadingToast = toast.loading("Salvando e gerando a Notificação...");
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
