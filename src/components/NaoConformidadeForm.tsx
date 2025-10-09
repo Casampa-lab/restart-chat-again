@@ -65,7 +65,7 @@ const NaoConformidadeForm = ({
     situacao: "Não Atendida",
     data_atendimento: "",
     data_notificacao: "",
-    observacao: "",
+    observacao: "Verificar prazo de atendimento e informar à supervisora para agendamento de nova vistoria após a execução do serviço.",
     km_referencia: "",
     km_inicial: "",
     km_final: ""
