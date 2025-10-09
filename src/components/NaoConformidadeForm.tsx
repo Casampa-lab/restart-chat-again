@@ -844,31 +844,6 @@ const NaoConformidadeForm = ({
           })} rows={3} />
           </div>
 
-          {/* Linha 3: Prazo de Atendimento e Data da Notificação com Botão */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="prazo_atendimento">Prazo de Atendimento (dias)</Label>
-              <Input id="prazo_atendimento" type="number" min="1" placeholder="Ex: 15" value={formData.prazo_atendimento} onChange={e => setFormData({
-              ...formData,
-              prazo_atendimento: e.target.value
-            })} />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="data_notificacao">Data da Notificação</Label>
-              <div className="flex gap-2">
-                <Input id="data_notificacao" type="date" value={formData.data_notificacao} onChange={e => setFormData({
-                ...formData,
-                data_notificacao: e.target.value
-              })} />
-                <Button type="button" variant="outline" onClick={handleNotificar}>
-                  <Bell className="h-4 w-4 mr-1" />
-                  NOTIFICAR
-                </Button>
-              </div>
-            </div>
-          </div>
-
           {/* Observação */}
           <div className="space-y-2">
             <Label htmlFor="observacao">Observação</Label>
@@ -876,6 +851,34 @@ const NaoConformidadeForm = ({
             ...formData,
             observacao: e.target.value
           })} rows={3} />
+          </div>
+
+          {/* Situação e Data de Atendimento */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="situacao">Situação *</Label>
+              <Select value={formData.situacao} onValueChange={value => setFormData({
+              ...formData,
+              situacao: value
+            })} required>
+                <SelectTrigger id="situacao" className={formData.situacao !== "Atendida" ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20" : ""}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SITUACOES_NC.map(situacao => <SelectItem key={situacao} value={situacao}>
+                      {situacao}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="data_atendimento">Data de Atendimento</Label>
+              <Input id="data_atendimento" type="date" value={formData.data_atendimento} onChange={e => setFormData({
+              ...formData,
+              data_atendimento: e.target.value
+            })} />
+            </div>
           </div>
 
           {/* Seção de Fotos */}
@@ -985,38 +988,41 @@ const NaoConformidadeForm = ({
             </div>
           </div>
 
-          {/* Linha 4: Situação, Data de Atendimento e Diferença de Dias */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="situacao">Situação *</Label>
-              <Select value={formData.situacao} onValueChange={value => setFormData({
-              ...formData,
-              situacao: value
-            })} required>
-                <SelectTrigger id="situacao" className={formData.situacao !== "Atendida" ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20" : ""}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SITUACOES_NC.map(situacao => <SelectItem key={situacao} value={situacao}>
-                      {situacao}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Prazo de Atendimento, Data da Notificação e Botão NOTIFICAR - APÓS AS FOTOS */}
+          <div className="border-t pt-4">
+            <h3 className="text-base font-semibold mb-4">Notificação e Prazo</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="prazo_atendimento">Prazo de Atendimento (dias)</Label>
+                <Input id="prazo_atendimento" type="number" min="1" placeholder="Ex: 15" value={formData.prazo_atendimento} onChange={e => setFormData({
+                ...formData,
+                prazo_atendimento: e.target.value
+              })} />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="data_atendimento">Data de Atendimento</Label>
-              <Input id="data_atendimento" type="date" value={formData.data_atendimento} onChange={e => setFormData({
-              ...formData,
-              data_atendimento: e.target.value
-            })} />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Prazo de Execução (dias)</Label>
-              <Input type="text" value={calcularDiferencaDias() !== null ? `${calcularDiferencaDias()} dias` : "—"} disabled className="bg-muted" />
+              <div className="space-y-2">
+                <Label htmlFor="data_notificacao">Data da Notificação</Label>
+                <div className="flex gap-2">
+                  <Input id="data_notificacao" type="date" value={formData.data_notificacao} onChange={e => setFormData({
+                  ...formData,
+                  data_notificacao: e.target.value
+                })} />
+                  <Button type="button" variant="outline" onClick={handleNotificar}>
+                    <Bell className="h-4 w-4 mr-1" />
+                    NOTIFICAR
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Diferença de Dias */}
+          {calcularDiferencaDias() !== null && (
+            <div className="space-y-2">
+              <Label>Prazo de Execução (dias)</Label>
+              <Input type="text" value={`${calcularDiferencaDias()} dias`} disabled className="bg-muted" />
+            </div>
+          )}
 
           <Button
             type="submit" 
