@@ -271,155 +271,56 @@ const NaoConformidadeForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.tipo_nc || !formData.problema_identificado) {
-      toast.error("Selecione o Tipo de NC e o Problema");
+    // Este botão agora é usado para ATUALIZAR a NC quando ela for atendida
+    if (!formData.numero_nc) {
+      toast.error("Use o botão NOTIFICAR primeiro para criar a NC");
       return;
     }
 
-    const isExtensao = formData.tipo_nc === TIPOS_NC.SINALIZACAO_HORIZONTAL || 
-                       formData.tipo_nc === TIPOS_NC.DISPOSITIVOS_SEGURANCA;
-    
-    // Validar GPS conforme o tipo
-    if (isExtensao) {
-      if (!locationInicio || !locationFim) {
-        toast.error("Capture as localizações GPS de início e fim antes de salvar");
-        return;
-      }
-    } else {
-      if (!location) {
-        toast.error("Capture a localização GPS antes de salvar");
-        return;
-      }
+    if (formData.situacao !== "Atendida") {
+      toast.error("Altere a Situação para 'Atendida' antes de salvar");
+      return;
+    }
+
+    if (!formData.data_atendimento) {
+      toast.error("Preencha a Data de Atendimento");
+      return;
     }
 
     setLoading(true);
     try {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
       
-      const baseData = {
-        user_id: user.id,
-        lote_id: loteId,
-        rodovia_id: rodoviaId,
-        data_ocorrencia: formData.data_ocorrencia,
-        numero_nc: formData.numero_nc,
-        tipo_nc: formData.tipo_nc,
-        problema_identificado: formData.problema_identificado,
-        descricao_problema: formData.descricao_problema || null,
-        empresa: empresaNome,
-        prazo_atendimento: formData.prazo_atendimento ? parseInt(formData.prazo_atendimento) : null,
-        situacao: formData.situacao,
-        data_atendimento: formData.data_atendimento || null,
-        data_notificacao: formData.data_notificacao || null,
-        observacao: formData.observacao || null,
-      };
+      // Buscar a NC existente
+      const { data: ncExistente, error: buscaError } = await supabase
+        .from("nao_conformidades")
+        .select("id")
+        .eq("numero_nc", formData.numero_nc)
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-      // Adicionar campos conforme o tipo de NC
-      const insertData = isExtensao 
-        ? {
-            ...baseData,
-            km_inicial: formData.km_inicial ? parseFloat(formData.km_inicial) : null,
-            km_final: formData.km_final ? parseFloat(formData.km_final) : null,
-            latitude_inicial: locationInicio!.lat,
-            longitude_inicial: locationInicio!.lng,
-            latitude_final: locationFim!.lat,
-            longitude_final: locationFim!.lng,
-            latitude: null,
-            longitude: null,
-            km_referencia: null
-          }
-        : {
-            ...baseData,
-            latitude: location!.lat,
-            longitude: location!.lng,
-            km_referencia: formData.km_referencia ? parseFloat(formData.km_referencia) : null,
-            km_inicial: null,
-            km_final: null,
-            latitude_inicial: null,
-            longitude_inicial: null,
-            latitude_final: null,
-            longitude_final: null
-          };
-
-      const {
-        data: ncData,
-        error
-      } = await supabase.from("nao_conformidades").insert(insertData).select().single();
-      if (error) throw error;
-
-      // Upload das fotos
-      const fotosParaSalvar = fotos.filter(f => f.arquivo !== null);
-      if (fotosParaSalvar.length > 0) {
-        toast.info(`Fazendo upload de ${fotosParaSalvar.length} foto(s)...`);
-        
-        for (let i = 0; i < fotosParaSalvar.length; i++) {
-          const foto = fotosParaSalvar[i];
-          const fotoIndex = fotos.indexOf(foto);
-          
-          try {
-            // Upload da foto para o storage
-            const fileExt = foto.arquivo!.name.split('.').pop();
-            const fileName = `${ncData.id}_foto${fotoIndex + 1}_${Date.now()}.${fileExt}`;
-            const filePath = `${user.id}/${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-              .from('nc-photos')
-              .upload(filePath, foto.arquivo!);
-
-            if (uploadError) throw uploadError;
-
-            // Obter URL pública
-            const { data: { publicUrl } } = supabase.storage
-              .from('nc-photos')
-              .getPublicUrl(filePath);
-
-            // Salvar registro da foto no banco
-            const { error: fotoError } = await supabase
-              .from('nao_conformidades_fotos')
-              .insert({
-                nc_id: ncData.id,
-                foto_url: publicUrl,
-                latitude: foto.latitude,
-                longitude: foto.longitude,
-                sentido: foto.sentido || null,
-                descricao: foto.descricao || null,
-                ordem: fotoIndex + 1,
-              });
-
-            if (fotoError) throw fotoError;
-          } catch (fotoErr: any) {
-            console.error(`Erro ao salvar foto ${fotoIndex + 1}:`, fotoErr);
-            toast.error(`Erro ao salvar foto ${fotoIndex + 1}`);
-          }
-        }
+      if (buscaError) throw buscaError;
+      
+      if (!ncExistente) {
+        toast.error("NC não encontrada. Use o botão NOTIFICAR primeiro para criar a NC");
+        setLoading(false);
+        return;
       }
 
-      // Enviar email para coordenadores/fiscais
-      try {
-        const {
-          data: rodovia
-        } = await supabase.from("rodovias").select("codigo, nome").eq("id", rodoviaId).single();
-        await supabase.functions.invoke("send-nc-email", {
-          body: {
-            numero_nc: formData.numero_nc,
-            empresa: empresaNome,
-            tipo_nc: formData.tipo_nc,
-            problema_identificado: formData.problema_identificado,
-            data_ocorrencia: formData.data_ocorrencia,
-            rodovia: rodovia ? `${rodovia.codigo} - ${rodovia.nome}` : "N/A",
-            km_referencia: formData.km_referencia || "N/A",
-            observacao: formData.observacao || ""
-          }
-        });
-        toast.success("Não-conformidade registrada e emails enviados!");
-      } catch (emailError: any) {
-        console.error("Erro ao enviar email:", emailError);
-        toast.warning("NC registrada, mas houve erro ao enviar emails");
-      }
+      // Atualizar a NC com os dados de atendimento
+      const { error: updateError } = await supabase
+        .from("nao_conformidades")
+        .update({
+          situacao: "Atendida",
+          data_atendimento: formData.data_atendimento,
+          observacao: formData.observacao || null,
+        })
+        .eq("id", ncExistente.id);
+
+      if (updateError) throw updateError;
+
+      toast.success("Atendimento registrado com sucesso!");
 
       // Reset form
       setFormData({
@@ -438,7 +339,7 @@ const NaoConformidadeForm = ({
         km_final: ""
       });
 
-      // Limpar localizações e fotos para o próximo registro
+      // Limpar localizações e fotos
       setLocation(null);
       setLocationInicio(null);
       setLocationFim(null);
@@ -449,7 +350,7 @@ const NaoConformidadeForm = ({
         { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
       ]);
     } catch (error: any) {
-      toast.error("Erro ao salvar: " + error.message);
+      toast.error("Erro ao registrar atendimento: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -1209,10 +1110,10 @@ const NaoConformidadeForm = ({
             type="submit" 
             className="w-full" 
             size="lg" 
-            disabled={loading || (isExtensao ? (!locationInicio || !locationFim) : !location)}
+            disabled={loading || formData.situacao !== "Atendida" || !formData.data_atendimento}
           >
             <Save className="mr-2 h-5 w-5" />
-            {loading ? "Salvando..." : "Salvar Não-Conformidade"}
+            {loading ? "Salvando..." : "Registrar Atendimento"}
           </Button>
         </form>
       </CardContent>
