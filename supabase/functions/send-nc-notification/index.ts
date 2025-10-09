@@ -54,21 +54,40 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Erro ao buscar NC: ${ncError?.message}`);
     }
 
-    // Buscar dados da supervisora através do perfil do usuário
-    const { data: profileData, error: profileError } = await supabase
+    // Buscar supervisora_id - primeiro tenta do perfil do usuário, senão busca da empresa do lote
+    let supervisora_id: string | null = null;
+    
+    const { data: profileData } = await supabase
       .from('profiles')
       .select('supervisora_id')
       .eq('id', ncData.user_id)
       .single();
 
-    if (profileError || !profileData?.supervisora_id) {
+    if (profileData?.supervisora_id) {
+      supervisora_id = profileData.supervisora_id;
+    } else {
+      // Se usuário não tem supervisora_id (ex: admin), busca através da empresa do lote
+      const { data: loteData, error: loteError } = await supabase
+        .from('lotes')
+        .select('empresas(supervisora_id)')
+        .eq('id', ncData.lote_id)
+        .single();
+
+      if (loteError || !loteData || !(loteData as any).empresas?.supervisora_id) {
+        throw new Error('Não foi possível identificar a supervisora do lote');
+      }
+      
+      supervisora_id = (loteData as any).empresas.supervisora_id;
+    }
+
+    if (!supervisora_id) {
       throw new Error('Não foi possível identificar a supervisora');
     }
 
     const { data: supervisoraData, error: supervisoraError } = await supabase
       .from('supervisoras')
       .select('nome_empresa, email_envio')
-      .eq('id', profileData.supervisora_id)
+      .eq('id', supervisora_id)
       .single();
 
     if (supervisoraError) {
@@ -90,7 +109,7 @@ const handler = async (req: Request): Promise<Response> => {
       .from('profiles')
       .select('email')
       .in('id', coordIds)
-      .eq('supervisora_id', profileData.supervisora_id)
+      .eq('supervisora_id', supervisora_id)
       .not('email', 'is', null);
 
     // Montar lista de destinatários
