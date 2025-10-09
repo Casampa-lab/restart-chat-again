@@ -238,7 +238,7 @@ const Index = () => {
             </Card>
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-8 h-auto bg-muted p-2 gap-1">
+              <TabsList className="grid w-full grid-cols-7 h-auto bg-muted p-2 gap-1">
                 <TabsTrigger value="frentes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Frente de Serviço</span>
                 </TabsTrigger>
@@ -253,10 +253,6 @@ const Index = () => {
                 </TabsTrigger>
                 <TabsTrigger value="intervencoes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Intervenções</span>
-                </TabsTrigger>
-                <TabsTrigger value="registro-nc" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">3.1.18</span>
-                  <span className="text-xs">Reg. NC</span>
                 </TabsTrigger>
                 <TabsTrigger value="ficha-verif" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs font-bold">3.1.19</span>
@@ -411,24 +407,6 @@ const Index = () => {
                       />
                     </TabsContent>
                   </Tabs>
-                </div>
-              </TabsContent>
-              <TabsContent value="registro-nc" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/meus-registros-nc")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver meus registros
-                    </Button>
-                  </div>
-                  <RegistroNCForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
                 </div>
               </TabsContent>
               <TabsContent value="ficha-verif" className="mt-6">
