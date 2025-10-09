@@ -12,6 +12,7 @@ import LotesManager from "@/components/admin/LotesManager";
 import RodoviasManager from "@/components/admin/RodoviasManager";
 import { SupervisorasManager } from "@/components/admin/SupervisorasManager";
 import { UsuariosManager } from "@/components/admin/UsuariosManager";
+import { InventarioPlacasManager } from "@/components/admin/InventarioPlacasManager";
 
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
@@ -113,12 +114,13 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="supervisoras" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="supervisoras">Supervisoras</TabsTrigger>
             <TabsTrigger value="usuarios">Usuários</TabsTrigger>
             <TabsTrigger value="empresas">Executoras</TabsTrigger>
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
+            <TabsTrigger value="inventario">Inventário</TabsTrigger>
           </TabsList>
 
           <TabsContent value="supervisoras">
@@ -139,6 +141,10 @@ const Admin = () => {
 
           <TabsContent value="rodovias">
             <RodoviasManager />
+          </TabsContent>
+
+          <TabsContent value="inventario">
+            <InventarioPlacasManager />
           </TabsContent>
         </Tabs>
       </main>

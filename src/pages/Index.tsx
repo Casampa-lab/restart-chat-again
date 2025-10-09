@@ -21,6 +21,7 @@ import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
 import { RegistroNCForm } from "@/components/RegistroNCForm";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
+import { InventarioPlacasViewer } from "@/components/InventarioPlacasViewer";
 import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
@@ -439,6 +440,13 @@ const Index = () => {
                     </TabsList>
                     <TabsContent value="placas" className="mt-4">
                       <div className="space-y-4">
+                        {/* Visualizador de Inventário */}
+                        <InventarioPlacasViewer
+                          loteId={activeSession.lote_id}
+                          rodoviaId={activeSession.rodovia_id}
+                        />
+                        
+                        {/* Formulário de Cadastro Individual */}
                         <div className="flex justify-end">
                           <Button 
                             variant="secondary"
