@@ -29,14 +29,47 @@ serve(async (req) => {
       }
     )
 
+    // Primeiro, verificar o usuário atual
+    console.log('Buscando informações do usuário:', userId)
+    const { data: currentUser, error: getUserError } = await supabaseAdmin.auth.admin.getUserById(userId)
+    
+    if (getUserError) {
+      console.error('Erro ao buscar usuário:', getUserError)
+      throw new Error('Usuário não encontrado')
+    }
+    
+    console.log('Usuário atual - email:', currentUser.user.email)
+    console.log('Novo email:', newEmail)
+
+    // Verificar se o email já está em uso por outro usuário
+    const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+    
+    if (!listError && existingUsers) {
+      const emailInUse = existingUsers.users.find(u => 
+        u.email?.toLowerCase() === newEmail.toLowerCase() && u.id !== userId
+      )
+      
+      if (emailInUse) {
+        console.log('Email já está em uso pelo usuário:', emailInUse.id)
+        throw new Error('Este email já está sendo usado por outro usuário')
+      }
+    }
+
     // Atualizar o email do usuário
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+    console.log('Atualizando email do usuário:', userId)
+    const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       userId,
       { email: newEmail }
     )
 
     if (updateError) {
-      console.error('Error updating user email:', updateError)
+      console.error('Erro detalhado ao atualizar email:', {
+        message: updateError.message,
+        status: updateError.status,
+        code: (updateError as any).code,
+        details: JSON.stringify(updateError)
+      })
+      
       // Verificar se é erro de email duplicado
       const errorStr = JSON.stringify(updateError)
       if (errorStr.includes('duplicate') || 
@@ -44,8 +77,11 @@ serve(async (req) => {
           errorStr.includes('users_email_partial_key')) {
         throw new Error('Este email já está sendo usado por outro usuário')
       }
+      
       throw new Error(updateError.message || 'Erro ao atualizar email do usuário')
     }
+
+    console.log('Email atualizado com sucesso')
 
     return new Response(
       JSON.stringify({ 
