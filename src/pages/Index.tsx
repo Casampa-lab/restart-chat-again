@@ -258,9 +258,8 @@ const Index = () => {
                   <span className="text-xs font-bold">3.1.19</span>
                   <span className="text-xs">Ficha Verif</span>
                 </TabsTrigger>
-                <TabsTrigger value="ficha-placa" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">3.1.20</span>
-                  <span className="text-xs">Ficha Placa</span>
+                <TabsTrigger value="prontuario" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs">Prontuário</span>
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="frentes" className="mt-6">
@@ -427,22 +426,42 @@ const Index = () => {
                   />
                 </div>
               </TabsContent>
-              <TabsContent value="ficha-placa" className="mt-6">
+              <TabsContent value="prontuario" className="mt-6">
                 <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/minhas-fichas-placa")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver minhas fichas
-                    </Button>
-                  </div>
-                  <FichaPlacaForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
+                  <Tabs defaultValue="placas" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="placas">
+                        Placas
+                      </TabsTrigger>
+                      <TabsTrigger value="defensas-pront">
+                        Defensas
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="placas" className="mt-4">
+                      <div className="space-y-4">
+                        <div className="flex justify-end">
+                          <Button 
+                            variant="secondary"
+                            onClick={() => navigate("/minhas-fichas-placa")}
+                            className="shadow-md hover:shadow-lg transition-shadow"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Ver minhas fichas
+                          </Button>
+                        </div>
+                        <FichaPlacaForm
+                          loteId={activeSession.lote_id}
+                          rodoviaId={activeSession.rodovia_id}
+                        />
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="defensas-pront" className="mt-4">
+                      <DefensasForm
+                        loteId={activeSession.lote_id}
+                        rodoviaId={activeSession.rodovia_id}
+                      />
+                    </TabsContent>
+                  </Tabs>
                 </div>
               </TabsContent>
             </Tabs>
