@@ -36,11 +36,15 @@ serve(async (req) => {
     )
 
     if (updateError) {
+      console.error('Error updating user email:', updateError)
       // Verificar se é erro de email duplicado
-      if (updateError.message.includes('duplicate') || updateError.message.includes('already exists')) {
+      const errorStr = JSON.stringify(updateError)
+      if (errorStr.includes('duplicate') || 
+          errorStr.includes('already exists') || 
+          errorStr.includes('users_email_partial_key')) {
         throw new Error('Este email já está sendo usado por outro usuário')
       }
-      throw updateError
+      throw new Error(updateError.message || 'Erro ao atualizar email do usuário')
     }
 
     return new Response(

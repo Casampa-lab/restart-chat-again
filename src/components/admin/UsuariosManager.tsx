@@ -166,11 +166,14 @@ export const UsuariosManager = () => {
 
       // Atualizar email no auth.users via edge function
       if (selectedEmail !== editingProfile.email) {
-        const { error: emailError } = await supabase.functions.invoke('update-user-email', {
+        const { data: emailData, error: emailError } = await supabase.functions.invoke('update-user-email', {
           body: { userId: editingProfile.id, newEmail: selectedEmail }
         });
         
-        if (emailError) throw new Error(`Erro ao atualizar email: ${emailError.message}`);
+        if (emailError) {
+          const errorMessage = emailData?.error || emailError.message || 'Erro ao atualizar email';
+          throw new Error(errorMessage);
+        }
       }
       
       // Atualizar supervisora e email no profiles
