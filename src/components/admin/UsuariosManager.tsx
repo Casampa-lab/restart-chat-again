@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Users, Pencil, X, Trash2 } from "lucide-react";
+import { Users, Pencil, X, Trash2, KeyRound } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { deleteUser } from "@/lib/deleteUser";
 
@@ -38,10 +38,12 @@ export const UsuariosManager = () => {
   const [supervisoras, setSupervisoras] = useState<Supervisora[]>([]);
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [selectedSupervisora, setSelectedSupervisora] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedEmail, setSelectedEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     loadSupervisoras();
@@ -259,6 +261,39 @@ export const UsuariosManager = () => {
     }
   };
 
+  const handleResetPassword = (profile: Profile) => {
+    setEditingProfile(profile);
+    setNewPassword("");
+    setIsResetPasswordOpen(true);
+  };
+
+  const handleConfirmResetPassword = async () => {
+    if (!editingProfile || !newPassword) return;
+
+    if (newPassword.length < 6) {
+      toast.error("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('reset-user-password', {
+        body: { userId: editingProfile.id, newPassword }
+      });
+
+      if (error) throw error;
+
+      toast.success("Senha alterada com sucesso!");
+      setIsResetPasswordOpen(false);
+      setEditingProfile(null);
+      setNewPassword("");
+    } catch (error: any) {
+      toast.error("Erro ao resetar senha: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingProfile(null);
@@ -325,6 +360,15 @@ export const UsuariosManager = () => {
                       title="Editar perfil e supervisora"
                     >
                       <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleResetPassword(profile)}
+                      title="Resetar senha"
+                      className="text-warning hover:text-warning"
+                    >
+                      <KeyRound className="h-4 w-4" />
                     </Button>
                     {profile.supervisora_id && (
                       <Button
@@ -433,6 +477,43 @@ export const UsuariosManager = () => {
               </Button>
               <Button onClick={handleSalvar} disabled={loading || !selectedRole || !selectedEmail}>
                 {loading ? "Salvando..." : "Salvar"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isResetPasswordOpen} onOpenChange={setIsResetPasswordOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Resetar Senha</DialogTitle>
+              <DialogDescription>
+                Digite a nova senha para {editingProfile?.nome}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">Nova Senha</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Mínimo 6 caracteres"
+                  minLength={6}
+                />
+                <p className="text-xs text-muted-foreground">
+                  A senha deve ter pelo menos 6 caracteres
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsResetPasswordOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleConfirmResetPassword} disabled={loading || !newPassword || newPassword.length < 6}>
+                {loading ? "Resetando..." : "Resetar Senha"}
               </Button>
             </DialogFooter>
           </DialogContent>
