@@ -142,13 +142,7 @@ const FrenteLiberadaForm = ({
     }
   };
   return <Card>
-      <CardHeader>
-        <CardTitle>2.2 - Frente Liberada das Rodovias</CardTitle>
-        <CardDescription>
-          Registro de frentes liberadas para trabalho nas rodovias
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">

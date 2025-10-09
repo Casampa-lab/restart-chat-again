@@ -680,16 +680,7 @@ const NaoConformidadeForm = ({
     return diferencaDias;
   };
   return <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Save className="h-5 w-5" />
-          Registro de Não-Conformidade
-        </CardTitle>
-        <CardDescription>
-          Planilha 2.3 - Empresa: {empresaNome || "Carregando..."}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Primeira Etapa - Notificação */}
           <div className="border-b pb-2 mb-4">

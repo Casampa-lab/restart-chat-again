@@ -192,13 +192,7 @@ const RetrorrefletividadeDinamicaForm = ({ loteId, rodoviaId }: Retrorrefletivid
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>3.1.3.2 - Retrorrefletividade Dinâmica</CardTitle>
-        <CardDescription>
-          Medição de retrorrefletividade dinâmica da demarcação viária
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
