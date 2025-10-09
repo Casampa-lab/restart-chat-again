@@ -623,10 +623,17 @@ const NaoConformidadeForm = ({
   // Calcular diferença de dias entre Data de Atendimento e Data da Notificação
   const calcularDiferencaDias = () => {
     if (!formData.data_atendimento || !formData.data_notificacao) return null;
-    const dataAtendimento = new Date(formData.data_atendimento);
-    const dataNotificacao = new Date(formData.data_notificacao);
+    
+    // Parse das datas no formato YYYY-MM-DD evitando problemas de timezone
+    const [anoAtend, mesAtend, diaAtend] = formData.data_atendimento.split('-').map(Number);
+    const [anoNotif, mesNotif, diaNotif] = formData.data_notificacao.split('-').map(Number);
+    
+    const dataAtendimento = new Date(anoAtend, mesAtend - 1, diaAtend);
+    const dataNotificacao = new Date(anoNotif, mesNotif - 1, diaNotif);
+    
     const diferencaMs = dataAtendimento.getTime() - dataNotificacao.getTime();
-    const diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24));
+    const diferencaDias = Math.round(diferencaMs / (1000 * 60 * 60 * 24));
+    
     return diferencaDias;
   };
   return <Card>
