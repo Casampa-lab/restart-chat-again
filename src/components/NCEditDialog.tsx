@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TIPOS_NC, PROBLEMAS_POR_TIPO, SITUACOES_NC, type TipoNC } from "@/constants/naoConformidades";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Save } from "lucide-react";
+import { Save, Bell } from "lucide-react";
 
 interface NCEditDialogProps {
   ncId: string | null;
@@ -196,19 +196,8 @@ const NCEditDialog = ({ ncId, open, onOpenChange, onSaved }: NCEditDialogProps) 
             />
           </div>
 
-          {/* Prazo, Situação, Datas */}
+          {/* Situação e Data de Atendimento */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit_prazo_atendimento">Prazo de Atendimento (dias)</Label>
-              <Input
-                id="edit_prazo_atendimento"
-                type="number"
-                min="1"
-                value={formData.prazo_atendimento || ""}
-                onChange={(e) => setFormData({ ...formData, prazo_atendimento: parseInt(e.target.value) || null })}
-              />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="edit_situacao">Situação</Label>
               <Select
@@ -226,16 +215,6 @@ const NCEditDialog = ({ ncId, open, onOpenChange, onSaved }: NCEditDialogProps) 
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit_data_notificacao">Data da Notificação</Label>
-              <Input
-                id="edit_data_notificacao"
-                type="date"
-                value={formData.data_notificacao || ""}
-                onChange={(e) => setFormData({ ...formData, data_notificacao: e.target.value })}
-              />
             </div>
 
             <div className="space-y-2">
@@ -272,14 +251,64 @@ const NCEditDialog = ({ ncId, open, onOpenChange, onSaved }: NCEditDialogProps) 
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
+          {/* Seção de Fotos - Placeholder */}
+          <div className="bg-muted p-4 rounded-lg">
+            <p className="font-semibold text-sm mb-2">Fotos da Não Conformidade</p>
+            <p className="text-sm text-muted-foreground">
+              As fotos são gerenciadas durante o cadastro da NC
+            </p>
+          </div>
+
+          {/* Campos após as fotos */}
+          <div className="border-t pt-4 space-y-4">
+            <h3 className="font-semibold">Notificação e Prazo</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_prazo_atendimento">Prazo de Atendimento (dias)</Label>
+                <Input
+                  id="edit_prazo_atendimento"
+                  type="number"
+                  min="1"
+                  value={formData.prazo_atendimento || ""}
+                  onChange={(e) => setFormData({ ...formData, prazo_atendimento: parseInt(e.target.value) || null })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit_data_notificacao">Data da Notificação</Label>
+                <Input
+                  id="edit_data_notificacao"
+                  type="date"
+                  value={formData.data_notificacao || ""}
+                  onChange={(e) => setFormData({ ...formData, data_notificacao: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center gap-2 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                // Gerar PDF da NC
+                toast.info("Gerando PDF...");
+                // A lógica será implementada
+              }}
+            >
+              <Bell className="mr-2 h-4 w-4" />
+              Notificar / Gerar PDF
             </Button>
-            <Button onClick={handleSave} disabled={loading}>
-              <Save className="mr-2 h-4 w-4" />
-              {loading ? "Salvando..." : "Salvar Alterações"}
-            </Button>
+            
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSave} disabled={loading}>
+                <Save className="mr-2 h-4 w-4" />
+                {loading ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
