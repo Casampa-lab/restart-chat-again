@@ -1013,23 +1013,35 @@ const NaoConformidadeForm = ({
               </Select>
             </div>
 
-            {/* Data de Atendimento - Só aparece se Situação = "Atendida" */}
+            {/* Data de Atendimento e Prazo de Execução - Só aparecem se Situação = "Atendida" */}
             {formData.situacao === "Atendida" && (
-              <div className="space-y-2">
-                <Label htmlFor="data_atendimento">Data de Atendimento *</Label>
-                <Input id="data_atendimento" type="date" value={formData.data_atendimento} onChange={e => setFormData({
-                ...formData,
-                data_atendimento: e.target.value
-              })} required />
-              </div>
-            )}
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="data_atendimento">Data de Atendimento *</Label>
+                  <Input id="data_atendimento" type="date" value={formData.data_atendimento} onChange={e => setFormData({
+                  ...formData,
+                  data_atendimento: e.target.value
+                })} required />
+                </div>
 
-            {/* Prazo de Execução - Só aparece se ambas as datas estiverem preenchidas */}
-            {calcularDiferencaDias() !== null && (
-              <div className="space-y-2">
-                <Label>Prazo de Execução (dias)</Label>
-                <Input type="text" value={`${calcularDiferencaDias()} dias`} disabled className="bg-muted" />
-              </div>
+                {/* Prazo de Execução - Aparece automaticamente quando ambas as datas estão preenchidas */}
+                {calcularDiferencaDias() !== null && (
+                  <div className="space-y-2 bg-muted/50 p-3 rounded-lg border">
+                    <Label className="font-semibold">Prazo de Execução</Label>
+                    <div className="flex items-center gap-2">
+                      <Input 
+                        type="text" 
+                        value={`${calcularDiferencaDias()} dias`} 
+                        disabled 
+                        className="bg-background font-bold text-lg text-center" 
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        (Diferença entre Data de Atendimento e Data de Notificação)
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
