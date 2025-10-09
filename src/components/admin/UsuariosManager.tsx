@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Users, Pencil, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import { Label } from "@/components/ui/label";
 interface Profile {
   id: string;
   nome: string;
+  email: string | null;
   supervisora_id: string | null;
   supervisoras?: {
     nome_empresa: string;
@@ -38,6 +40,7 @@ export const UsuariosManager = () => {
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [selectedSupervisora, setSelectedSupervisora] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
+  const [selectedEmail, setSelectedEmail] = useState("");
 
   useEffect(() => {
     loadSupervisoras();
@@ -65,6 +68,7 @@ export const UsuariosManager = () => {
         .select(`
           id,
           nome,
+          email,
           supervisora_id,
           supervisoras(nome_empresa)
         `)
@@ -98,6 +102,11 @@ export const UsuariosManager = () => {
     if (!editingProfile) return;
     if (!selectedRole) {
       toast.error("Selecione um perfil");
+      return;
+    }
+    
+    if (!selectedEmail || !selectedEmail.includes('@')) {
+      toast.error("Digite um email válido");
       return;
     }
 
@@ -155,10 +164,22 @@ export const UsuariosManager = () => {
         }
       }
 
-      // Atualizar supervisora
+      // Atualizar email no auth.users via edge function
+      if (selectedEmail !== editingProfile.email) {
+        const { error: emailError } = await supabase.functions.invoke('update-user-email', {
+          body: { userId: editingProfile.id, newEmail: selectedEmail }
+        });
+        
+        if (emailError) throw new Error(`Erro ao atualizar email: ${emailError.message}`);
+      }
+      
+      // Atualizar supervisora e email no profiles
       const { error: profileError } = await supabase
         .from("profiles")
-        .update({ supervisora_id: selectedSupervisora || null })
+        .update({ 
+          supervisora_id: selectedSupervisora || null,
+          email: selectedEmail 
+        })
         .eq("id", editingProfile.id);
 
       if (profileError) throw profileError;
@@ -190,6 +211,7 @@ export const UsuariosManager = () => {
     setEditingProfile(profile);
     setSelectedSupervisora(profile.supervisora_id || "");
     setSelectedRole(profile.user_roles?.[0]?.role || "");
+    setSelectedEmail(profile.email || "");
     setIsDialogOpen(true);
   };
 
@@ -221,6 +243,7 @@ export const UsuariosManager = () => {
     setEditingProfile(null);
     setSelectedSupervisora("");
     setSelectedRole("");
+    setSelectedEmail("");
   };
 
   const getRoleName = (profile: Profile) => {
@@ -324,6 +347,17 @@ export const UsuariosManager = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={selectedEmail}
+                    onChange={(e) => setSelectedEmail(e.target.value)}
+                    placeholder="Digite o email"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="role">Perfil *</Label>
                   <Select
                     value={selectedRole}
@@ -367,7 +401,7 @@ export const UsuariosManager = () => {
               <Button variant="outline" onClick={handleCloseDialog}>
                 Cancelar
               </Button>
-              <Button onClick={handleSalvar} disabled={loading || !selectedRole}>
+              <Button onClick={handleSalvar} disabled={loading || !selectedRole || !selectedEmail}>
                 {loading ? "Salvando..." : "Salvar"}
               </Button>
             </DialogFooter>
