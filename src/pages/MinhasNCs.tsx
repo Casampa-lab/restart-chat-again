@@ -146,7 +146,7 @@ const MinhasNCs = () => {
   };
 
   const handleNotificar = async (ncId: string) => {
-    const loadingToast = toast.loading("Gerando relatório e enviando notificação...");
+    toast.info("Gerando PDF...");
     
     try {
       // Buscar todos os dados necessários para o PDF
@@ -233,48 +233,31 @@ const MinhasNCs = () => {
         },
         supervisora: supervisoraData,
         fotos: fotos || [],
-        natureza: ncCompleta.tipo_nc,
-        grau: "Média",
-        tipo_obra: "Manutenção",
-        comentarios_supervisora: "",
-        comentarios_executora: "",
+        natureza: ncCompleta.natureza || ncCompleta.tipo_nc,
+        grau: ncCompleta.grau || "Média",
+        tipo_obra: ncCompleta.tipo_obra || "Manutenção",
+        comentarios_supervisora: ncCompleta.comentarios_supervisora || "",
+        comentarios_executora: ncCompleta.comentarios_executora || "",
       };
 
       // Gerar PDF
       const pdfBlob = await generateNCPDF(pdfData);
       
-      // Converter blob para base64
-      const reader = new FileReader();
-      const pdfBase64 = await new Promise<string>((resolve, reject) => {
-        reader.onloadend = () => {
-          const base64 = (reader.result as string).split(',')[1];
-          resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(pdfBlob);
-      });
+      // Criar link para download
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `NC-${pdfData.numero_nc}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-      // Enviar email com PDF via edge function
-      const { data: emailResult, error: emailError } = await supabase.functions.invoke(
-        "send-nc-notification",
-        {
-          body: {
-            nc_id: ncId,
-            pdf_base64: pdfBase64,
-          },
-        }
-      );
-
-      if (emailError) throw emailError;
-
-      toast.dismiss(loadingToast);
-      toast.success("Notificação enviada com sucesso!");
-      loadNCs();
+      toast.success("PDF gerado com sucesso!");
 
     } catch (error: any) {
-      toast.dismiss(loadingToast);
-      console.error("Erro ao notificar:", error);
-      toast.error("Erro ao enviar notificação: " + error.message);
+      console.error("Erro ao gerar PDF:", error);
+      toast.error("Erro ao gerar PDF: " + error.message);
     }
   };
 
@@ -388,7 +371,7 @@ const MinhasNCs = () => {
                               size="sm"
                               onClick={() => handleNotificar(nc.id)}
                               disabled={nc.enviado_coordenador}
-                              title={nc.enviado_coordenador ? "NC já foi enviada" : "Notificar por email"}
+                              title={nc.enviado_coordenador ? "NC já foi enviada" : "Gerar PDF"}
                             >
                               <Bell className="h-4 w-4" />
                             </Button>
