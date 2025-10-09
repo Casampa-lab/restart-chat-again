@@ -35,7 +35,13 @@ serve(async (req) => {
       { email: newEmail }
     )
 
-    if (updateError) throw updateError
+    if (updateError) {
+      // Verificar se é erro de email duplicado
+      if (updateError.message.includes('duplicate') || updateError.message.includes('already exists')) {
+        throw new Error('Este email já está sendo usado por outro usuário')
+      }
+      throw updateError
+    }
 
     return new Response(
       JSON.stringify({ 
