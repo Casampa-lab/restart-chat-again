@@ -238,7 +238,7 @@ const Index = () => {
             </Card>
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-11 h-auto bg-muted p-2 gap-1">
+              <TabsList className="grid w-full grid-cols-8 h-auto bg-muted p-2 gap-1">
                 <TabsTrigger value="frentes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Frente de Serviço</span>
                 </TabsTrigger>
@@ -251,21 +251,8 @@ const Index = () => {
                 <TabsTrigger value="defensas" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Defensas</span>
                 </TabsTrigger>
-                <TabsTrigger value="int-sh" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">3.1.5</span>
-                  <span className="text-xs">Int. SH</span>
-                </TabsTrigger>
-                <TabsTrigger value="int-insc" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">3.1.5</span>
-                  <span className="text-xs">Int. Insc</span>
-                </TabsTrigger>
-                <TabsTrigger value="int-sv" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">3.1.5</span>
-                  <span className="text-xs">Int. SV</span>
-                </TabsTrigger>
-                <TabsTrigger value="int-tacha" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">3.1.5</span>
-                  <span className="text-xs">Int. Tacha</span>
+                <TabsTrigger value="intervencoes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs">Intervenções</span>
                 </TabsTrigger>
                 <TabsTrigger value="registro-nc" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs font-bold">3.1.18</span>
@@ -372,76 +359,62 @@ const Index = () => {
                   />
                 </div>
               </TabsContent>
-              <TabsContent value="int-sh" className="mt-6">
+              <TabsContent value="intervencoes" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-end">
                     <Button 
                       variant="secondary"
-                      onClick={() => navigate("/minhas-intervencoes-sh")}
+                      onClick={() => navigate("/minhas-intervencoes")}
                       className="shadow-md hover:shadow-lg transition-shadow"
                     >
                       <Eye className="mr-2 h-4 w-4" />
                       Ver meus registros
                     </Button>
                   </div>
-                  <IntervencoesSHForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
-                </div>
-              </TabsContent>
-              <TabsContent value="int-insc" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/minhas-intervencoes-inscricoes")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver meus registros
-                    </Button>
-                  </div>
-                  <IntervencoesInscricoesForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
-                </div>
-              </TabsContent>
-              <TabsContent value="int-sv" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/minhas-intervencoes-sv")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver meus registros
-                    </Button>
-                  </div>
-                  <IntervencoesSVForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
-                </div>
-              </TabsContent>
-              <TabsContent value="int-tacha" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/minhas-intervencoes-tacha")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver meus registros
-                    </Button>
-                  </div>
-                  <IntervencoesTachaForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
+                  <Tabs defaultValue="sh" className="w-full">
+                    <TabsList className="grid w-full grid-cols-4">
+                      <TabsTrigger value="sh">
+                        <span className="text-xs font-bold mr-2">3.1.5.1</span>
+                        SH
+                      </TabsTrigger>
+                      <TabsTrigger value="inscricoes">
+                        <span className="text-xs font-bold mr-2">3.1.5.2</span>
+                        Inscrições
+                      </TabsTrigger>
+                      <TabsTrigger value="sv">
+                        <span className="text-xs font-bold mr-2">3.1.5.3</span>
+                        SV
+                      </TabsTrigger>
+                      <TabsTrigger value="tacha">
+                        <span className="text-xs font-bold mr-2">3.1.5.4</span>
+                        Tachas
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="sh" className="mt-4">
+                      <IntervencoesSHForm
+                        loteId={activeSession.lote_id}
+                        rodoviaId={activeSession.rodovia_id}
+                      />
+                    </TabsContent>
+                    <TabsContent value="inscricoes" className="mt-4">
+                      <IntervencoesInscricoesForm
+                        loteId={activeSession.lote_id}
+                        rodoviaId={activeSession.rodovia_id}
+                      />
+                    </TabsContent>
+                    <TabsContent value="sv" className="mt-4">
+                      <IntervencoesSVForm
+                        loteId={activeSession.lote_id}
+                        rodoviaId={activeSession.rodovia_id}
+                      />
+                    </TabsContent>
+                    <TabsContent value="tacha" className="mt-4">
+                      <IntervencoesTachaForm
+                        loteId={activeSession.lote_id}
+                        rodoviaId={activeSession.rodovia_id}
+                      />
+                    </TabsContent>
+                  </Tabs>
                 </div>
               </TabsContent>
               <TabsContent value="registro-nc" className="mt-6">

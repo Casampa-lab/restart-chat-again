@@ -18,6 +18,7 @@ import MinhasIntervencoesSH from "./pages/MinhasIntervencoesSH";
 import MinhasIntervencoesInscricoes from "./pages/MinhasIntervencoesInscricoes";
 import MinhasIntervencoesSV from "./pages/MinhasIntervencoesSV";
 import MinhasIntervencoesTacha from "./pages/MinhasIntervencoesTacha";
+import MinhasIntervencoes from "./pages/MinhasIntervencoes";
 import MeusRegistrosNC from "./pages/MeusRegistrosNC";
 import MinhasFichasVerificacao from "./pages/MinhasFichasVerificacao";
 import MinhasFichasPlaca from "./pages/MinhasFichasPlaca";
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/minhas-intervencoes-inscricoes" element={<MinhasIntervencoesInscricoes />} />
           <Route path="/minhas-intervencoes-sv" element={<MinhasIntervencoesSV />} />
           <Route path="/minhas-intervencoes-tacha" element={<MinhasIntervencoesTacha />} />
+          <Route path="/minhas-intervencoes" element={<MinhasIntervencoes />} />
           <Route path="/meus-registros-nc" element={<MeusRegistrosNC />} />
           <Route path="/minhas-fichas-verificacao" element={<MinhasFichasVerificacao />} />
           <Route path="/minhas-fichas-placa" element={<MinhasFichasPlaca />} />
