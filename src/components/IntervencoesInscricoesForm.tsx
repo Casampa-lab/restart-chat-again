@@ -199,13 +199,7 @@ const IntervencoesInscricoesForm = ({ loteId, rodoviaId }: IntervencoesInscricoe
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>3.1.5 - Intervenções Realizadas - Inscrições</CardTitle>
-        <CardDescription>
-          Registro de intervenções em inscrições nos pavimentos
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">

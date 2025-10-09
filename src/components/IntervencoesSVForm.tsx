@@ -126,13 +126,7 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>3.1.5 - Intervenções Realizadas - Sinalização Vertical</CardTitle>
-        <CardDescription>
-          Registro de intervenções realizadas em placas e dispositivos de sinalização vertical
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
