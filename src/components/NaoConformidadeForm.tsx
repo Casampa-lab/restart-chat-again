@@ -853,34 +853,6 @@ const NaoConformidadeForm = ({
           })} rows={3} />
           </div>
 
-          {/* Situação e Data de Atendimento */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="situacao">Situação *</Label>
-              <Select value={formData.situacao} onValueChange={value => setFormData({
-              ...formData,
-              situacao: value
-            })} required>
-                <SelectTrigger id="situacao" className={formData.situacao !== "Atendida" ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20" : ""}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SITUACOES_NC.map(situacao => <SelectItem key={situacao} value={situacao}>
-                      {situacao}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="data_atendimento">Data de Atendimento</Label>
-              <Input id="data_atendimento" type="date" value={formData.data_atendimento} onChange={e => setFormData({
-              ...formData,
-              data_atendimento: e.target.value
-            })} />
-            </div>
-          </div>
-
           {/* Seção de Fotos */}
           <div className="space-y-4 border-t pt-4">
             <div className="flex items-center gap-2">
@@ -988,41 +960,78 @@ const NaoConformidadeForm = ({
             </div>
           </div>
 
-          {/* Prazo de Atendimento, Data da Notificação e Botão NOTIFICAR - APÓS AS FOTOS */}
-          <div className="border-t pt-4">
-            <h3 className="text-base font-semibold mb-4">Notificação e Prazo</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="prazo_atendimento">Prazo de Atendimento (dias)</Label>
-                <Input id="prazo_atendimento" type="number" min="1" placeholder="Ex: 15" value={formData.prazo_atendimento} onChange={e => setFormData({
-                ...formData,
-                prazo_atendimento: e.target.value
-              })} />
-              </div>
+          {/* Prazo de Atendimento e Data da Notificação - APÓS AS FOTOS */}
+          <div className="border-t pt-4 space-y-4">
+            <h3 className="text-base font-semibold">Primeira Etapa - Notificação</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="prazo_atendimento">Prazo de Atendimento (dias)</Label>
+              <Input id="prazo_atendimento" type="number" min="1" placeholder="Ex: 15" value={formData.prazo_atendimento} onChange={e => setFormData({
+              ...formData,
+              prazo_atendimento: e.target.value
+            })} />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="data_notificacao">Data da Notificação</Label>
-                <div className="flex gap-2">
-                  <Input id="data_notificacao" type="date" value={formData.data_notificacao} onChange={e => setFormData({
-                  ...formData,
-                  data_notificacao: e.target.value
-                })} />
-                  <Button type="button" variant="outline" onClick={handleNotificar}>
-                    <Bell className="h-4 w-4 mr-1" />
-                    NOTIFICAR
-                  </Button>
-                </div>
+            <div className="space-y-2">
+              <Label htmlFor="data_notificacao">Data da Notificação</Label>
+              <div className="flex gap-2">
+                <Input id="data_notificacao" type="date" value={formData.data_notificacao} onChange={e => setFormData({
+                ...formData,
+                data_notificacao: e.target.value
+              })} />
+                <Button 
+                  type="button" 
+                  variant="default" 
+                  onClick={handleNotificar}
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md"
+                >
+                  <Bell className="h-4 w-4 mr-1" />
+                  NOTIFICAR
+                </Button>
               </div>
             </div>
           </div>
 
-          {/* Diferença de Dias */}
-          {calcularDiferencaDias() !== null && (
+          {/* Segunda Etapa - Verificação de Atendimento */}
+          <div className="border-t pt-4 space-y-4">
+            <h3 className="text-base font-semibold">Segunda Etapa - Verificação de Atendimento</h3>
+            
             <div className="space-y-2">
-              <Label>Prazo de Execução (dias)</Label>
-              <Input type="text" value={`${calcularDiferencaDias()} dias`} disabled className="bg-muted" />
+              <Label htmlFor="situacao">Situação *</Label>
+              <Select value={formData.situacao} onValueChange={value => setFormData({
+              ...formData,
+              situacao: value
+            })} required>
+                <SelectTrigger id="situacao" className={formData.situacao !== "Atendida" ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20" : "border-green-500 bg-green-50 dark:bg-green-950/20"}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SITUACOES_NC.map(situacao => <SelectItem key={situacao} value={situacao}>
+                      {situacao}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
-          )}
+
+            {/* Data de Atendimento - Só aparece se Situação = "Atendida" */}
+            {formData.situacao === "Atendida" && (
+              <div className="space-y-2">
+                <Label htmlFor="data_atendimento">Data de Atendimento *</Label>
+                <Input id="data_atendimento" type="date" value={formData.data_atendimento} onChange={e => setFormData({
+                ...formData,
+                data_atendimento: e.target.value
+              })} required />
+              </div>
+            )}
+
+            {/* Prazo de Execução - Só aparece se ambas as datas estiverem preenchidas */}
+            {calcularDiferencaDias() !== null && (
+              <div className="space-y-2">
+                <Label>Prazo de Execução (dias)</Label>
+                <Input type="text" value={`${calcularDiferencaDias()} dias`} disabled className="bg-muted" />
+              </div>
+            )}
+          </div>
 
           <Button
             type="submit" 
