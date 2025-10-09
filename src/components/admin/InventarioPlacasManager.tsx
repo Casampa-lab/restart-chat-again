@@ -87,14 +87,15 @@ export function InventarioPlacasManager() {
 
       toast.success(`${placasData.length} placas encontradas na planilha`);
 
-      // 2. Upload das fotos
+      // 2. Upload das fotos e criar mapeamento por nome
       const photoUrls: Record<string, string> = {};
       if (photosFolder && photosFolder.length > 0) {
         setProgress(`Fazendo upload de ${photosFolder.length} fotos...`);
         
         for (let i = 0; i < photosFolder.length; i++) {
           const photo = photosFolder[i];
-          const photoName = photo.name.split('.')[0]; // Nome sem extensão
+          // Nome do arquivo sem extensão (será usado para match com o hiperlink)
+          const photoName = photo.name.split('.')[0];
           const photoPath = `inventario/${selectedLote}/${Date.now()}_${photo.name}`;
           
           const { error: photoError } = await supabase.storage
@@ -106,6 +107,7 @@ export function InventarioPlacasManager() {
               .from("placa-photos")
               .getPublicUrl(photoPath);
             
+            // Mapear pelo nome do arquivo sem extensão
             photoUrls[photoName] = urlData.publicUrl;
           }
 
@@ -113,6 +115,8 @@ export function InventarioPlacasManager() {
             setProgress(`Upload de fotos: ${i + 1}/${photosFolder.length}`);
           }
         }
+        
+        toast.success(`${Object.keys(photoUrls).length} fotos carregadas com sucesso`);
       }
 
       // 3. Inserir dados no banco
@@ -142,7 +146,8 @@ export function InventarioPlacasManager() {
         area_m2: placa.area_m2,
         altura_m: placa.altura,
         data_vistoria: new Date().toISOString().split("T")[0],
-        foto_frontal_url: photoUrls[placa.snv] || null,
+        // Associar foto pelo nome extraído do hiperlink do Excel
+        foto_frontal_url: placa.foto_hiperlink ? photoUrls[placa.foto_hiperlink] || null : null,
       }));
 
       // Inserir em lotes de 50
@@ -275,7 +280,7 @@ export function InventarioPlacasManager() {
             </p>
           )}
           <p className="text-xs text-muted-foreground">
-            As fotos serão associadas às placas pelo código SNV (nome do arquivo sem extensão)
+            As fotos serão associadas automaticamente pelo hiperlink da coluna AA do Excel
           </p>
         </div>
 
@@ -312,8 +317,9 @@ export function InventarioPlacasManager() {
         <div className="bg-muted p-4 rounded-lg space-y-2">
           <h4 className="font-semibold text-sm">Instruções:</h4>
           <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-            <li>O arquivo Excel deve conter as colunas conforme modelo padrão</li>
-            <li>As fotos devem ter o mesmo nome do código SNV da placa (ex: 116BMG1010.jpg)</li>
+            <li>O arquivo Excel deve conter as colunas conforme modelo padrão DNIT</li>
+            <li>A coluna AA deve conter hiperlinks para as fotos das placas</li>
+            <li>Os nomes dos arquivos das fotos devem corresponder aos hiperlinks do Excel</li>
             <li>Formatos suportados: JPG, PNG, WEBP</li>
             <li>A importação pode levar alguns minutos dependendo da quantidade de registros</li>
           </ul>

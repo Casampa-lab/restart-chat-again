@@ -45,6 +45,7 @@ export interface PlacaData {
   altura: number | null;
   area_m2: number | null;
   dimensoes_mm: string | null;
+  foto_hiperlink: string | null; // Nome do arquivo da foto extraído do hiperlink
 }
 
 export async function parseExcelFile(file: File): Promise<PlacaData[]> {
@@ -74,15 +75,33 @@ export async function parseExcelFile(file: File): Promise<PlacaData[]> {
         }
 
         // Remover as primeiras linhas (cabeçalhos e descrição)
-        const headers = jsonData[6] as any; // Linha 7 tem os cabeçalhos
         const dataRows = jsonData.slice(7); // Dados começam na linha 8
 
         // Mapear os dados
         const placas: PlacaData[] = dataRows
           .filter((row: any) => row && row[0]) // Filtrar linhas vazias
-          .map((row: any) => {
+          .map((row: any, index: number) => {
             const velocidade = row[4] !== '-' ? String(row[4]) : null;
             const altura = row[24] !== '-' ? parseFloat(row[24]) : null;
+            
+            // Extrair nome do arquivo do hiperlink na coluna AA (índice 26)
+            // Precisamos acessar o cell diretamente para pegar o hiperlink
+            const rowNumber = index + 8; // +8 porque começamos na linha 8 (índice 7)
+            const cellAddress = `AA${rowNumber}`;
+            const cell = worksheet[cellAddress];
+            
+            let fotoNome: string | null = null;
+            if (cell && cell.l && cell.l.Target) {
+              // Extrair o nome do arquivo do link
+              const linkTarget = cell.l.Target;
+              // Pegar o nome do arquivo (última parte após /)
+              const parts = linkTarget.split('/');
+              fotoNome = parts[parts.length - 1];
+              // Remover extensão se houver
+              if (fotoNome.includes('.')) {
+                fotoNome = fotoNome.split('.')[0];
+              }
+            }
             
             return {
               br: String(row[0] || ''),
@@ -106,6 +125,7 @@ export async function parseExcelFile(file: File): Promise<PlacaData[]> {
               dimensoes_mm: row[23] && altura 
                 ? `${parseFloat(row[23]) * 1000}x${altura * 1000}` 
                 : null,
+              foto_hiperlink: fotoNome,
             };
           });
 
