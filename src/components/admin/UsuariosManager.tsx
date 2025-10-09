@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Users, Pencil, X, Trash2, KeyRound } from "lucide-react";
+import { Users, Pencil, X, Trash2, KeyRound, UserPlus } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { deleteUser } from "@/lib/deleteUser";
 
@@ -38,12 +38,18 @@ export const UsuariosManager = () => {
   const [supervisoras, setSupervisoras] = useState<Supervisora[]>([]);
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [selectedSupervisora, setSelectedSupervisora] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedEmail, setSelectedEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [newUserRole, setNewUserRole] = useState("");
+  const [newUserSupervisora, setNewUserSupervisora] = useState("");
 
   useEffect(() => {
     loadSupervisoras();
@@ -302,6 +308,46 @@ export const UsuariosManager = () => {
     setSelectedEmail("");
   };
 
+  const handleAddUser = async () => {
+    if (!newUserName || !newUserEmail || !newUserPassword || !newUserRole) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
+
+    if (newUserPassword.length < 6) {
+      toast.error("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('create-user', {
+        body: {
+          email: newUserEmail,
+          password: newUserPassword,
+          nome: newUserName,
+          role: newUserRole,
+          supervisoraId: newUserSupervisora || null
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success("Usuário criado com sucesso!");
+      setIsAddUserOpen(false);
+      setNewUserName("");
+      setNewUserEmail("");
+      setNewUserPassword("");
+      setNewUserRole("");
+      setNewUserSupervisora("");
+      await loadProfiles();
+    } catch (error: any) {
+      toast.error("Erro ao criar usuário: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getRoleName = (profile: Profile) => {
     const role = profile.user_roles?.[0]?.role;
     if (!role) return "Sem perfil";
@@ -328,6 +374,10 @@ export const UsuariosManager = () => {
               Gerencie perfis e vincule usuários às supervisoras
             </CardDescription>
           </div>
+          <Button onClick={() => setIsAddUserOpen(true)}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Adicionar Usuário
+          </Button>
         </div>
       </CardHeader>
       
@@ -514,6 +564,105 @@ export const UsuariosManager = () => {
               </Button>
               <Button onClick={handleConfirmResetPassword} disabled={loading || !newPassword || newPassword.length < 6}>
                 {loading ? "Resetando..." : "Resetar Senha"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Adicionar Novo Usuário</DialogTitle>
+              <DialogDescription>
+                Crie um novo usuário no sistema
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="newUserName">Nome *</Label>
+                <Input
+                  id="newUserName"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  placeholder="Digite o nome completo"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="newUserEmail">Email *</Label>
+                <Input
+                  id="newUserEmail"
+                  type="email"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  placeholder="Digite o email"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="newUserPassword">Senha *</Label>
+                <Input
+                  id="newUserPassword"
+                  type="password"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  placeholder="Mínimo 6 caracteres"
+                  minLength={6}
+                />
+                <p className="text-xs text-muted-foreground">
+                  A senha deve ter pelo menos 6 caracteres
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="newUserRole">Perfil *</Label>
+                <Select
+                  value={newUserRole}
+                  onValueChange={setNewUserRole}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o perfil" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((role) => (
+                      <SelectItem key={role.value} value={role.value}>
+                        {role.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="newUserSupervisora">Supervisora</Label>
+                <Select
+                  value={newUserSupervisora}
+                  onValueChange={setNewUserSupervisora}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a supervisora (opcional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {supervisoras.map((sup) => (
+                      <SelectItem key={sup.id} value={sup.id}>
+                        {sup.nome_empresa}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddUserOpen(false)}>
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleAddUser} 
+                disabled={loading || !newUserName || !newUserEmail || !newUserPassword || !newUserRole}
+              >
+                {loading ? "Criando..." : "Criar Usuário"}
               </Button>
             </DialogFooter>
           </DialogContent>
