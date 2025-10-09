@@ -37,8 +37,8 @@ export function InventarioPlacasManager() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("rodovias")
-        .select("id, nome")
-        .order("nome");
+        .select("id, codigo, nome")
+        .order("codigo");
       if (error) throw error;
       return data;
     },
@@ -232,7 +232,7 @@ export function InventarioPlacasManager() {
               <SelectContent>
                 {rodovias?.map((rodovia) => (
                   <SelectItem key={rodovia.id} value={rodovia.id}>
-                    {rodovia.nome}
+                    {rodovia.codigo}
                   </SelectItem>
                 ))}
               </SelectContent>
