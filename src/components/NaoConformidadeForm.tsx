@@ -1018,29 +1018,40 @@ const NaoConformidadeForm = ({
               <>
                 <div className="space-y-2">
                   <Label htmlFor="data_atendimento">Data de Atendimento *</Label>
-                  <Input id="data_atendimento" type="date" value={formData.data_atendimento} onChange={e => setFormData({
-                  ...formData,
-                  data_atendimento: e.target.value
-                })} required />
+                  <Input 
+                    id="data_atendimento" 
+                    type="date" 
+                    value={formData.data_atendimento} 
+                    onChange={e => setFormData({
+                      ...formData,
+                      data_atendimento: e.target.value
+                    })} 
+                    required 
+                  />
                 </div>
 
-                {/* Prazo de Execução - Aparece automaticamente quando ambas as datas estão preenchidas */}
-                {calcularDiferencaDias() !== null && (
-                  <div className="space-y-2 bg-muted/50 p-3 rounded-lg border">
-                    <Label className="font-semibold">Prazo de Execução</Label>
-                    <div className="flex items-center gap-2">
-                      <Input 
-                        type="text" 
-                        value={`${calcularDiferencaDias()} dias`} 
-                        disabled 
-                        className="bg-background font-bold text-lg text-center" 
-                      />
-                      <span className="text-sm text-muted-foreground">
-                        (Diferença entre Data de Atendimento e Data de Notificação)
-                      </span>
+                {/* Prazo de Execução - Sempre aparece quando Situação = Atendida */}
+                <div className="space-y-2 bg-muted/50 p-4 rounded-lg border">
+                  <Label className="font-semibold text-base">Prazo de Execução</Label>
+                  {formData.data_notificacao && formData.data_atendimento ? (
+                    <>
+                      <div className="flex items-center justify-center py-3">
+                        <div className="text-4xl font-bold text-primary">
+                          {calcularDiferencaDias()} dias
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground text-center">
+                        Diferença entre Data de Atendimento ({new Date(formData.data_atendimento).toLocaleDateString('pt-BR')}) 
+                        {' e Data de Notificação '}
+                        ({new Date(formData.data_notificacao).toLocaleDateString('pt-BR')})
+                      </p>
+                    </>
+                  ) : (
+                    <div className="text-center py-3 text-muted-foreground">
+                      <p className="text-sm">Preencha a Data de Notificação para calcular o prazo</p>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </>
             )}
           </div>
