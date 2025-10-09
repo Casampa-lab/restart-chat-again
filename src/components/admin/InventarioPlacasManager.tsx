@@ -94,8 +94,9 @@ export function InventarioPlacasManager() {
         
         for (let i = 0; i < photosFolder.length; i++) {
           const photo = photosFolder[i];
-          // Nome do arquivo sem extensão (será usado para match com o hiperlink)
-          const photoName = photo.name.split('.')[0];
+          // Nome do arquivo completo e sem extensão para múltiplas tentativas de match
+          const photoNameFull = photo.name;
+          const photoNameNoExt = photo.name.split('.')[0];
           const photoPath = `inventario/${selectedLote}/${Date.now()}_${photo.name}`;
           
           const { error: photoError } = await supabase.storage
@@ -107,8 +108,11 @@ export function InventarioPlacasManager() {
               .from("placa-photos")
               .getPublicUrl(photoPath);
             
-            // Mapear pelo nome do arquivo sem extensão
-            photoUrls[photoName] = urlData.publicUrl;
+            // Mapear por várias variações do nome para aumentar chance de match
+            photoUrls[photoNameFull] = urlData.publicUrl;
+            photoUrls[photoNameNoExt] = urlData.publicUrl;
+            photoUrls[photoNameFull.toLowerCase()] = urlData.publicUrl;
+            photoUrls[photoNameNoExt.toLowerCase()] = urlData.publicUrl;
           }
 
           if ((i + 1) % 10 === 0) {
@@ -116,7 +120,7 @@ export function InventarioPlacasManager() {
           }
         }
         
-        toast.success(`${Object.keys(photoUrls).length} fotos carregadas com sucesso`);
+        toast.success(`${Object.keys(photoUrls).length} mapeamentos de fotos criados`);
       }
 
       // 3. Inserir dados no banco
