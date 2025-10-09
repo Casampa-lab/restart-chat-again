@@ -238,7 +238,7 @@ const Index = () => {
             </Card>
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-12 h-auto bg-muted p-2 gap-1">
+              <TabsList className="grid w-full grid-cols-11 h-auto bg-muted p-2 gap-1">
                 <TabsTrigger value="frentes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs font-bold">2.2</span>
                   <span className="text-xs">Frentes</span>
@@ -247,13 +247,9 @@ const Index = () => {
                   <span className="text-xs font-bold">2.3</span>
                   <span className="text-xs">NCs</span>
                 </TabsTrigger>
-                <TabsTrigger value="retro-est" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">3.1.3.1</span>
-                  <span className="text-xs">R. Est</span>
-                </TabsTrigger>
-                <TabsTrigger value="retro-din" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">3.1.3.2</span>
-                  <span className="text-xs">R. Din</span>
+                <TabsTrigger value="retrorrefletividade" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs font-bold">3.1.3</span>
+                  <span className="text-xs">Retroref.</span>
                 </TabsTrigger>
                 <TabsTrigger value="defensas" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs font-bold">3.1.4</span>
@@ -324,7 +320,7 @@ const Index = () => {
                   />
                 </div>
               </TabsContent>
-              <TabsContent value="retro-est" className="mt-6">
+              <TabsContent value="retrorrefletividade" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-end">
                     <Button 
@@ -336,28 +332,30 @@ const Index = () => {
                       Ver meus registros
                     </Button>
                   </div>
-                  <RetrorrefletividadeEstaticaForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
-                </div>
-              </TabsContent>
-              <TabsContent value="retro-din" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/minhas-retrorrefletividades-dinamicas")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver meus registros
-                    </Button>
-                  </div>
-                  <RetrorrefletividadeDinamicaForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
+                  <Tabs defaultValue="estatica" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="estatica">
+                        <span className="text-xs font-bold mr-2">3.1.3.1</span>
+                        Estática
+                      </TabsTrigger>
+                      <TabsTrigger value="dinamica">
+                        <span className="text-xs font-bold mr-2">3.1.3.2</span>
+                        Dinâmica
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="estatica" className="mt-4">
+                      <RetrorrefletividadeEstaticaForm
+                        loteId={activeSession.lote_id}
+                        rodoviaId={activeSession.rodovia_id}
+                      />
+                    </TabsContent>
+                    <TabsContent value="dinamica" className="mt-4">
+                      <RetrorrefletividadeDinamicaForm
+                        loteId={activeSession.lote_id}
+                        rodoviaId={activeSession.rodovia_id}
+                      />
+                    </TabsContent>
+                  </Tabs>
                 </div>
               </TabsContent>
               <TabsContent value="defensas" className="mt-6">

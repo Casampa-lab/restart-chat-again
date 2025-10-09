@@ -13,7 +13,6 @@ import MinhasNCs from "./pages/MinhasNCs";
 import NCsCoordenador from "./pages/NCsCoordenador";
 import MinhasFrentesLiberadas from "./pages/MinhasFrentesLiberadas";
 import MinhasRetrorrefletividades from "./pages/MinhasRetrorrefletividades";
-import MinhasRetrorrefletividadesDinamicas from "./pages/MinhasRetrorrefletividadesDinamicas";
 import MinhasDefensas from "./pages/MinhasDefensas";
 import MinhasIntervencoesSH from "./pages/MinhasIntervencoesSH";
 import MinhasIntervencoesInscricoes from "./pages/MinhasIntervencoesInscricoes";
@@ -44,7 +43,6 @@ const App = () => (
           <Route path="/ncs-coordenador" element={<NCsCoordenador />} />
           <Route path="/minhas-frentes-liberadas" element={<MinhasFrentesLiberadas />} />
           <Route path="/minhas-retrorrefletividades" element={<MinhasRetrorrefletividades />} />
-          <Route path="/minhas-retrorrefletividades-dinamicas" element={<MinhasRetrorrefletividadesDinamicas />} />
           <Route path="/minhas-defensas" element={<MinhasDefensas />} />
           <Route path="/minhas-intervencoes-sh" element={<MinhasIntervencoesSH />} />
           <Route path="/minhas-intervencoes-inscricoes" element={<MinhasIntervencoesInscricoes />} />
