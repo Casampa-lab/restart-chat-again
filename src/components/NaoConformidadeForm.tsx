@@ -996,26 +996,27 @@ const NaoConformidadeForm = ({
           <div className="border-t pt-4 space-y-4">
             <h3 className="text-base font-semibold">Segunda Etapa - Verificação de Atendimento</h3>
             
-            <div className="space-y-2">
-              <Label htmlFor="situacao">Situação *</Label>
-              <Select value={formData.situacao} onValueChange={value => setFormData({
-              ...formData,
-              situacao: value
-            })} required>
-                <SelectTrigger id="situacao" className={formData.situacao !== "Atendida" ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20" : "border-green-500 bg-green-50 dark:bg-green-950/20"}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SITUACOES_NC.map(situacao => <SelectItem key={situacao} value={situacao}>
-                      {situacao}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Coluna 1 - Situação */}
+              <div className="space-y-2">
+                <Label htmlFor="situacao">Situação *</Label>
+                <Select value={formData.situacao} onValueChange={value => setFormData({
+                ...formData,
+                situacao: value
+              })} required>
+                  <SelectTrigger id="situacao" className={formData.situacao !== "Atendida" ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20" : "border-green-500 bg-green-50 dark:bg-green-950/20"}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SITUACOES_NC.map(situacao => <SelectItem key={situacao} value={situacao}>
+                        {situacao}
+                      </SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Data de Atendimento e Prazo de Execução - Só aparecem se Situação = "Atendida" */}
-            {formData.situacao === "Atendida" && (
-              <>
+              {/* Coluna 2 - Data de Atendimento (só aparece se Atendida) */}
+              {formData.situacao === "Atendida" ? (
                 <div className="space-y-2">
                   <Label htmlFor="data_atendimento">Data de Atendimento *</Label>
                   <Input 
@@ -1029,31 +1030,40 @@ const NaoConformidadeForm = ({
                     required 
                   />
                 </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">Data de Atendimento</Label>
+                  <div className="h-10 flex items-center px-3 border rounded-md bg-muted text-muted-foreground text-sm">
+                    Disponível após marcar como "Atendida"
+                  </div>
+                </div>
+              )}
 
-                {/* Prazo de Execução - Sempre aparece quando Situação = Atendida */}
-                <div className="space-y-2 bg-muted/50 p-4 rounded-lg border">
-                  <Label className="font-semibold text-base">Prazo de Execução</Label>
+              {/* Coluna 3 - Prazo de Execução (só aparece se Atendida) */}
+              {formData.situacao === "Atendida" ? (
+                <div className="space-y-2">
+                  <Label className="font-semibold">Prazo de Execução</Label>
                   {formData.data_notificacao && formData.data_atendimento ? (
-                    <>
-                      <div className="flex items-center justify-center py-3">
-                        <div className="text-4xl font-bold text-primary">
-                          {calcularDiferencaDias()} dias
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground text-center">
-                        Diferença entre Data de Atendimento ({new Date(formData.data_atendimento).toLocaleDateString('pt-BR')}) 
-                        {' e Data de Notificação '}
-                        ({new Date(formData.data_notificacao).toLocaleDateString('pt-BR')})
-                      </p>
-                    </>
+                    <div className="h-10 flex items-center justify-center border-2 rounded-md bg-primary/5 border-primary">
+                      <span className="text-2xl font-bold text-primary">
+                        {calcularDiferencaDias()} dias
+                      </span>
+                    </div>
                   ) : (
-                    <div className="text-center py-3 text-muted-foreground">
-                      <p className="text-sm">Preencha a Data de Notificação para calcular o prazo</p>
+                    <div className="h-10 flex items-center px-3 border rounded-md bg-muted text-muted-foreground text-sm">
+                      Aguardando datas
                     </div>
                   )}
                 </div>
-              </>
-            )}
+              ) : (
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">Prazo de Execução</Label>
+                  <div className="h-10 flex items-center px-3 border rounded-md bg-muted text-muted-foreground text-sm">
+                    Disponível após marcar como "Atendida"
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <Button
