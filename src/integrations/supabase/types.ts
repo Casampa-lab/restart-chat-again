@@ -261,12 +261,14 @@ export type Database = {
           area_m2: number | null
           br: string | null
           codigo: string | null
+          contrato: string | null
           created_at: string
           data_implantacao: string | null
           data_vistoria: string
           descricao: string | null
           dimensoes_mm: string | null
           distancia_m: number | null
+          empresa: string | null
           enviado_coordenador: boolean | null
           foto_base_url: string | null
           foto_frontal_url: string | null
@@ -280,6 +282,7 @@ export type Database = {
           longitude: number | null
           lote_id: string
           modelo: string | null
+          numero_patrimonio: string | null
           pelicula: string | null
           qtde_suporte: number | null
           retrorrefletividade: number | null
@@ -298,12 +301,14 @@ export type Database = {
           area_m2?: number | null
           br?: string | null
           codigo?: string | null
+          contrato?: string | null
           created_at?: string
           data_implantacao?: string | null
           data_vistoria: string
           descricao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
+          empresa?: string | null
           enviado_coordenador?: boolean | null
           foto_base_url?: string | null
           foto_frontal_url?: string | null
@@ -317,6 +322,7 @@ export type Database = {
           longitude?: number | null
           lote_id: string
           modelo?: string | null
+          numero_patrimonio?: string | null
           pelicula?: string | null
           qtde_suporte?: number | null
           retrorrefletividade?: number | null
@@ -335,12 +341,14 @@ export type Database = {
           area_m2?: number | null
           br?: string | null
           codigo?: string | null
+          contrato?: string | null
           created_at?: string
           data_implantacao?: string | null
           data_vistoria?: string
           descricao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
+          empresa?: string | null
           enviado_coordenador?: boolean | null
           foto_base_url?: string | null
           foto_frontal_url?: string | null
@@ -354,6 +362,7 @@ export type Database = {
           longitude?: number | null
           lote_id?: string
           modelo?: string | null
+          numero_patrimonio?: string | null
           pelicula?: string | null
           qtde_suporte?: number | null
           retrorrefletividade?: number | null
