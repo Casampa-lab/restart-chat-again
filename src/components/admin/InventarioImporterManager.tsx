@@ -378,7 +378,7 @@ export function InventarioImporterManager() {
           record.longitude_final = lngFim && lngFim !== "-" ? Number(lngFim) : null;
           
           // Extensão (km) -> converter para metros
-          const extensaoKm = getVal("Extensão (km)", "Extensão km", "Extensão", "extensao_km", "extensao");
+          const extensaoKm = getVal("Extensão (km)", "Extensão km", "Extensão", "extensao_km", "extensao", "Extensao (km)", "Extensao km", "Extensao");
           record.extensao_metros = extensaoKm && extensaoKm !== "-" && !isNaN(Number(extensaoKm)) ? Number(extensaoKm) * 1000 : null;
           
           // Material

@@ -341,6 +341,7 @@ serve(async (req) => {
         let normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_");
         
         // Aplicar mapeamento específico se existir
+        const originalKey = key; // Guardar chave original para verificações especiais
         if (fieldMapping[key]) {
           normalizedKey = fieldMapping[key];
         } else if (fieldMapping[normalizedKey]) {
@@ -370,11 +371,11 @@ serve(async (req) => {
             // Apenas adicionar se o valor não for undefined ou null ou vazio
             if (value !== undefined && value !== null && value !== '' && value !== '-') {
               hasValidData = true;
-              // Conversões especiais
-              if (normalizedKey === "largura_cm" && key.includes("(m)")) {
+              // Conversões especiais usando a chave original
+              if (normalizedKey === "largura_cm" && originalKey.toLowerCase().includes("(m)")) {
                 // Converter de metros para centímetros
                 record[normalizedKey] = Number(value) * 100;
-              } else if (normalizedKey === "extensao_metros" && key.includes("(km)")) {
+              } else if (normalizedKey === "extensao_metros" && originalKey.toLowerCase().includes("(km)")) {
                 // Converter de km para metros
                 record[normalizedKey] = Number(value) * 1000;
               } else {

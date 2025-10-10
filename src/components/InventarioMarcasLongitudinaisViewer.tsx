@@ -316,23 +316,13 @@ export function InventarioMarcasLongitudinaisViewer({
                 {/* Dimensões */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3">Dimensões</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Largura da Faixa (m):</span>
-                      <p className="text-sm">
-                        {selectedMarca.largura_cm 
-                          ? (selectedMarca.largura_cm / 100).toFixed(2) 
-                          : "-"}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Extensão (km):</span>
-                      <p className="text-sm">
-                        {selectedMarca.extensao_metros 
-                          ? (selectedMarca.extensao_metros / 1000).toFixed(2) 
-                          : "-"}
-                      </p>
-                    </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Largura da Faixa (m):</span>
+                    <p className="text-sm">
+                      {selectedMarca.largura_cm 
+                        ? (selectedMarca.largura_cm / 100).toFixed(2) 
+                        : "-"}
+                    </p>
                   </div>
                 </div>
 
@@ -431,6 +421,19 @@ export function InventarioMarcasLongitudinaisViewer({
                       <span className="text-sm font-medium text-muted-foreground">Outros materiais:</span>
                       <p className="text-sm">-</p>
                     </div>
+                  </div>
+                </div>
+
+                {/* Extensão */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Extensão</h3>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Extensão (km):</span>
+                    <p className="text-sm">
+                      {selectedMarca.extensao_metros 
+                        ? (selectedMarca.extensao_metros / 1000).toFixed(2) 
+                        : "-"}
+                    </p>
                   </div>
                 </div>
 
