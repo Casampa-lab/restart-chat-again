@@ -286,6 +286,12 @@ serve(async (req) => {
         rodovia_id: rodoviaId,
         [dateField]: "2023-01-01", // Data padrão: 01/01/2023
       };
+      
+      // Adicionar campos obrigatórios com valores padrão específicos por tabela
+      if (tableName === "ficha_inscricoes") {
+        record.tipo_inscricao = "Outros"; // Valor padrão, será sobrescrito se vier do Excel
+        record.cor = "Branca"; // Valor padrão, será sobrescrito se vier do Excel
+      }
 
       // Mapear campos do Excel para os campos da tabela
       for (const [key, value] of Object.entries(row)) {
