@@ -30,10 +30,9 @@ interface FichaInscricao {
   rodovia_id: string;
 }
 
-// Mapeamento de siglas para descrições completas
+// Mapeamento de siglas para descrições completas (apenas quando não há separador)
 const INSCRICAO_SIGLAS: Record<string, string> = {
   'LRV': 'Linha de estímulo a redução de velocidade',
-  'LEGENDA': 'Legenda',
   'PEM': 'Seta indicativa de posicionamento na pista',
   'LDP': 'Linha Dê a preferência',
   'SIP': 'Símbolo indicativo de interseção',
@@ -47,20 +46,23 @@ const INSCRICAO_SIGLAS: Record<string, string> = {
 
 // Função para extrair sigla e descrição do tipo_inscricao
 const parseTipoInscricao = (tipoInscricao: string): { sigla: string; descricao: string } => {
-  // Tenta identificar se é uma sigla conhecida
-  for (const [sigla, descricao] of Object.entries(INSCRICAO_SIGLAS)) {
-    if (tipoInscricao.toUpperCase().includes(sigla)) {
-      return { sigla, descricao: INSCRICAO_SIGLAS[sigla] };
-    }
+  // Primeiro tenta separar por hífen ou espaço
+  const parts = tipoInscricao.split(/\s*[-–]\s*/);
+  
+  // Se conseguiu separar (ex: "LEGENDA - LOMBADA")
+  if (parts.length >= 2) {
+    const sigla = parts[0].trim();
+    const descricao = parts.slice(1).join(' - ').trim();
+    return { sigla, descricao };
   }
   
-  // Se não encontrar uma sigla conhecida, tenta separar por espaço ou hífen
-  const parts = tipoInscricao.split(/[\s-]/);
-  if (parts.length > 1 && parts[0].length <= 10) {
-    return { sigla: parts[0], descricao: parts.slice(1).join(' ') };
+  // Se não tem separador, tenta usar o mapeamento de siglas conhecidas
+  const siglaUpper = tipoInscricao.toUpperCase().trim();
+  if (INSCRICAO_SIGLAS[siglaUpper]) {
+    return { sigla: siglaUpper, descricao: INSCRICAO_SIGLAS[siglaUpper] };
   }
   
-  // Caso padrão: retorna o tipo completo como descrição
+  // Caso padrão: retorna o tipo completo como sigla e descrição
   return { sigla: tipoInscricao, descricao: tipoInscricao };
 };
 
