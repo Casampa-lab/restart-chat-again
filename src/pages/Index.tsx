@@ -25,6 +25,7 @@ import { FichaPlacaForm } from "@/components/FichaPlacaForm";
 import { InventarioPlacasViewer } from "@/components/InventarioPlacasViewer";
 import { InventarioMarcasLongitudinaisViewer } from "@/components/InventarioMarcasLongitudinaisViewer";
 import { InventarioMarcasTransversaisViewer } from "@/components/InventarioMarcasTransversaisViewer";
+import { InventarioPorticosViewer } from "@/components/InventarioPorticosViewer";
 import { InventarioInscricoesViewer } from "@/components/InventarioInscricoesViewer";
 import { InventarioTachasViewer } from "@/components/InventarioTachasViewer";
 import { InventarioDefensasViewer } from "@/components/InventarioDefensasViewer";
@@ -53,6 +54,7 @@ const Index = () => {
   const [intervencaoSubTab, setIntervencaoSubTab] = useState("sv");
   const [shSubTab, setShSubTab] = useState("longitudinais");
   const [inventarioShSubTab, setInventarioShSubTab] = useState("longitudinais");
+  const [inventarioSvSubTab, setInventarioSvSubTab] = useState("placas");
   const [showInviteCode, setShowInviteCode] = useState(() => {
     return localStorage.getItem('hideInviteCode') !== 'true';
   });
@@ -442,11 +444,29 @@ const Index = () => {
                       </Tabs>
                     </TabsContent>
                     <TabsContent value="sv" className="mt-4">
-                      <InventarioPlacasViewer 
-                        loteId={activeSession.lote_id} 
-                        rodoviaId={activeSession.rodovia_id}
-                        onRegistrarIntervencao={handleRegistrarIntervencao}
-                      />
+                      <Tabs value={inventarioSvSubTab} onValueChange={setInventarioSvSubTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="placas">
+                            Placas
+                          </TabsTrigger>
+                          <TabsTrigger value="porticos">
+                            Pórticos (P/SM) e Braços Projetados
+                          </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="placas" className="mt-4">
+                          <InventarioPlacasViewer 
+                            loteId={activeSession.lote_id} 
+                            rodoviaId={activeSession.rodovia_id}
+                            onRegistrarIntervencao={handleRegistrarIntervencao}
+                          />
+                        </TabsContent>
+                        <TabsContent value="porticos" className="mt-4">
+                          <InventarioPorticosViewer 
+                            loteId={activeSession.lote_id} 
+                            rodoviaId={activeSession.rodovia_id}
+                          />
+                        </TabsContent>
+                      </Tabs>
                     </TabsContent>
                     <TabsContent value="inscricoes" className="mt-4">
                       <InventarioInscricoesViewer 

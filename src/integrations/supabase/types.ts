@@ -814,6 +814,105 @@ export type Database = {
           },
         ]
       }
+      ficha_porticos: {
+        Row: {
+          altura_livre_m: number | null
+          created_at: string
+          data_vistoria: string
+          enviado_coordenador: boolean | null
+          estado_conservacao: string | null
+          foto_url: string | null
+          id: string
+          km: number | null
+          lado: string | null
+          latitude: number | null
+          longitude: number | null
+          lote_id: string
+          observacao: string | null
+          rodovia_id: string
+          snv: string | null
+          tipo: string
+          updated_at: string
+          user_id: string
+          vao_horizontal_m: number | null
+        }
+        Insert: {
+          altura_livre_m?: number | null
+          created_at?: string
+          data_vistoria: string
+          enviado_coordenador?: boolean | null
+          estado_conservacao?: string | null
+          foto_url?: string | null
+          id?: string
+          km?: number | null
+          lado?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          lote_id: string
+          observacao?: string | null
+          rodovia_id: string
+          snv?: string | null
+          tipo: string
+          updated_at?: string
+          user_id: string
+          vao_horizontal_m?: number | null
+        }
+        Update: {
+          altura_livre_m?: number | null
+          created_at?: string
+          data_vistoria?: string
+          enviado_coordenador?: boolean | null
+          estado_conservacao?: string | null
+          foto_url?: string | null
+          id?: string
+          km?: number | null
+          lado?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          lote_id?: string
+          observacao?: string | null
+          rodovia_id?: string
+          snv?: string | null
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+          vao_horizontal_m?: number | null
+        }
+        Relationships: []
+      }
+      ficha_porticos_intervencoes: {
+        Row: {
+          altura_livre_m: number | null
+          created_at: string
+          data_intervencao: string
+          ficha_porticos_id: string
+          id: string
+          motivo: string
+          tipo: string | null
+          vao_horizontal_m: number | null
+        }
+        Insert: {
+          altura_livre_m?: number | null
+          created_at?: string
+          data_intervencao: string
+          ficha_porticos_id: string
+          id?: string
+          motivo: string
+          tipo?: string | null
+          vao_horizontal_m?: number | null
+        }
+        Update: {
+          altura_livre_m?: number | null
+          created_at?: string
+          data_intervencao?: string
+          ficha_porticos_id?: string
+          id?: string
+          motivo?: string
+          tipo?: string | null
+          vao_horizontal_m?: number | null
+        }
+        Relationships: []
+      }
       ficha_tachas: {
         Row: {
           cor: string
