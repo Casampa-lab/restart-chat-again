@@ -214,6 +214,28 @@ export function InventarioImporterManager() {
             const photoFileName = value as string;
             if (photoFileName && photoUrls[photoFileName]) {
               record.foto_url = photoUrls[photoFileName];
+              
+              // Para defensas, extrair data da foto do nome do arquivo
+              if (inventoryType === "defensas" && photoFileName) {
+                // Tentar extrair data do nome do arquivo (formato: YYYYMMDD ou DD-MM-YYYY)
+                const dateMatch = photoFileName.match(/(\d{8})|(\d{2}[-_]\d{2}[-_]\d{4})/);
+                if (dateMatch) {
+                  let dateStr = dateMatch[0];
+                  if (dateStr.length === 8) {
+                    // Formato YYYYMMDD
+                    const year = dateStr.substring(0, 4);
+                    const month = dateStr.substring(4, 6);
+                    const day = dateStr.substring(6, 8);
+                    record.data_inspecao = `${year}-${month}-${day}`;
+                  } else {
+                    // Formato DD-MM-YYYY ou DD_MM_YYYY
+                    const parts = dateStr.split(/[-_]/);
+                    if (parts.length === 3) {
+                      record.data_inspecao = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -277,8 +299,10 @@ export function InventarioImporterManager() {
           // Link e foto
           record.link_fotografia = excelRow["Link da Fotografia"] || excelRow.link_fotografia || null;
           
-          // Campos obrigatórios com defaults
-          record.data_inspecao = record.data_inspecao || record.data || new Date().toISOString().split('T')[0];
+          // Campos obrigatórios com defaults (data_inspecao já pode ter sido definida pela foto)
+          if (!record.data_inspecao) {
+            record.data_inspecao = record.data || new Date().toISOString().split('T')[0];
+          }
           record.extensao_metros = Number(record.comprimento_total_tramo_m || record.extensao_metros || record.extensao_m || 0);
           record.necessita_intervencao = Boolean(record.necessita_intervencao || false);
         }
