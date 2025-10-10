@@ -12,18 +12,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface FichaMarcaTransversal {
   id: string;
-  km_inicial: number | null;
-  km_final: number | null;
-  latitude_inicial: number | null;
-  longitude_inicial: number | null;
-  latitude_final: number | null;
-  longitude_final: number | null;
+  km: number | null;
+  latitude: number | null;
+  longitude: number | null;
   data_vistoria: string;
-  tipo_demarcacao: string | null;
+  snv: string | null;
+  sigla: string | null;
+  descricao: string | null;
   cor: string | null;
-  largura_cm: number | null;
-  espessura_cm: number | null;
   material: string | null;
+  outros_materiais: string | null;
+  area_m2: number | null;
+  espessura_cm: number | null;
   estado_conservacao: string | null;
   observacao: string | null;
   foto_url: string | null;
@@ -72,7 +72,7 @@ export function InventarioMarcasTransversaisViewer({
 
       if (searchTerm) {
         query = query.or(
-          `tipo_demarcacao.ilike.%${searchTerm}%,cor.ilike.%${searchTerm}%,material.ilike.%${searchTerm}%`
+          `sigla.ilike.%${searchTerm}%,descricao.ilike.%${searchTerm}%,cor.ilike.%${searchTerm}%,material.ilike.%${searchTerm}%`
         );
       }
 
@@ -89,8 +89,8 @@ export function InventarioMarcasTransversaisViewer({
           filteredData = filteredData
             .map((marca) => ({
               ...marca,
-              distance: marca.latitude_inicial && marca.longitude_inicial
-                ? calculateDistance(lat, lng, marca.latitude_inicial, marca.longitude_inicial)
+              distance: marca.latitude && marca.longitude
+                ? calculateDistance(lat, lng, marca.latitude, marca.longitude)
                 : Infinity,
             }))
             .filter((marca) => marca.distance <= 50)
@@ -98,8 +98,8 @@ export function InventarioMarcasTransversaisViewer({
         }
       } else {
         filteredData = filteredData.sort((a, b) => {
-          const kmA = a.km_inicial || 0;
-          const kmB = b.km_inicial || 0;
+          const kmA = a.km || 0;
+          const kmB = b.km || 0;
           return kmA - kmB;
         });
       }
@@ -186,9 +186,11 @@ export function InventarioMarcasTransversaisViewer({
                 <TableHeader>
                   <TableRow>
                     <TableHead>KM</TableHead>
-                    <TableHead>Tipo</TableHead>
+                    <TableHead>SNV</TableHead>
+                    <TableHead>Sigla</TableHead>
+                    <TableHead>Descrição</TableHead>
                     <TableHead>Cor</TableHead>
-                    <TableHead>Material</TableHead>
+                    <TableHead>Área (m²)</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead>Data Vistoria</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
@@ -201,15 +203,17 @@ export function InventarioMarcasTransversaisViewer({
                         <div className="flex items-center gap-1">
                           <MapPin className="h-3 w-3 text-muted-foreground" />
                           <span className="font-mono text-sm">
-                            {marca.km_inicial?.toFixed(3)} - {marca.km_final?.toFixed(3)}
+                            {marca.km?.toFixed(3) || "-"}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>{marca.tipo_demarcacao || "-"}</TableCell>
+                      <TableCell className="font-mono text-xs">{marca.snv || "-"}</TableCell>
+                      <TableCell><Badge variant="outline">{marca.sigla || "-"}</Badge></TableCell>
+                      <TableCell className="text-sm max-w-[200px] truncate">{marca.descricao || "-"}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{marca.cor || "-"}</Badge>
                       </TableCell>
-                      <TableCell className="text-sm">{marca.material || "-"}</TableCell>
+                      <TableCell className="text-sm">{marca.area_m2?.toFixed(2) || "-"}</TableCell>
                       <TableCell>
                         <Badge 
                           variant={
@@ -264,16 +268,20 @@ export function InventarioMarcasTransversaisViewer({
               <TabsContent value="dados" className="space-y-4 mt-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">KM Inicial</label>
-                    <p className="font-mono">{selectedMarca.km_inicial?.toFixed(3) || "-"}</p>
+                    <label className="text-sm font-medium text-muted-foreground">KM</label>
+                    <p className="font-mono">{selectedMarca.km?.toFixed(3) || "-"}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">KM Final</label>
-                    <p className="font-mono">{selectedMarca.km_final?.toFixed(3) || "-"}</p>
+                    <label className="text-sm font-medium text-muted-foreground">SNV</label>
+                    <p className="font-mono">{selectedMarca.snv || "-"}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Tipo de Demarcação</label>
-                    <p>{selectedMarca.tipo_demarcacao || "-"}</p>
+                    <label className="text-sm font-medium text-muted-foreground">Sigla</label>
+                    <p><Badge>{selectedMarca.sigla || "-"}</Badge></p>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-sm font-medium text-muted-foreground">Descrição</label>
+                    <p>{selectedMarca.descricao || "-"}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Cor</label>
@@ -284,21 +292,37 @@ export function InventarioMarcasTransversaisViewer({
                     <p>{selectedMarca.material || "-"}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Estado de Conservação</label>
-                    <p>{selectedMarca.estado_conservacao || "-"}</p>
+                    <label className="text-sm font-medium text-muted-foreground">Outros Materiais</label>
+                    <p>{selectedMarca.outros_materiais || "-"}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Largura (cm)</label>
-                    <p>{selectedMarca.largura_cm || "-"}</p>
+                    <label className="text-sm font-medium text-muted-foreground">Área (m²)</label>
+                    <p>{selectedMarca.area_m2?.toFixed(2) || "-"}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Espessura (cm)</label>
-                    <p>{selectedMarca.espessura_cm || "-"}</p>
+                    <p>{selectedMarca.espessura_cm?.toFixed(1) || "-"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Estado de Conservação</label>
+                    <p>{selectedMarca.estado_conservacao || "-"}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Data da Vistoria</label>
                     <p>{new Date(selectedMarca.data_vistoria).toLocaleDateString("pt-BR")}</p>
                   </div>
+                  {selectedMarca.latitude && selectedMarca.longitude && (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Latitude</label>
+                        <p className="font-mono text-sm">{selectedMarca.latitude}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Longitude</label>
+                        <p className="font-mono text-sm">{selectedMarca.longitude}</p>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {selectedMarca.observacao && (

@@ -14,18 +14,18 @@ import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
-  km_inicial: z.string().min(1, "KM inicial é obrigatório"),
-  km_final: z.string().min(1, "KM final é obrigatório"),
+  km: z.string().min(1, "KM é obrigatório"),
   tipo_intervencao: z.string().min(1, "Tipo de intervenção é obrigatório"),
-  tipo_demarcacao: z.string().min(1, "Tipo de demarcação é obrigatório"),
+  snv: z.string().optional(),
+  sigla: z.string().optional(),
+  descricao: z.string().optional(),
   cor: z.string().min(1, "Cor é obrigatória"),
-  area_m2: z.string().min(1, "Área é obrigatória"),
   material_utilizado: z.string().optional(),
+  outros_materiais: z.string().optional(),
+  area_m2: z.string().min(1, "Área é obrigatória"),
   espessura_cm: z.string().optional(),
-  latitude_inicial: z.string().optional(),
-  longitude_inicial: z.string().optional(),
-  latitude_final: z.string().optional(),
-  longitude_final: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
   observacao: z.string().optional(),
 });
 
@@ -43,18 +43,18 @@ export function IntervencoesMarcasTransversaisForm({ loteId, rodoviaId }: Interv
     resolver: zodResolver(formSchema),
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
-      km_inicial: "",
-      km_final: "",
+      km: "",
       tipo_intervencao: "",
-      tipo_demarcacao: "",
+      snv: "",
+      sigla: "",
+      descricao: "",
       cor: "",
       area_m2: "",
       material_utilizado: "",
+      outros_materiais: "",
       espessura_cm: "",
-      latitude_inicial: "",
-      longitude_inicial: "",
-      latitude_final: "",
-      longitude_final: "",
+      latitude: "",
+      longitude: "",
       observacao: "",
     },
   });
@@ -76,18 +76,18 @@ export function IntervencoesMarcasTransversaisForm({ loteId, rodoviaId }: Interv
           lote_id: loteId,
           rodovia_id: rodoviaId,
           data_intervencao: data.data_intervencao,
-          km_inicial: parseFloat(data.km_inicial),
-          km_final: parseFloat(data.km_final),
+          km: parseFloat(data.km),
           tipo_intervencao: data.tipo_intervencao,
-          tipo_demarcacao: data.tipo_demarcacao,
+          snv: data.snv || null,
+          sigla: data.sigla || null,
+          descricao: data.descricao || null,
           cor: data.cor,
           area_m2: parseFloat(data.area_m2),
           material_utilizado: data.material_utilizado || null,
+          outros_materiais: data.outros_materiais || null,
           espessura_cm: data.espessura_cm ? parseFloat(data.espessura_cm) : null,
-          latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
-          longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
-          latitude_final: data.latitude_final ? parseFloat(data.latitude_final) : null,
-          longitude_final: data.longitude_final ? parseFloat(data.longitude_final) : null,
+          latitude: data.latitude ? parseFloat(data.latitude) : null,
+          longitude: data.longitude ? parseFloat(data.longitude) : null,
           observacao: data.observacao || null,
         });
 
@@ -96,18 +96,18 @@ export function IntervencoesMarcasTransversaisForm({ loteId, rodoviaId }: Interv
       toast.success("Intervenção de Marcas Transversais registrada com sucesso!");
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
-        km_inicial: "",
-        km_final: "",
+        km: "",
         tipo_intervencao: "",
-        tipo_demarcacao: "",
+        snv: "",
+        sigla: "",
+        descricao: "",
         cor: "",
         area_m2: "",
         material_utilizado: "",
+        outros_materiais: "",
         espessura_cm: "",
-        latitude_inicial: "",
-        longitude_inicial: "",
-        latitude_final: "",
-        longitude_final: "",
+        latitude: "",
+        longitude: "",
         observacao: "",
       });
     } catch (error: any) {
@@ -123,7 +123,7 @@ export function IntervencoesMarcasTransversaisForm({ loteId, rodoviaId }: Interv
       <CardHeader>
         <CardTitle>Intervenções - Marcas Transversais</CardTitle>
         <CardDescription>
-          Registre intervenções realizadas em marcas transversais
+          Registre intervenções realizadas em marcas transversais (FTP, LRE, símbolos, etc.)
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -170,10 +170,10 @@ export function IntervencoesMarcasTransversaisForm({ loteId, rodoviaId }: Interv
 
               <FormField
                 control={form.control}
-                name="km_inicial"
+                name="km"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>KM Inicial *</FormLabel>
+                    <FormLabel>KM *</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.001" placeholder="Ex: 123.456" {...field} />
                     </FormControl>
@@ -184,12 +184,12 @@ export function IntervencoesMarcasTransversaisForm({ loteId, rodoviaId }: Interv
 
               <FormField
                 control={form.control}
-                name="km_final"
+                name="snv"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>KM Final *</FormLabel>
+                    <FormLabel>SNV</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.001" placeholder="Ex: 123.789" {...field} />
+                      <Input placeholder="Ex: 116BMG1010" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -198,24 +198,27 @@ export function IntervencoesMarcasTransversaisForm({ loteId, rodoviaId }: Interv
 
               <FormField
                 control={form.control}
-                name="tipo_demarcacao"
+                name="sigla"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tipo de Demarcação *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="faixa_pedestre">Faixa de Pedestre</SelectItem>
-                        <SelectItem value="linha_retencao">Linha de Retenção</SelectItem>
-                        <SelectItem value="linha_espera">Linha de Espera</SelectItem>
-                        <SelectItem value="simbolo_pare">Símbolo PARE</SelectItem>
-                        <SelectItem value="outras">Outras Marcas Transversais</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Sigla</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: FTP, LRE, ZPA, MOF, etc." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="descricao"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Descrição</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Faixa de Travessia de Pedestres" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -234,9 +237,9 @@ export function IntervencoesMarcasTransversaisForm({ loteId, rodoviaId }: Interv
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="branca">Branca</SelectItem>
-                        <SelectItem value="amarela">Amarela</SelectItem>
-                        <SelectItem value="vermelha">Vermelha</SelectItem>
+                        <SelectItem value="Branca">Branca</SelectItem>
+                        <SelectItem value="Amarela">Amarela</SelectItem>
+                        <SelectItem value="Vermelha">Vermelha</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -271,12 +274,27 @@ export function IntervencoesMarcasTransversaisForm({ loteId, rodoviaId }: Interv
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="tinta_base_solvente">Tinta Base Solvente</SelectItem>
-                        <SelectItem value="tinta_base_agua">Tinta Base Água</SelectItem>
-                        <SelectItem value="termoplastico">Termoplástico</SelectItem>
-                        <SelectItem value="massa_asfaltica">Massa Asfáltica</SelectItem>
+                        <SelectItem value="Acrílico">Acrílico</SelectItem>
+                        <SelectItem value="Termoplástico">Termoplástico</SelectItem>
+                        <SelectItem value="Tinta Base Solvente">Tinta Base Solvente</SelectItem>
+                        <SelectItem value="Tinta Base Água">Tinta Base Água</SelectItem>
+                        <SelectItem value="Massa Asfáltica">Massa Asfáltica</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="outros_materiais"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Outros Materiais</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Outros materiais utilizados" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -298,10 +316,10 @@ export function IntervencoesMarcasTransversaisForm({ loteId, rodoviaId }: Interv
 
               <FormField
                 control={form.control}
-                name="latitude_inicial"
+                name="latitude"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Latitude Inicial</FormLabel>
+                    <FormLabel>Latitude</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.000001" placeholder="Ex: -23.550520" {...field} />
                     </FormControl>
@@ -312,38 +330,10 @@ export function IntervencoesMarcasTransversaisForm({ loteId, rodoviaId }: Interv
 
               <FormField
                 control={form.control}
-                name="longitude_inicial"
+                name="longitude"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Longitude Inicial</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.000001" placeholder="Ex: -46.633308" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="latitude_final"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Latitude Final</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.000001" placeholder="Ex: -23.550520" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="longitude_final"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Longitude Final</FormLabel>
+                    <FormLabel>Longitude</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.000001" placeholder="Ex: -46.633308" {...field} />
                     </FormControl>

@@ -488,74 +488,74 @@ export type Database = {
       }
       ficha_marcas_transversais: {
         Row: {
+          area_m2: number | null
           cor: string | null
           created_at: string
           data_vistoria: string
+          descricao: string | null
           enviado_coordenador: boolean | null
           espessura_cm: number | null
           estado_conservacao: string | null
           foto_url: string | null
           id: string
-          km_final: number | null
-          km_inicial: number | null
-          largura_cm: number | null
-          latitude_final: number | null
-          latitude_inicial: number | null
-          longitude_final: number | null
-          longitude_inicial: number | null
+          km: number | null
+          latitude: number | null
+          longitude: number | null
           lote_id: string
           material: string | null
           observacao: string | null
+          outros_materiais: string | null
           rodovia_id: string
-          tipo_demarcacao: string | null
+          sigla: string | null
+          snv: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          area_m2?: number | null
           cor?: string | null
           created_at?: string
           data_vistoria: string
+          descricao?: string | null
           enviado_coordenador?: boolean | null
           espessura_cm?: number | null
           estado_conservacao?: string | null
           foto_url?: string | null
           id?: string
-          km_final?: number | null
-          km_inicial?: number | null
-          largura_cm?: number | null
-          latitude_final?: number | null
-          latitude_inicial?: number | null
-          longitude_final?: number | null
-          longitude_inicial?: number | null
+          km?: number | null
+          latitude?: number | null
+          longitude?: number | null
           lote_id: string
           material?: string | null
           observacao?: string | null
+          outros_materiais?: string | null
           rodovia_id: string
-          tipo_demarcacao?: string | null
+          sigla?: string | null
+          snv?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          area_m2?: number | null
           cor?: string | null
           created_at?: string
           data_vistoria?: string
+          descricao?: string | null
           enviado_coordenador?: boolean | null
           espessura_cm?: number | null
           estado_conservacao?: string | null
           foto_url?: string | null
           id?: string
-          km_final?: number | null
-          km_inicial?: number | null
-          largura_cm?: number | null
-          latitude_final?: number | null
-          latitude_inicial?: number | null
-          longitude_final?: number | null
-          longitude_inicial?: number | null
+          km?: number | null
+          latitude?: number | null
+          longitude?: number | null
           lote_id?: string
           material?: string | null
           observacao?: string | null
+          outros_materiais?: string | null
           rodovia_id?: string
-          tipo_demarcacao?: string | null
+          sigla?: string | null
+          snv?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1434,20 +1434,20 @@ export type Database = {
           cor: string
           created_at: string
           data_intervencao: string
+          descricao: string | null
           enviado_coordenador: boolean | null
           espessura_cm: number | null
           id: string
-          km_final: number
-          km_inicial: number
-          latitude_final: number | null
-          latitude_inicial: number | null
-          longitude_final: number | null
-          longitude_inicial: number | null
+          km: number
+          latitude: number | null
+          longitude: number | null
           lote_id: string
           material_utilizado: string | null
           observacao: string | null
+          outros_materiais: string | null
           rodovia_id: string
-          tipo_demarcacao: string
+          sigla: string | null
+          snv: string | null
           tipo_intervencao: string
           updated_at: string
           user_id: string
@@ -1457,20 +1457,20 @@ export type Database = {
           cor: string
           created_at?: string
           data_intervencao: string
+          descricao?: string | null
           enviado_coordenador?: boolean | null
           espessura_cm?: number | null
           id?: string
-          km_final: number
-          km_inicial: number
-          latitude_final?: number | null
-          latitude_inicial?: number | null
-          longitude_final?: number | null
-          longitude_inicial?: number | null
+          km?: number
+          latitude?: number | null
+          longitude?: number | null
           lote_id: string
           material_utilizado?: string | null
           observacao?: string | null
+          outros_materiais?: string | null
           rodovia_id: string
-          tipo_demarcacao: string
+          sigla?: string | null
+          snv?: string | null
           tipo_intervencao: string
           updated_at?: string
           user_id: string
@@ -1480,20 +1480,20 @@ export type Database = {
           cor?: string
           created_at?: string
           data_intervencao?: string
+          descricao?: string | null
           enviado_coordenador?: boolean | null
           espessura_cm?: number | null
           id?: string
-          km_final?: number
-          km_inicial?: number
-          latitude_final?: number | null
-          latitude_inicial?: number | null
-          longitude_final?: number | null
-          longitude_inicial?: number | null
+          km?: number
+          latitude?: number | null
+          longitude?: number | null
           lote_id?: string
           material_utilizado?: string | null
           observacao?: string | null
+          outros_materiais?: string | null
           rodovia_id?: string
-          tipo_demarcacao?: string
+          sigla?: string | null
+          snv?: string | null
           tipo_intervencao?: string
           updated_at?: string
           user_id?: string
