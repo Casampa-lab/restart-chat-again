@@ -201,9 +201,10 @@ export function InventarioImporterManager() {
 
         // Mapear campos do Excel
         for (const [key, value] of Object.entries(row)) {
-          if (!key || !value) continue;
+          // Ignorar colunas vazias, "__empty" ou valores nulos
+          if (!key || key.trim() === "" || key.includes("__empty") || key.includes("__EMPTY") || value === null || value === undefined) continue;
 
-          const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_");
+          const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_").replace(/[()]/g, "");
 
           // Adicionar campos conhecidos
           record[normalizedKey] = value;
@@ -219,14 +220,14 @@ export function InventarioImporterManager() {
 
         // Adicionar valores padrão para defensas
         if (inventoryType === "defensas") {
-          record.data_inspecao = record.data_inspecao || record.data || "2023-01-01";
+          record.data_inspecao = record.data_inspecao || record.data || new Date().toISOString().split('T')[0];
           record.lado = record.lado || "D";
-          record.tipo_defensa = record.tipo_defensa || "Metálica";
-          record.extensao_metros = record.extensao_metros || record["extensão_(m)"] || 0;
-          record.estado_conservacao = record.estado_conservacao || "Bom";
-          record.necessita_intervencao = record.necessita_intervencao || false;
-          record.km_inicial = record.km_inicial || 0;
-          record.km_final = record.km_final || 0;
+          record.tipo_defensa = record.tipo_defensa || record.tipo || "Metálica";
+          record.extensao_metros = Number(record.extensao_metros || record.extensao_m || record["extensao_m"] || 0);
+          record.estado_conservacao = record.estado_conservacao || record.estado || "Bom";
+          record.necessita_intervencao = Boolean(record.necessita_intervencao || false);
+          record.km_inicial = Number(record.km_inicial || record.km_inicio || 0);
+          record.km_final = Number(record.km_final || record.km_fim || 0);
         }
 
         return record;
