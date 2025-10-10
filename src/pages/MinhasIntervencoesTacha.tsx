@@ -51,12 +51,14 @@ interface IntervencaoTacha {
   km_inicial: number;
   km_final: number;
   tipo_intervencao: string;
-  tipo_tacha: string;
-  cor: string;
-  lado: string;
+  snv: string | null;
+  descricao: string | null;
+  corpo: string | null;
+  refletivo: string | null;
+  cor_refletivo: string | null;
+  local_implantacao: string | null;
+  espacamento_m: number | null;
   quantidade: number;
-  material: string | null;
-  estado_conservacao: string | null;
   observacao: string | null;
   lote_id: string;
   rodovia_id: string;
@@ -207,12 +209,14 @@ const MinhasIntervencoesTacha = () => {
           km_inicial: intervencaoToEdit.km_inicial,
           km_final: intervencaoToEdit.km_final,
           tipo_intervencao: intervencaoToEdit.tipo_intervencao,
-          tipo_tacha: intervencaoToEdit.tipo_tacha,
-          cor: intervencaoToEdit.cor,
-          lado: intervencaoToEdit.lado,
+          snv: intervencaoToEdit.snv,
+          descricao: intervencaoToEdit.descricao,
+          corpo: intervencaoToEdit.corpo,
+          refletivo: intervencaoToEdit.refletivo,
+          cor_refletivo: intervencaoToEdit.cor_refletivo,
+          local_implantacao: intervencaoToEdit.local_implantacao,
+          espacamento_m: intervencaoToEdit.espacamento_m,
           quantidade: intervencaoToEdit.quantidade,
-          material: intervencaoToEdit.material,
-          estado_conservacao: intervencaoToEdit.estado_conservacao,
           observacao: intervencaoToEdit.observacao,
         })
         .eq("id", intervencaoToEdit.id);
@@ -310,12 +314,12 @@ const MinhasIntervencoesTacha = () => {
                       <TableHead>Rodovia</TableHead>
                       <TableHead>Trecho (KM)</TableHead>
                       <TableHead>Tipo Intervenção</TableHead>
-                      <TableHead>Tipo Tacha</TableHead>
-                      <TableHead>Cor</TableHead>
-                      <TableHead>Lado</TableHead>
+                      <TableHead>SNV</TableHead>
+                      <TableHead>Descrição</TableHead>
+                      <TableHead>Corpo</TableHead>
+                      <TableHead>Cor Refletivo</TableHead>
+                      <TableHead>Local</TableHead>
                       <TableHead>Qtd</TableHead>
-                      <TableHead>Material</TableHead>
-                      <TableHead>Estado</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
@@ -341,12 +345,12 @@ const MinhasIntervencoesTacha = () => {
                           {intervencao.km_inicial.toFixed(3)} - {intervencao.km_final.toFixed(3)}
                         </TableCell>
                         <TableCell>{intervencao.tipo_intervencao}</TableCell>
-                        <TableCell>{intervencao.tipo_tacha}</TableCell>
-                        <TableCell>{intervencao.cor}</TableCell>
-                        <TableCell>{intervencao.lado}</TableCell>
+                        <TableCell>{intervencao.snv || "-"}</TableCell>
+                        <TableCell className="max-w-[150px] truncate">{intervencao.descricao || "-"}</TableCell>
+                        <TableCell>{intervencao.corpo || "-"}</TableCell>
+                        <TableCell>{intervencao.cor_refletivo || "-"}</TableCell>
+                        <TableCell>{intervencao.local_implantacao || "-"}</TableCell>
                         <TableCell>{intervencao.quantidade}</TableCell>
-                        <TableCell>{intervencao.material || "-"}</TableCell>
-                        <TableCell>{intervencao.estado_conservacao || "-"}</TableCell>
                         <TableCell>
                           {intervencao.enviado_coordenador ? (
                             <Badge variant="outline" className="bg-green-50">
@@ -456,32 +460,76 @@ const MinhasIntervencoesTacha = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Tipo Tacha</Label>
+                  <Label>SNV</Label>
                   <Input
-                    value={intervencaoToEdit.tipo_tacha}
-                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, tipo_tacha: e.target.value})}
+                    value={intervencaoToEdit.snv || ""}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, snv: e.target.value})}
                   />
                 </div>
                 <div>
-                  <Label>Cor</Label>
+                  <Label>Descrição</Label>
                   <Input
-                    value={intervencaoToEdit.cor}
-                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, cor: e.target.value})}
+                    value={intervencaoToEdit.descricao || ""}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, descricao: e.target.value})}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label>Lado</Label>
-                  <Select value={intervencaoToEdit.lado} onValueChange={(value) => setIntervencaoToEdit({...intervencaoToEdit, lado: value})}>
+                  <Label>Corpo</Label>
+                  <Select value={intervencaoToEdit.corpo || ""} onValueChange={(value) => setIntervencaoToEdit({...intervencaoToEdit, corpo: value})}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Direito">Direito</SelectItem>
-                      <SelectItem value="Esquerdo">Esquerdo</SelectItem>
-                      <SelectItem value="Eixo">Eixo</SelectItem>
-                      <SelectItem value="Bordo">Bordo</SelectItem>
+                      <SelectItem value="Plástico">Plástico</SelectItem>
+                      <SelectItem value="Metal">Metal</SelectItem>
+                      <SelectItem value="Cerâmico">Cerâmico</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Refletivo</Label>
+                  <Select value={intervencaoToEdit.refletivo || ""} onValueChange={(value) => setIntervencaoToEdit({...intervencaoToEdit, refletivo: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="I">I</SelectItem>
+                      <SelectItem value="II">II</SelectItem>
+                      <SelectItem value="III">III</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Cor Refletivo</Label>
+                  <Select value={intervencaoToEdit.cor_refletivo || ""} onValueChange={(value) => setIntervencaoToEdit({...intervencaoToEdit, cor_refletivo: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Branca">Branca</SelectItem>
+                      <SelectItem value="Amarela">Amarela</SelectItem>
+                      <SelectItem value="Branca/Vermelha">Branca/Vermelha</SelectItem>
+                      <SelectItem value="Vermelha">Vermelha</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>Local de Implantação</Label>
+                  <Select value={intervencaoToEdit.local_implantacao || ""} onValueChange={(value) => setIntervencaoToEdit({...intervencaoToEdit, local_implantacao: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="BD">BD - Bordo Direito</SelectItem>
+                      <SelectItem value="BE">BE - Bordo Esquerdo</SelectItem>
+                      <SelectItem value="E">E - Eixo</SelectItem>
+                      <SelectItem value="E1">E1 - Eixo 1</SelectItem>
+                      <SelectItem value="CD">CD - Centro Direita</SelectItem>
+                      <SelectItem value="CE">CE - Centro Esquerda</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -494,19 +542,14 @@ const MinhasIntervencoesTacha = () => {
                   />
                 </div>
                 <div>
-                  <Label>Material</Label>
+                  <Label>Espaçamento (m)</Label>
                   <Input
-                    value={intervencaoToEdit.material || ""}
-                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, material: e.target.value})}
+                    type="number"
+                    step="0.1"
+                    value={intervencaoToEdit.espacamento_m || ""}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, espacamento_m: parseFloat(e.target.value) || null})}
                   />
                 </div>
-              </div>
-              <div>
-                <Label>Estado de Conservação</Label>
-                <Input
-                  value={intervencaoToEdit.estado_conservacao || ""}
-                  onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, estado_conservacao: e.target.value})}
-                />
               </div>
               <div>
                 <Label>Observação</Label>

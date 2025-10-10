@@ -540,7 +540,7 @@ export const exportIntervencoesTacha = async () => {
     const wsData = [
       ['3.1.5 - INTERVENÇÕES - TACHAS'],
       [],
-      ['Data', 'Lote', 'Rodovia', 'km Inicial', 'km Final', 'Tipo Intervenção', 'Tipo Tacha', 'Cor', 'Lado', 'Quantidade', 'Estado', 'Material', 'Observação'],
+      ['Data', 'Lote', 'Rodovia', 'KM Inicial', 'KM Final', 'Tipo Intervenção', 'SNV', 'Descrição', 'Corpo', 'Refletivo', 'Cor Refletivo', 'Local', 'Quantidade', 'Espaçamento', 'Observação'],
       ...(data || []).map(item => {
         const lote = lotesMap.get(item.lote_id);
         const rodovia = rodoviasMap.get(item.rodovia_id);
@@ -551,12 +551,14 @@ export const exportIntervencoesTacha = async () => {
           formatNumber(item.km_inicial),
           formatNumber(item.km_final),
           item.tipo_intervencao || '',
-          item.tipo_tacha || '',
-          item.cor || '',
-          item.lado || '',
+          item.snv || '',
+          item.descricao || '',
+          item.corpo || '',
+          item.refletivo || '',
+          item.cor_refletivo || '',
+          item.local_implantacao || '',
           item.quantidade || '',
-          item.estado_conservacao || '',
-          item.material || '',
+          item.espacamento_m || '',
           item.observacao || ''
         ];
       })
