@@ -374,7 +374,7 @@ const Index = () => {
                     </TabsList>
                     <TabsContent value="sh" className="mt-4">
                       <Tabs value={shSubTab} onValueChange={setShSubTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-4 bg-secondary/30">
+                        <TabsList className="grid w-full grid-cols-4">
                           <TabsTrigger value="longitudinais">
                             Marcas Longitudinais
                           </TabsTrigger>
@@ -404,7 +404,7 @@ const Index = () => {
                     </TabsContent>
                     <TabsContent value="sv" className="mt-4">
                       <Tabs value={intervencaoSvSubTab} onValueChange={setIntervencaoSvSubTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 bg-secondary/30">
+                        <TabsList className="grid w-full grid-cols-2">
                           <TabsTrigger value="placas">
                             Placas
                           </TabsTrigger>
@@ -457,7 +457,7 @@ const Index = () => {
                     </TabsList>
                     <TabsContent value="sh" className="mt-4">
                       <Tabs value={inventarioShSubTab} onValueChange={setInventarioShSubTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-4 bg-secondary/30">
+                        <TabsList className="grid w-full grid-cols-4">
                           <TabsTrigger value="longitudinais">
                             Marcas Longitudinais
                           </TabsTrigger>
@@ -502,7 +502,7 @@ const Index = () => {
                     </TabsContent>
                     <TabsContent value="sv" className="mt-4">
                       <Tabs value={inventarioSvSubTab} onValueChange={setInventarioSvSubTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 bg-secondary/30">
+                        <TabsList className="grid w-full grid-cols-2">
                           <TabsTrigger value="placas">
                             Placas
                           </TabsTrigger>
