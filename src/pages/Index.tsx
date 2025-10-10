@@ -276,74 +276,112 @@ const Index = () => {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="frentes" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button variant="secondary" onClick={() => navigate("/minhas-frentes-liberadas")} className="shadow-md hover:shadow-lg transition-shadow">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver meus registros
-                    </Button>
-                  </div>
-                  <FrenteLiberadaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Frente de Serviço Liberada</CardTitle>
+                    <CardDescription>Registre as frentes de trabalho liberadas para execução dos serviços</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-end">
+                        <Button variant="secondary" onClick={() => navigate("/minhas-frentes-liberadas")} className="shadow-md hover:shadow-lg transition-shadow">
+                          <Eye className="mr-2 h-4 w-4" />
+                          Ver meus registros
+                        </Button>
+                      </div>
+                      <FrenteLiberadaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
               <TabsContent value="ficha-verif" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button variant="secondary" onClick={() => navigate("/minhas-fichas-verificacao")} className="shadow-md hover:shadow-lg transition-shadow">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver minhas fichas
-                    </Button>
-                  </div>
-                  <FichaVerificacaoForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ficha de Verificação de Serviços</CardTitle>
+                    <CardDescription>Realize a inspeção e verificação da qualidade dos serviços executados</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-end">
+                        <Button variant="secondary" onClick={() => navigate("/minhas-fichas-verificacao")} className="shadow-md hover:shadow-lg transition-shadow">
+                          <Eye className="mr-2 h-4 w-4" />
+                          Ver minhas fichas
+                        </Button>
+                      </div>
+                      <FichaVerificacaoForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
               <TabsContent value="ncs" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button variant="secondary" onClick={() => navigate("/minhas-ncs")} className="shadow-md hover:shadow-lg transition-shadow">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver meus registros
-                    </Button>
-                  </div>
-                  <NaoConformidadeForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Registro de Não Conformidades</CardTitle>
+                    <CardDescription>Documente irregularidades e não conformidades identificadas durante as inspeções</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-end">
+                        <Button variant="secondary" onClick={() => navigate("/minhas-ncs")} className="shadow-md hover:shadow-lg transition-shadow">
+                          <Eye className="mr-2 h-4 w-4" />
+                          Ver meus registros
+                        </Button>
+                      </div>
+                      <NaoConformidadeForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
               <TabsContent value="retrorrefletividade" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button variant="secondary" onClick={() => navigate("/minhas-retrorrefletividades")} className="shadow-md hover:shadow-lg transition-shadow">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver meus registros
-                    </Button>
-                  </div>
-                  <Tabs defaultValue="estatica" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="estatica">
-                        <span className="text-xs font-bold mr-2">3.1.3.1</span>
-                        Estática
-                      </TabsTrigger>
-                      <TabsTrigger value="dinamica">
-                        <span className="text-xs font-bold mr-2">3.1.3.2</span>
-                        Dinâmica
-                      </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="estatica" className="mt-4">
-                      <RetrorrefletividadeEstaticaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                    </TabsContent>
-                    <TabsContent value="dinamica" className="mt-4">
-                      <RetrorrefletividadeDinamicaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                    </TabsContent>
-                  </Tabs>
-                </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Medição de Retrorrefletividade</CardTitle>
+                    <CardDescription>Registre as medições de retrorrefletividade da sinalização horizontal e vertical</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-end">
+                        <Button variant="secondary" onClick={() => navigate("/minhas-retrorrefletividades")} className="shadow-md hover:shadow-lg transition-shadow">
+                          <Eye className="mr-2 h-4 w-4" />
+                          Ver meus registros
+                        </Button>
+                      </div>
+                      <Tabs defaultValue="estatica" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="estatica">
+                            <span className="text-xs font-bold mr-2">3.1.3.1</span>
+                            Estática
+                          </TabsTrigger>
+                          <TabsTrigger value="dinamica">
+                            <span className="text-xs font-bold mr-2">3.1.3.2</span>
+                            Dinâmica
+                          </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="estatica" className="mt-4">
+                          <RetrorrefletividadeEstaticaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                        </TabsContent>
+                        <TabsContent value="dinamica" className="mt-4">
+                          <RetrorrefletividadeDinamicaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
               <TabsContent value="intervencoes" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button variant="secondary" onClick={() => navigate("/minhas-intervencoes")} className="shadow-md hover:shadow-lg transition-shadow">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver meus registros
-                    </Button>
-                  </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Registro de Intervenções</CardTitle>
+                    <CardDescription>Documente as intervenções realizadas na sinalização viária</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-end">
+                        <Button variant="secondary" onClick={() => navigate("/minhas-intervencoes")} className="shadow-md hover:shadow-lg transition-shadow">
+                          <Eye className="mr-2 h-4 w-4" />
+                          Ver meus registros
+                        </Button>
+                      </div>
                   <Tabs value={intervencaoSubTab} onValueChange={setIntervencaoSubTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="sh">
@@ -416,10 +454,17 @@ const Index = () => {
                       <DefensasForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                   </Tabs>
-                </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
               <TabsContent value="prontuario" className="mt-6">
-                <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Inventário Dinâmico da Rodovia</CardTitle>
+                    <CardDescription>Consulte o inventário atualizado de todos os elementos de sinalização da rodovia</CardDescription>
+                  </CardHeader>
+                  <CardContent>
                   <Tabs defaultValue="sv" className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="sh">
@@ -510,7 +555,8 @@ const Index = () => {
                       />
                     </TabsContent>
                   </Tabs>
-                </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
             </Tabs>
           </> : <SessionSelector userId={user?.id} onSessionStarted={handleSessionStarted} />}
