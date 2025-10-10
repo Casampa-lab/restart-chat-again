@@ -292,7 +292,9 @@ export function InventarioMarcasLongitudinaisViewer({
                   <div className="grid grid-cols-4 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">BR:</span>
-                      <p className="text-sm">-</p>
+                      <p className="text-sm">
+                        {selectedMarca.observacao?.match(/BR:\s*([^|]+)/)?.[1]?.trim() || "-"}
+                      </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">SNV:</span>
@@ -304,7 +306,9 @@ export function InventarioMarcasLongitudinaisViewer({
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Posição:</span>
-                      <p className="text-sm">-</p>
+                      <p className="text-sm">
+                        {selectedMarca.observacao?.match(/Posição:\s*([^|]+)/)?.[1]?.trim() || "-"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -436,9 +440,7 @@ export function InventarioMarcasLongitudinaisViewer({
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Área (m²):</span>
                     <p className="text-sm">
-                      {selectedMarca.observacao?.includes("Área:") 
-                        ? selectedMarca.observacao.match(/Área:\s*([^|]+)/)?.[1]?.trim() || "-"
-                        : "-"}
+                      {selectedMarca.observacao?.match(/Área:\s*([^\s|]+)/)?.[1]?.trim() || "-"}
                     </p>
                   </div>
                 </div>
