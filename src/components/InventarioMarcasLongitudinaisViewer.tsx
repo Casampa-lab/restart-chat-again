@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, MapPin, Eye, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface FichaMarcaLongitudinal {
   id: string;
   snv: string | null;
@@ -277,237 +278,266 @@ export function InventarioMarcasLongitudinaisViewer({
           </DialogHeader>
 
           {selectedMarca && (
-            <div className="space-y-6 mt-4">
-              {/* Foto */}
-              {selectedMarca.foto_url && (
-                <div className="border rounded-lg p-4 bg-muted/30">
-                  <h3 className="font-semibold text-sm text-muted-foreground mb-3">
-                    Fotografia
+            <Tabs defaultValue="dados" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="dados">Dados</TabsTrigger>
+                <TabsTrigger value="foto">Foto</TabsTrigger>
+                <TabsTrigger value="historico">Histórico</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="dados" className="space-y-4 mt-4">
+                {/* Identificação Básica */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Identificação</h3>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">BR:</span>
+                      <p className="text-sm">-</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">SNV:</span>
+                      <p className="text-sm">{selectedMarca.snv || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Código:</span>
+                      <p className="text-sm">{selectedMarca.tipo_demarcacao || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Posição:</span>
+                      <p className="text-sm">-</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dimensões */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Dimensões</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Largura da Faixa (m):</span>
+                      <p className="text-sm">
+                        {selectedMarca.largura_cm 
+                          ? (selectedMarca.largura_cm / 100).toFixed(2) 
+                          : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Extensão (km):</span>
+                      <p className="text-sm">
+                        {selectedMarca.extensao_metros 
+                          ? (selectedMarca.extensao_metros / 1000).toFixed(2) 
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Localização Inicial */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Localização Inicial
                   </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Km Inicial:</span>
+                      <p className="text-sm">{selectedMarca.km_inicial?.toFixed(2) || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Latitude Inicial:</span>
+                      <p className="text-sm">
+                        {selectedMarca.latitude_inicial 
+                          ? selectedMarca.latitude_inicial.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Longitude Inicial:</span>
+                      <p className="text-sm">
+                        {selectedMarca.longitude_inicial 
+                          ? selectedMarca.longitude_inicial.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Localização Final */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Localização Final
+                  </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Km Final:</span>
+                      <p className="text-sm">{selectedMarca.km_final?.toFixed(2) || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Latitude Final:</span>
+                      <p className="text-sm">
+                        {selectedMarca.latitude_final 
+                          ? selectedMarca.latitude_final.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Longitude Final:</span>
+                      <p className="text-sm">
+                        {selectedMarca.longitude_final 
+                          ? selectedMarca.longitude_final.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Características da Demarcação */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Características da Demarcação</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Traço (m):</span>
+                      <p className="text-sm">
+                        {selectedMarca.observacao?.includes("Traço:") 
+                          ? selectedMarca.observacao.match(/Traço:\s*([^|]+)/)?.[1]?.trim() || "-"
+                          : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Espaçamento (m):</span>
+                      <p className="text-sm">
+                        {selectedMarca.observacao?.includes("Espaçamento:") 
+                          ? selectedMarca.observacao.match(/Espaçamento:\s*([^|]+)/)?.[1]?.trim() || "-"
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Material */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Material</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Material:</span>
+                      <p className="text-sm">{selectedMarca.material || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Outros materiais:</span>
+                      <p className="text-sm">-</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Área */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Área</h3>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Área (m²):</span>
+                    <p className="text-sm">
+                      {selectedMarca.observacao?.includes("Área:") 
+                        ? selectedMarca.observacao.match(/Área:\s*([^|]+)/)?.[1]?.trim() || "-"
+                        : "-"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Data */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Data
+                  </h3>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Data da Vistoria:</span>
+                    <p className="text-sm">
+                      {new Date(selectedMarca.data_vistoria).toLocaleDateString("pt-BR")}
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="foto" className="mt-4">
+                {selectedMarca.foto_url ? (
                   <div className="flex justify-center">
                     <img
                       src={supabase.storage.from('marcas-longitudinais').getPublicUrl(selectedMarca.foto_url).data.publicUrl}
                       alt="Marca Longitudinal"
-                      className="rounded-lg max-w-full h-auto max-h-96 object-contain"
+                      className="rounded-lg max-w-full h-auto"
                     />
                   </div>
-                </div>
-              )}
-
-              {/* Identificação Básica */}
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Identificação</h3>
-                <div className="grid grid-cols-4 gap-4">
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">BR:</span>
-                    <p className="text-sm">-</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">SNV:</span>
-                    <p className="text-sm">{selectedMarca.snv || "-"}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Código:</span>
-                    <p className="text-sm">{selectedMarca.tipo_demarcacao || "-"}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Posição:</span>
-                    <p className="text-sm">-</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dimensões */}
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Dimensões</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Largura da Faixa (m):</span>
-                    <p className="text-sm">
-                      {selectedMarca.largura_cm 
-                        ? (selectedMarca.largura_cm / 100).toFixed(2) 
-                        : "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Extensão (km):</span>
-                    <p className="text-sm">
-                      {selectedMarca.extensao_metros 
-                        ? (selectedMarca.extensao_metros / 1000).toFixed(2) 
-                        : "-"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Localização Inicial */}
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Localização Inicial
-                </h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Km Inicial:</span>
-                    <p className="text-sm">{selectedMarca.km_inicial?.toFixed(2) || "-"}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Latitude Inicial:</span>
-                    <p className="text-sm">
-                      {selectedMarca.latitude_inicial 
-                        ? selectedMarca.latitude_inicial.toFixed(6) 
-                        : "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Longitude Inicial:</span>
-                    <p className="text-sm">
-                      {selectedMarca.longitude_inicial 
-                        ? selectedMarca.longitude_inicial.toFixed(6) 
-                        : "-"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Localização Final */}
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Localização Final
-                </h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Km Final:</span>
-                    <p className="text-sm">{selectedMarca.km_final?.toFixed(2) || "-"}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Latitude Final:</span>
-                    <p className="text-sm">
-                      {selectedMarca.latitude_final 
-                        ? selectedMarca.latitude_final.toFixed(6) 
-                        : "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Longitude Final:</span>
-                    <p className="text-sm">
-                      {selectedMarca.longitude_final 
-                        ? selectedMarca.longitude_final.toFixed(6) 
-                        : "-"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Características da Demarcação */}
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Características da Demarcação</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Traço (m):</span>
-                    <p className="text-sm">
-                      {selectedMarca.observacao?.includes("Traço:") 
-                        ? selectedMarca.observacao.match(/Traço:\s*([^|]+)/)?.[1]?.trim() || "-"
-                        : "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Espaçamento (m):</span>
-                    <p className="text-sm">
-                      {selectedMarca.observacao?.includes("Espaçamento:") 
-                        ? selectedMarca.observacao.match(/Espaçamento:\s*([^|]+)/)?.[1]?.trim() || "-"
-                        : "-"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Material */}
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Material</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Material:</span>
-                    <p className="text-sm">{selectedMarca.material || "-"}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Outros materiais:</span>
-                    <p className="text-sm">-</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Área */}
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Área</h3>
-                <div>
-                  <span className="text-sm font-medium text-muted-foreground">Área (m²):</span>
-                  <p className="text-sm">
-                    {selectedMarca.observacao?.includes("Área:") 
-                      ? selectedMarca.observacao.match(/Área:\s*([^|]+)/)?.[1]?.trim() || "-"
-                      : "-"}
+                ) : (
+                  <p className="text-center py-8 text-muted-foreground">
+                    Nenhuma foto disponível
                   </p>
-                </div>
-              </div>
+                )}
+              </TabsContent>
 
-              {/* Histórico de Intervenções */}
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3">
-                  Histórico de Intervenções ({intervencoes.length})
-                </h3>
-                {intervencoes.length > 0 ? (
-                  <div className="space-y-3">
-                    {intervencoes.map((intervencao) => (
-                      <div key={intervencao.id} className="border-l-4 border-primary pl-4 py-2">
-                        <div className="flex justify-between items-start mb-2">
-                          <p className="font-semibold text-sm">{intervencao.motivo}</p>
-                          <Badge variant="outline">
-                            {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
-                          </Badge>
+              <TabsContent value="historico" className="mt-4">
+                {intervencoes && intervencoes.length > 0 ? (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm">
+                      Histórico de Intervenções ({intervencoes.length})
+                    </h3>
+                    <div className="space-y-4">
+                      {intervencoes.map((intervencao, index) => (
+                        <div key={intervencao.id} className="border rounded-lg p-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Badge variant="default">
+                              Intervenção #{intervencoes.length - index}
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            <div>
+                              <span className="text-sm font-medium">Motivo:</span>
+                              <p className="text-sm">{intervencao.motivo}</p>
+                            </div>
+                            {intervencao.tipo_demarcacao && (
+                              <div>
+                                <span className="text-sm font-medium">Tipo:</span>
+                                <p className="text-sm">{intervencao.tipo_demarcacao}</p>
+                              </div>
+                            )}
+                            {intervencao.cor && (
+                              <div>
+                                <span className="text-sm font-medium">Cor:</span>
+                                <p className="text-sm">{intervencao.cor}</p>
+                              </div>
+                            )}
+                            {intervencao.material && (
+                              <div>
+                                <span className="text-sm font-medium">Material:</span>
+                                <p className="text-sm">{intervencao.material}</p>
+                              </div>
+                            )}
+                            {intervencao.largura_cm && (
+                              <div>
+                                <span className="text-sm font-medium">Largura:</span>
+                                <p className="text-sm">{intervencao.largura_cm} cm</p>
+                              </div>
+                            )}
+                            {intervencao.espessura_cm && (
+                              <div>
+                                <span className="text-sm font-medium">Espessura:</span>
+                                <p className="text-sm">{intervencao.espessura_cm} cm</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-3 text-sm">
-                          {intervencao.tipo_demarcacao && (
-                            <div>
-                              <span className="text-muted-foreground">Tipo:</span>{" "}
-                              <span className="font-medium">{intervencao.tipo_demarcacao}</span>
-                            </div>
-                          )}
-                          {intervencao.cor && (
-                            <div>
-                              <span className="text-muted-foreground">Cor:</span>{" "}
-                              <span className="font-medium">{intervencao.cor}</span>
-                            </div>
-                          )}
-                          {intervencao.material && (
-                            <div>
-                              <span className="text-muted-foreground">Material:</span>{" "}
-                              <span className="font-medium">{intervencao.material}</span>
-                            </div>
-                          )}
-                          {intervencao.largura_cm && (
-                            <div>
-                              <span className="text-muted-foreground">Largura:</span>{" "}
-                              <span className="font-medium">{intervencao.largura_cm} cm</span>
-                            </div>
-                          )}
-                          {intervencao.espessura_cm && (
-                            <div>
-                              <span className="text-muted-foreground">Espessura:</span>{" "}
-                              <span className="font-medium">{intervencao.espessura_cm} cm</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 ) : (
-                  <p className="text-center py-6 text-muted-foreground text-sm">
+                  <p className="text-center py-8 text-muted-foreground">
                     Nenhuma intervenção registrada
                   </p>
                 )}
-              </div>
-            </div>
+              </TabsContent>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>
