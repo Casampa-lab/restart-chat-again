@@ -486,6 +486,120 @@ export type Database = {
         }
         Relationships: []
       }
+      ficha_marcas_transversais: {
+        Row: {
+          cor: string | null
+          created_at: string
+          data_vistoria: string
+          enviado_coordenador: boolean | null
+          espessura_cm: number | null
+          estado_conservacao: string | null
+          foto_url: string | null
+          id: string
+          km_final: number | null
+          km_inicial: number | null
+          largura_cm: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string
+          material: string | null
+          observacao: string | null
+          rodovia_id: string
+          tipo_demarcacao: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cor?: string | null
+          created_at?: string
+          data_vistoria: string
+          enviado_coordenador?: boolean | null
+          espessura_cm?: number | null
+          estado_conservacao?: string | null
+          foto_url?: string | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          largura_cm?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id: string
+          material?: string | null
+          observacao?: string | null
+          rodovia_id: string
+          tipo_demarcacao?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cor?: string | null
+          created_at?: string
+          data_vistoria?: string
+          enviado_coordenador?: boolean | null
+          espessura_cm?: number | null
+          estado_conservacao?: string | null
+          foto_url?: string | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          largura_cm?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string
+          material?: string | null
+          observacao?: string | null
+          rodovia_id?: string
+          tipo_demarcacao?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ficha_marcas_transversais_intervencoes: {
+        Row: {
+          cor: string | null
+          created_at: string
+          data_intervencao: string
+          espessura_cm: number | null
+          ficha_marcas_transversais_id: string
+          id: string
+          largura_cm: number | null
+          material: string | null
+          motivo: string
+          tipo_demarcacao: string | null
+        }
+        Insert: {
+          cor?: string | null
+          created_at?: string
+          data_intervencao: string
+          espessura_cm?: number | null
+          ficha_marcas_transversais_id: string
+          id?: string
+          largura_cm?: number | null
+          material?: string | null
+          motivo: string
+          tipo_demarcacao?: string | null
+        }
+        Update: {
+          cor?: string | null
+          created_at?: string
+          data_intervencao?: string
+          espessura_cm?: number | null
+          ficha_marcas_transversais_id?: string
+          id?: string
+          largura_cm?: number | null
+          material?: string | null
+          motivo?: string
+          tipo_demarcacao?: string | null
+        }
+        Relationships: []
+      }
       ficha_placa: {
         Row: {
           altura_m: number | null

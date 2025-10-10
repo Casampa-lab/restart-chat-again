@@ -24,6 +24,7 @@ import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
 import { InventarioPlacasViewer } from "@/components/InventarioPlacasViewer";
 import { InventarioMarcasLongitudinaisViewer } from "@/components/InventarioMarcasLongitudinaisViewer";
+import { InventarioMarcasTransversaisViewer } from "@/components/InventarioMarcasTransversaisViewer";
 import { InventarioInscricoesViewer } from "@/components/InventarioInscricoesViewer";
 import { InventarioTachasViewer } from "@/components/InventarioTachasViewer";
 import { InventarioDefensasViewer } from "@/components/InventarioDefensasViewer";
@@ -51,6 +52,7 @@ const Index = () => {
   });
   const [intervencaoSubTab, setIntervencaoSubTab] = useState("sv");
   const [shSubTab, setShSubTab] = useState("longitudinais");
+  const [inventarioShSubTab, setInventarioShSubTab] = useState("longitudinais");
   const [showInviteCode, setShowInviteCode] = useState(() => {
     return localStorage.getItem('hideInviteCode') !== 'true';
   });
@@ -415,11 +417,29 @@ const Index = () => {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="sh" className="mt-4">
-                      <InventarioMarcasLongitudinaisViewer 
-                        loteId={activeSession.lote_id} 
-                        rodoviaId={activeSession.rodovia_id}
-                        onRegistrarIntervencao={handleRegistrarIntervencaoSH}
-                      />
+                      <Tabs value={inventarioShSubTab} onValueChange={setInventarioShSubTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="longitudinais">
+                            Marcas Longitudinais
+                          </TabsTrigger>
+                          <TabsTrigger value="transversais">
+                            Marcas Transversais
+                          </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="longitudinais" className="mt-4">
+                          <InventarioMarcasLongitudinaisViewer 
+                            loteId={activeSession.lote_id} 
+                            rodoviaId={activeSession.rodovia_id}
+                            onRegistrarIntervencao={handleRegistrarIntervencaoSH}
+                          />
+                        </TabsContent>
+                        <TabsContent value="transversais" className="mt-4">
+                          <InventarioMarcasTransversaisViewer 
+                            loteId={activeSession.lote_id} 
+                            rodoviaId={activeSession.rodovia_id}
+                          />
+                        </TabsContent>
+                      </Tabs>
                     </TabsContent>
                     <TabsContent value="sv" className="mt-4">
                       <InventarioPlacasViewer 
