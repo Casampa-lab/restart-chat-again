@@ -332,6 +332,12 @@ serve(async (req) => {
           } else {
             // Apenas adicionar se o valor não for undefined ou null ou vazio
             if (value !== undefined && value !== null && value !== '' && value !== '-') {
+              // Não sobrescrever campos obrigatórios já definidos com valores padrão
+              if (tableName === "intervencoes_cilindros" && normalizedKey === "cor_corpo" && record.cor_corpo) {
+                // Manter o valor padrão se o Excel não tiver um valor válido
+                continue;
+              }
+              
               // Conversões especiais
               if (normalizedKey === "largura_cm" && key.includes("(m)")) {
                 // Converter de metros para centímetros
