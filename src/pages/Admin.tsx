@@ -13,7 +13,6 @@ import RodoviasManager from "@/components/admin/RodoviasManager";
 import { SupervisorasManager } from "@/components/admin/SupervisorasManager";
 import { UsuariosManager } from "@/components/admin/UsuariosManager";
 import { InventarioPlacasManager } from "@/components/admin/InventarioPlacasManager";
-import { DeleteInventarioTemp } from "@/components/admin/DeleteInventarioTemp";
 
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
@@ -145,10 +144,7 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="inventario">
-            <div className="space-y-6">
-              <DeleteInventarioTemp />
-              <InventarioPlacasManager />
-            </div>
+            <InventarioPlacasManager />
           </TabsContent>
         </Tabs>
       </main>
