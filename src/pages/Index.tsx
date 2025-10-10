@@ -24,88 +24,75 @@ import { FichaPlacaForm } from "@/components/FichaPlacaForm";
 import { InventarioPlacasViewer } from "@/components/InventarioPlacasViewer";
 import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
-
 const Index = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading, signOut } = useAuth();
-  const { activeSession, loading: sessionLoading, refreshSession, endSession } = useWorkSession(user?.id);
-  const { data: supervisora } = useSupervisora();
+  const {
+    user,
+    loading: authLoading,
+    signOut
+  } = useAuth();
+  const {
+    activeSession,
+    loading: sessionLoading,
+    refreshSession,
+    endSession
+  } = useWorkSession(user?.id);
+  const {
+    data: supervisora
+  } = useSupervisora();
   const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('activeTab') || 'frentes';
   });
-
   useEffect(() => {
     const checkAdminOrCoordinator = async () => {
       if (!user) return;
-
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .in("role", ["admin", "coordenador"])
-        .maybeSingle();
-
+      const {
+        data
+      } = await supabase.from("user_roles").select("role").eq("user_id", user.id).in("role", ["admin", "coordenador"]).maybeSingle();
       setIsAdminOrCoordinator(!!data);
     };
-
     checkAdminOrCoordinator();
   }, [user]);
-
   const handleSessionStarted = () => {
     refreshSession();
   };
-
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
-
   const handleSignOut = async () => {
     try {
       await signOut();
       // O redirecionamento será feito automaticamente pelo useEffect que monitora user
     } catch (error: any) {
       console.error("Erro ao fazer logout:", error);
-      navigate("/auth", { replace: true });
+      navigate("/auth", {
+        replace: true
+      });
     }
   };
-
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     localStorage.setItem('activeTab', value);
   };
-
   if (authLoading || sessionLoading) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
+    return <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
 
   // Determinar qual logo usar
-  const logoToDisplay = supervisora?.usar_logo_customizado && supervisora?.logo_url 
-    ? supervisora.logo_url 
-    : logoOperaVia;
-  const logoAlt = supervisora?.usar_logo_customizado && supervisora?.logo_url
-    ? `${supervisora.nome_empresa} - Sistema de Supervisão`
-    : "OperaVia - Sistema Nacional de Supervisão de Operação Rodoviária";
-
-  return (
-    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10 overflow-y-auto">
+  const logoToDisplay = supervisora?.usar_logo_customizado && supervisora?.logo_url ? supervisora.logo_url : logoOperaVia;
+  const logoAlt = supervisora?.usar_logo_customizado && supervisora?.logo_url ? `${supervisora.nome_empresa} - Sistema de Supervisão` : "OperaVia - Sistema Nacional de Supervisão de Operação Rodoviária";
+  return <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10 overflow-y-auto">
       <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="bg-white/95 rounded-lg px-3 py-2 shadow-md">
-                <img 
-                  src={logoToDisplay} 
-                  alt={logoAlt} 
-                  className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" 
-                  onClick={() => navigate("/")}
-                />
+                <img src={logoToDisplay} alt={logoAlt} className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate("/")} />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-primary-foreground">OperaVia</h1>
@@ -113,46 +100,22 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
-              {user?.email && (
-                <div className="bg-white/20 text-primary-foreground px-3 py-2 rounded-lg text-sm font-medium border border-white/30">
+              {user?.email && <div className="bg-white/20 text-primary-foreground px-3 py-2 rounded-lg text-sm font-medium border border-white/30">
                   👤 {user.email}
-                </div>
-              )}
-              <Button 
-                variant="secondary" 
-                size="lg"
-                className="font-semibold shadow-md hover:shadow-lg transition-shadow"
-                onClick={() => navigate("/modulos")}
-              >
+                </div>}
+              <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/modulos")}>
                 <Boxes className="mr-2 h-5 w-5" />
                 Módulos
               </Button>
-              <Button 
-                variant="secondary" 
-                size="lg"
-                className="font-semibold shadow-md hover:shadow-lg transition-shadow"
-                onClick={() => navigate("/coordenacao-fiscalizacao")}
-              >
+              <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/coordenacao-fiscalizacao")}>
                 <ClipboardList className="mr-2 h-5 w-5" />
                 Gestão
               </Button>
-              {isAdminOrCoordinator && (
-                <Button 
-                  variant="default"
-                  size="lg"
-                  className="font-semibold bg-accent text-accent-foreground shadow-md hover:shadow-lg transition-shadow hover:bg-accent/90"
-                  onClick={() => navigate("/admin")}
-                >
+              {isAdminOrCoordinator && <Button variant="default" size="lg" className="font-semibold bg-accent text-accent-foreground shadow-md hover:shadow-lg transition-shadow hover:bg-accent/90" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-5 w-5" />
                   Admin
-                </Button>
-              )}
-              <Button 
-                variant="destructive" 
-                size="lg"
-                onClick={handleSignOut}
-                className="font-semibold shadow-md hover:shadow-lg transition-shadow"
-              >
+                </Button>}
+              <Button variant="destructive" size="lg" onClick={handleSignOut} className="font-semibold shadow-md hover:shadow-lg transition-shadow">
                 <LogOut className="mr-2 h-5 w-5" />
                 Sair
               </Button>
@@ -162,8 +125,7 @@ const Index = () => {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-6 space-y-6">
-        {supervisora?.codigo_convite && (
-          <Card className="bg-accent/10 border-accent/20 shadow-md">
+        {supervisora?.codigo_convite && <Card className="bg-accent/10 border-accent/20 shadow-md">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
@@ -175,25 +137,18 @@ const Index = () => {
                     Compartilhe este código com novos usuários para que eles possam se cadastrar vinculados à {supervisora.nome_empresa}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => {
-                    navigator.clipboard.writeText(supervisora.codigo_convite!);
-                    toast.success("Código copiado!");
-                  }}
-                  className="shrink-0"
-                >
+                <Button variant="outline" size="lg" onClick={() => {
+              navigator.clipboard.writeText(supervisora.codigo_convite!);
+              toast.success("Código copiado!");
+            }} className="shrink-0">
                   <Copy className="h-4 w-4 mr-2" />
                   Copiar
                 </Button>
               </div>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
-        {activeSession ? (
-          <>
+        {activeSession ? <>
             <Card className="bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-elevated border-0">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -206,12 +161,7 @@ const Index = () => {
                       Seus dados estão sendo coletados para este lote e rodovia
                     </CardDescription>
                   </div>
-                  <Button 
-                    variant="default"
-                    size="lg"
-                    onClick={endSession}
-                    className="shrink-0 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-md"
-                  >
+                  <Button variant="default" size="lg" onClick={endSession} className="shrink-0 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-md">
                     <ArrowLeftRight className="h-5 w-5 mr-2" />
                     Trocar
                   </Button>
@@ -222,11 +172,9 @@ const Index = () => {
                   <Briefcase className="h-5 w-5" />
                   <span className="font-bold">Lote:</span>
                   <span className="font-semibold">{activeSession.lote?.numero}</span>
-                  {activeSession.lote?.empresa?.nome && (
-                    <span className="ml-2 opacity-90">
+                  {activeSession.lote?.empresa?.nome && <span className="ml-2 opacity-90">
                       ({activeSession.lote?.empresa?.nome})
-                    </span>
-                  )}
+                    </span>}
                 </div>
                 <div className="flex items-center gap-3 text-lg">
                   <MapPin className="h-5 w-5" />
@@ -260,53 +208,35 @@ const Index = () => {
                   <span className="text-xs">Ficha Verif</span>
                 </TabsTrigger>
                 <TabsTrigger value="prontuario" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Prontuário</span>
+                  <span className="text-xs">Inventário Dinâmico</span>
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="frentes" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/minhas-frentes-liberadas")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
+                    <Button variant="secondary" onClick={() => navigate("/minhas-frentes-liberadas")} className="shadow-md hover:shadow-lg transition-shadow">
                       <Eye className="mr-2 h-4 w-4" />
                       Ver meus registros
                     </Button>
                   </div>
-                  <FrenteLiberadaForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
+                  <FrenteLiberadaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                 </div>
               </TabsContent>
               <TabsContent value="ncs" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/minhas-ncs")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
+                    <Button variant="secondary" onClick={() => navigate("/minhas-ncs")} className="shadow-md hover:shadow-lg transition-shadow">
                       <Eye className="mr-2 h-4 w-4" />
                       Ver meus registros
                     </Button>
                   </div>
-                  <NaoConformidadeForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
+                  <NaoConformidadeForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                 </div>
               </TabsContent>
               <TabsContent value="retrorrefletividade" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/minhas-retrorrefletividades")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
+                    <Button variant="secondary" onClick={() => navigate("/minhas-retrorrefletividades")} className="shadow-md hover:shadow-lg transition-shadow">
                       <Eye className="mr-2 h-4 w-4" />
                       Ver meus registros
                     </Button>
@@ -323,16 +253,10 @@ const Index = () => {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="estatica" className="mt-4">
-                      <RetrorrefletividadeEstaticaForm
-                        loteId={activeSession.lote_id}
-                        rodoviaId={activeSession.rodovia_id}
-                      />
+                      <RetrorrefletividadeEstaticaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                     <TabsContent value="dinamica" className="mt-4">
-                      <RetrorrefletividadeDinamicaForm
-                        loteId={activeSession.lote_id}
-                        rodoviaId={activeSession.rodovia_id}
-                      />
+                      <RetrorrefletividadeDinamicaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                   </Tabs>
                 </div>
@@ -340,29 +264,18 @@ const Index = () => {
               <TabsContent value="defensas" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/minhas-defensas")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
+                    <Button variant="secondary" onClick={() => navigate("/minhas-defensas")} className="shadow-md hover:shadow-lg transition-shadow">
                       <Eye className="mr-2 h-4 w-4" />
                       Ver meus registros
                     </Button>
                   </div>
-                  <DefensasForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
+                  <DefensasForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                 </div>
               </TabsContent>
               <TabsContent value="intervencoes" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/minhas-intervencoes")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
+                    <Button variant="secondary" onClick={() => navigate("/minhas-intervencoes")} className="shadow-md hover:shadow-lg transition-shadow">
                       <Eye className="mr-2 h-4 w-4" />
                       Ver meus registros
                     </Button>
@@ -383,28 +296,16 @@ const Index = () => {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="sh" className="mt-4">
-                      <IntervencoesSHForm
-                        loteId={activeSession.lote_id}
-                        rodoviaId={activeSession.rodovia_id}
-                      />
+                      <IntervencoesSHForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                     <TabsContent value="inscricoes" className="mt-4">
-                      <IntervencoesInscricoesForm
-                        loteId={activeSession.lote_id}
-                        rodoviaId={activeSession.rodovia_id}
-                      />
+                      <IntervencoesInscricoesForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                     <TabsContent value="sv" className="mt-4">
-                      <IntervencoesSVForm
-                        loteId={activeSession.lote_id}
-                        rodoviaId={activeSession.rodovia_id}
-                      />
+                      <IntervencoesSVForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                     <TabsContent value="tacha" className="mt-4">
-                      <IntervencoesTachaForm
-                        loteId={activeSession.lote_id}
-                        rodoviaId={activeSession.rodovia_id}
-                      />
+                      <IntervencoesTachaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                   </Tabs>
                 </div>
@@ -412,19 +313,12 @@ const Index = () => {
               <TabsContent value="ficha-verif" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-end">
-                    <Button 
-                      variant="secondary"
-                      onClick={() => navigate("/minhas-fichas-verificacao")}
-                      className="shadow-md hover:shadow-lg transition-shadow"
-                    >
+                    <Button variant="secondary" onClick={() => navigate("/minhas-fichas-verificacao")} className="shadow-md hover:shadow-lg transition-shadow">
                       <Eye className="mr-2 h-4 w-4" />
                       Ver minhas fichas
                     </Button>
                   </div>
-                  <FichaVerificacaoForm
-                    loteId={activeSession.lote_id}
-                    rodoviaId={activeSession.rodovia_id}
-                  />
+                  <FichaVerificacaoForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                 </div>
               </TabsContent>
               <TabsContent value="prontuario" className="mt-6">
@@ -441,42 +335,26 @@ const Index = () => {
                     <TabsContent value="placas" className="mt-4">
                       <div className="space-y-4">
                         {/* Visualizador de Inventário */}
-                        <InventarioPlacasViewer
-                          loteId={activeSession.lote_id}
-                          rodoviaId={activeSession.rodovia_id}
-                        />
+                        <InventarioPlacasViewer loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                         
                         {/* Formulário de Cadastro Individual */}
                         <div className="flex justify-end">
-                          <Button 
-                            variant="secondary"
-                            onClick={() => navigate("/minhas-fichas-placa")}
-                            className="shadow-md hover:shadow-lg transition-shadow"
-                          >
+                          <Button variant="secondary" onClick={() => navigate("/minhas-fichas-placa")} className="shadow-md hover:shadow-lg transition-shadow">
                             <Eye className="mr-2 h-4 w-4" />
                             Ver minhas fichas
                           </Button>
                         </div>
-                        <FichaPlacaForm
-                          loteId={activeSession.lote_id}
-                          rodoviaId={activeSession.rodovia_id}
-                        />
+                        <FichaPlacaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                       </div>
                     </TabsContent>
                     <TabsContent value="defensas-pront" className="mt-4">
-                      <DefensasForm
-                        loteId={activeSession.lote_id}
-                        rodoviaId={activeSession.rodovia_id}
-                      />
+                      <DefensasForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                   </Tabs>
                 </div>
               </TabsContent>
             </Tabs>
-          </>
-        ) : (
-          <SessionSelector userId={user?.id} onSessionStarted={handleSessionStarted} />
-        )}
+          </> : <SessionSelector userId={user?.id} onSessionStarted={handleSessionStarted} />}
       </main>
 
       <div className="container mx-auto px-4 pb-6">
@@ -491,8 +369,6 @@ const Index = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
