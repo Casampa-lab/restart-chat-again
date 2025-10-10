@@ -291,7 +291,9 @@ export function InventarioTachasViewer({
                   <div className="grid grid-cols-4 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">BR:</span>
-                      <p className="text-sm">{selectedTacha.snv?.split('BMG')[0] || "-"}</p>
+                      <p className="text-sm">
+                        {selectedTacha.snv ? `BR-${selectedTacha.snv.split('BMG')[0]}` : "-"}
+                      </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">SNV:</span>
@@ -318,7 +320,7 @@ export function InventarioTachasViewer({
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Cor do Refletivo:</span>
-                      <p className="text-sm">{selectedTacha.cor_refletivo || "-"}</p>
+                      <p className="text-sm">{selectedTacha.cor_refletivo || "Não informado"}</p>
                     </div>
                   </div>
                 </div>
@@ -385,11 +387,11 @@ export function InventarioTachasViewer({
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Local Implantação:</span>
-                      <p className="text-sm">{selectedTacha.local_implantacao || "-"}</p>
+                      <p className="text-sm">{selectedTacha.local_implantacao || "Não informado"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Espaçamento (m):</span>
-                      <p className="text-sm">{selectedTacha.espacamento_m || "-"}</p>
+                      <p className="text-sm">{selectedTacha.espacamento_m || "Não informado"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Quantidade:</span>
