@@ -255,10 +255,11 @@ export function InventarioPorticosViewer({
           
           {selectedPortico && (
             <Tabs defaultValue="dados" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="dados">Dados</TabsTrigger>
+                <TabsTrigger value="foto">Foto</TabsTrigger>
                 <TabsTrigger value="intervencoes">
-                  Intervenções ({intervencoes.length})
+                  Histórico ({intervencoes.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -317,17 +318,6 @@ export function InventarioPorticosViewer({
                   </div>
                 )}
 
-                {selectedPortico.foto_url && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Foto</label>
-                    <img
-                      src={supabase.storage.from('porticos').getPublicUrl(selectedPortico.foto_url).data.publicUrl}
-                      alt="Pórtico"
-                      className="mt-2 rounded-lg max-w-full h-auto"
-                    />
-                  </div>
-                )}
-
                 {onRegistrarIntervencao && (
                   <div className="pt-4 border-t">
                     <Button 
@@ -340,6 +330,22 @@ export function InventarioPorticosViewer({
                       Registrar Intervenção
                     </Button>
                   </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="foto" className="mt-4">
+                {selectedPortico.foto_url ? (
+                  <div className="flex justify-center">
+                    <img
+                      src={supabase.storage.from('porticos').getPublicUrl(selectedPortico.foto_url).data.publicUrl}
+                      alt="Pórtico"
+                      className="rounded-lg max-w-full h-auto"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-center py-8 text-muted-foreground">
+                    Nenhuma foto disponível
+                  </p>
                 )}
               </TabsContent>
 
