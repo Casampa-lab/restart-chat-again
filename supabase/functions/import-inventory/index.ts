@@ -271,13 +271,6 @@ serve(async (req) => {
 
     // Preparar dados para inserção
     const recordsToInsert = jsonData.map((row: any) => {
-      // Converter campos do Excel para o formato esperado pela tabela
-      const record: any = {
-        user_id: user.id,
-        lote_id: loteId,
-        rodovia_id: rodoviaId,
-      };
-      
       // Determinar campo de data padrão baseado na tabela
       let dateField = "data_vistoria";
       if (tableName === "intervencoes_cilindros" || tableName === "intervencoes_inscricoes") {
@@ -285,6 +278,14 @@ serve(async (req) => {
       } else if (tableName === "defensas") {
         dateField = "data_inspecao";
       }
+      
+      // Converter campos do Excel para o formato esperado pela tabela
+      const record: any = {
+        user_id: user.id,
+        lote_id: loteId,
+        rodovia_id: rodoviaId,
+        [dateField]: new Date().toISOString().split('T')[0], // Data padrão
+      };
 
       // Mapear campos do Excel para os campos da tabela
       for (const [key, value] of Object.entries(row)) {
@@ -336,11 +337,6 @@ serve(async (req) => {
             }
           }
         }
-      }
-      
-      // Garantir que o campo de data sempre tenha um valor
-      if (!record[dateField]) {
-        record[dateField] = new Date().toISOString().split('T')[0];
       }
 
       return record;
