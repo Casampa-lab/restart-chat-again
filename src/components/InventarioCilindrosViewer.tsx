@@ -258,38 +258,52 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
       </Card>
 
       <Dialog open={!!selectedCilindro} onOpenChange={() => setSelectedCilindro(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-semibold">
-                Ficha de Visualização - Cilindro Delineador
-              </DialogTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSelectedCilindro(null)}
-                className="h-8 w-8"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Ficha de Visualização - Cilindro Delineador</span>
+              <div className="flex gap-2">
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={() => {
+                    toast.info("Funcionalidade em desenvolvimento");
+                  }}
+                >
+                  Registrar Intervenção
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setSelectedCilindro(null)}
+                >
+                  Voltar
+                </Button>
+              </div>
+            </DialogTitle>
           </DialogHeader>
           
           {selectedCilindro && (
             <>
               {/* Identification Section */}
-              <div className="bg-muted/50 rounded-lg p-4 mb-4">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3">
-                  Identificação
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
+              <div className="border rounded-lg p-4 mb-4">
+                <h3 className="font-semibold mb-3">Identificação</h3>
+                <div className="grid grid-cols-4 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">BR:</p>
-                    <p className="text-sm font-medium">{rodovia?.codigo || "-"}</p>
+                    <span className="text-sm font-medium text-muted-foreground">BR:</span>
+                    <p className="text-sm">{rodovia?.codigo || "-"}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">SNV:</p>
-                    <p className="text-sm font-medium">{selectedCilindro.snv || "-"}</p>
+                    <span className="text-sm font-medium text-muted-foreground">SNV:</span>
+                    <p className="text-sm">{selectedCilindro.snv || "-"}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Cor (Corpo):</span>
+                    <p className="text-sm">{selectedCilindro.cor_corpo}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Local:</span>
+                    <p className="text-sm">{selectedCilindro.local_implantacao || "-"}</p>
                   </div>
                 </div>
               </div>
@@ -301,84 +315,114 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
               </TabsList>
 
               <TabsContent value="dados" className="space-y-4 mt-4">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                      Características
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Data Vistoria</p>
-                        <p className="text-sm flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(selectedCilindro.data_vistoria).toLocaleDateString("pt-BR")}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Cor (Corpo)</p>
-                        <p className="text-sm">{selectedCilindro.cor_corpo}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Cor (Refletivo)</p>
-                        <p className="text-sm">{selectedCilindro.cor_refletivo || "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Tipo Refletivo</p>
-                        <p className="text-sm">{selectedCilindro.tipo_refletivo || "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Local de Implantação</p>
-                        <p className="text-sm">{selectedCilindro.local_implantacao || "-"}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      Localização
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">KM Inicial</p>
-                        <p className="text-sm">{selectedCilindro.km_inicial?.toFixed(3)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">KM Final</p>
-                        <p className="text-sm">{selectedCilindro.km_final?.toFixed(3)}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                      Dimensões e Quantidade
-                    </h3>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Quantidade</p>
-                        <p className="text-sm">{selectedCilindro.quantidade || "-"} unidades</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Extensão (km)</p>
-                        <p className="text-sm">{selectedCilindro.extensao_km?.toFixed(3) || "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Espaçamento (m)</p>
-                        <p className="text-sm">{selectedCilindro.espacamento_m || "-"}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {selectedCilindro.observacao && (
+                {/* Características */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Características</h3>
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                        Observações
-                      </h3>
-                      <p className="text-sm">{selectedCilindro.observacao}</p>
+                      <span className="text-sm font-medium text-muted-foreground">Data Vistoria:</span>
+                      <p className="text-sm flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(selectedCilindro.data_vistoria).toLocaleDateString("pt-BR")}
+                      </p>
                     </div>
-                  )}
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Cor (Refletivo):</span>
+                      <p className="text-sm">{selectedCilindro.cor_refletivo || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo Refletivo:</span>
+                      <p className="text-sm">{selectedCilindro.tipo_refletivo || "-"}</p>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Localização Inicial */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Localização Inicial
+                  </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Km Inicial:</span>
+                      <p className="text-sm">{selectedCilindro.km_inicial?.toFixed(2) || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Latitude Inicial:</span>
+                      <p className="text-sm">
+                        {selectedCilindro.latitude_inicial 
+                          ? selectedCilindro.latitude_inicial.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Longitude Inicial:</span>
+                      <p className="text-sm">
+                        {selectedCilindro.longitude_inicial 
+                          ? selectedCilindro.longitude_inicial.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Localização Final */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Localização Final
+                  </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Km Final:</span>
+                      <p className="text-sm">{selectedCilindro.km_final?.toFixed(2) || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Latitude Final:</span>
+                      <p className="text-sm">
+                        {selectedCilindro.latitude_final 
+                          ? selectedCilindro.latitude_final.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Longitude Final:</span>
+                      <p className="text-sm">
+                        {selectedCilindro.longitude_final 
+                          ? selectedCilindro.longitude_final.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dimensões e Quantidade */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Dimensões e Quantidade</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Quantidade:</span>
+                      <p className="text-sm">{selectedCilindro.quantidade || "-"} unidades</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Extensão (km):</span>
+                      <p className="text-sm">{selectedCilindro.extensao_km?.toFixed(3) || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Espaçamento (m):</span>
+                      <p className="text-sm">{selectedCilindro.espacamento_m || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Observações */}
+                {selectedCilindro.observacao && (
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3">Observações</h3>
+                    <p className="text-sm">{selectedCilindro.observacao}</p>
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="foto" className="mt-4">
@@ -455,23 +499,6 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                 )}
               </TabsContent>
             </Tabs>
-
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-2 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => setSelectedCilindro(null)}
-              >
-                Voltar
-              </Button>
-              <Button
-                onClick={() => {
-                  toast.info("Funcionalidade em desenvolvimento");
-                }}
-              >
-                Registrar Intervenção
-              </Button>
-            </div>
           </>
           )}
         </DialogContent>
