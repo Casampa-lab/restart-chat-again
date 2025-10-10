@@ -284,30 +284,6 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
           </DialogHeader>
           
           {selectedCilindro && (
-            <>
-              {/* Identificação - Before Tabs */}
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Identificação</h3>
-                <div className="grid grid-cols-4 gap-4">
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">BR:</span>
-                    <p className="text-sm">{rodovia?.codigo || "-"}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">SNV:</span>
-                    <p className="text-sm">{selectedCilindro.snv || "-"}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Cor (Corpo):</span>
-                    <p className="text-sm">{selectedCilindro.cor_corpo}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Local:</span>
-                    <p className="text-sm">{selectedCilindro.local_implantacao || "-"}</p>
-                  </div>
-                </div>
-              </div>
-
             <Tabs defaultValue="dados" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="dados">Dados</TabsTrigger>
@@ -316,6 +292,28 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
               </TabsList>
 
               <TabsContent value="dados" className="space-y-4 mt-4">
+                {/* Identificação */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Identificação</h3>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">BR:</span>
+                      <p className="text-sm">{rodovia?.codigo || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">SNV:</span>
+                      <p className="text-sm">{selectedCilindro.snv || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Cor (Corpo):</span>
+                      <p className="text-sm">{selectedCilindro.cor_corpo}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Local:</span>
+                      <p className="text-sm">{selectedCilindro.local_implantacao || "-"}</p>
+                    </div>
+                  </div>
+                </div>
                 {/* Características */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3">Características</h3>
@@ -500,7 +498,6 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                 )}
               </TabsContent>
             </Tabs>
-          </>
           )}
         </DialogContent>
       </Dialog>
