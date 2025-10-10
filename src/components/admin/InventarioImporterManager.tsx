@@ -275,7 +275,21 @@ export function InventarioImporterManager() {
           // Helper para buscar valor com variações de nome
           const getVal = (...keys: string[]) => {
             for (const key of keys) {
+              // Tentar com a chave original
               if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+              
+              // Tentar normalizando espaços extras da chave buscada
+              const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
+              
+              // Procurar nas chaves do Excel normalizando espaços
+              for (const excelKey of Object.keys(excelRow)) {
+                const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
+                if (normalizedExcelKey === normalizedSearchKey || 
+                    normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
+                  const value = excelRow[excelKey];
+                  if (value !== undefined && value !== null && value !== "") return value;
+                }
+              }
             }
             return null;
           };
@@ -344,7 +358,21 @@ export function InventarioImporterManager() {
           // Helper para buscar valor com variações de nome
           const getVal = (...keys: string[]) => {
             for (const key of keys) {
+              // Tentar com a chave original
               if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+              
+              // Tentar normalizando espaços extras da chave buscada
+              const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
+              
+              // Procurar nas chaves do Excel normalizando espaços
+              for (const excelKey of Object.keys(excelRow)) {
+                const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
+                if (normalizedExcelKey === normalizedSearchKey || 
+                    normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
+                  const value = excelRow[excelKey];
+                  if (value !== undefined && value !== null && value !== "") return value;
+                }
+              }
             }
             return null;
           };
@@ -409,9 +437,24 @@ export function InventarioImporterManager() {
         // Adicionar mapeamento específico para placas
         if (inventoryType === "placas") {
           const excelRow = row as any;
+          // Helper para buscar valor com variações de nome
           const getVal = (...keys: string[]) => {
             for (const key of keys) {
+              // Tentar com a chave original
               if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+              
+              // Tentar normalizando espaços extras da chave buscada
+              const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
+              
+              // Procurar nas chaves do Excel normalizando espaços
+              for (const excelKey of Object.keys(excelRow)) {
+                const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
+                if (normalizedExcelKey === normalizedSearchKey || 
+                    normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
+                  const value = excelRow[excelKey];
+                  if (value !== undefined && value !== null && value !== "") return value;
+                }
+              }
             }
             return null;
           };
@@ -475,7 +518,21 @@ export function InventarioImporterManager() {
           const excelRow = row as any;
           const getVal = (...keys: string[]) => {
             for (const key of keys) {
+              // Tentar com a chave original
               if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+              
+              // Tentar normalizando espaços extras da chave buscada
+              const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
+              
+              // Procurar nas chaves do Excel normalizando espaços
+              for (const excelKey of Object.keys(excelRow)) {
+                const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
+                if (normalizedExcelKey === normalizedSearchKey || 
+                    normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
+                  const value = excelRow[excelKey];
+                  if (value !== undefined && value !== null && value !== "") return value;
+                }
+              }
             }
             return null;
           };
@@ -520,7 +577,21 @@ export function InventarioImporterManager() {
           const excelRow = row as any;
           const getVal = (...keys: string[]) => {
             for (const key of keys) {
+              // Tentar com a chave original
               if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+              
+              // Tentar normalizando espaços extras da chave buscada
+              const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
+              
+              // Procurar nas chaves do Excel normalizando espaços
+              for (const excelKey of Object.keys(excelRow)) {
+                const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
+                if (normalizedExcelKey === normalizedSearchKey || 
+                    normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
+                  const value = excelRow[excelKey];
+                  if (value !== undefined && value !== null && value !== "") return value;
+                }
+              }
             }
             return null;
           };
@@ -563,7 +634,21 @@ export function InventarioImporterManager() {
           const excelRow = row as any;
           const getVal = (...keys: string[]) => {
             for (const key of keys) {
+              // Tentar com a chave original
               if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+              
+              // Tentar normalizando espaços extras da chave buscada
+              const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
+              
+              // Procurar nas chaves do Excel normalizando espaços
+              for (const excelKey of Object.keys(excelRow)) {
+                const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
+                if (normalizedExcelKey === normalizedSearchKey || 
+                    normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
+                  const value = excelRow[excelKey];
+                  if (value !== undefined && value !== null && value !== "") return value;
+                }
+              }
             }
             return null;
           };
@@ -606,7 +691,21 @@ export function InventarioImporterManager() {
           const excelRow = row as any;
           const getVal = (...keys: string[]) => {
             for (const key of keys) {
+              // Tentar com a chave original
               if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+              
+              // Tentar normalizando espaços extras da chave buscada
+              const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
+              
+              // Procurar nas chaves do Excel normalizando espaços
+              for (const excelKey of Object.keys(excelRow)) {
+                const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
+                if (normalizedExcelKey === normalizedSearchKey || 
+                    normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
+                  const value = excelRow[excelKey];
+                  if (value !== undefined && value !== null && value !== "") return value;
+                }
+              }
             }
             return null;
           };

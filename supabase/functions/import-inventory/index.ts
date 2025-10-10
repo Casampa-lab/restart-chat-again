@@ -338,12 +338,14 @@ serve(async (req) => {
           continue;
         }
         
-        let normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_");
+        // Normalizar chave removendo espaços extras entre palavras
+        const cleanKey = key.replace(/\s+/g, ' ').trim();
+        let normalizedKey = cleanKey.toLowerCase().replace(/\s+/g, "_");
         
         // Aplicar mapeamento específico se existir
-        const originalKey = key; // Guardar chave original para verificações especiais
-        if (fieldMapping[key]) {
-          normalizedKey = fieldMapping[key];
+        const originalKey = cleanKey; // Guardar chave original limpa para verificações especiais
+        if (fieldMapping[cleanKey]) {
+          normalizedKey = fieldMapping[cleanKey];
         } else if (fieldMapping[normalizedKey]) {
           normalizedKey = fieldMapping[normalizedKey];
         }
