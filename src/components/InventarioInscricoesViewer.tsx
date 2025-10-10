@@ -27,6 +27,7 @@ interface FichaInscricao {
   estado_conservacao: string | null;
   observacao: string | null;
   foto_url: string | null;
+  rodovia_id: string;
 }
 
 // Mapeamento de siglas para descrições completas
@@ -79,6 +80,20 @@ export function InventarioInscricoesViewer({
   const [searchLng, setSearchLng] = useState("");
   const [selectedInscricao, setSelectedInscricao] = useState<FichaInscricao | null>(null);
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
+
+  // Buscar informações da rodovia
+  const { data: rodovia } = useQuery({
+    queryKey: ["rodovia", rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rodovias")
+        .select("codigo")
+        .eq("id", rodoviaId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -324,10 +339,14 @@ export function InventarioInscricoesViewer({
                     <h3 className="font-semibold mb-3">Identificação</h3>
                     <div className="grid grid-cols-4 gap-4">
                       <div>
+                        <span className="text-sm font-medium text-muted-foreground">BR:</span>
+                        <p className="text-sm">{rodovia?.codigo || "-"}</p>
+                      </div>
+                      <div>
                         <span className="text-sm font-medium text-muted-foreground">Sigla:</span>
                         <p className="text-sm font-semibold">{sigla}</p>
                       </div>
-                      <div className="col-span-3">
+                      <div className="col-span-2">
                         <span className="text-sm font-medium text-muted-foreground">Descrição:</span>
                         <p className="text-sm">{descricao}</p>
                       </div>
