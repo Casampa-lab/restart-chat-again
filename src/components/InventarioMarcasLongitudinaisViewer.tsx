@@ -182,8 +182,9 @@ export function InventarioMarcasLongitudinaisViewer({
                       <TableHead>Material</TableHead>
                       <TableHead>Km Inicial</TableHead>
                       <TableHead>Km Final</TableHead>
+                      <TableHead>Traço (m)</TableHead>
+                      <TableHead>Espaçamento (m)</TableHead>
                       <TableHead>Extensão (km)</TableHead>
-                      {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead>Data Vistoria</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
@@ -198,14 +199,13 @@ export function InventarioMarcasLongitudinaisViewer({
                         <TableCell>{marca.material || "-"}</TableCell>
                         <TableCell>{marca.km_inicial?.toFixed(2) || "-"}</TableCell>
                         <TableCell>{marca.km_final?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>
+                          {marca.observacao?.match(/Traço:\s*([^m|]+)m?/)?.[1]?.trim() || "-"}
+                        </TableCell>
+                        <TableCell>
+                          {marca.observacao?.match(/Espaçamento:\s*([^m|]+)m?/)?.[1]?.trim() || "-"}
+                        </TableCell>
                         <TableCell>{marca.extensao_metros ? (marca.extensao_metros / 1000).toFixed(2) : "-"}</TableCell>
-                        {searchLat && searchLng && (
-                          <TableCell>
-                            <Badge variant="secondary">
-                              {(marca as any).distance?.toFixed(1)}m
-                            </Badge>
-                          </TableCell>
-                        )}
                         <TableCell>
                           {marca.data_vistoria
                             ? new Date(marca.data_vistoria).toLocaleDateString("pt-BR")
