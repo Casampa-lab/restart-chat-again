@@ -284,7 +284,7 @@ serve(async (req) => {
         user_id: user.id,
         lote_id: loteId,
         rodovia_id: rodoviaId,
-        [dateField]: "2024-11-17", // Data padrão: 17/11/2024
+        [dateField]: "2023-01-01", // Data padrão: 01/01/2023
       };
 
       // Mapear campos do Excel para os campos da tabela
