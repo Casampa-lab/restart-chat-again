@@ -200,6 +200,9 @@ const Index = () => {
                 <TabsTrigger value="frentes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Frente de Serviço</span>
                 </TabsTrigger>
+                <TabsTrigger value="ficha-verif" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs">Serviços</span>
+                </TabsTrigger>
                 <TabsTrigger value="ncs" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Não Conformidade</span>
                 </TabsTrigger>
@@ -208,10 +211,6 @@ const Index = () => {
                 </TabsTrigger>
                 <TabsTrigger value="intervencoes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Intervenções</span>
-                </TabsTrigger>
-                <TabsTrigger value="ficha-verif" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs font-bold">3.1.19</span>
-                  <span className="text-xs">Ficha Verif</span>
                 </TabsTrigger>
                 <TabsTrigger value="prontuario" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Inventário Dinâmico</span>
@@ -226,6 +225,17 @@ const Index = () => {
                     </Button>
                   </div>
                   <FrenteLiberadaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                </div>
+              </TabsContent>
+              <TabsContent value="ficha-verif" className="mt-6">
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button variant="secondary" onClick={() => navigate("/minhas-fichas-verificacao")} className="shadow-md hover:shadow-lg transition-shadow">
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver minhas fichas
+                    </Button>
+                  </div>
+                  <FichaVerificacaoForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                 </div>
               </TabsContent>
               <TabsContent value="ncs" className="mt-6">
@@ -314,17 +324,6 @@ const Index = () => {
                       <DefensasForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                   </Tabs>
-                </div>
-              </TabsContent>
-              <TabsContent value="ficha-verif" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button variant="secondary" onClick={() => navigate("/minhas-fichas-verificacao")} className="shadow-md hover:shadow-lg transition-shadow">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver minhas fichas
-                    </Button>
-                  </div>
-                  <FichaVerificacaoForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                 </div>
               </TabsContent>
               <TabsContent value="prontuario" className="mt-6">
