@@ -169,18 +169,53 @@ serve(async (req) => {
         "largura_da_faixa_(m)": "largura_cm",
         "extensão_(km)": "extensao_metros",
         "código": "tipo_demarcacao",
-        "posição": "observacao", // Guardar em observação temporariamente
-        "traço_(m)": "", // Ignorar
-        "espaçamento_(m)": "", // Ignorar
-        "outros_materiais": "", // Ignorar
-        "área_(m²)": "", // Ignorar (não há campo correspondente)
-        "br": "", // Ignorar (info já está em rodovia_id)
+        "posição": "observacao",
+        "traço_(m)": "",
+        "espaçamento_(m)": "",
+        "outros_materiais": "",
+        "área_(m²)": "",
+        "br": "",
+      },
+      ficha_inscricoes: {
+        "área_(m²)": "area_m2",
+        "tipo": "tipo_inscricao",
+        "data_vistoria": "data_vistoria",
+        "data": "data_vistoria",
+        "br": "",
       },
       ficha_placa: {
         "dimensões_(mm)": "dimensoes_mm",
         "área_(m²)": "area_m2",
+        "data": "data_vistoria",
       },
-      // Adicionar outros mapeamentos conforme necessário
+      intervencoes_cilindros: {
+        "extensão_(km)": "extensao_km",
+        "espaçamento_(m)": "espacamento_m",
+        "tipo_refletivo": "tipo_refletivo",
+        "cor_refletivo": "cor_refletivo",
+        "cor_corpo": "cor_corpo",
+        "data": "data_intervencao",
+        "data_intervenção": "data_intervencao",
+        "br": "",
+      },
+      ficha_tachas: {
+        "extensão_(km)": "extensao_km",
+        "espaçamento_(m)": "espacamento_m",
+        "data": "data_vistoria",
+        "br": "",
+      },
+      ficha_porticos: {
+        "altura_livre_(m)": "altura_livre_m",
+        "vão_horizontal_(m)": "vao_horizontal_m",
+        "data": "data_vistoria",
+        "br": "",
+      },
+      defensas: {
+        "extensão_(m)": "extensao_metros",
+        "data": "data_inspecao",
+        "data_inspeção": "data_inspecao",
+        "br": "",
+      },
     };
 
     // Campos válidos por tabela (baseado no schema)
@@ -192,6 +227,12 @@ serve(async (req) => {
         "longitude_final", "longitude_inicial", "material",
         "observacao", "tipo_demarcacao", "snv"
       ],
+      ficha_inscricoes: [
+        "area_m2", "cor", "data_vistoria", "dimensoes", "estado_conservacao",
+        "foto_url", "km_final", "km_inicial", "latitude_final", "latitude_inicial",
+        "longitude_final", "longitude_inicial", "material_utilizado",
+        "observacao", "tipo_inscricao"
+      ],
       ficha_placa: [
         "altura_m", "area_m2", "br", "codigo", "contrato", "data_implantacao",
         "data_vistoria", "descricao", "dimensoes_mm", "distancia_m", "empresa",
@@ -201,7 +242,28 @@ serve(async (req) => {
         "retrorrefletividade", "snv", "substrato", "suporte", "tipo", "uf",
         "velocidade"
       ],
-      // Adicionar outros inventários conforme necessário
+      intervencoes_cilindros: [
+        "cor_corpo", "cor_refletivo", "data_intervencao", "espacamento_m",
+        "extensao_km", "km_final", "km_inicial", "latitude_final", "latitude_inicial",
+        "local_implantacao", "longitude_final", "longitude_inicial", "observacao",
+        "quantidade", "snv", "tipo_refletivo"
+      ],
+      ficha_tachas: [
+        "corpo", "cor_refletivo", "data_vistoria", "descricao", "espacamento_m",
+        "extensao_km", "foto_url", "km_final", "km_inicial", "latitude_final",
+        "latitude_inicial", "local_implantacao", "longitude_final", "longitude_inicial",
+        "observacao", "quantidade", "refletivo", "snv"
+      ],
+      ficha_porticos: [
+        "altura_livre_m", "data_vistoria", "estado_conservacao", "foto_url",
+        "km", "lado", "latitude", "longitude", "observacao", "snv", "tipo",
+        "vao_horizontal_m"
+      ],
+      defensas: [
+        "data_inspecao", "estado_conservacao", "extensao_metros", "km_final",
+        "km_inicial", "lado", "necessita_intervencao", "nivel_risco",
+        "observacao", "tipo_avaria", "tipo_defensa"
+      ],
     };
 
     const fieldMapping = FIELD_MAPPINGS[tableName] || {};
@@ -214,8 +276,15 @@ serve(async (req) => {
         user_id: user.id,
         lote_id: loteId,
         rodovia_id: rodoviaId,
-        data_vistoria: new Date().toISOString().split('T')[0], // Data padrão se não vier do Excel
       };
+      
+      // Determinar campo de data padrão baseado na tabela
+      let dateField = "data_vistoria";
+      if (tableName === "intervencoes_cilindros" || tableName === "intervencoes_inscricoes") {
+        dateField = "data_intervencao";
+      } else if (tableName === "defensas") {
+        dateField = "data_inspecao";
+      }
 
       // Mapear campos do Excel para os campos da tabela
       for (const [key, value] of Object.entries(row)) {
@@ -267,6 +336,11 @@ serve(async (req) => {
             }
           }
         }
+      }
+      
+      // Garantir que o campo de data sempre tenha um valor
+      if (!record[dateField]) {
+        record[dateField] = new Date().toISOString().split('T')[0];
       }
 
       return record;
