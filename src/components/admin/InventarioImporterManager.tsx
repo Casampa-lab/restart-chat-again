@@ -206,8 +206,8 @@ export function InventarioImporterManager() {
 
           const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_").replace(/[()]/g, "");
 
-          // Para defensas, marcas longitudinais, placas, tachas, inscricoes e cilindros, não adicionar campos automaticamente (serão mapeados explicitamente depois)
-          if (inventoryType !== "defensas" && inventoryType !== "marcas_longitudinais" && inventoryType !== "placas" && inventoryType !== "tachas" && inventoryType !== "inscricoes" && inventoryType !== "cilindros") {
+          // Para defensas, marcas longitudinais, placas, tachas, inscricoes, cilindros e porticos, não adicionar campos automaticamente (serão mapeados explicitamente depois)
+          if (inventoryType !== "defensas" && inventoryType !== "marcas_longitudinais" && inventoryType !== "placas" && inventoryType !== "tachas" && inventoryType !== "inscricoes" && inventoryType !== "cilindros" && inventoryType !== "porticos") {
             record[normalizedKey] = value;
           }
 
@@ -669,6 +669,54 @@ export function InventarioImporterManager() {
           
           // Data de intervenção padrão (cilindros usa data_intervencao em vez de data_vistoria)
           record.data_intervencao = new Date().toISOString().split('T')[0];
+        }
+
+        // Adicionar mapeamento específico para pórticos, semipórticos e braços projetados
+        if (inventoryType === "porticos") {
+          const excelRow = row as any;
+          
+          // BR - Rodovia (não está na tabela, guardar em observação se necessário)
+          const br = excelRow.BR || excelRow.br || null;
+          
+          // SNV - SNV de implantação
+          record.snv = excelRow.SNV || excelRow.snv || null;
+          
+          // Tipo - Tipo do suporte
+          record.tipo = excelRow.Tipo || excelRow.tipo || "Pórtico";
+          
+          // Altura Livre (m) - Altura livre do suporte
+          const alturaLivre = excelRow["Altura Livre (m)"] || excelRow.altura_livre_m || excelRow.altura_livre || null;
+          record.altura_livre_m = alturaLivre ? Number(alturaLivre) : null;
+          
+          // Vão Horizontal - Vão horizontal do suporte
+          const vaoHorizontal = excelRow["Vão Horizontal"] || excelRow.vao_horizontal || excelRow.vao_horizontal_m || null;
+          record.vao_horizontal_m = vaoHorizontal ? Number(vaoHorizontal) : null;
+          
+          // Lado - Lado de implantação do suporte
+          record.lado = excelRow.Lado || excelRow.lado || null;
+          
+          // Km - Km de implantação
+          record.km = Number(excelRow.Km || excelRow.km || 0);
+          
+          // Latitude - Latitude de implantação
+          record.latitude = excelRow.Latitude || excelRow.latitude || null;
+          
+          // Longitude - Longitude de implantação
+          record.longitude = excelRow.Longitude || excelRow.longitude || null;
+          
+          // Link da Fotografia
+          const linkFoto = excelRow["Link da Fotografia"] || excelRow.link_da_fotografia || excelRow.link_fotografia || null;
+          
+          // Montar observações com BR e link de foto se houver
+          const observacoes = [];
+          if (br) observacoes.push(`BR: ${br}`);
+          if (linkFoto) observacoes.push(`Link foto: ${linkFoto}`);
+          
+          record.observacao = observacoes.length > 0 ? observacoes.join(" | ") : null;
+          
+          // Campos com valores padrão
+          record.estado_conservacao = "Bom"; // Padrão
+          record.data_vistoria = new Date().toISOString().split('T')[0];
         }
 
         return record;

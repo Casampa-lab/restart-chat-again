@@ -264,73 +264,106 @@ export function InventarioPorticosViewer({
               </TabsList>
 
               <TabsContent value="dados" className="space-y-4 mt-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">KM</label>
-                    <p className="font-mono">{selectedPortico.km?.toFixed(3) || "-"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">SNV</label>
-                    <p className="font-mono">{selectedPortico.snv || "-"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Tipo</label>
-                    <p>{selectedPortico.tipo}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Lado</label>
-                    <p>{selectedPortico.lado || "-"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Altura Livre (m)</label>
-                    <p>{selectedPortico.altura_livre_m?.toFixed(2) || "-"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Vão Horizontal (m)</label>
-                    <p>{selectedPortico.vao_horizontal_m?.toFixed(2) || "-"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Estado de Conservação</label>
-                    <p>{selectedPortico.estado_conservacao || "-"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Data da Vistoria</label>
-                    <p>{new Date(selectedPortico.data_vistoria).toLocaleDateString("pt-BR")}</p>
-                  </div>
-                  {selectedPortico.latitude && selectedPortico.longitude && (
-                    <>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                      Identificação
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Latitude</label>
-                        <p className="font-mono text-sm">{selectedPortico.latitude}</p>
+                        <label className="text-sm font-medium text-muted-foreground">SNV</label>
+                        <p className="font-mono">{selectedPortico.snv || "-"}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Longitude</label>
-                        <p className="font-mono text-sm">{selectedPortico.longitude}</p>
+                        <label className="text-sm font-medium text-muted-foreground">Tipo</label>
+                        <p>{selectedPortico.tipo}</p>
                       </div>
-                    </>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Lado</label>
+                        <p>{selectedPortico.lado || "-"}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Estado de Conservação</label>
+                        <p>{selectedPortico.estado_conservacao || "-"}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Localização
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">KM</label>
+                        <p className="font-mono">{selectedPortico.km?.toFixed(3) || "-"}</p>
+                      </div>
+                      {selectedPortico.latitude && selectedPortico.longitude && (
+                        <>
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Latitude</label>
+                            <p className="font-mono text-sm">{selectedPortico.latitude.toFixed(6)}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Longitude</label>
+                            <p className="font-mono text-sm">{selectedPortico.longitude.toFixed(6)}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                      Dimensões
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Altura Livre (m)</label>
+                        <p>{selectedPortico.altura_livre_m?.toFixed(2) || "-"}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Vão Horizontal (m)</label>
+                        <p>{selectedPortico.vao_horizontal_m?.toFixed(2) || "-"}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Data
+                    </h3>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Data da Vistoria</label>
+                      <p>{new Date(selectedPortico.data_vistoria).toLocaleDateString("pt-BR")}</p>
+                    </div>
+                  </div>
+
+                  {selectedPortico.observacao && (
+                    <div>
+                      <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                        Observações
+                      </h3>
+                      <p className="text-sm">{selectedPortico.observacao}</p>
+                    </div>
+                  )}
+
+                  {onRegistrarIntervencao && (
+                    <div className="pt-4 border-t">
+                      <Button 
+                        onClick={() => {
+                          onRegistrarIntervencao(selectedPortico);
+                          setSelectedPortico(null);
+                        }}
+                        className="w-full"
+                      >
+                        Registrar Intervenção
+                      </Button>
+                    </div>
                   )}
                 </div>
-
-                {selectedPortico.observacao && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Observações</label>
-                    <p className="mt-1 text-sm">{selectedPortico.observacao}</p>
-                  </div>
-                )}
-
-                {onRegistrarIntervencao && (
-                  <div className="pt-4 border-t">
-                    <Button 
-                      onClick={() => {
-                        onRegistrarIntervencao(selectedPortico);
-                        setSelectedPortico(null);
-                      }}
-                      className="w-full"
-                    >
-                      Registrar Intervenção
-                    </Button>
-                  </div>
-                )}
               </TabsContent>
 
               <TabsContent value="foto" className="mt-4">
