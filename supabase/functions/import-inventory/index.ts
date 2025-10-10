@@ -291,6 +291,8 @@ serve(async (req) => {
       if (tableName === "ficha_inscricoes") {
         record.tipo_inscricao = "Outros"; // Valor padrão, será sobrescrito se vier do Excel
         record.cor = "Branca"; // Valor padrão, será sobrescrito se vier do Excel
+      } else if (tableName === "intervencoes_cilindros") {
+        record.cor_corpo = "Branco"; // Valor padrão, será sobrescrito se vier do Excel
       }
 
       // Mapear campos do Excel para os campos da tabela
