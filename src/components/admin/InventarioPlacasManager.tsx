@@ -87,20 +87,19 @@ export function InventarioPlacasManager() {
 
       toast.success(`${placasData.length} placas encontradas na planilha`);
 
-      // 2. Upload das fotos e criar mapeamento por nome e data
+      // 2. Upload das fotos e criar mapeamento nome -> URL e nome -> data
       const photoUrls: Record<string, string> = {};
-      const photoDates: Record<string, string> = {};
+      const photoDates: Record<string, Date> = {};
       
       if (photosFolder && photosFolder.length > 0) {
         setProgress(`Fazendo upload de ${photosFolder.length} fotos...`);
         
         for (let i = 0; i < photosFolder.length; i++) {
           const photo = photosFolder[i];
-          const photoPath = `inventario/${selectedLote}/${Date.now()}_${photo.name}`;
+          const timestamp = Date.now();
+          const photoPath = `inventario/${selectedLote}/${timestamp}_${photo.name}`;
           
-          // Extrair data da foto (lastModified do arquivo)
-          const photoDate = new Date(photo.lastModified).toISOString().split("T")[0];
-          
+          // Upload da foto
           const { error: photoError } = await supabase.storage
             .from("placa-photos")
             .upload(photoPath, photo);
@@ -110,42 +109,40 @@ export function InventarioPlacasManager() {
               .from("placa-photos")
               .getPublicUrl(photoPath);
             
-            // Normalizar nome: remover extensão e criar variações
-            const nomeSemExt = photo.name.replace(/\.[^/.]+$/, ""); // Remove qualquer extensão
-            const nomeNormalizado = nomeSemExt.trim();
+            // Extrair data REAL da foto (lastModified)
+            const photoDate = new Date(photo.lastModified);
             
-            // Criar múltiplas chaves para aumentar chance de match
-            const chavesParaMapear = [
-              nomeNormalizado,
-              nomeNormalizado.toLowerCase(),
-              nomeNormalizado.toUpperCase(),
-              nomeSemExt,
-              nomeSemExt.toLowerCase(),
-              nomeSemExt.toUpperCase(),
-              photo.name, // Nome completo com extensão
-              photo.name.toLowerCase(),
-              photo.name.toUpperCase(),
+            // Criar chave base (nome sem extensão)
+            const nomeCompleto = photo.name;
+            const nomeSemExtensao = nomeCompleto.replace(/\.[^/.]+$/, "").trim();
+            
+            // Mapear com TODAS as variações possíveis
+            const variações = [
+              nomeSemExtensao,
+              nomeSemExtensao.toLowerCase(),
+              nomeSemExtensao.toUpperCase(),
+              nomeCompleto,
+              nomeCompleto.toLowerCase(),
+              nomeCompleto.toUpperCase(),
             ];
             
-            chavesParaMapear.forEach(chave => {
-              photoUrls[chave] = urlData.publicUrl;
-              photoDates[chave] = photoDate;
+            variações.forEach(variacao => {
+              photoUrls[variacao] = urlData.publicUrl;
+              photoDates[variacao] = photoDate;
             });
             
-            console.log(`✅ Foto mapeada: "${nomeNormalizado}" -> Data: ${photoDate}`);
+            console.log(`✅ [${i+1}/${photosFolder.length}] Foto: "${nomeSemExtensao}" | Data: ${photoDate.toISOString().split('T')[0]}`);
           } else {
-            console.error(`❌ Erro ao fazer upload da foto ${photo.name}:`, photoError);
+            console.error(`❌ Erro upload: ${photo.name}`, photoError);
           }
 
           if ((i + 1) % 10 === 0) {
-            setProgress(`Upload de fotos: ${i + 1}/${photosFolder.length}`);
+            setProgress(`Upload: ${i + 1}/${photosFolder.length}`);
           }
         }
         
-        console.log('📸 Total de fotos únicas:', photosFolder.length);
-        console.log('📸 Total de chaves mapeadas:', Object.keys(photoUrls).length);
-        console.log('📸 Primeiras 10 chaves:', Object.keys(photoUrls).slice(0, 10));
-        toast.success(`${photosFolder.length} fotos carregadas`);
+        console.log(`📸 ${photosFolder.length} fotos | ${Object.keys(photoUrls).length / 6} chaves únicas`);
+        toast.success(`${photosFolder.length} fotos carregadas com datas`);
       }
 
       // 3. Inserir dados no banco
@@ -163,45 +160,46 @@ export function InventarioPlacasManager() {
       let fotosNaoLinkadas = 0;
       
       const placasParaInserir = placasData.map((placa: PlacaData) => {
-        // Tentar múltiplas variações do nome da foto
-        let fotoUrl = null;
-        let dataVistoria = new Date().toISOString().split("T")[0]; // Data padrão se não encontrar foto
+        let fotoUrl: string | null = null;
+        let dataVistoria: string = new Date().toISOString().split("T")[0]; // Data padrão
         
         if (placa.foto_hiperlink) {
-          // Normalizar o nome do hiperlink
           const hiperlink = placa.foto_hiperlink.trim();
           
-          // Tentar todas as variações possíveis
+          // Tentar encontrar a foto com múltiplas variações
           const tentativas = [
             hiperlink,
             hiperlink.toLowerCase(),
             hiperlink.toUpperCase(),
-            hiperlink + '.jpg',
-            hiperlink + '.JPG',
-            hiperlink + '.jpeg',
-            hiperlink + '.JPEG',
-            hiperlink + '.png',
-            hiperlink + '.PNG',
-            hiperlink.toLowerCase() + '.jpg',
-            hiperlink.toLowerCase() + '.png',
-            hiperlink.toUpperCase() + '.JPG',
-            hiperlink.toUpperCase() + '.PNG',
+            `${hiperlink}.jpg`,
+            `${hiperlink}.JPG`,
+            `${hiperlink}.jpeg`,
+            `${hiperlink}.JPEG`,
+            `${hiperlink}.png`,
+            `${hiperlink}.PNG`,
+            `${hiperlink.toLowerCase()}.jpg`,
+            `${hiperlink.toUpperCase()}.JPG`,
           ];
           
           for (const tentativa of tentativas) {
             if (photoUrls[tentativa]) {
               fotoUrl = photoUrls[tentativa];
-              dataVistoria = photoDates[tentativa] || dataVistoria; // Usar data da foto
+              
+              // CRÍTICO: Usar a data da foto
+              const fotoDate = photoDates[tentativa];
+              if (fotoDate) {
+                dataVistoria = fotoDate.toISOString().split("T")[0];
+              }
+              
               fotosLinkadas++;
-              console.log(`✅ Match encontrado! "${hiperlink}" -> "${tentativa}" (SNV: ${placa.snv})`);
+              console.log(`✅ MATCH: "${hiperlink}" -> "${tentativa}" | Data: ${dataVistoria} | SNV: ${placa.snv}`);
               break;
             }
           }
           
           if (!fotoUrl) {
             fotosNaoLinkadas++;
-            console.warn(`❌ Foto não encontrada para: "${hiperlink}" (SNV: ${placa.snv})`);
-            console.warn('   Tentativas:', tentativas.slice(0, 5));
+            console.warn(`❌ SEM FOTO: "${hiperlink}" | SNV: ${placa.snv}`);
           }
         }
         
