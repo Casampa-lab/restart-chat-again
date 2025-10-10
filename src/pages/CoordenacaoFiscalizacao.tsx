@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Download } from "lucide-react";
+import { DeleteInventarioSelecionado } from "@/components/admin/DeleteInventarioSelecionado";
 import {
   exportFrentesLiberadas,
   exportNaoConformidades,
@@ -159,7 +160,7 @@ const CoordenacaoFiscalizacao = () => {
           </CardHeader>
           <CardContent className="pt-6">
             <Tabs defaultValue="frentes" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2 h-auto bg-muted p-2">
+              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 gap-2 h-auto bg-muted p-2">
                 <TabsTrigger value="frentes" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Frentes Liberadas
                 </TabsTrigger>
@@ -177,6 +178,9 @@ const CoordenacaoFiscalizacao = () => {
                 </TabsTrigger>
                 <TabsTrigger value="fichas" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Fichas
+                </TabsTrigger>
+                <TabsTrigger value="delete-inventario" className="whitespace-normal py-4 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground data-[state=active]:shadow-md font-semibold text-sm">
+                  🗑️ Deletar Inventário
                 </TabsTrigger>
               </TabsList>
 
@@ -395,6 +399,10 @@ const CoordenacaoFiscalizacao = () => {
                     Visualize e baixe as fichas de verificação e cadastro
                   </p>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="delete-inventario" className="mt-6">
+                <DeleteInventarioSelecionado />
               </TabsContent>
             </Tabs>
           </CardContent>
