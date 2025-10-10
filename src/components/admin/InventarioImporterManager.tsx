@@ -107,44 +107,71 @@ export function InventarioImporterManager() {
     setProgress("Iniciando importação...");
 
     try {
-      // Preparar dados para envio
-      const formData = new FormData();
-      formData.append("excel", excelFile);
-      formData.append("inventory_type", inventoryType);
-      formData.append("lote_id", selectedLote);
-      formData.append("rodovia_id", selectedRodovia);
-      formData.append("has_photos", hasPhotos.toString());
-      
-      if (hasPhotos && photoColumnName) {
-        formData.append("photo_column_name", photoColumnName);
-        
-        // Adicionar todas as fotos
-        if (photos) {
-          setProgress(`Preparando upload de ${photos.length} fotos...`);
-          Array.from(photos).forEach((photo, index) => {
-            formData.append(`photo_${index}`, photo);
-          });
-          toast.success(`${photos.length} fotos preparadas para upload`);
-        }
-      }
-
-      setProgress(hasPhotos && photos ? `Enviando ${photos.length} fotos e processando dados...` : "Enviando dados para processamento...");
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error("Usuário não autenticado");
       }
 
-      // Chamar edge function para processar importação
-      const { data, error } = await supabase.functions.invoke("import-inventory", {
-        body: formData,
-      });
+      const photoArray = photos ? Array.from(photos) : [];
+      const BATCH_SIZE = 50; // Limitar a 50 fotos por lote
 
-      if (error) throw error;
+      if (hasPhotos && photoArray.length > 0) {
+        // Upload em lotes para evitar timeout
+        const totalBatches = Math.ceil(photoArray.length / BATCH_SIZE);
+        let totalImported = 0;
+        
+        for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+          const start = batchIndex * BATCH_SIZE;
+          const end = Math.min(start + BATCH_SIZE, photoArray.length);
+          const batchPhotos = photoArray.slice(start, end);
+          
+          setProgress(`Lote ${batchIndex + 1}/${totalBatches}: enviando ${batchPhotos.length} fotos (${start + 1}-${end} de ${photoArray.length})...`);
 
-      setProgress("Importação concluída!");
-      const fotosMsg = hasPhotos && photos ? ` com ${photos.length} fotos` : '';
-      toast.success(`Importação realizada com sucesso! ${data?.imported_count || 0} registros importados${fotosMsg}.`);
+          const formData = new FormData();
+          formData.append("excel", excelFile);
+          formData.append("inventory_type", inventoryType);
+          formData.append("lote_id", selectedLote);
+          formData.append("rodovia_id", selectedRodovia);
+          formData.append("has_photos", "true");
+          formData.append("photo_column_name", photoColumnName);
+          
+          // Adicionar apenas as fotos do lote atual
+          batchPhotos.forEach((photo, index) => {
+            formData.append(`photo_${index}`, photo);
+          });
+
+          const { data, error } = await supabase.functions.invoke("import-inventory", {
+            body: formData,
+          });
+
+          if (error) throw error;
+
+          totalImported += data?.imported_count || 0;
+          toast.success(`Lote ${batchIndex + 1}/${totalBatches}: ${batchPhotos.length} fotos processadas`);
+        }
+
+        setProgress("Importação concluída!");
+        toast.success(`✅ Importação completa: ${totalImported} registros com ${photoArray.length} fotos`);
+      } else {
+        // Sem fotos - upload único
+        setProgress("Enviando dados para processamento...");
+
+        const formData = new FormData();
+        formData.append("excel", excelFile);
+        formData.append("inventory_type", inventoryType);
+        formData.append("lote_id", selectedLote);
+        formData.append("rodovia_id", selectedRodovia);
+        formData.append("has_photos", "false");
+
+        const { data, error } = await supabase.functions.invoke("import-inventory", {
+          body: formData,
+        });
+
+        if (error) throw error;
+
+        setProgress("Importação concluída!");
+        toast.success(`Importação realizada com sucesso! ${data?.imported_count || 0} registros importados.`);
+      }
       
       // Limpar formulário
       setExcelFile(null);
