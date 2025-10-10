@@ -163,6 +163,44 @@ serve(async (req) => {
       }
     }
 
+    // Mapeamento de campos do Excel para campos da tabela
+    const FIELD_MAPPINGS: Record<string, Record<string, string>> = {
+      ficha_marcas_longitudinais: {
+        "largura_da_faixa_(m)": "largura_cm",
+        "extensão_(km)": "extensao_metros",
+        "código": "tipo_demarcacao",
+      },
+      ficha_placa: {
+        "dimensões_(mm)": "dimensoes_mm",
+        "área_(m²)": "area_m2",
+      },
+      // Adicionar outros mapeamentos conforme necessário
+    };
+
+    // Campos válidos por tabela (baseado no schema)
+    const VALID_FIELDS: Record<string, string[]> = {
+      ficha_marcas_longitudinais: [
+        "cor", "data_vistoria", "espessura_cm", "estado_conservacao",
+        "extensao_metros", "foto_url", "km_final", "km_inicial",
+        "largura_cm", "latitude_final", "latitude_inicial",
+        "longitude_final", "longitude_inicial", "material",
+        "observacao", "tipo_demarcacao"
+      ],
+      ficha_placa: [
+        "altura_m", "area_m2", "br", "codigo", "contrato", "data_implantacao",
+        "data_vistoria", "descricao", "dimensoes_mm", "distancia_m", "empresa",
+        "foto_base_url", "foto_frontal_url", "foto_identificacao_url",
+        "foto_lateral_url", "foto_posterior_url", "km", "lado", "latitude",
+        "longitude", "modelo", "numero_patrimonio", "pelicula", "qtde_suporte",
+        "retrorrefletividade", "snv", "substrato", "suporte", "tipo", "uf",
+        "velocidade"
+      ],
+      // Adicionar outros inventários conforme necessário
+    };
+
+    const fieldMapping = FIELD_MAPPINGS[tableName] || {};
+    const validFields = VALID_FIELDS[tableName] || [];
+
     // Preparar dados para inserção
     const recordsToInsert = jsonData.map((row: any) => {
       // Converter campos do Excel para o formato esperado pela tabela
@@ -170,6 +208,7 @@ serve(async (req) => {
         user_id: user.id,
         lote_id: loteId,
         rodovia_id: rodoviaId,
+        data_vistoria: new Date().toISOString().split('T')[0], // Data padrão se não vier do Excel
       };
 
       // Mapear campos do Excel para os campos da tabela
@@ -179,23 +218,42 @@ serve(async (req) => {
           continue;
         }
         
-        const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_");
+        let normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_");
         
-        // Ignorar se a normalização resultar em string vazia ou contiver __empty
+        // Aplicar mapeamento específico se existir
+        if (fieldMapping[key]) {
+          normalizedKey = fieldMapping[key];
+        } else if (fieldMapping[normalizedKey]) {
+          normalizedKey = fieldMapping[normalizedKey];
+        }
+        
+        // Ignorar se a normalização resultar em string vazia
         if (!normalizedKey || normalizedKey === '_' || normalizedKey.includes('__empty')) {
           continue;
         }
         
-        // Se é o campo de foto e temos fotos, substituir pelo URL
-        if (hasPhotos && photoFieldName && key === photoFieldName) {
-          const photoFileName = value as string;
-          if (photoFileName && photoMap[photoFileName]) {
-            record[normalizedKey] = photoMap[photoFileName];
-          }
-        } else {
-          // Apenas adicionar se o valor não for undefined ou null vazio
-          if (value !== undefined && value !== null && value !== '') {
-            record[normalizedKey] = value;
+        // Apenas adicionar se o campo for válido para esta tabela
+        if (validFields.length === 0 || validFields.includes(normalizedKey)) {
+          // Se é o campo de foto e temos fotos, substituir pelo URL
+          if (hasPhotos && photoFieldName && key === photoFieldName) {
+            const photoFileName = value as string;
+            if (photoFileName && photoMap[photoFileName]) {
+              record[normalizedKey] = photoMap[photoFileName];
+            }
+          } else {
+            // Apenas adicionar se o valor não for undefined ou null ou vazio
+            if (value !== undefined && value !== null && value !== '' && value !== '-') {
+              // Conversões especiais
+              if (normalizedKey === "largura_cm" && key.includes("(m)")) {
+                // Converter de metros para centímetros
+                record[normalizedKey] = Number(value) * 100;
+              } else if (normalizedKey === "extensao_metros" && key.includes("(km)")) {
+                // Converter de km para metros
+                record[normalizedKey] = Number(value) * 1000;
+              } else {
+                record[normalizedKey] = value;
+              }
+            }
           }
         }
       }
