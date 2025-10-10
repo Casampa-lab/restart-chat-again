@@ -229,7 +229,7 @@ export function InventarioImporterManager() {
                 <SelectContent>
                   {rodovias?.map((rodovia) => (
                     <SelectItem key={rodovia.id} value={rodovia.id}>
-                      {rodovia.codigo} - {rodovia.nome}
+                      {rodovia.codigo}
                     </SelectItem>
                   ))}
                 </SelectContent>
