@@ -246,53 +246,65 @@ export function InventarioImporterManager() {
         if (inventoryType === "defensas") {
           const excelRow = row as any;
           
-          // Mapeamento direto conforme dicionário
-          record.br = excelRow["BR"] || null;
-          record.snv = excelRow["SNV"] || null;
-          record.tramo = excelRow["Tramo"] || "";
-          record.lado = excelRow["Lado"] || "";
-          record.tipo_defensa = "Simples"; // Padrão
-          record.estado_conservacao = "Bom"; // Padrão
+          // Helper para buscar valor com variações de nome
+          const getVal = (...keys: string[]) => {
+            for (const key of keys) {
+              if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+            }
+            return null;
+          };
+          
+          // Mapeamento conforme dicionário (com variações)
+          record.br = getVal("BR", "br");
+          record.snv = getVal("SNV", "snv");
+          record.tramo = getVal("Tramo", "tramo", "Tr") || "";
+          record.lado = getVal("Lado", "lado") || "";
+          record.tipo_defensa = "Simples";
+          record.estado_conservacao = "Bom";
           
           // Localização
-          record.km_inicial = excelRow["Km Inicial"] ? Number(excelRow["Km Inicial"]) : 0;
-          record.km_final = excelRow["Km Final"] ? Number(excelRow["Km Final"]) : 0;
-          record.latitude_inicial = excelRow["Latitude Incial"] || excelRow["Latitude Inicial"] || null;
-          record.longitude_inicial = excelRow["Longitude Inicial"] || null;
-          record.latitude_final = excelRow["Latitude Final"] || null;
-          record.longitude_final = excelRow["Longitude Final"] || null;
+          const kmIni = getVal("Km Inicial", "Km inicial", "km_inicial", "km inicial");
+          record.km_inicial = kmIni ? Number(kmIni) : 0;
+          
+          const kmFim = getVal("Km Final", "Km final", "km_final", "km final");
+          record.km_final = kmFim ? Number(kmFim) : 0;
+          
+          record.latitude_inicial = getVal("Latitude Incial", "Latitude Inicial", "Latitude inicial", "latitude_inicial");
+          record.longitude_inicial = getVal("Longitude Inicial", "Longitude inicial", "longitude_inicial");
+          record.latitude_final = getVal("Latitude Final", "Latitude final", "latitude_final");
+          record.longitude_final = getVal("Longitude Final", "Longitude final", "longitude_final");
           
           // Dimensões
-          record.quantidade_laminas = excelRow["Quantidade Lâminas"] || null;
-          record.comprimento_total_tramo_m = excelRow["Comprimento Total do Tramo (m)"] || null;
-          record.extensao_metros = excelRow["Comprimento Total do Tramo (m)"] || 0;
+          record.quantidade_laminas = getVal("Quantidade Lâminas", "Quantidade Laminas", "quantidade_laminas");
+          const compTotal = getVal("Comprimento Total do Tramo (m)", "Comprimento Total do Tramo m", "comprimento_total_tramo_m");
+          record.comprimento_total_tramo_m = compTotal;
+          record.extensao_metros = compTotal || 0;
           
           // Características
-          record.funcao = excelRow["Função"] || null;
-          record.especificacao_obstaculo_fixo = excelRow["Especificação do Obstáculo Fixo"] || null;
-          record.id_defensa = excelRow["ID"] || null;
-          record.distancia_pista_obstaculo_m = excelRow["Distância da pista ao obstáculo (m)"] || null;
-          record.risco = excelRow["Risco"] || null;
-          record.velocidade_kmh = excelRow["Velocidade (km/h)"] || null;
-          record.vmd_veic_dia = excelRow["VMD (veíc./dia)"] || null;
-          record.percentual_veiculos_pesados = excelRow["% Veículos Pesados"] || null;
-          record.geometria = excelRow["Geometria"] || null;
-          record.classificacao_nivel_contencao = excelRow["Classificação do nível de Contenção"] || null;
-          record.nivel_contencao_en1317 = excelRow["Nível de contenção EN 1317-2"] || null;
-          record.nivel_contencao_nchrp350 = excelRow["Nível de contenção NCHRP 350"] || null;
-          record.nivel_risco = excelRow["Classificação do nível de Contenção"] || null;
-          record.espaco_trabalho = excelRow["Espaço de Trabalho"] || null;
-          record.terminal_entrada = excelRow["Terminal de Entrada"] || null;
-          record.terminal_saida = excelRow["Terminal de Saída"] || null;
-          record.adequacao_funcionalidade_lamina = excelRow["Adequação à funcionalidade - Lâmina"] || null;
-          record.adequacao_funcionalidade_laminas_inadequadas = excelRow["Adequação à funcionalidade - Lâminas inadequadas"] || null;
-          record.adequacao_funcionalidade_terminais = excelRow["Adequação à funcionalidade - Terminais"] || null;
-          record.adequacao_funcionalidade_terminais_inadequados = excelRow["Adequação à funcionalidade - Terminais inadequados"] || null;
-          record.distancia_face_defensa_obstaculo_m = excelRow["Distância da face da defensa ao obstáculo(m)"] || null;
-          record.distancia_bordo_pista_face_defensa_m = excelRow["Distância da linha de bordo da pista à face da defensa (m)"] || null;
-          record.link_fotografia = excelRow["Link da Fotografia"] || null;
+          record.funcao = getVal("Função", "Funcao", "função", "funcao");
+          record.especificacao_obstaculo_fixo = getVal("Especificação do Obstáculo Fixo", "Especificacao do Obstaculo Fixo");
+          record.id_defensa = getVal("ID", "id", "id_defensa");
+          record.distancia_pista_obstaculo_m = getVal("Distância da pista ao obstáculo (m)", "Distancia da pista ao obstaculo m");
+          record.risco = getVal("Risco", "risco");
+          record.velocidade_kmh = getVal("Velocidade (km/h)", "Velocidade km/h", "velocidade_kmh");
+          record.vmd_veic_dia = getVal("VMD (veíc./dia)", "VMD veic/dia", "vmd_veic_dia");
+          record.percentual_veiculos_pesados = getVal("% Veículos Pesados", "% Veiculos Pesados", "percentual_veiculos_pesados");
+          record.geometria = getVal("Geometria", "geometria");
+          record.classificacao_nivel_contencao = getVal("Classificação do nível de Contenção", "Classificacao do nivel de Contencao");
+          record.nivel_contencao_en1317 = getVal("Nível de contenção EN 1317-2", "Nivel de contencao EN 1317-2");
+          record.nivel_contencao_nchrp350 = getVal("Nível de contenção NCHRP 350", "Nivel de contencao NCHRP 350");
+          record.nivel_risco = getVal("Classificação do nível de Contenção", "Classificacao do nivel de Contencao");
+          record.espaco_trabalho = getVal("Espaço de Trabalho", "Espaco de Trabalho");
+          record.terminal_entrada = getVal("Terminal de Entrada", "terminal_entrada");
+          record.terminal_saida = getVal("Terminal de Saída", "Terminal de Saida", "terminal_saida");
+          record.adequacao_funcionalidade_lamina = getVal("Adequação à funcionalidade - Lâmina", "Adequacao a funcionalidade - Lamina");
+          record.adequacao_funcionalidade_laminas_inadequadas = getVal("Adequação à funcionalidade - Lâminas inadequadas", "Adequacao a funcionalidade - Laminas inadequadas");
+          record.adequacao_funcionalidade_terminais = getVal("Adequação à funcionalidade - Terminais", "Adequacao a funcionalidade - Terminais");
+          record.adequacao_funcionalidade_terminais_inadequados = getVal("Adequação à funcionalidade - Terminais inadequados", "Adequacao a funcionalidade - Terminais inadequados");
+          record.distancia_face_defensa_obstaculo_m = getVal("Distância da face da defensa ao obstáculo(m)", "Distancia da face da defensa ao obstaculo m");
+          record.distancia_bordo_pista_face_defensa_m = getVal("Distância da linha de bordo da pista à face da defensa (m)", "Distancia da linha de bordo da pista a face da defensa m");
+          record.link_fotografia = getVal("Link da Fotografia", "Link da Fotografia", "link_fotografia");
           
-          // Data de inspeção
           if (!record.data_inspecao) {
             record.data_inspecao = new Date().toISOString().split('T')[0];
           }
@@ -303,39 +315,64 @@ export function InventarioImporterManager() {
         if (inventoryType === "marcas_longitudinais") {
           const excelRow = row as any;
           
-          // Mapeamento direto conforme dicionário
-          record.snv = excelRow["SNV"] || null;
-          record.tipo_demarcacao = excelRow["Código"] || null;
-          record.cor = excelRow["Cor"] || "Branca";
+          // Helper para buscar valor com variações de nome
+          const getVal = (...keys: string[]) => {
+            for (const key of keys) {
+              if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+            }
+            return null;
+          };
+          
+          // Mapeamento conforme dicionário (com variações)
+          record.snv = getVal("SNV", "snv");
+          record.tipo_demarcacao = getVal("Código", "Codigo", "código", "codigo");
+          record.cor = getVal("Cor", "cor") || "Branca";
           
           // Largura da Faixa (m) -> converter para cm
-          const larguraM = excelRow["Largura da Faixa (m)"];
+          const larguraM = getVal("Largura da Faixa (m)", "Largura da Faixa m", "Largura da Faixa", "largura_da_faixa_m", "largura");
           record.largura_cm = larguraM && larguraM !== "-" && !isNaN(Number(larguraM)) ? Number(larguraM) * 100 : null;
           
           // Localização
-          record.km_inicial = excelRow["Km Inicial"] && excelRow["Km Inicial"] !== "-" ? Number(excelRow["Km Inicial"]) : 0;
-          record.latitude_inicial = excelRow["Latitude Inicial"] && excelRow["Latitude Inicial"] !== "-" ? Number(excelRow["Latitude Inicial"]) : null;
-          record.longitude_inicial = excelRow["Longitude Inicial"] && excelRow["Longitude Inicial"] !== "-" ? Number(excelRow["Longitude Inicial"]) : null;
+          const kmIni = getVal("Km Inicial", "Km inicial", "km_inicial", "km inicial");
+          record.km_inicial = kmIni && kmIni !== "-" ? Number(kmIni) : 0;
           
-          record.km_final = excelRow["Km Final"] && excelRow["Km Final"] !== "-" ? Number(excelRow["Km Final"]) : 0;
-          record.latitude_final = excelRow["Latitude Final"] && excelRow["Latitude Final"] !== "-" ? Number(excelRow["Latitude Final"]) : null;
-          record.longitude_final = excelRow["Longitude Final"] && excelRow["Longitude Final"] !== "-" ? Number(excelRow["Longitude Final"]) : null;
+          const latIni = getVal("Latitude Inicial", "Latitude inicial", "latitude_inicial", "latitude inicial");
+          record.latitude_inicial = latIni && latIni !== "-" ? Number(latIni) : null;
+          
+          const lngIni = getVal("Longitude Inicial", "Longitude inicial", "longitude_inicial", "longitude inicial");
+          record.longitude_inicial = lngIni && lngIni !== "-" ? Number(lngIni) : null;
+          
+          const kmFim = getVal("Km Final", "Km final", "km_final", "km final");
+          record.km_final = kmFim && kmFim !== "-" ? Number(kmFim) : 0;
+          
+          const latFim = getVal("Latitude Final", "Latitude final", "latitude_final", "latitude final");
+          record.latitude_final = latFim && latFim !== "-" ? Number(latFim) : null;
+          
+          const lngFim = getVal("Longitude Final", "Longitude final", "longitude_final", "longitude final");
+          record.longitude_final = lngFim && lngFim !== "-" ? Number(lngFim) : null;
           
           // Extensão (km) -> converter para metros
-          const extensaoKm = excelRow["Extensão (km)"];
+          const extensaoKm = getVal("Extensão (km)", "Extensão km", "Extensão", "extensao_km", "extensao");
           record.extensao_metros = extensaoKm && extensaoKm !== "-" && !isNaN(Number(extensaoKm)) ? Number(extensaoKm) * 1000 : null;
           
           // Material
-          record.material = excelRow["Material"] || null;
+          record.material = getVal("Material", "material");
           
           // Montar observações com campos adicionais do dicionário
           const observacoes = [];
-          if (excelRow["BR"]) observacoes.push(`BR: ${excelRow["BR"]}`);
-          if (excelRow["Posição"]) observacoes.push(`Posição: ${excelRow["Posição"]}`);
-          if (excelRow["Traço (m)"]) observacoes.push(`Traço: ${excelRow["Traço (m)"]}m`);
-          if (excelRow["Espaçamento (m)"]) observacoes.push(`Espaçamento: ${excelRow["Espaçamento (m)"]}m`);
-          if (excelRow["Outros materiais"]) observacoes.push(`Outros materiais: ${excelRow["Outros materiais"]}`);
-          if (excelRow["Área (m²)"]) observacoes.push(`Área: ${excelRow["Área (m²)"]}m²`);
+          const br = getVal("BR", "br");
+          const posicao = getVal("Posição", "Posicao", "posição", "posicao");
+          const traco = getVal("Traço (m)", "Traço", "traco_m", "traco");
+          const espacamento = getVal("Espaçamento (m)", "Espaçamento", "espacamento_m", "espacamento");
+          const outrosMat = getVal("Outros materiais", "Outros Materiais", "outros_materiais");
+          const area = getVal("Área (m²)", "Área", "area_m2", "area");
+          
+          if (br && br !== "-") observacoes.push(`BR: ${br}`);
+          if (posicao && posicao !== "-") observacoes.push(`Posição: ${posicao}`);
+          if (traco && traco !== "-") observacoes.push(`Traço: ${traco}m`);
+          if (espacamento && espacamento !== "-") observacoes.push(`Espaçamento: ${espacamento}m`);
+          if (outrosMat && outrosMat !== "-") observacoes.push(`Outros materiais: ${outrosMat}`);
+          if (area && area !== "-") observacoes.push(`Área: ${area}m²`);
           
           record.observacao = observacoes.length > 0 ? observacoes.join(" | ") : null;
           record.estado_conservacao = "Bom";
@@ -346,52 +383,62 @@ export function InventarioImporterManager() {
         // Adicionar mapeamento específico para placas
         if (inventoryType === "placas") {
           const excelRow = row as any;
+          const getVal = (...keys: string[]) => {
+            for (const key of keys) {
+              if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+            }
+            return null;
+          };
           
-          // Mapeamento direto conforme dicionário
-          record.br = excelRow["BR"] || null;
-          record.snv = excelRow["SNV"] || null;
-          record.tipo = excelRow["Tipo de placa"] || null;
-          record.codigo = excelRow["Código da placa"] || null;
-          record.velocidade = excelRow["Velocidade"] ? String(excelRow["Velocidade"]) : null;
-          record.lado = excelRow["Lado"] || null;
-          record.km = excelRow["Km"] ? Number(excelRow["Km"]) : null;
-          record.latitude = excelRow["Latitude"] || null;
-          record.longitude = excelRow["Longitude"] || null;
-          record.suporte = excelRow["Tipo de Suporte"] || null;
-          record.qtde_suporte = excelRow["Quantidade de Suporte"] ? Number(excelRow["Quantidade de Suporte"]) : null;
-          record.substrato = excelRow["Tipo de Substrato"] || null;
+          record.br = getVal("BR", "br");
+          record.snv = getVal("SNV", "snv");
+          record.tipo = getVal("Tipo de placa", "Tipo de Placa", "tipo_de_placa", "tipo");
+          record.codigo = getVal("Código da placa", "Codigo da placa", "código_da_placa", "codigo_da_placa", "codigo");
+          record.velocidade = getVal("Velocidade", "velocidade") ? String(getVal("Velocidade", "velocidade")) : null;
+          record.lado = getVal("Lado", "lado");
+          record.km = getVal("Km", "km") ? Number(getVal("Km", "km")) : null;
+          record.latitude = getVal("Latitude", "latitude");
+          record.longitude = getVal("Longitude", "longitude");
+          record.suporte = getVal("Tipo de Suporte", "Tipo de suporte", "tipo_de_suporte", "suporte");
+          record.qtde_suporte = getVal("Quantidade de Suporte", "Quantidade de suporte", "quantidade_de_suporte", "qtde_suporte") ? Number(getVal("Quantidade de Suporte", "Quantidade de suporte", "quantidade_de_suporte")) : null;
+          record.substrato = getVal("Tipo de Substrato", "Tipo de substrato", "tipo_de_substrato", "substrato");
           
-          // Película - combinar tipo e cor
-          const tipoPeliculaFundo = excelRow["Tipo (película fundo)"];
-          const corPeliculaFundo = excelRow["Cor (película fundo)"];
+          const tipoPeliculaFundo = getVal("Tipo (película fundo)", "Tipo pelicula fundo");
+          const corPeliculaFundo = getVal("Cor (película fundo)", "Cor pelicula fundo");
           if (tipoPeliculaFundo || corPeliculaFundo) {
             record.pelicula = [tipoPeliculaFundo, corPeliculaFundo].filter(Boolean).join(" - ");
           }
           
-          // Retrorrefletividade
-          record.retrorrefletividade = excelRow["Retrorrefletância (película fundo)"] ? Number(excelRow["Retrorrefletância (película fundo)"]) : null;
+          record.retrorrefletividade = getVal("Retrorrefletância (película fundo)", "Retrorrefletancia pelicula fundo") ? Number(getVal("Retrorrefletância (película fundo)", "Retrorrefletancia pelicula fundo")) : null;
           
-          // Dimensões
-          const larguraM = excelRow["Largura (m)"];
-          const alturaM = excelRow["Altura (m)"];
+          const larguraM = getVal("Largura (m)", "Largura m", "largura");
+          const alturaM = getVal("Altura (m)", "Altura m", "altura");
           record.distancia_m = larguraM ? Number(larguraM) : null;
           record.altura_m = alturaM && alturaM !== "-" ? Number(alturaM) : null;
-          record.area_m2 = excelRow["Área (m²)"] ? Number(excelRow["Área (m²)"]) : null;
+          record.area_m2 = getVal("Área (m²)", "Area m2", "area") ? Number(getVal("Área (m²)", "Area m2", "area")) : null;
           
           if (larguraM && alturaM && alturaM !== "-") {
             record.dimensoes_mm = `${(Number(larguraM) * 1000).toFixed(0)}x${(Number(alturaM) * 1000).toFixed(0)}`;
           }
           
-          // Observações com campos extras
           const obs = [];
-          if (excelRow["Posição"]) obs.push(`Posição: ${excelRow["Posição"]}`);
-          if (excelRow["Detalhamento (página)"]) obs.push(`Detalhamento: ${excelRow["Detalhamento (página)"]}`);
-          if (excelRow["Tipo de Seção de Suporte"]) obs.push(`Seção suporte: ${excelRow["Tipo de Seção de Suporte"]}`);
-          if (excelRow["Seção do Suporte (mm)"]) obs.push(`Dimensão: ${excelRow["Seção do Suporte (mm)"]}mm`);
-          if (excelRow["SI (Sinal Impresso)"]) obs.push(`SI: ${excelRow["SI (Sinal Impresso)"]}`);
-          if (excelRow["Tipo (película legenda/orla)"]) obs.push(`Película legenda: ${excelRow["Tipo (película legenda/orla)"]}`);
-          if (excelRow["Retrorrefletância (película legenda/orla)"]) obs.push(`Retro legenda: ${excelRow["Retrorrefletância (película legenda/orla)"]}`);
-          if (excelRow["Link da Fotografia"]) obs.push(`Link: ${excelRow["Link da Fotografia"]}`);
+          const posicao = getVal("Posição", "Posicao", "posição", "posicao");
+          const detalhamento = getVal("Detalhamento (página)", "Detalhamento pagina", "detalhamento");
+          const secaoTipo = getVal("Tipo de Seção de Suporte", "Tipo de Secao de Suporte");
+          const secaoMm = getVal("Seção do Suporte (mm)", "Secao do Suporte mm");
+          const si = getVal("SI (Sinal Impresso)", "SI Sinal Impresso", "si");
+          const pelLeg = getVal("Tipo (película legenda/orla)", "Tipo pelicula legenda/orla");
+          const retroLeg = getVal("Retrorrefletância (película legenda/orla)", "Retrorrefletancia pelicula legenda/orla");
+          const linkFoto = getVal("Link da Fotografia", "Link da fotografia", "link_fotografia");
+          
+          if (posicao) obs.push(`Posição: ${posicao}`);
+          if (detalhamento) obs.push(`Detalhamento: ${detalhamento}`);
+          if (secaoTipo) obs.push(`Seção suporte: ${secaoTipo}`);
+          if (secaoMm) obs.push(`Dimensão: ${secaoMm}mm`);
+          if (si) obs.push(`SI: ${si}`);
+          if (pelLeg) obs.push(`Película legenda: ${pelLeg}`);
+          if (retroLeg) obs.push(`Retro legenda: ${retroLeg}`);
+          if (linkFoto) obs.push(`Link: ${linkFoto}`);
           record.descricao = obs.length > 0 ? obs.join(" | ") : null;
           
           record.data_vistoria = new Date().toISOString().split('T')[0];
@@ -400,27 +447,43 @@ export function InventarioImporterManager() {
         // Adicionar mapeamento específico para tachas
         if (inventoryType === "tachas") {
           const excelRow = row as any;
+          const getVal = (...keys: string[]) => {
+            for (const key of keys) {
+              if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+            }
+            return null;
+          };
           
-          // Mapeamento direto conforme dicionário
-          record.snv = excelRow["SNV"] || null;
-          record.descricao = excelRow["Descrição"] || null;
-          record.corpo = excelRow["Corpo"] || null;
-          record.refletivo = excelRow["Refletivo"] || null;
-          record.cor_refletivo = excelRow["Cor do refletivo"] || null;
-          record.km_inicial = excelRow["Km Inicial"] ? Number(excelRow["Km Inicial"]) : 0;
-          record.latitude_inicial = excelRow["Latitude Inicial"] || null;
-          record.longitude_inicial = excelRow["Longitude Inicial"] || null;
-          record.km_final = excelRow["km Final"] ? Number(excelRow["km Final"]) : 0;
-          record.latitude_final = excelRow["Latitude Final"] || null;
-          record.longitude_final = excelRow["Longitude Final"] || null;
-          record.extensao_km = excelRow["Extensão (km)"] ? Number(excelRow["Extensão (km)"]) : null;
-          record.local_implantacao = excelRow["Local de implantação"] || null;
-          record.espacamento_m = excelRow["Espaçamento"] ? Number(excelRow["Espaçamento"]) : null;
-          record.quantidade = excelRow["Quantidade"] ? Number(excelRow["Quantidade"]) : 1;
+          record.snv = getVal("SNV", "snv");
+          record.descricao = getVal("Descrição", "Descricao", "descrição", "descricao");
+          record.corpo = getVal("Corpo", "corpo");
+          record.refletivo = getVal("Refletivo", "refletivo");
+          record.cor_refletivo = getVal("Cor do refletivo", "Cor do Refletivo", "cor_do_refletivo", "cor_refletivo");
           
-          // Observação com BR
-          if (excelRow["BR"]) {
-            record.observacao = `BR: ${excelRow["BR"]}`;
+          const kmIni = getVal("Km Inicial", "Km inicial", "km_inicial", "km inicial");
+          record.km_inicial = kmIni ? Number(kmIni) : 0;
+          record.latitude_inicial = getVal("Latitude Inicial", "Latitude inicial", "latitude_inicial");
+          record.longitude_inicial = getVal("Longitude Inicial", "Longitude inicial", "longitude_inicial");
+          
+          const kmFim = getVal("km Final", "Km Final", "Km final", "km_final", "km final");
+          record.km_final = kmFim ? Number(kmFim) : 0;
+          record.latitude_final = getVal("Latitude Final", "Latitude final", "latitude_final");
+          record.longitude_final = getVal("Longitude Final", "Longitude final", "longitude_final");
+          
+          const extKm = getVal("Extensão (km)", "Extensão km", "Extensao km", "extensao_km", "extensao");
+          record.extensao_km = extKm ? Number(extKm) : null;
+          
+          record.local_implantacao = getVal("Local de implantação", "Local de Implantação", "Local de implantacao", "local_implantacao");
+          
+          const espac = getVal("Espaçamento", "Espacamento", "espaçamento", "espacamento");
+          record.espacamento_m = espac ? Number(espac) : null;
+          
+          const qtd = getVal("Quantidade", "quantidade");
+          record.quantidade = qtd ? Number(qtd) : 1;
+          
+          const br = getVal("BR", "br");
+          if (br) {
+            record.observacao = `BR: ${br}`;
           }
           
           record.data_vistoria = new Date().toISOString().split('T')[0];
@@ -429,29 +492,41 @@ export function InventarioImporterManager() {
         // Adicionar mapeamento específico para inscrições
         if (inventoryType === "inscricoes") {
           const excelRow = row as any;
+          const getVal = (...keys: string[]) => {
+            for (const key of keys) {
+              if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+            }
+            return null;
+          };
           
-          // Mapeamento direto conforme dicionário
-          const sigla = excelRow["Sigla"] || null;
-          const descricao = excelRow["Descrição"] || null;
+          const sigla = getVal("Sigla", "sigla");
+          const descricao = getVal("Descrição", "Descricao", "descrição", "descricao");
           record.tipo_inscricao = [sigla, descricao].filter(Boolean).join(" - ") || "Não especificado";
-          record.cor = excelRow["Cor"] || "Branca";
-          record.km_inicial = excelRow["Km"] ? Number(excelRow["Km"]) : null;
-          record.km_final = excelRow["Km"] ? Number(excelRow["Km"]) : null;
-          record.latitude_inicial = excelRow["Latitude"] || null;
-          record.longitude_inicial = excelRow["Longitude"] || null;
-          record.latitude_final = excelRow["Latitude"] || null;
-          record.longitude_final = excelRow["Longitude"] || null;
-          record.material_utilizado = excelRow["Material"] || null;
-          record.dimensoes = excelRow["Dimensões"] || null;
-          record.area_m2 = excelRow["Área (m²)"] ? Number(excelRow["Área (m²)"]) : null;
+          record.cor = getVal("Cor", "cor") || "Branca";
           
-          // Observação com BR
-          if (excelRow["BR"]) {
-            record.observacao = `BR: ${excelRow["BR"]}`;
-          }
-          if (excelRow["SNV"]) {
-            record.observacao = (record.observacao ? `${record.observacao} | ` : "") + `SNV: ${excelRow["SNV"]}`;
-          }
+          const km = getVal("Km", "km");
+          record.km_inicial = km ? Number(km) : null;
+          record.km_final = km ? Number(km) : null;
+          
+          const lat = getVal("Latitude", "latitude");
+          const lng = getVal("Longitude", "longitude");
+          record.latitude_inicial = lat;
+          record.longitude_inicial = lng;
+          record.latitude_final = lat;
+          record.longitude_final = lng;
+          
+          record.material_utilizado = getVal("Material", "material");
+          record.dimensoes = getVal("Dimensões", "Dimensoes", "dimensões", "dimensoes");
+          
+          const area = getVal("Área (m²)", "Area m2", "Área", "area");
+          record.area_m2 = area ? Number(area) : null;
+          
+          const br = getVal("BR", "br");
+          const snv = getVal("SNV", "snv");
+          const obs = [];
+          if (br) obs.push(`BR: ${br}`);
+          if (snv) obs.push(`SNV: ${snv}`);
+          record.observacao = obs.length > 0 ? obs.join(" | ") : null;
           
           record.estado_conservacao = "Bom";
           record.data_vistoria = new Date().toISOString().split('T')[0];
@@ -460,26 +535,41 @@ export function InventarioImporterManager() {
         // Adicionar mapeamento específico para cilindros delimitadores
         if (inventoryType === "cilindros") {
           const excelRow = row as any;
+          const getVal = (...keys: string[]) => {
+            for (const key of keys) {
+              if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+            }
+            return null;
+          };
           
-          // Mapeamento direto conforme dicionário
-          record.snv = excelRow["SNV"] || null;
-          record.local_implantacao = excelRow["Local de Implantação"] || null;
-          record.cor_corpo = excelRow["Cor (Corpo)"] || "Não especificado";
-          record.cor_refletivo = excelRow["Cor (Refletivo)"] || null;
-          record.tipo_refletivo = excelRow["Tipo Refletivo"] || null;
-          record.km_inicial = excelRow["Km Inicial"] ? Number(excelRow["Km Inicial"]) : 0;
-          record.latitude_inicial = excelRow["Latitude Inicial"] || null;
-          record.longitude_inicial = excelRow["Longitude Inicial"] || null;
-          record.km_final = excelRow["km Final"] ? Number(excelRow["km Final"]) : 0;
-          record.latitude_final = excelRow["Latitude Final"] || null;
-          record.longitude_final = excelRow["Longitude Final"] || null;
-          record.extensao_km = excelRow["Extensão (km)"] ? Number(excelRow["Extensão (km)"]) : null;
-          record.espacamento_m = excelRow["Espaçamento"] ? Number(excelRow["Espaçamento"]) : null;
-          record.quantidade = excelRow["Quantidade"] ? Number(excelRow["Quantidade"]) : null;
+          record.snv = getVal("SNV", "snv");
+          record.local_implantacao = getVal("Local de Implantação", "Local de Implantacao", "Local de implantação", "local_implantacao");
+          record.cor_corpo = getVal("Cor (Corpo)", "Cor Corpo", "cor_corpo") || "Não especificado";
+          record.cor_refletivo = getVal("Cor (Refletivo)", "Cor Refletivo", "cor_refletivo");
+          record.tipo_refletivo = getVal("Tipo Refletivo", "tipo_refletivo");
           
-          // Observação com BR
-          if (excelRow["BR"]) {
-            record.observacao = `BR: ${excelRow["BR"]}`;
+          const kmIni = getVal("Km Inicial", "Km inicial", "km_inicial", "km inicial");
+          record.km_inicial = kmIni ? Number(kmIni) : 0;
+          record.latitude_inicial = getVal("Latitude Inicial", "Latitude inicial", "latitude_inicial");
+          record.longitude_inicial = getVal("Longitude Inicial", "Longitude inicial", "longitude_inicial");
+          
+          const kmFim = getVal("km Final", "Km Final", "Km final", "km_final", "km final");
+          record.km_final = kmFim ? Number(kmFim) : 0;
+          record.latitude_final = getVal("Latitude Final", "Latitude final", "latitude_final");
+          record.longitude_final = getVal("Longitude Final", "Longitude final", "longitude_final");
+          
+          const extKm = getVal("Extensão (km)", "Extensão km", "Extensao km", "extensao_km", "extensao");
+          record.extensao_km = extKm ? Number(extKm) : null;
+          
+          const espac = getVal("Espaçamento", "Espacamento", "espaçamento", "espacamento");
+          record.espacamento_m = espac ? Number(espac) : null;
+          
+          const qtd = getVal("Quantidade", "quantidade");
+          record.quantidade = qtd ? Number(qtd) : null;
+          
+          const br = getVal("BR", "br");
+          if (br) {
+            record.observacao = `BR: ${br}`;
           }
           
           record.data_vistoria = new Date().toISOString().split('T')[0];
@@ -488,21 +578,35 @@ export function InventarioImporterManager() {
         // Adicionar mapeamento específico para pórticos
         if (inventoryType === "porticos") {
           const excelRow = row as any;
+          const getVal = (...keys: string[]) => {
+            for (const key of keys) {
+              if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+            }
+            return null;
+          };
           
-          // Mapeamento direto conforme dicionário
-          record.snv = excelRow["SNV"] || null;
-          record.tipo = excelRow["Tipo"] || "Pórtico";
-          record.altura_livre_m = excelRow["Altura Livre (m)"] ? Number(excelRow["Altura Livre (m)"]) : null;
-          record.vao_horizontal_m = excelRow["Vão Horizontal"] ? Number(excelRow["Vão Horizontal"]) : null;
-          record.lado = excelRow["Lado"] || null;
-          record.km = excelRow["Km"] ? Number(excelRow["Km"]) : null;
-          record.latitude = excelRow["Latitude"] || null;
-          record.longitude = excelRow["Longitude"] || null;
+          record.snv = getVal("SNV", "snv");
+          record.tipo = getVal("Tipo", "tipo") || "Pórtico";
           
-          // Observações com BR e link
+          const alturaLivre = getVal("Altura Livre (m)", "Altura Livre m", "altura_livre_m", "altura_livre");
+          record.altura_livre_m = alturaLivre ? Number(alturaLivre) : null;
+          
+          const vao = getVal("Vão Horizontal", "Vao Horizontal", "vão_horizontal", "vao_horizontal_m", "vao_horizontal");
+          record.vao_horizontal_m = vao ? Number(vao) : null;
+          
+          record.lado = getVal("Lado", "lado");
+          
+          const km = getVal("Km", "km");
+          record.km = km ? Number(km) : null;
+          
+          record.latitude = getVal("Latitude", "latitude");
+          record.longitude = getVal("Longitude", "longitude");
+          
           const obs = [];
-          if (excelRow["BR"]) obs.push(`BR: ${excelRow["BR"]}`);
-          if (excelRow["Link da Fotografia"]) obs.push(`Link: ${excelRow["Link da Fotografia"]}`);
+          const br = getVal("BR", "br");
+          const linkFoto = getVal("Link da Fotografia", "Link da fotografia", "link_fotografia");
+          if (br) obs.push(`BR: ${br}`);
+          if (linkFoto) obs.push(`Link: ${linkFoto}`);
           record.observacao = obs.length > 0 ? obs.join(" | ") : null;
           
           record.estado_conservacao = "Bom";
