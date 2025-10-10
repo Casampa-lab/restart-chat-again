@@ -285,8 +285,8 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
           
           {selectedCilindro && (
             <>
-              {/* Identification Section */}
-              <div className="border rounded-lg p-4 mb-4">
+              {/* Identificação - Before Tabs */}
+              <div className="border rounded-lg p-4">
                 <h3 className="font-semibold mb-3">Identificação</h3>
                 <div className="grid grid-cols-4 gap-4">
                   <div>
@@ -307,6 +307,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                   </div>
                 </div>
               </div>
+
             <Tabs defaultValue="dados" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="dados">Dados</TabsTrigger>
@@ -330,10 +331,10 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                       <span className="text-sm font-medium text-muted-foreground">Cor (Refletivo):</span>
                       <p className="text-sm">{selectedCilindro.cor_refletivo || "-"}</p>
                     </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Tipo Refletivo:</span>
-                      <p className="text-sm">{selectedCilindro.tipo_refletivo || "-"}</p>
-                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <span className="text-sm font-medium text-muted-foreground">Tipo Refletivo:</span>
+                    <p className="text-sm">{selectedCilindro.tipo_refletivo || "-"}</p>
                   </div>
                 </div>
 
