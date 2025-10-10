@@ -317,6 +317,7 @@ serve(async (req) => {
       }
 
       // Mapear campos do Excel para os campos da tabela
+      let hasValidData = false;
       for (const [key, value] of Object.entries(row)) {
         // Ignorar colunas vazias ou inválidas
         if (!key || key.trim() === '' || key.startsWith('__') || key.includes('__empty')) {
@@ -349,10 +350,12 @@ serve(async (req) => {
             const photoFileName = value as string;
             if (photoFileName && photoMap[photoFileName]) {
               record[normalizedKey] = photoMap[photoFileName];
+              hasValidData = true;
             }
           } else {
             // Apenas adicionar se o valor não for undefined ou null ou vazio
             if (value !== undefined && value !== null && value !== '' && value !== '-') {
+              hasValidData = true;
               // Conversões especiais
               if (normalizedKey === "largura_cm" && key.includes("(m)")) {
                 // Converter de metros para centímetros
@@ -368,8 +371,25 @@ serve(async (req) => {
         }
       }
 
-      return record;
-    });
+      // Apenas retornar o registro se houver dados válidos do Excel
+      return hasValidData ? record : null;
+    }).filter(record => record !== null); // Filtrar registros nulos
+
+    // Se não houver registros para inserir, retornar sucesso com 0 importados
+    if (recordsToInsert.length === 0) {
+      console.log("Nenhum registro válido encontrado no Excel");
+      return new Response(
+        JSON.stringify({
+          success: true,
+          imported_count: 0,
+          message: "Nenhum registro encontrado para importar (planilha vazia ou sem dados válidos)",
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
+      );
+    }
 
     // Log do primeiro registro para debug
     if (recordsToInsert.length > 0) {
