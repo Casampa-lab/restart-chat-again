@@ -252,6 +252,9 @@ export function InventarioImporterManager() {
           record.snv = excelRow.SNV || excelRow.snv || null;
           record.tramo = String(excelRow.Tramo || excelRow.tramo || "");
           
+          // Tipo de defensa (obrigatório)
+          record.tipo_defensa = excelRow["Tipo de Defensa"] || excelRow.tipo_defensa || excelRow["Tipo Defensa"] || "Simples";
+          
           // KMs e coordenadas
           record.km_inicial = Number(excelRow["Km Inicial"] || excelRow.km_inicial || 0);
           record.km_final = Number(excelRow["Km Final"] || excelRow.km_final || 0);
