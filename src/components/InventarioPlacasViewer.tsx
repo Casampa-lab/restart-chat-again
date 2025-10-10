@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler } from "lucide-react";
+import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, Plus, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { IntervencaoInventarioForm } from "./IntervencaoInventarioForm";
 
 interface FichaPlaca {
   id: string;
@@ -35,7 +36,19 @@ interface FichaPlaca {
   suporte: string | null;
   dimensoes_mm: string | null;
   retrorrefletividade: number | null;
-  
+}
+
+interface Intervencao {
+  id: string;
+  data_intervencao: string;
+  motivo: string;
+  placa_recuperada: boolean;
+  suporte: string | null;
+  substrato: string | null;
+  pelicula: string | null;
+  retro_fundo: number | null;
+  retro_orla_legenda: number | null;
+  created_at: string;
 }
 
 interface InventarioPlacasViewerProps {
@@ -46,6 +59,8 @@ interface InventarioPlacasViewerProps {
 export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasViewerProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlaca, setSelectedPlaca] = useState<FichaPlaca | null>(null);
+  const [showIntervencaoForm, setShowIntervencaoForm] = useState(false);
+  const [intervencoes, setIntervencoes] = useState<Intervencao[]>([]);
 
   const { data: placas, isLoading } = useQuery({
     queryKey: ["inventario-placas", loteId, rodoviaId, searchTerm],
@@ -69,8 +84,27 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
     },
   });
 
-  const openPlacaDetail = (placa: FichaPlaca) => {
+  const openPlacaDetail = async (placa: FichaPlaca) => {
     setSelectedPlaca(placa);
+    setShowIntervencaoForm(false);
+    
+    // Buscar intervenções vinculadas a esta placa
+    const { data, error } = await supabase
+      .from("ficha_placa_intervencoes")
+      .select("*")
+      .eq("ficha_placa_id", placa.id)
+      .order("data_intervencao", { ascending: false });
+    
+    if (!error && data) {
+      setIntervencoes(data as Intervencao[]);
+    }
+  };
+
+  const handleIntervencaoSuccess = () => {
+    setShowIntervencaoForm(false);
+    if (selectedPlaca) {
+      openPlacaDetail(selectedPlaca); // Recarrega os dados
+    }
   };
 
   const fotos = selectedPlaca
@@ -176,19 +210,45 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
       <Dialog open={!!selectedPlaca} onOpenChange={() => setSelectedPlaca(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              Detalhes da Placa - SNV: {selectedPlaca?.snv || "N/A"}
+            <DialogTitle className="flex items-center justify-between">
+              <span>Detalhes da Placa - SNV: {selectedPlaca?.snv || "N/A"}</span>
+              {!showIntervencaoForm && (
+                <Button onClick={() => setShowIntervencaoForm(true)} size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Registrar Intervenção
+                </Button>
+              )}
             </DialogTitle>
           </DialogHeader>
 
           {selectedPlaca && (
-            <Tabs defaultValue="info" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="info">Informações</TabsTrigger>
-                <TabsTrigger value="fotos">
-                  Fotos ({fotos.length})
-                </TabsTrigger>
-              </TabsList>
+            <>
+              {showIntervencaoForm ? (
+                <IntervencaoInventarioForm
+                  fichaPlacaId={selectedPlaca.id}
+                  placaInfo={{
+                    codigo: selectedPlaca.codigo,
+                    snv: selectedPlaca.snv,
+                    km: selectedPlaca.km,
+                    lado: selectedPlaca.lado,
+                    rodoviaId: rodoviaId,
+                    loteId: loteId,
+                  }}
+                  onSuccess={handleIntervencaoSuccess}
+                  onCancel={() => setShowIntervencaoForm(false)}
+                />
+              ) : (
+                <Tabs defaultValue="info" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="info">Informações</TabsTrigger>
+                    <TabsTrigger value="fotos">
+                      Fotos ({fotos.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="historico">
+                      <History className="mr-2 h-4 w-4" />
+                      Histórico ({intervencoes.length})
+                    </TabsTrigger>
+                  </TabsList>
 
               <TabsContent value="info" className="space-y-4">
                 {/* Identificação */}
@@ -346,7 +406,78 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
                   </div>
                 )}
               </TabsContent>
+
+              <TabsContent value="historico" className="space-y-4">
+                {intervencoes.length > 0 ? (
+                  <div className="space-y-3">
+                    {intervencoes.map((intervencao) => (
+                      <Card key={intervencao.id}>
+                        <CardContent className="pt-6">
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <p className="font-semibold">{intervencao.motivo}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
+                                </p>
+                              </div>
+                              {intervencao.placa_recuperada && (
+                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                  Recuperada
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 text-sm mt-3">
+                              {intervencao.suporte && (
+                                <div>
+                                  <span className="text-muted-foreground">Suporte:</span>{" "}
+                                  <span className="font-medium">{intervencao.suporte}</span>
+                                </div>
+                              )}
+                              {intervencao.substrato && (
+                                <div>
+                                  <span className="text-muted-foreground">Substrato:</span>{" "}
+                                  <span className="font-medium">{intervencao.substrato}</span>
+                                </div>
+                              )}
+                              {intervencao.pelicula && (
+                                <div>
+                                  <span className="text-muted-foreground">Película:</span>{" "}
+                                  <span className="font-medium">{intervencao.pelicula}</span>
+                                </div>
+                              )}
+                              {intervencao.retro_fundo && (
+                                <div>
+                                  <span className="text-muted-foreground">Retro Fundo:</span>{" "}
+                                  <span className="font-medium">{intervencao.retro_fundo} cd.lux/m²</span>
+                                </div>
+                              )}
+                              {intervencao.retro_orla_legenda && (
+                                <div>
+                                  <span className="text-muted-foreground">Retro Orla/Legenda:</span>{" "}
+                                  <span className="font-medium">{intervencao.retro_orla_legenda} cd.lux/m²</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>Nenhuma intervenção registrada ainda</p>
+                    <p className="text-sm mt-1">
+                      Clique em "Registrar Intervenção" para adicionar o primeiro registro
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
             </Tabs>
+              )}
+            </>
           )}
         </DialogContent>
       </Dialog>
