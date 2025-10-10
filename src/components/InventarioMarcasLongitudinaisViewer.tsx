@@ -276,8 +276,9 @@ export function InventarioMarcasLongitudinaisViewer({
 
           {selectedMarca && (
             <Tabs defaultValue="info" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="info">Informações</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="info">Dados</TabsTrigger>
+                <TabsTrigger value="foto">Foto</TabsTrigger>
                 <TabsTrigger value="historico">Histórico ({intervencoes.length})</TabsTrigger>
               </TabsList>
 
@@ -377,20 +378,23 @@ export function InventarioMarcasLongitudinaisViewer({
                   <p className="text-sm">{selectedMarca.observacao}</p>
                 </div>
               )}
-
-              {selectedMarca.foto_url && (
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                    Foto
-                  </h3>
-                  <img
-                    src={selectedMarca.foto_url}
-                    alt="Marca Longitudinal"
-                    className="w-full h-auto rounded-lg border shadow-sm"
-                  />
-                </div>
-              )}
             </div>
+              </TabsContent>
+
+              <TabsContent value="foto" className="mt-4">
+                {selectedMarca.foto_url ? (
+                  <div className="flex justify-center">
+                    <img
+                      src={supabase.storage.from('marcas-longitudinais').getPublicUrl(selectedMarca.foto_url).data.publicUrl}
+                      alt="Marca Longitudinal"
+                      className="rounded-lg max-w-full h-auto"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-center py-8 text-muted-foreground">
+                    Nenhuma foto disponível
+                  </p>
+                )}
               </TabsContent>
 
               <TabsContent value="historico" className="space-y-4">

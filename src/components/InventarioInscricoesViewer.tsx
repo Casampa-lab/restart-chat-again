@@ -274,6 +274,13 @@ export function InventarioInscricoesViewer({
           </DialogHeader>
 
           {selectedInscricao && (
+            <Tabs defaultValue="dados" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="dados">Dados</TabsTrigger>
+                <TabsTrigger value="foto">Foto</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="dados" className="space-y-4 mt-4">
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -365,20 +372,25 @@ export function InventarioInscricoesViewer({
                   <p className="text-sm">{selectedInscricao.observacao}</p>
                 </div>
               )}
-
-              {selectedInscricao.foto_url && (
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                    Foto
-                  </h3>
-                  <img
-                    src={selectedInscricao.foto_url}
-                    alt="Inscrição"
-                    className="w-full h-auto rounded-lg border shadow-sm"
-                  />
-                </div>
-              )}
             </div>
+              </TabsContent>
+
+              <TabsContent value="foto" className="mt-4">
+                {selectedInscricao.foto_url ? (
+                  <div className="flex justify-center">
+                    <img
+                      src={supabase.storage.from('inscricoes').getPublicUrl(selectedInscricao.foto_url).data.publicUrl}
+                      alt="Inscrição"
+                      className="rounded-lg max-w-full h-auto"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-center py-8 text-muted-foreground">
+                    Nenhuma foto disponível
+                  </p>
+                )}
+              </TabsContent>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>

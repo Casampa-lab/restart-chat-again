@@ -198,8 +198,9 @@ export const InventarioDefensasViewer = ({
 
           {selectedDefensa && (
             <Tabs defaultValue="info" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="info">Informações</TabsTrigger>
+                <TabsTrigger value="foto">Foto</TabsTrigger>
                 <TabsTrigger value="historico">Histórico</TabsTrigger>
               </TabsList>
 
@@ -247,6 +248,12 @@ export const InventarioDefensasViewer = ({
                     Voltar
                   </Button>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="foto" className="mt-4">
+                <p className="text-center py-8 text-muted-foreground">
+                  Nenhuma foto disponível
+                </p>
               </TabsContent>
 
               <TabsContent value="historico" className="space-y-4">

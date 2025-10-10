@@ -281,6 +281,13 @@ export function InventarioTachasViewer({
           </DialogHeader>
 
           {selectedTacha && (
+            <Tabs defaultValue="dados" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="dados">Dados</TabsTrigger>
+                <TabsTrigger value="foto">Foto</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="dados" className="space-y-4 mt-4">
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -384,20 +391,25 @@ export function InventarioTachasViewer({
                   <p className="text-sm">{selectedTacha.observacao}</p>
                 </div>
               )}
-
-              {selectedTacha.foto_url && (
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                    Foto
-                  </h3>
-                  <img
-                    src={selectedTacha.foto_url}
-                    alt="Tacha"
-                    className="w-full h-auto rounded-lg border shadow-sm"
-                  />
-                </div>
-              )}
             </div>
+              </TabsContent>
+
+              <TabsContent value="foto" className="mt-4">
+                {selectedTacha.foto_url ? (
+                  <div className="flex justify-center">
+                    <img
+                      src={supabase.storage.from('tachas').getPublicUrl(selectedTacha.foto_url).data.publicUrl}
+                      alt="Tacha"
+                      className="rounded-lg max-w-full h-auto"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-center py-8 text-muted-foreground">
+                    Nenhuma foto disponível
+                  </p>
+                )}
+              </TabsContent>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>
