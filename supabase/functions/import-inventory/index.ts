@@ -143,14 +143,14 @@ serve(async (req) => {
       // Mapear campos do Excel para os campos da tabela
       for (const [key, value] of Object.entries(row)) {
         // Ignorar colunas vazias ou inválidas
-        if (!key || key.trim() === '' || key.startsWith('__')) {
+        if (!key || key.trim() === '' || key.startsWith('__') || key.includes('__empty')) {
           continue;
         }
         
         const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_");
         
-        // Ignorar se a normalização resultar em string vazia
-        if (!normalizedKey || normalizedKey === '_') {
+        // Ignorar se a normalização resultar em string vazia ou contiver __empty
+        if (!normalizedKey || normalizedKey === '_' || normalizedKey.includes('__empty')) {
           continue;
         }
         
@@ -170,6 +170,12 @@ serve(async (req) => {
 
       return record;
     });
+
+    // Log do primeiro registro para debug
+    if (recordsToInsert.length > 0) {
+      console.log("Exemplo de registro a ser inserido:", JSON.stringify(recordsToInsert[0], null, 2));
+      console.log("Campos do registro:", Object.keys(recordsToInsert[0]));
+    }
 
     // Inserir dados em lotes para evitar estouro de memória
     const BATCH_SIZE = 500;
