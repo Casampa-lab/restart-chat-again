@@ -18,6 +18,7 @@ import IntervencoesSHForm from "@/components/IntervencoesSHForm";
 import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm";
 import IntervencoesSVForm from "@/components/IntervencoesSVForm";
 import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
+import { IntervencoesMarcasTransversaisForm } from "@/components/IntervencoesMarcasTransversaisForm";
 import { RegistroNCForm } from "@/components/RegistroNCForm";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
@@ -49,6 +50,7 @@ const Index = () => {
     return localStorage.getItem('activeTab') || 'frentes';
   });
   const [intervencaoSubTab, setIntervencaoSubTab] = useState("sv");
+  const [shSubTab, setShSubTab] = useState("longitudinais");
   const [selectedPlacaForIntervencao, setSelectedPlacaForIntervencao] = useState<any>(null);
   const [selectedMarcaSHForIntervencao, setSelectedMarcaSHForIntervencao] = useState<any>(null);
   const [selectedInscricaoForIntervencao, setSelectedInscricaoForIntervencao] = useState<any>(null);
@@ -340,7 +342,22 @@ const Index = () => {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="sh" className="mt-4">
-                      <IntervencoesSHForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                      <Tabs value={shSubTab} onValueChange={setShSubTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="longitudinais">
+                            Marcas Longitudinais
+                          </TabsTrigger>
+                          <TabsTrigger value="transversais">
+                            Marcas Transversais
+                          </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="longitudinais" className="mt-4">
+                          <IntervencoesSHForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                        </TabsContent>
+                        <TabsContent value="transversais" className="mt-4">
+                          <IntervencoesMarcasTransversaisForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                        </TabsContent>
+                      </Tabs>
                     </TabsContent>
                     <TabsContent value="inscricoes" className="mt-4">
                       <IntervencoesInscricoesForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
