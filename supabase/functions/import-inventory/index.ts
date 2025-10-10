@@ -141,9 +141,18 @@ serve(async (req) => {
       };
 
       // Mapear campos do Excel para os campos da tabela
-      // Isso precisa ser customizado para cada tipo de inventário
       for (const [key, value] of Object.entries(row)) {
-        const normalizedKey = key.toLowerCase().replace(/\s+/g, "_");
+        // Ignorar colunas vazias ou inválidas
+        if (!key || key.trim() === '' || key.startsWith('__')) {
+          continue;
+        }
+        
+        const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_");
+        
+        // Ignorar se a normalização resultar em string vazia
+        if (!normalizedKey || normalizedKey === '_') {
+          continue;
+        }
         
         // Se é o campo de foto e temos fotos, substituir pelo URL
         if (hasPhotos && photoFieldName && key === photoFieldName) {
@@ -152,7 +161,10 @@ serve(async (req) => {
             record[normalizedKey] = photoMap[photoFileName];
           }
         } else {
-          record[normalizedKey] = value;
+          // Apenas adicionar se o valor não for undefined ou null vazio
+          if (value !== undefined && value !== null && value !== '') {
+            record[normalizedKey] = value;
+          }
         }
       }
 
