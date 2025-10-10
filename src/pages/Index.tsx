@@ -18,14 +18,14 @@ import IntervencoesSHForm from "@/components/IntervencoesSHForm";
 import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm";
 import IntervencoesSVForm from "@/components/IntervencoesSVForm";
 import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
-import { IntervencoesMarcasTransversaisForm } from "@/components/IntervencoesMarcasTransversaisForm";
+import { IntervencoesCilindrosForm } from "@/components/IntervencoesCilindrosForm";
 import { IntervencoesPorticosForm } from "@/components/IntervencoesPorticosForm";
 import { RegistroNCForm } from "@/components/RegistroNCForm";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
 import { InventarioPlacasViewer } from "@/components/InventarioPlacasViewer";
 import { InventarioMarcasLongitudinaisViewer } from "@/components/InventarioMarcasLongitudinaisViewer";
-import { InventarioMarcasTransversaisViewer } from "@/components/InventarioMarcasTransversaisViewer";
+import { InventarioCilindrosViewer } from "@/components/InventarioCilindrosViewer";
 import { InventarioPorticosViewer } from "@/components/InventarioPorticosViewer";
 import { InventarioInscricoesViewer } from "@/components/InventarioInscricoesViewer";
 import { InventarioTachasViewer } from "@/components/InventarioTachasViewer";
@@ -401,7 +401,7 @@ const Index = () => {
                             Marcas Longitudinais
                           </TabsTrigger>
                           <TabsTrigger value="transversais">
-                            Marcas Transversais
+                            Cilindros
                           </TabsTrigger>
                           <TabsTrigger value="inscricoes">
                             Zebrados, Setas, Símbolos e Legendas
@@ -414,7 +414,7 @@ const Index = () => {
                           <IntervencoesSHForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                         </TabsContent>
                         <TabsContent value="transversais" className="mt-4">
-                          <IntervencoesMarcasTransversaisForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                          <IntervencoesCilindrosForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                         </TabsContent>
                         <TabsContent value="inscricoes" className="mt-4">
                           <IntervencoesInscricoesForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
@@ -484,7 +484,7 @@ const Index = () => {
                             Marcas Longitudinais
                           </TabsTrigger>
                           <TabsTrigger value="transversais">
-                            Marcas Transversais
+                            Cilindros
                           </TabsTrigger>
                           <TabsTrigger value="inscricoes">
                             Zebrados, Setas, Símbolos e Legendas
@@ -501,7 +501,7 @@ const Index = () => {
                           />
                         </TabsContent>
                         <TabsContent value="transversais" className="mt-4">
-                          <InventarioMarcasTransversaisViewer 
+                          <InventarioCilindrosViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
                           />
