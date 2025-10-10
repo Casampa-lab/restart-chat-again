@@ -360,12 +360,21 @@ serve(async (req) => {
         const cleanKey = key.replace(/\s+/g, ' ').trim();
         let normalizedKey = cleanKey.toLowerCase().replace(/\s+/g, "_");
         
+        // Log específico para tachas
+        if (tableName === "ficha_tachas" && (cleanKey === "Cor Refletivo" || cleanKey === "Local Implantação" || cleanKey === "Espaçamento (m)")) {
+          console.log(`[TACHA DEBUG] Campo: ${cleanKey}, Valor: ${value}, Normalizado: ${normalizedKey}`);
+        }
+        
         // Aplicar mapeamento específico se existir
         const originalKey = cleanKey; // Guardar chave original limpa para verificações especiais
         if (fieldMapping[cleanKey]) {
           normalizedKey = fieldMapping[cleanKey];
         } else if (fieldMapping[normalizedKey]) {
           normalizedKey = fieldMapping[normalizedKey];
+        }
+        
+        if (tableName === "ficha_tachas" && (originalKey === "Cor Refletivo" || originalKey === "Local Implantação" || originalKey === "Espaçamento (m)")) {
+          console.log(`[TACHA DEBUG] Após mapeamento: ${normalizedKey}, Valid: ${validFields.includes(normalizedKey)}`);
         }
         
         // Se o mapeamento retornou string vazia, pular este campo
@@ -401,6 +410,13 @@ serve(async (req) => {
               } else {
                 record[normalizedKey] = value;
               }
+              
+              // Log específico para tachas
+              if (tableName === "ficha_tachas" && (normalizedKey === "cor_refletivo" || normalizedKey === "local_implantacao" || normalizedKey === "espacamento_m")) {
+                console.log(`[TACHA DEBUG] INSERIDO: ${normalizedKey} = ${value}`);
+              }
+            } else if (tableName === "ficha_tachas" && (normalizedKey === "cor_refletivo" || normalizedKey === "local_implantacao" || normalizedKey === "espacamento_m")) {
+              console.log(`[TACHA DEBUG] REJEITADO (valor vazio/null/-): ${normalizedKey} = ${value}`);
             }
           }
         }
