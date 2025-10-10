@@ -169,6 +169,12 @@ serve(async (req) => {
         "largura_da_faixa_(m)": "largura_cm",
         "extensão_(km)": "extensao_metros",
         "código": "tipo_demarcacao",
+        "posição": "observacao", // Guardar em observação temporariamente
+        "traço_(m)": "", // Ignorar
+        "espaçamento_(m)": "", // Ignorar
+        "outros_materiais": "", // Ignorar
+        "área_(m²)": "", // Ignorar (não há campo correspondente)
+        "br": "", // Ignorar (info já está em rodovia_id)
       },
       ficha_placa: {
         "dimensões_(mm)": "dimensoes_mm",
@@ -184,7 +190,7 @@ serve(async (req) => {
         "extensao_metros", "foto_url", "km_final", "km_inicial",
         "largura_cm", "latitude_final", "latitude_inicial",
         "longitude_final", "longitude_inicial", "material",
-        "observacao", "tipo_demarcacao"
+        "observacao", "tipo_demarcacao", "snv"
       ],
       ficha_placa: [
         "altura_m", "area_m2", "br", "codigo", "contrato", "data_implantacao",
@@ -225,6 +231,11 @@ serve(async (req) => {
           normalizedKey = fieldMapping[key];
         } else if (fieldMapping[normalizedKey]) {
           normalizedKey = fieldMapping[normalizedKey];
+        }
+        
+        // Se o mapeamento retornou string vazia, pular este campo
+        if (normalizedKey === '') {
+          continue;
         }
         
         // Ignorar se a normalização resultar em string vazia
