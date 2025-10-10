@@ -289,110 +289,120 @@ export function InventarioTachasViewer({
               </TabsList>
 
               <TabsContent value="dados" className="space-y-4 mt-4">
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                    Características
-                  </h3>
-                  <div className="space-y-2">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-sm font-medium">SNV:</span>
-                      <p className="text-sm">{selectedTacha.snv || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium">Descrição:</span>
-                      <p className="text-sm">{selectedTacha.descricao || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium">Corpo:</span>
-                      <p className="text-sm">{selectedTacha.corpo || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium">Refletivo:</span>
-                      <p className="text-sm">{selectedTacha.refletivo || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium">Cor Refletivo:</span>
-                      <p className="text-sm">{selectedTacha.cor_refletivo || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium">Local de Implantação:</span>
-                      <p className="text-sm">{selectedTacha.local_implantacao || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium">Espaçamento:</span>
-                      <p className="text-sm">{selectedTacha.espacamento_m ? `${selectedTacha.espacamento_m}m` : "-"}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Localização
-                  </h3>
-                  <div className="space-y-2">
-                    <div>
-                      <span className="text-sm font-medium">KM Inicial:</span>
-                      <p className="text-sm">{selectedTacha.km_inicial.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium">KM Final:</span>
-                      <p className="text-sm">{selectedTacha.km_final.toFixed(2)}</p>
-                    </div>
-                    {selectedTacha.latitude_inicial && selectedTacha.longitude_inicial && (
-                      <div>
-                        <span className="text-sm font-medium">Coordenadas Inicial:</span>
-                        <p className="text-xs">
-                          Lat: {selectedTacha.latitude_inicial.toFixed(6)}
-                          <br />
-                          Lng: {selectedTacha.longitude_inicial.toFixed(6)}
-                        </p>
+                      <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                        Características
+                      </h3>
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-sm font-medium">SNV:</span>
+                          <p className="text-sm">{selectedTacha.snv || "-"}</p>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium">Descrição:</span>
+                          <p className="text-sm">{selectedTacha.descricao || "-"}</p>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium">Corpo:</span>
+                          <p className="text-sm">{selectedTacha.corpo || "-"}</p>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium">Refletivo:</span>
+                          <p className="text-sm">{selectedTacha.refletivo || "-"}</p>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium">Cor do Refletivo:</span>
+                          <p className="text-sm">{selectedTacha.cor_refletivo || "-"}</p>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+                    </div>
 
-              <div>
-                <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                  Dimensões
-                </h3>
-                <div className="space-y-2">
+                    <div>
+                      <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        Localização
+                      </h3>
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-sm font-medium">Local de Implantação:</span>
+                          <p className="text-sm">{selectedTacha.local_implantacao || "-"}</p>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium">KM Inicial:</span>
+                          <p className="text-sm">{selectedTacha.km_inicial.toFixed(2)}</p>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium">KM Final:</span>
+                          <p className="text-sm">{selectedTacha.km_final.toFixed(2)}</p>
+                        </div>
+                        {selectedTacha.latitude_inicial && selectedTacha.longitude_inicial && (
+                          <div>
+                            <span className="text-sm font-medium">Coordenadas Iniciais:</span>
+                            <p className="text-xs">
+                              Lat: {selectedTacha.latitude_inicial.toFixed(6)}
+                              <br />
+                              Lng: {selectedTacha.longitude_inicial.toFixed(6)}
+                            </p>
+                          </div>
+                        )}
+                        {selectedTacha.latitude_final && selectedTacha.longitude_final && (
+                          <div>
+                            <span className="text-sm font-medium">Coordenadas Finais:</span>
+                            <p className="text-xs">
+                              Lat: {selectedTacha.latitude_final.toFixed(6)}
+                              <br />
+                              Lng: {selectedTacha.longitude_final.toFixed(6)}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
-                    <span className="text-sm font-medium">Quantidade instalada:</span>
-                    <p className="text-sm">{selectedTacha.quantidade} unidades</p>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                      Dimensões e Quantidade
+                    </h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <span className="text-sm font-medium">Quantidade:</span>
+                        <p className="text-sm">{selectedTacha.quantidade} unidades</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">Extensão:</span>
+                        <p className="text-sm">{selectedTacha.extensao_km ? `${selectedTacha.extensao_km.toFixed(2)} km` : "-"}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">Espaçamento:</span>
+                        <p className="text-sm">{selectedTacha.espacamento_m ? `${selectedTacha.espacamento_m}m` : "-"}</p>
+                      </div>
+                    </div>
                   </div>
+
                   <div>
-                    <span className="text-sm font-medium">Extensão:</span>
-                    <p className="text-sm">{selectedTacha.extensao_km ? `${selectedTacha.extensao_km.toFixed(2)} km` : "-"}</p>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Data
+                    </h3>
+                    <div>
+                      <span className="text-sm font-medium">Data da Vistoria:</span>
+                      <p className="text-sm">
+                        {new Date(selectedTacha.data_vistoria).toLocaleDateString("pt-BR")}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              <div>
-                <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Data
-                </h3>
-                <div>
-                  <span className="text-sm font-medium">Data da Vistoria:</span>
-                  <p className="text-sm">
-                    {new Date(selectedTacha.data_vistoria).toLocaleDateString("pt-BR")}
-                  </p>
+                  {selectedTacha.observacao && (
+                    <div>
+                      <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                        Observações
+                      </h3>
+                      <p className="text-sm">{selectedTacha.observacao}</p>
+                    </div>
+                  )}
                 </div>
-              </div>
-
-              {selectedTacha.observacao && (
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                    Observações
-                  </h3>
-                  <p className="text-sm">{selectedTacha.observacao}</p>
-                </div>
-              )}
-            </div>
               </TabsContent>
 
               <TabsContent value="foto" className="mt-4">
