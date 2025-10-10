@@ -275,9 +275,10 @@ export function InventarioInscricoesViewer({
 
           {selectedInscricao && (
             <Tabs defaultValue="dados" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="dados">Dados</TabsTrigger>
                 <TabsTrigger value="foto">Foto</TabsTrigger>
+                <TabsTrigger value="historico">Histórico</TabsTrigger>
               </TabsList>
 
               <TabsContent value="dados" className="space-y-4 mt-4">
@@ -397,6 +398,70 @@ export function InventarioInscricoesViewer({
                 ) : (
                   <p className="text-center py-8 text-muted-foreground">
                     Nenhuma foto disponível
+                  </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="historico" className="mt-4">
+                {intervencoes && intervencoes.length > 0 ? (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm">
+                      Histórico de Intervenções ({intervencoes.length})
+                    </h3>
+                    <div className="space-y-4">
+                      {intervencoes.map((intervencao, index) => (
+                        <div key={intervencao.id} className="border rounded-lg p-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Badge variant="default">
+                              Intervenção #{intervencoes.length - index}
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            <div>
+                              <span className="text-sm font-medium">Motivo:</span>
+                              <p className="text-sm">{intervencao.motivo}</p>
+                            </div>
+                            {intervencao.tipo_inscricao && (
+                              <div>
+                                <span className="text-sm font-medium">Tipo:</span>
+                                <p className="text-sm">{intervencao.tipo_inscricao}</p>
+                              </div>
+                            )}
+                            {intervencao.cor && (
+                              <div>
+                                <span className="text-sm font-medium">Cor:</span>
+                                <p className="text-sm">{intervencao.cor}</p>
+                              </div>
+                            )}
+                            {intervencao.dimensoes && (
+                              <div>
+                                <span className="text-sm font-medium">Dimensões:</span>
+                                <p className="text-sm">{intervencao.dimensoes}</p>
+                              </div>
+                            )}
+                            {intervencao.area_m2 && (
+                              <div>
+                                <span className="text-sm font-medium">Área:</span>
+                                <p className="text-sm">{intervencao.area_m2} m²</p>
+                              </div>
+                            )}
+                            {intervencao.material_utilizado && (
+                              <div>
+                                <span className="text-sm font-medium">Material:</span>
+                                <p className="text-sm">{intervencao.material_utilizado}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-center py-8 text-muted-foreground">
+                    Nenhuma intervenção registrada
                   </p>
                 )}
               </TabsContent>
