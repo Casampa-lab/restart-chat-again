@@ -87,14 +87,19 @@ export function InventarioPlacasManager() {
 
       toast.success(`${placasData.length} placas encontradas na planilha`);
 
-      // 2. Upload das fotos e criar mapeamento por nome
+      // 2. Upload das fotos e criar mapeamento por nome e data
       const photoUrls: Record<string, string> = {};
+      const photoDates: Record<string, string> = {};
+      
       if (photosFolder && photosFolder.length > 0) {
         setProgress(`Fazendo upload de ${photosFolder.length} fotos...`);
         
         for (let i = 0; i < photosFolder.length; i++) {
           const photo = photosFolder[i];
           const photoPath = `inventario/${selectedLote}/${Date.now()}_${photo.name}`;
+          
+          // Extrair data da foto (lastModified do arquivo)
+          const photoDate = new Date(photo.lastModified).toISOString().split("T")[0];
           
           const { error: photoError } = await supabase.storage
             .from("placa-photos")
@@ -116,7 +121,15 @@ export function InventarioPlacasManager() {
             photoUrls[nomeSemExt.toLowerCase()] = urlData.publicUrl;
             photoUrls[nomeSemExt.toUpperCase()] = urlData.publicUrl;
             
-            console.log('✅ Foto mapeada:', nomeSemExt);
+            // Mapear datas também
+            photoDates[nomeOriginal] = photoDate;
+            photoDates[nomeOriginal.toLowerCase()] = photoDate;
+            photoDates[nomeOriginal.toUpperCase()] = photoDate;
+            photoDates[nomeSemExt] = photoDate;
+            photoDates[nomeSemExt.toLowerCase()] = photoDate;
+            photoDates[nomeSemExt.toUpperCase()] = photoDate;
+            
+            console.log('✅ Foto mapeada:', nomeSemExt, 'Data:', photoDate);
           }
 
           if ((i + 1) % 10 === 0) {
@@ -146,6 +159,7 @@ export function InventarioPlacasManager() {
       const placasParaInserir = placasData.map((placa: PlacaData) => {
         // Tentar múltiplas variações do nome da foto
         let fotoUrl = null;
+        let dataVistoria = new Date().toISOString().split("T")[0]; // Data padrão se não encontrar foto
         
         if (placa.foto_hiperlink) {
           const tentativas = [
@@ -161,6 +175,7 @@ export function InventarioPlacasManager() {
           for (const tentativa of tentativas) {
             if (photoUrls[tentativa]) {
               fotoUrl = photoUrls[tentativa];
+              dataVistoria = photoDates[tentativa] || dataVistoria; // Usar data da foto
               fotosLinkadas++;
               break;
             }
@@ -193,7 +208,7 @@ export function InventarioPlacasManager() {
           dimensoes_mm: placa.dimensoes_mm,
           area_m2: placa.area_m2,
           altura_m: placa.altura,
-          data_vistoria: new Date().toISOString().split("T")[0],
+          data_vistoria: dataVistoria,
           foto_frontal_url: fotoUrl,
         };
       });
