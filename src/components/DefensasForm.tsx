@@ -363,7 +363,7 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2 lg:col-span-3">
               <Label>Coordenadas GPS do Ponto Inicial</Label>
               <div className="flex gap-2">
                 <Button
@@ -394,7 +394,7 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
               </div>
             </div>
 
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2 lg:col-span-3">
               <Label>Coordenadas GPS do Ponto Final</Label>
               <div className="flex gap-2">
                 <Button
