@@ -88,18 +88,19 @@ export const InventarioDefensasViewer = ({
   const openDefensaDetail = async (defensa: FichaDefensa) => {
     setSelectedDefensa(defensa);
     
-    const { data, error } = await supabase
-      .from("defensas")
+    // Buscar intervenções da defensa
+    const { data: intervencoesData, error: intervencoesError } = await supabase
+      .from("defensas_intervencoes")
       .select("*")
-      .eq("id", defensa.id)
-      .maybeSingle();
+      .eq("defensa_id", defensa.id)
+      .order("data_intervencao", { ascending: false });
 
-    if (error) {
-      console.error("Erro ao buscar intervenções:", error);
-      return;
+    if (intervencoesError) {
+      console.error("Erro ao buscar intervenções:", intervencoesError);
+      setIntervencoes([]);
+    } else {
+      setIntervencoes(intervencoesData || []);
     }
-
-    setIntervencoes([]);
   };
 
   const filteredDefensas = gpsLat && gpsLong && defensas

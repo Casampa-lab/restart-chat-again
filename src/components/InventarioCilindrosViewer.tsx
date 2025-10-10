@@ -27,7 +27,18 @@ interface Cilindro {
   espacamento_m: number | null;
   quantidade: number | null;
   observacao: string | null;
+  foto_url: string | null;
+  data_vistoria: string;
+}
+
+interface IntervencaoCilindro {
+  id: string;
   data_intervencao: string;
+  motivo: string;
+  cor_corpo: string | null;
+  cor_refletivo: string | null;
+  tipo_refletivo: string | null;
+  quantidade: number | null;
 }
 
 interface InventarioCilindrosViewerProps {
@@ -40,6 +51,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
   const [searchLat, setSearchLat] = useState("");
   const [searchLon, setSearchLon] = useState("");
   const [selectedCilindro, setSelectedCilindro] = useState<Cilindro | null>(null);
+  const [intervencoes, setIntervencoes] = useState<IntervencaoCilindro[]>([]);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371e3; // Earth radius in meters
@@ -60,7 +72,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
     queryKey: ["cilindros", loteId, rodoviaId, searchTerm, searchLat, searchLon],
     queryFn: async () => {
       let query = supabase
-        .from("intervencoes_cilindros")
+        .from("ficha_cilindros")
         .select("*")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
@@ -98,8 +110,14 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
     },
   });
 
-  const handleViewDetails = (cilindro: Cilindro) => {
+  const handleViewDetails = async (cilindro: Cilindro) => {
     setSelectedCilindro(cilindro);
+    const { data } = await supabase
+      .from("ficha_cilindros_intervencoes")
+      .select("*")
+      .eq("ficha_cilindros_id", cilindro.id)
+      .order("data_intervencao", { ascending: false });
+    setIntervencoes(data || []);
   };
 
   if (isLoading) {
@@ -169,7 +187,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                         <TableCell>{cilindro.km_final?.toFixed(3)}</TableCell>
                         <TableCell>{cilindro.cor_corpo}</TableCell>
                         <TableCell>{cilindro.quantidade || "-"}</TableCell>
-                        <TableCell>{new Date(cilindro.data_intervencao).toLocaleDateString()}</TableCell>
+                        <TableCell>{new Date(cilindro.data_vistoria).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <Button
                             variant="outline"
@@ -224,8 +242,8 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                         <p className="text-sm">{selectedCilindro.snv || "-"}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">Data</p>
-                        <p className="text-sm">{new Date(selectedCilindro.data_intervencao).toLocaleDateString()}</p>
+                        <p className="text-sm font-medium text-muted-foreground">Data Vistoria</p>
+                        <p className="text-sm">{new Date(selectedCilindro.data_vistoria).toLocaleDateString()}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Cor (Corpo)</p>
@@ -318,15 +336,77 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
               </TabsContent>
 
               <TabsContent value="foto" className="mt-4">
-                <p className="text-center py-8 text-muted-foreground">
-                  Nenhuma foto disponível
-                </p>
+                {selectedCilindro.foto_url ? (
+                  <div className="flex justify-center">
+                    <img
+                      src={supabase.storage.from('cilindros').getPublicUrl(selectedCilindro.foto_url).data.publicUrl}
+                      alt="Cilindro"
+                      className="rounded-lg max-w-full h-auto"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-center py-8 text-muted-foreground">
+                    Nenhuma foto disponível
+                  </p>
+                )}
               </TabsContent>
 
               <TabsContent value="historico" className="mt-4">
-                <p className="text-center py-8 text-muted-foreground">
-                  Nenhum histórico disponível para este tipo de inventário
-                </p>
+                {intervencoes && intervencoes.length > 0 ? (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm">
+                      Histórico de Intervenções ({intervencoes.length})
+                    </h3>
+                    <div className="space-y-4">
+                      {intervencoes.map((intervencao, index) => (
+                        <div key={intervencao.id} className="border rounded-lg p-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="font-medium">
+                              Intervenção #{intervencoes.length - index}
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            <div>
+                              <span className="text-sm font-medium">Motivo:</span>
+                              <p className="text-sm">{intervencao.motivo}</p>
+                            </div>
+                            {intervencao.cor_corpo && (
+                              <div>
+                                <span className="text-sm font-medium">Cor (Corpo):</span>
+                                <p className="text-sm">{intervencao.cor_corpo}</p>
+                              </div>
+                            )}
+                            {intervencao.cor_refletivo && (
+                              <div>
+                                <span className="text-sm font-medium">Cor (Refletivo):</span>
+                                <p className="text-sm">{intervencao.cor_refletivo}</p>
+                              </div>
+                            )}
+                            {intervencao.tipo_refletivo && (
+                              <div>
+                                <span className="text-sm font-medium">Tipo Refletivo:</span>
+                                <p className="text-sm">{intervencao.tipo_refletivo}</p>
+                              </div>
+                            )}
+                            {intervencao.quantidade && (
+                              <div>
+                                <span className="text-sm font-medium">Quantidade:</span>
+                                <p className="text-sm">{intervencao.quantidade}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-center py-8 text-muted-foreground">
+                    Nenhuma intervenção registrada
+                  </p>
+                )}
               </TabsContent>
             </Tabs>
           )}

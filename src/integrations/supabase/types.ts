@@ -292,6 +292,39 @@ export type Database = {
         }
         Relationships: []
       }
+      defensas_intervencoes: {
+        Row: {
+          created_at: string
+          data_intervencao: string
+          defensa_id: string
+          estado_conservacao: string | null
+          extensao_metros: number | null
+          id: string
+          motivo: string
+          tipo_defensa: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_intervencao: string
+          defensa_id: string
+          estado_conservacao?: string | null
+          extensao_metros?: number | null
+          id?: string
+          motivo: string
+          tipo_defensa?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_intervencao?: string
+          defensa_id?: string
+          estado_conservacao?: string | null
+          extensao_metros?: number | null
+          id?: string
+          motivo?: string
+          tipo_defensa?: string | null
+        }
+        Relationships: []
+      }
       destinatarios_email: {
         Row: {
           ativo: boolean
@@ -350,6 +383,123 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ficha_cilindros: {
+        Row: {
+          cor_corpo: string
+          cor_refletivo: string | null
+          created_at: string
+          data_vistoria: string
+          enviado_coordenador: boolean | null
+          espacamento_m: number | null
+          extensao_km: number | null
+          foto_url: string | null
+          id: string
+          km_final: number
+          km_inicial: number
+          latitude_final: number | null
+          latitude_inicial: number | null
+          local_implantacao: string | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string
+          observacao: string | null
+          quantidade: number | null
+          rodovia_id: string
+          snv: string | null
+          tipo_refletivo: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cor_corpo: string
+          cor_refletivo?: string | null
+          created_at?: string
+          data_vistoria?: string
+          enviado_coordenador?: boolean | null
+          espacamento_m?: number | null
+          extensao_km?: number | null
+          foto_url?: string | null
+          id?: string
+          km_final?: number
+          km_inicial?: number
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          local_implantacao?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id: string
+          observacao?: string | null
+          quantidade?: number | null
+          rodovia_id: string
+          snv?: string | null
+          tipo_refletivo?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cor_corpo?: string
+          cor_refletivo?: string | null
+          created_at?: string
+          data_vistoria?: string
+          enviado_coordenador?: boolean | null
+          espacamento_m?: number | null
+          extensao_km?: number | null
+          foto_url?: string | null
+          id?: string
+          km_final?: number
+          km_inicial?: number
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          local_implantacao?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string
+          observacao?: string | null
+          quantidade?: number | null
+          rodovia_id?: string
+          snv?: string | null
+          tipo_refletivo?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ficha_cilindros_intervencoes: {
+        Row: {
+          cor_corpo: string | null
+          cor_refletivo: string | null
+          created_at: string
+          data_intervencao: string
+          ficha_cilindros_id: string
+          id: string
+          motivo: string
+          quantidade: number | null
+          tipo_refletivo: string | null
+        }
+        Insert: {
+          cor_corpo?: string | null
+          cor_refletivo?: string | null
+          created_at?: string
+          data_intervencao: string
+          ficha_cilindros_id: string
+          id?: string
+          motivo: string
+          quantidade?: number | null
+          tipo_refletivo?: string | null
+        }
+        Update: {
+          cor_corpo?: string | null
+          cor_refletivo?: string | null
+          created_at?: string
+          data_intervencao?: string
+          ficha_cilindros_id?: string
+          id?: string
+          motivo?: string
+          quantidade?: number | null
+          tipo_refletivo?: string | null
+        }
+        Relationships: []
       }
       ficha_inscricoes: {
         Row: {
