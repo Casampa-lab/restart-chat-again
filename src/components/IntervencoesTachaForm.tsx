@@ -304,7 +304,6 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
                   <SelectContent className="bg-background z-50">
                     <SelectItem value="Tacha monodirecional">Tacha monodirecional</SelectItem>
                     <SelectItem value="Tacha bidirecional">Tacha bidirecional</SelectItem>
-                    <SelectItem value="Tachão">Tachão</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
