@@ -255,6 +255,9 @@ export function InventarioImporterManager() {
           // Tipo de defensa (obrigatório)
           record.tipo_defensa = excelRow["Tipo de Defensa"] || excelRow.tipo_defensa || excelRow["Tipo Defensa"] || "Simples";
           
+          // Estado de conservação (obrigatório)
+          record.estado_conservacao = excelRow["Estado de Conservação"] || excelRow.estado_conservacao || excelRow["Estado Conservacao"] || "Bom";
+          
           // KMs e coordenadas
           record.km_inicial = Number(excelRow["Km Inicial"] || excelRow.km_inicial || 0);
           record.km_final = Number(excelRow["Km Final"] || excelRow.km_final || 0);
