@@ -179,6 +179,7 @@ export function InventarioMarcasLongitudinaisViewer({
                     <TableRow>
                       <TableHead>Código</TableHead>
                       <TableHead>Cor</TableHead>
+                      <TableHead>Material</TableHead>
                       <TableHead>Km Inicial</TableHead>
                       <TableHead>Km Final</TableHead>
                       <TableHead>Extensão (km)</TableHead>
@@ -194,6 +195,7 @@ export function InventarioMarcasLongitudinaisViewer({
                           <Badge variant="outline">{marca.tipo_demarcacao || "-"}</Badge>
                         </TableCell>
                         <TableCell>{marca.cor || "-"}</TableCell>
+                        <TableCell>{marca.material || "-"}</TableCell>
                         <TableCell>{marca.km_inicial?.toFixed(2) || "-"}</TableCell>
                         <TableCell>{marca.km_final?.toFixed(2) || "-"}</TableCell>
                         <TableCell>{marca.extensao_metros ? (marca.extensao_metros / 1000).toFixed(2) : "-"}</TableCell>
