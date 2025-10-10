@@ -289,12 +289,31 @@ serve(async (req) => {
       
       // Adicionar campos obrigatórios com valores padrão específicos por tabela
       if (tableName === "ficha_inscricoes") {
-        record.tipo_inscricao = "Outros"; // Valor padrão, será sobrescrito se vier do Excel
-        record.cor = "Branca"; // Valor padrão, será sobrescrito se vier do Excel
+        record.tipo_inscricao = "Outros";
+        record.cor = "Branca";
       } else if (tableName === "intervencoes_cilindros") {
-        record.cor_corpo = "Branco"; // Valor padrão, será sobrescrito se vier do Excel
-        record.km_inicial = 0; // Valor padrão, será sobrescrito se vier do Excel
-        record.km_final = 0; // Valor padrão, será sobrescrito se vier do Excel
+        // Todos os campos obrigatórios com valores padrão
+        record.cor_corpo = "Branco";
+        record.km_inicial = 0;
+        record.km_final = 0;
+      } else if (tableName === "defensas") {
+        record.lado = "D";
+        record.tipo_defensa = "Metálica";
+        record.extensao_metros = 0;
+        record.estado_conservacao = "Bom";
+        record.necessita_intervencao = false;
+        record.km_inicial = 0;
+        record.km_final = 0;
+      } else if (tableName === "ficha_placa") {
+        // Campos obrigatórios para placas já são preenchidos pelo mapeamento
+      } else if (tableName === "ficha_tachas") {
+        record.km_inicial = 0;
+        record.km_final = 0;
+        record.quantidade = 1;
+      } else if (tableName === "ficha_porticos") {
+        record.tipo = "Informativo";
+      } else if (tableName === "ficha_marcas_longitudinais") {
+        // Campos opcionais, não há obrigatórios além dos básicos
       }
 
       // Mapear campos do Excel para os campos da tabela
