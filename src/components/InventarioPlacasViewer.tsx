@@ -286,8 +286,15 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
       <Dialog open={!!selectedPlaca} onOpenChange={() => setSelectedPlaca(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              Detalhes da Placa - SNV: {selectedPlaca?.snv || "N/A"}
+            <DialogTitle className="flex items-center justify-between">
+              <span>Detalhes da Placa - SNV: {selectedPlaca?.snv || "N/A"}</span>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setSelectedPlaca(null)}
+              >
+                Voltar
+              </Button>
             </DialogTitle>
           </DialogHeader>
 
