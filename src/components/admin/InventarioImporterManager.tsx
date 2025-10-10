@@ -119,19 +119,37 @@ export function InventarioImporterManager() {
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      
+      // Definir linha inicial dos headers para cada tipo de inventário
+      const headerRowMap: Record<string, number> = {
+        "placas": 7,              // Headers na linha 8 (índice 7)
+        "marcas_longitudinais": 1, // Headers na linha 2 (índice 1)
+        "cilindros": 1,
+        "inscricoes": 1,
+        "tachas": 1,
+        "porticos": 1,
+        "defensas": 1,
+      };
+      
+      const headerRow = headerRowMap[inventoryType] || 0;
+      
+      // Ler JSON começando da linha correta dos headers
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+        range: headerRow, // Começa a ler da linha onde estão os headers
+        raw: false,
+        defval: null,
+      });
 
       if (jsonData.length === 0) {
         throw new Error("Nenhum registro encontrado na planilha");
       }
 
       // Log para debug - ver nomes das colunas disponíveis
-      if (jsonData.length > 0) {
-        console.log(`=== COLUNAS DISPONÍVEIS NO EXCEL (${inventoryType}) ===`);
-        console.log("Nomes das colunas:", Object.keys(jsonData[0]));
-        console.log("Primeira linha de dados:", jsonData[0]);
-        console.log("===============================");
-      }
+      console.log(`=== COLUNAS DISPONÍVEIS NO EXCEL (${inventoryType}) ===`);
+      console.log("Total de registros:", jsonData.length);
+      console.log("Nomes das colunas:", Object.keys(jsonData[0]));
+      console.log("Primeira linha de dados:", jsonData[0]);
+      console.log("===============================");
 
       toast.success(`${jsonData.length} registros encontrados na planilha`);
 
