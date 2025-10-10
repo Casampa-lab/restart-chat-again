@@ -220,14 +220,67 @@ export function InventarioImporterManager() {
 
         // Adicionar valores padrão para defensas
         if (inventoryType === "defensas") {
+          // Mapear campos específicos do Excel para o banco
+          const excelRow = row as any;
+          
+          // Campos básicos
+          record.br = excelRow.BR || excelRow.br || null;
+          record.snv = excelRow.SNV || excelRow.snv || null;
+          record.tramo = String(excelRow.Tramo || excelRow.tramo || "");
+          
+          // KMs e coordenadas
+          record.km_inicial = Number(excelRow["Km Inicial"] || excelRow.km_inicial || 0);
+          record.km_final = Number(excelRow["Km Final"] || excelRow.km_final || 0);
+          record.latitude_inicial = excelRow["Latitude Incial"] || excelRow.latitude_inicial || null;
+          record.longitude_inicial = excelRow["Longitude Inicial"] || excelRow.longitude_inicial || null;
+          record.latitude_final = excelRow["Latitude Final"] || excelRow.latitude_final || null;
+          record.longitude_final = excelRow["Longitude Final"] || excelRow.longitude_final || null;
+          
+          // Lado
+          record.lado = excelRow.Lado || excelRow.lado || "D";
+          
+          // Características da defensa
+          record.quantidade_laminas = excelRow["Quantidade Lâminas"] || excelRow.quantidade_laminas || null;
+          record.comprimento_total_tramo_m = Number(excelRow["Comprimento Total do Tramo (m)"] || excelRow.comprimento_total_tramo_m || 0);
+          record.funcao = excelRow["Função"] || excelRow.funcao || null;
+          record.especificacao_obstaculo_fixo = excelRow["Especificação do Obstáculo Fixo"] || excelRow.especificacao_obstaculo_fixo || null;
+          record.id_defensa = excelRow.ID || excelRow.id_defensa || null;
+          
+          // Distâncias e riscos
+          record.distancia_pista_obstaculo_m = Number(excelRow["Distância da pista ao obstáculo (m)"] || excelRow.distancia_pista_obstaculo_m || 0);
+          record.risco = excelRow.Risco || excelRow.risco || null;
+          record.velocidade_kmh = Number(excelRow["Velocidade (km/h)"] || excelRow.velocidade_kmh || 0);
+          record.vmd_veic_dia = Number(excelRow["VMD (veíc./dia)"] || excelRow.vmd_veic_dia || 0);
+          record.percentual_veiculos_pesados = Number(excelRow["% Veículos Pesados"] || excelRow.percentual_veiculos_pesados || 0);
+          
+          // Geometria e níveis
+          record.geometria = excelRow.Geometria || excelRow.geometria || null;
+          record.classificacao_nivel_contencao = excelRow["Classificação do nível de Contenção"] || excelRow.classificacao_nivel_contencao || null;
+          record.nivel_contencao_en1317 = excelRow["Nível de contenção EN 1317-2"] || excelRow.nivel_contencao_en1317 || null;
+          record.nivel_contencao_nchrp350 = excelRow["Nível de contenção NCHRP 350"] || excelRow.nivel_contencao_nchrp350 || null;
+          record.espaco_trabalho = excelRow["Espaço de Trabalho"] || excelRow.espaco_trabalho || null;
+          
+          // Terminais
+          record.terminal_entrada = excelRow["Terminal de Entrada"] || excelRow.terminal_entrada || null;
+          record.terminal_saida = excelRow["Terminal de Saída"] || excelRow.terminal_saida || null;
+          
+          // Adequação funcional
+          record.adequacao_funcionalidade_lamina = excelRow["Adequação à funcionalidade - Lâmina"] || excelRow.adequacao_funcionalidade_lamina || null;
+          record.adequacao_funcionalidade_laminas_inadequadas = excelRow["Adequação à funcionalidade - Lâminas inadequadas"] || excelRow.adequacao_funcionalidade_laminas_inadequadas || null;
+          record.adequacao_funcionalidade_terminais = excelRow["Adequação à funcionalidade - Terminais"] || excelRow.adequacao_funcionalidade_terminais || null;
+          record.adequacao_funcionalidade_terminais_inadequados = excelRow["Adequação à funcionalidade - Terminais inadequados"] || excelRow.adequacao_funcionalidade_terminais_inadequados || null;
+          
+          // Distâncias
+          record.distancia_face_defensa_obstaculo_m = Number(excelRow["Distância da face da defensa ao obstáculo(m)"] || excelRow.distancia_face_defensa_obstaculo_m || 0);
+          record.distancia_bordo_pista_face_defensa_m = Number(excelRow["Distância da linha de bordo da pista à face da defensa (m)"] || excelRow.distancia_bordo_pista_face_defensa_m || 0);
+          
+          // Link e foto
+          record.link_fotografia = excelRow["Link da Fotografia"] || excelRow.link_fotografia || null;
+          
+          // Campos obrigatórios com defaults
           record.data_inspecao = record.data_inspecao || record.data || new Date().toISOString().split('T')[0];
-          record.lado = record.lado || "D";
-          record.tipo_defensa = record.tipo_defensa || record.tipo || "Metálica";
-          record.extensao_metros = Number(record.extensao_metros || record.extensao_m || record["extensao_m"] || 0);
-          record.estado_conservacao = record.estado_conservacao || record.estado || "Bom";
+          record.extensao_metros = Number(record.comprimento_total_tramo_m || record.extensao_metros || record.extensao_m || 0);
           record.necessita_intervencao = Boolean(record.necessita_intervencao || false);
-          record.km_inicial = Number(record.km_inicial || record.km_inicio || 0);
-          record.km_final = Number(record.km_final || record.km_fim || 0);
         }
 
         return record;

@@ -135,64 +135,148 @@ export type Database = {
       }
       defensas: {
         Row: {
+          adequacao_funcionalidade_lamina: string | null
+          adequacao_funcionalidade_laminas_inadequadas: string | null
+          adequacao_funcionalidade_terminais: string | null
+          adequacao_funcionalidade_terminais_inadequados: string | null
+          br: string | null
+          classificacao_nivel_contencao: string | null
+          comprimento_total_tramo_m: number | null
           created_at: string
           data_inspecao: string
+          distancia_bordo_pista_face_defensa_m: number | null
+          distancia_face_defensa_obstaculo_m: number | null
+          distancia_pista_obstaculo_m: number | null
           enviado_coordenador: boolean | null
+          espaco_trabalho: string | null
+          especificacao_obstaculo_fixo: string | null
           estado_conservacao: string
           extensao_metros: number
+          foto_url: string | null
+          funcao: string | null
+          geometria: string | null
           id: string
+          id_defensa: string | null
           km_final: number
           km_inicial: number
           lado: string
+          link_fotografia: string | null
           lote_id: string
           necessita_intervencao: boolean
+          nivel_contencao_en1317: string | null
+          nivel_contencao_nchrp350: string | null
           nivel_risco: string | null
           observacao: string | null
+          percentual_veiculos_pesados: number | null
+          quantidade_laminas: number | null
+          risco: string | null
           rodovia_id: string
+          snv: string | null
+          terminal_entrada: string | null
+          terminal_saida: string | null
           tipo_avaria: string | null
           tipo_defensa: string
+          tramo: string | null
           updated_at: string
           user_id: string
+          velocidade_kmh: number | null
+          vmd_veic_dia: number | null
         }
         Insert: {
+          adequacao_funcionalidade_lamina?: string | null
+          adequacao_funcionalidade_laminas_inadequadas?: string | null
+          adequacao_funcionalidade_terminais?: string | null
+          adequacao_funcionalidade_terminais_inadequados?: string | null
+          br?: string | null
+          classificacao_nivel_contencao?: string | null
+          comprimento_total_tramo_m?: number | null
           created_at?: string
           data_inspecao: string
+          distancia_bordo_pista_face_defensa_m?: number | null
+          distancia_face_defensa_obstaculo_m?: number | null
+          distancia_pista_obstaculo_m?: number | null
           enviado_coordenador?: boolean | null
+          espaco_trabalho?: string | null
+          especificacao_obstaculo_fixo?: string | null
           estado_conservacao: string
           extensao_metros: number
+          foto_url?: string | null
+          funcao?: string | null
+          geometria?: string | null
           id?: string
+          id_defensa?: string | null
           km_final: number
           km_inicial: number
           lado: string
+          link_fotografia?: string | null
           lote_id: string
           necessita_intervencao?: boolean
+          nivel_contencao_en1317?: string | null
+          nivel_contencao_nchrp350?: string | null
           nivel_risco?: string | null
           observacao?: string | null
+          percentual_veiculos_pesados?: number | null
+          quantidade_laminas?: number | null
+          risco?: string | null
           rodovia_id: string
+          snv?: string | null
+          terminal_entrada?: string | null
+          terminal_saida?: string | null
           tipo_avaria?: string | null
           tipo_defensa: string
+          tramo?: string | null
           updated_at?: string
           user_id: string
+          velocidade_kmh?: number | null
+          vmd_veic_dia?: number | null
         }
         Update: {
+          adequacao_funcionalidade_lamina?: string | null
+          adequacao_funcionalidade_laminas_inadequadas?: string | null
+          adequacao_funcionalidade_terminais?: string | null
+          adequacao_funcionalidade_terminais_inadequados?: string | null
+          br?: string | null
+          classificacao_nivel_contencao?: string | null
+          comprimento_total_tramo_m?: number | null
           created_at?: string
           data_inspecao?: string
+          distancia_bordo_pista_face_defensa_m?: number | null
+          distancia_face_defensa_obstaculo_m?: number | null
+          distancia_pista_obstaculo_m?: number | null
           enviado_coordenador?: boolean | null
+          espaco_trabalho?: string | null
+          especificacao_obstaculo_fixo?: string | null
           estado_conservacao?: string
           extensao_metros?: number
+          foto_url?: string | null
+          funcao?: string | null
+          geometria?: string | null
           id?: string
+          id_defensa?: string | null
           km_final?: number
           km_inicial?: number
           lado?: string
+          link_fotografia?: string | null
           lote_id?: string
           necessita_intervencao?: boolean
+          nivel_contencao_en1317?: string | null
+          nivel_contencao_nchrp350?: string | null
           nivel_risco?: string | null
           observacao?: string | null
+          percentual_veiculos_pesados?: number | null
+          quantidade_laminas?: number | null
+          risco?: string | null
           rodovia_id?: string
+          snv?: string | null
+          terminal_entrada?: string | null
+          terminal_saida?: string | null
           tipo_avaria?: string | null
           tipo_defensa?: string
+          tramo?: string | null
           updated_at?: string
           user_id?: string
+          velocidade_kmh?: number | null
+          vmd_veic_dia?: number | null
         }
         Relationships: []
       }
