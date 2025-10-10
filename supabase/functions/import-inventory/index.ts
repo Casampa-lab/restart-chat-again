@@ -159,23 +159,34 @@ serve(async (req) => {
       return record;
     });
 
-    // Inserir dados na tabela
-    const { data: insertData, error: insertError } = await supabase
-      .from(tableName)
-      .insert(recordsToInsert)
-      .select();
+    // Inserir dados em lotes para evitar estouro de memória
+    const BATCH_SIZE = 500;
+    let totalInserted = 0;
 
-    if (insertError) {
-      console.error("Erro ao inserir dados:", insertError);
-      throw insertError;
+    for (let i = 0; i < recordsToInsert.length; i += BATCH_SIZE) {
+      const batch = recordsToInsert.slice(i, i + BATCH_SIZE);
+      console.log(`Inserindo lote ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} registros`);
+
+      const { data: insertData, error: insertError } = await supabase
+        .from(tableName)
+        .insert(batch)
+        .select();
+
+      if (insertError) {
+        console.error("Erro ao inserir lote:", insertError);
+        throw insertError;
+      }
+
+      totalInserted += insertData?.length || 0;
+      console.log(`Total inserido até agora: ${totalInserted}/${recordsToInsert.length}`);
     }
 
-    console.log(`${insertData?.length || 0} registros inseridos com sucesso`);
+    console.log(`${totalInserted} registros inseridos com sucesso`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        imported_count: insertData?.length || 0,
+        imported_count: totalInserted,
         message: "Importação concluída com sucesso",
       }),
       {
