@@ -84,20 +84,26 @@ export async function parseExcelFile(file: File): Promise<PlacaData[]> {
             const velocidade = row[4] !== '-' ? String(row[4]) : null;
             const altura = row[24] !== '-' ? parseFloat(row[24]) : null;
             
-            // Extrair nome do arquivo do hiperlink na coluna AA (índice 26)
-            // Precisamos acessar o cell diretamente para pegar o hiperlink
+            // Extrair nome do arquivo da coluna AE (índice 30)
             const rowNumber = index + 8; // +8 porque começamos na linha 8 (índice 7)
-            const cellAddress = `AA${rowNumber}`;
+            const cellAddress = `AE${rowNumber}`;
             const cell = worksheet[cellAddress];
             
             let fotoNome: string | null = null;
-            if (cell && cell.l && cell.l.Target) {
-              // Extrair o nome do arquivo do link
+            
+            // Verificar se há valor direto na célula (nome do arquivo)
+            if (cell && cell.v) {
+              fotoNome = String(cell.v).trim();
+              // Remover extensão se houver
+              if (fotoNome.includes('.')) {
+                fotoNome = fotoNome.split('.')[0];
+              }
+            }
+            // Se não houver valor direto, tentar hiperlink (fallback)
+            else if (cell && cell.l && cell.l.Target) {
               const linkTarget = cell.l.Target;
-              // Pegar o nome do arquivo (última parte após /)
               const parts = linkTarget.split('/');
               fotoNome = parts[parts.length - 1];
-              // Remover extensão se houver
               if (fotoNome.includes('.')) {
                 fotoNome = fotoNome.split('.')[0];
               }
