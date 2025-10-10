@@ -82,7 +82,39 @@ serve(async (req) => {
       }
     }
     
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    // Converter para JSON, começando da linha correta
+    // Detectar se a primeira linha é um título genérico
+    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+    const firstRowData: any = {};
+    
+    // Ler primeira linha
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: range.s.r, c: col });
+      const cell = worksheet[cellAddress];
+      if (cell && cell.v) {
+        firstRowData[col] = cell.v.toString().toLowerCase();
+      }
+    }
+    
+    // Verificar se primeira linha parece ser título (ex: tem "planilha", "cadastro", etc)
+    const firstRowValues = Object.values(firstRowData).join(' ');
+    const isTitleRow = firstRowValues.includes('planilha') || 
+                       firstRowValues.includes('cadastro') || 
+                       firstRowValues.includes('relatório');
+    
+    let jsonData;
+    if (isTitleRow) {
+      console.log("Detectado título na primeira linha, pulando para linha 2");
+      // Pular primeira linha e usar segunda como header
+      const dataRange = { 
+        ...range, 
+        s: { ...range.s, r: range.s.r + 1 } 
+      };
+      worksheet['!ref'] = XLSX.utils.encode_range(dataRange);
+      jsonData = XLSX.utils.sheet_to_json(worksheet);
+    } else {
+      jsonData = XLSX.utils.sheet_to_json(worksheet);
+    }
 
     console.log(`Processando ${jsonData.length} registros para ${tableName}`);
 
