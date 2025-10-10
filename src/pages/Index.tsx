@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy, X } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
@@ -51,6 +51,9 @@ const Index = () => {
   });
   const [intervencaoSubTab, setIntervencaoSubTab] = useState("sv");
   const [shSubTab, setShSubTab] = useState("longitudinais");
+  const [showInviteCode, setShowInviteCode] = useState(() => {
+    return localStorage.getItem('hideInviteCode') !== 'true';
+  });
   const [selectedPlacaForIntervencao, setSelectedPlacaForIntervencao] = useState<any>(null);
   const [selectedMarcaSHForIntervencao, setSelectedMarcaSHForIntervencao] = useState<any>(null);
   const [selectedInscricaoForIntervencao, setSelectedInscricaoForIntervencao] = useState<any>(null);
@@ -172,9 +175,21 @@ const Index = () => {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-6 space-y-6">
-        {supervisora?.codigo_convite && <Card className="bg-accent/10 border-accent/20 shadow-md">
+        {supervisora?.codigo_convite && showInviteCode && <Card className="bg-accent/10 border-accent/20 shadow-md relative">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="absolute top-2 right-2 h-6 w-6"
+              onClick={() => {
+                setShowInviteCode(false);
+                localStorage.setItem('hideInviteCode', 'true');
+                toast.success("Mensagem ocultada");
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pr-8">
                 <div className="space-y-1">
                   <h3 className="text-sm font-medium text-muted-foreground">Código de Convite da Supervisora</h3>
                   <code className="text-2xl font-bold font-mono bg-accent/20 px-4 py-2 rounded-md inline-block">
