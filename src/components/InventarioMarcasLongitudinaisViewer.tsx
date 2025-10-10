@@ -252,7 +252,7 @@ export function InventarioMarcasLongitudinaisViewer({
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
-              <span>Detalhes da Marca Longitudinal</span>
+              <span>Ficha de Visualização - Marca Longitudinal</span>
               <div className="flex gap-2">
                 {onRegistrarIntervencao && (
                   <Button 
