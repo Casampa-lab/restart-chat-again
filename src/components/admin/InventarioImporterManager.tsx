@@ -206,8 +206,8 @@ export function InventarioImporterManager() {
 
           const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_").replace(/[()]/g, "");
 
-          // Para defensas, marcas longitudinais, placas e tachas, não adicionar campos automaticamente (serão mapeados explicitamente depois)
-          if (inventoryType !== "defensas" && inventoryType !== "marcas_longitudinais" && inventoryType !== "placas" && inventoryType !== "tachas") {
+          // Para defensas, marcas longitudinais, placas, tachas e inscricoes, não adicionar campos automaticamente (serão mapeados explicitamente depois)
+          if (inventoryType !== "defensas" && inventoryType !== "marcas_longitudinais" && inventoryType !== "placas" && inventoryType !== "tachas" && inventoryType !== "inscricoes") {
             record[normalizedKey] = value;
           }
 
@@ -546,6 +546,67 @@ export function InventarioImporterManager() {
           }
           
           // Data de vistoria padrão
+          record.data_vistoria = new Date().toISOString().split('T')[0];
+        }
+
+        // Adicionar mapeamento específico para inscrições (zebrados, setas, símbolos e legendas)
+        if (inventoryType === "inscricoes") {
+          const excelRow = row as any;
+          
+          // BR - Rodovia (não está na tabela de inscrições, guardar em observação se necessário)
+          const br = excelRow.BR || excelRow.br || null;
+          
+          // SNV - SNV de implantação
+          const snv = excelRow.SNV || excelRow.snv || null;
+          
+          // Sigla - Código de identificação do tipo marca transversal
+          const sigla = excelRow.Sigla || excelRow.sigla || null;
+          
+          // Descrição - Descrição da identificação do tipo marca transversal
+          const descricao = excelRow["Descrição"] || excelRow.descricao || null;
+          
+          // Tipo de inscrição (combinar sigla e descrição)
+          const tiposParts = [];
+          if (sigla) tiposParts.push(sigla);
+          if (descricao) tiposParts.push(descricao);
+          record.tipo_inscricao = tiposParts.length > 0 ? tiposParts.join(" - ") : "Não especificado";
+          
+          // Cor - Cor da inscrição no pavimento
+          record.cor = excelRow.Cor || excelRow.cor || "Branca";
+          
+          // Km - Km de implantação (usar como inicial e final)
+          const km = excelRow.Km || excelRow.km || null;
+          record.km_inicial = km ? Number(km) : null;
+          record.km_final = km ? Number(km) : null;
+          
+          // Latitude - Latitude de implantação
+          record.latitude_inicial = excelRow.Latitude || excelRow.latitude || null;
+          record.longitude_inicial = excelRow.Longitude || excelRow.longitude || null;
+          
+          // Usar as mesmas coordenadas para final se não houver finais específicas
+          record.latitude_final = record.latitude_inicial;
+          record.longitude_final = record.longitude_inicial;
+          
+          // Material - Especificação material utilizado
+          record.material_utilizado = excelRow.Material || excelRow.material || null;
+          
+          // Outros materiais - Detalhamento para outros tipos de materiais
+          const outrosMateriais = excelRow["Outros materiais"] || excelRow.outros_materiais || null;
+          
+          // Área (m²)
+          const area = excelRow["Área (m²)"] || excelRow.area_m2 || excelRow.area || null;
+          record.area_m2 = area ? Number(area) : null;
+          
+          // Montar observações com todos os campos adicionais
+          const observacoes = [];
+          if (br) observacoes.push(`BR: ${br}`);
+          if (snv) observacoes.push(`SNV: ${snv}`);
+          if (outrosMateriais && outrosMateriais !== "-") observacoes.push(`Outros materiais: ${outrosMateriais}`);
+          
+          record.observacao = observacoes.length > 0 ? observacoes.join(" | ") : null;
+          
+          // Campos com valores padrão
+          record.estado_conservacao = "Bom"; // Padrão
           record.data_vistoria = new Date().toISOString().split('T')[0];
         }
 
