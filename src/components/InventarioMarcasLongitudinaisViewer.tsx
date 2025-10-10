@@ -18,7 +18,7 @@ interface FichaMarcaLongitudinal {
   latitude_final: number | null;
   longitude_final: number | null;
   data_vistoria: string;
-  tipo_demarcacao: string | null;
+  tipo_demarcacao: string | null; // Código
   cor: string | null;
   largura_cm: number | null;
   extensao_metros: number | null;
@@ -27,6 +27,9 @@ interface FichaMarcaLongitudinal {
   estado_conservacao: string | null;
   observacao: string | null;
   foto_url: string | null;
+  // Campos adicionais do dicionário
+  rodovia_id: string;
+  lote_id: string;
 }
 
 interface InventarioMarcasLongitudinaisViewerProps {
@@ -295,14 +298,12 @@ export function InventarioMarcasLongitudinaisViewer({
               <div className="border rounded-lg p-4">
                 <h3 className="font-semibold mb-3">Identificação</h3>
                 <div className="grid grid-cols-3 gap-4">
-                  {selectedMarca.snv && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">SNV:</span>
-                      <p className="text-sm">{selectedMarca.snv}</p>
-                    </div>
-                  )}
                   <div>
-                    <span className="text-sm font-medium text-muted-foreground">Tipo de Demarcação:</span>
+                    <span className="text-sm font-medium text-muted-foreground">SNV:</span>
+                    <p className="text-sm">{selectedMarca.snv || "-"}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Código (Tipo de Linha):</span>
                     <p className="text-sm">{selectedMarca.tipo_demarcacao || "-"}</p>
                   </div>
                   <div>
@@ -318,60 +319,95 @@ export function InventarioMarcasLongitudinaisViewer({
                   <MapPin className="h-4 w-4" />
                   Localização
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">KM Inicial:</span>
-                      <p className="text-sm">{selectedMarca.km_inicial?.toFixed(3) || "-"}</p>
-                    </div>
-                    {selectedMarca.latitude_inicial && selectedMarca.longitude_inicial && (
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Coordenadas Inicial:</span>
-                        <p className="text-xs font-mono">
-                          Lat: {selectedMarca.latitude_inicial.toFixed(6)}<br />
-                          Lng: {selectedMarca.longitude_inicial.toFixed(6)}
-                        </p>
+                    <div className="bg-muted/30 p-3 rounded">
+                      <h4 className="text-xs font-semibold text-muted-foreground mb-2">Ponto Inicial</h4>
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-xs font-medium text-muted-foreground">KM:</span>
+                          <p className="text-sm font-semibold">{selectedMarca.km_inicial?.toFixed(3) || "-"}</p>
+                        </div>
+                        {selectedMarca.latitude_inicial && selectedMarca.longitude_inicial && (
+                          <div>
+                            <span className="text-xs font-medium text-muted-foreground">Coordenadas:</span>
+                            <p className="text-xs font-mono">
+                              Lat: {selectedMarca.latitude_inicial.toFixed(6)}<br />
+                              Lng: {selectedMarca.longitude_inicial.toFixed(6)}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                   <div className="space-y-3">
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">KM Final:</span>
-                      <p className="text-sm">{selectedMarca.km_final?.toFixed(3) || "-"}</p>
-                    </div>
-                    {selectedMarca.latitude_final && selectedMarca.longitude_final && (
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Coordenadas Final:</span>
-                        <p className="text-xs font-mono">
-                          Lat: {selectedMarca.latitude_final.toFixed(6)}<br />
-                          Lng: {selectedMarca.longitude_final.toFixed(6)}
-                        </p>
+                    <div className="bg-muted/30 p-3 rounded">
+                      <h4 className="text-xs font-semibold text-muted-foreground mb-2">Ponto Final</h4>
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-xs font-medium text-muted-foreground">KM:</span>
+                          <p className="text-sm font-semibold">{selectedMarca.km_final?.toFixed(3) || "-"}</p>
+                        </div>
+                        {selectedMarca.latitude_final && selectedMarca.longitude_final && (
+                          <div>
+                            <span className="text-xs font-medium text-muted-foreground">Coordenadas:</span>
+                            <p className="text-xs font-mono">
+                              Lat: {selectedMarca.latitude_final.toFixed(6)}<br />
+                              Lng: {selectedMarca.longitude_final.toFixed(6)}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Características e Dimensões */}
+              {/* Dimensões e Características */}
               <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Características e Dimensões</h3>
+                <h3 className="font-semibold mb-3">Dimensões e Características</h3>
                 <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Largura da Faixa:</span>
+                    <p className="text-sm">
+                      {selectedMarca.largura_cm 
+                        ? `${selectedMarca.largura_cm} cm (${(selectedMarca.largura_cm / 100).toFixed(2)} m)` 
+                        : "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Extensão:</span>
+                    <p className="text-sm">
+                      {selectedMarca.extensao_metros 
+                        ? `${selectedMarca.extensao_metros.toFixed(2)} m (${(selectedMarca.extensao_metros / 1000).toFixed(3)} km)` 
+                        : "-"}
+                    </p>
+                  </div>
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Material:</span>
                     <p className="text-sm">{selectedMarca.material || "-"}</p>
                   </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Largura da Faixa:</span>
-                    <p className="text-sm">{selectedMarca.largura_cm ? `${selectedMarca.largura_cm} cm` : "-"}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Espessura:</span>
-                    <p className="text-sm">{selectedMarca.espessura_cm ? `${selectedMarca.espessura_cm} cm` : "-"}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Extensão:</span>
-                    <p className="text-sm">{selectedMarca.extensao_metros ? `${selectedMarca.extensao_metros.toFixed(2)} m` : "-"}</p>
-                  </div>
+                </div>
+              </div>
+
+              {/* Informações Complementares (Traço, Espaçamento, Área) */}
+              {selectedMarca.observacao && (
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Informações Complementares</h3>
+                  <p className="text-sm whitespace-pre-wrap">{selectedMarca.observacao}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    * Inclui informações sobre Traço, Espaçamento e Área quando disponíveis
+                  </p>
+                </div>
+              )}
+
+              {/* Estado e Data */}
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Informações da Vistoria
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Estado de Conservação:</span>
                     <p className="text-sm">{selectedMarca.estado_conservacao || "-"}</p>
@@ -384,14 +420,6 @@ export function InventarioMarcasLongitudinaisViewer({
                   </div>
                 </div>
               </div>
-
-              {/* Observações */}
-              {selectedMarca.observacao && (
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Observações</h3>
-                  <p className="text-sm whitespace-pre-wrap">{selectedMarca.observacao}</p>
-                </div>
-              )}
 
               {/* Histórico de Intervenções */}
               <div className="border rounded-lg p-4">
