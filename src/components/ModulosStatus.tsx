@@ -13,7 +13,7 @@ interface Modulo {
 const MODULOS_INFO: Modulo[] = [
   {
     codigo: "sinalizacao",
-    nome: "Sinalização Rodoviária",
+    nome: "Sinalização e Segurança Viária",
     descricao: "Gestão completa de sinalização horizontal e vertical",
     icone: "Route",
     status: "disponivel"
