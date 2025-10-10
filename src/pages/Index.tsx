@@ -324,10 +324,10 @@ const Index = () => {
                   <Tabs value={intervencaoSubTab} onValueChange={setIntervencaoSubTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-5">
                       <TabsTrigger value="sh">
-                        Marcas Longitudinais
+                        Marcas Longitudinais (SH)
                       </TabsTrigger>
                       <TabsTrigger value="sv">
-                        Marcas Transversais
+                        Marcas Transversais (Placas/SV)
                       </TabsTrigger>
                       <TabsTrigger value="inscricoes">
                         Setas, Símbolos e Legendas
@@ -367,10 +367,10 @@ const Index = () => {
                   <Tabs defaultValue="sv" className="w-full">
                     <TabsList className="grid w-full grid-cols-5">
                       <TabsTrigger value="sh">
-                        Marcas Longitudinais
+                        Marcas Longitudinais (SH)
                       </TabsTrigger>
                       <TabsTrigger value="sv">
-                        Marcas Transversais
+                        Marcas Transversais (Placas/SV)
                       </TabsTrigger>
                       <TabsTrigger value="inscricoes">
                         Setas, Símbolos e Legendas
