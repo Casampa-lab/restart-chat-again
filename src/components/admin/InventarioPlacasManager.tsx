@@ -15,6 +15,7 @@ export function InventarioPlacasManager() {
   const [photosFolder, setPhotosFolder] = useState<FileList | null>(null);
   const [selectedLote, setSelectedLote] = useState<string>("");
   const [selectedRodovia, setSelectedRodovia] = useState<string>("");
+  const [tipoServico, setTipoServico] = useState<string>("");
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState<string>("");
 
@@ -70,6 +71,11 @@ export function InventarioPlacasManager() {
 
     if (!selectedLote || !selectedRodovia) {
       toast.error("Selecione o lote e a rodovia");
+      return;
+    }
+
+    if (!tipoServico) {
+      toast.error("Selecione o tipo de serviço");
       return;
     }
 
@@ -271,6 +277,7 @@ export function InventarioPlacasManager() {
       setPhotosFolder(null);
       setSelectedLote("");
       setSelectedRodovia("");
+      setTipoServico("");
       
       // Resetar inputs
       const excelInput = document.getElementById('excel-file') as HTMLInputElement;
@@ -292,10 +299,10 @@ export function InventarioPlacasManager() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          Importar Inventário de Placas
+          Importar Inventário Existente
         </CardTitle>
         <CardDescription>
-          Faça upload do arquivo Excel com o cadastro de placas e a pasta com as fotos correspondentes
+          Faça upload do arquivo Excel com dados do inventário e a pasta com as fotos correspondentes
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -332,6 +339,23 @@ export function InventarioPlacasManager() {
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        {/* Seleção do Tipo de Serviço */}
+        <div className="space-y-2">
+          <Label htmlFor="tipo-servico">Tipo de Serviço *</Label>
+          <Select value={tipoServico} onValueChange={setTipoServico}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o tipo de serviço" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="marcas-longitudinais">Marcas Longitudinais (SH)</SelectItem>
+              <SelectItem value="marcas-transversais">Marcas Transversais (Placas/SV)</SelectItem>
+              <SelectItem value="inscricoes">Setas, Símbolos e Legendas</SelectItem>
+              <SelectItem value="tachas">Tachas</SelectItem>
+              <SelectItem value="defensas">Defensas</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Upload do Excel */}
@@ -391,7 +415,7 @@ export function InventarioPlacasManager() {
         {/* Botão de Importação */}
         <Button
           onClick={handleImport}
-          disabled={!excelFile || !selectedLote || !selectedRodovia || importing}
+          disabled={!excelFile || !selectedLote || !selectedRodovia || !tipoServico || importing}
           className="w-full"
           size="lg"
         >
