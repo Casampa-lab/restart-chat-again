@@ -349,8 +349,8 @@ export function InventarioPlacasManager() {
               <SelectValue placeholder="Selecione o tipo de serviço" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="marcas-longitudinais">Marcas Longitudinais (SH)</SelectItem>
-              <SelectItem value="marcas-transversais">Marcas Transversais (Placas/SV)</SelectItem>
+              <SelectItem value="marcas-longitudinais">Sinalização Horizontal (SH)</SelectItem>
+              <SelectItem value="marcas-transversais">Sinalização Vertical (SV)</SelectItem>
               <SelectItem value="inscricoes">Setas, Símbolos e Legendas</SelectItem>
               <SelectItem value="tachas">Tachas</SelectItem>
               <SelectItem value="defensas">Defensas</SelectItem>

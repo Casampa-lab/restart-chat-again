@@ -9,8 +9,8 @@ import { Trash2, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 const TABELAS_INVENTARIO = [
-  { value: "ficha_placa", label: "Marcas Transversais (Placas/SV)" },
-  { value: "ficha_marcas_longitudinais", label: "Marcas Longitudinais (SH)" },
+  { value: "ficha_placa", label: "Sinalização Vertical (SV)" },
+  { value: "ficha_marcas_longitudinais", label: "Sinalização Horizontal (SH)" },
   { value: "ficha_inscricoes", label: "Setas, Símbolos e Legendas" },
   { value: "ficha_tachas", label: "Tachas" },
   { value: "defensas", label: "Defensas" },
