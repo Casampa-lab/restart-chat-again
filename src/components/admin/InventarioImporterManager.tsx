@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Upload, FileSpreadsheet, Image, Loader2, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import * as XLSX from "xlsx";
 
 const INVENTORY_TYPES = [
   { value: "placas", label: "Placas de Sinalização Vertical", table: "ficha_placa" },
@@ -112,74 +113,155 @@ export function InventarioImporterManager() {
         throw new Error("Usuário não autenticado");
       }
 
+      // 1. Processar Excel localmente
+      setProgress("Processando planilha Excel...");
+      const arrayBuffer = await excelFile.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      if (jsonData.length === 0) {
+        throw new Error("Nenhum registro encontrado na planilha");
+      }
+
+      toast.success(`${jsonData.length} registros encontrados na planilha`);
+
+      // 2. Upload das fotos e criar mapeamento
+      const photoUrls: Record<string, string> = {};
       const photoArray = photos ? Array.from(photos) : [];
-      const BATCH_SIZE = 50; // Limitar a 50 fotos por lote
 
       if (hasPhotos && photoArray.length > 0) {
-        // Upload em lotes para evitar timeout
-        const totalBatches = Math.ceil(photoArray.length / BATCH_SIZE);
-        let totalImported = 0;
-        
-        for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
-          const start = batchIndex * BATCH_SIZE;
-          const end = Math.min(start + BATCH_SIZE, photoArray.length);
-          const batchPhotos = photoArray.slice(start, end);
-          
-          setProgress(`Lote ${batchIndex + 1}/${totalBatches}: enviando ${batchPhotos.length} fotos (${start + 1}-${end} de ${photoArray.length})...`);
+        setProgress(`Fazendo upload de ${photoArray.length} fotos...`);
 
-          const formData = new FormData();
-          formData.append("excel", excelFile);
-          formData.append("inventory_type", inventoryType);
-          formData.append("lote_id", selectedLote);
-          formData.append("rodovia_id", selectedRodovia);
-          formData.append("has_photos", "true");
-          formData.append("photo_column_name", photoColumnName);
-          
-          // Adicionar apenas as fotos do lote atual
-          batchPhotos.forEach((photo, index) => {
-            formData.append(`photo_${index}`, photo);
-          });
+        const bucketMap: Record<string, string> = {
+          "placas": "placa-photos",
+          "marcas_longitudinais": "marcas-longitudinais",
+          "cilindros": "cilindros",
+          "inscricoes": "inscricoes",
+          "tachas": "tachas",
+          "porticos": "porticos",
+          "defensas": "defensas",
+        };
 
-          const { data, error } = await supabase.functions.invoke("import-inventory", {
-            body: formData,
-          });
+        const bucketName = bucketMap[inventoryType] || "verificacao-photos";
 
-          if (error) throw error;
+        for (let i = 0; i < photoArray.length; i++) {
+          const photo = photoArray[i];
+          const timestamp = Date.now();
+          const photoPath = `${inventoryType}/${timestamp}_${photo.name}`;
 
-          totalImported += data?.imported_count || 0;
-          toast.success(`Lote ${batchIndex + 1}/${totalBatches}: ${batchPhotos.length} fotos processadas`);
+          const { error: photoError } = await supabase.storage
+            .from(bucketName)
+            .upload(photoPath, photo);
+
+          if (!photoError) {
+            const { data: urlData } = supabase.storage
+              .from(bucketName)
+              .getPublicUrl(photoPath);
+
+            // Mapear todas as variações do nome
+            const nomeCompleto = photo.name;
+            const nomeSemExtensao = nomeCompleto.replace(/\.[^/.]+$/, "").trim();
+
+            const variacoes = [
+              nomeSemExtensao,
+              nomeSemExtensao.toLowerCase(),
+              nomeSemExtensao.toUpperCase(),
+              nomeCompleto,
+              nomeCompleto.toLowerCase(),
+              nomeCompleto.toUpperCase(),
+            ];
+
+            variacoes.forEach(variacao => {
+              photoUrls[variacao] = urlData.publicUrl;
+            });
+          }
+
+          if ((i + 1) % 50 === 0 || i === photoArray.length - 1) {
+            setProgress(`Upload: ${i + 1}/${photoArray.length} fotos`);
+          }
         }
 
-        setProgress("Importação concluída!");
-        toast.success(`✅ Importação completa: ${totalImported} registros com ${photoArray.length} fotos`);
-      } else {
-        // Sem fotos - upload único
-        setProgress("Enviando dados para processamento...");
-
-        const formData = new FormData();
-        formData.append("excel", excelFile);
-        formData.append("inventory_type", inventoryType);
-        formData.append("lote_id", selectedLote);
-        formData.append("rodovia_id", selectedRodovia);
-        formData.append("has_photos", "false");
-
-        const { data, error } = await supabase.functions.invoke("import-inventory", {
-          body: formData,
-        });
-
-        if (error) throw error;
-
-        setProgress("Importação concluída!");
-        toast.success(`Importação realizada com sucesso! ${data?.imported_count || 0} registros importados.`);
+        toast.success(`${photoArray.length} fotos carregadas`);
       }
-      
+
+      // 3. Preparar registros para inserção
+      setProgress("Preparando dados para importação...");
+
+      const tableName = INVENTORY_TYPES.find(t => t.value === inventoryType)?.table;
+      if (!tableName) throw new Error("Tipo de inventário inválido");
+
+      const recordsToInsert = jsonData.map((row: any) => {
+        const record: Record<string, any> = {
+          user_id: user.id,
+          lote_id: selectedLote,
+          rodovia_id: selectedRodovia,
+        };
+
+        // Mapear campos do Excel
+        for (const [key, value] of Object.entries(row)) {
+          if (!key || !value) continue;
+
+          const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_");
+
+          // Adicionar campos conhecidos
+          record[normalizedKey] = value;
+
+          // Se é o campo de foto
+          if (hasPhotos && photoColumnName && key === photoColumnName) {
+            const photoFileName = value as string;
+            if (photoFileName && photoUrls[photoFileName]) {
+              record.foto_url = photoUrls[photoFileName];
+            }
+          }
+        }
+
+        // Adicionar valores padrão para defensas
+        if (inventoryType === "defensas") {
+          record.data_inspecao = record.data_inspecao || record.data || "2023-01-01";
+          record.lado = record.lado || "D";
+          record.tipo_defensa = record.tipo_defensa || "Metálica";
+          record.extensao_metros = record.extensao_metros || record["extensão_(m)"] || 0;
+          record.estado_conservacao = record.estado_conservacao || "Bom";
+          record.necessita_intervencao = record.necessita_intervencao || false;
+          record.km_inicial = record.km_inicial || 0;
+          record.km_final = record.km_final || 0;
+        }
+
+        return record;
+      });
+
+      // 4. Inserir em lotes
+      setProgress("Inserindo dados no banco...");
+      const batchSize = 50;
+      let imported = 0;
+
+      for (let i = 0; i < recordsToInsert.length; i += batchSize) {
+        const batch = recordsToInsert.slice(i, i + batchSize);
+        const { error: insertError } = await supabase
+          .from(tableName as any)
+          .insert(batch as any);
+
+        if (insertError) {
+          console.error("Erro ao inserir batch:", insertError);
+          throw insertError;
+        }
+
+        imported += batch.length;
+        setProgress(`Importando: ${imported}/${recordsToInsert.length} registros`);
+      }
+
+      setProgress("");
+      toast.success(`Importação concluída! ${imported} registros importados${hasPhotos ? ` com ${photoArray.length} fotos` : ''}.`);
+
       // Limpar formulário
       setExcelFile(null);
       setPhotos(null);
       setPhotoColumnName("");
       setHasPhotos(false);
       setProgress("");
-      
+
     } catch (error: any) {
       console.error("Erro na importação:", error);
       toast.error("Erro ao importar inventário: " + (error.message || "Erro desconhecido"));
