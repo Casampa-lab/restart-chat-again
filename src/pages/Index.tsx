@@ -50,7 +50,7 @@ const Index = () => {
   } = useSupervisora();
   const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem('activeTab') || 'frentes';
+    return localStorage.getItem('activeTab') || 'prontuario';
   });
   const [intervencaoSubTab, setIntervencaoSubTab] = useState("sv");
   const [shSubTab, setShSubTab] = useState("longitudinais");
@@ -255,24 +255,21 @@ const Index = () => {
             </Card>
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-6 h-auto bg-muted p-2 gap-1">
+              <TabsList className="grid w-full grid-cols-5 h-auto bg-muted p-2 gap-1">
+                <TabsTrigger value="prontuario" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs">Inventário Dinâmico</span>
+                </TabsTrigger>
                 <TabsTrigger value="frentes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Frente de Serviço</span>
-                </TabsTrigger>
-                <TabsTrigger value="ficha-verif" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Serviços</span>
-                </TabsTrigger>
-                <TabsTrigger value="ncs" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Não Conformidade</span>
-                </TabsTrigger>
-                <TabsTrigger value="retrorrefletividade" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Retrorefletividade</span>
                 </TabsTrigger>
                 <TabsTrigger value="intervencoes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Intervenções</span>
                 </TabsTrigger>
-                <TabsTrigger value="prontuario" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Inventário Dinâmico</span>
+                <TabsTrigger value="retrorrefletividade" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs">Retrorefletividade</span>
+                </TabsTrigger>
+                <TabsTrigger value="ncs" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs">Não Conformidade</span>
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="frentes" className="mt-6">
@@ -290,25 +287,6 @@ const Index = () => {
                         </Button>
                       </div>
                       <FrenteLiberadaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="ficha-verif" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ficha de Verificação de Serviços</CardTitle>
-                    <CardDescription>Realize a inspeção e verificação da qualidade dos serviços executados</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-end">
-                        <Button variant="secondary" onClick={() => navigate("/minhas-fichas-verificacao")} className="shadow-md hover:shadow-lg transition-shadow">
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver minhas fichas
-                        </Button>
-                      </div>
-                      <FichaVerificacaoForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </div>
                   </CardContent>
                 </Card>
