@@ -120,13 +120,15 @@ export function InventarioImporterManager() {
         
         // Adicionar todas as fotos
         if (photos) {
+          setProgress(`Preparando upload de ${photos.length} fotos...`);
           Array.from(photos).forEach((photo, index) => {
             formData.append(`photo_${index}`, photo);
           });
+          toast.success(`${photos.length} fotos preparadas para upload`);
         }
       }
 
-      setProgress("Enviando dados para processamento...");
+      setProgress(hasPhotos && photos ? `Enviando ${photos.length} fotos e processando dados...` : "Enviando dados para processamento...");
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -141,7 +143,8 @@ export function InventarioImporterManager() {
       if (error) throw error;
 
       setProgress("Importação concluída!");
-      toast.success(`Importação realizada com sucesso! ${data?.imported_count || 0} registros importados.`);
+      const fotosMsg = hasPhotos && photos ? ` com ${photos.length} fotos` : '';
+      toast.success(`Importação realizada com sucesso! ${data?.imported_count || 0} registros importados${fotosMsg}.`);
       
       // Limpar formulário
       setExcelFile(null);
