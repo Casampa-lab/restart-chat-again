@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
@@ -144,8 +145,16 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <Card>
+      <CardHeader>
+        <CardTitle>Intervenções - Tachas Refletivas</CardTitle>
+        <CardDescription>
+          Registre intervenções realizadas em tachas refletivas (monodirecional e bidirecional)
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -453,5 +462,7 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
         <Button type="submit" className="w-full">Salvar Intervenção</Button>
       </form>
     </Form>
+      </CardContent>
+    </Card>
   );
 }

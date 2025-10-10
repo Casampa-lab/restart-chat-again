@@ -201,7 +201,13 @@ const IntervencoesSHForm = ({ loteId, rodoviaId }: IntervencoesSHFormProps) => {
 
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardHeader>
+        <CardTitle>Intervenções - Marcas Longitudinais</CardTitle>
+        <CardDescription>
+          Registre intervenções realizadas em marcas longitudinais (linhas de bordo, divisórias, etc.)
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">

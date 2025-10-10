@@ -234,7 +234,13 @@ const IntervencoesSVForm = ({ loteId, rodoviaId, placaSelecionada, onIntervencao
 
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardHeader>
+        <CardTitle>Intervenções - Placas de Sinalização Vertical</CardTitle>
+        <CardDescription>
+          Registre intervenções realizadas em placas de sinalização vertical
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         {placaSelecionada && (
           <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="font-semibold text-blue-900">

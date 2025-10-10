@@ -199,7 +199,13 @@ const IntervencoesInscricoesForm = ({ loteId, rodoviaId }: IntervencoesInscricoe
 
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardHeader>
+        <CardTitle>Intervenções - Zebrados, Setas, Símbolos e Legendas</CardTitle>
+        <CardDescription>
+          Registre intervenções em faixas de pedestres, zebrados, setas, símbolos e outras inscrições
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">

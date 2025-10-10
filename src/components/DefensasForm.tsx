@@ -188,7 +188,13 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
 
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardHeader>
+        <CardTitle>Inspeção de Defensas</CardTitle>
+        <CardDescription>
+          Registre inspeções e avaliações de estado das defensas metálicas e dispositivos de proteção
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
