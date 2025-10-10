@@ -206,8 +206,8 @@ export function InventarioImporterManager() {
 
           const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_").replace(/[()]/g, "");
 
-          // Para defensas, não adicionar campos automaticamente (serão mapeados explicitamente depois)
-          if (inventoryType !== "defensas") {
+          // Para defensas e marcas longitudinais, não adicionar campos automaticamente (serão mapeados explicitamente depois)
+          if (inventoryType !== "defensas" && inventoryType !== "marcas_longitudinais") {
             record[normalizedKey] = value;
           }
 
@@ -315,6 +315,60 @@ export function InventarioImporterManager() {
           }
           record.extensao_metros = Number(record.comprimento_total_tramo_m || record.extensao_metros || record.extensao_m || 0);
           record.necessita_intervencao = Boolean(record.necessita_intervencao || false);
+        }
+
+        // Adicionar mapeamento específico para marcas longitudinais
+        if (inventoryType === "marcas_longitudinais") {
+          const excelRow = row as any;
+          
+          // Campos de identificação
+          record.snv = excelRow.SNV || excelRow.snv || excelRow["Código"] || excelRow.codigo || null;
+          
+          // Localização - KMs
+          record.km_inicial = Number(excelRow["Km Inicial"] || excelRow.km_inicial || 0);
+          record.km_final = Number(excelRow["Km Final"] || excelRow.km_final || 0);
+          
+          // Coordenadas iniciais
+          record.latitude_inicial = excelRow["Latitude Inicial"] || excelRow.latitude_inicial || null;
+          record.longitude_inicial = excelRow["Longitude Inicial"] || excelRow.longitude_inicial || null;
+          
+          // Coordenadas finais
+          record.latitude_final = excelRow["Latitude Final"] || excelRow.latitude_final || null;
+          record.longitude_final = excelRow["Longitude Final"] || excelRow.longitude_final || null;
+          
+          // Características da demarcação
+          record.tipo_demarcacao = excelRow["Posição"] || excelRow.posicao || excelRow.tipo_demarcacao || null;
+          record.cor = "Branca"; // Padrão - pode ser ajustado se houver campo específico na planilha
+          record.material = excelRow.Material || excelRow.material || excelRow["Outros materiais"] || null;
+          
+          // Dimensões
+          record.largura_cm = excelRow["Largura da Faixa (m)"] || excelRow["Largura da Faixa m"] || excelRow.largura_da_faixa_m 
+            ? Number(excelRow["Largura da Faixa (m)"] || excelRow["Largura da Faixa m"] || excelRow.largura_da_faixa_m) * 100 // Converter de metros para centímetros
+            : null;
+          
+          record.espessura_cm = null; // Não há na planilha
+          
+          // Extensão - converter de km para metros se necessário
+          const extensaoKm = excelRow["Extensão (km)"] || excelRow["Extensão km"] || excelRow.extensao_km || excelRow.extensao;
+          record.extensao_metros = extensaoKm ? Number(extensaoKm) * 1000 : null;
+          
+          // Estado de conservação - padrão
+          record.estado_conservacao = "Bom";
+          
+          // Data da vistoria - usar data atual como padrão
+          record.data_vistoria = new Date().toISOString().split('T')[0];
+          
+          // Observações - pode incluir informações sobre traço e espaçamento
+          const traco = excelRow["Traço (m)"] || excelRow.traco_m || excelRow.traco;
+          const espacamento = excelRow["Espaçamento (m)"] || excelRow.espacamento_m || excelRow.espacamento;
+          const area = excelRow["Área (m²)"] || excelRow.area_m2 || excelRow.area;
+          
+          const observacoes = [];
+          if (traco && traco !== "-") observacoes.push(`Traço: ${traco}m`);
+          if (espacamento && espacamento !== "-") observacoes.push(`Espaçamento: ${espacamento}m`);
+          if (area) observacoes.push(`Área: ${area}m²`);
+          
+          record.observacao = observacoes.length > 0 ? observacoes.join(" | ") : null;
         }
 
         return record;
