@@ -440,7 +440,7 @@ export function InventarioMarcasLongitudinaisViewer({
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Área (m²):</span>
                     <p className="text-sm">
-                      {selectedMarca.observacao?.match(/Extensão:\s*([^\s|]+)/)?.[1]?.trim() || "-"}
+                      {selectedMarca.observacao?.match(/Área:\s*([^\s|]+)/)?.[1]?.trim() || "-"}
                     </p>
                   </div>
                 </div>
