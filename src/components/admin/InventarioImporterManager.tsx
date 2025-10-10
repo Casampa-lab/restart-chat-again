@@ -125,6 +125,14 @@ export function InventarioImporterManager() {
         throw new Error("Nenhum registro encontrado na planilha");
       }
 
+      // Log para debug - ver nomes das colunas disponíveis
+      if (jsonData.length > 0) {
+        console.log(`=== COLUNAS DISPONÍVEIS NO EXCEL (${inventoryType}) ===`);
+        console.log("Nomes das colunas:", Object.keys(jsonData[0]));
+        console.log("Primeira linha de dados:", jsonData[0]);
+        console.log("===============================");
+      }
+
       toast.success(`${jsonData.length} registros encontrados na planilha`);
 
       // 2. Upload das fotos e criar mapeamento
