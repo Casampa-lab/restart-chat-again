@@ -117,6 +117,15 @@ serve(async (req) => {
     }
 
     console.log(`Processando ${jsonData.length} registros para ${tableName}`);
+    
+    // Log de depuração: mostrar TODOS os campos do Excel
+    if (tableName === "ficha_tachas" && jsonData.length > 0) {
+      console.log("=== TODOS OS CAMPOS DO EXCEL (TACHAS) - RAW ===");
+      const firstRow = jsonData[0] as any;
+      for (const [key, value] of Object.entries(firstRow)) {
+        console.log(`"${key}" = "${value}"`);
+      }
+    }
 
     // Normalizar chaves do Excel (remover espaços extras)
     const normalizedData = jsonData.map((row: any) => {
@@ -241,6 +250,8 @@ serve(async (req) => {
       },
       ficha_tachas: {
         "extensão_(km)": "extensao_km",
+        "espaçamento_(m)": "espacamento_m",
+        "cor_refletivo": "cor_refletivo",
         "local_implantação": "local_implantacao",
         "quantidade_(und)": "quantidade",
         "data": "data_vistoria",
@@ -399,6 +410,18 @@ serve(async (req) => {
         
         // Apenas adicionar se o campo for válido para esta tabela
         if (validFields.length === 0 || validFields.includes(normalizedKey)) {
+          // Log detalhado para tachas
+          if (tableName === "ficha_tachas" && (
+            normalizedKey === "cor_refletivo" || 
+            normalizedKey === "local_implantacao" || 
+            normalizedKey === "espacamento_m" ||
+            normalizedKey === "quantidade"
+          )) {
+            console.log(`[TACHA] Campo: "${originalKey}" → "${normalizedKey}"`);
+            console.log(`[TACHA] Valor: "${value}" (tipo: ${typeof value})`);
+            console.log(`[TACHA] Valor é válido: ${value !== undefined && value !== null && value !== '' && value !== '-'}`);
+          }
+          
           // Se é o campo de foto e temos fotos, substituir pelo URL
           if (hasPhotos && photoFieldName && key === photoFieldName) {
             const photoFileName = value as string;
