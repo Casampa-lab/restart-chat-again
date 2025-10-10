@@ -29,6 +29,40 @@ interface FichaInscricao {
   foto_url: string | null;
 }
 
+// Mapeamento de siglas para descrições completas
+const INSCRICAO_SIGLAS: Record<string, string> = {
+  'LRV': 'Linha de estímulo a redução de velocidade',
+  'LEGENDA': 'Legenda',
+  'PEM': 'Seta indicativa de posicionamento na pista',
+  'LDP': 'Linha Dê a preferência',
+  'SIP': 'Símbolo indicativo de interseção',
+  'LRE': 'Linha de retenção',
+  'ZPA': 'Zebrado de área não utilizável',
+  'FX': 'Faixa de pedestre',
+  'LBO': 'Linha de bordo',
+  'LMS': 'Linha de divisão de fluxos opostos',
+  'LMC': 'Linha de divisão de fluxos de mesmo sentido',
+};
+
+// Função para extrair sigla e descrição do tipo_inscricao
+const parseTipoInscricao = (tipoInscricao: string): { sigla: string; descricao: string } => {
+  // Tenta identificar se é uma sigla conhecida
+  for (const [sigla, descricao] of Object.entries(INSCRICAO_SIGLAS)) {
+    if (tipoInscricao.toUpperCase().includes(sigla)) {
+      return { sigla, descricao: INSCRICAO_SIGLAS[sigla] };
+    }
+  }
+  
+  // Se não encontrar uma sigla conhecida, tenta separar por espaço ou hífen
+  const parts = tipoInscricao.split(/[\s-]/);
+  if (parts.length > 1 && parts[0].length <= 10) {
+    return { sigla: parts[0], descricao: parts.slice(1).join(' ') };
+  }
+  
+  // Caso padrão: retorna o tipo completo como descrição
+  return { sigla: tipoInscricao, descricao: tipoInscricao };
+};
+
 interface InventarioInscricoesViewerProps {
   loteId: string;
   rodoviaId: string;
@@ -173,57 +207,58 @@ export function InventarioInscricoesViewer({
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
-                      <TableHead>Sigla / Descrição</TableHead>
+                      {searchLat && searchLng && <TableHead>Distância</TableHead>}
+                      <TableHead>Sigla</TableHead>
+                      <TableHead>Descrição</TableHead>
                       <TableHead>Cor</TableHead>
                       <TableHead>Km</TableHead>
-                      <TableHead>Km</TableHead>
+                      <TableHead>Material</TableHead>
                       <TableHead>Área (m²)</TableHead>
-                      {searchLat && searchLng && <TableHead>Distância</TableHead>}
-                      <TableHead>Data Vistoria</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {inscricoes.map((inscricao) => (
-                      <TableRow key={inscricao.id} className="hover:bg-muted/50">
-                        <TableCell>
-                          <Badge variant="outline">{inscricao.tipo_inscricao}</Badge>
-                        </TableCell>
-                        <TableCell>{inscricao.cor}</TableCell>
-                        <TableCell>{inscricao.km_inicial?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>{inscricao.km_final?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>{inscricao.area_m2?.toFixed(2) || "-"}</TableCell>
-                        {searchLat && searchLng && (
+                    {inscricoes.map((inscricao) => {
+                      const { sigla, descricao } = parseTipoInscricao(inscricao.tipo_inscricao);
+                      return (
+                        <TableRow key={inscricao.id} className="hover:bg-muted/50">
+                          {searchLat && searchLng && (
+                            <TableCell>
+                              <Badge variant="secondary">
+                                {(inscricao as any).distance?.toFixed(1)}m
+                              </Badge>
+                            </TableCell>
+                          )}
                           <TableCell>
-                            <Badge variant="secondary">
-                              {(inscricao as any).distance?.toFixed(1)}m
-                            </Badge>
+                            <Badge variant="outline">{sigla}</Badge>
                           </TableCell>
-                        )}
-                        <TableCell>
-                          {inscricao.data_vistoria
-                            ? new Date(inscricao.data_vistoria).toLocaleDateString("pt-BR")
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={async () => {
-                              setSelectedInscricao(inscricao);
-                              const { data } = await supabase
-                                .from("ficha_inscricoes_intervencoes")
-                                .select("*")
-                                .eq("ficha_inscricoes_id", inscricao.id)
-                                .order("data_intervencao", { ascending: false });
-                              setIntervencoes(data || []);
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <TableCell className="max-w-[200px] truncate" title={descricao}>
+                            {descricao}
+                          </TableCell>
+                          <TableCell>{inscricao.cor}</TableCell>
+                          <TableCell>{inscricao.km_inicial?.toFixed(2) || "-"}</TableCell>
+                          <TableCell>{inscricao.material_utilizado || "-"}</TableCell>
+                          <TableCell>{inscricao.area_m2?.toFixed(2) || "-"}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={async () => {
+                                setSelectedInscricao(inscricao);
+                                const { data } = await supabase
+                                  .from("ficha_inscricoes_intervencoes")
+                                  .select("*")
+                                  .eq("ficha_inscricoes_id", inscricao.id)
+                                  .order("data_intervencao", { ascending: false });
+                                setIntervencoes(data || []);
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -273,118 +308,137 @@ export function InventarioInscricoesViewer({
             </DialogTitle>
           </DialogHeader>
 
-          {selectedInscricao && (
-            <Tabs defaultValue="dados" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="dados">Dados</TabsTrigger>
-                <TabsTrigger value="foto">Foto</TabsTrigger>
-                <TabsTrigger value="historico">Histórico</TabsTrigger>
-              </TabsList>
+          {selectedInscricao && (() => {
+            const { sigla, descricao } = parseTipoInscricao(selectedInscricao.tipo_inscricao);
+            return (
+              <Tabs defaultValue="dados" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="dados">Dados</TabsTrigger>
+                  <TabsTrigger value="foto">Foto</TabsTrigger>
+                  <TabsTrigger value="historico">Histórico</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="dados" className="space-y-4 mt-4">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                        Características
-                      </h3>
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-sm font-medium">Tipo:</span>
-                          <p className="text-sm">{selectedInscricao.tipo_inscricao}</p>
-                        </div>
-                        <div>
-                          <span className="text-sm font-medium">Cor:</span>
-                          <p className="text-sm">{selectedInscricao.cor}</p>
-                        </div>
-                        <div>
-                          <span className="text-sm font-medium">Material:</span>
-                          <p className="text-sm">{selectedInscricao.material_utilizado || "-"}</p>
-                        </div>
-                        <div>
-                          <span className="text-sm font-medium">Estado de Conservação:</span>
-                          <p className="text-sm">{selectedInscricao.estado_conservacao || "-"}</p>
-                        </div>
+                <TabsContent value="dados" className="space-y-4 mt-4">
+                  {/* Identificação */}
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3">Identificação</h3>
+                    <div className="grid grid-cols-4 gap-4">
+                      <div>
+                        <span className="text-sm font-medium text-muted-foreground">Sigla:</span>
+                        <p className="text-sm font-semibold">{sigla}</p>
                       </div>
-                    </div>
-
-                    <div>
-                      <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        Localização
-                      </h3>
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-sm font-medium">KM Inicial:</span>
-                          <p className="text-sm">{selectedInscricao.km_inicial?.toFixed(2) || "-"}</p>
-                        </div>
-                        <div>
-                          <span className="text-sm font-medium">KM Final:</span>
-                          <p className="text-sm">{selectedInscricao.km_final?.toFixed(2) || "-"}</p>
-                        </div>
-                        {selectedInscricao.latitude_inicial && selectedInscricao.longitude_inicial && (
-                          <div>
-                            <span className="text-sm font-medium">Coordenadas Iniciais:</span>
-                            <p className="text-xs">
-                              Lat: {selectedInscricao.latitude_inicial.toFixed(6)}
-                              <br />
-                              Lng: {selectedInscricao.longitude_inicial.toFixed(6)}
-                            </p>
-                          </div>
-                        )}
-                        {selectedInscricao.latitude_final && selectedInscricao.longitude_final && (
-                          <div>
-                            <span className="text-sm font-medium">Coordenadas Finais:</span>
-                            <p className="text-xs">
-                              Lat: {selectedInscricao.latitude_final.toFixed(6)}
-                              <br />
-                              Lng: {selectedInscricao.longitude_final.toFixed(6)}
-                            </p>
-                          </div>
-                        )}
+                      <div className="col-span-3">
+                        <span className="text-sm font-medium text-muted-foreground">Descrição:</span>
+                        <p className="text-sm">{descricao}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                      Dimensões
+                  {/* Características */}
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3">Características</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <span className="text-sm font-medium text-muted-foreground">Cor:</span>
+                        <p className="text-sm">{selectedInscricao.cor}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-muted-foreground">Material:</span>
+                        <p className="text-sm">{selectedInscricao.material_utilizado || "-"}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-muted-foreground">Estado:</span>
+                        <p className="text-sm">{selectedInscricao.estado_conservacao || "-"}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Localização Inicial */}
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Localização Inicial
                     </h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <span className="text-sm font-medium text-muted-foreground">KM Inicial:</span>
+                        <p className="text-sm">{selectedInscricao.km_inicial?.toFixed(2) || "-"}</p>
+                      </div>
+                      {selectedInscricao.latitude_inicial && (
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Latitude:</span>
+                          <p className="text-sm font-mono text-xs">{selectedInscricao.latitude_inicial.toFixed(6)}</p>
+                        </div>
+                      )}
+                      {selectedInscricao.longitude_inicial && (
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Longitude:</span>
+                          <p className="text-sm font-mono text-xs">{selectedInscricao.longitude_inicial.toFixed(6)}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Localização Final */}
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Localização Final
+                    </h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <span className="text-sm font-medium text-muted-foreground">KM Final:</span>
+                        <p className="text-sm">{selectedInscricao.km_final?.toFixed(2) || "-"}</p>
+                      </div>
+                      {selectedInscricao.latitude_final && (
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Latitude:</span>
+                          <p className="text-sm font-mono text-xs">{selectedInscricao.latitude_final.toFixed(6)}</p>
+                        </div>
+                      )}
+                      {selectedInscricao.longitude_final && (
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Longitude:</span>
+                          <p className="text-sm font-mono text-xs">{selectedInscricao.longitude_final.toFixed(6)}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Dimensões e Área */}
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3">Dimensões e Área</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <span className="text-sm font-medium">Dimensões:</span>
+                        <span className="text-sm font-medium text-muted-foreground">Dimensões:</span>
                         <p className="text-sm">{selectedInscricao.dimensoes || "-"}</p>
                       </div>
                       <div>
-                        <span className="text-sm font-medium">Área:</span>
+                        <span className="text-sm font-medium text-muted-foreground">Área:</span>
                         <p className="text-sm">{selectedInscricao.area_m2?.toFixed(2) || "-"} m²</p>
                       </div>
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                  {/* Data */}
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      Data
+                      Data da Vistoria
                     </h3>
-                    <div>
-                      <span className="text-sm font-medium">Data da Vistoria:</span>
-                      <p className="text-sm">
-                        {new Date(selectedInscricao.data_vistoria).toLocaleDateString("pt-BR")}
-                      </p>
-                    </div>
+                    <p className="text-sm">
+                      {new Date(selectedInscricao.data_vistoria).toLocaleDateString("pt-BR")}
+                    </p>
                   </div>
 
+                  {/* Observações */}
                   {selectedInscricao.observacao && (
-                    <div>
-                      <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                        Observações
-                      </h3>
-                      <p className="text-sm">{selectedInscricao.observacao}</p>
+                    <div className="border rounded-lg p-4">
+                      <h3 className="font-semibold mb-3">Observações</h3>
+                      <p className="text-sm whitespace-pre-wrap">{selectedInscricao.observacao}</p>
                     </div>
                   )}
-                </div>
-              </TabsContent>
+                </TabsContent>
 
               <TabsContent value="foto" className="mt-4">
                 {selectedInscricao.foto_url ? (
@@ -466,7 +520,8 @@ export function InventarioInscricoesViewer({
                 )}
               </TabsContent>
             </Tabs>
-          )}
+          );
+        })()}
         </DialogContent>
       </Dialog>
     </>
