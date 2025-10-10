@@ -15,7 +15,7 @@ import * as XLSX from "xlsx";
 const INVENTORY_TYPES = [
   { value: "placas", label: "Placas de Sinalização Vertical", table: "ficha_placa" },
   { value: "marcas_longitudinais", label: "Marcas Longitudinais", table: "ficha_marcas_longitudinais" },
-  { value: "cilindros", label: "Cilindros Delimitadores", table: "intervencoes_cilindros" },
+  { value: "cilindros", label: "Cilindros Delimitadores", table: "ficha_cilindros" },
   { value: "inscricoes", label: "Zebrados, Setas, Símbolos e Legendas", table: "ficha_inscricoes" },
   { value: "tachas", label: "Tachas Refletivas", table: "ficha_tachas" },
   { value: "porticos", label: "Pórticos e Braços Projetados", table: "ficha_porticos" },
@@ -322,66 +322,72 @@ export function InventarioImporterManager() {
           const excelRow = row as any;
           
           // BR - Rodovia (não está na tabela, mas pode ser usado depois)
-          const br = excelRow.BR || excelRow.br || null;
+          const br = excelRow.BR || excelRow.br || excelRow["br"] || null;
           
           // SNV - SNV de implantação
-          record.snv = excelRow.SNV || excelRow.snv || null;
+          record.snv = excelRow.SNV || excelRow.snv || excelRow["SNV"] || null;
           
           // Código - Código de identificação do tipo de linha
-          record.tipo_demarcacao = excelRow["Código"] || excelRow.codigo || null;
+          record.tipo_demarcacao = excelRow["Código"] || excelRow.Codigo || excelRow.codigo || excelRow["codigo"] || null;
           
           // Posição - Posição da linha (não está no banco, incluir em observações se necessário)
-          const posicao = excelRow["Posição"] || excelRow.posicao || null;
+          const posicao = excelRow["Posição"] || excelRow.Posicao || excelRow.posicao || null;
           
           // Largura da Faixa (m) - converter de metros para centímetros
-          const larguraMetros = excelRow["Largura da Faixa (m)"] || excelRow["Largura da Faixa m"] || excelRow.largura_da_faixa_m;
-          record.largura_cm = larguraMetros ? Number(larguraMetros) * 100 : null;
+          const larguraMetros = excelRow["Largura da Faixa (m)"] || excelRow["Largura da Faixa m"] || excelRow["Largura da Faixa"] || excelRow.largura_da_faixa_m || excelRow.largura;
+          record.largura_cm = larguraMetros && larguraMetros !== "-" && !isNaN(Number(larguraMetros)) ? Number(larguraMetros) * 100 : null;
           
           // Km Inicial
-          record.km_inicial = Number(excelRow["Km Inicial"] || excelRow.km_inicial || 0);
+          const kmIni = excelRow["Km Inicial"] || excelRow["Km inicial"] || excelRow.km_inicial || excelRow["km inicial"] || 0;
+          record.km_inicial = kmIni && kmIni !== "-" ? Number(kmIni) : 0;
           
           // Latitude Inicial
-          record.latitude_inicial = excelRow["Latitude Inicial"] || excelRow.latitude_inicial || null;
+          const latIni = excelRow["Latitude Inicial"] || excelRow["Latitude inicial"] || excelRow.latitude_inicial || excelRow["latitude inicial"] || null;
+          record.latitude_inicial = latIni && latIni !== "-" ? Number(latIni) : null;
           
           // Longitude Inicial
-          record.longitude_inicial = excelRow["Longitude Inicial"] || excelRow.longitude_inicial || null;
+          const lngIni = excelRow["Longitude Inicial"] || excelRow["Longitude inicial"] || excelRow.longitude_inicial || excelRow["longitude inicial"] || null;
+          record.longitude_inicial = lngIni && lngIni !== "-" ? Number(lngIni) : null;
           
           // Km Final
-          record.km_final = Number(excelRow["Km Final"] || excelRow.km_final || 0);
+          const kmFim = excelRow["Km Final"] || excelRow["Km final"] || excelRow.km_final || excelRow["km final"] || 0;
+          record.km_final = kmFim && kmFim !== "-" ? Number(kmFim) : 0;
           
           // Latitude Final
-          record.latitude_final = excelRow["Latitude Final"] || excelRow.latitude_final || null;
+          const latFim = excelRow["Latitude Final"] || excelRow["Latitude final"] || excelRow.latitude_final || excelRow["latitude final"] || null;
+          record.latitude_final = latFim && latFim !== "-" ? Number(latFim) : null;
           
           // Longitude Final
-          record.longitude_final = excelRow["Longitude Final"] || excelRow.longitude_final || null;
+          const lngFim = excelRow["Longitude Final"] || excelRow["Longitude final"] || excelRow.longitude_final || excelRow["longitude final"] || null;
+          record.longitude_final = lngFim && lngFim !== "-" ? Number(lngFim) : null;
           
           // Traço (m)
-          const traco = excelRow["Traço (m)"] || excelRow.traco_m || excelRow.traco || null;
+          const traco = excelRow["Traço (m)"] || excelRow["Traço"] || excelRow.traco_m || excelRow.traco || null;
           
           // Espaçamento (m)
-          const espacamento = excelRow["Espaçamento (m)"] || excelRow.espacamento_m || excelRow.espacamento || null;
+          const espacamento = excelRow["Espaçamento (m)"] || excelRow["Espaçamento"] || excelRow.espacamento_m || excelRow.espacamento || null;
           
           // Material - Material utilizado
-          record.material = excelRow.Material || excelRow.material || null;
+          record.material = excelRow.Material || excelRow.material || excelRow["material"] || null;
           
           // Outros materiais - Detalhamento
-          const outrosMateriais = excelRow["Outros materiais"] || excelRow.outros_materiais || null;
+          const outrosMateriais = excelRow["Outros materiais"] || excelRow["Outros Materiais"] || excelRow.outros_materiais || null;
           
           // Extensão (km) - converter para metros
-          const extensaoKm = excelRow["Extensão (km)"] || excelRow["Extensão km"] || excelRow.extensao_km || excelRow.extensao;
-          record.extensao_metros = extensaoKm ? Number(extensaoKm) * 1000 : null;
+          const extensaoKm = excelRow["Extensão (km)"] || excelRow["Extensão km"] || excelRow["Extensão"] || excelRow.extensao_km || excelRow.extensao;
+          record.extensao_metros = extensaoKm && extensaoKm !== "-" && !isNaN(Number(extensaoKm)) ? Number(extensaoKm) * 1000 : null;
           
           // Área (m²)
-          const area = excelRow["Área (m²)"] || excelRow.area_m2 || excelRow.area || null;
+          const area = excelRow["Área (m²)"] || excelRow["Área"] || excelRow.area_m2 || excelRow.area || null;
           
           // Montar observações com todos os campos adicionais
           const observacoes = [];
-          if (br) observacoes.push(`BR: ${br}`);
-          if (posicao) observacoes.push(`Posição: ${posicao}`);
+          if (br && br !== "-") observacoes.push(`BR: ${br}`);
+          if (posicao && posicao !== "-") observacoes.push(`Posição: ${posicao}`);
           if (traco && traco !== "-") observacoes.push(`Traço: ${traco}m`);
           if (espacamento && espacamento !== "-") observacoes.push(`Espaçamento: ${espacamento}m`);
           if (outrosMateriais && outrosMateriais !== "-") observacoes.push(`Outros materiais: ${outrosMateriais}`);
-          if (area) observacoes.push(`Área: ${area}m²`);
+          if (area && area !== "-") observacoes.push(`Área: ${area}m²`);
           
           record.observacao = observacoes.length > 0 ? observacoes.join(" | ") : null;
           
@@ -390,6 +396,9 @@ export function InventarioImporterManager() {
           record.estado_conservacao = "Bom"; // Padrão
           record.espessura_cm = null; // Não há na planilha
           record.data_vistoria = new Date().toISOString().split('T')[0]; // Data atual
+          
+          // Log para debug
+          console.log("Marcas Longitudinais - Record processado:", record);
         }
 
         // Adicionar mapeamento específico para placas
