@@ -196,7 +196,7 @@ const Index = () => {
             </Card>
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-7 h-auto bg-muted p-2 gap-1">
+              <TabsList className="grid w-full grid-cols-6 h-auto bg-muted p-2 gap-1">
                 <TabsTrigger value="frentes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Frente de Serviço</span>
                 </TabsTrigger>
@@ -205,9 +205,6 @@ const Index = () => {
                 </TabsTrigger>
                 <TabsTrigger value="retrorrefletividade" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Retrorefletividade</span>
-                </TabsTrigger>
-                <TabsTrigger value="defensas" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Defensas</span>
                 </TabsTrigger>
                 <TabsTrigger value="intervencoes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Intervenções</span>
@@ -270,17 +267,6 @@ const Index = () => {
                   </Tabs>
                 </div>
               </TabsContent>
-              <TabsContent value="defensas" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <Button variant="secondary" onClick={() => navigate("/minhas-defensas")} className="shadow-md hover:shadow-lg transition-shadow">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver meus registros
-                    </Button>
-                  </div>
-                  <DefensasForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                </div>
-              </TabsContent>
               <TabsContent value="intervencoes" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-end">
@@ -290,7 +276,7 @@ const Index = () => {
                     </Button>
                   </div>
                   <Tabs value={intervencaoSubTab} onValueChange={setIntervencaoSubTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-4">
+                    <TabsList className="grid w-full grid-cols-5">
                       <TabsTrigger value="sh">
                         Marcas Longitudinais
                       </TabsTrigger>
@@ -302,6 +288,9 @@ const Index = () => {
                       </TabsTrigger>
                       <TabsTrigger value="tacha">
                         Tachas
+                      </TabsTrigger>
+                      <TabsTrigger value="defensas">
+                        Defensas
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="sh" className="mt-4">
@@ -320,6 +309,9 @@ const Index = () => {
                     </TabsContent>
                     <TabsContent value="tacha" className="mt-4">
                       <IntervencoesTachaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                    </TabsContent>
+                    <TabsContent value="defensas" className="mt-4">
+                      <DefensasForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                   </Tabs>
                 </div>
