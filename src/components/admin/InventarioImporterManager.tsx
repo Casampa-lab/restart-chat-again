@@ -206,8 +206,10 @@ export function InventarioImporterManager() {
 
           const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_").replace(/[()]/g, "");
 
-          // Adicionar campos conhecidos
-          record[normalizedKey] = value;
+          // Para defensas, não adicionar campos automaticamente (serão mapeados explicitamente depois)
+          if (inventoryType !== "defensas") {
+            record[normalizedKey] = value;
+          }
 
           // Se é o campo de foto
           if (hasPhotos && photoColumnName && key === photoColumnName) {
@@ -250,13 +252,9 @@ export function InventarioImporterManager() {
           record.snv = excelRow.SNV || excelRow.snv || null;
           record.tramo = String(excelRow.Tramo || excelRow.tramo || "");
           
-          // KMs e coordenadas
+          // KMs
           record.km_inicial = Number(excelRow["Km Inicial"] || excelRow.km_inicial || 0);
           record.km_final = Number(excelRow["Km Final"] || excelRow.km_final || 0);
-          record.latitude_inicial = excelRow["Latitude Incial"] || excelRow.latitude_inicial || null;
-          record.longitude_inicial = excelRow["Longitude Inicial"] || excelRow.longitude_inicial || null;
-          record.latitude_final = excelRow["Latitude Final"] || excelRow.latitude_final || null;
-          record.longitude_final = excelRow["Longitude Final"] || excelRow.longitude_final || null;
           
           // Lado
           record.lado = excelRow.Lado || excelRow.lado || "D";
