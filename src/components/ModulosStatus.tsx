@@ -14,7 +14,7 @@ const MODULOS_INFO: Modulo[] = [
   {
     codigo: "sinalizacao",
     nome: "Sinalização e Segurança Viária",
-    descricao: "Gestão completa de sinalização horizontal e vertical",
+    descricao: "Gestão de sinalização horizontal, vertical e dispositivos de segurança",
     icone: "Route",
     status: "disponivel"
   },
