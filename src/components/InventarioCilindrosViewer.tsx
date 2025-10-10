@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, Library, Eye, MapPin, Calendar, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface Cilindro {
   id: string;
@@ -47,11 +49,13 @@ interface InventarioCilindrosViewerProps {
 }
 
 export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilindrosViewerProps) {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchLat, setSearchLat] = useState("");
   const [searchLon, setSearchLon] = useState("");
   const [selectedCilindro, setSelectedCilindro] = useState<Cilindro | null>(null);
   const [intervencoes, setIntervencoes] = useState<IntervencaoCilindro[]>([]);
+  const [rodovia, setRodovia] = useState<{ codigo: string } | null>(null);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371e3; // Earth radius in meters
@@ -67,6 +71,20 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
 
     return R * c; // Distance in meters
   };
+
+  // Fetch rodovia data
+  useQuery({
+    queryKey: ["rodovia", rodoviaId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("rodovias")
+        .select("codigo")
+        .eq("id", rodoviaId)
+        .single();
+      setRodovia(data);
+      return data;
+    },
+  });
 
   const { data: cilindros, isLoading } = useQuery({
     queryKey: ["cilindros", loteId, rodoviaId, searchTerm, searchLat, searchLon],
@@ -94,16 +112,29 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
         const targetLat = parseFloat(searchLat);
         const targetLon = parseFloat(searchLon);
         
-        return data.filter((cilindro: Cilindro) => {
-          if (!cilindro.latitude_inicial || !cilindro.longitude_inicial) return false;
-          const distance = calculateDistance(
-            targetLat,
-            targetLon,
-            cilindro.latitude_inicial,
-            cilindro.longitude_inicial
-          );
-          return distance <= 50; // 50m radius
-        });
+        const filtered = data
+          .filter((cilindro: Cilindro) => {
+            if (!cilindro.latitude_inicial || !cilindro.longitude_inicial) return false;
+            const distance = calculateDistance(
+              targetLat,
+              targetLon,
+              cilindro.latitude_inicial,
+              cilindro.longitude_inicial
+            );
+            return distance <= 50; // 50m radius
+          })
+          .map((cilindro: Cilindro) => ({
+            ...cilindro,
+            distance: calculateDistance(
+              targetLat,
+              targetLon,
+              cilindro.latitude_inicial!,
+              cilindro.longitude_inicial!
+            ),
+          }))
+          .sort((a, b) => a.distance - b.distance);
+        
+        return filtered;
       }
 
       return data || [];
@@ -132,10 +163,10 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Inventário - Cilindros Delimitadores</CardTitle>
-          <CardDescription>
-            Visualize os cilindros delimitadores cadastrados
-          </CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <Library className="h-5 w-5" />
+            Ficha de Visualização - Cilindro Delineador
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -165,43 +196,56 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
               />
             </div>
 
-            <div className="rounded-md border">
+            <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    {searchLat && searchLon && <TableHead>Distância</TableHead>}
                     <TableHead>SNV</TableHead>
                     <TableHead>Km Inicial</TableHead>
-                    <TableHead>km Final</TableHead>
-                    <TableHead>Cor (Corpo)</TableHead>
+                    <TableHead>Km Final</TableHead>
+                    <TableHead>Cor Corpo</TableHead>
+                    <TableHead>Cor Refletivo</TableHead>
                     <TableHead>Quantidade</TableHead>
+                    <TableHead>Espaçamento (m)</TableHead>
                     <TableHead>Data</TableHead>
-                    <TableHead>Ações</TableHead>
+                    <TableHead className="text-center">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {cilindros && cilindros.length > 0 ? (
-                    cilindros.map((cilindro: Cilindro) => (
+                    cilindros.map((cilindro: any) => (
                       <TableRow key={cilindro.id}>
+                        {searchLat && searchLon && (
+                          <TableCell>
+                            <Badge variant="secondary" className="font-mono">
+                              {cilindro.distance?.toFixed(1)}m
+                            </Badge>
+                          </TableCell>
+                        )}
                         <TableCell>{cilindro.snv || "-"}</TableCell>
                         <TableCell>{cilindro.km_inicial?.toFixed(3)}</TableCell>
                         <TableCell>{cilindro.km_final?.toFixed(3)}</TableCell>
                         <TableCell>{cilindro.cor_corpo}</TableCell>
+                        <TableCell>{cilindro.cor_refletivo || "-"}</TableCell>
                         <TableCell>{cilindro.quantidade || "-"}</TableCell>
-                        <TableCell>{new Date(cilindro.data_vistoria).toLocaleDateString()}</TableCell>
-                        <TableCell>
+                        <TableCell>{cilindro.espacamento_m || "-"}</TableCell>
+                        <TableCell>{new Date(cilindro.data_vistoria).toLocaleDateString("pt-BR")}</TableCell>
+                        <TableCell className="text-center">
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant="ghost"
+                            size="icon"
                             onClick={() => handleViewDetails(cilindro)}
+                            className="h-8 w-8"
                           >
-                            Ver
+                            <Eye className="h-4 w-4" />
                           </Button>
                         </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      <TableCell colSpan={searchLat && searchLon ? 10 : 9} className="text-center text-muted-foreground py-8">
                         Nenhum cilindro cadastrado
                       </TableCell>
                     </TableRow>
@@ -214,15 +258,41 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
       </Card>
 
       <Dialog open={!!selectedCilindro} onOpenChange={() => setSelectedCilindro(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Detalhes do Cilindro Delimitador</DialogTitle>
-            <DialogDescription>
-              Informações completas do registro
-            </DialogDescription>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-semibold">
+                Ficha de Visualização - Cilindro Delineador
+              </DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSelectedCilindro(null)}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </DialogHeader>
           
           {selectedCilindro && (
+            <>
+              {/* Identification Section */}
+              <div className="bg-muted/50 rounded-lg p-4 mb-4">
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+                  Identificação
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">BR:</p>
+                    <p className="text-sm font-medium">{rodovia?.codigo || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">SNV:</p>
+                    <p className="text-sm font-medium">{selectedCilindro.snv || "-"}</p>
+                  </div>
+                </div>
+              </div>
             <Tabs defaultValue="dados" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="dados">Dados</TabsTrigger>
@@ -238,12 +308,11 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">SNV</p>
-                        <p className="text-sm">{selectedCilindro.snv || "-"}</p>
-                      </div>
-                      <div>
                         <p className="text-sm font-medium text-muted-foreground">Data Vistoria</p>
-                        <p className="text-sm">{new Date(selectedCilindro.data_vistoria).toLocaleDateString()}</p>
+                        <p className="text-sm flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(selectedCilindro.data_vistoria).toLocaleDateString("pt-BR")}
+                        </p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Cor (Corpo)</p>
@@ -265,7 +334,8 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-1">
+                      <MapPin className="h-4 w-4" />
                       Localização
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
@@ -277,30 +347,6 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                         <p className="text-sm font-medium text-muted-foreground">KM Final</p>
                         <p className="text-sm">{selectedCilindro.km_final?.toFixed(3)}</p>
                       </div>
-                      {selectedCilindro.latitude_inicial && selectedCilindro.longitude_inicial && (
-                        <>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Latitude Inicial</p>
-                            <p className="text-sm">{selectedCilindro.latitude_inicial.toFixed(6)}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Longitude Inicial</p>
-                            <p className="text-sm">{selectedCilindro.longitude_inicial.toFixed(6)}</p>
-                          </div>
-                        </>
-                      )}
-                      {selectedCilindro.latitude_final && selectedCilindro.longitude_final && (
-                        <>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Latitude Final</p>
-                            <p className="text-sm">{selectedCilindro.latitude_final.toFixed(6)}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Longitude Final</p>
-                            <p className="text-sm">{selectedCilindro.longitude_final.toFixed(6)}</p>
-                          </div>
-                        </>
-                      )}
                     </div>
                   </div>
 
@@ -409,6 +455,24 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                 )}
               </TabsContent>
             </Tabs>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => setSelectedCilindro(null)}
+              >
+                Voltar
+              </Button>
+              <Button
+                onClick={() => {
+                  toast.info("Funcionalidade em desenvolvimento");
+                }}
+              >
+                Registrar Intervenção
+              </Button>
+            </div>
+          </>
           )}
         </DialogContent>
       </Dialog>
