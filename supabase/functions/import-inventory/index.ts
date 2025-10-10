@@ -133,6 +133,16 @@ serve(async (req) => {
     if (normalizedData.length > 0) {
       console.log("Colunas:", Object.keys(normalizedData[0]));
       console.log("Dados:", normalizedData[0]);
+      
+      // Log específico para tachas
+      if (tableName === "ficha_tachas") {
+        console.log("=== CAMPOS TACHAS NO EXCEL ===");
+        for (const [key, value] of Object.entries(normalizedData[0])) {
+          if (key.includes("Cor") || key.includes("Local") || key.includes("Espaça")) {
+            console.log(`Campo: "${key}" = "${value}"`);
+          }
+        }
+      }
     }
 
     // Processar fotos se houver
@@ -231,7 +241,6 @@ serve(async (req) => {
       },
       ficha_tachas: {
         "extensão_(km)": "extensao_km",
-        "espaçamento_(m)": "espacamento_m",
         "local_implantação": "local_implantacao",
         "data": "data_vistoria",
         "br": "",
