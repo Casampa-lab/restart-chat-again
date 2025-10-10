@@ -242,6 +242,7 @@ serve(async (req) => {
       ficha_tachas: {
         "extensão_(km)": "extensao_km",
         "local_implantação": "local_implantacao",
+        "quantidade_(und)": "quantidade",
         "data": "data_vistoria",
         "br": "",
       },
@@ -350,7 +351,7 @@ serve(async (req) => {
       } else if (tableName === "ficha_tachas") {
         record.km_inicial = 0;
         record.km_final = 0;
-        record.quantidade = 1;
+        // Não forçar quantidade = 1, deixar vir do Excel
       } else if (tableName === "ficha_porticos") {
         record.tipo = "Informativo";
       } else if (tableName === "ficha_marcas_longitudinais") {
