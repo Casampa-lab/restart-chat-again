@@ -150,18 +150,22 @@ export function InventarioPlacasManager() {
       
       const { data: userData } = await supabase.auth.getUser();
       
-      // Log para debug
-      console.log('🔍 Primeiras 5 placas com hiperlink:', placasData.slice(0, 5).map(p => ({
-        snv: p.snv,
-        foto_hiperlink: p.foto_hiperlink
-      })));
+      // Listar todas as chaves disponíveis no photoUrls
+      const chavesDisponiveis = Object.keys(photoUrls).filter((k, i, arr) => 
+        arr.indexOf(k) === i // Remove duplicatas para log
+      ).slice(0, 20); // Primeiras 20 chaves únicas
+      
+      console.log('📸 Chaves de fotos disponíveis (primeiras 20):', chavesDisponiveis);
+      console.log('🔍 Total de placas no Excel:', placasData.length);
+      console.log('🔍 Placas com hiperlink:', placasData.filter(p => p.foto_hiperlink).length);
       
       let fotosLinkadas = 0;
       let fotosNaoLinkadas = 0;
+      let placasSemHiperlink = 0;
       
       const placasParaInserir = placasData.map((placa: PlacaData) => {
         let fotoUrl: string | null = null;
-        let dataVistoria: string = new Date().toISOString().split("T")[0]; // Data padrão
+        let dataVistoria: string | null = null; // Iniciar como null
         
         if (placa.foto_hiperlink) {
           const hiperlink = placa.foto_hiperlink.trim();
@@ -192,15 +196,21 @@ export function InventarioPlacasManager() {
               }
               
               fotosLinkadas++;
-              console.log(`✅ MATCH: "${hiperlink}" -> "${tentativa}" | Data: ${dataVistoria} | SNV: ${placa.snv}`);
+              if (fotosLinkadas <= 10) {
+                console.log(`✅ MATCH: "${hiperlink}" -> "${tentativa}" | Data: ${dataVistoria} | SNV: ${placa.snv}`);
+              }
               break;
             }
           }
           
           if (!fotoUrl) {
             fotosNaoLinkadas++;
-            console.warn(`❌ SEM FOTO: "${hiperlink}" | SNV: ${placa.snv}`);
+            if (fotosNaoLinkadas <= 10) {
+              console.warn(`❌ SEM FOTO: "${hiperlink}" | SNV: ${placa.snv} | Tentativas: ${tentativas.slice(0, 3).join(', ')}`);
+            }
           }
+        } else {
+          placasSemHiperlink++;
         }
         
         return {
@@ -224,12 +234,15 @@ export function InventarioPlacasManager() {
           dimensoes_mm: placa.dimensoes_mm,
           area_m2: placa.area_m2,
           altura_m: placa.altura,
-          data_vistoria: dataVistoria,
+          data_vistoria: dataVistoria, // Será null se não houver foto linkada
           foto_frontal_url: fotoUrl,
         };
       });
       
-      console.log(`📊 Fotos linkadas: ${fotosLinkadas} | Não linkadas: ${fotosNaoLinkadas}`);
+      console.log(`📊 RESUMO:`);
+      console.log(`   ✅ Fotos linkadas: ${fotosLinkadas}`);
+      console.log(`   ❌ Não linkadas: ${fotosNaoLinkadas}`);
+      console.log(`   ⚠️  Sem hiperlink: ${placasSemHiperlink}`);
 
       // Inserir em lotes de 50
       const batchSize = 50;
