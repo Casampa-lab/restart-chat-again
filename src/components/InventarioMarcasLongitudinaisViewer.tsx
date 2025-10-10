@@ -294,130 +294,160 @@ export function InventarioMarcasLongitudinaisViewer({
                 </div>
               )}
 
-              {/* Identificação */}
+              {/* Identificação Básica */}
               <div className="border rounded-lg p-4">
                 <h3 className="font-semibold mb-3">Identificação</h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-4 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">BR:</span>
+                    <p className="text-sm">-</p>
+                  </div>
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">SNV:</span>
                     <p className="text-sm">{selectedMarca.snv || "-"}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-muted-foreground">Código (Tipo de Linha):</span>
+                    <span className="text-sm font-medium text-muted-foreground">Código:</span>
                     <p className="text-sm">{selectedMarca.tipo_demarcacao || "-"}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-muted-foreground">Cor:</span>
-                    <p className="text-sm">{selectedMarca.cor || "-"}</p>
+                    <span className="text-sm font-medium text-muted-foreground">Posição:</span>
+                    <p className="text-sm">-</p>
                   </div>
                 </div>
               </div>
 
-              {/* Localização */}
+              {/* Dimensões */}
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-3">Dimensões</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Largura da Faixa (m):</span>
+                    <p className="text-sm">
+                      {selectedMarca.largura_cm 
+                        ? (selectedMarca.largura_cm / 100).toFixed(2) 
+                        : "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Extensão (km):</span>
+                    <p className="text-sm">
+                      {selectedMarca.extensao_metros 
+                        ? (selectedMarca.extensao_metros / 1000).toFixed(2) 
+                        : "-"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Localização Inicial */}
               <div className="border rounded-lg p-4">
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  Localização
+                  Localização Inicial
                 </h3>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div className="bg-muted/30 p-3 rounded">
-                      <h4 className="text-xs font-semibold text-muted-foreground mb-2">Ponto Inicial</h4>
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-xs font-medium text-muted-foreground">KM:</span>
-                          <p className="text-sm font-semibold">{selectedMarca.km_inicial?.toFixed(3) || "-"}</p>
-                        </div>
-                        {selectedMarca.latitude_inicial && selectedMarca.longitude_inicial && (
-                          <div>
-                            <span className="text-xs font-medium text-muted-foreground">Coordenadas:</span>
-                            <p className="text-xs font-mono">
-                              Lat: {selectedMarca.latitude_inicial.toFixed(6)}<br />
-                              Lng: {selectedMarca.longitude_inicial.toFixed(6)}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Km Inicial:</span>
+                    <p className="text-sm">{selectedMarca.km_inicial?.toFixed(2) || "-"}</p>
                   </div>
-                  <div className="space-y-3">
-                    <div className="bg-muted/30 p-3 rounded">
-                      <h4 className="text-xs font-semibold text-muted-foreground mb-2">Ponto Final</h4>
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-xs font-medium text-muted-foreground">KM:</span>
-                          <p className="text-sm font-semibold">{selectedMarca.km_final?.toFixed(3) || "-"}</p>
-                        </div>
-                        {selectedMarca.latitude_final && selectedMarca.longitude_final && (
-                          <div>
-                            <span className="text-xs font-medium text-muted-foreground">Coordenadas:</span>
-                            <p className="text-xs font-mono">
-                              Lat: {selectedMarca.latitude_final.toFixed(6)}<br />
-                              Lng: {selectedMarca.longitude_final.toFixed(6)}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Latitude Inicial:</span>
+                    <p className="text-sm">
+                      {selectedMarca.latitude_inicial 
+                        ? selectedMarca.latitude_inicial.toFixed(6) 
+                        : "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Longitude Inicial:</span>
+                    <p className="text-sm">
+                      {selectedMarca.longitude_inicial 
+                        ? selectedMarca.longitude_inicial.toFixed(6) 
+                        : "-"}
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Dimensões e Características */}
+              {/* Localização Final */}
               <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Dimensões e Características</h3>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Localização Final
+                </h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <span className="text-sm font-medium text-muted-foreground">Largura da Faixa:</span>
+                    <span className="text-sm font-medium text-muted-foreground">Km Final:</span>
+                    <p className="text-sm">{selectedMarca.km_final?.toFixed(2) || "-"}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Latitude Final:</span>
                     <p className="text-sm">
-                      {selectedMarca.largura_cm 
-                        ? `${selectedMarca.largura_cm} cm (${(selectedMarca.largura_cm / 100).toFixed(2)} m)` 
+                      {selectedMarca.latitude_final 
+                        ? selectedMarca.latitude_final.toFixed(6) 
                         : "-"}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-muted-foreground">Extensão:</span>
+                    <span className="text-sm font-medium text-muted-foreground">Longitude Final:</span>
                     <p className="text-sm">
-                      {selectedMarca.extensao_metros 
-                        ? `${selectedMarca.extensao_metros.toFixed(2)} m (${(selectedMarca.extensao_metros / 1000).toFixed(3)} km)` 
+                      {selectedMarca.longitude_final 
+                        ? selectedMarca.longitude_final.toFixed(6) 
                         : "-"}
                     </p>
                   </div>
+                </div>
+              </div>
+
+              {/* Características da Demarcação */}
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-3">Características da Demarcação</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Traço (m):</span>
+                    <p className="text-sm">
+                      {selectedMarca.observacao?.includes("Traço:") 
+                        ? selectedMarca.observacao.match(/Traço:\s*([^|]+)/)?.[1]?.trim() || "-"
+                        : "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Espaçamento (m):</span>
+                    <p className="text-sm">
+                      {selectedMarca.observacao?.includes("Espaçamento:") 
+                        ? selectedMarca.observacao.match(/Espaçamento:\s*([^|]+)/)?.[1]?.trim() || "-"
+                        : "-"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Material */}
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-3">Material</h3>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Material:</span>
                     <p className="text-sm">{selectedMarca.material || "-"}</p>
                   </div>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Outros materiais:</span>
+                    <p className="text-sm">-</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Informações Complementares (Traço, Espaçamento, Área) */}
-              {selectedMarca.observacao && (
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-3">Informações Complementares</h3>
-                  <p className="text-sm whitespace-pre-wrap">{selectedMarca.observacao}</p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    * Inclui informações sobre Traço, Espaçamento e Área quando disponíveis
-                  </p>
-                </div>
-              )}
-
-              {/* Estado e Data */}
+              {/* Área */}
               <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Informações da Vistoria
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Estado de Conservação:</span>
-                    <p className="text-sm">{selectedMarca.estado_conservacao || "-"}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Data da Vistoria:</span>
-                    <p className="text-sm">
-                      {new Date(selectedMarca.data_vistoria).toLocaleDateString("pt-BR")}
-                    </p>
-                  </div>
+                <h3 className="font-semibold mb-3">Área</h3>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Área (m²):</span>
+                  <p className="text-sm">
+                    {selectedMarca.observacao?.includes("Área:") 
+                      ? selectedMarca.observacao.match(/Área:\s*([^|]+)/)?.[1]?.trim() || "-"
+                      : "-"}
+                  </p>
                 </div>
               </div>
 
