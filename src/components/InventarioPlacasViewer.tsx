@@ -56,18 +56,35 @@ interface InventarioPlacasViewerProps {
 
 export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasViewerProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchLat, setSearchLat] = useState("");
+  const [searchLng, setSearchLng] = useState("");
   const [selectedPlaca, setSelectedPlaca] = useState<FichaPlaca | null>(null);
   const [intervencoes, setIntervencoes] = useState<Intervencao[]>([]);
 
+  // Função para calcular distância entre dois pontos (Haversine)
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371e3; // Raio da Terra em metros
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distância em metros
+  };
+
   const { data: placas, isLoading } = useQuery({
-    queryKey: ["inventario-placas", loteId, rodoviaId, searchTerm],
+    queryKey: ["inventario-placas", loteId, rodoviaId, searchTerm, searchLat, searchLng],
     queryFn: async () => {
       let query = supabase
         .from("ficha_placa")
         .select("*")
         .eq("lote_id", loteId)
-        .eq("rodovia_id", rodoviaId)
-        .order("km", { ascending: true });
+        .eq("rodovia_id", rodoviaId);
 
       if (searchTerm) {
         query = query.or(
@@ -77,7 +94,31 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as FichaPlaca[];
+      
+      let filteredData = data as FichaPlaca[];
+
+      // Filtrar por coordenadas se fornecidas
+      if (searchLat && searchLng) {
+        const lat = parseFloat(searchLat);
+        const lng = parseFloat(searchLng);
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+          filteredData = filteredData
+            .map((placa) => ({
+              ...placa,
+              distance: placa.latitude && placa.longitude
+                ? calculateDistance(lat, lng, placa.latitude, placa.longitude)
+                : Infinity,
+            }))
+            .filter((placa) => placa.distance <= 50) // 50 metros de raio
+            .sort((a, b) => a.distance - b.distance);
+        }
+      } else {
+        // Se não houver busca por coordenadas, ordena por km
+        filteredData = filteredData.sort((a, b) => (a.km || 0) - (b.km || 0));
+      }
+
+      return filteredData;
     },
   });
 
@@ -116,16 +157,54 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Campo de Pesquisa */}
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Pesquisar por SNV, código, tipo ou BR..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
+          {/* Campos de Pesquisa */}
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Pesquisar por SNV, código, tipo ou BR..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+            
+            {/* Busca por Coordenadas GPS */}
+            <div className="border-t pt-3">
+              <p className="text-sm font-medium mb-2 text-muted-foreground">
+                Buscar por Coordenadas GPS (raio de 50m)
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  type="number"
+                  step="0.000001"
+                  placeholder="Latitude (ex: -19.924500)"
+                  value={searchLat}
+                  onChange={(e) => setSearchLat(e.target.value)}
+                />
+                <Input
+                  type="number"
+                  step="0.000001"
+                  placeholder="Longitude (ex: -43.935200)"
+                  value={searchLng}
+                  onChange={(e) => setSearchLng(e.target.value)}
+                />
+              </div>
+              {searchLat && searchLng && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchLat("");
+                    setSearchLng("");
+                  }}
+                  className="mt-2 text-xs"
+                >
+                  Limpar coordenadas
+                </Button>
+              )}
             </div>
           </div>
 
@@ -145,6 +224,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
                       <TableHead>Tipo</TableHead>
                       <TableHead>KM</TableHead>
                       <TableHead>Lado</TableHead>
+                      {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead>Data Vistoria</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
@@ -159,6 +239,13 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
                         </TableCell>
                         <TableCell>{placa.km?.toFixed(2) || "-"}</TableCell>
                         <TableCell>{placa.lado || "-"}</TableCell>
+                        {searchLat && searchLng && (
+                          <TableCell>
+                            <Badge variant="secondary">
+                              {(placa as any).distance?.toFixed(1)}m
+                            </Badge>
+                          </TableCell>
+                        )}
                         <TableCell>
                           {placa.data_vistoria
                             ? new Date(placa.data_vistoria).toLocaleDateString("pt-BR")
@@ -181,7 +268,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              {searchTerm
+              {searchTerm || (searchLat && searchLng)
                 ? "Nenhuma placa encontrada com esse critério"
                 : "Nenhuma placa cadastrada neste inventário"}
             </div>
