@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 
@@ -204,6 +205,14 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
           </DialogHeader>
           
           {selectedCilindro && (
+            <Tabs defaultValue="dados" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="dados">Dados</TabsTrigger>
+                <TabsTrigger value="foto">Foto</TabsTrigger>
+                <TabsTrigger value="historico">Histórico</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="dados" className="space-y-4 mt-4">
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -282,6 +291,20 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                 )}
               </div>
             </div>
+              </TabsContent>
+
+              <TabsContent value="foto" className="mt-4">
+                <p className="text-center py-8 text-muted-foreground">
+                  Nenhuma foto disponível
+                </p>
+              </TabsContent>
+
+              <TabsContent value="historico" className="mt-4">
+                <p className="text-center py-8 text-muted-foreground">
+                  Nenhum histórico disponível para este tipo de inventário
+                </p>
+              </TabsContent>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>

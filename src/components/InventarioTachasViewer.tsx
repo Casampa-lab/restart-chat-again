@@ -282,9 +282,10 @@ export function InventarioTachasViewer({
 
           {selectedTacha && (
             <Tabs defaultValue="dados" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="dados">Dados</TabsTrigger>
                 <TabsTrigger value="foto">Foto</TabsTrigger>
+                <TabsTrigger value="historico">Histórico ({intervencoes.length})</TabsTrigger>
               </TabsList>
 
               <TabsContent value="dados" className="space-y-4 mt-4">
@@ -407,6 +408,34 @@ export function InventarioTachasViewer({
                   <p className="text-center py-8 text-muted-foreground">
                     Nenhuma foto disponível
                   </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="historico" className="space-y-4 mt-4">
+                <h3 className="font-semibold">Histórico de Intervenções</h3>
+                {intervencoes.length === 0 ? (
+                  <p className="text-muted-foreground">Nenhuma intervenção registrada para esta tacha.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {intervencoes.map((intervencao) => (
+                      <div key={intervencao.id} className="border rounded-lg p-4">
+                        <p><strong>Data:</strong> {new Date(intervencao.data_intervencao).toLocaleDateString('pt-BR')}</p>
+                        <p><strong>Motivo:</strong> {intervencao.motivo}</p>
+                        {intervencao.quantidade && (
+                          <p><strong>Quantidade:</strong> {intervencao.quantidade}</p>
+                        )}
+                        {intervencao.tipo_tacha && (
+                          <p><strong>Tipo:</strong> {intervencao.tipo_tacha}</p>
+                        )}
+                        {intervencao.cor && (
+                          <p><strong>Cor:</strong> {intervencao.cor}</p>
+                        )}
+                        {intervencao.material && (
+                          <p><strong>Material:</strong> {intervencao.material}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </TabsContent>
             </Tabs>
