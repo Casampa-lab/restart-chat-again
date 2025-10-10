@@ -6,11 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, Plus, History } from "lucide-react";
+import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { IntervencaoInventarioForm } from "./IntervencaoInventarioForm";
-
 interface FichaPlaca {
   id: string;
   codigo: string | null;
@@ -59,7 +57,6 @@ interface InventarioPlacasViewerProps {
 export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasViewerProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlaca, setSelectedPlaca] = useState<FichaPlaca | null>(null);
-  const [showIntervencaoForm, setShowIntervencaoForm] = useState(false);
   const [intervencoes, setIntervencoes] = useState<Intervencao[]>([]);
 
   const { data: placas, isLoading } = useQuery({
@@ -86,7 +83,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
 
   const openPlacaDetail = async (placa: FichaPlaca) => {
     setSelectedPlaca(placa);
-    setShowIntervencaoForm(false);
     
     // Buscar intervenções vinculadas a esta placa
     const { data, error } = await supabase
@@ -97,13 +93,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
     
     if (!error && data) {
       setIntervencoes(data as Intervencao[]);
-    }
-  };
-
-  const handleIntervencaoSuccess = () => {
-    setShowIntervencaoForm(false);
-    if (selectedPlaca) {
-      openPlacaDetail(selectedPlaca); // Recarrega os dados
     }
   };
 
@@ -210,35 +199,13 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
       <Dialog open={!!selectedPlaca} onOpenChange={() => setSelectedPlaca(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>Detalhes da Placa - SNV: {selectedPlaca?.snv || "N/A"}</span>
-              {!showIntervencaoForm && (
-                <Button onClick={() => setShowIntervencaoForm(true)} size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Registrar Intervenção
-                </Button>
-              )}
+            <DialogTitle>
+              Detalhes da Placa - SNV: {selectedPlaca?.snv || "N/A"}
             </DialogTitle>
           </DialogHeader>
 
           {selectedPlaca && (
-            <>
-              {showIntervencaoForm ? (
-                <IntervencaoInventarioForm
-                  fichaPlacaId={selectedPlaca.id}
-                  placaInfo={{
-                    codigo: selectedPlaca.codigo,
-                    snv: selectedPlaca.snv,
-                    km: selectedPlaca.km,
-                    lado: selectedPlaca.lado,
-                    rodoviaId: rodoviaId,
-                    loteId: loteId,
-                  }}
-                  onSuccess={handleIntervencaoSuccess}
-                  onCancel={() => setShowIntervencaoForm(false)}
-                />
-              ) : (
-                <Tabs defaultValue="info" className="w-full">
+            <Tabs defaultValue="info" className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="info">Informações</TabsTrigger>
                     <TabsTrigger value="fotos">
@@ -476,8 +443,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
                 )}
               </TabsContent>
             </Tabs>
-              )}
-            </>
           )}
         </DialogContent>
       </Dialog>
