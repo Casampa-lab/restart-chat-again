@@ -251,7 +251,7 @@ serve(async (req) => {
       ficha_tachas: {
         "extensão_(km)": "extensao_km",
         "espaçamento_(m)": "espacamento_m",
-        "cor_refletivo": "cor_refletivo",
+        "cor refletivo": "cor_refletivo",
         "local_implantação": "local_implantacao",
         "quantidade_(und)": "quantidade",
         "data": "data_vistoria",
