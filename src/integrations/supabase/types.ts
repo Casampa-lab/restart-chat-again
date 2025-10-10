@@ -255,6 +255,237 @@ export type Database = {
           },
         ]
       }
+      ficha_inscricoes: {
+        Row: {
+          area_m2: number | null
+          cor: string
+          created_at: string
+          data_vistoria: string
+          dimensoes: string | null
+          enviado_coordenador: boolean | null
+          estado_conservacao: string | null
+          foto_url: string | null
+          id: string
+          km_final: number | null
+          km_inicial: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string
+          material_utilizado: string | null
+          observacao: string | null
+          rodovia_id: string
+          tipo_inscricao: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          area_m2?: number | null
+          cor: string
+          created_at?: string
+          data_vistoria: string
+          dimensoes?: string | null
+          enviado_coordenador?: boolean | null
+          estado_conservacao?: string | null
+          foto_url?: string | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id: string
+          material_utilizado?: string | null
+          observacao?: string | null
+          rodovia_id: string
+          tipo_inscricao: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          area_m2?: number | null
+          cor?: string
+          created_at?: string
+          data_vistoria?: string
+          dimensoes?: string | null
+          enviado_coordenador?: boolean | null
+          estado_conservacao?: string | null
+          foto_url?: string | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string
+          material_utilizado?: string | null
+          observacao?: string | null
+          rodovia_id?: string
+          tipo_inscricao?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ficha_inscricoes_intervencoes: {
+        Row: {
+          area_m2: number | null
+          cor: string | null
+          created_at: string
+          data_intervencao: string
+          dimensoes: string | null
+          ficha_inscricoes_id: string
+          id: string
+          material_utilizado: string | null
+          motivo: string
+          tipo_inscricao: string | null
+        }
+        Insert: {
+          area_m2?: number | null
+          cor?: string | null
+          created_at?: string
+          data_intervencao: string
+          dimensoes?: string | null
+          ficha_inscricoes_id: string
+          id?: string
+          material_utilizado?: string | null
+          motivo: string
+          tipo_inscricao?: string | null
+        }
+        Update: {
+          area_m2?: number | null
+          cor?: string | null
+          created_at?: string
+          data_intervencao?: string
+          dimensoes?: string | null
+          ficha_inscricoes_id?: string
+          id?: string
+          material_utilizado?: string | null
+          motivo?: string
+          tipo_inscricao?: string | null
+        }
+        Relationships: []
+      }
+      ficha_marcas_longitudinais: {
+        Row: {
+          cor: string | null
+          created_at: string
+          data_vistoria: string
+          enviado_coordenador: boolean | null
+          espessura_cm: number | null
+          estado_conservacao: string | null
+          extensao_metros: number | null
+          foto_url: string | null
+          id: string
+          km_final: number | null
+          km_inicial: number | null
+          largura_cm: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string
+          material: string | null
+          observacao: string | null
+          rodovia_id: string
+          tipo_demarcacao: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cor?: string | null
+          created_at?: string
+          data_vistoria: string
+          enviado_coordenador?: boolean | null
+          espessura_cm?: number | null
+          estado_conservacao?: string | null
+          extensao_metros?: number | null
+          foto_url?: string | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          largura_cm?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id: string
+          material?: string | null
+          observacao?: string | null
+          rodovia_id: string
+          tipo_demarcacao?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cor?: string | null
+          created_at?: string
+          data_vistoria?: string
+          enviado_coordenador?: boolean | null
+          espessura_cm?: number | null
+          estado_conservacao?: string | null
+          extensao_metros?: number | null
+          foto_url?: string | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          largura_cm?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string
+          material?: string | null
+          observacao?: string | null
+          rodovia_id?: string
+          tipo_demarcacao?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ficha_marcas_longitudinais_intervencoes: {
+        Row: {
+          cor: string | null
+          created_at: string
+          data_intervencao: string
+          espessura_cm: number | null
+          ficha_marcas_longitudinais_id: string
+          id: string
+          largura_cm: number | null
+          material: string | null
+          motivo: string
+          tipo_demarcacao: string | null
+        }
+        Insert: {
+          cor?: string | null
+          created_at?: string
+          data_intervencao: string
+          espessura_cm?: number | null
+          ficha_marcas_longitudinais_id: string
+          id?: string
+          largura_cm?: number | null
+          material?: string | null
+          motivo: string
+          tipo_demarcacao?: string | null
+        }
+        Update: {
+          cor?: string | null
+          created_at?: string
+          data_intervencao?: string
+          espessura_cm?: number | null
+          ficha_marcas_longitudinais_id?: string
+          id?: string
+          largura_cm?: number | null
+          material?: string | null
+          motivo?: string
+          tipo_demarcacao?: string | null
+        }
+        Relationships: []
+      }
       ficha_placa: {
         Row: {
           altura_m: number | null
@@ -468,6 +699,120 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ficha_tachas: {
+        Row: {
+          cor: string
+          created_at: string
+          data_vistoria: string
+          enviado_coordenador: boolean | null
+          estado_conservacao: string | null
+          foto_url: string | null
+          id: string
+          km_final: number
+          km_inicial: number
+          lado: string
+          latitude_final: number | null
+          latitude_inicial: number | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string
+          material: string | null
+          observacao: string | null
+          quantidade: number
+          rodovia_id: string
+          tipo_tacha: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cor: string
+          created_at?: string
+          data_vistoria: string
+          enviado_coordenador?: boolean | null
+          estado_conservacao?: string | null
+          foto_url?: string | null
+          id?: string
+          km_final: number
+          km_inicial: number
+          lado: string
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id: string
+          material?: string | null
+          observacao?: string | null
+          quantidade?: number
+          rodovia_id: string
+          tipo_tacha: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cor?: string
+          created_at?: string
+          data_vistoria?: string
+          enviado_coordenador?: boolean | null
+          estado_conservacao?: string | null
+          foto_url?: string | null
+          id?: string
+          km_final?: number
+          km_inicial?: number
+          lado?: string
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string
+          material?: string | null
+          observacao?: string | null
+          quantidade?: number
+          rodovia_id?: string
+          tipo_tacha?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ficha_tachas_intervencoes: {
+        Row: {
+          cor: string | null
+          created_at: string
+          data_intervencao: string
+          ficha_tachas_id: string
+          id: string
+          lado: string | null
+          material: string | null
+          motivo: string
+          quantidade: number | null
+          tipo_tacha: string | null
+        }
+        Insert: {
+          cor?: string | null
+          created_at?: string
+          data_intervencao: string
+          ficha_tachas_id: string
+          id?: string
+          lado?: string | null
+          material?: string | null
+          motivo: string
+          quantidade?: number | null
+          tipo_tacha?: string | null
+        }
+        Update: {
+          cor?: string | null
+          created_at?: string
+          data_intervencao?: string
+          ficha_tachas_id?: string
+          id?: string
+          lado?: string | null
+          material?: string | null
+          motivo?: string
+          quantidade?: number | null
+          tipo_tacha?: string | null
+        }
+        Relationships: []
       }
       ficha_verificacao: {
         Row: {

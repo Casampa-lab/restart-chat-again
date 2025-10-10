@@ -22,6 +22,9 @@ import { RegistroNCForm } from "@/components/RegistroNCForm";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
 import { InventarioPlacasViewer } from "@/components/InventarioPlacasViewer";
+import { InventarioMarcasLongitudinaisViewer } from "@/components/InventarioMarcasLongitudinaisViewer";
+import { InventarioInscricoesViewer } from "@/components/InventarioInscricoesViewer";
+import { InventarioTachasViewer } from "@/components/InventarioTachasViewer";
 import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 const Index = () => {
@@ -46,6 +49,9 @@ const Index = () => {
   });
   const [intervencaoSubTab, setIntervencaoSubTab] = useState("sv");
   const [selectedPlacaForIntervencao, setSelectedPlacaForIntervencao] = useState<any>(null);
+  const [selectedMarcaSHForIntervencao, setSelectedMarcaSHForIntervencao] = useState<any>(null);
+  const [selectedInscricaoForIntervencao, setSelectedInscricaoForIntervencao] = useState<any>(null);
+  const [selectedTachaForIntervencao, setSelectedTachaForIntervencao] = useState<any>(null);
   useEffect(() => {
     const checkAdminOrCoordinator = async () => {
       if (!user) return;
@@ -84,6 +90,27 @@ const Index = () => {
     setSelectedPlacaForIntervencao(placaData);
     setActiveTab('intervencoes');
     setIntervencaoSubTab('sv');
+    localStorage.setItem('activeTab', 'intervencoes');
+  };
+
+  const handleRegistrarIntervencaoSH = (marcaSHData: any) => {
+    setSelectedMarcaSHForIntervencao(marcaSHData);
+    setActiveTab('intervencoes');
+    setIntervencaoSubTab('sh');
+    localStorage.setItem('activeTab', 'intervencoes');
+  };
+
+  const handleRegistrarIntervencaoInscricao = (inscricaoData: any) => {
+    setSelectedInscricaoForIntervencao(inscricaoData);
+    setActiveTab('intervencoes');
+    setIntervencaoSubTab('inscricoes');
+    localStorage.setItem('activeTab', 'intervencoes');
+  };
+
+  const handleRegistrarIntervencaoTacha = (tachaData: any) => {
+    setSelectedTachaForIntervencao(tachaData);
+    setActiveTab('intervencoes');
+    setIntervencaoSubTab('tacha');
     localStorage.setItem('activeTab', 'intervencoes');
   };
   if (authLoading || sessionLoading) {
@@ -328,20 +355,50 @@ const Index = () => {
               </TabsContent>
               <TabsContent value="prontuario" className="mt-6">
                 <div className="space-y-4">
-                  <Tabs defaultValue="placas" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="placas">
-                        Placas
+                  <Tabs defaultValue="sv" className="w-full">
+                    <TabsList className="grid w-full grid-cols-5">
+                      <TabsTrigger value="sh">
+                        Marcas Longitudinais
+                      </TabsTrigger>
+                      <TabsTrigger value="sv">
+                        Marcas Transversais
+                      </TabsTrigger>
+                      <TabsTrigger value="inscricoes">
+                        Setas, Símbolos e Legendas
+                      </TabsTrigger>
+                      <TabsTrigger value="tacha">
+                        Tachas
                       </TabsTrigger>
                       <TabsTrigger value="defensas-pront">
                         Defensas
                       </TabsTrigger>
                     </TabsList>
-                    <TabsContent value="placas" className="mt-4">
+                    <TabsContent value="sh" className="mt-4">
+                      <InventarioMarcasLongitudinaisViewer 
+                        loteId={activeSession.lote_id} 
+                        rodoviaId={activeSession.rodovia_id}
+                        onRegistrarIntervencao={handleRegistrarIntervencaoSH}
+                      />
+                    </TabsContent>
+                    <TabsContent value="sv" className="mt-4">
                       <InventarioPlacasViewer 
                         loteId={activeSession.lote_id} 
                         rodoviaId={activeSession.rodovia_id}
                         onRegistrarIntervencao={handleRegistrarIntervencao}
+                      />
+                    </TabsContent>
+                    <TabsContent value="inscricoes" className="mt-4">
+                      <InventarioInscricoesViewer 
+                        loteId={activeSession.lote_id} 
+                        rodoviaId={activeSession.rodovia_id}
+                        onRegistrarIntervencao={handleRegistrarIntervencaoInscricao}
+                      />
+                    </TabsContent>
+                    <TabsContent value="tacha" className="mt-4">
+                      <InventarioTachasViewer 
+                        loteId={activeSession.lote_id} 
+                        rodoviaId={activeSession.rodovia_id}
+                        onRegistrarIntervencao={handleRegistrarIntervencaoTacha}
                       />
                     </TabsContent>
                     <TabsContent value="defensas-pront" className="mt-4">
