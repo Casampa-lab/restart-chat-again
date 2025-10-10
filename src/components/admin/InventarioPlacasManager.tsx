@@ -110,26 +110,31 @@ export function InventarioPlacasManager() {
               .from("placa-photos")
               .getPublicUrl(photoPath);
             
-            // Mapear por TODAS as variações possíveis do nome
-            const nomeOriginal = photo.name;
-            const nomeSemExt = photo.name.split('.')[0];
+            // Normalizar nome: remover extensão e criar variações
+            const nomeSemExt = photo.name.replace(/\.[^/.]+$/, ""); // Remove qualquer extensão
+            const nomeNormalizado = nomeSemExt.trim();
             
-            photoUrls[nomeOriginal] = urlData.publicUrl;
-            photoUrls[nomeOriginal.toLowerCase()] = urlData.publicUrl;
-            photoUrls[nomeOriginal.toUpperCase()] = urlData.publicUrl;
-            photoUrls[nomeSemExt] = urlData.publicUrl;
-            photoUrls[nomeSemExt.toLowerCase()] = urlData.publicUrl;
-            photoUrls[nomeSemExt.toUpperCase()] = urlData.publicUrl;
+            // Criar múltiplas chaves para aumentar chance de match
+            const chavesParaMapear = [
+              nomeNormalizado,
+              nomeNormalizado.toLowerCase(),
+              nomeNormalizado.toUpperCase(),
+              nomeSemExt,
+              nomeSemExt.toLowerCase(),
+              nomeSemExt.toUpperCase(),
+              photo.name, // Nome completo com extensão
+              photo.name.toLowerCase(),
+              photo.name.toUpperCase(),
+            ];
             
-            // Mapear datas também
-            photoDates[nomeOriginal] = photoDate;
-            photoDates[nomeOriginal.toLowerCase()] = photoDate;
-            photoDates[nomeOriginal.toUpperCase()] = photoDate;
-            photoDates[nomeSemExt] = photoDate;
-            photoDates[nomeSemExt.toLowerCase()] = photoDate;
-            photoDates[nomeSemExt.toUpperCase()] = photoDate;
+            chavesParaMapear.forEach(chave => {
+              photoUrls[chave] = urlData.publicUrl;
+              photoDates[chave] = photoDate;
+            });
             
-            console.log('✅ Foto mapeada:', nomeSemExt, 'Data:', photoDate);
+            console.log(`✅ Foto mapeada: "${nomeNormalizado}" -> Data: ${photoDate}`);
+          } else {
+            console.error(`❌ Erro ao fazer upload da foto ${photo.name}:`, photoError);
           }
 
           if ((i + 1) % 10 === 0) {
@@ -137,7 +142,8 @@ export function InventarioPlacasManager() {
           }
         }
         
-        console.log('📸 Total de chaves no photoUrls:', Object.keys(photoUrls).length);
+        console.log('📸 Total de fotos únicas:', photosFolder.length);
+        console.log('📸 Total de chaves mapeadas:', Object.keys(photoUrls).length);
         console.log('📸 Primeiras 10 chaves:', Object.keys(photoUrls).slice(0, 10));
         toast.success(`${photosFolder.length} fotos carregadas`);
       }
@@ -162,14 +168,24 @@ export function InventarioPlacasManager() {
         let dataVistoria = new Date().toISOString().split("T")[0]; // Data padrão se não encontrar foto
         
         if (placa.foto_hiperlink) {
+          // Normalizar o nome do hiperlink
+          const hiperlink = placa.foto_hiperlink.trim();
+          
+          // Tentar todas as variações possíveis
           const tentativas = [
-            placa.foto_hiperlink,
-            placa.foto_hiperlink.toLowerCase(),
-            placa.foto_hiperlink.toUpperCase(),
-            placa.foto_hiperlink + '.jpg',
-            placa.foto_hiperlink + '.JPG',
-            placa.foto_hiperlink + '.png',
-            placa.foto_hiperlink + '.PNG',
+            hiperlink,
+            hiperlink.toLowerCase(),
+            hiperlink.toUpperCase(),
+            hiperlink + '.jpg',
+            hiperlink + '.JPG',
+            hiperlink + '.jpeg',
+            hiperlink + '.JPEG',
+            hiperlink + '.png',
+            hiperlink + '.PNG',
+            hiperlink.toLowerCase() + '.jpg',
+            hiperlink.toLowerCase() + '.png',
+            hiperlink.toUpperCase() + '.JPG',
+            hiperlink.toUpperCase() + '.PNG',
           ];
           
           for (const tentativa of tentativas) {
@@ -177,13 +193,15 @@ export function InventarioPlacasManager() {
               fotoUrl = photoUrls[tentativa];
               dataVistoria = photoDates[tentativa] || dataVistoria; // Usar data da foto
               fotosLinkadas++;
+              console.log(`✅ Match encontrado! "${hiperlink}" -> "${tentativa}" (SNV: ${placa.snv})`);
               break;
             }
           }
           
           if (!fotoUrl) {
             fotosNaoLinkadas++;
-            console.warn('❌ Foto não encontrada para:', placa.foto_hiperlink, 'SNV:', placa.snv);
+            console.warn(`❌ Foto não encontrada para: "${hiperlink}" (SNV: ${placa.snv})`);
+            console.warn('   Tentativas:', tentativas.slice(0, 5));
           }
         }
         
