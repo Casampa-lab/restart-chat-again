@@ -44,6 +44,8 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('activeTab') || 'frentes';
   });
+  const [intervencaoSubTab, setIntervencaoSubTab] = useState("sv");
+  const [selectedPlacaForIntervencao, setSelectedPlacaForIntervencao] = useState<any>(null);
   useEffect(() => {
     const checkAdminOrCoordinator = async () => {
       if (!user) return;
@@ -76,6 +78,13 @@ const Index = () => {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     localStorage.setItem('activeTab', value);
+  };
+
+  const handleRegistrarIntervencao = (placaData: any) => {
+    setSelectedPlacaForIntervencao(placaData);
+    setActiveTab('intervencoes');
+    setIntervencaoSubTab('sv');
+    localStorage.setItem('activeTab', 'intervencoes');
   };
   if (authLoading || sessionLoading) {
     return <div className="fixed inset-0 flex items-center justify-center bg-background">
@@ -280,7 +289,7 @@ const Index = () => {
                       Ver meus registros
                     </Button>
                   </div>
-                  <Tabs defaultValue="sh" className="w-full">
+                  <Tabs value={intervencaoSubTab} onValueChange={setIntervencaoSubTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-4">
                       <TabsTrigger value="sh">
                         Marcas Longitudinais
@@ -302,7 +311,12 @@ const Index = () => {
                       <IntervencoesInscricoesForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                     <TabsContent value="sv" className="mt-4">
-                      <IntervencoesSVForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                      <IntervencoesSVForm 
+                        loteId={activeSession.lote_id} 
+                        rodoviaId={activeSession.rodovia_id}
+                        placaSelecionada={selectedPlacaForIntervencao}
+                        onIntervencaoRegistrada={() => setSelectedPlacaForIntervencao(null)}
+                      />
                     </TabsContent>
                     <TabsContent value="tacha" className="mt-4">
                       <IntervencoesTachaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
@@ -333,7 +347,11 @@ const Index = () => {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="placas" className="mt-4">
-                      <InventarioPlacasViewer loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                      <InventarioPlacasViewer 
+                        loteId={activeSession.lote_id} 
+                        rodoviaId={activeSession.rodovia_id}
+                        onRegistrarIntervencao={handleRegistrarIntervencao}
+                      />
                     </TabsContent>
                     <TabsContent value="defensas-pront" className="mt-4">
                       <DefensasForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />

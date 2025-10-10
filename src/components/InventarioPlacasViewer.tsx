@@ -52,9 +52,10 @@ interface Intervencao {
 interface InventarioPlacasViewerProps {
   loteId: string;
   rodoviaId: string;
+  onRegistrarIntervencao?: (placaData: any) => void;
 }
 
-export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasViewerProps) {
+export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervencao }: InventarioPlacasViewerProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchLat, setSearchLat] = useState("");
   const [searchLng, setSearchLng] = useState("");
@@ -288,13 +289,27 @@ export function InventarioPlacasViewer({ loteId, rodoviaId }: InventarioPlacasVi
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>Detalhes da Placa - SNV: {selectedPlaca?.snv || "N/A"}</span>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setSelectedPlaca(null)}
-              >
-                Voltar
-              </Button>
+              <div className="flex gap-2">
+                {onRegistrarIntervencao && (
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    onClick={() => {
+                      onRegistrarIntervencao(selectedPlaca);
+                      setSelectedPlaca(null);
+                    }}
+                  >
+                    Registrar Intervenção
+                  </Button>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setSelectedPlaca(null)}
+                >
+                  Voltar
+                </Button>
+              </div>
             </DialogTitle>
           </DialogHeader>
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -35,9 +35,11 @@ type FormValues = z.infer<typeof formSchema>;
 interface IntervencoesSVFormProps {
   loteId: string;
   rodoviaId: string;
+  placaSelecionada?: any;
+  onIntervencaoRegistrada?: () => void;
 }
 
-const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
+const IntervencoesSVForm = ({ loteId, rodoviaId, placaSelecionada, onIntervencaoRegistrada }: IntervencoesSVFormProps) => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -85,6 +87,35 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
     },
   });
 
+  // Pré-preencher campos quando uma placa é selecionada
+  useEffect(() => {
+    if (placaSelecionada) {
+      form.reset({
+        data_intervencao: new Date().toISOString().split('T')[0],
+        km_referencia: placaSelecionada.km?.toString() || "",
+        tipo_intervencao: "",
+        tipo_placa: placaSelecionada.tipo || "",
+        codigo_placa: placaSelecionada.codigo || "",
+        lado: placaSelecionada.lado || "",
+        dimensoes: placaSelecionada.dimensoes_mm || "",
+        material: placaSelecionada.substrato || "",
+        tipo_suporte: placaSelecionada.suporte || "",
+        estado_conservacao: "",
+        quantidade: "1",
+        observacao: "",
+      });
+      
+      if (placaSelecionada.latitude && placaSelecionada.longitude) {
+        setCoordenadas({
+          latitude: placaSelecionada.latitude.toString(),
+          longitude: placaSelecionada.longitude.toString(),
+        });
+      }
+
+      toast.info(`Editando placa: ${placaSelecionada.snv || placaSelecionada.codigo || "N/A"}`);
+    }
+  }, [placaSelecionada, form]);
+
   const onSubmit = async (values: FormValues) => {
     if (!user) {
       toast.error("Usuário não autenticado");
@@ -93,32 +124,58 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
 
     setIsLoading(true);
     try {
-      // 1. Criar entrada no inventário (ficha_placa)
-      const { data: fichaPlaca, error: fichaError } = await supabase
-        .from("ficha_placa")
-        .insert({
-          user_id: user.id,
-          lote_id: loteId,
-          rodovia_id: rodoviaId,
-          data_vistoria: values.data_intervencao,
-          km: parseFloat(values.km_referencia),
-          latitude: coordenadas.latitude ? parseFloat(coordenadas.latitude) : null,
-          longitude: coordenadas.longitude ? parseFloat(coordenadas.longitude) : null,
-          codigo: values.codigo_placa || null,
-          tipo: values.tipo_placa,
-          lado: values.lado,
-          dimensoes_mm: values.dimensoes || null,
-          substrato: values.material || null,
-          suporte: values.tipo_suporte || null,
-          data_implantacao: values.data_intervencao,
-        })
-        .select()
-        .single();
+      let fichaPlacaId: string;
 
-      if (fichaError) throw fichaError;
+      // Se há uma placa selecionada, atualizar; caso contrário, criar nova
+      if (placaSelecionada?.id) {
+        // Atualizar placa existente
+        const { error: updateError } = await supabase
+          .from("ficha_placa")
+          .update({
+            data_vistoria: values.data_intervencao,
+            km: parseFloat(values.km_referencia),
+            latitude: coordenadas.latitude ? parseFloat(coordenadas.latitude) : null,
+            longitude: coordenadas.longitude ? parseFloat(coordenadas.longitude) : null,
+            codigo: values.codigo_placa || null,
+            tipo: values.tipo_placa,
+            lado: values.lado,
+            dimensoes_mm: values.dimensoes || null,
+            substrato: values.material || null,
+            suporte: values.tipo_suporte || null,
+          })
+          .eq('id', placaSelecionada.id);
 
-      // 2. Criar registro da intervenção (intervencoes_sv)
-      const { data: intervencao, error: intervencaoError } = await supabase
+        if (updateError) throw updateError;
+        fichaPlacaId = placaSelecionada.id;
+      } else {
+        // Criar nova entrada no inventário (ficha_placa)
+        const { data: fichaPlaca, error: fichaError } = await supabase
+          .from("ficha_placa")
+          .insert({
+            user_id: user.id,
+            lote_id: loteId,
+            rodovia_id: rodoviaId,
+            data_vistoria: values.data_intervencao,
+            km: parseFloat(values.km_referencia),
+            latitude: coordenadas.latitude ? parseFloat(coordenadas.latitude) : null,
+            longitude: coordenadas.longitude ? parseFloat(coordenadas.longitude) : null,
+            codigo: values.codigo_placa || null,
+            tipo: values.tipo_placa,
+            lado: values.lado,
+            dimensoes_mm: values.dimensoes || null,
+            substrato: values.material || null,
+            suporte: values.tipo_suporte || null,
+            data_implantacao: values.data_intervencao,
+          })
+          .select()
+          .single();
+
+        if (fichaError) throw fichaError;
+        fichaPlacaId = fichaPlaca.id;
+      }
+
+      // Criar registro da intervenção (intervencoes_sv) - sempre cria novo
+      const { error: intervencaoError } = await supabase
         .from("intervencoes_sv")
         .insert({
           user_id: user.id,
@@ -138,17 +195,15 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
           observacao: values.observacao || null,
           latitude: coordenadas.latitude ? parseFloat(coordenadas.latitude) : null,
           longitude: coordenadas.longitude ? parseFloat(coordenadas.longitude) : null,
-        })
-        .select()
-        .single();
+        });
 
       if (intervencaoError) throw intervencaoError;
 
-      // 3. Criar ligação entre ficha_placa e intervenção
+      // Criar registro no histórico (ficha_placa_intervencoes) - sempre cria novo
       const { error: ligacaoError } = await supabase
         .from("ficha_placa_intervencoes")
         .insert({
-          ficha_placa_id: fichaPlaca.id,
+          ficha_placa_id: fichaPlacaId,
           data_intervencao: values.data_intervencao,
           motivo: values.tipo_intervencao,
           suporte: values.tipo_suporte || null,
@@ -161,9 +216,15 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
 
       if (ligacaoError) throw ligacaoError;
 
-      toast.success("Intervenção registrada e adicionada ao inventário!");
+      toast.success(
+        placaSelecionada?.id
+          ? "Intervenção registrada e placa atualizada no inventário!"
+          : "Intervenção registrada e adicionada ao inventário!"
+      );
+      
       form.reset();
       setCoordenadas({ latitude: "", longitude: "" });
+      onIntervencaoRegistrada?.();
     } catch (error: any) {
       toast.error("Erro ao salvar intervenção: " + error.message);
     } finally {
@@ -174,6 +235,19 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
   return (
     <Card>
       <CardContent className="pt-6">
+        {placaSelecionada && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="font-semibold text-blue-900">
+              📝 Editando placa do inventário
+            </p>
+            <p className="text-sm text-blue-700 mt-1">
+              SNV: {placaSelecionada.snv || "N/A"} | Código: {placaSelecionada.codigo || "N/A"}
+            </p>
+            <p className="text-xs text-blue-600 mt-2">
+              Todas as alterações serão registradas no histórico com seu nome de usuário e data.
+            </p>
+          </div>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
