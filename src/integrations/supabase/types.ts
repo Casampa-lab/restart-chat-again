@@ -391,6 +391,7 @@ export type Database = {
           material: string | null
           observacao: string | null
           rodovia_id: string
+          snv: string | null
           tipo_demarcacao: string | null
           updated_at: string
           user_id: string
@@ -416,6 +417,7 @@ export type Database = {
           material?: string | null
           observacao?: string | null
           rodovia_id: string
+          snv?: string | null
           tipo_demarcacao?: string | null
           updated_at?: string
           user_id: string
@@ -441,6 +443,7 @@ export type Database = {
           material?: string | null
           observacao?: string | null
           rodovia_id?: string
+          snv?: string | null
           tipo_demarcacao?: string | null
           updated_at?: string
           user_id?: string

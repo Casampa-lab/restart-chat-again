@@ -175,7 +175,6 @@ serve(async (req) => {
         "outros_materiais": "", // Ignorar
         "área_(m²)": "", // Ignorar (não há campo correspondente)
         "br": "", // Ignorar (info já está em rodovia_id)
-        "snv": "", // Ignorar (não existe nesta tabela)
       },
       ficha_placa: {
         "dimensões_(mm)": "dimensoes_mm",
@@ -191,8 +190,7 @@ serve(async (req) => {
         "extensao_metros", "foto_url", "km_final", "km_inicial",
         "largura_cm", "latitude_final", "latitude_inicial",
         "longitude_final", "longitude_inicial", "material",
-        "observacao", "tipo_demarcacao"
-        // Nota: SNV não existe nesta tabela
+        "observacao", "tipo_demarcacao", "snv"
       ],
       ficha_placa: [
         "altura_m", "area_m2", "br", "codigo", "contrato", "data_implantacao",
