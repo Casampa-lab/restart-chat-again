@@ -93,30 +93,77 @@ const IntervencoesSVForm = ({ loteId, rodoviaId }: IntervencoesSVFormProps) => {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.from("intervencoes_sv").insert({
-        user_id: user.id,
-        lote_id: loteId,
-        rodovia_id: rodoviaId,
-        data_intervencao: values.data_intervencao,
-        km_referencia: parseFloat(values.km_referencia),
-        tipo_intervencao: values.tipo_intervencao,
-        tipo_placa: values.tipo_placa,
-        codigo_placa: values.codigo_placa || null,
-        lado: values.lado,
-        dimensoes: values.dimensoes || null,
-        material: values.material || null,
-        tipo_suporte: values.tipo_suporte || null,
-        estado_conservacao: values.estado_conservacao,
-        quantidade: parseInt(values.quantidade),
-        observacao: values.observacao || null,
-        latitude: coordenadas.latitude ? parseFloat(coordenadas.latitude) : null,
-        longitude: coordenadas.longitude ? parseFloat(coordenadas.longitude) : null,
-      });
+      // 1. Criar entrada no inventário (ficha_placa)
+      const { data: fichaPlaca, error: fichaError } = await supabase
+        .from("ficha_placa")
+        .insert({
+          user_id: user.id,
+          lote_id: loteId,
+          rodovia_id: rodoviaId,
+          data_vistoria: values.data_intervencao,
+          km: parseFloat(values.km_referencia),
+          latitude: coordenadas.latitude ? parseFloat(coordenadas.latitude) : null,
+          longitude: coordenadas.longitude ? parseFloat(coordenadas.longitude) : null,
+          codigo: values.codigo_placa || null,
+          tipo: values.tipo_placa,
+          lado: values.lado,
+          dimensoes_mm: values.dimensoes || null,
+          substrato: values.material || null,
+          suporte: values.tipo_suporte || null,
+          data_implantacao: values.data_intervencao,
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (fichaError) throw fichaError;
 
-      toast.success("Intervenção em SV salva com sucesso!");
+      // 2. Criar registro da intervenção (intervencoes_sv)
+      const { data: intervencao, error: intervencaoError } = await supabase
+        .from("intervencoes_sv")
+        .insert({
+          user_id: user.id,
+          lote_id: loteId,
+          rodovia_id: rodoviaId,
+          data_intervencao: values.data_intervencao,
+          km_referencia: parseFloat(values.km_referencia),
+          tipo_intervencao: values.tipo_intervencao,
+          tipo_placa: values.tipo_placa,
+          codigo_placa: values.codigo_placa || null,
+          lado: values.lado,
+          dimensoes: values.dimensoes || null,
+          material: values.material || null,
+          tipo_suporte: values.tipo_suporte || null,
+          estado_conservacao: values.estado_conservacao,
+          quantidade: parseInt(values.quantidade),
+          observacao: values.observacao || null,
+          latitude: coordenadas.latitude ? parseFloat(coordenadas.latitude) : null,
+          longitude: coordenadas.longitude ? parseFloat(coordenadas.longitude) : null,
+        })
+        .select()
+        .single();
+
+      if (intervencaoError) throw intervencaoError;
+
+      // 3. Criar ligação entre ficha_placa e intervenção
+      const { error: ligacaoError } = await supabase
+        .from("ficha_placa_intervencoes")
+        .insert({
+          ficha_placa_id: fichaPlaca.id,
+          data_intervencao: values.data_intervencao,
+          motivo: values.tipo_intervencao,
+          suporte: values.tipo_suporte || null,
+          pelicula: null,
+          substrato: values.material || null,
+          placa_recuperada: false,
+          retro_fundo: null,
+          retro_orla_legenda: null,
+        });
+
+      if (ligacaoError) throw ligacaoError;
+
+      toast.success("Intervenção registrada e adicionada ao inventário!");
       form.reset();
+      setCoordenadas({ latitude: "", longitude: "" });
     } catch (error: any) {
       toast.error("Erro ao salvar intervenção: " + error.message);
     } finally {
