@@ -177,6 +177,7 @@ export function InventarioMarcasLongitudinaisViewer({
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
+                      {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead>Código</TableHead>
                       <TableHead>Cor</TableHead>
                       <TableHead>Material</TableHead>
@@ -192,6 +193,13 @@ export function InventarioMarcasLongitudinaisViewer({
                   <TableBody>
                     {marcas.map((marca) => (
                       <TableRow key={marca.id} className="hover:bg-muted/50">
+                        {searchLat && searchLng && (
+                          <TableCell>
+                            <Badge variant="secondary">
+                              {(marca as any).distance?.toFixed(1)}m
+                            </Badge>
+                          </TableCell>
+                        )}
                         <TableCell>
                           <Badge variant="outline">{marca.tipo_demarcacao || "-"}</Badge>
                         </TableCell>
