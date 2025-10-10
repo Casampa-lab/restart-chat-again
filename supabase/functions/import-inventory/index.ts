@@ -141,8 +141,22 @@ serve(async (req) => {
         const storagePath = `${inventoryType}/${timestamp}_${fileName}`;
 
         const arrayBuffer = await photo.arrayBuffer();
+        
+        // Determinar bucket correto baseado no tipo de inventário
+        const bucketMap: Record<string, string> = {
+          "placas": "placa-photos",
+          "marcas_longitudinais": "marcas-longitudinais",
+          "cilindros": "cilindros",
+          "inscricoes": "inscricoes",
+          "tachas": "tachas",
+          "porticos": "porticos",
+          "defensas": "defensas",
+        };
+        
+        const bucketName = bucketMap[inventoryType] || "verificacao-photos";
+        
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("verificacao-photos")
+          .from(bucketName)
           .upload(storagePath, arrayBuffer, {
             contentType: photo.type,
             upsert: false,
@@ -155,7 +169,7 @@ serve(async (req) => {
 
         // Obter URL pública
         const { data: urlData } = supabase.storage
-          .from("verificacao-photos")
+          .from(bucketName)
           .getPublicUrl(storagePath);
 
         photoMap[fileName] = urlData.publicUrl;
