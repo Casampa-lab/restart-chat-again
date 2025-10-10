@@ -25,6 +25,7 @@ import { InventarioPlacasViewer } from "@/components/InventarioPlacasViewer";
 import { InventarioMarcasLongitudinaisViewer } from "@/components/InventarioMarcasLongitudinaisViewer";
 import { InventarioInscricoesViewer } from "@/components/InventarioInscricoesViewer";
 import { InventarioTachasViewer } from "@/components/InventarioTachasViewer";
+import { InventarioDefensasViewer } from "@/components/InventarioDefensasViewer";
 import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 const Index = () => {
@@ -52,6 +53,7 @@ const Index = () => {
   const [selectedMarcaSHForIntervencao, setSelectedMarcaSHForIntervencao] = useState<any>(null);
   const [selectedInscricaoForIntervencao, setSelectedInscricaoForIntervencao] = useState<any>(null);
   const [selectedTachaForIntervencao, setSelectedTachaForIntervencao] = useState<any>(null);
+  const [selectedDefensaForIntervencao, setSelectedDefensaForIntervencao] = useState<any>(null);
   useEffect(() => {
     const checkAdminOrCoordinator = async () => {
       if (!user) return;
@@ -111,6 +113,13 @@ const Index = () => {
     setSelectedTachaForIntervencao(tachaData);
     setActiveTab('intervencoes');
     setIntervencaoSubTab('tacha');
+    localStorage.setItem('activeTab', 'intervencoes');
+  };
+
+  const handleRegistrarIntervencaoDefensa = (defensaData: any) => {
+    setSelectedDefensaForIntervencao(defensaData);
+    setActiveTab('intervencoes');
+    setIntervencaoSubTab('defensas');
     localStorage.setItem('activeTab', 'intervencoes');
   };
   if (authLoading || sessionLoading) {
@@ -402,7 +411,11 @@ const Index = () => {
                       />
                     </TabsContent>
                     <TabsContent value="defensas-pront" className="mt-4">
-                      <DefensasForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                      <InventarioDefensasViewer 
+                        loteId={activeSession.lote_id} 
+                        rodoviaId={activeSession.rodovia_id}
+                        onRegistrarIntervencao={handleRegistrarIntervencaoDefensa}
+                      />
                     </TabsContent>
                   </Tabs>
                 </div>
