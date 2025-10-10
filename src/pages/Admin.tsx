@@ -13,6 +13,7 @@ import RodoviasManager from "@/components/admin/RodoviasManager";
 import { SupervisorasManager } from "@/components/admin/SupervisorasManager";
 import { UsuariosManager } from "@/components/admin/UsuariosManager";
 import { InventarioPlacasManager } from "@/components/admin/InventarioPlacasManager";
+import { InventarioImporterManager } from "@/components/admin/InventarioImporterManager";
 
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
@@ -143,8 +144,12 @@ const Admin = () => {
             <RodoviasManager />
           </TabsContent>
 
-          <TabsContent value="inventario">
-            <InventarioPlacasManager />
+          <TabsContent value="inventario" className="space-y-6">
+            <InventarioImporterManager />
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold mb-4">Importação de Placas (Legacy)</h3>
+              <InventarioPlacasManager />
+            </div>
           </TabsContent>
         </Tabs>
       </main>
