@@ -19,12 +19,15 @@ interface FichaTacha {
   latitude_final: number | null;
   longitude_final: number | null;
   data_vistoria: string;
-  tipo_tacha: string;
-  cor: string;
-  lado: string;
+  snv: string | null;
+  descricao: string | null;
+  corpo: string | null;
+  refletivo: string | null;
+  cor_refletivo: string | null;
+  extensao_km: number | null;
+  local_implantacao: string | null;
+  espacamento_m: number | null;
   quantidade: number;
-  material: string | null;
-  estado_conservacao: string | null;
   observacao: string | null;
   foto_url: string | null;
 }
@@ -72,7 +75,7 @@ export function InventarioTachasViewer({
 
       if (searchTerm) {
         query = query.or(
-          `tipo_tacha.ilike.%${searchTerm}%,cor.ilike.%${searchTerm}%,lado.ilike.%${searchTerm}%,material.ilike.%${searchTerm}%`
+          `snv.ilike.%${searchTerm}%,descricao.ilike.%${searchTerm}%,corpo.ilike.%${searchTerm}%,cor_refletivo.ilike.%${searchTerm}%,local_implantacao.ilike.%${searchTerm}%`
         );
       }
 
@@ -119,7 +122,7 @@ export function InventarioTachasViewer({
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Pesquisar por tipo, cor, lado ou material..."
+                  placeholder="Pesquisar por SNV, descrição, corpo, cor ou local..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -173,11 +176,13 @@ export function InventarioTachasViewer({
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Cor</TableHead>
-                      <TableHead>Lado</TableHead>
+                      <TableHead>SNV</TableHead>
+                      <TableHead>Descrição</TableHead>
+                      <TableHead>Corpo</TableHead>
+                      <TableHead>Cor Refletivo</TableHead>
                       <TableHead>KM Inicial</TableHead>
                       <TableHead>KM Final</TableHead>
+                      <TableHead>Local</TableHead>
                       <TableHead>Quantidade</TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead>Data Vistoria</TableHead>
@@ -188,12 +193,14 @@ export function InventarioTachasViewer({
                     {tachas.map((tacha) => (
                       <TableRow key={tacha.id} className="hover:bg-muted/50">
                         <TableCell>
-                          <Badge variant="outline">{tacha.tipo_tacha}</Badge>
+                          <Badge variant="outline">{tacha.snv || "-"}</Badge>
                         </TableCell>
-                        <TableCell>{tacha.cor}</TableCell>
-                        <TableCell>{tacha.lado}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">{tacha.descricao || "-"}</TableCell>
+                        <TableCell>{tacha.corpo || "-"}</TableCell>
+                        <TableCell>{tacha.cor_refletivo || "-"}</TableCell>
                         <TableCell>{tacha.km_inicial.toFixed(2)}</TableCell>
                         <TableCell>{tacha.km_final.toFixed(2)}</TableCell>
+                        <TableCell>{tacha.local_implantacao || "-"}</TableCell>
                         <TableCell>{tacha.quantidade}</TableCell>
                         {searchLat && searchLng && (
                           <TableCell>
@@ -282,24 +289,32 @@ export function InventarioTachasViewer({
                   </h3>
                   <div className="space-y-2">
                     <div>
-                      <span className="text-sm font-medium">Tipo:</span>
-                      <p className="text-sm">{selectedTacha.tipo_tacha}</p>
+                      <span className="text-sm font-medium">SNV:</span>
+                      <p className="text-sm">{selectedTacha.snv || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium">Cor:</span>
-                      <p className="text-sm">{selectedTacha.cor}</p>
+                      <span className="text-sm font-medium">Descrição:</span>
+                      <p className="text-sm">{selectedTacha.descricao || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium">Lado:</span>
-                      <p className="text-sm">{selectedTacha.lado}</p>
+                      <span className="text-sm font-medium">Corpo:</span>
+                      <p className="text-sm">{selectedTacha.corpo || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium">Material:</span>
-                      <p className="text-sm">{selectedTacha.material || "-"}</p>
+                      <span className="text-sm font-medium">Refletivo:</span>
+                      <p className="text-sm">{selectedTacha.refletivo || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium">Estado:</span>
-                      <p className="text-sm">{selectedTacha.estado_conservacao || "-"}</p>
+                      <span className="text-sm font-medium">Cor Refletivo:</span>
+                      <p className="text-sm">{selectedTacha.cor_refletivo || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium">Local de Implantação:</span>
+                      <p className="text-sm">{selectedTacha.local_implantacao || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium">Espaçamento:</span>
+                      <p className="text-sm">{selectedTacha.espacamento_m ? `${selectedTacha.espacamento_m}m` : "-"}</p>
                     </div>
                   </div>
                 </div>
@@ -334,11 +349,17 @@ export function InventarioTachasViewer({
 
               <div>
                 <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                  Quantidade
+                  Dimensões
                 </h3>
-                <div>
-                  <span className="text-sm font-medium">Quantidade instalada:</span>
-                  <p className="text-sm">{selectedTacha.quantidade} unidades</p>
+                <div className="space-y-2">
+                  <div>
+                    <span className="text-sm font-medium">Quantidade instalada:</span>
+                    <p className="text-sm">{selectedTacha.quantidade} unidades</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">Extensão:</span>
+                    <p className="text-sm">{selectedTacha.extensao_km ? `${selectedTacha.extensao_km.toFixed(2)} km` : "-"}</p>
+                  </div>
                 </div>
               </div>
 

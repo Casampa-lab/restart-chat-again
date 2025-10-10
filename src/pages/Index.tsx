@@ -345,7 +345,7 @@ const Index = () => {
                     </Button>
                   </div>
                   <Tabs value={intervencaoSubTab} onValueChange={setIntervencaoSubTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-5">
+                    <TabsList className="grid w-full grid-cols-4">
                       <TabsTrigger value="sh">
                         Sinalização Horizontal (SH)
                       </TabsTrigger>
@@ -355,21 +355,21 @@ const Index = () => {
                       <TabsTrigger value="inscricoes">
                         Setas, Símbolos e Legendas
                       </TabsTrigger>
-                      <TabsTrigger value="tacha">
-                        Tachas
-                      </TabsTrigger>
                       <TabsTrigger value="defensas">
                         Defensas
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="sh" className="mt-4">
                       <Tabs value={shSubTab} onValueChange={setShSubTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
+                        <TabsList className="grid w-full grid-cols-3">
                           <TabsTrigger value="longitudinais">
                             Marcas Longitudinais
                           </TabsTrigger>
                           <TabsTrigger value="transversais">
                             Marcas Transversais
+                          </TabsTrigger>
+                          <TabsTrigger value="tachas">
+                            Tachas
                           </TabsTrigger>
                         </TabsList>
                         <TabsContent value="longitudinais" className="mt-4">
@@ -377,6 +377,9 @@ const Index = () => {
                         </TabsContent>
                         <TabsContent value="transversais" className="mt-4">
                           <IntervencoesMarcasTransversaisForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                        </TabsContent>
+                        <TabsContent value="tachas" className="mt-4">
+                          <IntervencoesTachaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                         </TabsContent>
                       </Tabs>
                     </TabsContent>
@@ -409,9 +412,6 @@ const Index = () => {
                         </TabsContent>
                       </Tabs>
                     </TabsContent>
-                    <TabsContent value="tacha" className="mt-4">
-                      <IntervencoesTachaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                    </TabsContent>
                     <TabsContent value="defensas" className="mt-4">
                       <DefensasForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
@@ -421,7 +421,7 @@ const Index = () => {
               <TabsContent value="prontuario" className="mt-6">
                 <div className="space-y-4">
                   <Tabs defaultValue="sv" className="w-full">
-                    <TabsList className="grid w-full grid-cols-5">
+                    <TabsList className="grid w-full grid-cols-4">
                       <TabsTrigger value="sh">
                         Sinalização Horizontal (SH)
                       </TabsTrigger>
@@ -431,21 +431,21 @@ const Index = () => {
                       <TabsTrigger value="inscricoes">
                         Setas, Símbolos e Legendas
                       </TabsTrigger>
-                      <TabsTrigger value="tacha">
-                        Tachas
-                      </TabsTrigger>
                       <TabsTrigger value="defensas-pront">
                         Defensas
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="sh" className="mt-4">
                       <Tabs value={inventarioShSubTab} onValueChange={setInventarioShSubTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
+                        <TabsList className="grid w-full grid-cols-3">
                           <TabsTrigger value="longitudinais">
                             Marcas Longitudinais
                           </TabsTrigger>
                           <TabsTrigger value="transversais">
                             Marcas Transversais
+                          </TabsTrigger>
+                          <TabsTrigger value="tachas">
+                            Tachas
                           </TabsTrigger>
                         </TabsList>
                         <TabsContent value="longitudinais" className="mt-4">
@@ -459,6 +459,13 @@ const Index = () => {
                           <InventarioMarcasTransversaisViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
+                          />
+                        </TabsContent>
+                        <TabsContent value="tachas" className="mt-4">
+                          <InventarioTachasViewer 
+                            loteId={activeSession.lote_id} 
+                            rodoviaId={activeSession.rodovia_id}
+                            onRegistrarIntervencao={handleRegistrarIntervencaoTacha}
                           />
                         </TabsContent>
                       </Tabs>
@@ -493,13 +500,6 @@ const Index = () => {
                         loteId={activeSession.lote_id} 
                         rodoviaId={activeSession.rodovia_id}
                         onRegistrarIntervencao={handleRegistrarIntervencaoInscricao}
-                      />
-                    </TabsContent>
-                    <TabsContent value="tacha" className="mt-4">
-                      <InventarioTachasViewer 
-                        loteId={activeSession.lote_id} 
-                        rodoviaId={activeSession.rodovia_id}
-                        onRegistrarIntervencao={handleRegistrarIntervencaoTacha}
                       />
                     </TabsContent>
                     <TabsContent value="defensas-pront" className="mt-4">

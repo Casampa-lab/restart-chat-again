@@ -19,15 +19,17 @@ interface IntervencoesTachaFormProps {
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
-  km_inicial: z.string().min(1, "km inicial é obrigatório"),
-  km_final: z.string().min(1, "km final é obrigatório"),
+  km_inicial: z.string().min(1, "KM inicial é obrigatório"),
+  km_final: z.string().min(1, "KM final é obrigatório"),
   tipo_intervencao: z.string().min(1, "Tipo de intervenção é obrigatório"),
-  tipo_tacha: z.string().min(1, "Tipo de tacha é obrigatório"),
-  cor: z.string().min(1, "Cor é obrigatória"),
-  lado: z.string().min(1, "Lado é obrigatório"),
+  snv: z.string().optional(),
+  descricao: z.string().optional(),
+  corpo: z.string().optional(),
+  refletivo: z.string().optional(),
+  cor_refletivo: z.string().optional(),
+  local_implantacao: z.string().optional(),
   quantidade: z.string().min(1, "Quantidade é obrigatória"),
-  estado_conservacao: z.string().optional(),
-  material: z.string().optional(),
+  espacamento_m: z.string().optional(),
   observacao: z.string().optional(),
 });
 
@@ -86,12 +88,14 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
       km_inicial: "",
       km_final: "",
       tipo_intervencao: "",
-      tipo_tacha: "",
-      cor: "",
-      lado: "",
+      snv: "",
+      descricao: "",
+      corpo: "",
+      refletivo: "",
+      cor_refletivo: "",
+      local_implantacao: "",
       quantidade: "1",
-      estado_conservacao: "",
-      material: "",
+      espacamento_m: "",
       observacao: "",
     },
   });
@@ -109,12 +113,14 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
         km_inicial: parseFloat(values.km_inicial),
         km_final: parseFloat(values.km_final),
         tipo_intervencao: values.tipo_intervencao,
-        tipo_tacha: values.tipo_tacha,
-        cor: values.cor,
-        lado: values.lado,
+        snv: values.snv || null,
+        descricao: values.descricao || null,
+        corpo: values.corpo || null,
+        refletivo: values.refletivo || null,
+        cor_refletivo: values.cor_refletivo || null,
+        local_implantacao: values.local_implantacao || null,
         quantidade: parseInt(values.quantidade),
-        estado_conservacao: values.estado_conservacao || null,
-        material: values.material || null,
+        espacamento_m: values.espacamento_m ? parseFloat(values.espacamento_m) : null,
         observacao: values.observacao || null,
         latitude_inicial: coordenadas.latitude_inicial ? parseFloat(coordenadas.latitude_inicial) : null,
         longitude_inicial: coordenadas.longitude_inicial ? parseFloat(coordenadas.longitude_inicial) : null,
@@ -126,6 +132,12 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
 
       toast.success("Intervenção em tacha salva com sucesso!");
       form.reset();
+      setCoordenadas({
+        latitude_inicial: "",
+        longitude_inicial: "",
+        latitude_final: "",
+        longitude_final: "",
+      });
     } catch (error: any) {
       toast.error("Erro ao salvar intervenção: " + error.message);
     }
@@ -178,7 +190,7 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
             name="km_inicial"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>km Inicial</FormLabel>
+                <FormLabel>KM Inicial</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.001" placeholder="Ex: 10.500" {...field} />
                 </FormControl>
@@ -192,7 +204,7 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
             name="km_final"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>km Final</FormLabel>
+                <FormLabel>KM Final</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.001" placeholder="Ex: 10.800" {...field} />
                 </FormControl>
@@ -265,21 +277,48 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
 
           <FormField
             control={form.control}
-            name="tipo_tacha"
+            name="snv"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Tacha</FormLabel>
+                <FormLabel>SNV</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ex: 116BMG1010" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="descricao"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descrição</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ex: Tacha bidirecional" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="corpo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Corpo</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
+                      <SelectValue placeholder="Selecione (opcional)" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Monodirecional">Monodirecional</SelectItem>
-                    <SelectItem value="Bidirecional">Bidirecional</SelectItem>
-                    <SelectItem value="Refletiva">Refletiva</SelectItem>
-                    <SelectItem value="Não Refletiva">Não Refletiva</SelectItem>
+                    <SelectItem value="Plástico">Plástico</SelectItem>
+                    <SelectItem value="Metal">Metal</SelectItem>
+                    <SelectItem value="Cerâmico">Cerâmico</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -289,21 +328,44 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
 
           <FormField
             control={form.control}
-            name="cor"
+            name="refletivo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cor</FormLabel>
+                <FormLabel>Refletivo</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
+                      <SelectValue placeholder="Selecione (opcional)" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="I">I</SelectItem>
+                    <SelectItem value="II">II</SelectItem>
+                    <SelectItem value="III">III</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="cor_refletivo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cor Refletivo</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione (opcional)" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="Branca">Branca</SelectItem>
                     <SelectItem value="Amarela">Amarela</SelectItem>
+                    <SelectItem value="Branca/Vermelha">Branca/Vermelha</SelectItem>
                     <SelectItem value="Vermelha">Vermelha</SelectItem>
-                    <SelectItem value="Azul">Azul</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -313,21 +375,23 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
 
           <FormField
             control={form.control}
-            name="lado"
+            name="local_implantacao"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Lado</FormLabel>
+                <FormLabel>Local de Implantação</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
+                      <SelectValue placeholder="Selecione (opcional)" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Direito">Direito</SelectItem>
-                    <SelectItem value="Esquerdo">Esquerdo</SelectItem>
-                    <SelectItem value="Central">Central</SelectItem>
-                    <SelectItem value="Ambos">Ambos</SelectItem>
+                    <SelectItem value="BD">BD - Bordo Direito</SelectItem>
+                    <SelectItem value="BE">BE - Bordo Esquerdo</SelectItem>
+                    <SelectItem value="E">E - Eixo</SelectItem>
+                    <SelectItem value="E1">E1 - Eixo 1</SelectItem>
+                    <SelectItem value="CD">CD - Centro Direita</SelectItem>
+                    <SelectItem value="CE">CE - Centro Esquerda</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -351,37 +415,12 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
 
           <FormField
             control={form.control}
-            name="estado_conservacao"
+            name="espacamento_m"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Estado de Conservação</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione (opcional)" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Ótimo">Ótimo</SelectItem>
-                    <SelectItem value="Bom">Bom</SelectItem>
-                    <SelectItem value="Regular">Regular</SelectItem>
-                    <SelectItem value="Ruim">Ruim</SelectItem>
-                    <SelectItem value="Péssimo">Péssimo</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="material"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Material</FormLabel>
+                <FormLabel>Espaçamento (m)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ex: Plástico refletivo" {...field} />
+                  <Input type="number" step="0.1" placeholder="Ex: 16" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

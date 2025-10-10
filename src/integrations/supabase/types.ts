@@ -915,74 +915,83 @@ export type Database = {
       }
       ficha_tachas: {
         Row: {
-          cor: string
+          cor_refletivo: string | null
+          corpo: string | null
           created_at: string
           data_vistoria: string
+          descricao: string | null
           enviado_coordenador: boolean | null
-          estado_conservacao: string | null
+          espacamento_m: number | null
+          extensao_km: number | null
           foto_url: string | null
           id: string
           km_final: number
           km_inicial: number
-          lado: string
           latitude_final: number | null
           latitude_inicial: number | null
+          local_implantacao: string | null
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
-          material: string | null
           observacao: string | null
           quantidade: number
+          refletivo: string | null
           rodovia_id: string
-          tipo_tacha: string
+          snv: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
-          cor: string
+          cor_refletivo?: string | null
+          corpo?: string | null
           created_at?: string
           data_vistoria: string
+          descricao?: string | null
           enviado_coordenador?: boolean | null
-          estado_conservacao?: string | null
+          espacamento_m?: number | null
+          extensao_km?: number | null
           foto_url?: string | null
           id?: string
           km_final: number
           km_inicial: number
-          lado: string
           latitude_final?: number | null
           latitude_inicial?: number | null
+          local_implantacao?: string | null
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
-          material?: string | null
           observacao?: string | null
           quantidade?: number
+          refletivo?: string | null
           rodovia_id: string
-          tipo_tacha: string
+          snv?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
-          cor?: string
+          cor_refletivo?: string | null
+          corpo?: string | null
           created_at?: string
           data_vistoria?: string
+          descricao?: string | null
           enviado_coordenador?: boolean | null
-          estado_conservacao?: string | null
+          espacamento_m?: number | null
+          extensao_km?: number | null
           foto_url?: string | null
           id?: string
           km_final?: number
           km_inicial?: number
-          lado?: string
           latitude_final?: number | null
           latitude_inicial?: number | null
+          local_implantacao?: string | null
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
-          material?: string | null
           observacao?: string | null
           quantidade?: number
+          refletivo?: string | null
           rodovia_id?: string
-          tipo_tacha?: string
+          snv?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1712,74 +1721,80 @@ export type Database = {
       }
       intervencoes_tacha: {
         Row: {
-          cor: string
+          cor_refletivo: string | null
+          corpo: string | null
           created_at: string
           data_intervencao: string
+          descricao: string | null
           enviado_coordenador: boolean | null
-          estado_conservacao: string | null
+          espacamento_m: number | null
           id: string
           km_final: number
           km_inicial: number
-          lado: string
           latitude_final: number | null
           latitude_inicial: number | null
+          local_implantacao: string | null
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
-          material: string | null
           observacao: string | null
           quantidade: number
+          refletivo: string | null
           rodovia_id: string
+          snv: string | null
           tipo_intervencao: string
-          tipo_tacha: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          cor: string
+          cor_refletivo?: string | null
+          corpo?: string | null
           created_at?: string
           data_intervencao: string
+          descricao?: string | null
           enviado_coordenador?: boolean | null
-          estado_conservacao?: string | null
+          espacamento_m?: number | null
           id?: string
           km_final: number
           km_inicial: number
-          lado: string
           latitude_final?: number | null
           latitude_inicial?: number | null
+          local_implantacao?: string | null
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
-          material?: string | null
           observacao?: string | null
           quantidade?: number
+          refletivo?: string | null
           rodovia_id: string
+          snv?: string | null
           tipo_intervencao: string
-          tipo_tacha: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          cor?: string
+          cor_refletivo?: string | null
+          corpo?: string | null
           created_at?: string
           data_intervencao?: string
+          descricao?: string | null
           enviado_coordenador?: boolean | null
-          estado_conservacao?: string | null
+          espacamento_m?: number | null
           id?: string
           km_final?: number
           km_inicial?: number
-          lado?: string
           latitude_final?: number | null
           latitude_inicial?: number | null
+          local_implantacao?: string | null
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
-          material?: string | null
           observacao?: string | null
           quantidade?: number
+          refletivo?: string | null
           rodovia_id?: string
+          snv?: string | null
           tipo_intervencao?: string
-          tipo_tacha?: string
           updated_at?: string
           user_id?: string
         }
