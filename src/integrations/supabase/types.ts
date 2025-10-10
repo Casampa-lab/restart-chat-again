@@ -160,7 +160,11 @@ export type Database = {
           km_final: number
           km_inicial: number
           lado: string
+          latitude_final: number | null
+          latitude_inicial: number | null
           link_fotografia: string | null
+          longitude_final: number | null
+          longitude_inicial: number | null
           lote_id: string
           necessita_intervencao: boolean
           nivel_contencao_en1317: string | null
@@ -208,7 +212,11 @@ export type Database = {
           km_final: number
           km_inicial: number
           lado: string
+          latitude_final?: number | null
+          latitude_inicial?: number | null
           link_fotografia?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
           lote_id: string
           necessita_intervencao?: boolean
           nivel_contencao_en1317?: string | null
@@ -256,7 +264,11 @@ export type Database = {
           km_final?: number
           km_inicial?: number
           lado?: string
+          latitude_final?: number | null
+          latitude_inicial?: number | null
           link_fotografia?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
           lote_id?: string
           necessita_intervencao?: boolean
           nivel_contencao_en1317?: string | null
