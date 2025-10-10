@@ -94,9 +94,6 @@ export function InventarioPlacasManager() {
         
         for (let i = 0; i < photosFolder.length; i++) {
           const photo = photosFolder[i];
-          // Nome do arquivo completo e sem extensão para múltiplas tentativas de match
-          const photoNameFull = photo.name;
-          const photoNameNoExt = photo.name.split('.')[0];
           const photoPath = `inventario/${selectedLote}/${Date.now()}_${photo.name}`;
           
           const { error: photoError } = await supabase.storage
@@ -108,11 +105,18 @@ export function InventarioPlacasManager() {
               .from("placa-photos")
               .getPublicUrl(photoPath);
             
-            // Mapear por várias variações do nome para aumentar chance de match
-            photoUrls[photoNameFull] = urlData.publicUrl;
-            photoUrls[photoNameNoExt] = urlData.publicUrl;
-            photoUrls[photoNameFull.toLowerCase()] = urlData.publicUrl;
-            photoUrls[photoNameNoExt.toLowerCase()] = urlData.publicUrl;
+            // Mapear por TODAS as variações possíveis do nome
+            const nomeOriginal = photo.name;
+            const nomeSemExt = photo.name.split('.')[0];
+            
+            photoUrls[nomeOriginal] = urlData.publicUrl;
+            photoUrls[nomeOriginal.toLowerCase()] = urlData.publicUrl;
+            photoUrls[nomeOriginal.toUpperCase()] = urlData.publicUrl;
+            photoUrls[nomeSemExt] = urlData.publicUrl;
+            photoUrls[nomeSemExt.toLowerCase()] = urlData.publicUrl;
+            photoUrls[nomeSemExt.toUpperCase()] = urlData.publicUrl;
+            
+            console.log('✅ Foto mapeada:', nomeSemExt);
           }
 
           if ((i + 1) % 10 === 0) {
@@ -120,7 +124,9 @@ export function InventarioPlacasManager() {
           }
         }
         
-        toast.success(`${Object.keys(photoUrls).length} mapeamentos de fotos criados`);
+        console.log('📸 Total de chaves no photoUrls:', Object.keys(photoUrls).length);
+        console.log('📸 Primeiras 10 chaves:', Object.keys(photoUrls).slice(0, 10));
+        toast.success(`${photosFolder.length} fotos carregadas`);
       }
 
       // 3. Inserir dados no banco
@@ -128,31 +134,71 @@ export function InventarioPlacasManager() {
       
       const { data: userData } = await supabase.auth.getUser();
       
-      const placasParaInserir = placasData.map((placa: PlacaData) => ({
-        user_id: userData.user?.id,
-        lote_id: selectedLote,
-        rodovia_id: selectedRodovia,
-        br: placa.br,
-        snv: placa.snv,
-        tipo: placa.tipo,
-        codigo: placa.codigo,
-        velocidade: placa.velocidade,
-        lado: placa.lado,
-        km: placa.km,
-        latitude: placa.latitude,
-        longitude: placa.longitude,
-        suporte: placa.tipo_suporte,
-        qtde_suporte: placa.qtde_suporte,
-        substrato: placa.substrato,
-        pelicula: placa.pelicula,
-        retrorrefletividade: placa.retrorrefletividade,
-        dimensoes_mm: placa.dimensoes_mm,
-        area_m2: placa.area_m2,
-        altura_m: placa.altura,
-        data_vistoria: new Date().toISOString().split("T")[0],
-        // Associar foto pelo nome extraído do hiperlink do Excel
-        foto_frontal_url: placa.foto_hiperlink ? photoUrls[placa.foto_hiperlink] || null : null,
-      }));
+      // Log para debug
+      console.log('🔍 Primeiras 5 placas com hiperlink:', placasData.slice(0, 5).map(p => ({
+        snv: p.snv,
+        foto_hiperlink: p.foto_hiperlink
+      })));
+      
+      let fotosLinkadas = 0;
+      let fotosNaoLinkadas = 0;
+      
+      const placasParaInserir = placasData.map((placa: PlacaData) => {
+        // Tentar múltiplas variações do nome da foto
+        let fotoUrl = null;
+        
+        if (placa.foto_hiperlink) {
+          const tentativas = [
+            placa.foto_hiperlink,
+            placa.foto_hiperlink.toLowerCase(),
+            placa.foto_hiperlink.toUpperCase(),
+            placa.foto_hiperlink + '.jpg',
+            placa.foto_hiperlink + '.JPG',
+            placa.foto_hiperlink + '.png',
+            placa.foto_hiperlink + '.PNG',
+          ];
+          
+          for (const tentativa of tentativas) {
+            if (photoUrls[tentativa]) {
+              fotoUrl = photoUrls[tentativa];
+              fotosLinkadas++;
+              break;
+            }
+          }
+          
+          if (!fotoUrl) {
+            fotosNaoLinkadas++;
+            console.warn('❌ Foto não encontrada para:', placa.foto_hiperlink, 'SNV:', placa.snv);
+          }
+        }
+        
+        return {
+          user_id: userData.user?.id,
+          lote_id: selectedLote,
+          rodovia_id: selectedRodovia,
+          br: placa.br,
+          snv: placa.snv,
+          tipo: placa.tipo,
+          codigo: placa.codigo,
+          velocidade: placa.velocidade,
+          lado: placa.lado,
+          km: placa.km,
+          latitude: placa.latitude,
+          longitude: placa.longitude,
+          suporte: placa.tipo_suporte,
+          qtde_suporte: placa.qtde_suporte,
+          substrato: placa.substrato,
+          pelicula: placa.pelicula,
+          retrorrefletividade: placa.retrorrefletividade,
+          dimensoes_mm: placa.dimensoes_mm,
+          area_m2: placa.area_m2,
+          altura_m: placa.altura,
+          data_vistoria: new Date().toISOString().split("T")[0],
+          foto_frontal_url: fotoUrl,
+        };
+      });
+      
+      console.log(`📊 Fotos linkadas: ${fotosLinkadas} | Não linkadas: ${fotosNaoLinkadas}`);
 
       // Inserir em lotes de 50
       const batchSize = 50;
@@ -174,7 +220,7 @@ export function InventarioPlacasManager() {
       }
 
       setProgress("");
-      toast.success(`Importação concluída! ${imported} placas importadas.`);
+      toast.success(`Importação concluída! ${imported} placas importadas (${fotosLinkadas} com fotos).`);
       
       // Limpar formulário
       setExcelFile(null);
