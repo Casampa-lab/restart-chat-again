@@ -321,7 +321,7 @@ export function InventarioPorticosViewer({
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Foto</label>
                     <img
-                      src={selectedPortico.foto_url}
+                      src={supabase.storage.from('porticos').getPublicUrl(selectedPortico.foto_url).data.publicUrl}
                       alt="Pórtico"
                       className="mt-2 rounded-lg max-w-full h-auto"
                     />
