@@ -173,10 +173,10 @@ export function InventarioInscricoesViewer({
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
-                      <TableHead>Tipo</TableHead>
+                      <TableHead>Sigla / Descrição</TableHead>
                       <TableHead>Cor</TableHead>
-                      <TableHead>KM Inicial</TableHead>
-                      <TableHead>KM Final</TableHead>
+                      <TableHead>Km</TableHead>
+                      <TableHead>Km</TableHead>
                       <TableHead>Área (m²)</TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead>Data Vistoria</TableHead>

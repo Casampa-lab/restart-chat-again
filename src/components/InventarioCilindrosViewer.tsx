@@ -170,9 +170,9 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                 <TableHeader>
                   <TableRow>
                     <TableHead>SNV</TableHead>
-                    <TableHead>KM Inicial</TableHead>
-                    <TableHead>KM Final</TableHead>
-                    <TableHead>Cor Corpo</TableHead>
+                    <TableHead>Km Inicial</TableHead>
+                    <TableHead>km Final</TableHead>
+                    <TableHead>Cor (Corpo)</TableHead>
                     <TableHead>Quantidade</TableHead>
                     <TableHead>Data</TableHead>
                     <TableHead>Ações</TableHead>

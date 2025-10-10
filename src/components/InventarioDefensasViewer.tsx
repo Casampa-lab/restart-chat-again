@@ -155,11 +155,11 @@ export const InventarioDefensasViewer = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tipo Defensa</TableHead>
+                <TableHead>Tramo</TableHead>
                 <TableHead>Lado</TableHead>
-                <TableHead>KM Inicial</TableHead>
-                <TableHead>KM Final</TableHead>
-                <TableHead>Extensão (m)</TableHead>
+                <TableHead>Km Inicial</TableHead>
+                <TableHead>Km Final</TableHead>
+                <TableHead>Comprimento Total do Tramo (m)</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Necessita Intervenção</TableHead>
                 <TableHead>Ações</TableHead>
@@ -168,7 +168,7 @@ export const InventarioDefensasViewer = ({
             <TableBody>
               {filteredDefensas?.map((defensa) => (
                 <TableRow key={defensa.id}>
-                  <TableCell>{defensa.tipo_defensa}</TableCell>
+                  <TableCell>{(defensa as any).tramo || "-"}</TableCell>
                   <TableCell>{defensa.lado}</TableCell>
                   <TableCell>{defensa.km_inicial}</TableCell>
                   <TableCell>{defensa.km_final}</TableCell>

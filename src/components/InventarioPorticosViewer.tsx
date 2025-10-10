@@ -182,11 +182,11 @@ export function InventarioPorticosViewer({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>KM</TableHead>
+                    <TableHead>Km</TableHead>
                     <TableHead>SNV</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead>Altura Livre (m)</TableHead>
-                    <TableHead>Vão (m)</TableHead>
+                    <TableHead>Vão Horizontal</TableHead>
                     <TableHead>Lado</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead>Data Vistoria</TableHead>

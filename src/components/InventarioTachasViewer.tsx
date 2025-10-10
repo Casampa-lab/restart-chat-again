@@ -179,10 +179,10 @@ export function InventarioTachasViewer({
                       <TableHead>SNV</TableHead>
                       <TableHead>Descrição</TableHead>
                       <TableHead>Corpo</TableHead>
-                      <TableHead>Cor Refletivo</TableHead>
-                      <TableHead>KM Inicial</TableHead>
-                      <TableHead>KM Final</TableHead>
-                      <TableHead>Local</TableHead>
+                      <TableHead>Cor do refletivo</TableHead>
+                      <TableHead>Km Inicial</TableHead>
+                      <TableHead>km Final</TableHead>
+                      <TableHead>Local de implantação</TableHead>
                       <TableHead>Quantidade</TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead>Data Vistoria</TableHead>

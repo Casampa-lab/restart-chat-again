@@ -177,11 +177,11 @@ export function InventarioMarcasLongitudinaisViewer({
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
-                      <TableHead>Tipo</TableHead>
+                      <TableHead>Código</TableHead>
                       <TableHead>Cor</TableHead>
-                      <TableHead>KM Inicial</TableHead>
-                      <TableHead>KM Final</TableHead>
-                      <TableHead>Extensão (m)</TableHead>
+                      <TableHead>Km Inicial</TableHead>
+                      <TableHead>Km Final</TableHead>
+                      <TableHead>Extensão (km)</TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead>Data Vistoria</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -196,7 +196,7 @@ export function InventarioMarcasLongitudinaisViewer({
                         <TableCell>{marca.cor || "-"}</TableCell>
                         <TableCell>{marca.km_inicial?.toFixed(2) || "-"}</TableCell>
                         <TableCell>{marca.km_final?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>{marca.extensao_metros?.toFixed(1) || "-"}m</TableCell>
+                        <TableCell>{marca.extensao_metros ? (marca.extensao_metros / 1000).toFixed(2) : "-"}</TableCell>
                         {searchLat && searchLng && (
                           <TableCell>
                             <Badge variant="secondary">

@@ -229,9 +229,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
                       <TableHead>SNV</TableHead>
-                      <TableHead>Código</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>KM</TableHead>
+                      <TableHead>Código da placa</TableHead>
+                      <TableHead>Tipo de placa</TableHead>
+                      <TableHead>Km</TableHead>
                       <TableHead>Lado</TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead>Data Vistoria</TableHead>
