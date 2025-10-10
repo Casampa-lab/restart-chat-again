@@ -153,6 +153,22 @@ export function InventarioImporterManager() {
 
       toast.success(`${jsonData.length} registros encontrados na planilha`);
 
+      // Normalizar chaves do Excel (remover espaços extras)
+      const normalizedData = jsonData.map(row => {
+        const normalizedRow: any = {};
+        for (const [key, value] of Object.entries(row)) {
+          // Normalizar a chave: remover espaços extras, trim
+          const normalizedKey = String(key).replace(/\s+/g, ' ').trim();
+          normalizedRow[normalizedKey] = value;
+        }
+        return normalizedRow;
+      });
+
+      console.log("=== PRIMEIRA LINHA NORMALIZADA ===");
+      if (normalizedData.length > 0) {
+        console.log("Colunas normalizadas:", Object.keys(normalizedData[0]));
+      }
+
       // 2. Upload das fotos e criar mapeamento
       const photoUrls: Record<string, string> = {};
       const photoArray = photos ? Array.from(photos) : [];
@@ -218,7 +234,7 @@ export function InventarioImporterManager() {
       const tableName = INVENTORY_TYPES.find(t => t.value === inventoryType)?.table;
       if (!tableName) throw new Error("Tipo de inventário inválido");
 
-      const recordsToInsert = jsonData.map((row: any) => {
+      const recordsToInsert = normalizedData.map((row: any) => {
         const record: Record<string, any> = {
           user_id: user.id,
           lote_id: selectedLote,

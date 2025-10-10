@@ -118,6 +118,23 @@ serve(async (req) => {
 
     console.log(`Processando ${jsonData.length} registros para ${tableName}`);
 
+    // Normalizar chaves do Excel (remover espaços extras)
+    const normalizedData = jsonData.map((row: any) => {
+      const normalizedRow: any = {};
+      for (const [key, value] of Object.entries(row)) {
+        // Normalizar a chave: remover espaços extras, trim
+        const normalizedKey = String(key).replace(/\s+/g, ' ').trim();
+        normalizedRow[normalizedKey] = value;
+      }
+      return normalizedRow;
+    });
+
+    console.log("=== PRIMEIRA LINHA NORMALIZADA ===");
+    if (normalizedData.length > 0) {
+      console.log("Colunas:", Object.keys(normalizedData[0]));
+      console.log("Dados:", normalizedData[0]);
+    }
+
     // Processar fotos se houver
     const photoMap: Record<string, string> = {};
     
@@ -284,7 +301,7 @@ serve(async (req) => {
     const validFields = VALID_FIELDS[tableName] || [];
 
     // Preparar dados para inserção
-    const recordsToInsert = jsonData.map((row: any) => {
+    const recordsToInsert = normalizedData.map((row: any) => {
       // Determinar campo de data padrão baseado na tabela
       let dateField = "data_vistoria";
       if (tableName === "intervencoes_cilindros" || tableName === "intervencoes_inscricoes") {
