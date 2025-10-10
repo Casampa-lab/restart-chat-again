@@ -177,7 +177,7 @@ export function InventarioImporterManager() {
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Este sistema permite importar qualquer tipo de inventário. Selecione o tipo, faça upload do Excel e, 
-            se houver fotos, informe o nome da coluna e selecione os arquivos.
+            se houver fotos, marque a opção correspondente, informe a letra da coluna (ex: AA, AB) e selecione as fotos.
           </AlertDescription>
         </Alert>
 
@@ -273,15 +273,15 @@ export function InventarioImporterManager() {
           {hasPhotos && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="photo-column">Nome da Coluna das Fotos *</Label>
+                <Label htmlFor="photo-column">Letra da Coluna das Fotos *</Label>
                 <Input
                   id="photo-column"
-                  placeholder="Ex: foto_url, foto_frontal_url, etc."
+                  placeholder="Ex: AA, AB, AC, etc..."
                   value={photoColumnName}
-                  onChange={(e) => setPhotoColumnName(e.target.value)}
+                  onChange={(e) => setPhotoColumnName(e.target.value.toUpperCase())}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Informe o nome exato da coluna no Excel que contém os nomes dos arquivos de foto
+                  Informe a letra da coluna no Excel que contém os nomes dos arquivos de foto (ex: AA, AB, AC)
                 </p>
               </div>
 

@@ -66,6 +66,22 @@ serve(async (req) => {
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
+    
+    // Converter letra da coluna para nome do campo
+    let photoFieldName = photoColumnName;
+    if (hasPhotos && photoColumnName) {
+      // Se for uma letra de coluna (ex: AA, AB), pegar o header dessa coluna
+      const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+      const colIndex = XLSX.utils.decode_col(photoColumnName);
+      
+      // Pegar o valor do header (primeira linha) dessa coluna
+      const headerCell = worksheet[XLSX.utils.encode_cell({ r: range.s.r, c: colIndex })];
+      if (headerCell && headerCell.v) {
+        photoFieldName = headerCell.v.toString();
+        console.log(`Coluna ${photoColumnName} corresponde ao campo: ${photoFieldName}`);
+      }
+    }
+    
     const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
     console.log(`Processando ${jsonData.length} registros para ${tableName}`);
@@ -73,7 +89,7 @@ serve(async (req) => {
     // Processar fotos se houver
     const photoMap: Record<string, string> = {};
     
-    if (hasPhotos && photoColumnName) {
+    if (hasPhotos && photoFieldName) {
       const photoFiles: File[] = [];
       
       // Coletar todos os arquivos de foto do FormData
@@ -129,8 +145,8 @@ serve(async (req) => {
       for (const [key, value] of Object.entries(row)) {
         const normalizedKey = key.toLowerCase().replace(/\s+/g, "_");
         
-        // Se é a coluna de foto e temos fotos, substituir pelo URL
-        if (hasPhotos && photoColumnName && normalizedKey === photoColumnName.toLowerCase()) {
+        // Se é o campo de foto e temos fotos, substituir pelo URL
+        if (hasPhotos && photoFieldName && key === photoFieldName) {
           const photoFileName = value as string;
           if (photoFileName && photoMap[photoFileName]) {
             record[normalizedKey] = photoMap[photoFileName];
