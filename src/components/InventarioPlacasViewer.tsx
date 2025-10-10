@@ -34,6 +34,14 @@ interface FichaPlaca {
   suporte: string | null;
   dimensoes_mm: string | null;
   retrorrefletividade: number | null;
+  contrato: string | null;
+  numero_patrimonio: string | null;
+  descricao: string | null;
+  empresa: string | null;
+  area_m2: number | null;
+  altura_m: number | null;
+  distancia_m: number | null;
+  qtde_suporte: number | null;
 }
 
 interface Intervencao {
@@ -405,7 +413,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <div>
-                        <span className="text-sm font-medium">Substrato:</span>
+                        <span className="text-sm font-medium">Tipo de Substrato:</span>
                         <p className="text-sm">{selectedPlaca.substrato || "-"}</p>
                       </div>
                       <div>
@@ -413,25 +421,59 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                         <p className="text-sm">{selectedPlaca.pelicula || "-"}</p>
                       </div>
                       <div>
-                        <span className="text-sm font-medium">Suporte:</span>
+                        <span className="text-sm font-medium">Tipo de Suporte:</span>
                         <p className="text-sm">{selectedPlaca.suporte || "-"}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">Quantidade de Suporte:</span>
+                        <p className="text-sm">{selectedPlaca.qtde_suporte || "-"}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">Largura (m):</span>
+                        <p className="text-sm">{selectedPlaca.distancia_m?.toFixed(2) || "-"}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">Altura (m):</span>
+                        <p className="text-sm">{selectedPlaca.altura_m?.toFixed(2) || "-"}</p>
                       </div>
                     </div>
                     <div className="space-y-2">
                       <div>
-                        <span className="text-sm font-medium">Dimensões:</span>
+                        <span className="text-sm font-medium">Dimensões (mm):</span>
                         <p className="text-sm">{selectedPlaca.dimensoes_mm || "-"}</p>
                       </div>
                       <div>
-                        <span className="text-sm font-medium">Retrorrefletividade:</span>
+                        <span className="text-sm font-medium">Área (m²):</span>
+                        <p className="text-sm">{selectedPlaca.area_m2?.toFixed(2) || "-"}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">Retrorrefletividade Fundo:</span>
                         <p className="text-sm">
                           {selectedPlaca.retrorrefletividade
                             ? `${selectedPlaca.retrorrefletividade} cd.lux/m²`
                             : "-"}
                         </p>
                       </div>
+                      <div>
+                        <span className="text-sm font-medium">Empresa:</span>
+                        <p className="text-sm">{selectedPlaca.empresa || "-"}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">Contrato:</span>
+                        <p className="text-sm">{selectedPlaca.contrato || "-"}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">Nº Patrimônio:</span>
+                        <p className="text-sm">{selectedPlaca.numero_patrimonio || "-"}</p>
+                      </div>
                     </div>
                   </div>
+                  {selectedPlaca.descricao && (
+                    <div className="mt-2 pt-2 border-t">
+                      <span className="text-sm font-medium">Descrição:</span>
+                      <p className="text-sm mt-1">{selectedPlaca.descricao}</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Datas */}

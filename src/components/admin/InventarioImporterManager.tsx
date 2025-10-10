@@ -206,8 +206,8 @@ export function InventarioImporterManager() {
 
           const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_").replace(/[()]/g, "");
 
-          // Para defensas e marcas longitudinais, não adicionar campos automaticamente (serão mapeados explicitamente depois)
-          if (inventoryType !== "defensas" && inventoryType !== "marcas_longitudinais") {
+          // Para defensas, marcas longitudinais e placas, não adicionar campos automaticamente (serão mapeados explicitamente depois)
+          if (inventoryType !== "defensas" && inventoryType !== "marcas_longitudinais" && inventoryType !== "placas") {
             record[normalizedKey] = value;
           }
 
@@ -390,6 +390,99 @@ export function InventarioImporterManager() {
           record.estado_conservacao = "Bom"; // Padrão
           record.espessura_cm = null; // Não há na planilha
           record.data_vistoria = new Date().toISOString().split('T')[0]; // Data atual
+        }
+
+        // Adicionar mapeamento específico para placas
+        if (inventoryType === "placas") {
+          const excelRow = row as any;
+          
+          // Campos básicos de identificação
+          record.br = excelRow.BR || excelRow.br || null;
+          record.snv = excelRow.SNV || excelRow.snv || null;
+          record.tipo = excelRow["Tipo de placa"] || excelRow.tipo_de_placa || excelRow.tipo || null;
+          record.codigo = excelRow["Código da placa"] || excelRow.codigo_da_placa || excelRow.codigo || null;
+          record.velocidade = excelRow.Velocidade || excelRow.velocidade ? String(excelRow.Velocidade || excelRow.velocidade) : null;
+          record.lado = excelRow.Lado || excelRow.lado || null;
+          
+          // Posição (guardar em descricao ou observação se não houver campo específico)
+          const posicao = excelRow["Posição"] || excelRow.posicao || null;
+          
+          // Localização
+          record.km = Number(excelRow.Km || excelRow.km || 0);
+          record.latitude = excelRow.Latitude || excelRow.latitude || null;
+          record.longitude = excelRow.Longitude || excelRow.longitude || null;
+          
+          // Detalhamento (página) - guardar em numero_patrimonio ou descricao
+          const detalhamentoPagina = excelRow["Detalhamento (página)"] || excelRow.detalhamento_pagina || excelRow.detalhamento || null;
+          
+          // Suporte
+          record.suporte = excelRow["Tipo de Suporte"] || excelRow.tipo_de_suporte || excelRow.suporte || null;
+          record.qtde_suporte = excelRow["Quantidade de Suporte"] || excelRow.quantidade_de_suporte || excelRow.qtde_suporte ? Number(excelRow["Quantidade de Suporte"] || excelRow.quantidade_de_suporte || excelRow.qtde_suporte) : null;
+          
+          // Seção do suporte (guardar em dimensoes_mm ou descrição)
+          const tipoSecaoSuporte = excelRow["Tipo de Seção de Suporte"] || excelRow.tipo_de_secao_de_suporte || null;
+          const secaoSuporteMm = excelRow["Seção do Suporte (mm)"] || excelRow.secao_do_suporte_mm || excelRow.secao_suporte || null;
+          
+          // Substrato
+          record.substrato = excelRow["Tipo de Substrato"] || excelRow.tipo_de_substrato || excelRow.substrato || null;
+          
+          // SI (Sinal Impresso) - guardar em descrição
+          const sinalImpresso = excelRow["SI (Sinal Impresso)"] || excelRow.si_sinal_impresso || excelRow.si || null;
+          
+          // Película de fundo
+          const tipoPeliculaFundo = excelRow["Tipo (película fundo)"] || excelRow.tipo_pelicula_fundo || null;
+          const corPeliculaFundo = excelRow["Cor (película fundo)"] || excelRow.cor_pelicula_fundo || null;
+          const retroFundo = excelRow["Retrorrefletância (película fundo)"] || excelRow.retrorrefletancia_pelicula_fundo || excelRow.retro_fundo || null;
+          
+          // Montar string de película (combinando tipo e cor do fundo)
+          const peliculaParts = [];
+          if (tipoPeliculaFundo) peliculaParts.push(`Tipo ${tipoPeliculaFundo}`);
+          if (corPeliculaFundo) peliculaParts.push(corPeliculaFundo);
+          record.pelicula = peliculaParts.length > 0 ? peliculaParts.join(" - ") : null;
+          
+          // Retrorrefletividade do fundo
+          record.retrorrefletividade = retroFundo ? Number(retroFundo) : null;
+          
+          // Película legenda/orla (guardar em descrição)
+          const tipoPeliculaLegenda = excelRow["Tipo (película legenda/orla)"] || excelRow.tipo_pelicula_legenda_orla || null;
+          const corPeliculaLegenda = excelRow["Cor (película legenda/orla)"] || excelRow.cor_pelicula_legenda_orla || null;
+          const retroLegenda = excelRow["Retrorrefletância (película legenda/orla)"] || excelRow.retrorrefletancia_pelicula_legenda_orla || excelRow.retro_legenda || null;
+          
+          // Dimensões
+          const larguraM = excelRow["Largura (m)"] || excelRow.largura_m || excelRow.largura || null;
+          const alturaM = excelRow["Altura (m)"] || excelRow.altura_m || excelRow.altura || null;
+          const areaM2 = excelRow["Área (m²)"] || excelRow.area_m2 || excelRow.area || null;
+          
+          record.distancia_m = larguraM ? Number(larguraM) : null;
+          record.altura_m = alturaM && alturaM !== "-" ? Number(alturaM) : null;
+          record.area_m2 = areaM2 ? Number(areaM2) : null;
+          
+          // Dimensões em mm (para compatibilidade)
+          if (larguraM && alturaM && alturaM !== "-") {
+            record.dimensoes_mm = `${(Number(larguraM) * 1000).toFixed(0)}x${(Number(alturaM) * 1000).toFixed(0)}`;
+          } else if (larguraM) {
+            record.dimensoes_mm = `Ø ${(Number(larguraM) * 1000).toFixed(0)}`;
+          }
+          
+          // Link da fotografia
+          const linkFoto = excelRow["Link da Fotografia"] || excelRow.link_da_fotografia || excelRow.link_fotografia || null;
+          
+          // Montar descrição com todos os campos adicionais
+          const descricaoParts = [];
+          if (posicao) descricaoParts.push(`Posição: ${posicao}`);
+          if (detalhamentoPagina) descricaoParts.push(`Detalhamento (pág.): ${detalhamentoPagina}`);
+          if (tipoSecaoSuporte) descricaoParts.push(`Seção suporte: ${tipoSecaoSuporte}`);
+          if (secaoSuporteMm) descricaoParts.push(`Dimensão seção: ${secaoSuporteMm}mm`);
+          if (sinalImpresso) descricaoParts.push(`Sinal Impresso: ${sinalImpresso}`);
+          if (tipoPeliculaLegenda) descricaoParts.push(`Película legenda tipo: ${tipoPeliculaLegenda}`);
+          if (corPeliculaLegenda) descricaoParts.push(`Película legenda cor: ${corPeliculaLegenda}`);
+          if (retroLegenda) descricaoParts.push(`Retro legenda: ${retroLegenda} cd.lux/m²`);
+          if (linkFoto) descricaoParts.push(`Link foto: ${linkFoto}`);
+          
+          record.descricao = descricaoParts.length > 0 ? descricaoParts.join(" | ") : null;
+          
+          // Data de vistoria padrão
+          record.data_vistoria = new Date().toISOString().split('T')[0];
         }
 
         return record;
