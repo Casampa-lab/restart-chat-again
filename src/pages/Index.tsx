@@ -333,19 +333,7 @@ const Index = () => {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="placas" className="mt-4">
-                      <div className="space-y-4">
-                        {/* Visualizador de Inventário */}
-                        <InventarioPlacasViewer loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                        
-                        {/* Formulário de Cadastro Individual */}
-                        <div className="flex justify-end">
-                          <Button variant="secondary" onClick={() => navigate("/minhas-fichas-placa")} className="shadow-md hover:shadow-lg transition-shadow">
-                            <Eye className="mr-2 h-4 w-4" />
-                            Ver minhas fichas
-                          </Button>
-                        </div>
-                        <FichaPlacaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                      </div>
+                      <InventarioPlacasViewer loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                     <TabsContent value="defensas-pront" className="mt-4">
                       <DefensasForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
