@@ -19,6 +19,7 @@ import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm"
 import IntervencoesSVForm from "@/components/IntervencoesSVForm";
 import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
 import { IntervencoesMarcasTransversaisForm } from "@/components/IntervencoesMarcasTransversaisForm";
+import { IntervencoesPorticosForm } from "@/components/IntervencoesPorticosForm";
 import { RegistroNCForm } from "@/components/RegistroNCForm";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
@@ -53,6 +54,7 @@ const Index = () => {
   });
   const [intervencaoSubTab, setIntervencaoSubTab] = useState("sv");
   const [shSubTab, setShSubTab] = useState("longitudinais");
+  const [intervencaoSvSubTab, setIntervencaoSvSubTab] = useState("placas");
   const [inventarioShSubTab, setInventarioShSubTab] = useState("longitudinais");
   const [inventarioSvSubTab, setInventarioSvSubTab] = useState("placas");
   const [showInviteCode, setShowInviteCode] = useState(() => {
@@ -382,12 +384,30 @@ const Index = () => {
                       <IntervencoesInscricoesForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </TabsContent>
                     <TabsContent value="sv" className="mt-4">
-                      <IntervencoesSVForm 
-                        loteId={activeSession.lote_id} 
-                        rodoviaId={activeSession.rodovia_id}
-                        placaSelecionada={selectedPlacaForIntervencao}
-                        onIntervencaoRegistrada={() => setSelectedPlacaForIntervencao(null)}
-                      />
+                      <Tabs value={intervencaoSvSubTab} onValueChange={setIntervencaoSvSubTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="placas">
+                            Placas
+                          </TabsTrigger>
+                          <TabsTrigger value="porticos">
+                            Pórticos (P/SM) e Braços Projetados
+                          </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="placas" className="mt-4">
+                          <IntervencoesSVForm 
+                            loteId={activeSession.lote_id} 
+                            rodoviaId={activeSession.rodovia_id}
+                            placaSelecionada={selectedPlacaForIntervencao}
+                            onIntervencaoRegistrada={() => setSelectedPlacaForIntervencao(null)}
+                          />
+                        </TabsContent>
+                        <TabsContent value="porticos" className="mt-4">
+                          <IntervencoesPorticosForm 
+                            loteId={activeSession.lote_id} 
+                            rodoviaId={activeSession.rodovia_id}
+                          />
+                        </TabsContent>
+                      </Tabs>
                     </TabsContent>
                     <TabsContent value="tacha" className="mt-4">
                       <IntervencoesTachaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />

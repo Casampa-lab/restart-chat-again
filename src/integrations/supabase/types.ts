@@ -1500,6 +1500,72 @@ export type Database = {
         }
         Relationships: []
       }
+      intervencoes_porticos: {
+        Row: {
+          altura_livre_m: number | null
+          created_at: string
+          data_intervencao: string
+          enviado_coordenador: boolean | null
+          estado_conservacao: string
+          id: string
+          km: number
+          lado: string | null
+          latitude: number | null
+          longitude: number | null
+          lote_id: string
+          observacao: string | null
+          rodovia_id: string
+          snv: string | null
+          tipo: string
+          tipo_intervencao: string
+          updated_at: string
+          user_id: string
+          vao_horizontal_m: number | null
+        }
+        Insert: {
+          altura_livre_m?: number | null
+          created_at?: string
+          data_intervencao: string
+          enviado_coordenador?: boolean | null
+          estado_conservacao: string
+          id?: string
+          km: number
+          lado?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          lote_id: string
+          observacao?: string | null
+          rodovia_id: string
+          snv?: string | null
+          tipo: string
+          tipo_intervencao: string
+          updated_at?: string
+          user_id: string
+          vao_horizontal_m?: number | null
+        }
+        Update: {
+          altura_livre_m?: number | null
+          created_at?: string
+          data_intervencao?: string
+          enviado_coordenador?: boolean | null
+          estado_conservacao?: string
+          id?: string
+          km?: number
+          lado?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          lote_id?: string
+          observacao?: string | null
+          rodovia_id?: string
+          snv?: string | null
+          tipo?: string
+          tipo_intervencao?: string
+          updated_at?: string
+          user_id?: string
+          vao_horizontal_m?: number | null
+        }
+        Relationships: []
+      }
       intervencoes_sh: {
         Row: {
           area_m2: number
