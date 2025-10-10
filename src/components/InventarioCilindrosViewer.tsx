@@ -213,84 +213,108 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
               </TabsList>
 
               <TabsContent value="dados" className="space-y-4 mt-4">
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">SNV</p>
-                  <p className="text-sm">{selectedCilindro.snv || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Data</p>
-                  <p className="text-sm">{new Date(selectedCilindro.data_intervencao).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Cor (Corpo)</p>
-                  <p className="text-sm">{selectedCilindro.cor_corpo}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Cor (Refletivo)</p>
-                  <p className="text-sm">{selectedCilindro.cor_refletivo || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Tipo Refletivo</p>
-                  <p className="text-sm">{selectedCilindro.tipo_refletivo || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Quantidade</p>
-                  <p className="text-sm">{selectedCilindro.quantidade || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">KM Inicial</p>
-                  <p className="text-sm">{selectedCilindro.km_inicial?.toFixed(3)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">KM Final</p>
-                  <p className="text-sm">{selectedCilindro.km_final?.toFixed(3)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Extensão (km)</p>
-                  <p className="text-sm">{selectedCilindro.extensao_km?.toFixed(3) || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Espaçamento (m)</p>
-                  <p className="text-sm">{selectedCilindro.espacamento_m || "-"}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm font-medium text-muted-foreground">Local de Implantação</p>
-                  <p className="text-sm">{selectedCilindro.local_implantacao || "-"}</p>
-                </div>
-                {selectedCilindro.latitude_inicial && selectedCilindro.longitude_inicial && (
-                  <>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Latitude Inicial</p>
-                      <p className="text-sm">{selectedCilindro.latitude_inicial}</p>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                      Características
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">SNV</p>
+                        <p className="text-sm">{selectedCilindro.snv || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Data</p>
+                        <p className="text-sm">{new Date(selectedCilindro.data_intervencao).toLocaleDateString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Cor (Corpo)</p>
+                        <p className="text-sm">{selectedCilindro.cor_corpo}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Cor (Refletivo)</p>
+                        <p className="text-sm">{selectedCilindro.cor_refletivo || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Tipo Refletivo</p>
+                        <p className="text-sm">{selectedCilindro.tipo_refletivo || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Local de Implantação</p>
+                        <p className="text-sm">{selectedCilindro.local_implantacao || "-"}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Longitude Inicial</p>
-                      <p className="text-sm">{selectedCilindro.longitude_inicial}</p>
-                    </div>
-                  </>
-                )}
-                {selectedCilindro.latitude_final && selectedCilindro.longitude_final && (
-                  <>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Latitude Final</p>
-                      <p className="text-sm">{selectedCilindro.latitude_final}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Longitude Final</p>
-                      <p className="text-sm">{selectedCilindro.longitude_final}</p>
-                    </div>
-                  </>
-                )}
-                {selectedCilindro.observacao && (
-                  <div className="col-span-2">
-                    <p className="text-sm font-medium text-muted-foreground">Observações</p>
-                    <p className="text-sm">{selectedCilindro.observacao}</p>
                   </div>
-                )}
-              </div>
-            </div>
+
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                      Localização
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">KM Inicial</p>
+                        <p className="text-sm">{selectedCilindro.km_inicial?.toFixed(3)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">KM Final</p>
+                        <p className="text-sm">{selectedCilindro.km_final?.toFixed(3)}</p>
+                      </div>
+                      {selectedCilindro.latitude_inicial && selectedCilindro.longitude_inicial && (
+                        <>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Latitude Inicial</p>
+                            <p className="text-sm">{selectedCilindro.latitude_inicial.toFixed(6)}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Longitude Inicial</p>
+                            <p className="text-sm">{selectedCilindro.longitude_inicial.toFixed(6)}</p>
+                          </div>
+                        </>
+                      )}
+                      {selectedCilindro.latitude_final && selectedCilindro.longitude_final && (
+                        <>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Latitude Final</p>
+                            <p className="text-sm">{selectedCilindro.latitude_final.toFixed(6)}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Longitude Final</p>
+                            <p className="text-sm">{selectedCilindro.longitude_final.toFixed(6)}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                      Dimensões e Quantidade
+                    </h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Quantidade</p>
+                        <p className="text-sm">{selectedCilindro.quantidade || "-"} unidades</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Extensão (km)</p>
+                        <p className="text-sm">{selectedCilindro.extensao_km?.toFixed(3) || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Espaçamento (m)</p>
+                        <p className="text-sm">{selectedCilindro.espacamento_m || "-"}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {selectedCilindro.observacao && (
+                    <div>
+                      <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                        Observações
+                      </h3>
+                      <p className="text-sm">{selectedCilindro.observacao}</p>
+                    </div>
+                  )}
+                </div>
               </TabsContent>
 
               <TabsContent value="foto" className="mt-4">

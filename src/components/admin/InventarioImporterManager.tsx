@@ -206,8 +206,8 @@ export function InventarioImporterManager() {
 
           const normalizedKey = key.toLowerCase().trim().replace(/\s+/g, "_").replace(/[()]/g, "");
 
-          // Para defensas, marcas longitudinais, placas, tachas e inscricoes, não adicionar campos automaticamente (serão mapeados explicitamente depois)
-          if (inventoryType !== "defensas" && inventoryType !== "marcas_longitudinais" && inventoryType !== "placas" && inventoryType !== "tachas" && inventoryType !== "inscricoes") {
+          // Para defensas, marcas longitudinais, placas, tachas, inscricoes e cilindros, não adicionar campos automaticamente (serão mapeados explicitamente depois)
+          if (inventoryType !== "defensas" && inventoryType !== "marcas_longitudinais" && inventoryType !== "placas" && inventoryType !== "tachas" && inventoryType !== "inscricoes" && inventoryType !== "cilindros") {
             record[normalizedKey] = value;
           }
 
@@ -608,6 +608,67 @@ export function InventarioImporterManager() {
           // Campos com valores padrão
           record.estado_conservacao = "Bom"; // Padrão
           record.data_vistoria = new Date().toISOString().split('T')[0];
+        }
+
+        // Adicionar mapeamento específico para cilindros delimitadores
+        if (inventoryType === "cilindros") {
+          const excelRow = row as any;
+          
+          // BR - Rodovia (não está na tabela, guardar em observação se necessário)
+          const br = excelRow.BR || excelRow.br || null;
+          
+          // SNV - SNV de implantação
+          record.snv = excelRow.SNV || excelRow.snv || null;
+          
+          // Cor (Corpo) - Cor do corpo utilizada
+          record.cor_corpo = excelRow["Cor (Corpo)"] || excelRow.cor_corpo || excelRow.cor || "Não especificado";
+          
+          // Cor (Refletivo) - Cor da película utilizada
+          record.cor_refletivo = excelRow["Cor (Refletivo)"] || excelRow.cor_refletivo || null;
+          
+          // Tipo Refletivo - Tipo da película do refletivo
+          record.tipo_refletivo = excelRow["Tipo Refletivo"] || excelRow.tipo_refletivo || null;
+          
+          // Km Inicial
+          record.km_inicial = Number(excelRow["Km Inicial"] || excelRow.km_inicial || 0);
+          
+          // Latitude Inicial
+          record.latitude_inicial = excelRow["Latitude Inicial"] || excelRow.latitude_inicial || null;
+          
+          // Longitude Inicial
+          record.longitude_inicial = excelRow["Longitude Inicial"] || excelRow.longitude_inicial || null;
+          
+          // km Final
+          record.km_final = Number(excelRow["km Final"] || excelRow.km_final || 0);
+          
+          // Latitude Final
+          record.latitude_final = excelRow["Latitude Final"] || excelRow.latitude_final || null;
+          
+          // Longitude Final
+          record.longitude_final = excelRow["Longitude Final"] || excelRow.longitude_final || null;
+          
+          // Extensão (km)
+          const extensaoKm = excelRow["Extensão (km)"] || excelRow["Extensão km"] || excelRow.extensao_km || excelRow.extensao || null;
+          record.extensao_km = extensaoKm ? Number(extensaoKm) : null;
+          
+          // Local de Implantação
+          record.local_implantacao = excelRow["Local de Implantação"] || excelRow.local_de_implantacao || excelRow.local_implantacao || null;
+          
+          // Espaçamento
+          const espacamento = excelRow.Espaçamento || excelRow.espacamento || null;
+          record.espacamento_m = espacamento ? Number(espacamento) : null;
+          
+          // Quantidade
+          const quantidade = excelRow.Quantidade || excelRow.quantidade || null;
+          record.quantidade = quantidade ? Number(quantidade) : null;
+          
+          // Montar observações com BR se houver
+          if (br) {
+            record.observacao = `BR: ${br}`;
+          }
+          
+          // Data de intervenção padrão (cilindros usa data_intervencao em vez de data_vistoria)
+          record.data_intervencao = new Date().toISOString().split('T')[0];
         }
 
         return record;
