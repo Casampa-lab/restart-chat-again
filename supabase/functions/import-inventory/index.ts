@@ -393,15 +393,22 @@ serve(async (req) => {
             // Apenas adicionar se o valor não for undefined ou null ou vazio
             if (value !== undefined && value !== null && value !== '' && value !== '-') {
               hasValidData = true;
+              
+              // Limpar valores com porcentagem (ex: "55.10%" → 55.10)
+              let cleanedValue = value;
+              if (typeof value === 'string' && value.includes('%')) {
+                cleanedValue = value.replace('%', '').trim();
+              }
+              
               // Conversões especiais usando a chave original
               if (normalizedKey === "largura_cm" && originalKey.toLowerCase().includes("(m)")) {
                 // Converter de metros para centímetros
-                record[normalizedKey] = Number(value) * 100;
+                record[normalizedKey] = Number(cleanedValue) * 100;
               } else if (normalizedKey === "extensao_metros" && originalKey.toLowerCase().includes("(km)")) {
                 // Converter de km para metros
-                record[normalizedKey] = Number(value) * 1000;
+                record[normalizedKey] = Number(cleanedValue) * 1000;
               } else {
-                record[normalizedKey] = value;
+                record[normalizedKey] = cleanedValue;
               }
               
               // Log específico para tachas
