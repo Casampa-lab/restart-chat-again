@@ -512,15 +512,19 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 - ✅ Implementar RLS policies
 - ✅ Criar índices para performance
 - ✅ Triggers para updated_at
-- 🔜 Criar função `match_cadastro_por_coordenadas`
+- ✅ Criar função `match_cadastro_por_coordenadas`
 
 **📌 CHECKPOINT: Migration 20251011-232318** - Pode retroceder até aqui se necessário
 
-### Sprint 2: Importação
-- ✅ Componente `NecessidadesImporter.tsx`
-- ✅ Lógica de parse de .xlsm
+### Sprint 2: Importação ✅ **CONCLUÍDO**
+- ✅ Componente `NecessidadesImporter.tsx` criado
+- ✅ Lógica de parse de .xlsm implementada
 - ✅ Integração com função de match
-- ✅ Identificação automática de serviço
+- ✅ Identificação automática de serviço (Inclusão/Substituição/Remoção)
+- ✅ Interface com logs coloridos e progresso
+- ✅ Nova aba "Necessidades" no painel Admin
+
+**📌 CHECKPOINT ATUAL** - Sistema de importação funcionando!
 
 ### Sprint 3: Visualização
 - ✅ Página `MinhasNecessidades.tsx`
