@@ -288,29 +288,52 @@ export function InventarioImporterManager() {
           }
 
           // Se é o campo de foto - SEMPRE processar independente do tipo
-          if (hasPhotos && photoColumnName && key === photoColumnName) {
-            const photoFileName = value as string;
+          if (hasPhotos && photoColumnName) {
+            // Normalizar tanto a chave buscada quanto as chaves disponíveis
+            const normalizedPhotoColumn = photoColumnName.replace(/\s+/g, ' ').trim();
+            const normalizedKey = key.replace(/\s+/g, ' ').trim();
             
-            // Log detalhado apenas para os primeiros 3 registros
-            if (index < 3) {
-              console.log(`[FOTO ${index}] ✓ Coluna "${key}" encontrada!`);
-              console.log(`[FOTO ${index}] Nome do arquivo no Excel: "${photoFileName}"`);
-              console.log(`[FOTO ${index}] Existe no mapeamento?`, photoFileName in photoUrls);
-              if (photoFileName && !(photoFileName in photoUrls)) {
-                console.log(`[FOTO ${index}] Variações disponíveis:`, 
-                  Object.keys(photoUrls).filter(k => k.toLowerCase().includes(photoFileName.toLowerCase()) || photoFileName.toLowerCase().includes(k.toLowerCase())).slice(0, 5)
-                );
-              }
-            }
-            
-            if (photoFileName && photoUrls[photoFileName]) {
-              record.foto_url = photoUrls[photoFileName];
+            if (normalizedKey === normalizedPhotoColumn || 
+                normalizedKey.toLowerCase() === normalizedPhotoColumn.toLowerCase()) {
+              const photoFileName = value as string;
+              
+              // Log detalhado apenas para os primeiros 3 registros
               if (index < 3) {
-                console.log(`[FOTO ${index}] ✓✓ URL mapeada: ${photoUrls[photoFileName].substring(0, 80)}...`);
+                console.log(`[FOTO ${index}] ✓ Coluna "${key}" encontrada!`);
+                console.log(`[FOTO ${index}] Nome do arquivo no Excel: "${photoFileName}"`);
+              }
+              
+              if (photoFileName) {
+                // Tentar match direto primeiro
+                let matchedUrl = photoUrls[photoFileName];
+                
+                // Se não encontrou, tentar variações mais flexíveis
+                if (!matchedUrl) {
+                  const cleanedFileName = String(photoFileName).trim().replace(/\.[^/.]+$/, "");
+                  
+                  // Procurar por matching parcial (case insensitive)
+                  for (const [key, url] of Object.entries(photoUrls)) {
+                    const cleanedKey = key.replace(/\.[^/.]+$/, "").trim();
+                    if (cleanedKey.toLowerCase() === cleanedFileName.toLowerCase()) {
+                      matchedUrl = url;
+                      break;
+                    }
+                  }
+                }
+                
+                if (matchedUrl) {
+                  record.foto_url = matchedUrl;
+                  if (index < 3) {
+                    console.log(`[FOTO ${index}] ✓✓ URL mapeada: ${matchedUrl.substring(0, 80)}...`);
+                  }
+                } else if (index < 3) {
+                  console.log(`[FOTO ${index}] ✗ Não encontrou match para "${photoFileName}"`);
+                  console.log(`[FOTO ${index}] Primeiras 5 chaves disponíveis:`, Object.keys(photoUrls).slice(0, 5));
+                }
               }
               
               // Para defensas, extrair data da foto do nome do arquivo
-              if (inventoryType === "defensas" && photoFileName) {
+              if (inventoryType === "defensas" && photoFileName && record.foto_url) {
                 // Tentar extrair data do nome do arquivo (formato: YYYYMMDD ou DD-MM-YYYY)
                 const dateMatch = photoFileName.match(/(\d{8})|(\d{2}[-_]\d{2}[-_]\d{4})/);
                 if (dateMatch) {
