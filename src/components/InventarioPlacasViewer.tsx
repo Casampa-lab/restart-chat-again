@@ -11,37 +11,32 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface FichaPlaca {
   id: string;
-  codigo: string | null;
-  tipo: string | null;
-  modelo: string | null;
+  br: string | null;
   snv: string | null;
+  tipo: string | null;
+  codigo: string | null;
+  velocidade: string | null;
+  lado: string | null;
   km: number | null;
   latitude: number | null;
   longitude: number | null;
-  data_vistoria: string;
-  data_implantacao: string | null;
-  lado: string | null;
-  br: string | null;
-  uf: string | null;
-  velocidade: string | null;
+  suporte: string | null;
+  qtde_suporte: number | null;
+  substrato: string | null;
+  pelicula: string | null;
+  dimensoes_mm: string | null;
+  area_m2: number | null;
+  altura_m: number | null;
+  retrorrefletividade: number | null;
   foto_frontal_url: string | null;
   foto_lateral_url: string | null;
   foto_posterior_url: string | null;
   foto_base_url: string | null;
   foto_identificacao_url: string | null;
-  substrato: string | null;
-  pelicula: string | null;
-  suporte: string | null;
-  dimensoes_mm: string | null;
-  retrorrefletividade: number | null;
-  contrato: string | null;
-  numero_patrimonio: string | null;
-  descricao: string | null;
-  empresa: string | null;
-  area_m2: number | null;
-  altura_m: number | null;
-  distancia_m: number | null;
-  qtde_suporte: number | null;
+  data_vistoria: string;
+  // Campos do dicionário adicionais
+  rodovia_id: string;
+  lote_id: string;
 }
 
 interface Intervencao {
@@ -322,186 +317,145 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
           </DialogHeader>
 
           {selectedPlaca && (
-            <Tabs defaultValue="info" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="info">Informações</TabsTrigger>
-                    <TabsTrigger value="fotos">
-                      Fotos ({fotos.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="historico">
-                      <History className="mr-2 h-4 w-4" />
-                      Histórico ({intervencoes.length})
-                    </TabsTrigger>
-                  </TabsList>
+            <Tabs defaultValue="dados" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="dados">Dados</TabsTrigger>
+                <TabsTrigger value="fotos">Fotos</TabsTrigger>
+                <TabsTrigger value="historico">Histórico</TabsTrigger>
+              </TabsList>
 
-              <TabsContent value="info" className="space-y-4">
+              <TabsContent value="dados" className="space-y-4 mt-4">
                 {/* Identificação */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">
-                      Identificação
-                    </h3>
-                    <div className="space-y-2">
-                      <div>
-                        <span className="text-sm font-medium">SNV:</span>
-                        <p className="text-sm">{selectedPlaca.snv || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Código:</span>
-                        <p className="text-sm">{selectedPlaca.codigo || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Tipo:</span>
-                        <p className="text-sm">{selectedPlaca.tipo || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Modelo:</span>
-                        <p className="text-sm">{selectedPlaca.modelo || "-"}</p>
-                      </div>
-                      {selectedPlaca.velocidade && (
-                        <div>
-                          <span className="text-sm font-medium">Velocidade:</span>
-                          <p className="text-sm">{selectedPlaca.velocidade} km/h</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Localização */}
-                  <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Localização
-                    </h3>
-                    <div className="space-y-2">
-                      <div>
-                        <span className="text-sm font-medium">BR:</span>
-                        <p className="text-sm">{selectedPlaca.br || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">UF:</span>
-                        <p className="text-sm">{selectedPlaca.uf || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">KM:</span>
-                        <p className="text-sm">{selectedPlaca.km?.toFixed(2) || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Lado:</span>
-                        <p className="text-sm">{selectedPlaca.lado || "-"}</p>
-                      </div>
-                      {selectedPlaca.latitude && selectedPlaca.longitude && (
-                        <div>
-                          <span className="text-sm font-medium">Coordenadas:</span>
-                          <p className="text-xs">
-                            Lat: {selectedPlaca.latitude.toFixed(6)}
-                            <br />
-                            Lng: {selectedPlaca.longitude.toFixed(6)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Características Técnicas */}
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-2">
-                    <Ruler className="h-4 w-4" />
-                    Características Técnicas
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div>
-                        <span className="text-sm font-medium">Tipo de Substrato:</span>
-                        <p className="text-sm">{selectedPlaca.substrato || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Película:</span>
-                        <p className="text-sm">{selectedPlaca.pelicula || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Tipo de Suporte:</span>
-                        <p className="text-sm">{selectedPlaca.suporte || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Quantidade de Suporte:</span>
-                        <p className="text-sm">{selectedPlaca.qtde_suporte || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Largura (m):</span>
-                        <p className="text-sm">{selectedPlaca.distancia_m?.toFixed(2) || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Altura (m):</span>
-                        <p className="text-sm">{selectedPlaca.altura_m?.toFixed(2) || "-"}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div>
-                        <span className="text-sm font-medium">Dimensões (mm):</span>
-                        <p className="text-sm">{selectedPlaca.dimensoes_mm || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Área (m²):</span>
-                        <p className="text-sm">{selectedPlaca.area_m2?.toFixed(2) || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Retrorrefletividade Fundo:</span>
-                        <p className="text-sm">
-                          {selectedPlaca.retrorrefletividade
-                            ? `${selectedPlaca.retrorrefletividade} cd.lux/m²`
-                            : "-"}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Empresa:</span>
-                        <p className="text-sm">{selectedPlaca.empresa || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Contrato:</span>
-                        <p className="text-sm">{selectedPlaca.contrato || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Nº Patrimônio:</span>
-                        <p className="text-sm">{selectedPlaca.numero_patrimonio || "-"}</p>
-                      </div>
-                    </div>
-                  </div>
-                  {selectedPlaca.descricao && (
-                    <div className="mt-2 pt-2 border-t">
-                      <span className="text-sm font-medium">Descrição:</span>
-                      <p className="text-sm mt-1">{selectedPlaca.descricao}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Datas */}
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground mb-2 flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Datas
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Identificação</h3>
+                  <div className="grid grid-cols-4 gap-4">
                     <div>
-                      <span className="text-sm font-medium">Data da Vistoria:</span>
+                      <span className="text-sm font-medium text-muted-foreground">BR:</span>
+                      <p className="text-sm">{selectedPlaca.br || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">SNV:</span>
+                      <p className="text-sm">{selectedPlaca.snv || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Código da placa:</span>
+                      <p className="text-sm">{selectedPlaca.codigo || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo de placa:</span>
+                      <p className="text-sm">{selectedPlaca.tipo || "-"}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-3">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Velocidade:</span>
+                      <p className="text-sm">{selectedPlaca.velocidade || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Lado:</span>
+                      <p className="text-sm">{selectedPlaca.lado || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Localização */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Localização
+                  </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Km:</span>
+                      <p className="text-sm">{selectedPlaca.km?.toFixed(2) || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Latitude:</span>
                       <p className="text-sm">
-                        {new Date(selectedPlaca.data_vistoria).toLocaleDateString("pt-BR")}
+                        {selectedPlaca.latitude ? selectedPlaca.latitude.toFixed(6) : "-"}
                       </p>
                     </div>
-                    {selectedPlaca.data_implantacao && (
-                      <div>
-                        <span className="text-sm font-medium">Data de Implantação:</span>
-                        <p className="text-sm">
-                          {new Date(selectedPlaca.data_implantacao).toLocaleDateString("pt-BR")}
-                        </p>
-                      </div>
-                    )}
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Longitude:</span>
+                      <p className="text-sm">
+                        {selectedPlaca.longitude ? selectedPlaca.longitude.toFixed(6) : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dimensões */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Ruler className="h-4 w-4" />
+                    Dimensões
+                  </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Largura (m):</span>
+                      <p className="text-sm">{selectedPlaca.dimensoes_mm?.split('x')[0] || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Altura (m):</span>
+                      <p className="text-sm">{selectedPlaca.altura_m?.toFixed(2) || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Área (m²):</span>
+                      <p className="text-sm">{selectedPlaca.area_m2?.toFixed(2) || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Características do Substrato e Película */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Características do Substrato e Película</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo de Substrato:</span>
+                      <p className="text-sm">{selectedPlaca.substrato || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo de Película:</span>
+                      <p className="text-sm">{selectedPlaca.pelicula || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Retrorrefletividade Fundo (cd.lux/m²):</span>
+                      <p className="text-sm">{selectedPlaca.retrorrefletividade || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Características do Suporte */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Características do Suporte</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo de Suporte:</span>
+                      <p className="text-sm">{selectedPlaca.suporte || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Quantidade de Suporte:</span>
+                      <p className="text-sm">{selectedPlaca.qtde_suporte || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Data */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Data
+                  </h3>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Data da Vistoria:</span>
+                    <p className="text-sm">
+                      {new Date(selectedPlaca.data_vistoria).toLocaleDateString("pt-BR")}
+                    </p>
                   </div>
                 </div>
               </TabsContent>
 
-              <TabsContent value="fotos" className="space-y-4">
+              <TabsContent value="fotos" className="mt-4">
                 {fotos.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {fotos.map((foto, index) => (
@@ -519,78 +473,78 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    Nenhuma foto disponível para esta placa
-                  </div>
+                  <p className="text-center py-8 text-muted-foreground">
+                    Nenhuma foto disponível
+                  </p>
                 )}
               </TabsContent>
 
-              <TabsContent value="historico" className="space-y-4">
-                {intervencoes.length > 0 ? (
-                  <div className="space-y-3">
-                    {intervencoes.map((intervencao) => (
-                      <Card key={intervencao.id}>
-                        <CardContent className="pt-6">
-                          <div className="space-y-2">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <p className="font-semibold">{intervencao.motivo}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
-                                </p>
-                              </div>
-                              {intervencao.placa_recuperada && (
-                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                  Recuperada
-                                </Badge>
-                              )}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 text-sm mt-3">
-                              {intervencao.suporte && (
-                                <div>
-                                  <span className="text-muted-foreground">Suporte:</span>{" "}
-                                  <span className="font-medium">{intervencao.suporte}</span>
-                                </div>
-                              )}
-                              {intervencao.substrato && (
-                                <div>
-                                  <span className="text-muted-foreground">Substrato:</span>{" "}
-                                  <span className="font-medium">{intervencao.substrato}</span>
-                                </div>
-                              )}
-                              {intervencao.pelicula && (
-                                <div>
-                                  <span className="text-muted-foreground">Película:</span>{" "}
-                                  <span className="font-medium">{intervencao.pelicula}</span>
-                                </div>
-                              )}
-                              {intervencao.retro_fundo && (
-                                <div>
-                                  <span className="text-muted-foreground">Retro Fundo:</span>{" "}
-                                  <span className="font-medium">{intervencao.retro_fundo} cd.lux/m²</span>
-                                </div>
-                              )}
-                              {intervencao.retro_orla_legenda && (
-                                <div>
-                                  <span className="text-muted-foreground">Retro Orla/Legenda:</span>{" "}
-                                  <span className="font-medium">{intervencao.retro_orla_legenda} cd.lux/m²</span>
-                                </div>
-                              )}
-                            </div>
+              <TabsContent value="historico" className="mt-4">
+                {intervencoes && intervencoes.length > 0 ? (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm">
+                      Histórico de Intervenções ({intervencoes.length})
+                    </h3>
+                    <div className="space-y-4">
+                      {intervencoes.map((intervencao, index) => (
+                        <div key={intervencao.id} className="border rounded-lg p-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Badge variant="default">
+                              Intervenção #{intervencoes.length - index}
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
+                            </span>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                          {intervencao.placa_recuperada && (
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                              Placa Recuperada
+                            </Badge>
+                          )}
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            <div>
+                              <span className="text-sm font-medium">Motivo:</span>
+                              <p className="text-sm">{intervencao.motivo}</p>
+                            </div>
+                            {intervencao.suporte && (
+                              <div>
+                                <span className="text-sm font-medium">Suporte:</span>
+                                <p className="text-sm">{intervencao.suporte}</p>
+                              </div>
+                            )}
+                            {intervencao.substrato && (
+                              <div>
+                                <span className="text-sm font-medium">Substrato:</span>
+                                <p className="text-sm">{intervencao.substrato}</p>
+                              </div>
+                            )}
+                            {intervencao.pelicula && (
+                              <div>
+                                <span className="text-sm font-medium">Película:</span>
+                                <p className="text-sm">{intervencao.pelicula}</p>
+                              </div>
+                            )}
+                            {intervencao.retro_fundo && (
+                              <div>
+                                <span className="text-sm font-medium">Retro Fundo:</span>
+                                <p className="text-sm">{intervencao.retro_fundo} cd.lux/m²</p>
+                              </div>
+                            )}
+                            {intervencao.retro_orla_legenda && (
+                              <div>
+                                <span className="text-sm font-medium">Retro Orla/Legenda:</span>
+                                <p className="text-sm">{intervencao.retro_orla_legenda} cd.lux/m²</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>Nenhuma intervenção registrada ainda</p>
-                    <p className="text-sm mt-1">
-                      Clique em "Registrar Intervenção" para adicionar o primeiro registro
-                    </p>
-                  </div>
+                  <p className="text-center py-8 text-muted-foreground">
+                    Nenhuma intervenção registrada
+                  </p>
                 )}
               </TabsContent>
             </Tabs>
