@@ -83,9 +83,23 @@ export function DeleteInventarioSelecionado() {
 
       // 1. Primeiro buscar os registros para pegar as URLs das fotos
       toast.info("Buscando registros e fotos...");
+      
+      // Definir colunas de fotos por tabela
+      const fotoColumns: Record<string, string> = {
+        "ficha_placa": "foto_frontal_url, foto_lateral_url, foto_posterior_url, foto_base_url, foto_identificacao_url",
+        "ficha_marcas_longitudinais": "foto_url",
+        "ficha_cilindros": "foto_url",
+        "ficha_inscricoes": "foto_url",
+        "ficha_tachas": "foto_url",
+        "ficha_porticos": "foto_url",
+        "defensas": "foto_url",
+      };
+      
+      const selectColumns = `id, ${fotoColumns[selectedTabela] || 'foto_url'}`;
+      
       const { data: registros, error: fetchError } = await supabase
         .from(selectedTabela as any)
-        .select('foto_url, id')
+        .select(selectColumns)
         .eq('lote_id', selectedLote)
         .eq('rodovia_id', selectedRodovia) as any;
 
@@ -95,12 +109,24 @@ export function DeleteInventarioSelecionado() {
       const fotosParaDeletar: string[] = [];
       if (registros && Array.isArray(registros)) {
         registros.forEach((reg: any) => {
-          if (reg.foto_url) {
-            const bucketName = bucketMap[selectedTabela];
-            if (bucketName) {
-              // Extrair o caminho do storage da URL pública
+          const bucketName = bucketMap[selectedTabela];
+          if (bucketName) {
+            // Para ficha_placa, verificar múltiplas colunas de fotos
+            const fotoUrls: string[] = [];
+            if (selectedTabela === 'ficha_placa') {
+              if (reg.foto_frontal_url) fotoUrls.push(reg.foto_frontal_url);
+              if (reg.foto_lateral_url) fotoUrls.push(reg.foto_lateral_url);
+              if (reg.foto_posterior_url) fotoUrls.push(reg.foto_posterior_url);
+              if (reg.foto_base_url) fotoUrls.push(reg.foto_base_url);
+              if (reg.foto_identificacao_url) fotoUrls.push(reg.foto_identificacao_url);
+            } else {
+              if (reg.foto_url) fotoUrls.push(reg.foto_url);
+            }
+            
+            // Processar cada URL
+            fotoUrls.forEach(fotoUrl => {
               try {
-                const url = new URL(reg.foto_url);
+                const url = new URL(fotoUrl);
                 const pathParts = url.pathname.split(`/storage/v1/object/public/${bucketName}/`);
                 if (pathParts[1]) {
                   fotosParaDeletar.push(pathParts[1]);
@@ -108,7 +134,7 @@ export function DeleteInventarioSelecionado() {
               } catch (e) {
                 console.error('Erro ao processar URL da foto:', e);
               }
-            }
+            });
           }
         });
       }
