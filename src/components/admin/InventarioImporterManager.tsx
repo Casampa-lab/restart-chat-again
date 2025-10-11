@@ -1011,24 +1011,55 @@ export function InventarioImporterManager() {
             </Alert>
           )}
 
-          <Button 
-            onClick={handleImport} 
-            disabled={importing || !inventoryType || !excelFile || !selectedLote || !selectedRodovia}
-            className="w-full"
-            size="lg"
-          >
-            {importing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Importando...
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" />
-                Importar Inventário
-              </>
+          {/* Indicador do que está faltando */}
+          {!importing && (!inventoryType || !excelFile || !selectedLote || !selectedRodovia) && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Para iniciar a importação, você precisa:
+                {!inventoryType && <div className="ml-4">✗ Selecionar o tipo de inventário</div>}
+                {!selectedLote && <div className="ml-4">✗ Selecionar o lote</div>}
+                {!selectedRodovia && <div className="ml-4">✗ Selecionar a rodovia</div>}
+                {!excelFile && <div className="ml-4">✗ Selecionar o arquivo Excel</div>}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleImport} 
+              disabled={importing || !inventoryType || !excelFile || !selectedLote || !selectedRodovia}
+              className="flex-1"
+              size="lg"
+            >
+              {importing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Importando...
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Importar Inventário
+                </>
+              )}
+            </Button>
+            
+            {/* Botão de reset caso fique travado */}
+            {importing && (
+              <Button 
+                onClick={() => {
+                  setImporting(false);
+                  setProgress("");
+                  toast.info("Importação cancelada");
+                }}
+                variant="outline"
+                size="lg"
+              >
+                Cancelar
+              </Button>
             )}
-          </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
