@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Search, Library, Eye, MapPin, Calendar, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 
 interface Cilindro {
   id: string;
@@ -164,10 +164,21 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Library className="h-5 w-5" />
-            Inventário de Cilindros Delineadores
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Library className="h-5 w-5" />
+              Inventário de Cilindros Delineadores
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/minhas-necessidades?tipo=cilindros")}
+              className="gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Ver Necessidades
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">

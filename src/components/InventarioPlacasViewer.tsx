@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library } from "lucide-react";
+import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface FichaPlaca {
@@ -72,6 +73,7 @@ interface InventarioPlacasViewerProps {
 }
 
 export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervencao }: InventarioPlacasViewerProps) {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchLat, setSearchLat] = useState("");
   const [searchLng, setSearchLng] = useState("");
@@ -170,10 +172,21 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Library className="h-5 w-5" />
-            Inventário de Placas
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Library className="h-5 w-5" />
+              Inventário de Placas
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/minhas-necessidades?tipo=placas")}
+              className="gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Ver Necessidades
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Campos de Pesquisa */}

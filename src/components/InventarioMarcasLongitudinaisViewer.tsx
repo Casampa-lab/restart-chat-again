@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Calendar, Library } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Search, MapPin, Eye, Calendar, Library, FileText } from "lucide-react";
+
 interface FichaMarcaLongitudinal {
   id: string;
   snv: string | null;
@@ -44,6 +46,7 @@ export function InventarioMarcasLongitudinaisViewer({
   rodoviaId,
   onRegistrarIntervencao 
 }: InventarioMarcasLongitudinaisViewerProps) {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchLat, setSearchLat] = useState("");
   const [searchLng, setSearchLng] = useState("");
@@ -113,10 +116,21 @@ export function InventarioMarcasLongitudinaisViewer({
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Library className="h-5 w-5" />
-            Inventário de Marcas Longitudinais
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Library className="h-5 w-5" />
+              Inventário de Marcas Longitudinais
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/minhas-necessidades?tipo=marcas_longitudinais")}
+              className="gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Ver Necessidades
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-3">

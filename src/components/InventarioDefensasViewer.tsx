@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye } from "lucide-react";
+import { Search, MapPin, Eye, FileText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface FichaDefensa {
@@ -45,6 +47,7 @@ export const InventarioDefensasViewer = ({
   rodoviaId,
   onRegistrarIntervencao,
 }: InventarioDefensasViewerProps) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [gpsLat, setGpsLat] = useState("");
   const [gpsLong, setGpsLong] = useState("");
@@ -119,6 +122,19 @@ export const InventarioDefensasViewer = ({
 
   return (
     <div className="space-y-4">
+      {/* Botão Ver Necessidades */}
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/minhas-necessidades?tipo=defensas")}
+          className="gap-2"
+        >
+          <FileText className="h-4 w-4" />
+          Ver Necessidades
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />

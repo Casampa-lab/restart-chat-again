@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupervisora } from "@/hooks/useSupervisora";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,9 +39,17 @@ const TIPOS_NECESSIDADES = [
 
 const MinhasNecessidades = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { data: supervisora } = useSupervisora();
-  const [tipoAtivo, setTipoAtivo] = useState(TIPOS_NECESSIDADES[0].value);
+  
+  // Pegar tipo da URL ou usar primeiro como padrão
+  const tipoFromUrl = searchParams.get("tipo");
+  const tipoInicial = tipoFromUrl && TIPOS_NECESSIDADES.find(t => t.value === tipoFromUrl)
+    ? tipoFromUrl
+    : TIPOS_NECESSIDADES[0].value;
+  
+  const [tipoAtivo, setTipoAtivo] = useState(tipoInicial);
   const [necessidades, setNecessidades] = useState<Necessidade[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtroServico, setFiltroServico] = useState<string>("todos");
