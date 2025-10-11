@@ -278,11 +278,22 @@ export function InventarioImporterManager() {
           rodovia_id: selectedRodovia,
         };
 
+      // Função para converter letra de coluna para índice
+        const columnLetterToIndex = (letter: string): number => {
+          let index = 0;
+          for (let i = 0; i < letter.length; i++) {
+            index = index * 26 + (letter.charCodeAt(i) - 'A'.charCodeAt(0) + 1);
+          }
+          return index - 1;
+        };
+
         // Log das colunas disponíveis para os primeiros registros
-        if (index === 0) {
-          console.log("=== COLUNAS DO PRIMEIRO REGISTRO ===");
-          console.log("Todas as colunas:", Object.keys(row));
-          console.log("Procurando pela coluna:", photoColumnName);
+        if (index === 0 && hasPhotos && photoColumnName) {
+          const photoIndex = columnLetterToIndex(photoColumnName);
+          console.log("=== CONFIGURAÇÃO DE FOTOS ===");
+          console.log("Letra da coluna configurada:", photoColumnName);
+          console.log("Índice da coluna:", photoIndex);
+          console.log("Valor na coluna:", row[photoIndex]);
         }
 
         // Mapear campos do Excel
@@ -296,75 +307,69 @@ export function InventarioImporterManager() {
           if (inventoryType !== "defensas" && inventoryType !== "marcas_longitudinais" && inventoryType !== "placas" && inventoryType !== "tachas" && inventoryType !== "inscricoes" && inventoryType !== "cilindros" && inventoryType !== "porticos") {
             record[normalizedKey] = value;
           }
-
-          // Se é o campo de foto - SEMPRE processar independente do tipo
-          if (hasPhotos && photoColumnName) {
-            // Normalizar tanto a chave buscada quanto as chaves disponíveis
-            const normalizedPhotoColumn = photoColumnName.replace(/\s+/g, ' ').trim();
-            const normalizedKey = key.replace(/\s+/g, ' ').trim();
+        }
+        
+        // Processar foto usando índice da coluna (letra convertida para número)
+        if (hasPhotos && photoColumnName) {
+          const photoIndex = columnLetterToIndex(photoColumnName);
+          const photoFileName = row[photoIndex] as string;
+          
+          // Log detalhado apenas para os primeiros 3 registros
+          if (index < 3) {
+            console.log(`[FOTO ${index}] Índice da coluna: ${photoIndex}`);
+            console.log(`[FOTO ${index}] Nome do arquivo no Excel: "${photoFileName}"`);
+          }
+          
+          if (photoFileName) {
+            // Normalizar espaços antes de parênteses (ex: "D (152)" -> "D(152)")
+            const normalizeSpaces = (str: string) => str.replace(/\s+\(/g, '(').trim();
             
-            if (normalizedKey === normalizedPhotoColumn || 
-                normalizedKey.toLowerCase() === normalizedPhotoColumn.toLowerCase()) {
-              const photoFileName = value as string;
+            // Tentar match direto primeiro
+            let matchedUrl = photoUrls[photoFileName];
+            
+            // Se não encontrou, tentar variações mais flexíveis
+            if (!matchedUrl) {
+              const normalizedFileName = normalizeSpaces(String(photoFileName));
+              const cleanedFileName = normalizedFileName.replace(/\.[^/.]+$/, "");
               
-              // Log detalhado apenas para os primeiros 3 registros
+              // Procurar por matching parcial (case insensitive + normalização de espaços)
+              for (const [key, url] of Object.entries(photoUrls)) {
+                const normalizedKey = normalizeSpaces(key);
+                const cleanedKey = normalizedKey.replace(/\.[^/.]+$/, "");
+                if (cleanedKey.toLowerCase() === cleanedFileName.toLowerCase()) {
+                  matchedUrl = url;
+                  break;
+                }
+              }
+            }
+            
+            if (matchedUrl) {
+              record.foto_url = matchedUrl;
               if (index < 3) {
-                console.log(`[FOTO ${index}] ✓ Coluna "${key}" encontrada!`);
-                console.log(`[FOTO ${index}] Nome do arquivo no Excel: "${photoFileName}"`);
+                console.log(`[FOTO ${index}] ✓✓ URL mapeada: ${matchedUrl.substring(0, 80)}...`);
               }
-              
-              if (photoFileName) {
-                // Normalizar espaços antes de parênteses (ex: "D (152)" -> "D(152)")
-                const normalizeSpaces = (str: string) => str.replace(/\s+\(/g, '(').trim();
-                
-                // Tentar match direto primeiro
-                let matchedUrl = photoUrls[photoFileName];
-                
-                // Se não encontrou, tentar variações mais flexíveis
-                if (!matchedUrl) {
-                  const normalizedFileName = normalizeSpaces(String(photoFileName));
-                  const cleanedFileName = normalizedFileName.replace(/\.[^/.]+$/, "");
-                  
-                  // Procurar por matching parcial (case insensitive + normalização de espaços)
-                  for (const [key, url] of Object.entries(photoUrls)) {
-                    const normalizedKey = normalizeSpaces(key);
-                    const cleanedKey = normalizedKey.replace(/\.[^/.]+$/, "");
-                    if (cleanedKey.toLowerCase() === cleanedFileName.toLowerCase()) {
-                      matchedUrl = url;
-                      break;
-                    }
-                  }
-                }
-                
-                if (matchedUrl) {
-                  record.foto_url = matchedUrl;
-                  if (index < 3) {
-                    console.log(`[FOTO ${index}] ✓✓ URL mapeada: ${matchedUrl.substring(0, 80)}...`);
-                  }
-                } else if (index < 3) {
-                  console.log(`[FOTO ${index}] ✗ Não encontrou match para "${photoFileName}"`);
-                  console.log(`[FOTO ${index}] Primeiras 5 chaves disponíveis:`, Object.keys(photoUrls).slice(0, 5));
-                }
-              }
-              
-              // Para defensas, extrair data da foto do nome do arquivo
-              if (inventoryType === "defensas" && photoFileName && record.foto_url) {
-                // Tentar extrair data do nome do arquivo (formato: YYYYMMDD ou DD-MM-YYYY)
-                const dateMatch = photoFileName.match(/(\d{8})|(\d{2}[-_]\d{2}[-_]\d{4})/);
-                if (dateMatch) {
-                  let dateStr = dateMatch[0];
-                  if (dateStr.length === 8) {
-                    // Formato YYYYMMDD
-                    const year = dateStr.substring(0, 4);
-                    const month = dateStr.substring(4, 6);
-                    const day = dateStr.substring(6, 8);
-                    record.data_inspecao = `${year}-${month}-${day}`;
-                  } else {
-                    // Formato DD-MM-YYYY ou DD_MM_YYYY
-                    const parts = dateStr.split(/[-_]/);
-                    if (parts.length === 3) {
-                      record.data_inspecao = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                    }
+            } else if (index < 3) {
+              console.log(`[FOTO ${index}] ✗ Não encontrou match para "${photoFileName}"`);
+              console.log(`[FOTO ${index}] Primeiras 5 chaves disponíveis:`, Object.keys(photoUrls).slice(0, 5));
+            }
+            
+            // Para defensas, extrair data da foto do nome do arquivo
+            if (inventoryType === "defensas" && photoFileName && record.foto_url) {
+              // Tentar extrair data do nome do arquivo (formato: YYYYMMDD ou DD-MM-YYYY)
+              const dateMatch = photoFileName.match(/(\d{8})|(\d{2}[-_]\d{2}[-_]\d{4})/);
+              if (dateMatch) {
+                let dateStr = dateMatch[0];
+                if (dateStr.length === 8) {
+                  // Formato YYYYMMDD
+                  const year = dateStr.substring(0, 4);
+                  const month = dateStr.substring(4, 6);
+                  const day = dateStr.substring(6, 8);
+                  record.data_inspecao = `${year}-${month}-${day}`;
+                } else {
+                  // Formato DD-MM-YYYY ou DD_MM_YYYY
+                  const parts = dateStr.split(/[-_]/);
+                  if (parts.length === 3) {
+                    record.data_inspecao = `${parts[2]}-${parts[1]}-${parts[0]}`;
                   }
                 }
               }
