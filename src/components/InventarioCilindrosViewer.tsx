@@ -165,7 +165,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Library className="h-5 w-5" />
-            Ficha de Visualização - Cilindro Delineador
+            Inventário de Cilindros Delineadores
           </CardTitle>
         </CardHeader>
         <CardContent>
