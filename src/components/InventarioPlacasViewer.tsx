@@ -526,22 +526,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   </div>
                 </div>
 
-                {/* Link da Fotografia */}
-                {selectedPlaca.link_fotografia && (
-                  <div className="border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3">Link da Fotografia</h3>
-                    <div>
-                      <a 
-                        href={selectedPlaca.link_fotografia} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-sm text-primary underline hover:text-primary/80"
-                      >
-                        {selectedPlaca.link_fotografia}
-                      </a>
-                    </div>
-                  </div>
-                )}
               </TabsContent>
 
               <TabsContent value="fotos" className="mt-4">
@@ -562,9 +546,38 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center py-8 text-muted-foreground">
-                    Nenhuma foto disponível
-                  </p>
+                  <div className="border rounded-lg p-8 text-center">
+                    {(() => {
+                      const linkFotografia = selectedPlaca.link_fotografia;
+                      
+                      // Se tem link externo
+                      if (linkFotografia && linkFotografia !== "HIPERLINK" && linkFotografia.startsWith('http')) {
+                        return (
+                          <>
+                            <p className="text-muted-foreground mb-4">Foto disponível via link externo:</p>
+                            <a 
+                              href={linkFotografia} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-primary underline hover:text-primary/80"
+                            >
+                              Abrir foto em nova aba
+                            </a>
+                          </>
+                        );
+                      }
+                      
+                      // Nenhuma foto disponível
+                      return (
+                        <div className="text-center">
+                          <p className="text-muted-foreground mb-2">Nenhuma foto disponível</p>
+                          <p className="text-sm text-muted-foreground/70">
+                            As fotos devem ser importadas junto com a planilha ou os links devem estar preenchidos corretamente no Excel
+                          </p>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 )}
               </TabsContent>
 
