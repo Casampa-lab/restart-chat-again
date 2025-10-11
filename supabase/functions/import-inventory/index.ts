@@ -246,6 +246,13 @@ serve(async (req) => {
       },
       defensas: {
         "extensão_(m)": "extensao_metros",
+        "comprimento_total_do_tramo_(m)": "comprimento_total_tramo_m",
+        "%_veículos_pesados": "percentual_veiculos_pesados",
+        "distância_da_pista_ao_obstáculo_(m)": "distancia_pista_obstaculo_m",
+        "velocidade_(km/h)": "velocidade_kmh",
+        "vmd_(veíc./dia)": "vmd_veic_dia",
+        "distância_da_face_da_defensa_ao_obstáculo(m)": "distancia_face_defensa_obstaculo_m",
+        "distância_da_linha_de_bordo_da_pista_à_face_da_defensa_(m)": "distancia_bordo_pista_face_defensa_m",
         "data": "data_inspecao",
         "data_inspeção": "data_inspecao",
         "br": "",
@@ -296,7 +303,20 @@ serve(async (req) => {
       defensas: [
         "data_inspecao", "estado_conservacao", "extensao_metros", "km_final",
         "km_inicial", "lado", "necessita_intervencao", "nivel_risco",
-        "observacao", "tipo_avaria", "tipo_defensa"
+        "observacao", "tipo_avaria", "tipo_defensa", "br", "snv", "tramo",
+        "funcao", "especificacao_obstaculo_fixo", "id_defensa",
+        "distancia_pista_obstaculo_m", "risco", "velocidade_kmh",
+        "vmd_veic_dia", "percentual_veiculos_pesados", "geometria",
+        "classificacao_nivel_contencao", "nivel_contencao_en1317",
+        "nivel_contencao_nchrp350", "espaco_trabalho", "terminal_entrada",
+        "terminal_saida", "adequacao_funcionalidade_lamina",
+        "adequacao_funcionalidade_laminas_inadequadas",
+        "adequacao_funcionalidade_terminais",
+        "adequacao_funcionalidade_terminais_inadequados",
+        "distancia_face_defensa_obstaculo_m",
+        "distancia_bordo_pista_face_defensa_m", "link_fotografia",
+        "foto_url", "quantidade_laminas", "comprimento_total_tramo_m",
+        "latitude_inicial", "longitude_inicial", "latitude_final", "longitude_final"
       ],
     };
 
