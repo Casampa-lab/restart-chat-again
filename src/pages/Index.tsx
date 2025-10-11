@@ -4,9 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkSession } from "@/hooks/useWorkSession";
 import { useSupervisora } from "@/hooks/useSupervisora";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy, X } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
@@ -65,6 +67,99 @@ const Index = () => {
   const [selectedInscricaoForIntervencao, setSelectedInscricaoForIntervencao] = useState<any>(null);
   const [selectedTachaForIntervencao, setSelectedTachaForIntervencao] = useState<any>(null);
   const [selectedDefensaForIntervencao, setSelectedDefensaForIntervencao] = useState<any>(null);
+
+  // Queries para contar registros de inventário
+  const { data: countMarcasLong } = useQuery({
+    queryKey: ["count-marcas-long", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("ficha_marcas_longitudinais")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
+  const { data: countCilindros } = useQuery({
+    queryKey: ["count-cilindros", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("ficha_cilindros")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
+  const { data: countInscricoes } = useQuery({
+    queryKey: ["count-inscricoes", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("ficha_inscricoes")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
+  const { data: countTachas } = useQuery({
+    queryKey: ["count-tachas", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("ficha_tachas")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
+  const { data: countPlacas } = useQuery({
+    queryKey: ["count-placas", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("ficha_placa")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
+  const { data: countPorticos } = useQuery({
+    queryKey: ["count-porticos", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("ficha_porticos")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
+  const { data: countDefensas } = useQuery({
+    queryKey: ["count-defensas", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("defensas")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
   useEffect(() => {
     const checkAdminOrCoordinator = async () => {
       if (!user) return;
@@ -451,24 +546,49 @@ const Index = () => {
                       <TabsTrigger value="sv">
                         Sinalização Vertical (SV)
                       </TabsTrigger>
-                      <TabsTrigger value="defensas-pront">
-                        Defensas
+                      <TabsTrigger value="defensas-pront" className="flex items-center gap-2">
+                        <span>Defensas</span>
+                        {countDefensas! > 0 && (
+                          <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                            {countDefensas}
+                          </Badge>
+                        )}
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="sh" className="mt-4">
                       <Tabs value={inventarioShSubTab} onValueChange={setInventarioShSubTab} className="w-full">
                         <TabsList className="grid w-full grid-cols-4">
-                          <TabsTrigger value="longitudinais">
-                            Marcas Longitudinais
+                          <TabsTrigger value="longitudinais" className="flex items-center gap-2">
+                            <span>Marcas Longitudinais</span>
+                            {countMarcasLong! > 0 && (
+                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                {countMarcasLong}
+                              </Badge>
+                            )}
                           </TabsTrigger>
-                          <TabsTrigger value="transversais">
-                            Cilindros
+                          <TabsTrigger value="transversais" className="flex items-center gap-2">
+                            <span>Cilindros</span>
+                            {countCilindros! > 0 && (
+                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                {countCilindros}
+                              </Badge>
+                            )}
                           </TabsTrigger>
-                          <TabsTrigger value="inscricoes">
-                            Zebrados, Setas, Símbolos e Legendas
+                          <TabsTrigger value="inscricoes" className="flex items-center gap-2">
+                            <span>Zebrados, Setas, Símbolos e Legendas</span>
+                            {countInscricoes! > 0 && (
+                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                {countInscricoes}
+                              </Badge>
+                            )}
                           </TabsTrigger>
-                          <TabsTrigger value="tachas">
-                            Tachas
+                          <TabsTrigger value="tachas" className="flex items-center gap-2">
+                            <span>Tachas</span>
+                            {countTachas! > 0 && (
+                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                {countTachas}
+                              </Badge>
+                            )}
                           </TabsTrigger>
                         </TabsList>
                         <TabsContent value="longitudinais" className="mt-4">
@@ -503,11 +623,21 @@ const Index = () => {
                     <TabsContent value="sv" className="mt-4">
                       <Tabs value={inventarioSvSubTab} onValueChange={setInventarioSvSubTab} className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="placas">
-                            Placas
+                          <TabsTrigger value="placas" className="flex items-center gap-2">
+                            <span>Placas</span>
+                            {countPlacas! > 0 && (
+                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                {countPlacas}
+                              </Badge>
+                            )}
                           </TabsTrigger>
-                          <TabsTrigger value="porticos">
-                            Pórticos (P/SM) e Braços Projetados
+                          <TabsTrigger value="porticos" className="flex items-center gap-2">
+                            <span>Pórticos (P/SM) e Braços Projetados</span>
+                            {countPorticos! > 0 && (
+                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                {countPorticos}
+                              </Badge>
+                            )}
                           </TabsTrigger>
                         </TabsList>
                         <TabsContent value="placas" className="mt-4">
