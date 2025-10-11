@@ -139,34 +139,31 @@ export function InventarioImporterManager() {
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       
-      // Definir linha inicial dos headers para cada tipo de inventário
-      const headerRowMap: Record<string, number> = {
-        "placas": 7,              // Headers na linha 8 (índice 7)
-        "marcas_longitudinais": 1, // Headers na linha 2 (índice 1)
-        "cilindros": 1,
-        "inscricoes": 1,
-        "tachas": 1,
-        "porticos": 1,
-        "defensas": 1,
-      };
-      
-      const headerRow = headerRowMap[inventoryType] || 0;
-      
-      // Ler JSON como ARRAY (header: 1) para acessar por índice de coluna
+      // Ler JSON completo como ARRAY (header: 1) para acessar por índice de coluna
       const jsonData = XLSX.utils.sheet_to_json(worksheet, {
         header: 1, // Retorna arrays ao invés de objetos
-        range: headerRow, // Começa a ler da linha onde estão os headers
         raw: false,
         defval: null,
-      });
+      }) as any[][];
 
       if (jsonData.length === 0) {
         throw new Error("Nenhum registro encontrado na planilha");
       }
 
-      // Primeira linha são os headers
-      const headers = jsonData[0] as any[];
-      const dataRows = jsonData.slice(1); // Dados começam da segunda linha
+      // Definir onde estão os headers e onde começam os dados para cada tipo
+      const sheetConfig: Record<string, { headerRow: number; dataStartRow: number }> = {
+        "placas": { headerRow: 7, dataStartRow: 8 },              // Headers na linha 8 (índice 7), dados na linha 9 (índice 8)
+        "marcas_longitudinais": { headerRow: 1, dataStartRow: 2 }, // Headers na linha 2 (índice 1), dados na linha 3 (índice 2)
+        "cilindros": { headerRow: 1, dataStartRow: 2 },
+        "inscricoes": { headerRow: 1, dataStartRow: 2 },
+        "tachas": { headerRow: 1, dataStartRow: 2 },
+        "porticos": { headerRow: 1, dataStartRow: 2 },
+        "defensas": { headerRow: 1, dataStartRow: 2 },
+      };
+      
+      const config = sheetConfig[inventoryType] || { headerRow: 0, dataStartRow: 1 };
+      const headers = jsonData[config.headerRow] as any[];
+      const dataRows = jsonData.slice(config.dataStartRow);
 
       // Log para debug
       console.log(`=== COLUNAS DISPONÍVEIS NO EXCEL (${inventoryType}) ===`);
