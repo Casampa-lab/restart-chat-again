@@ -247,7 +247,7 @@ serve(async (req) => {
       defensas: {
         "extensão_(m)": "extensao_metros",
         "comprimento_total_do_tramo_(m)": "comprimento_total_tramo_m",
-        "%_veículos_pesados": "percentual_veiculos_pesados",
+        "% veículos pesados": "percentual_veiculos_pesados",
         "distância_da_pista_ao_obstáculo_(m)": "distancia_pista_obstaculo_m",
         "velocidade_(km/h)": "velocidade_kmh",
         "vmd_(veíc./dia)": "vmd_veic_dia",
