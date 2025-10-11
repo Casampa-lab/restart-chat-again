@@ -152,7 +152,7 @@ export function InventarioImporterManager() {
 
       // Definir onde estão os headers e onde começam os dados para cada tipo
       const sheetConfig: Record<string, { headerRow: number; dataStartRow: number }> = {
-        "placas": { headerRow: 7, dataStartRow: 8 },              // Headers na linha 8 (índice 7), dados na linha 9 (índice 8)
+        "placas": { headerRow: 1, dataStartRow: 2 },              // Headers na linha 2 (índice 1), dados na linha 3 (índice 2)
         "marcas_longitudinais": { headerRow: 1, dataStartRow: 2 }, // Headers na linha 2 (índice 1), dados na linha 3 (índice 2)
         "cilindros": { headerRow: 1, dataStartRow: 2 },
         "inscricoes": { headerRow: 1, dataStartRow: 2 },
