@@ -217,90 +217,373 @@ export const InventarioDefensasViewer = ({
       )}
 
       <Dialog open={!!selectedDefensa} onOpenChange={() => setSelectedDefensa(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Detalhes da Defensa</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Ficha de Visualização - Defensa</span>
+              <div className="flex gap-2">
+                {onRegistrarIntervencao && (
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    onClick={() => {
+                      onRegistrarIntervencao(selectedDefensa);
+                      setSelectedDefensa(null);
+                    }}
+                  >
+                    Registrar Intervenção
+                  </Button>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setSelectedDefensa(null)}
+                >
+                  Voltar
+                </Button>
+              </div>
+            </DialogTitle>
           </DialogHeader>
 
           {selectedDefensa && (
-            <Tabs defaultValue="info" className="w-full">
+            <Tabs defaultValue="dados" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="info">Informações</TabsTrigger>
+                <TabsTrigger value="dados">Dados</TabsTrigger>
                 <TabsTrigger value="foto">Foto</TabsTrigger>
                 <TabsTrigger value="historico">Histórico</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="info" className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="font-semibold mb-2">Características</h3>
-                    <p><strong>Tipo:</strong> {selectedDefensa.tipo_defensa}</p>
-                    <p><strong>Lado:</strong> {selectedDefensa.lado}</p>
-                    <p><strong>Estado:</strong> {selectedDefensa.estado_conservacao}</p>
-                    <p><strong>Necessita Intervenção:</strong> {selectedDefensa.necessita_intervencao ? "Sim" : "Não"}</p>
-                    {selectedDefensa.tipo_avaria && (
-                      <p><strong>Tipo de Avaria:</strong> {selectedDefensa.tipo_avaria}</p>
-                    )}
-                    {selectedDefensa.nivel_risco && (
-                      <p><strong>Nível de Risco:</strong> {selectedDefensa.nivel_risco}</p>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-2">Localização e Dimensões</h3>
-                    <p><strong>KM Inicial:</strong> {selectedDefensa.km_inicial}</p>
-                    <p><strong>KM Final:</strong> {selectedDefensa.km_final}</p>
-                    <p><strong>Extensão:</strong> {selectedDefensa.extensao_metros} metros</p>
-                    <p><strong>Data Inspeção:</strong> {new Date(selectedDefensa.data_inspecao).toLocaleDateString('pt-BR')}</p>
+              <TabsContent value="dados" className="space-y-4 mt-4">
+                {/* Identificação */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Identificação</h3>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">BR:</span>
+                      <p className="text-sm">{(selectedDefensa as any).br || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">SNV:</span>
+                      <p className="text-sm">{(selectedDefensa as any).snv || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tramo:</span>
+                      <p className="text-sm">{(selectedDefensa as any).tramo || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">ID Defensa:</span>
+                      <p className="text-sm">{(selectedDefensa as any).id_defensa || "-"}</p>
+                    </div>
                   </div>
                 </div>
 
-                {selectedDefensa.observacao && (
-                  <div>
-                    <h3 className="font-semibold mb-2">Observações</h3>
-                    <p>{selectedDefensa.observacao}</p>
+                {/* Características */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Características</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo:</span>
+                      <p className="text-sm">{selectedDefensa.tipo_defensa}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Lado:</span>
+                      <p className="text-sm">{selectedDefensa.lado}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Função:</span>
+                      <p className="text-sm">{(selectedDefensa as any).funcao || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Estado:</span>
+                      <p className="text-sm">{selectedDefensa.estado_conservacao || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Necessita Intervenção:</span>
+                      <p className="text-sm">{selectedDefensa.necessita_intervencao ? "Sim" : "Não"}</p>
+                    </div>
+                    {selectedDefensa.tipo_avaria && (
+                      <div>
+                        <span className="text-sm font-medium text-muted-foreground">Tipo de Avaria:</span>
+                        <p className="text-sm">{selectedDefensa.tipo_avaria}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Localização Inicial */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Localização Inicial
+                  </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Km Inicial:</span>
+                      <p className="text-sm">{selectedDefensa.km_inicial}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Latitude Inicial:</span>
+                      <p className="text-sm">
+                        {(selectedDefensa as any).latitude_inicial 
+                          ? (selectedDefensa as any).latitude_inicial.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Longitude Inicial:</span>
+                      <p className="text-sm">
+                        {(selectedDefensa as any).longitude_inicial 
+                          ? (selectedDefensa as any).longitude_inicial.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Localização Final */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Localização Final
+                  </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Km Final:</span>
+                      <p className="text-sm">{selectedDefensa.km_final}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Latitude Final:</span>
+                      <p className="text-sm">
+                        {(selectedDefensa as any).latitude_final 
+                          ? (selectedDefensa as any).latitude_final.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Longitude Final:</span>
+                      <p className="text-sm">
+                        {(selectedDefensa as any).longitude_final 
+                          ? (selectedDefensa as any).longitude_final.toFixed(6) 
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dimensões */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Dimensões</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Extensão (m):</span>
+                      <p className="text-sm">{selectedDefensa.extensao_metros}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Comprimento Total (m):</span>
+                      <p className="text-sm">{(selectedDefensa as any).comprimento_total_tramo_m || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Quantidade Lâminas:</span>
+                      <p className="text-sm">{(selectedDefensa as any).quantidade_laminas || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Níveis e Risco */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Níveis e Risco</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Nível de Risco:</span>
+                      <p className="text-sm">{selectedDefensa.nivel_risco || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Risco:</span>
+                      <p className="text-sm">{(selectedDefensa as any).risco || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Nível Contenção EN1317:</span>
+                      <p className="text-sm">{(selectedDefensa as any).nivel_contencao_en1317 || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Nível Contenção NCHRP350:</span>
+                      <p className="text-sm">{(selectedDefensa as any).nivel_contencao_nchrp350 || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Classificação Contenção:</span>
+                      <p className="text-sm">{(selectedDefensa as any).classificacao_nivel_contencao || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dados Técnicos */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Dados Técnicos</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Velocidade (km/h):</span>
+                      <p className="text-sm">{(selectedDefensa as any).velocidade_kmh || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">VMD (veíc./dia):</span>
+                      <p className="text-sm">{(selectedDefensa as any).vmd_veic_dia || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">% Veículos Pesados:</span>
+                      <p className="text-sm">{(selectedDefensa as any).percentual_veiculos_pesados || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Geometria:</span>
+                      <p className="text-sm">{(selectedDefensa as any).geometria || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Espaço de Trabalho:</span>
+                      <p className="text-sm">{(selectedDefensa as any).espaco_trabalho || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Terminais */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Terminais</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Terminal Entrada:</span>
+                      <p className="text-sm">{(selectedDefensa as any).terminal_entrada || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Terminal Saída:</span>
+                      <p className="text-sm">{(selectedDefensa as any).terminal_saida || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Distâncias */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Distâncias</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Dist. Pista-Obstáculo (m):</span>
+                      <p className="text-sm">{(selectedDefensa as any).distancia_pista_obstaculo_m || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Dist. Face Defensa-Obstáculo (m):</span>
+                      <p className="text-sm">{(selectedDefensa as any).distancia_face_defensa_obstaculo_m || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Dist. Bordo-Face Defensa (m):</span>
+                      <p className="text-sm">{(selectedDefensa as any).distancia_bordo_pista_face_defensa_m || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Adequação Funcional */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Adequação Funcional</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Adequação Lâmina:</span>
+                      <p className="text-sm">{(selectedDefensa as any).adequacao_funcionalidade_lamina || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Lâminas Inadequadas:</span>
+                      <p className="text-sm">{(selectedDefensa as any).adequacao_funcionalidade_laminas_inadequadas || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Adequação Terminais:</span>
+                      <p className="text-sm">{(selectedDefensa as any).adequacao_funcionalidade_terminais || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Terminais Inadequados:</span>
+                      <p className="text-sm">{(selectedDefensa as any).adequacao_funcionalidade_terminais_inadequados || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Obstáculo */}
+                {(selectedDefensa as any).especificacao_obstaculo_fixo && (
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3">Obstáculo</h3>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Especificação:</span>
+                      <p className="text-sm">{(selectedDefensa as any).especificacao_obstaculo_fixo}</p>
+                    </div>
                   </div>
                 )}
 
-                <div className="flex gap-2">
-                  {onRegistrarIntervencao && (
-                    <Button onClick={() => {
-                      onRegistrarIntervencao(selectedDefensa);
-                      setSelectedDefensa(null);
-                    }}>
-                      Registrar Intervenção
-                    </Button>
-                  )}
-                  <Button variant="outline" onClick={() => setSelectedDefensa(null)}>
-                    Voltar
-                  </Button>
+                {/* Data Inspeção */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Data</h3>
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Data Inspeção:</span>
+                    <p className="text-sm">{new Date(selectedDefensa.data_inspecao).toLocaleDateString('pt-BR')}</p>
+                  </div>
                 </div>
+
+                {/* Observações */}
+                {selectedDefensa.observacao && (
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3">Observações</h3>
+                    <p className="text-sm">{selectedDefensa.observacao}</p>
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="foto" className="mt-4">
-                <p className="text-center py-8 text-muted-foreground">
-                  Nenhuma foto disponível
-                </p>
+                <div className="border rounded-lg p-8 text-center">
+                  <p className="text-muted-foreground">
+                    {(selectedDefensa as any).foto_url 
+                      ? "Foto disponível" 
+                      : "Nenhuma foto disponível"}
+                  </p>
+                  {(selectedDefensa as any).foto_url && (
+                    <img 
+                      src={(selectedDefensa as any).foto_url} 
+                      alt="Foto da defensa" 
+                      className="mt-4 mx-auto max-w-full rounded-lg"
+                    />
+                  )}
+                </div>
               </TabsContent>
 
-              <TabsContent value="historico" className="space-y-4">
+              <TabsContent value="historico" className="space-y-4 mt-4">
                 <h3 className="font-semibold">Histórico de Intervenções</h3>
                 {intervencoes.length === 0 ? (
-                  <p className="text-muted-foreground">Nenhuma intervenção registrada para esta defensa.</p>
+                  <div className="border rounded-lg p-8 text-center">
+                    <p className="text-muted-foreground">Nenhuma intervenção registrada para esta defensa.</p>
+                  </div>
                 ) : (
                   <div className="space-y-4">
                     {intervencoes.map((intervencao) => (
                       <div key={intervencao.id} className="border rounded-lg p-4">
-                        <p><strong>Data:</strong> {new Date(intervencao.data_intervencao).toLocaleDateString('pt-BR')}</p>
-                        <p><strong>Motivo:</strong> {intervencao.motivo}</p>
-                        {intervencao.extensao_metros && (
-                          <p><strong>Extensão:</strong> {intervencao.extensao_metros} metros</p>
-                        )}
-                        {intervencao.tipo_defensa && (
-                          <p><strong>Tipo:</strong> {intervencao.tipo_defensa}</p>
-                        )}
-                        {intervencao.estado_conservacao && (
-                          <p><strong>Estado:</strong> {intervencao.estado_conservacao}</p>
-                        )}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <span className="text-sm font-medium text-muted-foreground">Data:</span>
+                            <p className="text-sm">{new Date(intervencao.data_intervencao).toLocaleDateString('pt-BR')}</p>
+                          </div>
+                          <div>
+                            <span className="text-sm font-medium text-muted-foreground">Motivo:</span>
+                            <p className="text-sm">{intervencao.motivo}</p>
+                          </div>
+                          {intervencao.extensao_metros && (
+                            <div>
+                              <span className="text-sm font-medium text-muted-foreground">Extensão:</span>
+                              <p className="text-sm">{intervencao.extensao_metros} metros</p>
+                            </div>
+                          )}
+                          {intervencao.tipo_defensa && (
+                            <div>
+                              <span className="text-sm font-medium text-muted-foreground">Tipo:</span>
+                              <p className="text-sm">{intervencao.tipo_defensa}</p>
+                            </div>
+                          )}
+                          {intervencao.estado_conservacao && (
+                            <div>
+                              <span className="text-sm font-medium text-muted-foreground">Estado:</span>
+                              <p className="text-sm">{intervencao.estado_conservacao}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
