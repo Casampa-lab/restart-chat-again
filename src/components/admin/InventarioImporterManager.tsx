@@ -329,6 +329,20 @@ export function InventarioImporterManager() {
             return null;
           };
           
+          // Helper para limpar valores com porcentagem e converter para número
+          const cleanPercentage = (value: any): number | null => {
+            if (value === null || value === undefined || value === "") return null;
+            const strValue = String(value).trim();
+            if (strValue.includes('%')) {
+              const cleanValue = strValue.replace('%', '').replace(',', '.').trim();
+              const numValue = parseFloat(cleanValue);
+              console.log(`[PERCENT CLEAN] Original: "${strValue}" -> Limpo: ${numValue}`);
+              return isNaN(numValue) ? null : numValue;
+            }
+            const numValue = parseFloat(strValue);
+            return isNaN(numValue) ? null : numValue;
+          };
+          
           // Mapeamento conforme dicionário (com variações)
           record.br = getVal("BR", "br");
           record.snv = getVal("SNV", "snv");
@@ -361,9 +375,9 @@ export function InventarioImporterManager() {
           record.id_defensa = getVal("ID", "id", "id_defensa");
           record.distancia_pista_obstaculo_m = getVal("Distância da pista ao obstáculo (m)", "Distancia da pista ao obstaculo m");
           record.risco = getVal("Risco", "risco");
-          record.velocidade_kmh = getVal("Velocidade (km/h)", "Velocidade km/h", "velocidade_kmh");
-          record.vmd_veic_dia = getVal("VMD (veíc./dia)", "VMD veic/dia", "vmd_veic_dia");
-          record.percentual_veiculos_pesados = getVal("% Veículos Pesados", "% Veiculos Pesados", "percentual_veiculos_pesados");
+          record.velocidade_kmh = cleanPercentage(getVal("Velocidade (km/h)", "Velocidade km/h", "velocidade_kmh"));
+          record.vmd_veic_dia = cleanPercentage(getVal("VMD (veíc./dia)", "VMD veic/dia", "vmd_veic_dia"));
+          record.percentual_veiculos_pesados = cleanPercentage(getVal("% Veículos Pesados", "% Veiculos Pesados", "% veículos pesados", "percentual_veiculos_pesados"));
           record.geometria = getVal("Geometria", "geometria");
           record.classificacao_nivel_contencao = getVal("Classificação do nível de Contenção", "Classificacao do nivel de Contencao");
           record.nivel_contencao_en1317 = getVal("Nível de contenção EN 1317-2", "Nivel de contencao EN 1317-2");
