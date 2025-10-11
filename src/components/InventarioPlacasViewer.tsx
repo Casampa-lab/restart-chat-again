@@ -27,6 +27,7 @@ interface FichaPlaca {
   dimensoes_mm: string | null;
   area_m2: number | null;
   altura_m: number | null;
+  distancia_m: number | null;
   retrorrefletividade: number | null;
   foto_frontal_url: string | null;
   foto_lateral_url: string | null;
@@ -34,6 +35,8 @@ interface FichaPlaca {
   foto_base_url: string | null;
   foto_identificacao_url: string | null;
   data_vistoria: string;
+  data_implantacao: string | null;
+  descricao: string | null;
   // Campos do dicionário adicionais
   rodovia_id: string;
   lote_id: string;
@@ -338,15 +341,15 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       <p className="text-sm">{selectedPlaca.snv || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Código da placa:</span>
-                      <p className="text-sm">{selectedPlaca.codigo || "-"}</p>
-                    </div>
-                    <div>
                       <span className="text-sm font-medium text-muted-foreground">Tipo de placa:</span>
                       <p className="text-sm">{selectedPlaca.tipo || "-"}</p>
                     </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Código da placa:</span>
+                      <p className="text-sm">{selectedPlaca.codigo || "-"}</p>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 mt-3">
+                  <div className="grid grid-cols-3 gap-4 mt-3">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Velocidade:</span>
                       <p className="text-sm">{selectedPlaca.velocidade || "-"}</p>
@@ -354,6 +357,10 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Lado:</span>
                       <p className="text-sm">{selectedPlaca.lado || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Posição:</span>
+                      <p className="text-sm">{selectedPlaca.descricao || "-"}</p>
                     </div>
                   </div>
                 </div>
@@ -384,16 +391,94 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   </div>
                 </div>
 
-                {/* Dimensões */}
+                {/* Suporte */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Suporte</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo de Suporte:</span>
+                      <p className="text-sm">{selectedPlaca.suporte || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Quantidade de Suporte:</span>
+                      <p className="text-sm">{selectedPlaca.qtde_suporte || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo de Seção de Suporte:</span>
+                      <p className="text-sm">-</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 mt-3">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Seção do Suporte (mm):</span>
+                      <p className="text-sm">-</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Substrato e Sinal Impresso */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Substrato</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo de Substrato:</span>
+                      <p className="text-sm">{selectedPlaca.substrato || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">SI (Sinal Impresso):</span>
+                      <p className="text-sm">-</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Película Fundo */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Película Fundo</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo (película fundo):</span>
+                      <p className="text-sm">{selectedPlaca.pelicula || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Cor (película fundo):</span>
+                      <p className="text-sm">-</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Retrorrefletância (película fundo) cd.lux/m²:</span>
+                      <p className="text-sm">{selectedPlaca.retrorrefletividade || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Película Legenda/Orla */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Película Legenda/Orla</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo (película legenda/orla):</span>
+                      <p className="text-sm">-</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Cor (película legenda/orla):</span>
+                      <p className="text-sm">-</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Retrorrefletância (película legenda/orla) cd.lux/m²:</span>
+                      <p className="text-sm">-</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dimensões da Placa */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <Ruler className="h-4 w-4" />
-                    Dimensões
+                    Dimensões da Placa
                   </h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Largura (m):</span>
-                      <p className="text-sm">{selectedPlaca.dimensoes_mm?.split('x')[0] || "-"}</p>
+                      <p className="text-sm">{selectedPlaca.distancia_m?.toFixed(2) || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Altura (m):</span>
@@ -406,51 +491,27 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   </div>
                 </div>
 
-                {/* Características do Substrato e Película */}
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-3">Características do Substrato e Película</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Tipo de Substrato:</span>
-                      <p className="text-sm">{selectedPlaca.substrato || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Tipo de Película:</span>
-                      <p className="text-sm">{selectedPlaca.pelicula || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Retrorrefletividade Fundo (cd.lux/m²):</span>
-                      <p className="text-sm">{selectedPlaca.retrorrefletividade || "-"}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Características do Suporte */}
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-3">Características do Suporte</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Tipo de Suporte:</span>
-                      <p className="text-sm">{selectedPlaca.suporte || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Quantidade de Suporte:</span>
-                      <p className="text-sm">{selectedPlaca.qtde_suporte || "-"}</p>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Data */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     Data
                   </h3>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Data da Vistoria:</span>
-                    <p className="text-sm">
-                      {new Date(selectedPlaca.data_vistoria).toLocaleDateString("pt-BR")}
-                    </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Data da Vistoria:</span>
+                      <p className="text-sm">
+                        {new Date(selectedPlaca.data_vistoria).toLocaleDateString("pt-BR")}
+                      </p>
+                    </div>
+                    {selectedPlaca.data_implantacao && (
+                      <div>
+                        <span className="text-sm font-medium text-muted-foreground">Data de Implantação:</span>
+                        <p className="text-sm">
+                          {new Date(selectedPlaca.data_implantacao).toLocaleDateString("pt-BR")}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </TabsContent>
@@ -465,7 +526,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           {foto.label}
                         </h4>
                         <img
-                          src={foto.url!}
+                          src={supabase.storage.from('placas').getPublicUrl(foto.url!).data.publicUrl}
                           alt={foto.label}
                           className="w-full h-auto rounded-lg border shadow-sm"
                         />
