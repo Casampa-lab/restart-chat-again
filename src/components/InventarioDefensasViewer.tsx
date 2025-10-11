@@ -531,18 +531,51 @@ export const InventarioDefensasViewer = ({
 
               <TabsContent value="foto" className="mt-4">
                 <div className="border rounded-lg p-8 text-center">
-                  <p className="text-muted-foreground">
-                    {(selectedDefensa as any).foto_url 
-                      ? "Foto disponível" 
-                      : "Nenhuma foto disponível"}
-                  </p>
-                  {(selectedDefensa as any).foto_url && (
-                    <img 
-                      src={(selectedDefensa as any).foto_url} 
-                      alt="Foto da defensa" 
-                      className="mt-4 mx-auto max-w-full rounded-lg"
-                    />
-                  )}
+                  {(() => {
+                    const fotoUrl = (selectedDefensa as any).foto_url;
+                    const linkFotografia = (selectedDefensa as any).link_fotografia;
+                    
+                    // Se tem URL da foto no Supabase
+                    if (fotoUrl && fotoUrl !== "HIPERLINK") {
+                      return (
+                        <>
+                          <p className="text-muted-foreground mb-4">Foto da defensa:</p>
+                          <img 
+                            src={fotoUrl} 
+                            alt="Foto da defensa" 
+                            className="mx-auto max-w-full rounded-lg"
+                          />
+                        </>
+                      );
+                    }
+                    
+                    // Se tem link externo
+                    if (linkFotografia && linkFotografia !== "HIPERLINK" && linkFotografia.startsWith('http')) {
+                      return (
+                        <>
+                          <p className="text-muted-foreground mb-4">Foto disponível via link externo:</p>
+                          <a 
+                            href={linkFotografia} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-primary underline hover:text-primary/80"
+                          >
+                            Abrir foto em nova aba
+                          </a>
+                        </>
+                      );
+                    }
+                    
+                    // Nenhuma foto disponível
+                    return (
+                      <div className="text-center">
+                        <p className="text-muted-foreground mb-2">Nenhuma foto disponível</p>
+                        <p className="text-sm text-muted-foreground/70">
+                          As fotos devem ser importadas junto com a planilha ou os links devem estar preenchidos corretamente no Excel
+                        </p>
+                      </div>
+                    );
+                  })()}
                 </div>
               </TabsContent>
 
