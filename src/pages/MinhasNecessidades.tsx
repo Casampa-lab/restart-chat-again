@@ -23,7 +23,7 @@ interface Necessidade {
   linha_planilha: number;
   created_at: string;
   rodovia?: { codigo: string; nome: string };
-  lote?: { nome: string };
+  lote?: { numero: string };
   [key: string]: any;
 }
 
@@ -72,7 +72,7 @@ const MinhasNecessidades = () => {
         .select(`
           *,
           rodovia:rodovias(codigo, nome),
-          lote:lotes(nome)
+          lote:lotes(numero)
         `)
         .eq("user_id", user?.id)
         .order("created_at", { ascending: false });
@@ -262,7 +262,7 @@ const MinhasNecessidades = () => {
                               <TableCell>
                                 <div className="text-sm">
                                   <div className="font-medium">{nec.rodovia?.codigo || "-"}</div>
-                                  <div className="text-muted-foreground">{nec.lote?.nome || "-"}</div>
+                                  <div className="text-muted-foreground">Lote {nec.lote?.numero || "-"}</div>
                                 </div>
                               </TableCell>
                               <TableCell>
