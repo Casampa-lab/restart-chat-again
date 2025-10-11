@@ -304,16 +304,21 @@ export function InventarioImporterManager() {
               }
               
               if (photoFileName) {
+                // Normalizar espaços antes de parênteses (ex: "D (152)" -> "D(152)")
+                const normalizeSpaces = (str: string) => str.replace(/\s+\(/g, '(').trim();
+                
                 // Tentar match direto primeiro
                 let matchedUrl = photoUrls[photoFileName];
                 
                 // Se não encontrou, tentar variações mais flexíveis
                 if (!matchedUrl) {
-                  const cleanedFileName = String(photoFileName).trim().replace(/\.[^/.]+$/, "");
+                  const normalizedFileName = normalizeSpaces(String(photoFileName));
+                  const cleanedFileName = normalizedFileName.replace(/\.[^/.]+$/, "");
                   
-                  // Procurar por matching parcial (case insensitive)
+                  // Procurar por matching parcial (case insensitive + normalização de espaços)
                   for (const [key, url] of Object.entries(photoUrls)) {
-                    const cleanedKey = key.replace(/\.[^/.]+$/, "").trim();
+                    const normalizedKey = normalizeSpaces(key);
+                    const cleanedKey = normalizedKey.replace(/\.[^/.]+$/, "");
                     if (cleanedKey.toLowerCase() === cleanedFileName.toLowerCase()) {
                       matchedUrl = url;
                       break;
