@@ -3695,6 +3695,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      match_cadastro_por_coordenadas: {
+        Args: {
+          p_lat: number
+          p_long: number
+          p_rodovia_id: string
+          p_tipo: string
+          p_tolerancia_metros?: number
+        }
+        Returns: {
+          cadastro_id: string
+          distancia_metros: number
+        }[]
+      }
       user_has_module_access: {
         Args: { _modulo_codigo: string; _user_id: string }
         Returns: boolean
