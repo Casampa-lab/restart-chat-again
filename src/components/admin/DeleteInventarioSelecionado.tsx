@@ -62,7 +62,7 @@ export function DeleteInventarioSelecionado() {
 
     if (!confirm(
       `Tem certeza que deseja apagar TODOS os registros de ${tabelaNome} da ${rodoviaNome} do Lote ${loteNome}?\n\n` +
-      `Esta ação não pode ser desfeita!`
+      `Esta ação não pode ser desfeita e incluirá as fotos associadas!`
     )) {
       return;
     }
@@ -70,18 +70,80 @@ export function DeleteInventarioSelecionado() {
     setDeleting(true);
 
     try {
-      const { error, count } = await supabase
+      // Mapa de tabelas para buckets de storage
+      const bucketMap: Record<string, string> = {
+        "ficha_placa": "placa-photos",
+        "ficha_marcas_longitudinais": "marcas-longitudinais",
+        "ficha_cilindros": "cilindros",
+        "ficha_inscricoes": "inscricoes",
+        "ficha_tachas": "tachas",
+        "ficha_porticos": "porticos",
+        "defensas": "defensas",
+      };
+
+      // 1. Primeiro buscar os registros para pegar as URLs das fotos
+      toast.info("Buscando registros e fotos...");
+      const { data: registros, error: fetchError } = await supabase
+        .from(selectedTabela as any)
+        .select('foto_url, id')
+        .eq('lote_id', selectedLote)
+        .eq('rodovia_id', selectedRodovia) as any;
+
+      if (fetchError) throw fetchError;
+
+      // 2. Coletar os caminhos das fotos
+      const fotosParaDeletar: string[] = [];
+      if (registros && Array.isArray(registros)) {
+        registros.forEach((reg: any) => {
+          if (reg.foto_url) {
+            const bucketName = bucketMap[selectedTabela];
+            if (bucketName) {
+              // Extrair o caminho do storage da URL pública
+              try {
+                const url = new URL(reg.foto_url);
+                const pathParts = url.pathname.split(`/storage/v1/object/public/${bucketName}/`);
+                if (pathParts[1]) {
+                  fotosParaDeletar.push(pathParts[1]);
+                }
+              } catch (e) {
+                console.error('Erro ao processar URL da foto:', e);
+              }
+            }
+          }
+        });
+      }
+
+      // 3. Deletar os registros do banco
+      toast.info(`Deletando ${registros?.length || 0} registros...`);
+      const { error: deleteError, count } = await supabase
         .from(selectedTabela as any)
         .delete({ count: 'exact' })
         .eq('lote_id', selectedLote)
         .eq('rodovia_id', selectedRodovia);
 
-      if (error) {
-        console.error('Erro ao deletar:', error);
-        throw error;
+      if (deleteError) {
+        console.error('Erro ao deletar registros:', deleteError);
+        throw deleteError;
       }
 
-      toast.success(`${count} registros deletados com sucesso!`);
+      // 4. Deletar as fotos do storage
+      if (fotosParaDeletar.length > 0) {
+        toast.info(`Deletando ${fotosParaDeletar.length} fotos do storage...`);
+        const bucketName = bucketMap[selectedTabela];
+        
+        const { error: storageError } = await supabase.storage
+          .from(bucketName)
+          .remove(fotosParaDeletar);
+
+        if (storageError) {
+          console.error('Erro ao deletar fotos:', storageError);
+          toast.warning(`Registros deletados, mas houve erro ao deletar algumas fotos: ${storageError.message}`);
+        } else {
+          toast.success(`${count} registros e ${fotosParaDeletar.length} fotos deletados com sucesso!`);
+        }
+      } else {
+        toast.success(`${count} registros deletados com sucesso! (Nenhuma foto associada)`);
+      }
       
       // Limpar seleção
       setSelectedLote("");
@@ -89,7 +151,7 @@ export function DeleteInventarioSelecionado() {
       setSelectedTabela("");
     } catch (error: any) {
       console.error('Erro:', error);
-      toast.error('Erro ao deletar registros: ' + error.message);
+      toast.error('Erro ao deletar: ' + error.message);
     } finally {
       setDeleting(false);
     }
