@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Camera, X, MapPin } from "lucide-react";
+import { extractDateFromPhotos } from "@/lib/photoMetadata";
 
 interface FichaVerificacaoSHFormProps {
   loteId: string;
@@ -67,11 +68,11 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId }: FichaVerificacaoSH
   const [contrato, setContrato] = useState("");
   const [empresa, setEmpresa] = useState("");
   const [snv, setSnv] = useState("");
-  const [dataVerificacao, setDataVerificacao] = useState(new Date().toISOString().split('T')[0]);
+  const [dataVerificacao, setDataVerificacao] = useState('');
   const [itens, setItens] = useState<ItemSH[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  const handleAddItem = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddItem = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -82,6 +83,15 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId }: FichaVerificacaoSH
 
     const preview = URL.createObjectURL(file);
     setItens([...itens, { file, preview, ...createEmptyItem() }]);
+    
+    // Se é o primeiro item com foto, extrair data e atualizar data de verificação
+    if (itens.length === 0) {
+      const photoDate = await extractDateFromPhotos(file);
+      if (photoDate) {
+        setDataVerificacao(photoDate);
+        toast.success(`Data de verificação atualizada: ${photoDate}`);
+      }
+    }
   };
 
   const handleRemoveItem = (index: number) => {
@@ -89,6 +99,11 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId }: FichaVerificacaoSH
     URL.revokeObjectURL(newItens[index].preview);
     newItens.splice(index, 1);
     setItens(newItens);
+    
+    // Se removeu todas as fotos, limpar a data
+    if (newItens.length === 0) {
+      setDataVerificacao('');
+    }
   };
 
   const handleUpdateItem = (index: number, field: keyof ItemSH, value: any) => {

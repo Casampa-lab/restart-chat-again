@@ -13,10 +13,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, X, Loader2, MapPin } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { extractDateFromPhotos } from "@/lib/photoMetadata";
 
 const fichaPlacaSchema = z.object({
   data_implantacao: z.string().optional(),
-  data_vistoria: z.string().min(1, "Data de vistoria obrigatória"),
+  data_vistoria: z.string().optional(), // Agora opcional, será preenchida pela foto
   codigo: z.string().optional(),
   modelo: z.string().optional(),
   tipo: z.string().optional(),
@@ -97,8 +98,20 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
     defaultValues: { placa_recuperada: false },
   });
 
-  const handlePhotoChange = (type: keyof typeof photos, file: File | undefined) => {
+  const handlePhotoChange = async (type: keyof typeof photos, file: File | undefined) => {
     setPhotos(prev => ({ ...prev, [type]: file }));
+    
+    // Se uma foto foi adicionada, extrair sua data e usar como data de vistoria
+    if (file) {
+      const photoDate = await extractDateFromPhotos(file);
+      if (photoDate) {
+        form.setValue('data_vistoria', photoDate);
+        toast.success(`Data da vistoria atualizada: ${photoDate}`);
+      }
+    } else if (Object.keys(photos).filter(k => k !== type && photos[k as keyof typeof photos]).length === 0) {
+      // Se removeu a última foto, limpar a data
+      form.setValue('data_vistoria', '');
+    }
   };
 
   const uploadPhoto = async (file: File, type: string): Promise<string> => {
