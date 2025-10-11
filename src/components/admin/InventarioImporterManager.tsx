@@ -573,22 +573,40 @@ export function InventarioImporterManager() {
         // Adicionar mapeamento específico para placas
         if (inventoryType === "placas") {
           const excelRow = row as any;
+          
+          // Log das chaves disponíveis para debug (apenas primeira linha)
+          if (index === 0) {
+            const availableKeys = Object.keys(excelRow).filter(k => !k.startsWith('_') && !k.startsWith('__'));
+            console.log("=== PLACAS: Chaves disponíveis no Excel ===", availableKeys);
+            console.log("=== PLACAS: Primeiros 5 valores ===");
+            availableKeys.slice(0, 5).forEach(key => {
+              console.log(`  ${key}: ${excelRow[key]}`);
+            });
+          }
+          
           // Helper para buscar valor com variações de nome
           const getVal = (...keys: string[]) => {
             for (const key of keys) {
-              // Tentar com a chave original
-              if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") return excelRow[key];
+              // Tentar com a chave original (case-sensitive)
+              if (excelRow[key] !== undefined && excelRow[key] !== null && excelRow[key] !== "") {
+                return excelRow[key];
+              }
               
               // Tentar normalizando espaços extras da chave buscada
               const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
               
-              // Procurar nas chaves do Excel normalizando espaços (excluir _rowArray)
-              for (const excelKey of Object.keys(excelRow).filter(k => k !== '_rowArray')) {
+              // Procurar nas chaves do Excel normalizando espaços e case-insensitive
+              for (const excelKey of Object.keys(excelRow)) {
+                // Pular propriedades internas
+                if (excelKey.startsWith('_') || excelKey.startsWith('__')) continue;
+                
                 const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
                 if (normalizedExcelKey === normalizedSearchKey || 
                     normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
                   const value = excelRow[excelKey];
-                  if (value !== undefined && value !== null && value !== "") return value;
+                  if (value !== undefined && value !== null && value !== "") {
+                    return value;
+                  }
                 }
               }
             }
