@@ -79,6 +79,12 @@ export function InventarioImporterManager() {
   };
 
   const handleImport = async () => {
+    // Prevenir múltiplas execuções simultâneas
+    if (importing) {
+      console.log("Importação já em andamento, ignorando clique duplicado");
+      return;
+    }
+    
     if (!inventoryType) {
       toast.error("Selecione o tipo de inventário");
       return;
@@ -115,7 +121,20 @@ export function InventarioImporterManager() {
 
       // 1. Processar Excel localmente
       setProgress("Processando planilha Excel...");
-      const arrayBuffer = await excelFile.arrayBuffer();
+      
+      // Verificar se o arquivo ainda é acessível
+      if (!excelFile || !excelFile.size) {
+        throw new Error("Arquivo Excel não está mais acessível. Por favor, selecione o arquivo novamente.");
+      }
+      
+      // Ler o arrayBuffer do arquivo com tratamento de erro específico
+      let arrayBuffer: ArrayBuffer;
+      try {
+        arrayBuffer = await excelFile.arrayBuffer();
+      } catch (fileError: any) {
+        console.error("Erro ao ler arquivo:", fileError);
+        throw new Error(`Erro ao ler o arquivo Excel: ${fileError.message || 'Arquivo não acessível'}. Tente selecionar o arquivo novamente.`);
+      }
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
