@@ -268,6 +268,13 @@ export function InventarioImporterManager() {
           rodovia_id: selectedRodovia,
         };
 
+        // Log das colunas disponíveis para os primeiros registros
+        if (index === 0) {
+          console.log("=== COLUNAS DO PRIMEIRO REGISTRO ===");
+          console.log("Todas as colunas:", Object.keys(row));
+          console.log("Procurando pela coluna:", photoColumnName);
+        }
+
         // Mapear campos do Excel
         for (const [key, value] of Object.entries(row)) {
           // Ignorar colunas vazias, "__empty" ou valores nulos
@@ -280,18 +287,18 @@ export function InventarioImporterManager() {
             record[normalizedKey] = value;
           }
 
-          // Se é o campo de foto
+          // Se é o campo de foto - SEMPRE processar independente do tipo
           if (hasPhotos && photoColumnName && key === photoColumnName) {
             const photoFileName = value as string;
             
             // Log detalhado apenas para os primeiros 3 registros
             if (index < 3) {
-              console.log(`[FOTO ${index}] Coluna encontrada: "${key}"`);
+              console.log(`[FOTO ${index}] ✓ Coluna "${key}" encontrada!`);
               console.log(`[FOTO ${index}] Nome do arquivo no Excel: "${photoFileName}"`);
               console.log(`[FOTO ${index}] Existe no mapeamento?`, photoFileName in photoUrls);
               if (photoFileName && !(photoFileName in photoUrls)) {
-                console.log(`[FOTO ${index}] Variações disponíveis para "${photoFileName}":`, 
-                  Object.keys(photoUrls).filter(k => k.includes(photoFileName) || photoFileName.includes(k)).slice(0, 5)
+                console.log(`[FOTO ${index}] Variações disponíveis:`, 
+                  Object.keys(photoUrls).filter(k => k.toLowerCase().includes(photoFileName.toLowerCase()) || photoFileName.toLowerCase().includes(k.toLowerCase())).slice(0, 5)
                 );
               }
             }
@@ -299,7 +306,7 @@ export function InventarioImporterManager() {
             if (photoFileName && photoUrls[photoFileName]) {
               record.foto_url = photoUrls[photoFileName];
               if (index < 3) {
-                console.log(`[FOTO ${index}] ✓ URL da foto mapeada com sucesso`);
+                console.log(`[FOTO ${index}] ✓✓ URL mapeada: ${photoUrls[photoFileName].substring(0, 80)}...`);
               }
               
               // Para defensas, extrair data da foto do nome do arquivo
