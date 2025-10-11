@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, Eye } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface FichaDefensa {
@@ -155,33 +155,50 @@ export const InventarioDefensasViewer = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tramo</TableHead>
-                <TableHead>Lado</TableHead>
-                <TableHead>Km Inicial</TableHead>
-                <TableHead>Km Final</TableHead>
-                <TableHead>Comprimento Total do Tramo (m)</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Necessita Intervenção</TableHead>
-                <TableHead>Ações</TableHead>
+                <TableHead className="text-center">
+                  <div className="whitespace-normal leading-tight">Tramo</div>
+                </TableHead>
+                <TableHead className="text-center">
+                  <div className="whitespace-normal leading-tight">Lado</div>
+                </TableHead>
+                <TableHead className="text-center">
+                  <div className="whitespace-normal leading-tight">Km<br/>Inicial</div>
+                </TableHead>
+                <TableHead className="text-center">
+                  <div className="whitespace-normal leading-tight">Km<br/>Final</div>
+                </TableHead>
+                <TableHead className="text-center">
+                  <div className="whitespace-normal leading-tight">Comprimento<br/>Total (m)</div>
+                </TableHead>
+                <TableHead className="text-center">
+                  <div className="whitespace-normal leading-tight">Estado<br/>Conservação</div>
+                </TableHead>
+                <TableHead className="text-center">
+                  <div className="whitespace-normal leading-tight">Necessita<br/>Intervenção</div>
+                </TableHead>
+                <TableHead className="text-center w-[80px]">
+                  <div className="whitespace-normal leading-tight">Ações</div>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredDefensas?.map((defensa) => (
                 <TableRow key={defensa.id}>
-                  <TableCell>{(defensa as any).tramo || "-"}</TableCell>
-                  <TableCell>{defensa.lado}</TableCell>
-                  <TableCell>{defensa.km_inicial}</TableCell>
-                  <TableCell>{defensa.km_final}</TableCell>
-                  <TableCell>{defensa.extensao_metros}</TableCell>
-                  <TableCell>{defensa.estado_conservacao}</TableCell>
-                  <TableCell>{defensa.necessita_intervencao ? "Sim" : "Não"}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">{(defensa as any).tramo || "-"}</TableCell>
+                  <TableCell className="text-center">{defensa.lado}</TableCell>
+                  <TableCell className="text-center">{defensa.km_inicial}</TableCell>
+                  <TableCell className="text-center">{defensa.km_final}</TableCell>
+                  <TableCell className="text-center">{defensa.extensao_metros}</TableCell>
+                  <TableCell className="text-center">{defensa.estado_conservacao}</TableCell>
+                  <TableCell className="text-center">{defensa.necessita_intervencao ? "Sim" : "Não"}</TableCell>
+                  <TableCell className="text-center">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={() => openDefensaDetail(defensa)}
+                      className="h-8 w-8 p-0"
                     >
-                      Ver Detalhes
+                      <Eye className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>
