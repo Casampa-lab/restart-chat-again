@@ -171,6 +171,12 @@ export const InventarioDefensasViewer = ({
                   <div className="whitespace-normal leading-tight">Comprimento<br/>Total (m)</div>
                 </TableHead>
                 <TableHead className="text-center">
+                  <div className="whitespace-normal leading-tight">Qtde<br/>Lâminas</div>
+                </TableHead>
+                <TableHead className="text-center">
+                  <div className="whitespace-normal leading-tight">Nível de<br/>Contenção</div>
+                </TableHead>
+                <TableHead className="text-center">
                   <div className="whitespace-normal leading-tight">Estado<br/>Conservação</div>
                 </TableHead>
                 <TableHead className="text-center">
@@ -189,7 +195,9 @@ export const InventarioDefensasViewer = ({
                   <TableCell className="text-center">{defensa.km_inicial}</TableCell>
                   <TableCell className="text-center">{defensa.km_final}</TableCell>
                   <TableCell className="text-center">{defensa.extensao_metros}</TableCell>
-                  <TableCell className="text-center">{defensa.estado_conservacao}</TableCell>
+                  <TableCell className="text-center">{(defensa as any).quantidade_laminas || "-"}</TableCell>
+                  <TableCell className="text-center">{(defensa as any).nivel_contencao_en1317 || "-"}</TableCell>
+                  <TableCell className="text-center">{defensa.estado_conservacao || "-"}</TableCell>
                   <TableCell className="text-center">{defensa.necessita_intervencao ? "Sim" : "Não"}</TableCell>
                   <TableCell className="text-center">
                     <Button

@@ -349,7 +349,7 @@ export function InventarioImporterManager() {
           record.tramo = getVal("Tramo", "tramo", "Tr") || "";
           record.lado = getVal("Lado", "lado") || "";
           record.tipo_defensa = "Simples";
-          record.estado_conservacao = "Bom";
+          record.estado_conservacao = getVal("Estado de Conservação", "Estado de Conservacao", "estado_conservacao") || "";
           
           // Localização
           const kmIni = getVal("Km Inicial", "Km inicial", "km_inicial", "km inicial");
