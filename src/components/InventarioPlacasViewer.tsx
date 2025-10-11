@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History } from "lucide-react";
+import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface FichaPlaca {
@@ -170,7 +170,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
+            <Library className="h-5 w-5" />
             Inventário de Placas
           </CardTitle>
         </CardHeader>
