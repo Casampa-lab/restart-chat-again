@@ -403,8 +403,8 @@ export function InventarioImporterManager() {
               // Tentar normalizando espaços extras da chave buscada
               const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
               
-              // Procurar nas chaves do Excel normalizando espaços
-              for (const excelKey of Object.keys(excelRow)) {
+              // Procurar nas chaves do Excel normalizando espaços (excluir _rowArray)
+              for (const excelKey of Object.keys(excelRow).filter(k => k !== '_rowArray')) {
                 const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
                 if (normalizedExcelKey === normalizedSearchKey || 
                     normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
@@ -500,8 +500,8 @@ export function InventarioImporterManager() {
               // Tentar normalizando espaços extras da chave buscada
               const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
               
-              // Procurar nas chaves do Excel normalizando espaços
-              for (const excelKey of Object.keys(excelRow)) {
+              // Procurar nas chaves do Excel normalizando espaços (excluir _rowArray)
+              for (const excelKey of Object.keys(excelRow).filter(k => k !== '_rowArray')) {
                 const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
                 if (normalizedExcelKey === normalizedSearchKey || 
                     normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
@@ -582,8 +582,8 @@ export function InventarioImporterManager() {
               // Tentar normalizando espaços extras da chave buscada
               const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
               
-              // Procurar nas chaves do Excel normalizando espaços
-              for (const excelKey of Object.keys(excelRow)) {
+              // Procurar nas chaves do Excel normalizando espaços (excluir _rowArray)
+              for (const excelKey of Object.keys(excelRow).filter(k => k !== '_rowArray')) {
                 const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
                 if (normalizedExcelKey === normalizedSearchKey || 
                     normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
@@ -660,8 +660,8 @@ export function InventarioImporterManager() {
               // Tentar normalizando espaços extras da chave buscada
               const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
               
-              // Procurar nas chaves do Excel normalizando espaços
-              for (const excelKey of Object.keys(excelRow)) {
+              // Procurar nas chaves do Excel normalizando espaços (excluir _rowArray)
+              for (const excelKey of Object.keys(excelRow).filter(k => k !== '_rowArray')) {
                 const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
                 if (normalizedExcelKey === normalizedSearchKey || 
                     normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
@@ -719,8 +719,8 @@ export function InventarioImporterManager() {
               // Tentar normalizando espaços extras da chave buscada
               const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
               
-              // Procurar nas chaves do Excel normalizando espaços
-              for (const excelKey of Object.keys(excelRow)) {
+              // Procurar nas chaves do Excel normalizando espaços (excluir _rowArray)
+              for (const excelKey of Object.keys(excelRow).filter(k => k !== '_rowArray')) {
                 const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
                 if (normalizedExcelKey === normalizedSearchKey || 
                     normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
@@ -776,8 +776,8 @@ export function InventarioImporterManager() {
               // Tentar normalizando espaços extras da chave buscada
               const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
               
-              // Procurar nas chaves do Excel normalizando espaços
-              for (const excelKey of Object.keys(excelRow)) {
+              // Procurar nas chaves do Excel normalizando espaços (excluir _rowArray)
+              for (const excelKey of Object.keys(excelRow).filter(k => k !== '_rowArray')) {
                 const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
                 if (normalizedExcelKey === normalizedSearchKey || 
                     normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
@@ -833,8 +833,8 @@ export function InventarioImporterManager() {
               // Tentar normalizando espaços extras da chave buscada
               const normalizedSearchKey = key.replace(/\s+/g, ' ').trim();
               
-              // Procurar nas chaves do Excel normalizando espaços
-              for (const excelKey of Object.keys(excelRow)) {
+              // Procurar nas chaves do Excel normalizando espaços (excluir _rowArray)
+              for (const excelKey of Object.keys(excelRow).filter(k => k !== '_rowArray')) {
                 const normalizedExcelKey = excelKey.replace(/\s+/g, ' ').trim();
                 if (normalizedExcelKey === normalizedSearchKey || 
                     normalizedExcelKey.toLowerCase() === normalizedSearchKey.toLowerCase()) {
