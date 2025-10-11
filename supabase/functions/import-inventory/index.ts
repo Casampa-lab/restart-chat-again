@@ -133,6 +133,13 @@ serve(async (req) => {
     if (normalizedData.length > 0) {
       console.log("Colunas:", Object.keys(normalizedData[0]));
       console.log("Dados:", normalizedData[0]);
+      
+      // Log específico para campos que podem conter porcentagem
+      for (const [key, value] of Object.entries(normalizedData[0])) {
+        if (typeof value === 'string' && value.includes('%')) {
+          console.log(`[PERCENT DETECTION] Campo: "${key}", Valor: "${value}", Tipo: ${typeof value}`);
+        }
+      }
     }
 
     // Processar fotos se houver
@@ -415,11 +422,22 @@ serve(async (req) => {
               hasValidData = true;
               
               // Limpar valores com porcentagem (ex: "55.10%" → 55.10)
-              let cleanedValue = value;
-              if (typeof value === 'string' && value.includes('%')) {
+              // IMPORTANTE: Fazer isso ANTES de qualquer outra conversão
+              let cleanedValue: any = value;
+              if (typeof value === 'string' && value.trim().includes('%')) {
                 const originalValue = value;
-                cleanedValue = parseFloat(value.replace('%', '').trim());
-                console.log(`[PERCENT DEBUG] Campo: ${normalizedKey}, Original: "${originalValue}", Limpo: ${cleanedValue}, Tipo: ${typeof cleanedValue}`);
+                // Remover % e converter para número
+                const numericString = value.replace('%', '').replace(',', '.').trim();
+                const numericValue = parseFloat(numericString);
+                console.log(`[PERCENT DEBUG] Campo: "${normalizedKey}" (original key: "${key}"), Valor original: "${originalValue}", Valor limpo: ${numericValue}, Tipo após conversão: ${typeof numericValue}`);
+                
+                // Se a conversão falhou (NaN), manter o valor original e logar erro
+                if (isNaN(numericValue)) {
+                  console.error(`[PERCENT ERROR] Falha ao converter "${originalValue}" para número no campo "${normalizedKey}"`);
+                  cleanedValue = originalValue;
+                } else {
+                  cleanedValue = numericValue;
+                }
               }
               
               // Conversões especiais usando a chave original
