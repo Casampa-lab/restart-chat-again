@@ -221,17 +221,27 @@ export function InventarioImporterManager() {
               .from(bucketName)
               .getPublicUrl(photoPath);
 
+            // Normalizar espaços antes de parênteses
+            const normalizeSpaces = (str: string) => str.replace(/\s+\(/g, '(').trim();
+            
             // Mapear todas as variações do nome
             const nomeCompleto = photo.name;
             const nomeSemExtensao = nomeCompleto.replace(/\.[^/.]+$/, "").trim();
-
+            
+            // Variações com e sem normalização de espaços
             const variacoes = [
               nomeSemExtensao,
+              normalizeSpaces(nomeSemExtensao),
               nomeSemExtensao.toLowerCase(),
+              normalizeSpaces(nomeSemExtensao.toLowerCase()),
               nomeSemExtensao.toUpperCase(),
+              normalizeSpaces(nomeSemExtensao.toUpperCase()),
               nomeCompleto,
+              normalizeSpaces(nomeCompleto),
               nomeCompleto.toLowerCase(),
+              normalizeSpaces(nomeCompleto.toLowerCase()),
               nomeCompleto.toUpperCase(),
+              normalizeSpaces(nomeCompleto.toUpperCase()),
             ];
 
             variacoes.forEach(variacao => {
