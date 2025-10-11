@@ -253,7 +253,15 @@ export function InventarioImporterManager() {
       const tableName = INVENTORY_TYPES.find(t => t.value === inventoryType)?.table;
       if (!tableName) throw new Error("Tipo de inventário inválido");
 
-      const recordsToInsert = normalizedData.map((row: any) => {
+      // Log das chaves de fotos disponíveis
+      if (hasPhotos && Object.keys(photoUrls).length > 0) {
+        console.log("=== FOTOS DISPONÍVEIS PARA MAPEAMENTO ===");
+        console.log("Total de fotos carregadas:", Object.keys(photoUrls).length);
+        console.log("Primeiras 5 chaves:", Object.keys(photoUrls).slice(0, 5));
+        console.log("Coluna de fotos configurada:", photoColumnName);
+      }
+
+      const recordsToInsert = normalizedData.map((row: any, index: number) => {
         const record: Record<string, any> = {
           user_id: user.id,
           lote_id: selectedLote,
@@ -275,8 +283,24 @@ export function InventarioImporterManager() {
           // Se é o campo de foto
           if (hasPhotos && photoColumnName && key === photoColumnName) {
             const photoFileName = value as string;
+            
+            // Log detalhado apenas para os primeiros 3 registros
+            if (index < 3) {
+              console.log(`[FOTO ${index}] Coluna encontrada: "${key}"`);
+              console.log(`[FOTO ${index}] Nome do arquivo no Excel: "${photoFileName}"`);
+              console.log(`[FOTO ${index}] Existe no mapeamento?`, photoFileName in photoUrls);
+              if (photoFileName && !(photoFileName in photoUrls)) {
+                console.log(`[FOTO ${index}] Variações disponíveis para "${photoFileName}":`, 
+                  Object.keys(photoUrls).filter(k => k.includes(photoFileName) || photoFileName.includes(k)).slice(0, 5)
+                );
+              }
+            }
+            
             if (photoFileName && photoUrls[photoFileName]) {
               record.foto_url = photoUrls[photoFileName];
+              if (index < 3) {
+                console.log(`[FOTO ${index}] ✓ URL da foto mapeada com sucesso`);
+              }
               
               // Para defensas, extrair data da foto do nome do arquivo
               if (inventoryType === "defensas" && photoFileName) {
