@@ -2284,6 +2284,805 @@ export type Database = {
           },
         ]
       }
+      necessidades_cilindros: {
+        Row: {
+          arquivo_origem: string | null
+          cadastro_id: string | null
+          cor_corpo: string | null
+          cor_refletivo: string | null
+          created_at: string | null
+          data_importacao: string | null
+          distancia_match_metros: number | null
+          espacamento_m: number | null
+          extensao_km: number | null
+          id: string
+          km_final: number | null
+          km_inicial: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          linha_planilha: number | null
+          local_implantacao: string | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string
+          observacao: string | null
+          quantidade: number | null
+          rodovia_id: string
+          servico: string
+          snv: string | null
+          tipo_refletivo: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          arquivo_origem?: string | null
+          cadastro_id?: string | null
+          cor_corpo?: string | null
+          cor_refletivo?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          distancia_match_metros?: number | null
+          espacamento_m?: number | null
+          extensao_km?: number | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          linha_planilha?: number | null
+          local_implantacao?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id: string
+          observacao?: string | null
+          quantidade?: number | null
+          rodovia_id: string
+          servico: string
+          snv?: string | null
+          tipo_refletivo?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          arquivo_origem?: string | null
+          cadastro_id?: string | null
+          cor_corpo?: string | null
+          cor_refletivo?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          distancia_match_metros?: number | null
+          espacamento_m?: number | null
+          extensao_km?: number | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          linha_planilha?: number | null
+          local_implantacao?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string
+          observacao?: string | null
+          quantidade?: number | null
+          rodovia_id?: string
+          servico?: string
+          snv?: string | null
+          tipo_refletivo?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "necessidades_cilindros_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_cilindros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_cilindros_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_cilindros_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      necessidades_defensas: {
+        Row: {
+          arquivo_origem: string | null
+          br: string | null
+          cadastro_id: string | null
+          created_at: string | null
+          data_importacao: string | null
+          distancia_match_metros: number | null
+          estado_conservacao: string | null
+          extensao_metros: number | null
+          id: string
+          km_final: number | null
+          km_inicial: number | null
+          lado: string | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          linha_planilha: number | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string
+          nivel_contencao_en1317: string | null
+          nivel_contencao_nchrp350: string | null
+          nivel_risco: string | null
+          observacao: string | null
+          quantidade_laminas: number | null
+          rodovia_id: string
+          servico: string
+          snv: string | null
+          terminal_entrada: string | null
+          terminal_saida: string | null
+          tipo_avaria: string | null
+          tipo_defensa: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          arquivo_origem?: string | null
+          br?: string | null
+          cadastro_id?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          distancia_match_metros?: number | null
+          estado_conservacao?: string | null
+          extensao_metros?: number | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          lado?: string | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          linha_planilha?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id: string
+          nivel_contencao_en1317?: string | null
+          nivel_contencao_nchrp350?: string | null
+          nivel_risco?: string | null
+          observacao?: string | null
+          quantidade_laminas?: number | null
+          rodovia_id: string
+          servico: string
+          snv?: string | null
+          terminal_entrada?: string | null
+          terminal_saida?: string | null
+          tipo_avaria?: string | null
+          tipo_defensa?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          arquivo_origem?: string | null
+          br?: string | null
+          cadastro_id?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          distancia_match_metros?: number | null
+          estado_conservacao?: string | null
+          extensao_metros?: number | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          lado?: string | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          linha_planilha?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string
+          nivel_contencao_en1317?: string | null
+          nivel_contencao_nchrp350?: string | null
+          nivel_risco?: string | null
+          observacao?: string | null
+          quantidade_laminas?: number | null
+          rodovia_id?: string
+          servico?: string
+          snv?: string | null
+          terminal_entrada?: string | null
+          terminal_saida?: string | null
+          tipo_avaria?: string | null
+          tipo_defensa?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "necessidades_defensas_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "defensas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_defensas_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_defensas_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      necessidades_marcas_longitudinais: {
+        Row: {
+          arquivo_origem: string | null
+          cadastro_id: string | null
+          cor: string | null
+          created_at: string | null
+          data_importacao: string | null
+          distancia_match_metros: number | null
+          espessura_cm: number | null
+          estado_conservacao: string | null
+          extensao_metros: number | null
+          id: string
+          km_final: number | null
+          km_inicial: number | null
+          largura_cm: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          linha_planilha: number | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string
+          material: string | null
+          observacao: string | null
+          rodovia_id: string
+          servico: string
+          snv: string | null
+          tipo_demarcacao: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          arquivo_origem?: string | null
+          cadastro_id?: string | null
+          cor?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          distancia_match_metros?: number | null
+          espessura_cm?: number | null
+          estado_conservacao?: string | null
+          extensao_metros?: number | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          largura_cm?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          linha_planilha?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id: string
+          material?: string | null
+          observacao?: string | null
+          rodovia_id: string
+          servico: string
+          snv?: string | null
+          tipo_demarcacao?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          arquivo_origem?: string | null
+          cadastro_id?: string | null
+          cor?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          distancia_match_metros?: number | null
+          espessura_cm?: number | null
+          estado_conservacao?: string | null
+          extensao_metros?: number | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          largura_cm?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          linha_planilha?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string
+          material?: string | null
+          observacao?: string | null
+          rodovia_id?: string
+          servico?: string
+          snv?: string | null
+          tipo_demarcacao?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "necessidades_marcas_longitudinais_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_marcas_longitudinais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_marcas_longitudinais_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_marcas_longitudinais_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      necessidades_marcas_transversais: {
+        Row: {
+          area_m2: number | null
+          arquivo_origem: string | null
+          cadastro_id: string | null
+          cor: string | null
+          created_at: string | null
+          data_importacao: string | null
+          dimensoes: string | null
+          distancia_match_metros: number | null
+          estado_conservacao: string | null
+          id: string
+          km_final: number | null
+          km_inicial: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          linha_planilha: number | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string
+          material_utilizado: string | null
+          observacao: string | null
+          rodovia_id: string
+          servico: string
+          tipo_inscricao: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          area_m2?: number | null
+          arquivo_origem?: string | null
+          cadastro_id?: string | null
+          cor?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          dimensoes?: string | null
+          distancia_match_metros?: number | null
+          estado_conservacao?: string | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          linha_planilha?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id: string
+          material_utilizado?: string | null
+          observacao?: string | null
+          rodovia_id: string
+          servico: string
+          tipo_inscricao?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          area_m2?: number | null
+          arquivo_origem?: string | null
+          cadastro_id?: string | null
+          cor?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          dimensoes?: string | null
+          distancia_match_metros?: number | null
+          estado_conservacao?: string | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          linha_planilha?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string
+          material_utilizado?: string | null
+          observacao?: string | null
+          rodovia_id?: string
+          servico?: string
+          tipo_inscricao?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "necessidades_marcas_transversais_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_inscricoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_marcas_transversais_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_marcas_transversais_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      necessidades_placas: {
+        Row: {
+          altura_m: number | null
+          area_m2: number | null
+          arquivo_origem: string | null
+          br: string | null
+          cadastro_id: string | null
+          codigo: string | null
+          created_at: string | null
+          data_importacao: string | null
+          descricao: string | null
+          dimensoes_mm: string | null
+          distancia_m: number | null
+          distancia_match_metros: number | null
+          id: string
+          km: number | null
+          lado: string | null
+          latitude: number | null
+          linha_planilha: number | null
+          longitude: number | null
+          lote_id: string
+          modelo: string | null
+          observacao: string | null
+          pelicula: string | null
+          retrorrefletividade: number | null
+          rodovia_id: string
+          servico: string
+          snv: string | null
+          substrato: string | null
+          suporte: string | null
+          tipo: string | null
+          uf: string | null
+          updated_at: string | null
+          user_id: string
+          velocidade: string | null
+        }
+        Insert: {
+          altura_m?: number | null
+          area_m2?: number | null
+          arquivo_origem?: string | null
+          br?: string | null
+          cadastro_id?: string | null
+          codigo?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          descricao?: string | null
+          dimensoes_mm?: string | null
+          distancia_m?: number | null
+          distancia_match_metros?: number | null
+          id?: string
+          km?: number | null
+          lado?: string | null
+          latitude?: number | null
+          linha_planilha?: number | null
+          longitude?: number | null
+          lote_id: string
+          modelo?: string | null
+          observacao?: string | null
+          pelicula?: string | null
+          retrorrefletividade?: number | null
+          rodovia_id: string
+          servico: string
+          snv?: string | null
+          substrato?: string | null
+          suporte?: string | null
+          tipo?: string | null
+          uf?: string | null
+          updated_at?: string | null
+          user_id: string
+          velocidade?: string | null
+        }
+        Update: {
+          altura_m?: number | null
+          area_m2?: number | null
+          arquivo_origem?: string | null
+          br?: string | null
+          cadastro_id?: string | null
+          codigo?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          descricao?: string | null
+          dimensoes_mm?: string | null
+          distancia_m?: number | null
+          distancia_match_metros?: number | null
+          id?: string
+          km?: number | null
+          lado?: string | null
+          latitude?: number | null
+          linha_planilha?: number | null
+          longitude?: number | null
+          lote_id?: string
+          modelo?: string | null
+          observacao?: string | null
+          pelicula?: string | null
+          retrorrefletividade?: number | null
+          rodovia_id?: string
+          servico?: string
+          snv?: string | null
+          substrato?: string | null
+          suporte?: string | null
+          tipo?: string | null
+          uf?: string | null
+          updated_at?: string | null
+          user_id?: string
+          velocidade?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "necessidades_placas_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_placa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_placas_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_placas_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      necessidades_porticos: {
+        Row: {
+          altura_livre_m: number | null
+          arquivo_origem: string | null
+          cadastro_id: string | null
+          created_at: string | null
+          data_importacao: string | null
+          distancia_match_metros: number | null
+          estado_conservacao: string | null
+          id: string
+          km: number | null
+          lado: string | null
+          latitude: number | null
+          linha_planilha: number | null
+          longitude: number | null
+          lote_id: string
+          observacao: string | null
+          rodovia_id: string
+          servico: string
+          snv: string | null
+          tipo: string | null
+          updated_at: string | null
+          user_id: string
+          vao_horizontal_m: number | null
+        }
+        Insert: {
+          altura_livre_m?: number | null
+          arquivo_origem?: string | null
+          cadastro_id?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          distancia_match_metros?: number | null
+          estado_conservacao?: string | null
+          id?: string
+          km?: number | null
+          lado?: string | null
+          latitude?: number | null
+          linha_planilha?: number | null
+          longitude?: number | null
+          lote_id: string
+          observacao?: string | null
+          rodovia_id: string
+          servico: string
+          snv?: string | null
+          tipo?: string | null
+          updated_at?: string | null
+          user_id: string
+          vao_horizontal_m?: number | null
+        }
+        Update: {
+          altura_livre_m?: number | null
+          arquivo_origem?: string | null
+          cadastro_id?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          distancia_match_metros?: number | null
+          estado_conservacao?: string | null
+          id?: string
+          km?: number | null
+          lado?: string | null
+          latitude?: number | null
+          linha_planilha?: number | null
+          longitude?: number | null
+          lote_id?: string
+          observacao?: string | null
+          rodovia_id?: string
+          servico?: string
+          snv?: string | null
+          tipo?: string | null
+          updated_at?: string | null
+          user_id?: string
+          vao_horizontal_m?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "necessidades_porticos_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_porticos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_porticos_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_porticos_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      necessidades_tachas: {
+        Row: {
+          arquivo_origem: string | null
+          cadastro_id: string | null
+          cor_refletivo: string | null
+          corpo: string | null
+          created_at: string | null
+          data_importacao: string | null
+          descricao: string | null
+          distancia_match_metros: number | null
+          espacamento_m: number | null
+          extensao_km: number | null
+          id: string
+          km_final: number | null
+          km_inicial: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          linha_planilha: number | null
+          local_implantacao: string | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string
+          observacao: string | null
+          quantidade: number | null
+          refletivo: string | null
+          rodovia_id: string
+          servico: string
+          snv: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          arquivo_origem?: string | null
+          cadastro_id?: string | null
+          cor_refletivo?: string | null
+          corpo?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          descricao?: string | null
+          distancia_match_metros?: number | null
+          espacamento_m?: number | null
+          extensao_km?: number | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          linha_planilha?: number | null
+          local_implantacao?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id: string
+          observacao?: string | null
+          quantidade?: number | null
+          refletivo?: string | null
+          rodovia_id: string
+          servico: string
+          snv?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          arquivo_origem?: string | null
+          cadastro_id?: string | null
+          cor_refletivo?: string | null
+          corpo?: string | null
+          created_at?: string | null
+          data_importacao?: string | null
+          descricao?: string | null
+          distancia_match_metros?: number | null
+          espacamento_m?: number | null
+          extensao_km?: number | null
+          id?: string
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          linha_planilha?: number | null
+          local_implantacao?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string
+          observacao?: string | null
+          quantidade?: number | null
+          refletivo?: string | null
+          rodovia_id?: string
+          servico?: string
+          snv?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "necessidades_tachas_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_tachas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_tachas_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_tachas_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planos: {
         Row: {
           ativo: boolean | null
