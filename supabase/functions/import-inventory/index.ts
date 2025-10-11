@@ -111,12 +111,26 @@ serve(async (req) => {
         s: { ...range.s, r: range.s.r + 1 } 
       };
       worksheet['!ref'] = XLSX.utils.encode_range(dataRange);
-      jsonData = XLSX.utils.sheet_to_json(worksheet);
+      jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     } else {
-      jsonData = XLSX.utils.sheet_to_json(worksheet);
+      jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     }
 
-    console.log(`Processando ${jsonData.length} registros para ${tableName}`);
+    // Filtrar linhas vazias - uma linha é considerada vazia se TODOS os campos são null/undefined/empty
+    jsonData = jsonData.filter((row: any) => {
+      // Se a linha não existe ou é vazia, retornar false
+      if (!row || !Array.isArray(row)) return false;
+      
+      // Verificar se há pelo menos um valor não vazio na linha
+      return row.some((cell: any) => {
+        return cell !== null && 
+               cell !== undefined && 
+               cell !== '' && 
+               String(cell).trim() !== '';
+      });
+    });
+
+    console.log(`Processando ${jsonData.length} registros (após filtrar vazios) para ${tableName}`);
 
     // Normalizar chaves do Excel (remover espaços extras)
     const normalizedData = jsonData.map((row: any) => {

@@ -163,11 +163,25 @@ export function InventarioImporterManager() {
       
       const config = sheetConfig[inventoryType] || { headerRow: 0, dataStartRow: 1 };
       const headers = jsonData[config.headerRow] as any[];
-      const dataRows = jsonData.slice(config.dataStartRow);
+      let dataRows = jsonData.slice(config.dataStartRow);
+
+      // Filtrar linhas vazias - uma linha é considerada vazia se TODOS os campos são null/undefined/empty
+      dataRows = dataRows.filter((row: any) => {
+        // Se a linha não existe ou é vazia, retornar false
+        if (!row || !Array.isArray(row)) return false;
+        
+        // Verificar se há pelo menos um valor não vazio na linha
+        return row.some((cell: any) => {
+          return cell !== null && 
+                 cell !== undefined && 
+                 cell !== '' && 
+                 String(cell).trim() !== '';
+        });
+      });
 
       // Log para debug
       console.log(`=== COLUNAS DISPONÍVEIS NO EXCEL (${inventoryType}) ===`);
-      console.log("Total de registros:", dataRows.length);
+      console.log("Total de registros após filtrar vazios:", dataRows.length);
       console.log("Nomes das colunas:", headers);
       console.log("Primeira linha de dados:", dataRows[0]);
       console.log("===============================");
