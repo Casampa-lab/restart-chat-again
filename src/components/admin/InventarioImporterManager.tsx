@@ -200,20 +200,79 @@ export function InventarioImporterManager() {
       const photoUrls: Record<string, string> = {};
       const photoArray = photos ? Array.from(photos) : [];
 
-      if (hasPhotos && photoArray.length > 0) {
+      const bucketMap: Record<string, string> = {
+        "placas": "placa-photos",
+        "marcas_longitudinais": "marcas-longitudinais",
+        "cilindros": "cilindros",
+        "inscricoes": "inscricoes",
+        "tachas": "tachas",
+        "porticos": "porticos",
+        "defensas": "defensas",
+      };
+
+      const bucketName = bucketMap[inventoryType] || "verificacao-photos";
+
+      // Se não há fotos para upload, buscar fotos existentes no bucket
+      if (hasPhotos && photoArray.length === 0) {
+        setProgress("Buscando fotos já existentes no bucket...");
+        
+        // Buscar em múltiplos níveis do bucket
+        const paths = ['', inventoryType, 'inventario'];
+        let allFiles: any[] = [];
+        
+        for (const path of paths) {
+          const { data: files, error: listError } = await supabase.storage
+            .from(bucketName)
+            .list(path, { limit: 1000 });
+
+          if (!listError && files) {
+            allFiles = allFiles.concat(files.map(f => ({ ...f, path })));
+          }
+        }
+
+        const normalizeSpaces = (str: string) => str.replace(/\s+\(/g, '(').trim();
+        
+        for (const file of allFiles) {
+          const fullPath = file.path ? `${file.path}/${file.name}` : file.name;
+          const { data: urlData } = supabase.storage
+            .from(bucketName)
+            .getPublicUrl(fullPath);
+
+          // Extrair nome do arquivo sem caminho e sem extensão
+          const fileName = file.name.split('/').pop() || file.name;
+          const nomeSemExtensao = fileName.replace(/\.[^/.]+$/, "").replace(/^\d+_/, "").trim();
+          
+          // Variações
+          const variacoes = [
+            nomeSemExtensao,
+            normalizeSpaces(nomeSemExtensao),
+            nomeSemExtensao.toLowerCase(),
+            normalizeSpaces(nomeSemExtensao.toLowerCase()),
+            nomeSemExtensao.toUpperCase(),
+            normalizeSpaces(nomeSemExtensao.toUpperCase()),
+            fileName,
+            normalizeSpaces(fileName),
+            fileName.toLowerCase(),
+            normalizeSpaces(fileName.toLowerCase()),
+            fileName.toUpperCase(),
+            normalizeSpaces(fileName.toUpperCase()),
+          ];
+
+          variacoes.forEach(variacao => {
+            photoUrls[variacao] = urlData.publicUrl;
+          });
+        }
+        
+        if (allFiles.length > 0) {
+          toast.success(`${allFiles.length} fotos encontradas no bucket`);
+          console.log("=== FOTOS CARREGADAS DO BUCKET ===");
+          console.log("Total:", allFiles.length);
+          console.log("Primeiras 5 chaves:", Object.keys(photoUrls).slice(0, 5));
+        } else {
+          toast.error("Nenhuma foto encontrada no bucket");
+        }
+      } else if (hasPhotos && photoArray.length > 0) {
         setProgress(`Fazendo upload de ${photoArray.length} fotos...`);
-
-        const bucketMap: Record<string, string> = {
-          "placas": "placa-photos",
-          "marcas_longitudinais": "marcas-longitudinais",
-          "cilindros": "cilindros",
-          "inscricoes": "inscricoes",
-          "tachas": "tachas",
-          "porticos": "porticos",
-          "defensas": "defensas",
-        };
-
-        const bucketName = bucketMap[inventoryType] || "verificacao-photos";
 
         for (let i = 0; i < photoArray.length; i++) {
           const photo = photoArray[i];
@@ -229,14 +288,11 @@ export function InventarioImporterManager() {
               .from(bucketName)
               .getPublicUrl(photoPath);
 
-            // Normalizar espaços antes de parênteses
             const normalizeSpaces = (str: string) => str.replace(/\s+\(/g, '(').trim();
             
-            // Mapear todas as variações do nome
             const nomeCompleto = photo.name;
             const nomeSemExtensao = nomeCompleto.replace(/\.[^/.]+$/, "").trim();
             
-            // Variações com e sem normalização de espaços
             const variacoes = [
               nomeSemExtensao,
               normalizeSpaces(nomeSemExtensao),
