@@ -17,18 +17,28 @@ interface FichaPlaca {
   codigo: string | null;
   velocidade: string | null;
   lado: string | null;
+  posicao: string | null;
   km: number | null;
   latitude: number | null;
   longitude: number | null;
+  detalhamento_pagina: number | null;
   suporte: string | null;
   qtde_suporte: number | null;
+  tipo_secao_suporte: string | null;
+  secao_suporte_mm: string | null;
   substrato: string | null;
-  pelicula: string | null;
+  si_sinal_impresso: string | null;
+  tipo_pelicula_fundo: string | null;
+  cor_pelicula_fundo: string | null;
+  retrorrefletividade: number | null;
+  tipo_pelicula_legenda_orla: string | null;
+  cor_pelicula_legenda_orla: string | null;
+  retro_pelicula_legenda_orla: number | null;
   dimensoes_mm: string | null;
   area_m2: number | null;
   altura_m: number | null;
   distancia_m: number | null;
-  retrorrefletividade: number | null;
+  link_fotografia: string | null;
   foto_frontal_url: string | null;
   foto_lateral_url: string | null;
   foto_posterior_url: string | null;
@@ -36,7 +46,6 @@ interface FichaPlaca {
   foto_identificacao_url: string | null;
   data_vistoria: string;
   data_implantacao: string | null;
-  descricao: string | null;
   // Campos do dicionário adicionais
   rodovia_id: string;
   lote_id: string;
@@ -360,7 +369,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Posição:</span>
-                      <p className="text-sm">{selectedPlaca.descricao || "-"}</p>
+                      <p className="text-sm">{selectedPlaca.posicao || "-"}</p>
                     </div>
                   </div>
                 </div>
@@ -371,7 +380,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     <MapPin className="h-4 w-4" />
                     Localização
                   </h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-4 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Km:</span>
                       <p className="text-sm">{selectedPlaca.km?.toFixed(2) || "-"}</p>
@@ -388,13 +397,17 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                         {selectedPlaca.longitude ? selectedPlaca.longitude.toFixed(6) : "-"}
                       </p>
                     </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Detalhamento (página):</span>
+                      <p className="text-sm">{selectedPlaca.detalhamento_pagina || "-"}</p>
+                    </div>
                   </div>
                 </div>
 
                 {/* Suporte */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3">Suporte</h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Tipo de Suporte:</span>
                       <p className="text-sm">{selectedPlaca.suporte || "-"}</p>
@@ -405,13 +418,11 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Tipo de Seção de Suporte:</span>
-                      <p className="text-sm">-</p>
+                      <p className="text-sm">{selectedPlaca.tipo_secao_suporte || "-"}</p>
                     </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 mt-3">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Seção do Suporte (mm):</span>
-                      <p className="text-sm">-</p>
+                      <p className="text-sm">{selectedPlaca.secao_suporte_mm || "-"}</p>
                     </div>
                   </div>
                 </div>
@@ -426,7 +437,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">SI (Sinal Impresso):</span>
-                      <p className="text-sm">-</p>
+                      <p className="text-sm">{selectedPlaca.si_sinal_impresso || "-"}</p>
                     </div>
                   </div>
                 </div>
@@ -437,11 +448,11 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Tipo (película fundo):</span>
-                      <p className="text-sm">{selectedPlaca.pelicula || "-"}</p>
+                      <p className="text-sm">{selectedPlaca.tipo_pelicula_fundo || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Cor (película fundo):</span>
-                      <p className="text-sm">-</p>
+                      <p className="text-sm">{selectedPlaca.cor_pelicula_fundo || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Retrorrefletância (película fundo) cd.lux/m²:</span>
@@ -456,15 +467,15 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Tipo (película legenda/orla):</span>
-                      <p className="text-sm">-</p>
+                      <p className="text-sm">{selectedPlaca.tipo_pelicula_legenda_orla || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Cor (película legenda/orla):</span>
-                      <p className="text-sm">-</p>
+                      <p className="text-sm">{selectedPlaca.cor_pelicula_legenda_orla || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Retrorrefletância (película legenda/orla) cd.lux/m²:</span>
-                      <p className="text-sm">-</p>
+                      <p className="text-sm">{selectedPlaca.retro_pelicula_legenda_orla || "-"}</p>
                     </div>
                   </div>
                 </div>
@@ -514,6 +525,23 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     )}
                   </div>
                 </div>
+
+                {/* Link da Fotografia */}
+                {selectedPlaca.link_fotografia && (
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3">Link da Fotografia</h3>
+                    <div>
+                      <a 
+                        href={selectedPlaca.link_fotografia} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary underline hover:text-primary/80"
+                      >
+                        {selectedPlaca.link_fotografia}
+                      </a>
+                    </div>
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="fotos" className="mt-4">

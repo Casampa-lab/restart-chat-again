@@ -616,20 +616,27 @@ export function InventarioImporterManager() {
           record.codigo = getVal("Código da placa", "Codigo da placa", "código_da_placa", "codigo_da_placa", "codigo");
           record.velocidade = getVal("Velocidade", "velocidade") ? String(getVal("Velocidade", "velocidade")) : null;
           record.lado = getVal("Lado", "lado");
+          record.posicao = getVal("Posição", "Posicao", "posição", "posicao");
           record.km = getVal("Km", "km") ? Number(getVal("Km", "km")) : null;
           record.latitude = getVal("Latitude", "latitude");
           record.longitude = getVal("Longitude", "longitude");
+          record.detalhamento_pagina = getVal("Detalhamento (página)", "Detalhamento pagina", "detalhamento") ? Number(getVal("Detalhamento (página)", "Detalhamento pagina", "detalhamento")) : null;
+          
           record.suporte = getVal("Tipo de Suporte", "Tipo de suporte", "tipo_de_suporte", "suporte");
           record.qtde_suporte = getVal("Quantidade de Suporte", "Quantidade de suporte", "quantidade_de_suporte", "qtde_suporte") ? Number(getVal("Quantidade de Suporte", "Quantidade de suporte", "quantidade_de_suporte")) : null;
+          record.tipo_secao_suporte = getVal("Tipo de Seção de Suporte", "Tipo de Secao de Suporte", "tipo_secao_suporte");
+          record.secao_suporte_mm = getVal("Seção do Suporte (mm)", "Secao do Suporte mm", "secao_suporte_mm");
+          
           record.substrato = getVal("Tipo de Substrato", "Tipo de substrato", "tipo_de_substrato", "substrato");
+          record.si_sinal_impresso = getVal("SI (Sinal Impresso)", "SI Sinal Impresso", "si");
           
-          const tipoPeliculaFundo = getVal("Tipo (película fundo)", "Tipo pelicula fundo");
-          const corPeliculaFundo = getVal("Cor (película fundo)", "Cor pelicula fundo");
-          if (tipoPeliculaFundo || corPeliculaFundo) {
-            record.pelicula = [tipoPeliculaFundo, corPeliculaFundo].filter(Boolean).join(" - ");
-          }
+          record.tipo_pelicula_fundo = getVal("Tipo (película fundo)", "Tipo pelicula fundo", "tipo_pelicula_fundo");
+          record.cor_pelicula_fundo = getVal("Cor (película fundo)", "Cor pelicula fundo", "cor_pelicula_fundo");
+          record.retrorrefletividade = getVal("Retrorrefletância (película fundo) (cd.lux/m-2)", "Retrorrefletância (película fundo)", "Retrorrefletancia pelicula fundo", "cd.lux/m-2") ? Number(getVal("Retrorrefletância (película fundo) (cd.lux/m-2)", "Retrorrefletância (película fundo)", "Retrorrefletancia pelicula fundo", "cd.lux/m-2")) : null;
           
-          record.retrorrefletividade = getVal("Retrorrefletância (película fundo)", "Retrorrefletancia pelicula fundo") ? Number(getVal("Retrorrefletância (película fundo)", "Retrorrefletancia pelicula fundo")) : null;
+          record.tipo_pelicula_legenda_orla = getVal("Tipo (película legenda/orla)", "Tipo pelicula legenda/orla", "tipo_pelicula_legenda_orla");
+          record.cor_pelicula_legenda_orla = getVal("Cor (película legenda/orla)", "Cor pelicula legenda/orla", "cor_pelicula_legenda_orla");
+          record.retro_pelicula_legenda_orla = getVal("Retrorrefletância (película legenda/orla) (cd.lux/m-2)", "Retrorrefletância (película legenda/orla)", "Retrorrefletancia pelicula legenda/orla") ? Number(getVal("Retrorrefletância (película legenda/orla) (cd.lux/m-2)", "Retrorrefletância (película legenda/orla)", "Retrorrefletancia pelicula legenda/orla")) : null;
           
           const larguraM = getVal("Largura (m)", "Largura m", "largura");
           const alturaM = getVal("Altura (m)", "Altura m", "altura");
@@ -641,26 +648,7 @@ export function InventarioImporterManager() {
             record.dimensoes_mm = `${(Number(larguraM) * 1000).toFixed(0)}x${(Number(alturaM) * 1000).toFixed(0)}`;
           }
           
-          const obs = [];
-          const posicao = getVal("Posição", "Posicao", "posição", "posicao");
-          const detalhamento = getVal("Detalhamento (página)", "Detalhamento pagina", "detalhamento");
-          const secaoTipo = getVal("Tipo de Seção de Suporte", "Tipo de Secao de Suporte");
-          const secaoMm = getVal("Seção do Suporte (mm)", "Secao do Suporte mm");
-          const si = getVal("SI (Sinal Impresso)", "SI Sinal Impresso", "si");
-          const pelLeg = getVal("Tipo (película legenda/orla)", "Tipo pelicula legenda/orla");
-          const retroLeg = getVal("Retrorrefletância (película legenda/orla)", "Retrorrefletancia pelicula legenda/orla");
-          const linkFoto = getVal("Link da Fotografia", "Link da fotografia", "link_fotografia");
-          
-          if (posicao) obs.push(`Posição: ${posicao}`);
-          if (detalhamento) obs.push(`Detalhamento: ${detalhamento}`);
-          if (secaoTipo) obs.push(`Seção suporte: ${secaoTipo}`);
-          if (secaoMm) obs.push(`Dimensão: ${secaoMm}mm`);
-          if (si) obs.push(`SI: ${si}`);
-          if (pelLeg) obs.push(`Película legenda: ${pelLeg}`);
-          if (retroLeg) obs.push(`Retro legenda: ${retroLeg}`);
-          if (linkFoto) obs.push(`Link: ${linkFoto}`);
-          record.descricao = obs.length > 0 ? obs.join(" | ") : null;
-          
+          record.link_fotografia = getVal("Link da Fotografia", "Link da fotografia", "link_fotografia");
           record.data_vistoria = new Date().toISOString().split('T')[0];
         }
 

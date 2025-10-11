@@ -742,10 +742,13 @@ export type Database = {
           br: string | null
           codigo: string | null
           contrato: string | null
+          cor_pelicula_fundo: string | null
+          cor_pelicula_legenda_orla: string | null
           created_at: string
           data_implantacao: string | null
           data_vistoria: string
           descricao: string | null
+          detalhamento_pagina: number | null
           dimensoes_mm: string | null
           distancia_m: number | null
           empresa: string | null
@@ -759,18 +762,26 @@ export type Database = {
           km: number | null
           lado: string | null
           latitude: number | null
+          link_fotografia: string | null
           longitude: number | null
           lote_id: string
           modelo: string | null
           numero_patrimonio: string | null
           pelicula: string | null
+          posicao: string | null
           qtde_suporte: number | null
+          retro_pelicula_legenda_orla: number | null
           retrorrefletividade: number | null
           rodovia_id: string
+          secao_suporte_mm: string | null
+          si_sinal_impresso: string | null
           snv: string | null
           substrato: string | null
           suporte: string | null
           tipo: string | null
+          tipo_pelicula_fundo: string | null
+          tipo_pelicula_legenda_orla: string | null
+          tipo_secao_suporte: string | null
           uf: string | null
           updated_at: string
           user_id: string
@@ -782,10 +793,13 @@ export type Database = {
           br?: string | null
           codigo?: string | null
           contrato?: string | null
+          cor_pelicula_fundo?: string | null
+          cor_pelicula_legenda_orla?: string | null
           created_at?: string
           data_implantacao?: string | null
           data_vistoria: string
           descricao?: string | null
+          detalhamento_pagina?: number | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
           empresa?: string | null
@@ -799,18 +813,26 @@ export type Database = {
           km?: number | null
           lado?: string | null
           latitude?: number | null
+          link_fotografia?: string | null
           longitude?: number | null
           lote_id: string
           modelo?: string | null
           numero_patrimonio?: string | null
           pelicula?: string | null
+          posicao?: string | null
           qtde_suporte?: number | null
+          retro_pelicula_legenda_orla?: number | null
           retrorrefletividade?: number | null
           rodovia_id: string
+          secao_suporte_mm?: string | null
+          si_sinal_impresso?: string | null
           snv?: string | null
           substrato?: string | null
           suporte?: string | null
           tipo?: string | null
+          tipo_pelicula_fundo?: string | null
+          tipo_pelicula_legenda_orla?: string | null
+          tipo_secao_suporte?: string | null
           uf?: string | null
           updated_at?: string
           user_id: string
@@ -822,10 +844,13 @@ export type Database = {
           br?: string | null
           codigo?: string | null
           contrato?: string | null
+          cor_pelicula_fundo?: string | null
+          cor_pelicula_legenda_orla?: string | null
           created_at?: string
           data_implantacao?: string | null
           data_vistoria?: string
           descricao?: string | null
+          detalhamento_pagina?: number | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
           empresa?: string | null
@@ -839,18 +864,26 @@ export type Database = {
           km?: number | null
           lado?: string | null
           latitude?: number | null
+          link_fotografia?: string | null
           longitude?: number | null
           lote_id?: string
           modelo?: string | null
           numero_patrimonio?: string | null
           pelicula?: string | null
+          posicao?: string | null
           qtde_suporte?: number | null
+          retro_pelicula_legenda_orla?: number | null
           retrorrefletividade?: number | null
           rodovia_id?: string
+          secao_suporte_mm?: string | null
+          si_sinal_impresso?: string | null
           snv?: string | null
           substrato?: string | null
           suporte?: string | null
           tipo?: string | null
+          tipo_pelicula_fundo?: string | null
+          tipo_pelicula_legenda_orla?: string | null
+          tipo_secao_suporte?: string | null
           uf?: string | null
           updated_at?: string
           user_id?: string
