@@ -10,9 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, FileText, ExternalLink, Trash2, Filter, Download } from "lucide-react";
+import { ArrowLeft, FileText, ExternalLink, Trash2, Filter, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
 interface Necessidade {
@@ -137,35 +136,6 @@ const MinhasNecessidades = () => {
     return true;
   });
 
-  const exportarExcel = () => {
-    try {
-      const tipoConfig = TIPOS_NECESSIDADES.find(t => t.value === tipoAtivo);
-      if (!tipoConfig) return;
-
-      const dadosExportar = necessidadesFiltradas.map(nec => ({
-        "Serviço": nec.servico,
-        "Rodovia": nec.rodovia?.codigo || "-",
-        "Lote": nec.lote?.numero || "-",
-        "KM Inicial": nec.km_inicial || nec.km || "-",
-        "KM Final": nec.km_final || "-",
-        "Match Cadastro": nec.cadastro_id ? "Sim" : "Não",
-        "Distância Match (m)": nec.distancia_match_metros?.toFixed(0) || "-",
-        "Arquivo Origem": nec.arquivo_origem,
-        "Linha Planilha": nec.linha_planilha,
-        "Data Importação": new Date(nec.created_at).toLocaleDateString("pt-BR"),
-      }));
-
-      const ws = XLSX.utils.json_to_sheet(dadosExportar);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, tipoConfig.label);
-
-      XLSX.writeFile(wb, `Necessidades_${tipoConfig.label}_${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}.xlsx`);
-      toast.success("Exportado com sucesso!");
-    } catch (error: any) {
-      toast.error("Erro ao exportar: " + error.message);
-    }
-  };
-
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -235,18 +205,8 @@ const MinhasNecessidades = () => {
                       </CardDescription>
                     </div>
 
-                    {/* Filtros e Ações */}
+                    {/* Filtros */}
                     <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={exportarExcel}
-                        disabled={necessidadesFiltradas.length === 0}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Exportar Excel
-                      </Button>
-
                       <Select value={filtroServico} onValueChange={setFiltroServico}>
                         <SelectTrigger className="w-[180px]">
                           <Filter className="h-4 w-4 mr-2" />

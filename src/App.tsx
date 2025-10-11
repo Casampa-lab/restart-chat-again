@@ -23,6 +23,7 @@ import MeusRegistrosNC from "./pages/MeusRegistrosNC";
 import MinhasFichasVerificacao from "./pages/MinhasFichasVerificacao";
 import MinhasFichasPlaca from "./pages/MinhasFichasPlaca";
 import MinhasNecessidades from "./pages/MinhasNecessidades";
+import MinhasNecessidadesRelatorios from "./pages/MinhasNecessidadesRelatorios";
 import Modulos from "./pages/Modulos";
 import ResetAdminPassword from "./pages/ResetAdminPassword";
 import TestePDF from "./pages/TestePDF";
@@ -55,6 +56,7 @@ const App = () => (
           <Route path="/minhas-fichas-verificacao" element={<MinhasFichasVerificacao />} />
           <Route path="/minhas-fichas-placa" element={<MinhasFichasPlaca />} />
           <Route path="/minhas-necessidades" element={<MinhasNecessidades />} />
+          <Route path="/minhas-necessidades-relatorios" element={<MinhasNecessidadesRelatorios />} />
           <Route path="/modulos" element={<Modulos />} />
           <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
           <Route path="/teste-pdf" element={<TestePDF />} />

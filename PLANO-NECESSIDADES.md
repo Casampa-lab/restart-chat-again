@@ -539,9 +539,9 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 
 ### Sprint 4: Relatórios
 - [x] Exportação Excel das necessidades (por tipo)
-- [ ] Seção Relatórios no Admin
-- [ ] Relatório Inicial (CADASTRO + SERVIÇO vazio)
-- [ ] Relatório Permanente (CADASTRO + NECESSIDADES)
+- [x] Seção Relatórios no Admin
+- [x] Relatório Inicial (CADASTRO + SERVIÇO vazio)
+- [x] Relatório Permanente (CADASTRO + NECESSIDADES)
 - [ ] Função de adicionar logos no header
 
 ### Sprint 5: Refinamentos
