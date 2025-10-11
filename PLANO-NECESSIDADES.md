@@ -538,10 +538,11 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 **📌 CHECKPOINT ATUAL** - Sistema de visualização funcionando!
 
 ### Sprint 4: Relatórios
-- ✅ Seção Relatórios no Admin
-- ✅ Relatório Inicial (CADASTRO + SERVIÇO vazio)
-- ✅ Relatório Permanente (CADASTRO + NECESSIDADES)
-- ✅ Função de adicionar logos no header
+- [x] Exportação Excel das necessidades (por tipo)
+- [ ] Seção Relatórios no Admin
+- [ ] Relatório Inicial (CADASTRO + SERVIÇO vazio)
+- [ ] Relatório Permanente (CADASTRO + NECESSIDADES)
+- [ ] Função de adicionar logos no header
 
 ### Sprint 5: Refinamentos
 - ✅ Relatório Final (após intervenções)
