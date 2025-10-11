@@ -397,7 +397,9 @@ serve(async (req) => {
               // Limpar valores com porcentagem (ex: "55.10%" → 55.10)
               let cleanedValue = value;
               if (typeof value === 'string' && value.includes('%')) {
-                cleanedValue = value.replace('%', '').trim();
+                const originalValue = value;
+                cleanedValue = parseFloat(value.replace('%', '').trim());
+                console.log(`[PERCENT DEBUG] Campo: ${normalizedKey}, Original: "${originalValue}", Limpo: ${cleanedValue}, Tipo: ${typeof cleanedValue}`);
               }
               
               // Conversões especiais usando a chave original
