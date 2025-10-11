@@ -39,6 +39,7 @@ interface FichaPlaca {
   altura_m: number | null;
   distancia_m: number | null;
   link_fotografia: string | null;
+  foto_url: string | null;
   foto_frontal_url: string | null;
   foto_lateral_url: string | null;
   foto_posterior_url: string | null;
@@ -155,6 +156,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
 
   const fotos = selectedPlaca
     ? [
+        { label: "Principal", url: selectedPlaca.foto_url },
         { label: "Frontal", url: selectedPlaca.foto_frontal_url },
         { label: "Lateral", url: selectedPlaca.foto_lateral_url },
         { label: "Posterior", url: selectedPlaca.foto_posterior_url },
@@ -538,7 +540,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           {foto.label}
                         </h4>
                         <img
-                          src={supabase.storage.from('placas').getPublicUrl(foto.url!).data.publicUrl}
+                          src={supabase.storage.from('placa-photos').getPublicUrl(foto.url!).data.publicUrl}
                           alt={foto.label}
                           className="w-full h-auto rounded-lg border shadow-sm"
                         />

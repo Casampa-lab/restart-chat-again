@@ -15,6 +15,7 @@ interface FichaPlaca {
   tipo: string | null;
   km: number | null;
   lado: string | null;
+  foto_url: string | null;
   foto_frontal_url: string | null;
   created_at: string;
   rodovias: { nome: string; codigo: string } | null;
@@ -177,12 +178,14 @@ export default function MinhasFichasPlaca() {
               </div>
             </div>
 
-            {selectedFicha.foto_frontal_url && (
+            {(selectedFicha.foto_url || selectedFicha.foto_frontal_url) && (
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Foto Frontal</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {selectedFicha.foto_url ? 'Foto Principal' : 'Foto Frontal'}
+                </p>
                 <img 
-                  src={selectedFicha.foto_frontal_url} 
-                  alt="Foto frontal da placa" 
+                  src={selectedFicha.foto_url || selectedFicha.foto_frontal_url} 
+                  alt="Foto da placa" 
                   className="max-w-md rounded-lg"
                 />
               </div>

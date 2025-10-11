@@ -758,6 +758,7 @@ export type Database = {
           foto_identificacao_url: string | null
           foto_lateral_url: string | null
           foto_posterior_url: string | null
+          foto_url: string | null
           id: string
           km: number | null
           lado: string | null
@@ -809,6 +810,7 @@ export type Database = {
           foto_identificacao_url?: string | null
           foto_lateral_url?: string | null
           foto_posterior_url?: string | null
+          foto_url?: string | null
           id?: string
           km?: number | null
           lado?: string | null
@@ -860,6 +862,7 @@ export type Database = {
           foto_identificacao_url?: string | null
           foto_lateral_url?: string | null
           foto_posterior_url?: string | null
+          foto_url?: string | null
           id?: string
           km?: number | null
           lado?: string | null

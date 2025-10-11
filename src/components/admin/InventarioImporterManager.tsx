@@ -354,15 +354,16 @@ export function InventarioImporterManager() {
             }
             
             if (matchedUrl) {
-              // Para placas, usar foto_frontal_url; para outros inventários, usar foto_url
+              // Para placas, preencher tanto foto_url quanto foto_frontal_url
               if (inventoryType === "placas") {
+                record.foto_url = matchedUrl;
                 record.foto_frontal_url = matchedUrl;
               } else {
                 record.foto_url = matchedUrl;
               }
               
               if (index < 3) {
-                console.log(`[FOTO ${index}] ✓✓ URL mapeada para ${inventoryType === "placas" ? "foto_frontal_url" : "foto_url"}: ${matchedUrl.substring(0, 80)}...`);
+                console.log(`[FOTO ${index}] ✓✓ URL mapeada: ${matchedUrl.substring(0, 80)}...`);
               }
             } else if (index < 3) {
               console.log(`[FOTO ${index}] ✗ Não encontrou match para "${photoFileName}"`);
@@ -370,8 +371,7 @@ export function InventarioImporterManager() {
             }
             
             // Para defensas, extrair data da foto do nome do arquivo
-            const fotoFieldName = inventoryType === "placas" ? record.foto_frontal_url : record.foto_url;
-            if (inventoryType === "defensas" && photoFileName && fotoFieldName) {
+            if (inventoryType === "defensas" && photoFileName && record.foto_url) {
               // Tentar extrair data do nome do arquivo (formato: YYYYMMDD ou DD-MM-YYYY)
               const dateMatch = photoFileName.match(/(\d{8})|(\d{2}[-_]\d{2}[-_]\d{4})/);
               if (dateMatch) {
