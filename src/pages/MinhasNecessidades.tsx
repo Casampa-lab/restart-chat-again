@@ -22,7 +22,7 @@ interface Necessidade {
   arquivo_origem: string;
   linha_planilha: number;
   created_at: string;
-  rodovia?: { sigla: string };
+  rodovia?: { codigo: string; nome: string };
   lote?: { nome: string };
   [key: string]: any;
 }
@@ -71,7 +71,7 @@ const MinhasNecessidades = () => {
         .from(tipoConfig.table as any)
         .select(`
           *,
-          rodovia:rodovias(sigla),
+          rodovia:rodovias(codigo, nome),
           lote:lotes(nome)
         `)
         .eq("user_id", user?.id)
@@ -261,7 +261,7 @@ const MinhasNecessidades = () => {
                               </TableCell>
                               <TableCell>
                                 <div className="text-sm">
-                                  <div className="font-medium">{nec.rodovia?.sigla || "-"}</div>
+                                  <div className="font-medium">{nec.rodovia?.codigo || "-"}</div>
                                   <div className="text-muted-foreground">{nec.lote?.nome || "-"}</div>
                                 </div>
                               </TableCell>
