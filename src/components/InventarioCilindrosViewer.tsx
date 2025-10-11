@@ -91,9 +91,10 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
     queryFn: async () => {
       let query = supabase
         .from("ficha_cilindros")
-        .select("*")
+        .select("*", { count: "exact" })
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
+        .range(0, 9999)
         .order("km_inicial", { ascending: true });
 
       if (searchTerm) {

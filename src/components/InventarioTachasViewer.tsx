@@ -69,9 +69,10 @@ export function InventarioTachasViewer({
     queryFn: async () => {
       let query = supabase
         .from("ficha_tachas")
-        .select("*")
+        .select("*", { count: "exact" })
         .eq("lote_id", loteId)
-        .eq("rodovia_id", rodoviaId);
+        .eq("rodovia_id", rodoviaId)
+        .range(0, 9999);
 
       if (searchTerm) {
         query = query.or(

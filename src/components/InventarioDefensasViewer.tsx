@@ -56,9 +56,10 @@ export const InventarioDefensasViewer = ({
     queryFn: async () => {
       let query = supabase
         .from("defensas")
-        .select("*")
+        .select("*", { count: "exact" })
         .eq("lote_id", loteId)
-        .eq("rodovia_id", rodoviaId);
+        .eq("rodovia_id", rodoviaId)
+        .range(0, 9999);
 
       if (searchTerm) {
         query = query.or(`tipo_defensa.ilike.%${searchTerm}%,lado.ilike.%${searchTerm}%,estado_conservacao.ilike.%${searchTerm}%`);

@@ -99,9 +99,10 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     queryFn: async () => {
       let query = supabase
         .from("ficha_placa")
-        .select("*")
+        .select("*", { count: "exact" })
         .eq("lote_id", loteId)
-        .eq("rodovia_id", rodoviaId);
+        .eq("rodovia_id", rodoviaId)
+        .range(0, 9999);
 
       if (searchTerm) {
         query = query.or(
