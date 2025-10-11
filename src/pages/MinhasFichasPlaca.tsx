@@ -178,16 +178,16 @@ export default function MinhasFichasPlaca() {
               </div>
             </div>
 
-            {(selectedFicha.foto_url || selectedFicha.foto_frontal_url) && (
+            {selectedFicha.foto_url && (
               <div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  {selectedFicha.foto_url ? 'Foto Principal' : 'Foto Frontal'}
-                </p>
-                <img 
-                  src={selectedFicha.foto_url || selectedFicha.foto_frontal_url} 
-                  alt="Foto da placa" 
-                  className="max-w-md rounded-lg"
-                />
+                <p className="text-sm text-muted-foreground mb-2">Fotografia</p>
+                <div className="relative w-full max-w-md h-[400px] bg-muted rounded-lg overflow-hidden">
+                  <img 
+                    src={`${supabase.storage.from('placa-photos').getPublicUrl(selectedFicha.foto_url).data.publicUrl}`}
+                    alt="Foto da placa" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
               </div>
             )}
           </CardContent>

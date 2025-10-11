@@ -531,56 +531,22 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
               </TabsContent>
 
               <TabsContent value="fotos" className="mt-4">
-                {fotos.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {fotos.map((foto, index) => (
-                      <div key={index} className="space-y-2">
-                        <h4 className="font-semibold text-sm flex items-center gap-2">
-                          <ImageIcon className="h-4 w-4" />
-                          {foto.label}
-                        </h4>
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3">Fotografia</h3>
+                  {selectedPlaca.foto_url ? (
+                    <div className="space-y-2">
+                      <div className="relative w-full h-[400px] bg-muted rounded-lg overflow-hidden">
                         <img
-                          src={supabase.storage.from('placa-photos').getPublicUrl(foto.url!).data.publicUrl}
-                          alt={foto.label}
-                          className="w-full h-auto rounded-lg border shadow-sm"
+                          src={`${supabase.storage.from('placa-photos').getPublicUrl(selectedPlaca.foto_url).data.publicUrl}`}
+                          alt="Foto da Placa"
+                          className="w-full h-full object-contain"
                         />
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="border rounded-lg p-8 text-center">
-                    {(() => {
-                      const linkFotografia = selectedPlaca.link_fotografia;
-                      
-                      // Se tem link externo
-                      if (linkFotografia && linkFotografia !== "HIPERLINK" && linkFotografia.startsWith('http')) {
-                        return (
-                          <>
-                            <p className="text-muted-foreground mb-4">Foto disponível via link externo:</p>
-                            <a 
-                              href={linkFotografia} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-primary underline hover:text-primary/80"
-                            >
-                              Abrir foto em nova aba
-                            </a>
-                          </>
-                        );
-                      }
-                      
-                      // Nenhuma foto disponível
-                      return (
-                        <div className="text-center">
-                          <p className="text-muted-foreground mb-2">Nenhuma foto disponível</p>
-                          <p className="text-sm text-muted-foreground/70">
-                            As fotos devem ser importadas junto com a planilha ou os links devem estar preenchidos corretamente no Excel
-                          </p>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nenhuma foto disponível</p>
+                  )}
+                </div>
               </TabsContent>
 
               <TabsContent value="historico" className="mt-4">
