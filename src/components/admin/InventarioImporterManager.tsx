@@ -177,15 +177,26 @@ export function InventarioImporterManager() {
 
       toast.success(`${dataRows.length} registros encontrados na planilha`);
 
-      // Normalizar dados - cada linha é um array
+      // Normalizar dados - criar objeto com nomes de coluna E manter array para acesso por índice
       const normalizedData = dataRows.map((row: any) => {
-        // Manter como array para acessar por índice
-        return row;
+        // Criar objeto mapeado com os nomes das colunas
+        const mappedRow: any = {};
+        headers.forEach((header: any, index: number) => {
+          if (header) {
+            // Normalizar nome da coluna (remover espaços extras)
+            const normalizedKey = String(header).replace(/\s+/g, ' ').trim();
+            mappedRow[normalizedKey] = row[index];
+          }
+        });
+        // Adicionar array original para acesso por índice (para foto)
+        mappedRow._rowArray = row;
+        return mappedRow;
       });
 
       console.log("=== PRIMEIRA LINHA NORMALIZADA ===");
       if (normalizedData.length > 0) {
-        console.log("Colunas normalizadas:", normalizedData[0]);
+        console.log("Chaves da primeira linha:", Object.keys(normalizedData[0]).filter(k => k !== '_rowArray'));
+        console.log("Array da primeira linha:", normalizedData[0]._rowArray);
       }
 
       // 2. Upload das fotos e criar mapeamento
@@ -312,7 +323,9 @@ export function InventarioImporterManager() {
         // Processar foto usando índice da coluna (letra convertida para número)
         if (hasPhotos && photoColumnName) {
           const photoIndex = columnLetterToIndex(photoColumnName);
-          const photoFileName = row[photoIndex] as string;
+          // Usar o array original da linha para acessar por índice
+          const rowArray = (row as any)._rowArray || row;
+          const photoFileName = rowArray[photoIndex] as string;
           
           // Log detalhado apenas para os primeiros 3 registros
           if (index < 3) {
