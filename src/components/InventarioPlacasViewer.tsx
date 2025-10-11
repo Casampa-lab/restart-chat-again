@@ -533,11 +533,11 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
               <TabsContent value="fotos" className="mt-4">
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3">Fotografia</h3>
-                  {selectedPlaca.foto_url ? (
+                  {(selectedPlaca.foto_url || selectedPlaca.foto_identificacao_url || selectedPlaca.foto_frontal_url) ? (
                     <div className="space-y-2">
                       <div className="relative w-full h-[400px] bg-muted rounded-lg overflow-hidden">
                         <img
-                          src={`${supabase.storage.from('placa-photos').getPublicUrl(selectedPlaca.foto_url).data.publicUrl}`}
+                          src={selectedPlaca.foto_url || selectedPlaca.foto_identificacao_url || selectedPlaca.foto_frontal_url}
                           alt="Foto da Placa"
                           className="w-full h-full object-contain"
                         />

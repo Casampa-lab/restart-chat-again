@@ -17,6 +17,7 @@ interface FichaPlaca {
   lado: string | null;
   foto_url: string | null;
   foto_frontal_url: string | null;
+  foto_identificacao_url: string | null;
   created_at: string;
   rodovias: { nome: string; codigo: string } | null;
   lotes: { numero: string } | null;
@@ -178,12 +179,12 @@ export default function MinhasFichasPlaca() {
               </div>
             </div>
 
-            {selectedFicha.foto_url && (
+            {(selectedFicha.foto_url || selectedFicha.foto_identificacao_url || selectedFicha.foto_frontal_url) && (
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Fotografia</p>
                 <div className="relative w-full max-w-md h-[400px] bg-muted rounded-lg overflow-hidden">
                   <img 
-                    src={`${supabase.storage.from('placa-photos').getPublicUrl(selectedFicha.foto_url).data.publicUrl}`}
+                    src={selectedFicha.foto_url || selectedFicha.foto_identificacao_url || selectedFicha.foto_frontal_url}
                     alt="Foto da placa" 
                     className="w-full h-full object-contain"
                   />
