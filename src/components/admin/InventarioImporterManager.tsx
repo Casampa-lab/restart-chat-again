@@ -152,8 +152,9 @@ export function InventarioImporterManager() {
       
       const headerRow = headerRowMap[inventoryType] || 0;
       
-      // Ler JSON começando da linha correta dos headers
+      // Ler JSON como ARRAY (header: 1) para acessar por índice de coluna
       const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+        header: 1, // Retorna arrays ao invés de objetos
         range: headerRow, // Começa a ler da linha onde estão os headers
         raw: false,
         defval: null,
@@ -163,29 +164,28 @@ export function InventarioImporterManager() {
         throw new Error("Nenhum registro encontrado na planilha");
       }
 
-      // Log para debug - ver nomes das colunas disponíveis
+      // Primeira linha são os headers
+      const headers = jsonData[0] as any[];
+      const dataRows = jsonData.slice(1); // Dados começam da segunda linha
+
+      // Log para debug
       console.log(`=== COLUNAS DISPONÍVEIS NO EXCEL (${inventoryType}) ===`);
-      console.log("Total de registros:", jsonData.length);
-      console.log("Nomes das colunas:", Object.keys(jsonData[0]));
-      console.log("Primeira linha de dados:", jsonData[0]);
+      console.log("Total de registros:", dataRows.length);
+      console.log("Nomes das colunas:", headers);
+      console.log("Primeira linha de dados:", dataRows[0]);
       console.log("===============================");
 
-      toast.success(`${jsonData.length} registros encontrados na planilha`);
+      toast.success(`${dataRows.length} registros encontrados na planilha`);
 
-      // Normalizar chaves do Excel (remover espaços extras)
-      const normalizedData = jsonData.map(row => {
-        const normalizedRow: any = {};
-        for (const [key, value] of Object.entries(row)) {
-          // Normalizar a chave: remover espaços extras, trim
-          const normalizedKey = String(key).replace(/\s+/g, ' ').trim();
-          normalizedRow[normalizedKey] = value;
-        }
-        return normalizedRow;
+      // Normalizar dados - cada linha é um array
+      const normalizedData = dataRows.map((row: any) => {
+        // Manter como array para acessar por índice
+        return row;
       });
 
       console.log("=== PRIMEIRA LINHA NORMALIZADA ===");
       if (normalizedData.length > 0) {
-        console.log("Colunas normalizadas:", Object.keys(normalizedData[0]));
+        console.log("Colunas normalizadas:", normalizedData[0]);
       }
 
       // 2. Upload das fotos e criar mapeamento
