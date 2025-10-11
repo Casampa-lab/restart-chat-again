@@ -231,12 +231,12 @@ export function InventarioPorticosViewer({
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
-                          variant="outline"
-                          size="sm"
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleViewDetails(portico)}
+                          className="h-8 w-8"
                         >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Ver
+                          <Eye className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
