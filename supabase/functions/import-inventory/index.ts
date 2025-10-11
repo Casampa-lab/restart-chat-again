@@ -117,15 +117,6 @@ serve(async (req) => {
     }
 
     console.log(`Processando ${jsonData.length} registros para ${tableName}`);
-    
-    // Log de depuração: mostrar TODOS os campos do Excel
-    if (tableName === "ficha_tachas" && jsonData.length > 0) {
-      console.log("=== TODOS OS CAMPOS DO EXCEL (TACHAS) - RAW ===");
-      const firstRow = jsonData[0] as any;
-      for (const [key, value] of Object.entries(firstRow)) {
-        console.log(`"${key}" = "${value}"`);
-      }
-    }
 
     // Normalizar chaves do Excel (remover espaços extras)
     const normalizedData = jsonData.map((row: any) => {
@@ -142,16 +133,6 @@ serve(async (req) => {
     if (normalizedData.length > 0) {
       console.log("Colunas:", Object.keys(normalizedData[0]));
       console.log("Dados:", normalizedData[0]);
-      
-      // Log específico para tachas
-      if (tableName === "ficha_tachas") {
-        console.log("=== CAMPOS TACHAS NO EXCEL ===");
-        for (const [key, value] of Object.entries(normalizedData[0])) {
-          if (key.includes("Cor") || key.includes("Local") || key.includes("Espaça")) {
-            console.log(`Campo: "${key}" = "${value}"`);
-          }
-        }
-      }
     }
 
     // Processar fotos se houver
@@ -251,8 +232,8 @@ serve(async (req) => {
       ficha_tachas: {
         "Extensão (km)": "extensao_km",
         "Espaçamento (m)": "espacamento_m",
-        "Cor Refletivo": "cor_refletivo",
-        "Local Implantação": "local_implantacao",
+        "Cor do Refletivo": "cor_refletivo",
+        "Local de Implantação": "local_implantacao",
         "Quantidade (und)": "quantidade",
         "data": "data_vistoria",
         "br": "",
@@ -381,21 +362,12 @@ serve(async (req) => {
         const cleanKey = key.replace(/\s+/g, ' ').trim();
         let normalizedKey = cleanKey.toLowerCase().replace(/\s+/g, "_");
         
-        // Log específico para tachas
-        if (tableName === "ficha_tachas" && (cleanKey === "Cor Refletivo" || cleanKey === "Local Implantação" || cleanKey === "Espaçamento (m)")) {
-          console.log(`[TACHA DEBUG] Campo: ${cleanKey}, Valor: ${value}, Normalizado: ${normalizedKey}`);
-        }
-        
         // Aplicar mapeamento específico se existir
         const originalKey = cleanKey; // Guardar chave original limpa para verificações especiais
         if (fieldMapping[cleanKey]) {
           normalizedKey = fieldMapping[cleanKey];
         } else if (fieldMapping[normalizedKey]) {
           normalizedKey = fieldMapping[normalizedKey];
-        }
-        
-        if (tableName === "ficha_tachas" && (originalKey === "Cor Refletivo" || originalKey === "Local Implantação" || originalKey === "Espaçamento (m)")) {
-          console.log(`[TACHA DEBUG] Após mapeamento: ${normalizedKey}, Valid: ${validFields.includes(normalizedKey)}`);
         }
         
         // Se o mapeamento retornou string vazia, pular este campo
@@ -410,18 +382,6 @@ serve(async (req) => {
         
         // Apenas adicionar se o campo for válido para esta tabela
         if (validFields.length === 0 || validFields.includes(normalizedKey)) {
-          // Log detalhado para tachas
-          if (tableName === "ficha_tachas" && (
-            normalizedKey === "cor_refletivo" || 
-            normalizedKey === "local_implantacao" || 
-            normalizedKey === "espacamento_m" ||
-            normalizedKey === "quantidade"
-          )) {
-            console.log(`[TACHA] Campo: "${originalKey}" → "${normalizedKey}"`);
-            console.log(`[TACHA] Valor: "${value}" (tipo: ${typeof value})`);
-            console.log(`[TACHA] Valor é válido: ${value !== undefined && value !== null && value !== '' && value !== '-'}`);
-          }
-          
           // Se é o campo de foto e temos fotos, substituir pelo URL
           if (hasPhotos && photoFieldName && key === photoFieldName) {
             const photoFileName = value as string;
