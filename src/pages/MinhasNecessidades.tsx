@@ -167,15 +167,26 @@ const MinhasNecessidades = () => {
                 <p className="text-sm text-primary-foreground/80">Serviços planejados para as rodovias</p>
               </div>
             </div>
-            <Button 
-              variant="default" 
-              size="lg"
-              onClick={() => navigate("/")}
-              className="font-semibold shadow-md"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Voltar
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="secondary" 
+                size="lg"
+                onClick={() => navigate("/minhas-necessidades-relatorios")}
+                className="font-semibold shadow-md"
+              >
+                <FileSpreadsheet className="mr-2 h-5 w-5" />
+                Relatórios
+              </Button>
+              <Button 
+                variant="default" 
+                size="lg"
+                onClick={() => navigate("/")}
+                className="font-semibold shadow-md"
+              >
+                <ArrowLeft className="mr-2 h-5 w-5" />
+                Voltar
+              </Button>
+            </div>
           </div>
         </div>
       </header>
