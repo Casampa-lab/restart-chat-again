@@ -511,11 +511,11 @@ export const InventarioDefensasViewer = ({
                   </div>
                 )}
 
-                {/* Data Inspeção */}
+                {/* Data da Foto */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3">Data</h3>
                   <div>
-                    <span className="text-sm font-medium text-muted-foreground">Data Inspeção:</span>
+                    <span className="text-sm font-medium text-muted-foreground">Data da Foto:</span>
                     <p className="text-sm">{new Date(selectedDefensa.data_inspecao).toLocaleDateString('pt-BR')}</p>
                   </div>
                 </div>
