@@ -220,8 +220,8 @@ serve(async (req) => {
       ficha_marcas_longitudinais: {
         "largura_da_faixa_(m)": "largura_cm",
         "extensão_(km)": "extensao_metros",
-        "código": "tipo_demarcacao",
-        "posição": "observacao",
+        "código": "codigo",
+        "posição": "posicao",
         "traço_(m)": "",
         "espaçamento_(m)": "",
         "outros_materiais": "",
@@ -283,7 +283,7 @@ serve(async (req) => {
     // Campos válidos por tabela (baseado no schema)
     const VALID_FIELDS: Record<string, string[]> = {
       ficha_marcas_longitudinais: [
-        "cor", "data_vistoria", "espessura_cm", "estado_conservacao",
+        "codigo", "posicao", "cor", "data_vistoria", "espessura_cm", "estado_conservacao",
         "extensao_metros", "foto_url", "km_final", "km_inicial",
         "largura_cm", "latitude_final", "latitude_inicial",
         "longitude_final", "longitude_inicial", "material",
@@ -461,6 +461,9 @@ serve(async (req) => {
               } else if (normalizedKey === "extensao_metros" && originalKey.toLowerCase().includes("(km)")) {
                 // Converter de km para metros
                 record[normalizedKey] = Number(cleanedValue) * 1000;
+              } else if (normalizedKey === "espessura_cm" && originalKey.toLowerCase().includes("(mm)")) {
+                // Converter de mm para cm
+                record[normalizedKey] = Number(cleanedValue) / 10;
               } else {
                 record[normalizedKey] = cleanedValue;
               }

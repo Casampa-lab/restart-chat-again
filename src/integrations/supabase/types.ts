@@ -617,6 +617,7 @@ export type Database = {
       }
       ficha_marcas_longitudinais: {
         Row: {
+          codigo: string | null
           cor: string | null
           created_at: string
           data_vistoria: string
@@ -636,6 +637,7 @@ export type Database = {
           lote_id: string
           material: string | null
           observacao: string | null
+          posicao: string | null
           rodovia_id: string
           snv: string | null
           tipo_demarcacao: string | null
@@ -643,6 +645,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          codigo?: string | null
           cor?: string | null
           created_at?: string
           data_vistoria: string
@@ -662,6 +665,7 @@ export type Database = {
           lote_id: string
           material?: string | null
           observacao?: string | null
+          posicao?: string | null
           rodovia_id: string
           snv?: string | null
           tipo_demarcacao?: string | null
@@ -669,6 +673,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          codigo?: string | null
           cor?: string | null
           created_at?: string
           data_vistoria?: string
@@ -688,6 +693,7 @@ export type Database = {
           lote_id?: string
           material?: string | null
           observacao?: string | null
+          posicao?: string | null
           rodovia_id?: string
           snv?: string | null
           tipo_demarcacao?: string | null
@@ -2533,6 +2539,7 @@ export type Database = {
         Row: {
           arquivo_origem: string | null
           cadastro_id: string | null
+          codigo: string | null
           cor: string | null
           created_at: string | null
           data_importacao: string | null
@@ -2552,6 +2559,7 @@ export type Database = {
           lote_id: string
           material: string | null
           observacao: string | null
+          posicao: string | null
           rodovia_id: string
           servico: string
           snv: string | null
@@ -2563,6 +2571,7 @@ export type Database = {
         Insert: {
           arquivo_origem?: string | null
           cadastro_id?: string | null
+          codigo?: string | null
           cor?: string | null
           created_at?: string | null
           data_importacao?: string | null
@@ -2582,6 +2591,7 @@ export type Database = {
           lote_id: string
           material?: string | null
           observacao?: string | null
+          posicao?: string | null
           rodovia_id: string
           servico: string
           snv?: string | null
@@ -2593,6 +2603,7 @@ export type Database = {
         Update: {
           arquivo_origem?: string | null
           cadastro_id?: string | null
+          codigo?: string | null
           cor?: string | null
           created_at?: string | null
           data_importacao?: string | null
@@ -2612,6 +2623,7 @@ export type Database = {
           lote_id?: string
           material?: string | null
           observacao?: string | null
+          posicao?: string | null
           rodovia_id?: string
           servico?: string
           snv?: string | null

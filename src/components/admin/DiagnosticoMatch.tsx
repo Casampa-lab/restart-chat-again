@@ -119,7 +119,7 @@ export function DiagnosticoMatch() {
       // Para marcas longitudinais, filtrar por Posição = 'E' (eixo)
       // Para outros tipos, filtrar por solucao_planilha contendo "substitu"
       if (tipoServico === "marcas_longitudinais") {
-        query = query.eq("posicao", "E");
+        query = query.eq("posicao", "E").not("cadastro_id", "is", null); // Apenas onde há match para fazer diagnóstico
       } else {
         query = query.ilike("solucao_planilha", "%substitu%");
       }
@@ -187,13 +187,13 @@ export function DiagnosticoMatch() {
           nec_km: nec.km || nec.km_inicial || 0,
           nec_lat: necLat || 0,
           nec_long: necLong || 0,
-          nec_codigo: nec.codigo || nec.tipo || "-",
+          nec_codigo: nec.codigo || nec.tipo_demarcacao || nec.tipo || "-",
           nec_solucao: nec.solucao_planilha,
           cadastro_mais_proximo_id: maisProximo?.id || null,
           cad_km: maisProximo?.km || maisProximo?.km_inicial || null,
           cad_lat: converterCoordenada(maisProximo?.[cadastroLatField]) || null,
           cad_long: converterCoordenada(maisProximo?.[cadastroLongField]) || null,
-          cad_codigo: maisProximo?.codigo || maisProximo?.tipo || null,
+          cad_codigo: maisProximo?.codigo || maisProximo?.tipo_demarcacao || maisProximo?.tipo || null,
           distancia_metros: menorDistancia !== Infinity ? menorDistancia : null,
         });
       }

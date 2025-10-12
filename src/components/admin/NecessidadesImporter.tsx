@@ -135,14 +135,14 @@ export function NecessidadesImporter() {
 
     // Mapeamento básico para outros tipos (com inicial/final)
     const baseMap: any = {
-      km_inicial: row["KM Inicial"] || row["Km Inicial"] || row["km_inicial"],
-      km_final: row["KM Final"] || row["Km Final"] || row["km_final"],
-      latitude_inicial: converterCoordenada(row["Latitude Inicial"] || row["Lat Inicial"] || row["latitude_inicial"]),
-      longitude_inicial: converterCoordenada(row["Longitude Inicial"] || row["Long Inicial"] || row["longitude_inicial"]),
-      latitude_final: converterCoordenada(row["Latitude Final"] || row["Lat Final"] || row["latitude_final"]),
-      longitude_final: converterCoordenada(row["Longitude Final"] || row["Long Final"] || row["longitude_final"]),
+      km_inicial: row["Km Inicial"] || row["KM Inicial"] || row["km_inicial"] || row["__EMPTY_5"],
+      km_final: row["Km Final"] || row["KM Final"] || row["km_final"] || row["__EMPTY_8"],
+      latitude_inicial: converterCoordenada(row["Latitude Inicial"] || row["Lat Inicial"] || row["latitude_inicial"] || row["__EMPTY_6"]),
+      longitude_inicial: converterCoordenada(row["Longitude Inicial"] || row["Long Inicial"] || row["longitude_inicial"] || row["__EMPTY_7"]),
+      latitude_final: converterCoordenada(row["Latitude Final"] || row["Lat Final"] || row["latitude_final"] || row["__EMPTY_9"]),
+      longitude_final: converterCoordenada(row["Longitude Final"] || row["Long Final"] || row["longitude_final"] || row["__EMPTY_10"]),
       observacao: row["Observação"] || row["Observacao"] || row["observacao"],
-      snv: row["SNV"] || row["snv"] || row["__EMPTY"],
+      snv: row["SNV"] || row["snv"] || row["__EMPTY_1"],
       solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"] || row["__EMPTY_25"],
     };
 
@@ -151,12 +151,17 @@ export function NecessidadesImporter() {
       case "marcas_longitudinais":
         return {
           ...baseMap,
-          tipo_demarcacao: row["Tipo Demarcação"] || row["tipo_demarcacao"],
+          codigo: row["Código"] || row["codigo"] || row["__EMPTY_2"],
+          posicao: row["Posição"] || row["Posicao"] || row["posicao"] || row["__EMPTY_3"],
+          tipo_demarcacao: row["Código"] || row["codigo"] || row["__EMPTY_2"], // Usar Código também como tipo_demarcacao
           cor: row["Cor"] || row["cor"],
-          material: row["Material"] || row["material"],
-          largura_cm: row["Largura (cm)"] || row["largura_cm"],
-          espessura_cm: row["Espessura (cm)"] || row["espessura_cm"],
-          extensao_metros: row["Extensão (m)"] || row["extensao_metros"],
+          material: row["Material"] || row["material"] || row["__EMPTY_13"],
+          largura_cm: (row["Largura da Faixa (m)"] || row["largura_cm"] || row["__EMPTY_4"]) ? 
+            parseFloat(String(row["Largura da Faixa (m)"] || row["largura_cm"] || row["__EMPTY_4"]).replace(',', '.')) * 100 : null, // Converter m para cm
+          espessura_cm: (row["Espessura (mm)"] || row["espessura_cm"] || row["__EMPTY_14"]) ?
+            parseFloat(String(row["Espessura (mm)"] || row["espessura_cm"] || row["__EMPTY_14"]).replace(',', '.')) / 10 : null, // Converter mm para cm
+          extensao_metros: (row["Extensão (km)"] || row["extensao_metros"] || row["__EMPTY_15"]) ?
+            parseFloat(String(row["Extensão (km)"] || row["extensao_metros"] || row["__EMPTY_15"]).replace(',', '.')) * 1000 : null, // Converter km para m
           estado_conservacao: row["Estado Conservação"] || row["estado_conservacao"],
         };
 
