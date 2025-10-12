@@ -10,6 +10,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 
+const TIPOS_NECESSIDADES = [
+  { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabela_nec: "necessidades_marcas_longitudinais", tabela_cad: "ficha_marcas_longitudinais" },
+  { value: "tachas", label: "Tachas", tabela_nec: "necessidades_tachas", tabela_cad: "ficha_tachas" },
+  { value: "marcas_transversais", label: "Zebrados (Marcas Transversais)", tabela_nec: "necessidades_inscricoes", tabela_cad: "ficha_inscricoes" },
+  { value: "cilindros", label: "Cilindros Delimitadores", tabela_nec: "necessidades_cilindros", tabela_cad: "ficha_cilindros" },
+  { value: "placas", label: "Placas", tabela_nec: "necessidades_placas", tabela_cad: "ficha_placa" },
+  { value: "porticos", label: "Pórticos", tabela_nec: "necessidades_porticos", tabela_cad: "ficha_porticos" },
+  { value: "defensas", label: "Defensas", tabela_nec: "necessidades_defensas", tabela_cad: "defensas" },
+];
+
 interface ResultadoDiagnostico {
   necessidade_id: string;
   nec_km: number;
@@ -26,6 +36,7 @@ interface ResultadoDiagnostico {
 }
 
 export function DiagnosticoMatch() {
+  const [tipoServico, setTipoServico] = useState<string>("");
   const [loteId, setLoteId] = useState<string>("");
   const [rodoviaId, setRodoviaId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -77,10 +88,10 @@ export function DiagnosticoMatch() {
   };
 
   const handleDiagnostico = async () => {
-    if (!loteId || !rodoviaId) {
+    if (!tipoServico || !loteId || !rodoviaId) {
       toast({
         title: "Erro",
-        description: "Selecione lote e rodovia",
+        description: "Selecione tipo de serviço, lote e rodovia",
         variant: "destructive",
       });
       return;
@@ -90,14 +101,22 @@ export function DiagnosticoMatch() {
     setResultados([]);
 
     try {
+      const tipoConfig = TIPOS_NECESSIDADES.find(t => t.value === tipoServico);
+      if (!tipoConfig) throw new Error("Tipo de serviço inválido");
+
+      // Determinar campos de coordenadas baseado no tipo
+      const usaLatLongInicial = tipoServico !== "placas" && tipoServico !== "porticos";
+      const latField = usaLatLongInicial ? "latitude_inicial" : "latitude";
+      const longField = usaLatLongInicial ? "longitude_inicial" : "longitude";
+
       // 1. Buscar necessidades de substituição
       const { data: necessidades, error: necError } = await supabase
-        .from("necessidades_placas")
+        .from(tipoConfig.tabela_nec as any)
         .select("*")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .ilike("solucao_planilha", "%substitu%")
-        .limit(50); // Aumentar para 50 para melhor amostra
+        .limit(50);
 
       if (necError) throw necError;
       if (!necessidades || necessidades.length === 0) {
@@ -109,86 +128,61 @@ export function DiagnosticoMatch() {
         return;
       }
 
-      // 2. Buscar todas as placas do cadastro da rodovia
+      // 2. Buscar todos os cadastros da rodovia
       const { data: cadastros, error: cadError } = await supabase
-        .from("ficha_placa")
+        .from(tipoConfig.tabela_cad as any)
         .select("*")
         .eq("rodovia_id", rodoviaId);
 
       if (cadError) throw cadError;
 
+      const cadastroLatField = usaLatLongInicial ? "latitude_inicial" : "latitude";
+      const cadastroLongField = usaLatLongInicial ? "longitude_inicial" : "longitude";
+
       console.log("🔍 Diagnóstico Match:");
+      console.log(`- Tipo: ${tipoConfig.label}`);
       console.log(`- Necessidades encontradas: ${necessidades.length}`);
-      console.log(`- Cadastro de placas encontrado: ${cadastros?.length || 0}`);
-      console.log(`- Cadastro com coordenadas: ${cadastros?.filter((c: any) => c.latitude && c.longitude).length || 0}`);
-      
-      // Debug: mostrar primeiras necessidades e cadastros
-      console.log("📋 Primeira necessidade:", necessidades[0]);
-      console.log("📋 Primeiro cadastro:", cadastros?.[0]);
+      console.log(`- Cadastro encontrado: ${cadastros?.length || 0}`);
+      console.log(`- Cadastro com coordenadas: ${cadastros?.filter((c: any) => c[cadastroLatField] && c[cadastroLongField]).length || 0}`);
 
       const diagnosticos: ResultadoDiagnostico[] = [];
 
-      // 3. Para cada necessidade, encontrar a placa mais próxima
+      // 3. Para cada necessidade, encontrar o cadastro mais próximo
       for (const nec of (necessidades as any[])) {
         let maisProximo = null;
         let menorDistancia = Infinity;
 
-        const necLat = converterCoordenada(nec.latitude);
-        const necLong = converterCoordenada(nec.longitude);
-
-        console.log(`🔍 Nec KM ${nec.km} (${nec.codigo}): lat=${necLat}, long=${necLong}`);
+        const necLat = converterCoordenada(nec[latField]);
+        const necLong = converterCoordenada(nec[longField]);
 
         if (cadastros && necLat !== null && necLong !== null) {
-          let comparacoes = 0;
-          let cadastrosValidos = 0;
           for (const cad of (cadastros as any[])) {
-            const cadLat = converterCoordenada(cad.latitude);
-            const cadLong = converterCoordenada(cad.longitude);
+            const cadLat = converterCoordenada(cad[cadastroLatField]);
+            const cadLong = converterCoordenada(cad[cadastroLongField]);
             
             if (cadLat !== null && cadLong !== null) {
-              cadastrosValidos++;
-              const dist = calcularDistancia(
-                necLat, 
-                necLong, 
-                cadLat, 
-                cadLong
-              );
-              
-              // Log TODAS as comparações para primeira necessidade
-              if (comparacoes < 5) {
-                console.log(`    [${comparacoes}] ${cad.codigo} KM ${cad.km}: dist=${dist.toFixed(2)}m`);
-              }
-              
-              comparacoes++;
+              const dist = calcularDistancia(necLat, necLong, cadLat, cadLong);
               
               if (dist < menorDistancia) {
                 menorDistancia = dist;
                 maisProximo = cad;
-                console.log(`  ✅ MATCH: ${cad.codigo} dist=${dist.toFixed(2)}m`);
-              }
-            } else {
-              if (comparacoes < 3) {
-                console.log(`  ⚠️ ${cad.codigo} sem coords`);
               }
             }
           }
-          console.log(`  Total comparações: ${comparacoes} de ${cadastros.length} cadastros (${cadastrosValidos} válidos)`);
-        } else {
-          console.log(`  ❌ Necessidade sem coordenadas válidas`);
         }
 
         diagnosticos.push({
           necessidade_id: nec.id,
-          nec_km: nec.km,
+          nec_km: nec.km || nec.km_inicial || 0,
           nec_lat: necLat || 0,
           nec_long: necLong || 0,
-          nec_codigo: nec.codigo || "-",
+          nec_codigo: nec.codigo || nec.tipo || "-",
           nec_solucao: nec.solucao_planilha,
           cadastro_mais_proximo_id: maisProximo?.id || null,
-          cad_km: maisProximo?.km || null,
-          cad_lat: converterCoordenada(maisProximo?.latitude) || null,
-          cad_long: converterCoordenada(maisProximo?.longitude) || null,
-          cad_codigo: maisProximo?.codigo || null,
+          cad_km: maisProximo?.km || maisProximo?.km_inicial || null,
+          cad_lat: converterCoordenada(maisProximo?.[cadastroLatField]) || null,
+          cad_long: converterCoordenada(maisProximo?.[cadastroLongField]) || null,
+          cad_codigo: maisProximo?.codigo || maisProximo?.tipo || null,
           distancia_metros: menorDistancia !== Infinity ? menorDistancia : null,
         });
       }
@@ -200,27 +194,25 @@ export function DiagnosticoMatch() {
       const comMatchMedio = diagnosticos.filter(d => d.distancia_metros && d.distancia_metros > 100 && d.distancia_metros <= 500).length;
       const comMatchLonge = diagnosticos.filter(d => d.distancia_metros && d.distancia_metros > 500 && d.distancia_metros <= 2000).length;
       const semMatch = diagnosticos.filter(d => !d.distancia_metros || d.distancia_metros > 2000).length;
-      const semCoordenadas = necessidades.filter((n: any) => !n.latitude || !n.longitude).length;
-      const cadastroSemCoordenadas = cadastros?.filter((c: any) => !c.latitude || !c.longitude).length || 0;
-      
-      console.log("📊 Resultados:", { comMatchPerto, comMatchMedio, comMatchLonge, semMatch });
+      const semCoordenadas = necessidades.filter((n: any) => !n[latField] || !n[longField]).length;
+      const cadastroSemCoordenadas = cadastros?.filter((c: any) => !c[cadastroLatField] || !c[cadastroLongField]).length || 0;
 
       if (cadastros?.length === 0) {
         toast({
-          title: "❌ Sem cadastro de placas",
-          description: `Encontradas ${necessidades.length} necessidades, mas não há placas cadastradas para esta rodovia. É necessário importar o inventário primeiro.`,
+          title: "❌ Sem cadastro",
+          description: `Encontradas ${necessidades.length} necessidades, mas não há itens cadastrados para esta rodovia. É necessário importar o inventário primeiro.`,
           variant: "destructive",
         });
       } else if (cadastroSemCoordenadas === cadastros?.length) {
         toast({
           title: "❌ Cadastro sem coordenadas",
-          description: `Há ${cadastros.length} placas cadastradas, mas NENHUMA tem coordenadas. O inventário precisa ter lat/long.`,
+          description: `Há ${cadastros.length} itens cadastrados, mas NENHUM tem coordenadas. O inventário precisa ter lat/long.`,
           variant: "destructive",
         });
       } else {
         toast({
           title: "Diagnóstico concluído",
-          description: `Necessidades: ${necessidades.length} | Cadastro: ${cadastros?.length || 0} placas (${cadastroSemCoordenadas} sem coords) | Match <100m: ${comMatchPerto} | 100-500m: ${comMatchMedio} | 500m-2km: ${comMatchLonge} | >2km: ${semMatch}`,
+          description: `Necessidades: ${necessidades.length} | Cadastro: ${cadastros?.length || 0} (${cadastroSemCoordenadas} sem coords) | Match <100m: ${comMatchPerto} | 100-500m: ${comMatchMedio} | 500m-2km: ${comMatchLonge} | >2km: ${semMatch}`,
         });
       }
 
@@ -254,13 +246,34 @@ export function DiagnosticoMatch() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label>Tipo de Serviço</Label>
+          <Select value={tipoServico} onValueChange={(value) => {
+            setTipoServico(value);
+            setLoteId("");
+            setRodoviaId("");
+            setResultados([]);
+          }} disabled={isLoading}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o tipo de serviço" />
+            </SelectTrigger>
+            <SelectContent>
+              {TIPOS_NECESSIDADES.map(tipo => (
+                <SelectItem key={tipo.value} value={tipo.value}>
+                  {tipo.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Lote</Label>
             <Select value={loteId} onValueChange={(value) => {
               setLoteId(value);
               setRodoviaId("");
-            }} disabled={isLoading}>
+            }} disabled={isLoading || !tipoServico}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o lote" />
               </SelectTrigger>
@@ -293,7 +306,7 @@ export function DiagnosticoMatch() {
 
         <Button
           onClick={handleDiagnostico}
-          disabled={!loteId || !rodoviaId || isLoading}
+          disabled={!tipoServico || !loteId || !rodoviaId || isLoading}
           className="w-full"
         >
           <Search className="mr-2 h-4 w-4" />
