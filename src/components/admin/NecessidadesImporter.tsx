@@ -215,19 +215,10 @@ export function NecessidadesImporter() {
           // Mapear colunas
           const dados = mapearColunas(row, tipo);
 
-          // Validar coordenadas
+          // Buscar match no cadastro (apenas se houver coordenadas)
           const lat = tipo === "placas" ? dados.latitude : dados.latitude_inicial;
           const long = tipo === "placas" ? dados.longitude : dados.longitude_inicial;
 
-          if (!lat || !long) {
-            setLogs(prev => [...prev, {
-              tipo: "warning",
-              linha: linhaExcel,
-              mensagem: "Coordenadas ausentes - importado sem match"
-            }]);
-          }
-
-          // Buscar match no cadastro
           let match = null;
           let distancia = null;
 
@@ -247,7 +238,7 @@ export function NecessidadesImporter() {
             }
           }
 
-          // Identificar tipo de serviço - usar da planilha se existir, senão inferir
+          // Usar o serviço da planilha (coluna "Solução")
           let servico: string;
           const solucaoPlanilha = dados.solucao_planilha?.toLowerCase();
           
@@ -257,17 +248,17 @@ export function NecessidadesImporter() {
               servico = "Substituição";
             } else if (solucaoPlanilha.includes("implant") || solucaoPlanilha.includes("incluir")) {
               servico = "Inclusão";
-            } else if (solucaoPlanilha.includes("remov") || solucaoPlanilha.includes("manter")) {
+            } else if (solucaoPlanilha.includes("remov")) {
               servico = "Remoção";
+            } else if (solucaoPlanilha.includes("manter")) {
+              servico = "Manutenção";
             } else {
-              servico = identificarServico(dados, match);
+              servico = "Inclusão"; // Padrão
             }
           } else {
+            // Se não tem solução na planilha, usar lógica de inferência
             servico = identificarServico(dados, match);
           }
-          
-          // Verificar inconsistência: planilha diz "Substituir" mas não há match
-          const alertaInconsistencia = solucaoPlanilha?.includes("substitu") && !match;
 
           // Inserir necessidade
           const tabelaNecessidade = `necessidades_${tipo}` as 
@@ -295,15 +286,14 @@ export function NecessidadesImporter() {
 
           if (error) throw error;
 
-          // Log de sucesso
-          const icon = servico === "Inclusão" ? "🟢" : servico === "Substituição" ? "🟡" : "🔴";
-          const matchInfo = match ? ` (match ${distancia?.toFixed(0)}m)` : " (sem match)";
-          const alerta = alertaInconsistencia ? " ⚠️ PLANILHA DIZ SUBSTITUIR MAS NÃO HÁ MATCH!" : "";
+          // Log de sucesso (simples e direto)
+          const icon = servico === "Inclusão" ? "🟢" : servico === "Substituição" ? "🟡" : servico === "Remoção" ? "🔴" : "🔵";
+          const matchInfo = match ? ` (${distancia?.toFixed(0)}m)` : "";
           
           setLogs(prev => [...prev, {
-            tipo: alertaInconsistencia ? "warning" : "success",
+            tipo: "success",
             linha: linhaExcel,
-            mensagem: `${icon} ${servico}${matchInfo}${alerta}`
+            mensagem: `${icon} ${servico}${matchInfo}`
           }]);
           sucessos++;
 
