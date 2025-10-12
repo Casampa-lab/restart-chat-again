@@ -104,6 +104,7 @@ export function NecessidadesImporter() {
       longitude_final: row["Longitude Final"] || row["Long Final"] || row["longitude_final"],
       observacao: row["Observação"] || row["Observacao"] || row["observacao"],
       snv: row["SNV"] || row["snv"],
+      solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
     };
 
     // Campos específicos por tipo
@@ -135,19 +136,20 @@ export function NecessidadesImporter() {
 
       case "placas":
         return {
-          km: row["KM"] || row["km"],
+          km: row["Km"] || row["KM"] || row["km"],
           latitude: row["Latitude"] || row["latitude"],
           longitude: row["Longitude"] || row["longitude"],
-          codigo: row["Código"] || row["codigo"],
+          codigo: row["Código da placa"] || row["Código"] || row["codigo"],
           modelo: row["Modelo"] || row["modelo"],
-          tipo: row["Tipo"] || row["tipo"],
+          tipo: row["Tipo de placa"] || row["Tipo"] || row["tipo"],
           velocidade: row["Velocidade"] || row["velocidade"],
           descricao: row["Descrição"] || row["descricao"],
           lado: row["Lado"] || row["lado"],
           dimensoes_mm: row["Dimensões (mm)"] || row["dimensoes_mm"],
-          substrato: row["Substrato"] || row["substrato"],
-          suporte: row["Suporte"] || row["suporte"],
+          substrato: row["Tipo de Substrato"] || row["Substrato"] || row["substrato"],
+          suporte: row["Tipo de Suporte"] || row["Suporte"] || row["suporte"],
           pelicula: row["Película"] || row["pelicula"],
+          solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
         };
 
       default:
@@ -245,8 +247,27 @@ export function NecessidadesImporter() {
             }
           }
 
-          // Identificar tipo de serviço
-          const servico = identificarServico(dados, match);
+          // Identificar tipo de serviço - usar da planilha se existir, senão inferir
+          let servico: string;
+          const solucaoPlanilha = dados.solucao_planilha?.toLowerCase();
+          
+          if (solucaoPlanilha) {
+            // Mapear valores da planilha
+            if (solucaoPlanilha.includes("substitu")) {
+              servico = "Substituição";
+            } else if (solucaoPlanilha.includes("implant") || solucaoPlanilha.includes("incluir")) {
+              servico = "Inclusão";
+            } else if (solucaoPlanilha.includes("remov") || solucaoPlanilha.includes("manter")) {
+              servico = "Remoção";
+            } else {
+              servico = identificarServico(dados, match);
+            }
+          } else {
+            servico = identificarServico(dados, match);
+          }
+          
+          // Verificar inconsistência: planilha diz "Substituir" mas não há match
+          const alertaInconsistencia = solucaoPlanilha?.includes("substitu") && !match;
 
           // Inserir necessidade
           const tabelaNecessidade = `necessidades_${tipo}` as 
@@ -276,10 +297,13 @@ export function NecessidadesImporter() {
 
           // Log de sucesso
           const icon = servico === "Inclusão" ? "🟢" : servico === "Substituição" ? "🟡" : "🔴";
+          const matchInfo = match ? ` (match ${distancia?.toFixed(0)}m)` : " (sem match)";
+          const alerta = alertaInconsistencia ? " ⚠️ PLANILHA DIZ SUBSTITUIR MAS NÃO HÁ MATCH!" : "";
+          
           setLogs(prev => [...prev, {
-            tipo: "success",
+            tipo: alertaInconsistencia ? "warning" : "success",
             linha: linhaExcel,
-            mensagem: `${icon} ${servico}${match ? ` (match ${distancia?.toFixed(0)}m)` : " (sem match)"}`
+            mensagem: `${icon} ${servico}${matchInfo}${alerta}`
           }]);
           sucessos++;
 
