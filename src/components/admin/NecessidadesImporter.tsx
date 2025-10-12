@@ -200,21 +200,39 @@ export function NecessidadesImporter() {
     cancelImportRef.current = false;
 
     try {
-      // 1. Ler arquivo Excel
+      // 1. Ler arquivo Excel - usar linha 2 como cabeçalho (onde está o dicionário)
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      
+      // Ler com cabeçalho na linha 2 (índice 1)
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+        header: 1,  // Ler como array de arrays primeiro
+        defval: null 
+      });
 
-      if (jsonData.length === 0) {
-        throw new Error("Planilha vazia");
+      if (jsonData.length < 2) {
+        throw new Error("Planilha vazia ou sem dados");
       }
 
-      // Filtrar linhas de cabeçalho (que têm texto em campos numéricos)
-      const dadosFiltrados = jsonData.filter((row: any) => {
-        // Se o campo KM/Km contém texto como "Km", é cabeçalho - pular
-        const kmValue = row["__EMPTY_6"] || row["Km"] || row["KM"] || row["km"];
-        return kmValue !== undefined && !isNaN(Number(kmValue));
+      // Pegar os cabeçalhos da linha 2 (índice 1)
+      const headers = jsonData[1] as any[];
+      
+      // Converter os dados (a partir da linha 3) em objetos usando os cabeçalhos da linha 2
+      const dadosComHeader = jsonData.slice(2).map((row: any) => {
+        const obj: any = {};
+        headers.forEach((header, index) => {
+          obj[header] = row[index];
+        });
+        return obj;
+      });
+
+      // Filtrar linhas vazias (que não têm KM)
+      const dadosFiltrados = dadosComHeader.filter((row: any) => {
+        const kmValue = tipo === "placas" 
+          ? (row["Km"] || row["KM"] || row["km"])
+          : (row["Km Inicial"] || row["KM Inicial"] || row["km_inicial"]);
+        return kmValue !== undefined && kmValue !== null && kmValue !== "";
       });
 
       // 2. Buscar user_id
