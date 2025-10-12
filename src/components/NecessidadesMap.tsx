@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from "react-leaflet";
 import L, { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, AlertCircle, Upload } from "lucide-react";
@@ -30,7 +29,6 @@ interface NecessidadesMapProps {
   tipo: string;
 }
 
-// Componente auxiliar para ajustar bounds do mapa
 const MapBounds = ({ coordinates }: { coordinates: LatLngExpression[] }) => {
   const map = useMap();
   
@@ -44,58 +42,42 @@ const MapBounds = ({ coordinates }: { coordinates: LatLngExpression[] }) => {
   return null;
 };
 
+const createCustomIcon = (servico: string) => {
+  const color = servico === "Inclusão" ? "#22c55e" : servico === "Substituição" ? "#eab308" : "#ef4444";
+  const emoji = servico === "Inclusão" ? "➕" : servico === "Substituição" ? "🔄" : "➖";
+  
+  return L.divIcon({
+    className: "custom-marker",
+    html: `
+      <div style="
+        background-color: ${color};
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      ">${emoji}</div>
+    `,
+    iconSize: [32, 32] as [number, number],
+    iconAnchor: [16, 16] as [number, number],
+    popupAnchor: [0, -16] as [number, number],
+  });
+};
+
 export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) => {
   const [geojsonData, setGeojsonData] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
 
-  // Filtrar necessidades com coordenadas válidas
   const necessidadesComCoordenadas = necessidades.filter(n => {
     const lat = n.latitude_inicial || n.latitude;
     const lng = n.longitude_inicial || n.longitude;
     return lat && lng && lat !== 0 && lng !== 0;
   });
 
-  const getMarkerColor = (servico: string) => {
-    switch (servico) {
-      case "Inclusão":
-        return "#22c55e"; // green-500
-      case "Substituição":
-        return "#eab308"; // yellow-500
-      case "Remoção":
-        return "#ef4444"; // red-500
-      default:
-        return "#6b7280"; // gray-500
-    }
-  };
-
-  // Criar ícones customizados do Leaflet
-  const createCustomIcon = (servico: string) => {
-    const color = getMarkerColor(servico);
-    const emoji = servico === "Inclusão" ? "➕" : servico === "Substituição" ? "🔄" : "➖";
-    
-    return L.divIcon({
-      className: "custom-marker",
-      html: `
-        <div style="
-          background-color: ${color};
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 16px;
-        ">${emoji}</div>
-      `,
-      iconSize: [32, 32] as [number, number],
-      iconAnchor: [16, 16] as [number, number],
-      popupAnchor: [0, -16] as [number, number],
-    });
-  };
-
-  // Carregar GeoJSON salvo ao montar
   useEffect(() => {
     const loadGeojson = async () => {
       const { data } = await supabase
@@ -130,12 +112,10 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
       const text = await file.text();
       const data = JSON.parse(text);
       
-      // Validar se é um GeoJSON válido
       if (!data.type || (data.type !== "FeatureCollection" && data.type !== "Feature")) {
         throw new Error("Arquivo não é um GeoJSON válido");
       }
 
-      // Salvar no banco
       const { error } = await supabase
         .from("configuracoes")
         .upsert({
@@ -161,8 +141,8 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
     return [lat, lng] as LatLngExpression;
   });
 
-  // Centro padrão: Brasil
   const defaultCenter: LatLngExpression = [-15.7801, -47.9292];
+  const mapCenter = coordinates.length > 0 ? coordinates[0] : defaultCenter;
 
   return (
     <div className="space-y-4">
@@ -229,7 +209,7 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
 
       <div className="w-full h-[600px] rounded-lg border shadow-lg overflow-hidden">
         <MapContainer
-          center={coordinates[0] || defaultCenter}
+          center={mapCenter}
           zoom={13}
           style={{ width: "100%", height: "100%" }}
           scrollWheelZoom={true}
@@ -238,8 +218,8 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-
-          {geojsonData && (
+          
+          {geojsonData ? (
             <GeoJSON
               data={geojsonData}
               pathOptions={{
@@ -248,7 +228,7 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
                 opacity: 0.7,
               }}
             />
-          )}
+          ) : null}
 
           {necessidadesComCoordenadas.map((nec) => {
             const lat = nec.latitude_inicial || nec.latitude || 0;
@@ -256,7 +236,7 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
             const km = nec.km_inicial || nec.km || "N/A";
             const rodovia = nec.rodovia?.codigo || "N/A";
             const match = nec.distancia_match_metros 
-              ? `Match: ${nec.distancia_match_metros.toFixed(0)}m\n`
+              ? `Match: ${nec.distancia_match_metros.toFixed(0)}m` 
               : "";
 
             return (
@@ -273,7 +253,11 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
                     <p className="text-xs space-y-1">
                       <strong>Rodovia:</strong> {rodovia}<br />
                       <strong>KM:</strong> {km}<br />
-                      {match && <><strong>{match}</strong><br /></>}
+                      {match && (
+                        <>
+                          <strong>{match}</strong><br />
+                        </>
+                      )}
                       {nec.observacao && (
                         <span className="text-muted-foreground italic">
                           {nec.observacao}
@@ -286,7 +270,7 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
             );
           })}
 
-          {coordinates.length > 0 && <MapBounds coordinates={coordinates} />}
+          {coordinates.length > 0 ? <MapBounds coordinates={coordinates} /> : null}
         </MapContainer>
       </div>
     </div>
