@@ -15,6 +15,7 @@ import { UsuariosManager } from "@/components/admin/UsuariosManager";
 import { InventarioImporterManager } from "@/components/admin/InventarioImporterManager";
 import { DeleteInventarioSelecionado } from "@/components/admin/DeleteInventarioSelecionado";
 import { LimparFotosOrfas } from "@/components/admin/LimparFotosOrfas";
+import { NecessidadesImporter } from "@/components/admin/NecessidadesImporter";
 
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
@@ -116,13 +117,14 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="supervisoras" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="supervisoras">Supervisoras</TabsTrigger>
             <TabsTrigger value="usuarios">Usuários</TabsTrigger>
             <TabsTrigger value="empresas">Executoras</TabsTrigger>
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
             <TabsTrigger value="inventario">Inventário</TabsTrigger>
+            <TabsTrigger value="necessidades">Necessidades</TabsTrigger>
           </TabsList>
 
           <TabsContent value="supervisoras">
@@ -151,6 +153,10 @@ const Admin = () => {
               <DeleteInventarioSelecionado />
               <LimparFotosOrfas />
             </div>
+          </TabsContent>
+
+          <TabsContent value="necessidades">
+            <NecessidadesImporter />
           </TabsContent>
         </Tabs>
       </main>

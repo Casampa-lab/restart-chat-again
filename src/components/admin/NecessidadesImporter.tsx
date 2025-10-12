@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Upload, CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Upload, CheckCircle2, XCircle, AlertCircle, Loader2, StopCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from "xlsx";
@@ -34,6 +34,7 @@ export function NecessidadesImporter() {
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const { toast } = useToast();
+  const cancelImportRef = useRef(false);
 
   const identificarServico = (row: any, match: any): string => {
     // SEM match = nova instalação
@@ -141,6 +142,7 @@ export function NecessidadesImporter() {
     setIsImporting(true);
     setLogs([]);
     setProgress(0);
+    cancelImportRef.current = false;
 
     try {
       // 1. Ler arquivo Excel
@@ -163,6 +165,21 @@ export function NecessidadesImporter() {
       let falhas = 0;
 
       for (let i = 0; i < jsonData.length; i++) {
+        // Verificar se foi cancelado
+        if (cancelImportRef.current) {
+          setLogs(prev => [...prev, {
+            tipo: "warning",
+            linha: 0,
+            mensagem: "Importação cancelada pelo usuário"
+          }]);
+          toast({
+            title: "Importação Cancelada",
+            description: `Processadas ${i} de ${total} linhas antes do cancelamento`,
+            variant: "default",
+          });
+          break;
+        }
+
         const row: any = jsonData[i];
         const linhaExcel = i + 2; // +2 pois Excel começa em 1 e tem header
 
@@ -324,24 +341,43 @@ export function NecessidadesImporter() {
           )}
         </div>
 
-        {/* Botão importar */}
-        <Button
-          onClick={handleImport}
-          disabled={!file || !tipo || isImporting}
-          className="w-full"
-        >
-          {isImporting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Importando...
-            </>
-          ) : (
-            <>
-              <Upload className="mr-2 h-4 w-4" />
-              Importar
-            </>
+        {/* Botões importar/cancelar */}
+        <div className="flex gap-2">
+          <Button
+            onClick={handleImport}
+            disabled={!file || !tipo || isImporting}
+            className="flex-1"
+          >
+            {isImporting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Importando...
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                Importar
+              </>
+            )}
+          </Button>
+
+          {isImporting && (
+            <Button
+              onClick={() => {
+                cancelImportRef.current = true;
+                toast({
+                  title: "Cancelando...",
+                  description: "A importação será interrompida após a linha atual",
+                });
+              }}
+              variant="destructive"
+              className="flex-shrink-0"
+            >
+              <StopCircle className="mr-2 h-4 w-4" />
+              Cancelar
+            </Button>
           )}
-        </Button>
+        </div>
 
         {/* Barra de progresso */}
         {isImporting && (
