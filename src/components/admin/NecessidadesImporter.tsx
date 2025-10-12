@@ -36,6 +36,7 @@ export function NecessidadesImporter() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loteId, setLoteId] = useState<string>("");
   const [rodoviaId, setRodoviaId] = useState<string>("");
+  const [progressInfo, setProgressInfo] = useState<{ current: number; total: number } | null>(null);
   const { toast } = useToast();
   const cancelImportRef = useRef(false);
 
@@ -197,6 +198,7 @@ export function NecessidadesImporter() {
     setIsImporting(true);
     setLogs([]);
     setProgress(0);
+    setProgressInfo(null);
     cancelImportRef.current = false;
 
     try {
@@ -283,8 +285,11 @@ export function NecessidadesImporter() {
       const total = dadosFiltrados.length;
       let sucessos = 0;
       let falhas = 0;
+      setProgressInfo({ current: 0, total });
 
       for (let i = 0; i < dadosFiltrados.length; i++) {
+        // Atualizar progresso em tempo real
+        setProgressInfo({ current: i + 1, total });
         // Verificar se foi cancelado
         if (cancelImportRef.current) {
           setLogs(prev => [...prev, {
@@ -435,6 +440,7 @@ export function NecessidadesImporter() {
       });
     } finally {
       setIsImporting(false);
+      setProgressInfo(null);
     }
   };
 
@@ -559,9 +565,15 @@ export function NecessidadesImporter() {
         {isImporting && (
           <div className="space-y-2">
             <Progress value={progress} />
-            <p className="text-sm text-center text-muted-foreground">
-              {progress}% concluído
-            </p>
+            {progressInfo ? (
+              <p className="text-sm text-center text-muted-foreground">
+                Processando: <span className="font-semibold">{progressInfo.current}</span> / {progressInfo.total} linhas ({progress}%)
+              </p>
+            ) : (
+              <p className="text-sm text-center text-muted-foreground">
+                {progress}% concluído
+              </p>
+            )}
           </div>
         )}
 
