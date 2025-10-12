@@ -119,7 +119,7 @@ export function DiagnosticoMatch() {
       // Para marcas longitudinais, filtrar por Posição = 'E' (eixo)
       // Para outros tipos, filtrar por solucao_planilha contendo "substitu"
       if (tipoServico === "marcas_longitudinais") {
-        query = query.eq("posicao", "E").not("cadastro_id", "is", null); // Apenas onde há match para fazer diagnóstico
+        query = query.eq("posicao", "E");
       } else {
         query = query.ilike("solucao_planilha", "%substitu%");
       }
