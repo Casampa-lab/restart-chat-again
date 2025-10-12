@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, FileText, ExternalLink, Trash2, Filter, FileSpreadsheet, Map } from "lucide-react";
+import { ArrowLeft, FileText, ExternalLink, Trash2, Filter, FileSpreadsheet, Map, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { NecessidadesMap } from "@/components/NecessidadesMap";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
@@ -170,6 +170,15 @@ const MinhasNecessidades = () => {
               </div>
             </div>
             <div className="flex gap-2">
+              <Button 
+                variant="secondary" 
+                size="lg"
+                onClick={() => navigate("/dashboard-necessidades")}
+                className="font-semibold shadow-md"
+              >
+                <BarChart3 className="mr-2 h-5 w-5" />
+                Dashboard
+              </Button>
               <Button 
                 variant="secondary" 
                 size="lg"
