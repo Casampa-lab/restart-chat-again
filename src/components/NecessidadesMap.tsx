@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from "react-leaflet";
+import { MapContainer, useMap } from "react-leaflet";
 import L, { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, AlertCircle, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { NecessidadesMapLayers } from "./NecessidadesMapLayers";
 
 interface Necessidade {
   id: string;
@@ -214,65 +215,12 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
           style={{ width: "100%", height: "100%" }}
           scrollWheelZoom={true}
         >
-          <>
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            
-            {geojsonData && (
-              <GeoJSON
-                data={geojsonData}
-                pathOptions={{
-                  color: "#1e40af",
-                  weight: 4,
-                  opacity: 0.7,
-                }}
-              />
-            )}
-
-            {necessidadesComCoordenadas.map((nec) => {
-              const lat = nec.latitude_inicial || nec.latitude || 0;
-              const lng = nec.longitude_inicial || nec.longitude || 0;
-              const km = nec.km_inicial || nec.km || "N/A";
-              const rodovia = nec.rodovia?.codigo || "N/A";
-              const match = nec.distancia_match_metros 
-                ? `Match: ${nec.distancia_match_metros.toFixed(0)}m` 
-                : "";
-
-              return (
-                <Marker
-                  key={nec.id}
-                  position={[lat, lng] as LatLngExpression}
-                  icon={createCustomIcon(nec.servico)}
-                >
-                  <Popup>
-                    <div className="font-sans">
-                      <h3 className="font-semibold text-sm mb-2">
-                        {nec.servico === "Inclusão" ? "➕" : nec.servico === "Substituição" ? "🔄" : "➖"} {nec.servico}
-                      </h3>
-                      <p className="text-xs space-y-1">
-                        <strong>Rodovia:</strong> {rodovia}<br />
-                        <strong>KM:</strong> {km}<br />
-                        {match && (
-                          <>
-                            <strong>{match}</strong><br />
-                          </>
-                        )}
-                        {nec.observacao && (
-                          <span className="text-muted-foreground italic">
-                            {nec.observacao}
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </Popup>
-                </Marker>
-              );
-            })}
-
-            {coordinates.length > 0 && <MapBounds coordinates={coordinates} />}
-          </>
+          <NecessidadesMapLayers
+            geojsonData={geojsonData}
+            necessidadesComCoordenadas={necessidadesComCoordenadas}
+            createCustomIcon={createCustomIcon}
+          />
+          {coordinates.length > 0 && <MapBounds coordinates={coordinates} />}
         </MapContainer>
       </div>
     </div>
