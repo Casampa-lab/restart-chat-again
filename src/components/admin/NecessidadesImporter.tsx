@@ -252,7 +252,9 @@ export function NecessidadesImporter() {
           let distancia = null;
 
           if (lat && long) {
-            const { data: matchData } = await supabase
+            console.log(`🔍 Linha ${linhaExcel}: Chamando RPC com lat=${lat}, long=${long}, tipo=${tipo}, rodovia=${rodoviaId}`);
+            
+            const { data: matchData, error: matchError } = await supabase
               .rpc("match_cadastro_por_coordenadas", {
                 p_tipo: tipo,
                 p_lat: lat,
@@ -261,10 +263,17 @@ export function NecessidadesImporter() {
                 p_tolerancia_metros: 50,
               });
 
-            if (matchData && matchData.length > 0) {
+            if (matchError) {
+              console.error(`❌ Linha ${linhaExcel}: Erro na RPC:`, matchError);
+            } else if (matchData && matchData.length > 0) {
               match = matchData[0].cadastro_id;
               distancia = matchData[0].distancia_metros;
+              console.log(`✅ Linha ${linhaExcel}: Match encontrado! cadastro_id=${match}, distancia=${distancia}m`);
+            } else {
+              console.log(`⚠️ Linha ${linhaExcel}: RPC retornou vazio (sem match dentro de 50m)`);
             }
+          } else {
+            console.log(`⚠️ Linha ${linhaExcel}: Sem coordenadas válidas (lat=${lat}, long=${long})`);
           }
 
           // Usar o serviço da planilha (coluna "Solução")
