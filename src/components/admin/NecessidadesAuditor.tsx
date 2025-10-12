@@ -179,15 +179,15 @@ export function NecessidadesAuditor() {
     const ehSubstituicao = item.solucao_planilha?.toLowerCase().includes("substitu");
     
     if (ehSubstituicao && !item.tem_match) {
-      return <Badge variant="destructive">❌ Substituição sem Match</Badge>;
+      return <Badge variant="destructive">❌ Substituir sem Match</Badge>;
     }
     if (ehSubstituicao && item.tem_match) {
-      return <Badge variant="default">✅ Substituição com Match</Badge>;
+      return <Badge variant="default">✅ Substituir com Match</Badge>;
     }
     if (!ehSubstituicao && item.tem_match) {
-      return <Badge variant="secondary">⚠️ Inclusão com Match</Badge>;
+      return <Badge variant="secondary">⚠️ Implantar com Match</Badge>;
     }
-    return <Badge variant="outline">🟢 Inclusão sem Match</Badge>;
+    return <Badge variant="outline">🟢 Implantar sem Match</Badge>;
   };
 
   return (
@@ -273,11 +273,11 @@ export function NecessidadesAuditor() {
                 <br />
                 ❌ = Planilha diz "Substituir" mas não há match (PROBLEMA!)
                 <br />
-                ✅ = Substituição com match correto
+                ✅ = Substituir com match correto
                 <br />
-                ⚠️ = Inclusão mas achou match (pode ser duplicata)
+                ⚠️ = Implantar mas achou match (pode ser duplicata)
                 <br />
-                🟢 = Inclusão sem match (normal)
+                🟢 = Implantar sem match (normal)
               </AlertDescription>
             </Alert>
 

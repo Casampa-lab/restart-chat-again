@@ -65,7 +65,7 @@ export function NecessidadesImporter() {
   const identificarServico = (row: any, match: any): string => {
     // SEM match = nova instalação
     if (!match) {
-      return "Inclusão";
+      return "Implantar";
     }
 
     // COM match - verificar sinais de remoção
@@ -77,11 +77,11 @@ export function NecessidadesImporter() {
     ];
 
     if (sinaisRemocao.some(Boolean)) {
-      return "Remoção";
+      return "Remover";
     }
 
     // Caso contrário = substituição
-    return "Substituição";
+    return "Substituir";
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,15 +245,15 @@ export function NecessidadesImporter() {
           if (solucaoPlanilha) {
             // Mapear valores da planilha
             if (solucaoPlanilha.includes("substitu")) {
-              servico = "Substituição";
-            } else if (solucaoPlanilha.includes("implant") || solucaoPlanilha.includes("incluir")) {
-              servico = "Inclusão";
+              servico = "Substituir";
+            } else if (solucaoPlanilha.includes("implant")) {
+              servico = "Implantar";
             } else if (solucaoPlanilha.includes("remov")) {
-              servico = "Remoção";
+              servico = "Remover";
             } else if (solucaoPlanilha.includes("manter")) {
-              servico = "Manutenção";
+              servico = "Manter";
             } else {
-              servico = "Inclusão"; // Padrão
+              servico = "Implantar"; // Padrão
             }
           } else {
             // Se não tem solução na planilha, usar lógica de inferência
@@ -287,7 +287,7 @@ export function NecessidadesImporter() {
           if (error) throw error;
 
           // Log de sucesso (simples e direto)
-          const icon = servico === "Inclusão" ? "🟢" : servico === "Substituição" ? "🟡" : servico === "Remoção" ? "🔴" : "🔵";
+          const icon = servico === "Implantar" ? "🟢" : servico === "Substituir" ? "🟡" : servico === "Remover" ? "🔴" : "🔵";
           const matchInfo = match ? ` (${distancia?.toFixed(0)}m)` : "";
           
           setLogs(prev => [...prev, {
