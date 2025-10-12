@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, CheckCircle2, XCircle, AlertCircle, Loader2, StopCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import * as XLSX from "xlsx";
 
 const TIPOS_NECESSIDADES = [
@@ -33,8 +34,33 @@ export function NecessidadesImporter() {
   const [isImporting, setIsImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [loteId, setLoteId] = useState<string>("");
+  const [rodoviaId, setRodoviaId] = useState<string>("");
   const { toast } = useToast();
   const cancelImportRef = useRef(false);
+
+  // Buscar lotes
+  const { data: lotes } = useQuery({
+    queryKey: ["lotes"],
+    queryFn: async () => {
+      const { data } = await supabase.from("lotes").select("*").order("numero");
+      return data || [];
+    },
+  });
+
+  // Buscar rodovias do lote selecionado
+  const { data: rodovias } = useQuery({
+    queryKey: ["rodovias", loteId],
+    queryFn: async () => {
+      if (!loteId) return [];
+      const { data } = await supabase
+        .from("lotes_rodovias")
+        .select("rodovia:rodovias(*)")
+        .eq("lote_id", loteId);
+      return data?.map(lr => lr.rodovia) || [];
+    },
+    enabled: !!loteId,
+  });
 
   const identificarServico = (row: any, match: any): string => {
     // SEM match = nova instalação
@@ -130,10 +156,10 @@ export function NecessidadesImporter() {
   };
 
   const handleImport = async () => {
-    if (!file || !tipo) {
+    if (!file || !tipo || !loteId || !rodoviaId) {
       toast({
         title: "Erro",
-        description: "Selecione o tipo e o arquivo antes de importar",
+        description: "Selecione o tipo, lote, rodovia e arquivo antes de importar",
         variant: "destructive",
       });
       return;
@@ -199,17 +225,6 @@ export function NecessidadesImporter() {
             }]);
           }
 
-          // Buscar rodovia (simplificado - ajustar conforme sua lógica)
-          const { data: rodovias } = await supabase
-            .from("rodovias")
-            .select("id")
-            .limit(1)
-            .single();
-
-          if (!rodovias) {
-            throw new Error("Nenhuma rodovia cadastrada");
-          }
-
           // Buscar match no cadastro
           let match = null;
           let distancia = null;
@@ -220,7 +235,7 @@ export function NecessidadesImporter() {
                 p_tipo: tipo,
                 p_lat: parseFloat(lat),
                 p_long: parseFloat(long),
-                p_rodovia_id: rodovias.id,
+                p_rodovia_id: rodoviaId,
                 p_tolerancia_metros: 50,
               });
 
@@ -247,8 +262,8 @@ export function NecessidadesImporter() {
             .from(tabelaNecessidade)
             .insert({
               user_id: user.id,
-              lote_id: rodovias.id, // Ajustar conforme sua estrutura
-              rodovia_id: rodovias.id,
+              lote_id: loteId,
+              rodovia_id: rodoviaId,
               cadastro_id: match,
               servico,
               ...dados,
@@ -325,6 +340,43 @@ export function NecessidadesImporter() {
           </Select>
         </div>
 
+        {/* Seleção de Lote */}
+        <div className="space-y-2">
+          <Label>Lote</Label>
+          <Select value={loteId} onValueChange={(value) => {
+            setLoteId(value);
+            setRodoviaId(""); // Limpar rodovia ao mudar lote
+          }} disabled={isImporting}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o lote" />
+            </SelectTrigger>
+            <SelectContent>
+              {lotes?.map(lote => (
+                <SelectItem key={lote.id} value={lote.id}>
+                  {lote.numero}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Seleção de Rodovia */}
+        <div className="space-y-2">
+          <Label>Rodovia</Label>
+          <Select value={rodoviaId} onValueChange={setRodoviaId} disabled={isImporting || !loteId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione a rodovia" />
+            </SelectTrigger>
+            <SelectContent>
+              {rodovias?.map((rodovia: any) => (
+                <SelectItem key={rodovia.id} value={rodovia.id}>
+                  {rodovia.codigo} - {rodovia.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Upload de arquivo */}
         <div className="space-y-2">
           <Label>Arquivo Excel (.xlsx, .xlsm)</Label>
@@ -345,7 +397,7 @@ export function NecessidadesImporter() {
         <div className="flex gap-2">
           <Button
             onClick={handleImport}
-            disabled={!file || !tipo || isImporting}
+            disabled={!file || !tipo || !loteId || !rodoviaId || isImporting}
             className="flex-1"
           >
             {isImporting ? (
