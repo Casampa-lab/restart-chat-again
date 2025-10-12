@@ -97,6 +97,8 @@ const MinhasNecessidades = () => {
 
   useEffect(() => {
     if (user) {
+      // Força reload removendo cache anterior
+      setNecessidades([]);
       loadNecessidades(tipoAtivo);
     }
   }, [user, tipoAtivo]);
