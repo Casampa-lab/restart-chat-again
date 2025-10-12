@@ -262,10 +262,6 @@ const Index = () => {
                 <ClipboardList className="mr-2 h-5 w-5" />
                 Gestão
               </Button>
-              <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-necessidades")}>
-                <FileText className="mr-2 h-5 w-5" />
-                Necessidades
-              </Button>
               {isAdminOrCoordinator && <Button variant="default" size="lg" className="font-semibold bg-accent text-accent-foreground shadow-md hover:shadow-lg transition-shadow hover:bg-accent/90" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-5 w-5" />
                   Admin
