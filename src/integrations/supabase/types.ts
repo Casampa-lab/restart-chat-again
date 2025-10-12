@@ -2956,6 +2956,7 @@ export type Database = {
           linha_planilha: number | null
           longitude: number | null
           lote_id: string
+          motivo: string | null
           observacao: string | null
           rodovia_id: string
           servico: string
@@ -2981,6 +2982,7 @@ export type Database = {
           linha_planilha?: number | null
           longitude?: number | null
           lote_id: string
+          motivo?: string | null
           observacao?: string | null
           rodovia_id: string
           servico: string
@@ -3006,6 +3008,7 @@ export type Database = {
           linha_planilha?: number | null
           longitude?: number | null
           lote_id?: string
+          motivo?: string | null
           observacao?: string | null
           rodovia_id?: string
           servico?: string

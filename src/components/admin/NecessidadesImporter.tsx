@@ -224,6 +224,35 @@ export function NecessidadesImporter() {
           area_m2: row["Área (m²)"] || row["Área"] || row["area_m2"] ? parseFloat(String(row["Área (m²)"] || row["Área"] || row["area_m2"]).replace(',', '.')) : null,
         };
 
+      case "porticos":
+        const solucaoPortico = (row["Solução"] || row["Solucao"] || row["solucao"] || "").toLowerCase();
+        let motivoPortico = row["Motivo"] || row["motivo"] || "-";
+        
+        // Aplicar regras do campo Motivo para pórticos
+        if (solucaoPortico.includes("remov") || solucaoPortico.includes("substitu")) {
+          // Para Remover ou Substituir, motivo deve ser 1, 2 ou 3
+          if (motivoPortico !== "1" && motivoPortico !== "2" && motivoPortico !== "3") {
+            motivoPortico = "-";
+          }
+        } else {
+          // Para outras soluções, usar "-"
+          motivoPortico = "-";
+        }
+        
+        return {
+          km: row["Km"] || row["KM"] || row["km"] ? parseFloat(String(row["Km"] || row["KM"] || row["km"]).replace(',', '.')) : null,
+          latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
+          longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
+          tipo: row["Tipo"] || row["tipo"],
+          lado: row["Lado"] || row["lado"],
+          altura_livre_m: row["Altura Livre (m)"] || row["Altura Livre"] || row["altura_livre_m"] ? parseFloat(String(row["Altura Livre (m)"] || row["Altura Livre"] || row["altura_livre_m"]).replace(',', '.')) : null,
+          vao_horizontal_m: row["Vão Horizontal"] || row["Vao Horizontal"] || row["vao_horizontal_m"] ? parseFloat(String(row["Vão Horizontal"] || row["Vao Horizontal"] || row["vao_horizontal_m"]).replace(',', '.')) : null,
+          observacao: row["Observação"] || row["Observacao"] || row["observacao"],
+          snv: row["SNV"] || row["snv"],
+          solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
+          motivo: motivoPortico,
+        };
+
       default:
         return baseMap;
     }
@@ -275,7 +304,7 @@ export function NecessidadesImporter() {
 
       // Filtrar linhas vazias (que não têm KM)
       const dadosFiltrados = dadosComHeader.filter((row: any) => {
-        const kmValue = (tipo === "placas" || tipo === "marcas_transversais")
+        const kmValue = (tipo === "placas" || tipo === "marcas_transversais" || tipo === "porticos")
           ? (row["Km"] || row["KM"] || row["km"])
           : (row["Km Inicial"] || row["KM Inicial"] || row["km_inicial"]);
         return kmValue !== undefined && kmValue !== null && kmValue !== "";
@@ -357,10 +386,10 @@ export function NecessidadesImporter() {
           const dados = mapearColunas(row, tipo);
 
           // Buscar match no cadastro localmente (sem chamar RPC)
-          const lat = (tipo === "placas" || tipo === "marcas_transversais") 
+          const lat = (tipo === "placas" || tipo === "marcas_transversais" || tipo === "porticos") 
             ? converterCoordenada(dados.latitude) 
             : converterCoordenada(dados.latitude_inicial);
-          const long = (tipo === "placas" || tipo === "marcas_transversais") 
+          const long = (tipo === "placas" || tipo === "marcas_transversais" || tipo === "porticos") 
             ? converterCoordenada(dados.longitude) 
             : converterCoordenada(dados.longitude_inicial);
 
