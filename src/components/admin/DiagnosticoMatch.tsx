@@ -186,18 +186,36 @@ export function DiagnosticoMatch() {
           }
         }
 
+        // Construir código descritivo para tachas
+        let necCodigo = nec.codigo || nec.tipo_demarcacao || nec.tipo || "-";
+        let cadCodigo = maisProximo?.codigo || maisProximo?.tipo_demarcacao || maisProximo?.tipo || null;
+        
+        if (tipoServico === "tachas") {
+          const necParts = [];
+          if (nec.descricao) necParts.push(nec.descricao);
+          if (nec.quantidade) necParts.push(`Qtd: ${nec.quantidade}`);
+          necCodigo = necParts.length > 0 ? necParts.join(" | ") : "-";
+          
+          if (maisProximo) {
+            const cadParts = [];
+            if (maisProximo.descricao) cadParts.push(maisProximo.descricao);
+            if (maisProximo.quantidade) cadParts.push(`Qtd: ${maisProximo.quantidade}`);
+            cadCodigo = cadParts.length > 0 ? cadParts.join(" | ") : null;
+          }
+        }
+
         diagnosticos.push({
           necessidade_id: nec.id,
           nec_km: nec.km || nec.km_inicial || 0,
           nec_lat: necLat || 0,
           nec_long: necLong || 0,
-          nec_codigo: nec.codigo || nec.tipo_demarcacao || nec.tipo || "-",
+          nec_codigo: necCodigo,
           nec_solucao: nec.solucao_planilha,
           cadastro_mais_proximo_id: maisProximo?.id || null,
           cad_km: maisProximo?.km || maisProximo?.km_inicial || null,
           cad_lat: converterCoordenada(maisProximo?.[cadastroLatField]) || null,
           cad_long: converterCoordenada(maisProximo?.[cadastroLongField]) || null,
-          cad_codigo: maisProximo?.codigo || maisProximo?.tipo_demarcacao || maisProximo?.tipo || null,
+          cad_codigo: cadCodigo,
           distancia_metros: menorDistancia !== Infinity ? menorDistancia : null,
         });
       }
