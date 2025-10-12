@@ -114,36 +114,36 @@ export function NecessidadesImporter() {
     // Para placas, não usar campos do baseMap (não tem inicial/final)
     if (tipo === "placas") {
       return {
-        km: row["Km"] || row["KM"] || row["km"] || row["__EMPTY_6"],
-        latitude: converterCoordenada(row["Latitude"] || row["latitude"] || row["__EMPTY_7"]),
-        longitude: converterCoordenada(row["Longitude"] || row["longitude"] || row["__EMPTY_8"]),
-        codigo: row["Código da placa"] || row["Código"] || row["codigo"] || row["__EMPTY_2"],
+        km: row["Km"] || row["KM"] || row["km"],
+        latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
+        longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
+        codigo: row["Código da placa"] || row["Código"] || row["codigo"],
         modelo: row["Modelo"] || row["modelo"],
-        tipo: row["Tipo de placa"] || row["Tipo"] || row["tipo"] || row["__EMPTY_1"],
-        velocidade: row["Velocidade"] || row["velocidade"] || row["__EMPTY_3"],
+        tipo: row["Tipo de placa"] || row["Tipo"] || row["tipo"],
+        velocidade: row["Velocidade"] || row["velocidade"],
         descricao: row["Descrição"] || row["descricao"],
-        lado: row["Lado"] || row["lado"] || row["__EMPTY_4"],
+        lado: row["Lado"] || row["lado"],
         dimensoes_mm: row["Dimensões (mm)"] || row["dimensoes_mm"],
-        substrato: row["Tipo de Substrato"] || row["Substrato"] || row["substrato"] || row["__EMPTY_14"],
-        suporte: row["Tipo de Suporte"] || row["Suporte"] || row["suporte"] || row["__EMPTY_10"],
+        substrato: row["Tipo de Substrato"] || row["Substrato"] || row["substrato"],
+        suporte: row["Tipo de Suporte"] || row["Suporte"] || row["suporte"],
         pelicula: row["Película"] || row["pelicula"],
-        snv: row["SNV"] || row["snv"] || row["__EMPTY"],
+        snv: row["SNV"] || row["snv"],
         observacao: row["Observação"] || row["Observacao"] || row["observacao"],
-        solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"] || row["__EMPTY_25"],
+        solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
       };
     }
 
     // Mapeamento básico para outros tipos (com inicial/final)
     const baseMap: any = {
-      km_inicial: row["Km Inicial"] || row["KM Inicial"] || row["km_inicial"] || row["__EMPTY_5"],
-      km_final: row["Km Final"] || row["KM Final"] || row["km_final"] || row["__EMPTY_8"],
-      latitude_inicial: converterCoordenada(row["Latitude Inicial"] || row["Lat Inicial"] || row["latitude_inicial"] || row["__EMPTY_6"]),
-      longitude_inicial: converterCoordenada(row["Longitude Inicial"] || row["Long Inicial"] || row["longitude_inicial"] || row["__EMPTY_7"]),
-      latitude_final: converterCoordenada(row["Latitude Final"] || row["Lat Final"] || row["latitude_final"] || row["__EMPTY_9"]),
-      longitude_final: converterCoordenada(row["Longitude Final"] || row["Long Final"] || row["longitude_final"] || row["__EMPTY_10"]),
+      km_inicial: row["Km Inicial"] || row["KM Inicial"] || row["km_inicial"],
+      km_final: row["Km Final"] || row["KM Final"] || row["km_final"],
+      latitude_inicial: converterCoordenada(row["Latitude Inicial"] || row["Lat Inicial"] || row["latitude_inicial"]),
+      longitude_inicial: converterCoordenada(row["Longitude Inicial"] || row["Long Inicial"] || row["longitude_inicial"]),
+      latitude_final: converterCoordenada(row["Latitude Final"] || row["Lat Final"] || row["latitude_final"]),
+      longitude_final: converterCoordenada(row["Longitude Final"] || row["Long Final"] || row["longitude_final"]),
       observacao: row["Observação"] || row["Observacao"] || row["observacao"],
-      snv: row["SNV"] || row["snv"] || row["__EMPTY_1"],
-      solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"] || row["__EMPTY_25"],
+      snv: row["SNV"] || row["snv"],
+      solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
     };
 
     // Campos específicos por tipo
@@ -151,19 +151,19 @@ export function NecessidadesImporter() {
       case "marcas_longitudinais":
         return {
           ...baseMap,
-          codigo: row["Código"] || row["codigo"] || row["__EMPTY_2"],
-          posicao: row["Código"] || row["codigo"] || row["__EMPTY_2"], // Posição é a mesma coluna do código
-          tipo_demarcacao: row["Código"] || row["codigo"] || row["__EMPTY_2"],
-          largura_cm: (row["Largura da Faixa (m)"] || row["largura_cm"] || row["__EMPTY_4"]) ? 
-            parseFloat(String(row["Largura da Faixa (m)"] || row["largura_cm"] || row["__EMPTY_4"]).replace(',', '.')) * 100 : null,
-          material: row["Material"] || row["material"] || row["__EMPTY_13"],
-          espessura_cm: (row["Espessura (mm)"] || row["espessura_cm"] || row["__EMPTY_14"]) ?
-            parseFloat(String(row["Espessura (mm)"] || row["espessura_cm"] || row["__EMPTY_14"]).replace(',', '.')) / 10 : null,
-          extensao_metros: (row["Extensão (km)"] || row["extensao_metros"] || row["__EMPTY_16"]) ?
-            parseFloat(String(row["Extensão (km)"] || row["extensao_metros"] || row["__EMPTY_16"]).replace(',', '.')) * 1000 : null,
-          traco_m: row["Traço (m)"] && row["Traço (m)"] !== "-" ? parseFloat(String(row["Traço (m)"] || row["__EMPTY_11"]).replace(',', '.')) : null,
-          espacamento_m: row["Espaçamento (m)"] && row["Espaçamento (m)"] !== "-" ? parseFloat(String(row["Espaçamento (m)"] || row["__EMPTY_12"]).replace(',', '.')) : null,
-          area_m2: row["Área (m²)"] ? parseFloat(String(row["Área (m²)"] || row["__EMPTY_17"]).replace(',', '.')) : null,
+          codigo: row["Código"] || row["codigo"],
+          posicao: row["Posição"] || row["Posicao"] || row["posicao"] || row["Código"] || row["codigo"], // Posição vem da coluna Posição (ou do Código se não existir)
+          tipo_demarcacao: row["Código"] || row["codigo"],
+          largura_cm: (row["Largura da Faixa (m)"] || row["largura_cm"]) ? 
+            parseFloat(String(row["Largura da Faixa (m)"] || row["largura_cm"]).replace(',', '.')) * 100 : null,
+          material: row["Material"] || row["material"],
+          espessura_cm: (row["Espessura (mm)"] || row["espessura_cm"]) ?
+            parseFloat(String(row["Espessura (mm)"] || row["espessura_cm"]).replace(',', '.')) / 10 : null,
+          extensao_metros: (row["Extensão (km)"] || row["extensao_metros"]) ?
+            parseFloat(String(row["Extensão (km)"] || row["extensao_metros"]).replace(',', '.')) * 1000 : null,
+          traco_m: row["Traço (m)"] && row["Traço (m)"] !== "-" ? parseFloat(String(row["Traço (m)"]).replace(',', '.')) : null,
+          espacamento_m: row["Espaçamento (m)"] && row["Espaçamento (m)"] !== "-" ? parseFloat(String(row["Espaçamento (m)"]).replace(',', '.')) : null,
+          area_m2: row["Área (m²)"] ? parseFloat(String(row["Área (m²)"]).replace(',', '.')) : null,
         };
 
       case "tachas":
