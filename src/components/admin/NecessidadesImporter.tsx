@@ -215,6 +215,11 @@ export function NecessidadesImporter() {
           // Mapear colunas
           const dados = mapearColunas(row, tipo);
 
+          // DEBUG: Verificar o valor de solucao_planilha
+          console.log(`Linha ${linhaExcel}: solucao_planilha =`, dados.solucao_planilha);
+          console.log(`Linha ${linhaExcel}: row["Solução"] =`, row["Solução"]);
+          console.log(`Linha ${linhaExcel}: row =`, row);
+
           // Buscar match no cadastro (apenas se houver coordenadas)
           const lat = tipo === "placas" ? dados.latitude : dados.latitude_inicial;
           const long = tipo === "placas" ? dados.longitude : dados.longitude_inicial;
