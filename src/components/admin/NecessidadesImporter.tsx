@@ -258,7 +258,13 @@ export function NecessidadesImporter() {
       const cadastroLatField = usaLatLongInicial ? "latitude_inicial" : "latitude";
       const cadastroLongField = usaLatLongInicial ? "longitude_inicial" : "longitude";
 
-      console.log(`✅ ${cadastros?.length || 0} cadastros carregados para match`);
+      console.log(`✅ VERSÃO OTIMIZADA: ${cadastros?.length || 0} cadastros carregados. Match será local (sem RPC).`);
+      
+      setLogs(prev => [...prev, {
+        tipo: "success",
+        linha: 0,
+        mensagem: `🚀 Modo otimizado: ${cadastros?.length || 0} cadastros carregados. Match local ativado.`
+      }]);
 
       // Função para calcular distância (Haversine)
       const calcularDistancia = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -331,14 +337,14 @@ export function NecessidadesImporter() {
               match = cadastroMaisProximo.id;
               distancia = Math.round(menorDistancia);
               if (i % 50 === 0) { // Log a cada 50 linhas para não sobrecarregar
-                console.log(`✅ Linha ${linhaExcel}: Match encontrado! distancia=${distancia}m`);
+                console.log(`✅ Processando linha ${linhaExcel}: Match encontrado! distancia=${distancia}m [${i+1}/${total}]`);
               }
             } else if (i % 50 === 0) {
-              console.log(`⚠️ Linha ${linhaExcel}: Sem match dentro de 50m`);
+              console.log(`⚠️ Processando linha ${linhaExcel}: Sem match dentro de 50m [${i+1}/${total}]`);
             }
           } else if (!lat || !long) {
             if (i % 50 === 0) {
-              console.log(`⚠️ Linha ${linhaExcel}: Sem coordenadas válidas`);
+              console.log(`⚠️ Processando linha ${linhaExcel}: Sem coordenadas válidas [${i+1}/${total}]`);
             }
           }
 
