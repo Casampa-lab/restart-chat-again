@@ -244,7 +244,7 @@ export default function MinhasNecessidadesRelatorios() {
             <div className="flex items-center gap-4">
               <img src={logoOperaVia} alt="Logo" className="h-12 object-contain" />
               <div>
-                <h1 className="text-2xl font-bold">Relatórios de Necessidades</h1>
+                <h1 className="text-2xl font-bold">Relatórios de Programa de Sinalização e Segurança Viária</h1>
                 <p className="text-sm text-muted-foreground">
                   Gere relatórios inicial e permanente do cadastro
                 </p>
