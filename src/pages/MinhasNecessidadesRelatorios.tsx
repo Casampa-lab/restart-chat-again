@@ -12,6 +12,7 @@ import { useSupervisora } from "@/hooks/useSupervisora";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
 const TIPOS_RELATORIO = [
+  { value: "dados_rodovias", label: "Dados das Rodovias", tabelaCadastro: "dados_rodovias" },
   { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabelaCadastro: "ficha_marcas_longitudinais" },
   { value: "tachas", label: "Tachas", tabelaCadastro: "ficha_tachas" },
   { value: "marcas_transversais", label: "Zebrados", tabelaCadastro: "ficha_inscricoes" },
@@ -24,7 +25,7 @@ const TIPOS_RELATORIO = [
 export default function MinhasNecessidadesRelatorios() {
   const navigate = useNavigate();
   const { data: supervisora } = useSupervisora();
-  const [tipoSelecionado, setTipoSelecionado] = useState<string>("marcas_longitudinais");
+  const [tipoSelecionado, setTipoSelecionado] = useState<string>("dados_rodovias");
   const [gerando, setGerando] = useState(false);
 
   const gerarRelatorioInicial = async () => {
@@ -33,24 +34,50 @@ export default function MinhasNecessidadesRelatorios() {
       const tipoConfig = TIPOS_RELATORIO.find(t => t.value === tipoSelecionado);
       if (!tipoConfig) return;
 
-      // Buscar dados do CADASTRO
-      const { data: cadastro, error } = await supabase
-        .from(tipoConfig.tabelaCadastro as any)
-        .select("*")
-        .order("km_inicial");
+      let cadastro: any[] = [];
 
-      if (error) throw error;
+      // Tratamento especial para Dados das Rodovias
+      if (tipoSelecionado === "dados_rodovias") {
+        const { data: lotesRodovias, error } = await supabase
+          .from("lotes_rodovias")
+          .select(`
+            *,
+            lotes (nome, uf),
+            rodovias (nome, codigo)
+          `);
+
+        if (error) throw error;
+
+        cadastro = (lotesRodovias || []).map((lr: any) => ({
+          estado: lr.lotes?.uf || "",
+          lote: lr.lotes?.nome || "",
+          rodovia: lr.rodovias?.codigo || lr.rodovias?.nome || "",
+          trecho: lr.trecho || "",
+          extensao: lr.extensao_km || 0,
+        }));
+      } else {
+        // Buscar dados do CADASTRO normal
+        const { data, error } = await supabase
+          .from(tipoConfig.tabelaCadastro as any)
+          .select("*")
+          .order("km_inicial");
+
+        if (error) throw error;
+        cadastro = data || [];
+      }
 
       if (!cadastro || cadastro.length === 0) {
         toast.warning("Nenhum dado de cadastro encontrado para este tipo");
         return;
       }
 
-      // Adicionar coluna SERVIÇO vazia
-      const dadosComServico = (cadastro as any[]).map((item: any) => ({
-        ...item,
-        servico: "", // VAZIO no relatório inicial
-      }));
+      // Adicionar coluna SERVIÇO vazia (exceto para Dados das Rodovias)
+      const dadosComServico = tipoSelecionado === "dados_rodovias" 
+        ? cadastro 
+        : (cadastro as any[]).map((item: any) => ({
+            ...item,
+            servico: "", // VAZIO no relatório inicial
+          }));
 
       // Gerar Excel com logos
       const workbook = await criarWorkbookComLogos(dadosComServico, "Dados", {
@@ -100,6 +127,13 @@ export default function MinhasNecessidadesRelatorios() {
       setGerando(true);
       const tipoConfig = TIPOS_RELATORIO.find(t => t.value === tipoSelecionado);
       if (!tipoConfig) return;
+
+      // Dados das Rodovias não tem relatório permanente
+      if (tipoSelecionado === "dados_rodovias") {
+        toast.info("Dados das Rodovias não possui Relatório Permanente. Use o Relatório Inicial.");
+        setGerando(false);
+        return;
+      }
 
       // Buscar CADASTRO
       const { data: cadastro, error: erroCadastro } = await supabase

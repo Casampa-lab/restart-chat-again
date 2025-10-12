@@ -20,8 +20,7 @@ import {
   exportIntervencoesTacha,
   exportFichasVerificacao,
   exportFichasPlaca,
-  exportRegistroNC,
-  exportDadosRodovias
+  exportRegistroNC
 } from "@/lib/excelExport";
 import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
@@ -58,10 +57,6 @@ const CoordenacaoFiscalizacao = () => {
   const handleDownload = async (type: string) => {
     try {
       switch (type) {
-        case 'dados-rodovias':
-          await exportDadosRodovias();
-          toast.success('Planilha 1.3 - Dados das Rodovias baixada com sucesso!');
-          break;
         case 'frentes':
           await exportFrentesLiberadas();
           toast.success('Planilha de Frentes Liberadas baixada com sucesso!');
@@ -191,24 +186,6 @@ const CoordenacaoFiscalizacao = () => {
 
               <TabsContent value="frentes" className="mt-6">
                 <div className="text-center py-8 space-y-4">
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Planilha 1.3 - Dados das Rodovias</h3>
-                    <Button 
-                      size="lg"
-                      variant="outline"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => handleDownload('dados-rodovias')}
-                    >
-                      <Download className="mr-2 h-5 w-5" />
-                      Baixar Dados das Rodovias por Estado
-                    </Button>
-                    <p className="text-sm text-muted-foreground">
-                      Lotes, rodovias, trechos e extensões organizados por estado
-                    </p>
-                  </div>
-
-                  <div className="border-t my-6" />
-
                   <div className="space-y-2">
                     <h3 className="text-lg font-semibold">Planilha 2.2 - Frente Liberada</h3>
                     <div className="flex gap-4 justify-center">
