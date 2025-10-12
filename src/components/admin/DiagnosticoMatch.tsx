@@ -89,7 +89,7 @@ export function DiagnosticoMatch() {
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .ilike("solucao_planilha", "%substitu%")
-        .limit(10); // Limitar para teste
+        .limit(50); // Aumentar para 50 para melhor amostra
 
       if (necError) throw necError;
       if (!necessidades || necessidades.length === 0) {
@@ -152,14 +152,16 @@ export function DiagnosticoMatch() {
 
       setResultados(diagnosticos);
 
-      // Estatísticas
+      // Estatísticas detalhadas
       const comMatchPerto = diagnosticos.filter(d => d.distancia_metros && d.distancia_metros <= 50).length;
       const comMatchLonge = diagnosticos.filter(d => d.distancia_metros && d.distancia_metros > 50 && d.distancia_metros <= 500).length;
       const semMatch = diagnosticos.filter(d => !d.distancia_metros || d.distancia_metros > 500).length;
+      const semCoordenadas = necessidades.filter(n => !n.latitude || !n.longitude).length;
+      const cadastroSemCoordenadas = cadastros?.filter((c: any) => !c.latitude || !c.longitude).length || 0;
 
       toast({
         title: "Diagnóstico concluído",
-        description: `${comMatchPerto} com match < 50m | ${comMatchLonge} entre 50-500m | ${semMatch} sem match > 500m`,
+        description: `Necessidades: ${necessidades.length} (${semCoordenadas} sem coords) | Cadastro: ${cadastros?.length || 0} placas (${cadastroSemCoordenadas} sem coords) | Match < 50m: ${comMatchPerto} | 50-500m: ${comMatchLonge} | > 500m: ${semMatch}`,
       });
 
     } catch (error: any) {
@@ -175,8 +177,8 @@ export function DiagnosticoMatch() {
 
   const getDistanciaColor = (distancia: number | null) => {
     if (!distancia) return "destructive";
-    if (distancia <= 50) return "default";
-    if (distancia <= 200) return "secondary";
+    if (distancia <= 100) return "default";
+    if (distancia <= 500) return "secondary";
     return "destructive";
   };
 
@@ -235,7 +237,7 @@ export function DiagnosticoMatch() {
           className="w-full"
         >
           <Search className="mr-2 h-4 w-4" />
-          {isLoading ? "Diagnosticando..." : "Executar Diagnóstico (10 primeiras)"}
+          {isLoading ? "Diagnosticando..." : "Executar Diagnóstico (50 primeiras)"}
         </Button>
 
         {resultados.length > 0 && (
