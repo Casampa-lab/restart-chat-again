@@ -370,7 +370,7 @@ export function NecessidadesImporter() {
             <SelectContent>
               {rodovias?.map((rodovia: any) => (
                 <SelectItem key={rodovia.id} value={rodovia.id}>
-                  {rodovia.codigo} - {rodovia.nome}
+                  {rodovia.codigo}
                 </SelectItem>
               ))}
             </SelectContent>
