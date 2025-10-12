@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Download, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import * as XLSX from "xlsx";
+import { criarWorkbookComLogos } from "@/lib/excelLogoHelper";
+import { useSupervisora } from "@/hooks/useSupervisora";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
 const TIPOS_RELATORIO = [
@@ -22,6 +23,7 @@ const TIPOS_RELATORIO = [
 
 export default function MinhasNecessidadesRelatorios() {
   const navigate = useNavigate();
+  const { data: supervisora } = useSupervisora();
   const [tipoSelecionado, setTipoSelecionado] = useState<string>("marcas_longitudinais");
   const [gerando, setGerando] = useState(false);
 
@@ -50,22 +52,39 @@ export default function MinhasNecessidadesRelatorios() {
         servico: "", // VAZIO no relatório inicial
       }));
 
-      // Gerar Excel
-      const ws = XLSX.utils.json_to_sheet(dadosComServico);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Dados");
+      // Gerar Excel com logos
+      const workbook = await criarWorkbookComLogos(dadosComServico, "Dados", {
+        logoSupervisoraUrl: supervisora?.logo_url,
+        logoOrgaoUrl: (supervisora as any)?.logo_orgao_fiscalizador_url,
+        nomeEmpresa: supervisora?.nome_empresa,
+        contrato: (supervisora as any)?.contrato,
+      });
 
-      // Sheet DIC (dicionário) - simplificado
+      // Sheet DIC (dicionário)
       const dicData = [
         { Campo: "servico", Descrição: "Tipo de serviço (Inclusão/Substituição/Remoção)" },
         { Campo: "km_inicial", Descrição: "Quilômetro inicial" },
         { Campo: "km_final", Descrição: "Quilômetro final" },
       ];
-      const dicSheet = XLSX.utils.json_to_sheet(dicData);
-      XLSX.utils.book_append_sheet(wb, dicSheet, "DIC");
+      const dicSheet = workbook.addWorksheet("DIC");
+      dicSheet.addRow(Object.keys(dicData[0]));
+      dicData.forEach(row => {
+        dicSheet.addRow(Object.values(row));
+      });
 
+      // Download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+      });
       const nomeArquivo = `1.8.X_CONDICAO_INICIAL_${tipoConfig.label}_${new Date().toISOString().split("T")[0]}.xlsx`;
-      XLSX.writeFile(wb, nomeArquivo);
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = nomeArquivo;
+      link.click();
+      window.URL.revokeObjectURL(url);
 
       toast.success("Relatório Inicial gerado com sucesso!");
     } catch (error: any) {
@@ -138,10 +157,13 @@ export default function MinhasNecessidadesRelatorios() {
         });
       }
 
-      // Gerar Excel
-      const ws = XLSX.utils.json_to_sheet(dadosMesclados);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Dados");
+      // Gerar Excel com logos
+      const workbook = await criarWorkbookComLogos(dadosMesclados, "Dados", {
+        logoSupervisoraUrl: supervisora?.logo_url,
+        logoOrgaoUrl: (supervisora as any)?.logo_orgao_fiscalizador_url,
+        nomeEmpresa: supervisora?.nome_empresa,
+        contrato: (supervisora as any)?.contrato,
+      });
 
       // Sheet DIC
       const dicData = [
@@ -150,11 +172,25 @@ export default function MinhasNecessidadesRelatorios() {
         { Campo: "km_final", Descrição: "Quilômetro final" },
         { Campo: "observacao_necessidade", Descrição: "Observação da necessidade identificada" },
       ];
-      const dicSheet = XLSX.utils.json_to_sheet(dicData);
-      XLSX.utils.book_append_sheet(wb, dicSheet, "DIC");
+      const dicSheet = workbook.addWorksheet("DIC");
+      dicSheet.addRow(Object.keys(dicData[0]));
+      dicData.forEach(row => {
+        dicSheet.addRow(Object.values(row));
+      });
 
+      // Download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+      });
       const nomeArquivo = `RELATORIO_PERMANENTE_${tipoConfig.label}_${new Date().toISOString().split("T")[0]}.xlsx`;
-      XLSX.writeFile(wb, nomeArquivo);
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = nomeArquivo;
+      link.click();
+      window.URL.revokeObjectURL(url);
 
       toast.success("Relatório Permanente gerado com sucesso!");
     } catch (error: any) {

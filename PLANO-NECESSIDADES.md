@@ -559,15 +559,18 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 
 **📌 CHECKPOINT ATUAL** - Sistema de visualização funcionando!
 
-### Sprint 4: Relatórios ✅ **EM ANDAMENTO**
+### Sprint 4: Relatórios ✅ **CONCLUÍDO**
 - [x] Exportação Excel das necessidades (por tipo)
 - [x] Seção Relatórios no Admin
 - [x] Relatório Inicial (CADASTRO + SERVIÇO vazio)
 - [x] Relatório Permanente (CADASTRO + NECESSIDADES)
 - [x] Campo para logo do órgão fiscalizador (DNIT, DER, etc.) configurável por supervisora
-- [ ] Função de adicionar logos no header dos relatórios Excel
+- [x] Função de adicionar logos no header dos relatórios Excel
 
-**📌 NOTA**: Sistema preparado para venda em esfera estadual e federal - logo do órgão fiscalizador é configurável
+**📌 CHECKPOINT: Sprint 4 finalizada!**
+- Sistema preparado para venda em esfera estadual e federal - logo do órgão fiscalizador é configurável
+- Relatórios Excel incluem logos da supervisora e órgão fiscalizador no cabeçalho
+- Biblioteca ExcelJS implementada para suporte avançado a imagens
 
 ### Sprint 5: Refinamentos
 - [ ] Relatório Final (após intervenções)
