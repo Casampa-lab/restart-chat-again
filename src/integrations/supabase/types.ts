@@ -2310,6 +2310,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv: string | null
+          solucao_planilha: string | null
           tipo_refletivo: string | null
           updated_at: string | null
           user_id: string
@@ -2339,6 +2340,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv?: string | null
+          solucao_planilha?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
           user_id: string
@@ -2368,6 +2370,7 @@ export type Database = {
           rodovia_id?: string
           servico?: string
           snv?: string | null
+          solucao_planilha?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
           user_id?: string
@@ -2424,6 +2427,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv: string | null
+          solucao_planilha: string | null
           terminal_entrada: string | null
           terminal_saida: string | null
           tipo_avaria: string | null
@@ -2458,6 +2462,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv?: string | null
+          solucao_planilha?: string | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
           tipo_avaria?: string | null
@@ -2492,6 +2497,7 @@ export type Database = {
           rodovia_id?: string
           servico?: string
           snv?: string | null
+          solucao_planilha?: string | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
           tipo_avaria?: string | null
@@ -2549,6 +2555,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv: string | null
+          solucao_planilha: string | null
           tipo_demarcacao: string | null
           updated_at: string | null
           user_id: string
@@ -2578,6 +2585,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv?: string | null
+          solucao_planilha?: string | null
           tipo_demarcacao?: string | null
           updated_at?: string | null
           user_id: string
@@ -2607,6 +2615,7 @@ export type Database = {
           rodovia_id?: string
           servico?: string
           snv?: string | null
+          solucao_planilha?: string | null
           tipo_demarcacao?: string | null
           updated_at?: string | null
           user_id?: string
@@ -2659,6 +2668,7 @@ export type Database = {
           observacao: string | null
           rodovia_id: string
           servico: string
+          solucao_planilha: string | null
           tipo_inscricao: string | null
           updated_at: string | null
           user_id: string
@@ -2686,6 +2696,7 @@ export type Database = {
           observacao?: string | null
           rodovia_id: string
           servico: string
+          solucao_planilha?: string | null
           tipo_inscricao?: string | null
           updated_at?: string | null
           user_id: string
@@ -2713,6 +2724,7 @@ export type Database = {
           observacao?: string | null
           rodovia_id?: string
           servico?: string
+          solucao_planilha?: string | null
           tipo_inscricao?: string | null
           updated_at?: string | null
           user_id?: string
@@ -2769,6 +2781,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv: string | null
+          solucao_planilha: string | null
           substrato: string | null
           suporte: string | null
           tipo: string | null
@@ -2804,6 +2817,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv?: string | null
+          solucao_planilha?: string | null
           substrato?: string | null
           suporte?: string | null
           tipo?: string | null
@@ -2839,6 +2853,7 @@ export type Database = {
           rodovia_id?: string
           servico?: string
           snv?: string | null
+          solucao_planilha?: string | null
           substrato?: string | null
           suporte?: string | null
           tipo?: string | null
@@ -2891,6 +2906,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv: string | null
+          solucao_planilha: string | null
           tipo: string | null
           updated_at: string | null
           user_id: string
@@ -2915,6 +2931,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv?: string | null
+          solucao_planilha?: string | null
           tipo?: string | null
           updated_at?: string | null
           user_id: string
@@ -2939,6 +2956,7 @@ export type Database = {
           rodovia_id?: string
           servico?: string
           snv?: string | null
+          solucao_planilha?: string | null
           tipo?: string | null
           updated_at?: string | null
           user_id?: string
@@ -2996,6 +3014,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv: string | null
+          solucao_planilha: string | null
           updated_at: string | null
           user_id: string
         }
@@ -3026,6 +3045,7 @@ export type Database = {
           rodovia_id: string
           servico: string
           snv?: string | null
+          solucao_planilha?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -3056,6 +3076,7 @@ export type Database = {
           rodovia_id?: string
           servico?: string
           snv?: string | null
+          solucao_planilha?: string | null
           updated_at?: string | null
           user_id?: string
         }
