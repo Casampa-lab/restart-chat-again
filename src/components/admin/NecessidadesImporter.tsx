@@ -152,7 +152,7 @@ export function NecessidadesImporter() {
         return {
           ...baseMap,
           codigo: row["Código"] || row["codigo"] || row["__EMPTY_2"],
-          posicao: row["Posição"] || row["Posicao"] || row["posicao"] || row["__EMPTY_3"],
+          posicao: row["Código"] || row["codigo"] || row["__EMPTY_2"], // Posição é a mesma coluna do código
           tipo_demarcacao: row["Código"] || row["codigo"] || row["__EMPTY_2"],
           largura_cm: (row["Largura da Faixa (m)"] || row["largura_cm"] || row["__EMPTY_4"]) ? 
             parseFloat(String(row["Largura da Faixa (m)"] || row["largura_cm"] || row["__EMPTY_4"]).replace(',', '.')) * 100 : null,
