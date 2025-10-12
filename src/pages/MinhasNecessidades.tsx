@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupervisora } from "@/hooks/useSupervisora";
@@ -12,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, FileText, ExternalLink, Trash2, Filter, FileSpreadsheet, Map, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
-import { NecessidadesMap } from "@/components/NecessidadesMap";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
+
+const NecessidadesMap = lazy(() => import("@/components/NecessidadesMap").then(module => ({ default: module.NecessidadesMap })));
 
 interface Necessidade {
   id: string;
@@ -265,10 +266,16 @@ const MinhasNecessidades = () => {
                       Nenhuma necessidade encontrada
                     </div>
                   ) : visualizacao === "mapa" ? (
-                    <NecessidadesMap 
-                      necessidades={necessidadesFiltradas} 
-                      tipo={tipoAtivo}
-                    />
+                    <Suspense fallback={
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      </div>
+                    }>
+                      <NecessidadesMap 
+                        necessidades={necessidadesFiltradas} 
+                        tipo={tipoAtivo}
+                      />
+                    </Suspense>
                   ) : (
                     <div className="overflow-x-auto">
                       <Table>
