@@ -617,11 +617,13 @@ export type Database = {
       }
       ficha_marcas_longitudinais: {
         Row: {
+          area_m2: number | null
           codigo: string | null
           cor: string | null
           created_at: string
           data_vistoria: string
           enviado_coordenador: boolean | null
+          espacamento_m: number | null
           espessura_cm: number | null
           estado_conservacao: string | null
           extensao_metros: number | null
@@ -641,15 +643,18 @@ export type Database = {
           rodovia_id: string
           snv: string | null
           tipo_demarcacao: string | null
+          traco_m: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          area_m2?: number | null
           codigo?: string | null
           cor?: string | null
           created_at?: string
           data_vistoria: string
           enviado_coordenador?: boolean | null
+          espacamento_m?: number | null
           espessura_cm?: number | null
           estado_conservacao?: string | null
           extensao_metros?: number | null
@@ -669,15 +674,18 @@ export type Database = {
           rodovia_id: string
           snv?: string | null
           tipo_demarcacao?: string | null
+          traco_m?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          area_m2?: number | null
           codigo?: string | null
           cor?: string | null
           created_at?: string
           data_vistoria?: string
           enviado_coordenador?: boolean | null
+          espacamento_m?: number | null
           espessura_cm?: number | null
           estado_conservacao?: string | null
           extensao_metros?: number | null
@@ -697,6 +705,7 @@ export type Database = {
           rodovia_id?: string
           snv?: string | null
           tipo_demarcacao?: string | null
+          traco_m?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -2537,6 +2546,7 @@ export type Database = {
       }
       necessidades_marcas_longitudinais: {
         Row: {
+          area_m2: number | null
           arquivo_origem: string | null
           cadastro_id: string | null
           codigo: string | null
@@ -2544,6 +2554,7 @@ export type Database = {
           created_at: string | null
           data_importacao: string | null
           distancia_match_metros: number | null
+          espacamento_m: number | null
           espessura_cm: number | null
           estado_conservacao: string | null
           extensao_metros: number | null
@@ -2565,10 +2576,12 @@ export type Database = {
           snv: string | null
           solucao_planilha: string | null
           tipo_demarcacao: string | null
+          traco_m: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          area_m2?: number | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
           codigo?: string | null
@@ -2576,6 +2589,7 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           distancia_match_metros?: number | null
+          espacamento_m?: number | null
           espessura_cm?: number | null
           estado_conservacao?: string | null
           extensao_metros?: number | null
@@ -2597,10 +2611,12 @@ export type Database = {
           snv?: string | null
           solucao_planilha?: string | null
           tipo_demarcacao?: string | null
+          traco_m?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          area_m2?: number | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
           codigo?: string | null
@@ -2608,6 +2624,7 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           distancia_match_metros?: number | null
+          espacamento_m?: number | null
           espessura_cm?: number | null
           estado_conservacao?: string | null
           extensao_metros?: number | null
@@ -2629,6 +2646,7 @@ export type Database = {
           snv?: string | null
           solucao_planilha?: string | null
           tipo_demarcacao?: string | null
+          traco_m?: number | null
           updated_at?: string | null
           user_id?: string
         }

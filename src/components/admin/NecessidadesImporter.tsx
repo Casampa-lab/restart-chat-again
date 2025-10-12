@@ -153,16 +153,17 @@ export function NecessidadesImporter() {
           ...baseMap,
           codigo: row["Código"] || row["codigo"] || row["__EMPTY_2"],
           posicao: row["Posição"] || row["Posicao"] || row["posicao"] || row["__EMPTY_3"],
-          tipo_demarcacao: row["Código"] || row["codigo"] || row["__EMPTY_2"], // Usar Código também como tipo_demarcacao
-          cor: row["Cor"] || row["cor"],
-          material: row["Material"] || row["material"] || row["__EMPTY_13"],
+          tipo_demarcacao: row["Código"] || row["codigo"] || row["__EMPTY_2"],
           largura_cm: (row["Largura da Faixa (m)"] || row["largura_cm"] || row["__EMPTY_4"]) ? 
-            parseFloat(String(row["Largura da Faixa (m)"] || row["largura_cm"] || row["__EMPTY_4"]).replace(',', '.')) * 100 : null, // Converter m para cm
+            parseFloat(String(row["Largura da Faixa (m)"] || row["largura_cm"] || row["__EMPTY_4"]).replace(',', '.')) * 100 : null,
+          material: row["Material"] || row["material"] || row["__EMPTY_13"],
           espessura_cm: (row["Espessura (mm)"] || row["espessura_cm"] || row["__EMPTY_14"]) ?
-            parseFloat(String(row["Espessura (mm)"] || row["espessura_cm"] || row["__EMPTY_14"]).replace(',', '.')) / 10 : null, // Converter mm para cm
-          extensao_metros: (row["Extensão (km)"] || row["extensao_metros"] || row["__EMPTY_15"]) ?
-            parseFloat(String(row["Extensão (km)"] || row["extensao_metros"] || row["__EMPTY_15"]).replace(',', '.')) * 1000 : null, // Converter km para m
-          estado_conservacao: row["Estado Conservação"] || row["estado_conservacao"],
+            parseFloat(String(row["Espessura (mm)"] || row["espessura_cm"] || row["__EMPTY_14"]).replace(',', '.')) / 10 : null,
+          extensao_metros: (row["Extensão (km)"] || row["extensao_metros"] || row["__EMPTY_16"]) ?
+            parseFloat(String(row["Extensão (km)"] || row["extensao_metros"] || row["__EMPTY_16"]).replace(',', '.')) * 1000 : null,
+          traco_m: row["Traço (m)"] && row["Traço (m)"] !== "-" ? parseFloat(String(row["Traço (m)"] || row["__EMPTY_11"]).replace(',', '.')) : null,
+          espacamento_m: row["Espaçamento (m)"] && row["Espaçamento (m)"] !== "-" ? parseFloat(String(row["Espaçamento (m)"] || row["__EMPTY_12"]).replace(',', '.')) : null,
+          area_m2: row["Área (m²)"] ? parseFloat(String(row["Área (m²)"] || row["__EMPTY_17"]).replace(',', '.')) : null,
         };
 
       case "tachas":

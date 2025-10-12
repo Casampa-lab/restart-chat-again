@@ -222,10 +222,11 @@ serve(async (req) => {
         "extensão_(km)": "extensao_metros",
         "código": "codigo",
         "posição": "posicao",
-        "traço_(m)": "",
-        "espaçamento_(m)": "",
+        "traço_(m)": "traco_m",
+        "espaçamento_(m)": "espacamento_m",
+        "área_(m²)": "area_m2",
+        "espessura_(mm)": "espessura_cm",
         "outros_materiais": "",
-        "área_(m²)": "",
         "br": "",
       },
       ficha_inscricoes: {
@@ -287,7 +288,7 @@ serve(async (req) => {
         "extensao_metros", "foto_url", "km_final", "km_inicial",
         "largura_cm", "latitude_final", "latitude_inicial",
         "longitude_final", "longitude_inicial", "material",
-        "observacao", "tipo_demarcacao", "snv"
+        "observacao", "tipo_demarcacao", "snv", "traco_m", "espacamento_m", "area_m2"
       ],
       ficha_inscricoes: [
         "area_m2", "cor", "data_vistoria", "dimensoes", "estado_conservacao",
