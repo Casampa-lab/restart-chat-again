@@ -70,24 +70,39 @@ const MinhasNecessidades = () => {
       const tipoConfig = TIPOS_NECESSIDADES.find(t => t.value === tipo);
       if (!tipoConfig) return;
 
-      const { data, error } = await supabase
-        .from(tipoConfig.table as any)
-        .select(`
-          *,
-          rodovia:rodovias(codigo, nome),
-          lote:lotes(numero)
-        `)
-        .eq("user_id", user?.id)
-        .order("created_at", { ascending: false })
-        .limit(10000);
+      // Carregar TODOS os registros (sem limit = sem restrição de 1000)
+      let allData: any[] = [];
+      let from = 0;
+      const batchSize = 1000;
+      let hasMore = true;
 
-      if (error) throw error;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from(tipoConfig.table as any)
+          .select(`
+            *,
+            rodovia:rodovias(codigo, nome),
+            lote:lotes(numero)
+          `)
+          .eq("user_id", user?.id)
+          .order("created_at", { ascending: false })
+          .range(from, from + batchSize - 1);
 
-      const necessidadesData = (data as any) || [];
-      console.log("Necessidades carregadas:", necessidadesData.length, "registros");
-      console.log("Serviços encontrados:", [...new Set(necessidadesData.map((d: any) => d.servico))]);
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          allData = [...allData, ...data];
+          from += batchSize;
+          hasMore = data.length === batchSize;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      console.log("Necessidades carregadas:", allData.length, "registros");
+      console.log("Serviços encontrados:", [...new Set(allData.map((d: any) => d.servico))]);
       
-      setNecessidades(necessidadesData);
+      setNecessidades(allData);
     } catch (error: any) {
       toast.error("Erro ao carregar necessidades: " + error.message);
     } finally {
