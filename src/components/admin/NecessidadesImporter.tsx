@@ -239,7 +239,41 @@ export function NecessidadesImporter() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // 3. Processar cada linha
+      // 3. Buscar todos os cadastros da rodovia de uma vez para match em lote
+      const tabelaCadastro = tipo === "placas" ? "ficha_placa" : 
+                             tipo === "marcas_transversais" ? "ficha_inscricoes" :
+                             tipo === "marcas_longitudinais" ? "ficha_marcas_longitudinais" :
+                             tipo === "cilindros" ? "ficha_cilindros" :
+                             tipo === "tachas" ? "ficha_tachas" :
+                             tipo === "porticos" ? "ficha_porticos" :
+                             "defensas";
+
+      console.log(`📊 Buscando cadastros da rodovia para match em lote...`);
+      const { data: cadastros } = await supabase
+        .from(tabelaCadastro as any)
+        .select("*")
+        .eq("rodovia_id", rodoviaId);
+
+      const usaLatLongInicial = tipo !== "placas" && tipo !== "porticos";
+      const cadastroLatField = usaLatLongInicial ? "latitude_inicial" : "latitude";
+      const cadastroLongField = usaLatLongInicial ? "longitude_inicial" : "longitude";
+
+      console.log(`✅ ${cadastros?.length || 0} cadastros carregados para match`);
+
+      // Função para calcular distância (Haversine)
+      const calcularDistancia = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+        const R = 6371000; // Raio da Terra em metros
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+          Math.sin(dLat/2) * Math.sin(dLat/2) +
+          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+          Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+      };
+
+      // 4. Processar cada linha
       const total = dadosFiltrados.length;
       let sucessos = 0;
       let falhas = 0;
@@ -267,37 +301,45 @@ export function NecessidadesImporter() {
           // Mapear colunas
           const dados = mapearColunas(row, tipo);
 
-          // Buscar match no cadastro (apenas se houver coordenadas)
-          // Converter coordenadas para número (vírgula -> ponto)
+          // Buscar match no cadastro localmente (sem chamar RPC)
           const lat = tipo === "placas" ? converterCoordenada(dados.latitude) : converterCoordenada(dados.latitude_inicial);
           const long = tipo === "placas" ? converterCoordenada(dados.longitude) : converterCoordenada(dados.longitude_inicial);
 
           let match = null;
           let distancia = null;
 
-          if (lat && long) {
-            console.log(`🔍 Linha ${linhaExcel}: Chamando RPC com lat=${lat}, long=${long}, tipo=${tipo}, rodovia=${rodoviaId}`);
-            
-            const { data: matchData, error: matchError } = await supabase
-              .rpc("match_cadastro_por_coordenadas", {
-                p_tipo: tipo,
-                p_lat: lat,
-                p_long: long,
-                p_rodovia_id: rodoviaId,
-                p_tolerancia_metros: 50,
-              });
+          if (lat && long && cadastros && cadastros.length > 0) {
+            // Buscar o cadastro mais próximo localmente
+            let menorDistancia = Infinity;
+            let cadastroMaisProximo = null;
 
-            if (matchError) {
-              console.error(`❌ Linha ${linhaExcel}: Erro na RPC:`, matchError);
-            } else if (matchData && matchData.length > 0) {
-              match = matchData[0].cadastro_id;
-              distancia = matchData[0].distancia_metros;
-              console.log(`✅ Linha ${linhaExcel}: Match encontrado! cadastro_id=${match}, distancia=${distancia}m`);
-            } else {
-              console.log(`⚠️ Linha ${linhaExcel}: RPC retornou vazio (sem match dentro de 50m)`);
+            for (const cad of (cadastros as any[])) {
+              const cadLat = converterCoordenada(cad[cadastroLatField]);
+              const cadLong = converterCoordenada(cad[cadastroLongField]);
+              
+              if (cadLat !== null && cadLong !== null) {
+                const dist = calcularDistancia(lat, long, cadLat, cadLong);
+                
+                if (dist < menorDistancia && dist <= 50) { // Tolerância de 50m
+                  menorDistancia = dist;
+                  cadastroMaisProximo = cad;
+                }
+              }
             }
-          } else {
-            console.log(`⚠️ Linha ${linhaExcel}: Sem coordenadas válidas (lat=${lat}, long=${long})`);
+
+            if (cadastroMaisProximo) {
+              match = cadastroMaisProximo.id;
+              distancia = Math.round(menorDistancia);
+              if (i % 50 === 0) { // Log a cada 50 linhas para não sobrecarregar
+                console.log(`✅ Linha ${linhaExcel}: Match encontrado! distancia=${distancia}m`);
+              }
+            } else if (i % 50 === 0) {
+              console.log(`⚠️ Linha ${linhaExcel}: Sem match dentro de 50m`);
+            }
+          } else if (!lat || !long) {
+            if (i % 50 === 0) {
+              console.log(`⚠️ Linha ${linhaExcel}: Sem coordenadas válidas`);
+            }
           }
 
           // Usar o serviço da planilha (coluna "Solução")
