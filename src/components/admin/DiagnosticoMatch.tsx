@@ -55,6 +55,14 @@ export function DiagnosticoMatch() {
     enabled: !!loteId,
   });
 
+  const converterCoordenada = (valor: any): number | null => {
+    if (valor === null || valor === undefined || valor === "") return null;
+    if (typeof valor === "number") return valor;
+    const valorStr = String(valor).replace(",", ".");
+    const numero = parseFloat(valorStr);
+    return isNaN(numero) ? null : numero;
+  };
+
   const calcularDistancia = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     // Fórmula de Haversine
     const R = 6371000; // Raio da Terra em metros
@@ -121,14 +129,20 @@ export function DiagnosticoMatch() {
         let maisProximo = null;
         let menorDistancia = Infinity;
 
-        if (cadastros && nec.latitude && nec.longitude) {
+        const necLat = converterCoordenada(nec.latitude);
+        const necLong = converterCoordenada(nec.longitude);
+
+        if (cadastros && necLat !== null && necLong !== null) {
           for (const cad of (cadastros as any[])) {
-            if (cad.latitude && cad.longitude) {
+            const cadLat = converterCoordenada(cad.latitude);
+            const cadLong = converterCoordenada(cad.longitude);
+            
+            if (cadLat !== null && cadLong !== null) {
               const dist = calcularDistancia(
-                nec.latitude, 
-                nec.longitude, 
-                cad.latitude, 
-                cad.longitude
+                necLat, 
+                necLong, 
+                cadLat, 
+                cadLong
               );
               
               if (dist < menorDistancia) {
@@ -142,14 +156,14 @@ export function DiagnosticoMatch() {
         diagnosticos.push({
           necessidade_id: nec.id,
           nec_km: nec.km,
-          nec_lat: nec.latitude,
-          nec_long: nec.longitude,
+          nec_lat: necLat || 0,
+          nec_long: necLong || 0,
           nec_codigo: nec.codigo || "-",
           nec_solucao: nec.solucao_planilha,
           cadastro_mais_proximo_id: maisProximo?.id || null,
           cad_km: maisProximo?.km || null,
-          cad_lat: maisProximo?.latitude || null,
-          cad_long: maisProximo?.longitude || null,
+          cad_lat: converterCoordenada(maisProximo?.latitude) || null,
+          cad_long: converterCoordenada(maisProximo?.longitude) || null,
           cad_codigo: maisProximo?.codigo || null,
           distancia_metros: menorDistancia !== Infinity ? menorDistancia : null,
         });

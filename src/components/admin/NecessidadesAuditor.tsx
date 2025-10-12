@@ -70,6 +70,14 @@ export function NecessidadesAuditor() {
     enabled: !!loteId,
   });
 
+  const converterCoordenada = (valor: any): number | null => {
+    if (valor === null || valor === undefined || valor === "") return null;
+    if (typeof valor === "number") return valor;
+    const valorStr = String(valor).replace(",", ".");
+    const numero = parseFloat(valorStr);
+    return isNaN(numero) ? null : numero;
+  };
+
   const handleAuditar = async () => {
     if (!tipo || !loteId || !rodoviaId) {
       toast({
@@ -125,8 +133,8 @@ export function NecessidadesAuditor() {
           tem_match: !!nec.cadastro_id,
           distancia_match: nec.distancia_match_metros,
           cadastro_id: nec.cadastro_id,
-          latitude_nec: nec.latitude || nec.latitude_inicial,
-          longitude_nec: nec.longitude || nec.longitude_inicial,
+          latitude_nec: converterCoordenada(nec.latitude || nec.latitude_inicial) || 0,
+          longitude_nec: converterCoordenada(nec.longitude || nec.longitude_inicial) || 0,
         };
 
         // Se tem match, buscar dados do cadastro
@@ -138,8 +146,8 @@ export function NecessidadesAuditor() {
             .maybeSingle();
 
           if (cadastro) {
-            item.latitude_cad = (cadastro as any).latitude || (cadastro as any).latitude_inicial;
-            item.longitude_cad = (cadastro as any).longitude || (cadastro as any).longitude_inicial;
+            item.latitude_cad = converterCoordenada((cadastro as any).latitude || (cadastro as any).latitude_inicial) || undefined;
+            item.longitude_cad = converterCoordenada((cadastro as any).longitude || (cadastro as any).longitude_inicial) || undefined;
             item.km_cad = (cadastro as any).km || (cadastro as any).km_inicial;
             item.codigo_cad = (cadastro as any).codigo || (cadastro as any).tipo_demarcacao || (cadastro as any).tipo || "-";
           }
