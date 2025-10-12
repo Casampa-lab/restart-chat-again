@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, FileText, ExternalLink, Trash2, Filter, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, FileText, ExternalLink, Trash2, Filter, FileSpreadsheet, Map } from "lucide-react";
 import { toast } from "sonner";
+import { NecessidadesMap } from "@/components/NecessidadesMap";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
 interface Necessidade {
@@ -54,6 +55,7 @@ const MinhasNecessidades = () => {
   const [loading, setLoading] = useState(true);
   const [filtroServico, setFiltroServico] = useState<string>("todos");
   const [busca, setBusca] = useState("");
+  const [visualizacao, setVisualizacao] = useState<"tabela" | "mapa">("tabela");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -216,8 +218,29 @@ const MinhasNecessidades = () => {
                       </CardDescription>
                     </div>
 
-                    {/* Filtros */}
+                    {/* Filtros e Visualização */}
                     <div className="flex items-center gap-2">
+                      <div className="flex border rounded-lg overflow-hidden">
+                        <Button
+                          variant={visualizacao === "tabela" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setVisualizacao("tabela")}
+                          className="rounded-none"
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          Tabela
+                        </Button>
+                        <Button
+                          variant={visualizacao === "mapa" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setVisualizacao("mapa")}
+                          className="rounded-none"
+                        >
+                          <Map className="h-4 w-4 mr-2" />
+                          Mapa
+                        </Button>
+                      </div>
+
                       <Select value={filtroServico} onValueChange={setFiltroServico}>
                         <SelectTrigger className="w-[180px]">
                           <Filter className="h-4 w-4 mr-2" />
@@ -250,6 +273,11 @@ const MinhasNecessidades = () => {
                     <div className="text-center py-8 text-muted-foreground">
                       Nenhuma necessidade encontrada
                     </div>
+                  ) : visualizacao === "mapa" ? (
+                    <NecessidadesMap 
+                      necessidades={necessidadesFiltradas} 
+                      tipo={tipoAtivo}
+                    />
                   ) : (
                     <div className="overflow-x-auto">
                       <Table>
