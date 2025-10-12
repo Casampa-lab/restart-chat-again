@@ -236,6 +236,15 @@ export function InventarioMarcasLongitudinaisViewer({
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("snv")}
+                      >
+                        <div className="flex items-center">
+                          SNV
+                          <SortIcon column="snv" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("tipo_demarcacao")}
                       >
                         <div className="flex items-center">
@@ -312,6 +321,7 @@ export function InventarioMarcasLongitudinaisViewer({
                             </Badge>
                           </TableCell>
                         )}
+                        <TableCell className="font-mono text-sm">{marca.snv || "-"}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{marca.tipo_demarcacao || "-"}</Badge>
                         </TableCell>

@@ -232,6 +232,15 @@ export function InventarioTachasViewer({
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("snv")}
+                      >
+                        <div className="flex items-center">
+                          SNV
+                          <SortIcon column="snv" />
+                        </div>
+                      </TableHead>
                       <TableHead>Descrição</TableHead>
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50"
@@ -318,6 +327,7 @@ export function InventarioTachasViewer({
                             </Badge>
                           </TableCell>
                         )}
+                        <TableCell className="font-mono text-sm">{tacha.snv || "-"}</TableCell>
                         <TableCell className="max-w-[200px] truncate">{tacha.descricao || "Tacha bidirecional"}</TableCell>
                         <TableCell>{tacha.corpo || "-"}</TableCell>
                         <TableCell>{tacha.refletivo || "-"}</TableCell>

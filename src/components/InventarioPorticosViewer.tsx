@@ -237,20 +237,85 @@ export function InventarioPorticosViewer({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Km</TableHead>
-                    <TableHead>SNV</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Altura Livre (m)</TableHead>
-                    <TableHead>Vão Horizontal</TableHead>
-                    <TableHead>Lado</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Data Vistoria</TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("snv")}
+                    >
+                      <div className="flex items-center">
+                        SNV
+                        <SortIcon column="snv" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("km")}
+                    >
+                      <div className="flex items-center">
+                        Km
+                        <SortIcon column="km" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("tipo")}
+                    >
+                      <div className="flex items-center">
+                        Tipo
+                        <SortIcon column="tipo" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("altura_livre_m")}
+                    >
+                      <div className="flex items-center">
+                        Altura Livre (m)
+                        <SortIcon column="altura_livre_m" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("vao_horizontal_m")}
+                    >
+                      <div className="flex items-center">
+                        Vão Horizontal
+                        <SortIcon column="vao_horizontal_m" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("lado")}
+                    >
+                      <div className="flex items-center">
+                        Lado
+                        <SortIcon column="lado" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("estado_conservacao")}
+                    >
+                      <div className="flex items-center">
+                        Estado
+                        <SortIcon column="estado_conservacao" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("data_vistoria")}
+                    >
+                      <div className="flex items-center">
+                        Data Vistoria
+                        <SortIcon column="data_vistoria" />
+                      </div>
+                    </TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {porticos.map((portico) => (
+                  {sortedPorticos.map((portico) => (
                     <TableRow key={portico.id}>
+                      <TableCell className="font-mono text-sm">{portico.snv || "-"}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <MapPin className="h-3 w-3 text-muted-foreground" />
@@ -259,7 +324,6 @@ export function InventarioPorticosViewer({
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="font-mono text-sm">{portico.snv || "-"}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{portico.tipo}</Badge>
                       </TableCell>
