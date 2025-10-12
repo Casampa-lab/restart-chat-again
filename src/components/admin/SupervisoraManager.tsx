@@ -18,11 +18,14 @@ import {
 export const SupervisoraManager = () => {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const orgaoFileInputRef = useRef<HTMLInputElement>(null);
   
   const [nomeEmpresa, setNomeEmpresa] = useState("");
   const [contrato, setContrato] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>("");
+  const [logoOrgaoFile, setLogoOrgaoFile] = useState<File | null>(null);
+  const [logoOrgaoPreview, setLogoOrgaoPreview] = useState<string>("");
   const [usarLogoCustomizado, setUsarLogoCustomizado] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -41,6 +44,7 @@ export const SupervisoraManager = () => {
         setNomeEmpresa(data.nome_empresa);
         setContrato(data.contrato);
         setLogoPreview(data.logo_url || "");
+        setLogoOrgaoPreview((data as any).logo_orgao_fiscalizador_url || "");
         setUsarLogoCustomizado(data.usar_logo_customizado || false);
       }
       
@@ -68,14 +72,35 @@ export const SupervisoraManager = () => {
     setLogoPreview(URL.createObjectURL(file));
   };
 
+  const handleOrgaoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    if (!file.type.startsWith("image/")) {
+      toast.error("Por favor, selecione uma imagem");
+      return;
+    }
+
+    // Validar tamanho (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Imagem muito grande. Máximo 2MB");
+      return;
+    }
+
+    setLogoOrgaoFile(file);
+    setLogoOrgaoPreview(URL.createObjectURL(file));
+  };
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       setUploading(true);
       let logoUrl = supervisora?.logo_url || null;
+      let logoOrgaoUrl = (supervisora as any)?.logo_orgao_fiscalizador_url || null;
 
       console.log('Estado do switch antes de salvar:', usarLogoCustomizado);
 
-      // Upload do logo se houver arquivo novo
+      // Upload do logo da supervisora se houver arquivo novo
       if (logoFile) {
         const fileExt = logoFile.name.split('.').pop();
         const fileName = `logo-supervisora.${fileExt}`;
@@ -104,10 +129,40 @@ export const SupervisoraManager = () => {
         logoUrl = publicUrl;
       }
 
+      // Upload do logo do órgão fiscalizador se houver arquivo novo
+      if (logoOrgaoFile) {
+        const fileExt = logoOrgaoFile.name.split('.').pop();
+        const fileName = `logo-orgao-fiscalizador.${fileExt}`;
+
+        // Remove arquivo antigo se existir
+        if ((supervisora as any)?.logo_orgao_fiscalizador_url) {
+          const oldFileName = (supervisora as any).logo_orgao_fiscalizador_url.split('/').pop();
+          if (oldFileName && oldFileName !== 'logo-orgao-fiscalizador.png') {
+            await supabase.storage
+              .from('supervisora-logos')
+              .remove([oldFileName]);
+          }
+        }
+
+        // Upload novo arquivo
+        const { error: uploadError } = await supabase.storage
+          .from('supervisora-logos')
+          .upload(fileName, logoOrgaoFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('supervisora-logos')
+          .getPublicUrl(fileName);
+
+        logoOrgaoUrl = publicUrl;
+      }
+
       const payload = {
         nome_empresa: nomeEmpresa,
         contrato: contrato,
         logo_url: logoUrl,
+        logo_orgao_fiscalizador_url: logoOrgaoUrl,
         usar_logo_customizado: usarLogoCustomizado,
       };
 
@@ -135,6 +190,7 @@ export const SupervisoraManager = () => {
     },
     onSuccess: (data) => {
       setLogoFile(null);
+      setLogoOrgaoFile(null);
       toast.success("Informações da supervisora salvas com sucesso!");
       
       // Invalidar queries para forçar atualização
@@ -233,6 +289,37 @@ export const SupervisoraManager = () => {
                 </p>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="logoOrgao">Logo do Órgão Fiscalizador (DNIT, DER, etc.)</Label>
+                <div className="flex items-center gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => orgaoFileInputRef.current?.click()}
+                    className="w-full md:w-auto"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {logoOrgaoFile || (supervisora as any)?.logo_orgao_fiscalizador_url ? "Alterar Logo Órgão" : "Upload Logo Órgão"}
+                  </Button>
+                  <input
+                    ref={orgaoFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleOrgaoFileChange}
+                  />
+                  {logoOrgaoPreview && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <ImageIcon className="h-4 w-4" />
+                      Logo do órgão carregado
+                    </div>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Usado nos relatórios. Pode ser DNIT, DER estadual ou outro órgão.
+                </p>
+              </div>
+
               <div className="flex items-center justify-between p-6 border-2 rounded-lg bg-primary/5 border-primary/20">
                 <div className="space-y-2">
                   <Label htmlFor="usar-logo" className="text-lg font-semibold cursor-pointer">
@@ -263,22 +350,41 @@ export const SupervisoraManager = () => {
               </div>
             </div>
 
-            {logoPreview && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">Pré-visualização do Logo</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-white p-4 rounded border flex items-center justify-center">
-                    <img
-                      src={logoPreview}
-                      alt="Logo da Supervisora"
-                      className="max-h-32 object-contain"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {logoPreview && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Logo Supervisora</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-white p-4 rounded border flex items-center justify-center">
+                      <img
+                        src={logoPreview}
+                        alt="Logo da Supervisora"
+                        className="max-h-32 object-contain"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {logoOrgaoPreview && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Logo Órgão Fiscalizador</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-white p-4 rounded border flex items-center justify-center">
+                      <img
+                        src={logoOrgaoPreview}
+                        alt="Logo do Órgão Fiscalizador"
+                        className="max-h-32 object-contain"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
 
             <Button 
               type="submit" 

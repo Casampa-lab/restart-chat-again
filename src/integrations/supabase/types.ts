@@ -3618,6 +3618,7 @@ export type Database = {
           email_envio: string | null
           email_prefixo: string | null
           id: string
+          logo_orgao_fiscalizador_url: string | null
           logo_url: string | null
           nome_empresa: string
           updated_at: string | null
@@ -3630,6 +3631,7 @@ export type Database = {
           email_envio?: string | null
           email_prefixo?: string | null
           id?: string
+          logo_orgao_fiscalizador_url?: string | null
           logo_url?: string | null
           nome_empresa: string
           updated_at?: string | null
@@ -3642,6 +3644,7 @@ export type Database = {
           email_envio?: string | null
           email_prefixo?: string | null
           id?: string
+          logo_orgao_fiscalizador_url?: string | null
           logo_url?: string | null
           nome_empresa?: string
           updated_at?: string | null
