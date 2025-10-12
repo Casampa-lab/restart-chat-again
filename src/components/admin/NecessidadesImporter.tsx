@@ -183,16 +183,23 @@ export function NecessidadesImporter() {
         throw new Error("Planilha vazia");
       }
 
+      // Filtrar linhas de cabeçalho (que têm texto em campos numéricos)
+      const dadosFiltrados = jsonData.filter((row: any) => {
+        // Se o campo KM/Km contém texto como "Km", é cabeçalho - pular
+        const kmValue = row["__EMPTY_6"] || row["Km"] || row["KM"] || row["km"];
+        return kmValue !== undefined && !isNaN(Number(kmValue));
+      });
+
       // 2. Buscar user_id
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
       // 3. Processar cada linha
-      const total = jsonData.length;
+      const total = dadosFiltrados.length;
       let sucessos = 0;
       let falhas = 0;
 
-      for (let i = 0; i < jsonData.length; i++) {
+      for (let i = 0; i < dadosFiltrados.length; i++) {
         // Verificar se foi cancelado
         if (cancelImportRef.current) {
           setLogs(prev => [...prev, {
@@ -208,8 +215,8 @@ export function NecessidadesImporter() {
           break;
         }
 
-        const row: any = jsonData[i];
-        const linhaExcel = i + 2; // +2 pois Excel começa em 1 e tem header
+        const row: any = dadosFiltrados[i];
+        const linhaExcel = i + 3; // +3 pois Excel começa em 1, tem header, e pulamos a linha de cabeçalho duplicada
 
         try {
           // Mapear colunas
