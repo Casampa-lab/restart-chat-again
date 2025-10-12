@@ -111,7 +111,29 @@ export function NecessidadesImporter() {
   };
 
   const mapearColunas = (row: any, tipo: string) => {
-    // Mapeamento básico - ajustar conforme estrutura real das planilhas
+    // Para placas, não usar campos do baseMap (não tem inicial/final)
+    if (tipo === "placas") {
+      return {
+        km: row["Km"] || row["KM"] || row["km"] || row["__EMPTY_6"],
+        latitude: converterCoordenada(row["Latitude"] || row["latitude"] || row["__EMPTY_7"]),
+        longitude: converterCoordenada(row["Longitude"] || row["longitude"] || row["__EMPTY_8"]),
+        codigo: row["Código da placa"] || row["Código"] || row["codigo"] || row["__EMPTY_2"],
+        modelo: row["Modelo"] || row["modelo"],
+        tipo: row["Tipo de placa"] || row["Tipo"] || row["tipo"] || row["__EMPTY_1"],
+        velocidade: row["Velocidade"] || row["velocidade"] || row["__EMPTY_3"],
+        descricao: row["Descrição"] || row["descricao"],
+        lado: row["Lado"] || row["lado"] || row["__EMPTY_4"],
+        dimensoes_mm: row["Dimensões (mm)"] || row["dimensoes_mm"],
+        substrato: row["Tipo de Substrato"] || row["Substrato"] || row["substrato"] || row["__EMPTY_14"],
+        suporte: row["Tipo de Suporte"] || row["Suporte"] || row["suporte"] || row["__EMPTY_10"],
+        pelicula: row["Película"] || row["pelicula"],
+        snv: row["SNV"] || row["snv"] || row["__EMPTY"],
+        observacao: row["Observação"] || row["Observacao"] || row["observacao"],
+        solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"] || row["__EMPTY_25"],
+      };
+    }
+
+    // Mapeamento básico para outros tipos (com inicial/final)
     const baseMap: any = {
       km_inicial: row["KM Inicial"] || row["Km Inicial"] || row["km_inicial"],
       km_final: row["KM Final"] || row["Km Final"] || row["km_final"],
@@ -149,24 +171,6 @@ export function NecessidadesImporter() {
           extensao_km: row["Extensão (km)"] || row["extensao_km"],
           local_implantacao: row["Local Implantação"] || row["local_implantacao"],
           descricao: row["Descrição"] || row["descricao"],
-        };
-
-      case "placas":
-        return {
-          ...baseMap, // IMPORTANTE: incluir os campos do baseMap (snv, observacao, solucao_planilha)
-          km: row["Km"] || row["KM"] || row["km"] || row["__EMPTY_6"],
-          latitude: converterCoordenada(row["Latitude"] || row["latitude"] || row["__EMPTY_7"]),
-          longitude: converterCoordenada(row["Longitude"] || row["longitude"] || row["__EMPTY_8"]),
-          codigo: row["Código da placa"] || row["Código"] || row["codigo"] || row["__EMPTY_2"],
-          modelo: row["Modelo"] || row["modelo"],
-          tipo: row["Tipo de placa"] || row["Tipo"] || row["tipo"] || row["__EMPTY_1"],
-          velocidade: row["Velocidade"] || row["velocidade"] || row["__EMPTY_3"],
-          descricao: row["Descrição"] || row["descricao"],
-          lado: row["Lado"] || row["lado"] || row["__EMPTY_4"],
-          dimensoes_mm: row["Dimensões (mm)"] || row["dimensoes_mm"],
-          substrato: row["Tipo de Substrato"] || row["Substrato"] || row["substrato"] || row["__EMPTY_14"],
-          suporte: row["Tipo de Suporte"] || row["Suporte"] || row["suporte"] || row["__EMPTY_10"],
-          pelicula: row["Película"] || row["pelicula"],
         };
 
       default:
@@ -240,8 +244,9 @@ export function NecessidadesImporter() {
           const dados = mapearColunas(row, tipo);
 
           // Buscar match no cadastro (apenas se houver coordenadas)
-          const lat = tipo === "placas" ? dados.latitude : dados.latitude_inicial;
-          const long = tipo === "placas" ? dados.longitude : dados.longitude_inicial;
+          // Converter coordenadas para número (vírgula -> ponto)
+          const lat = tipo === "placas" ? converterCoordenada(dados.latitude) : converterCoordenada(dados.latitude_inicial);
+          const long = tipo === "placas" ? converterCoordenada(dados.longitude) : converterCoordenada(dados.longitude_inicial);
 
           let match = null;
           let distancia = null;
@@ -250,8 +255,8 @@ export function NecessidadesImporter() {
             const { data: matchData } = await supabase
               .rpc("match_cadastro_por_coordenadas", {
                 p_tipo: tipo,
-                p_lat: parseFloat(lat),
-                p_long: parseFloat(long),
+                p_lat: lat,
+                p_long: long,
                 p_rodovia_id: rodoviaId,
                 p_tolerancia_metros: 50,
               });
