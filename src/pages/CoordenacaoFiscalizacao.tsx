@@ -159,7 +159,7 @@ const CoordenacaoFiscalizacao = () => {
           </CardHeader>
           <CardContent className="pt-6">
             <Tabs defaultValue="frentes" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2 h-auto bg-muted p-2">
+              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 gap-2 h-auto bg-muted p-2">
                 <TabsTrigger value="frentes" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Frentes Liberadas
                 </TabsTrigger>
@@ -177,6 +177,9 @@ const CoordenacaoFiscalizacao = () => {
                 </TabsTrigger>
                 <TabsTrigger value="fichas" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
                   Fichas
+                </TabsTrigger>
+                <TabsTrigger value="programa-ssv" className="whitespace-normal py-4 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-md font-semibold text-sm">
+                  Programa SSV
                 </TabsTrigger>
               </TabsList>
 
@@ -399,6 +402,23 @@ const CoordenacaoFiscalizacao = () => {
                   <p className="text-muted-foreground mt-4">
                     Visualize e baixe as fichas de verificação e cadastro
                   </p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="programa-ssv" className="mt-6">
+                <div className="text-center py-8 space-y-4">
+                  <h3 className="text-lg font-semibold">Relatórios de Programa de Sinalização e Segurança Viária</h3>
+                  <p className="text-muted-foreground">
+                    Gere relatórios inicial e permanente do cadastro para análise e planejamento
+                  </p>
+                  <Button 
+                    size="lg"
+                    variant="default"
+                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                    onClick={() => navigate("/minhas-necessidades-relatorios")}
+                  >
+                    Acessar Relatórios do Programa
+                  </Button>
                 </div>
               </TabsContent>
             </Tabs>
