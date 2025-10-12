@@ -439,11 +439,13 @@ async function gerarRelatorioPermanente(tipo: string) {
 }
 ```
 
-### 3️⃣ Relatório Final
+### 3️⃣ Relatório Final ⏸️
 
 **Objetivo**: Estado após INTERVENÇÕES executadas
 
-**Status**: ⏸️ Pendente - será implementado após sistema de intervenções estar maduro
+**Status**: ⏸️ **PAUSADO** - Aguardando modelo/especificação do cliente
+
+**Nota**: Será implementado quando houver definição clara do formato e conteúdo esperado.
 
 **Funcionalidade**:
 ```typescript
@@ -573,12 +575,12 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 - Biblioteca ExcelJS implementada para suporte avançado a imagens
 
 ### Sprint 5: Refinamentos
-- [ ] Relatório Final (após intervenções)
-- [ ] Implementar logos nos relatórios Excel (header)
-- 🔜 Visualização em mapa
+- ⏸️ **PAUSADO** - Relatório Final (aguardando modelo/especificação do cliente)
+- ✅ Implementar logos nos relatórios Excel (header)
+- 🔜 Visualização em mapa (FASE 6)
 - 🔜 Analytics e dashboards
 
-**📌 CHECKPOINT ATUAL** - Sistema de relatórios funcionando, falta apenas adicionar logos no Excel
+**📌 CHECKPOINT ATUAL** - Sprint 4 completa. Relatório Final pausado até receber especificação.
 
 ---
 
