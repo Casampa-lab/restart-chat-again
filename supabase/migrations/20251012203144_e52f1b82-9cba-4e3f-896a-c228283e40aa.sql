@@ -1,0 +1,22 @@
+-- Add missing columns to necessidades_defensas table
+ALTER TABLE public.necessidades_defensas 
+ADD COLUMN IF NOT EXISTS tramo text,
+ADD COLUMN IF NOT EXISTS comprimento_total_tramo_m numeric,
+ADD COLUMN IF NOT EXISTS funcao text,
+ADD COLUMN IF NOT EXISTS especificacao_obstaculo_fixo text,
+ADD COLUMN IF NOT EXISTS id_defensa text,
+ADD COLUMN IF NOT EXISTS distancia_pista_obstaculo_m numeric,
+ADD COLUMN IF NOT EXISTS risco text,
+ADD COLUMN IF NOT EXISTS velocidade_kmh integer,
+ADD COLUMN IF NOT EXISTS vmd_veic_dia integer,
+ADD COLUMN IF NOT EXISTS percentual_veiculos_pesados numeric,
+ADD COLUMN IF NOT EXISTS geometria text,
+ADD COLUMN IF NOT EXISTS classificacao_nivel_contencao text,
+ADD COLUMN IF NOT EXISTS espaco_trabalho text,
+ADD COLUMN IF NOT EXISTS adequacao_funcionalidade_lamina text,
+ADD COLUMN IF NOT EXISTS adequacao_funcionalidade_laminas_inadequadas text,
+ADD COLUMN IF NOT EXISTS adequacao_funcionalidade_terminais text,
+ADD COLUMN IF NOT EXISTS adequacao_funcionalidade_terminais_inadequados text,
+ADD COLUMN IF NOT EXISTS distancia_face_defensa_obstaculo_m numeric,
+ADD COLUMN IF NOT EXISTS distancia_bordo_pista_face_defensa_m numeric,
+ADD COLUMN IF NOT EXISTS motivo text;

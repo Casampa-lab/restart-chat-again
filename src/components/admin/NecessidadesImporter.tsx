@@ -253,6 +253,56 @@ export function NecessidadesImporter() {
           motivo: motivoPortico,
         };
 
+      case "defensas":
+        const solucaoDefensa = (row["Solução"] || row["Solucao"] || row["solucao"] || "").toLowerCase();
+        let motivoDefensa = row["Motivo"] || row["motivo"] || "-";
+        
+        // Aplicar regras do campo Motivo para defensas
+        if (solucaoDefensa.includes("remov") || solucaoDefensa.includes("substitu")) {
+          // Para Remover ou Substituir, motivo deve ser 1, 2, 3 ou 4
+          if (motivoDefensa !== "1" && motivoDefensa !== "2" && motivoDefensa !== "3" && motivoDefensa !== "4") {
+            motivoDefensa = "-";
+          }
+        } else {
+          // Para outras soluções, usar "-"
+          motivoDefensa = "-";
+        }
+        
+        return {
+          ...baseMap,
+          tramo: row["Tramo"] || row["tramo"],
+          lado: row["Lado"] || row["lado"],
+          quantidade_laminas: parseInt(row["Quantidade lâminas"] || row["Quantidade laminas"] || row["quantidade_laminas"]) || null,
+          comprimento_total_tramo_m: row["Comprimento Total do Tramo (m)"] || row["Comprimento Total"] || row["comprimento_total_tramo_m"] ? 
+            parseFloat(String(row["Comprimento Total do Tramo (m)"] || row["Comprimento Total"] || row["comprimento_total_tramo_m"]).replace(',', '.')) : null,
+          funcao: row["Função"] || row["Funcao"] || row["funcao"],
+          especificacao_obstaculo_fixo: row["Especificação do obstáculo fixo"] || row["Especificacao obstaculo fixo"] || row["especificacao_obstaculo_fixo"],
+          id_defensa: row["ID"] || row["id"],
+          distancia_pista_obstaculo_m: row["Distância da pista ao obstáculo (m)"] || row["Distancia pista obstaculo"] || row["distancia_pista_obstaculo_m"] ? 
+            parseFloat(String(row["Distância da pista ao obstáculo (m)"] || row["Distancia pista obstaculo"] || row["distancia_pista_obstaculo_m"]).replace(',', '.')) : null,
+          risco: row["Risco"] || row["risco"],
+          velocidade_kmh: parseInt(row["Velocidade (km/h)"] || row["Velocidade"] || row["velocidade_kmh"]) || null,
+          vmd_veic_dia: parseInt(row["VMD (veíc./dia)"] || row["VMD"] || row["vmd_veic_dia"]) || null,
+          percentual_veiculos_pesados: row["% veículos pesados"] || row["Percentual veiculos pesados"] || row["percentual_veiculos_pesados"] ? 
+            parseFloat(String(row["% veículos pesados"] || row["Percentual veiculos pesados"] || row["percentual_veiculos_pesados"]).replace(',', '.').replace('%', '')) : null,
+          geometria: row["Geometria"] || row["geometria"],
+          classificacao_nivel_contencao: row["Classificação do nível de contenção"] || row["Classificacao nivel contencao"] || row["classificacao_nivel_contencao"],
+          nivel_contencao_en1317: row["Nível de contenção EN 1317-2"] || row["Nivel contencao EN1317"] || row["nivel_contencao_en1317"],
+          nivel_contencao_nchrp350: row["Nível de contenção NCHRP 350"] || row["Nivel contencao NCHRP350"] || row["nivel_contencao_nchrp350"],
+          espaco_trabalho: row["Espaço de trabalho"] || row["Espaco trabalho"] || row["espaco_trabalho"],
+          terminal_entrada: row["Terminal de entrada"] || row["Terminal entrada"] || row["terminal_entrada"],
+          terminal_saida: row["Terminal de saída"] || row["Terminal saida"] || row["terminal_saida"],
+          adequacao_funcionalidade_lamina: row["Adequação à funcionalidade - Lâmina"] || row["Adequacao funcionalidade lamina"] || row["adequacao_funcionalidade_lamina"],
+          adequacao_funcionalidade_laminas_inadequadas: row["Adequação à funcionalidade - Lâminas inadequadas"] || row["Adequacao laminas inadequadas"] || row["adequacao_funcionalidade_laminas_inadequadas"],
+          adequacao_funcionalidade_terminais: row["Adequação à funcionalidade - Terminais"] || row["Adequacao funcionalidade terminais"] || row["adequacao_funcionalidade_terminais"],
+          adequacao_funcionalidade_terminais_inadequados: row["Adequação à funcionalidade - Terminais inadequados"] || row["Adequacao terminais inadequados"] || row["adequacao_funcionalidade_terminais_inadequados"],
+          distancia_face_defensa_obstaculo_m: row["Distância da face da defensa ao obstáculo(m)"] || row["Distancia face defensa obstaculo"] || row["distancia_face_defensa_obstaculo_m"] ? 
+            parseFloat(String(row["Distância da face da defensa ao obstáculo(m)"] || row["Distancia face defensa obstaculo"] || row["distancia_face_defensa_obstaculo_m"]).replace(',', '.')) : null,
+          distancia_bordo_pista_face_defensa_m: row["Distância da linha de bordo da pista à face da defensa (m)"] || row["Distancia bordo pista face defensa"] || row["distancia_bordo_pista_face_defensa_m"] ? 
+            parseFloat(String(row["Distância da linha de bordo da pista à face da defensa (m)"] || row["Distancia bordo pista face defensa"] || row["distancia_bordo_pista_face_defensa_m"]).replace(',', '.')) : null,
+          motivo: motivoDefensa,
+        };
+
       default:
         return baseMap;
     }
