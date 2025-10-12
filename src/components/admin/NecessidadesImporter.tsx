@@ -113,8 +113,8 @@ export function NecessidadesImporter() {
   const mapearColunas = (row: any, tipo: string) => {
     // Mapeamento básico - ajustar conforme estrutura real das planilhas
     const baseMap: any = {
-      km_inicial: converterCoordenada(row["KM Inicial"] || row["Km Inicial"] || row["km_inicial"]),
-      km_final: converterCoordenada(row["KM Final"] || row["Km Final"] || row["km_final"]),
+      km_inicial: row["KM Inicial"] || row["Km Inicial"] || row["km_inicial"],
+      km_final: row["KM Final"] || row["Km Final"] || row["km_final"],
       latitude_inicial: converterCoordenada(row["Latitude Inicial"] || row["Lat Inicial"] || row["latitude_inicial"]),
       longitude_inicial: converterCoordenada(row["Longitude Inicial"] || row["Long Inicial"] || row["longitude_inicial"]),
       latitude_final: converterCoordenada(row["Latitude Final"] || row["Lat Final"] || row["latitude_final"]),
@@ -132,9 +132,9 @@ export function NecessidadesImporter() {
           tipo_demarcacao: row["Tipo Demarcação"] || row["tipo_demarcacao"],
           cor: row["Cor"] || row["cor"],
           material: row["Material"] || row["material"],
-          largura_cm: converterCoordenada(row["Largura (cm)"] || row["largura_cm"]),
-          espessura_cm: converterCoordenada(row["Espessura (cm)"] || row["espessura_cm"]),
-          extensao_metros: converterCoordenada(row["Extensão (m)"] || row["extensao_metros"]),
+          largura_cm: row["Largura (cm)"] || row["largura_cm"],
+          espessura_cm: row["Espessura (cm)"] || row["espessura_cm"],
+          extensao_metros: row["Extensão (m)"] || row["extensao_metros"],
           estado_conservacao: row["Estado Conservação"] || row["estado_conservacao"],
         };
 
@@ -145,8 +145,8 @@ export function NecessidadesImporter() {
           corpo: row["Corpo"] || row["corpo"],
           refletivo: row["Refletivo"] || row["refletivo"],
           cor_refletivo: row["Cor Refletivo"] || row["cor_refletivo"],
-          espacamento_m: converterCoordenada(row["Espaçamento (m)"] || row["espacamento_m"]),
-          extensao_km: converterCoordenada(row["Extensão (km)"] || row["extensao_km"]),
+          espacamento_m: row["Espaçamento (m)"] || row["espacamento_m"],
+          extensao_km: row["Extensão (km)"] || row["extensao_km"],
           local_implantacao: row["Local Implantação"] || row["local_implantacao"],
           descricao: row["Descrição"] || row["descricao"],
         };
@@ -154,7 +154,7 @@ export function NecessidadesImporter() {
       case "placas":
         return {
           ...baseMap, // IMPORTANTE: incluir os campos do baseMap (snv, observacao, solucao_planilha)
-          km: converterCoordenada(row["Km"] || row["KM"] || row["km"] || row["__EMPTY_6"]),
+          km: row["Km"] || row["KM"] || row["km"] || row["__EMPTY_6"],
           latitude: converterCoordenada(row["Latitude"] || row["latitude"] || row["__EMPTY_7"]),
           longitude: converterCoordenada(row["Longitude"] || row["longitude"] || row["__EMPTY_8"]),
           codigo: row["Código da placa"] || row["Código"] || row["codigo"] || row["__EMPTY_2"],
