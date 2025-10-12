@@ -17,6 +17,7 @@ import { DeleteInventarioSelecionado } from "@/components/admin/DeleteInventario
 import { LimparFotosOrfas } from "@/components/admin/LimparFotosOrfas";
 import { NecessidadesImporter } from "@/components/admin/NecessidadesImporter";
 import { NecessidadesAuditor } from "@/components/admin/NecessidadesAuditor";
+import { DeleteNecessidades } from "@/components/admin/DeleteNecessidades";
 
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
@@ -160,6 +161,7 @@ const Admin = () => {
             <div className="space-y-6">
               <NecessidadesImporter />
               <NecessidadesAuditor />
+              <DeleteNecessidades />
             </div>
           </TabsContent>
         </Tabs>
