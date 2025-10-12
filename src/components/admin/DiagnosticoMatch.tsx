@@ -132,12 +132,16 @@ export function DiagnosticoMatch() {
         const necLat = converterCoordenada(nec.latitude);
         const necLong = converterCoordenada(nec.longitude);
 
+        console.log(`🔍 Nec KM ${nec.km} (${nec.codigo}): lat=${necLat}, long=${necLong}`);
+
         if (cadastros && necLat !== null && necLong !== null) {
+          let comparacoes = 0;
           for (const cad of (cadastros as any[])) {
             const cadLat = converterCoordenada(cad.latitude);
             const cadLong = converterCoordenada(cad.longitude);
             
             if (cadLat !== null && cadLong !== null) {
+              comparacoes++;
               const dist = calcularDistancia(
                 necLat, 
                 necLong, 
@@ -148,9 +152,13 @@ export function DiagnosticoMatch() {
               if (dist < menorDistancia) {
                 menorDistancia = dist;
                 maisProximo = cad;
+                console.log(`  ✅ Novo match: ${cad.codigo} dist=${dist.toFixed(2)}m`);
               }
             }
           }
+          console.log(`  Total comparações: ${comparacoes}`);
+        } else {
+          console.log(`  ❌ Necessidade sem coordenadas válidas`);
         }
 
         diagnosticos.push({
