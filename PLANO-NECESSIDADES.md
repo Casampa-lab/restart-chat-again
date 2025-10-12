@@ -324,17 +324,33 @@ async function importarNecessidades(file: File, tipo: string) {
 
 ## 📄 FASE 5: Sistema de Relatórios
 
-### Nova seção no Admin: **Relatórios**
+### Nova seção no Admin: **Relatórios** ✅
 
-**Localização**: Nova aba em `src/pages/Admin.tsx`
+**Status**: Implementado como página separada `/minhas-necessidades-relatorios`
 
-**Layout**:
+**Localização**: `src/pages/MinhasNecessidadesRelatorios.tsx`
+
+### Configuração de Logos ✅
+
+**Tabela `supervisoras`** - Novos campos:
+- `logo_url`: Logo da empresa supervisora (BR-LEGAL, etc.)
+- `logo_orgao_fiscalizador_url`: Logo do órgão fiscalizador (DNIT, DER, etc.) - **NOVO**
+- `usar_logo_customizado`: Switch para usar logo customizado
+
+**Componente**: `src/components/admin/SupervisoraManager.tsx`
+- Upload de logo da supervisora
+- Upload de logo do órgão fiscalizador
+- Pré-visualização de ambos os logos
+- Armazenamento no bucket `supervisora-logos`
+
+**💡 Estratégia Comercial**: Sistema preparado para venda em esfera federal (DNIT) e estadual (DER) através de logos configuráveis.
+
+**Layout**: ✅ Implementado
 ```tsx
 <Tabs>
   <TabsList>
     <TabsTrigger>Relatório Inicial</TabsTrigger>
     <TabsTrigger>Relatório Permanente</TabsTrigger>
-    <TabsTrigger>Relatório Final</TabsTrigger>
   </TabsList>
   
   <TabsContent value="inicial">
@@ -344,16 +360,14 @@ async function importarNecessidades(file: File, tipo: string) {
   <TabsContent value="permanente">
     <RelatorioPermanenteExporter />
   </TabsContent>
-  
-  <TabsContent value="final">
-    <RelatorioFinalExporter />
-  </TabsContent>
 </Tabs>
 ```
 
-### 1️⃣ Relatório Inicial
+### 1️⃣ Relatório Inicial ✅
 
-**Objetivo**: Exportar estado atual do CADASTRO com coluna SERVIÇO vazia
+**Objetivo**: Exportar estado atual do CADASTRO com coluna SERVIÇO vazia ✅
+
+**Status**: Implementado em `src/pages/MinhasNecessidadesRelatorios.tsx`
 
 **Funcionalidade**:
 ```typescript
@@ -395,9 +409,11 @@ async function gerarRelatorioInicial(tipo: string) {
 }
 ```
 
-### 2️⃣ Relatório Permanente
+### 2️⃣ Relatório Permanente ✅
 
-**Objetivo**: CADASTRO + coluna SERVIÇO preenchida (onde há necessidade)
+**Objetivo**: CADASTRO + coluna SERVIÇO preenchida (onde há necessidade) ✅
+
+**Status**: Implementado em `src/pages/MinhasNecessidadesRelatorios.tsx`
 
 **Funcionalidade**:
 ```typescript
@@ -426,6 +442,8 @@ async function gerarRelatorioPermanente(tipo: string) {
 ### 3️⃣ Relatório Final
 
 **Objetivo**: Estado após INTERVENÇÕES executadas
+
+**Status**: ⏸️ Pendente - será implementado após sistema de intervenções estar maduro
 
 **Funcionalidade**:
 ```typescript
@@ -459,10 +477,14 @@ async function gerarRelatorioFinal(tipo: string) {
 
 ### Utilitários de Geração de Excel
 
+**Status**: 🔜 Próxima etapa
+
 ```typescript
 // Adicionar logos no header
-function adicionarLogosHeader(workbook: XLSX.WorkBook) {
-  // Buscar logos da supervisora e DNIT
+function adicionarLogosHeader(workbook: XLSX.WorkBook, supervisora: any) {
+  // Buscar logos configurados:
+  // - supervisora.logo_url (logo da supervisora)
+  // - supervisora.logo_orgao_fiscalizador_url (DNIT, DER, etc.)
   // Inserir nas primeiras linhas do Excel
   // Usar biblioteca para manipular células com imagens
 }
@@ -537,17 +559,23 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 
 **📌 CHECKPOINT ATUAL** - Sistema de visualização funcionando!
 
-### Sprint 4: Relatórios
+### Sprint 4: Relatórios ✅ **EM ANDAMENTO**
 - [x] Exportação Excel das necessidades (por tipo)
 - [x] Seção Relatórios no Admin
 - [x] Relatório Inicial (CADASTRO + SERVIÇO vazio)
 - [x] Relatório Permanente (CADASTRO + NECESSIDADES)
-- [ ] Função de adicionar logos no header
+- [x] Campo para logo do órgão fiscalizador (DNIT, DER, etc.) configurável por supervisora
+- [ ] Função de adicionar logos no header dos relatórios Excel
+
+**📌 NOTA**: Sistema preparado para venda em esfera estadual e federal - logo do órgão fiscalizador é configurável
 
 ### Sprint 5: Refinamentos
-- ✅ Relatório Final (após intervenções)
+- [ ] Relatório Final (após intervenções)
+- [ ] Implementar logos nos relatórios Excel (header)
 - 🔜 Visualização em mapa
 - 🔜 Analytics e dashboards
+
+**📌 CHECKPOINT ATUAL** - Sistema de relatórios funcionando, falta apenas adicionar logos no Excel
 
 ---
 
