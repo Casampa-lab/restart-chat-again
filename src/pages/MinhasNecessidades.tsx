@@ -165,7 +165,7 @@ const MinhasNecessidades = () => {
                 />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-primary-foreground">Minhas Necessidades</h1>
+                <h1 className="text-xl font-bold text-primary-foreground">Necessidades Levantadas pelo Projeto</h1>
                 <p className="text-sm text-primary-foreground/80">Serviços planejados para as rodovias</p>
               </div>
             </div>
