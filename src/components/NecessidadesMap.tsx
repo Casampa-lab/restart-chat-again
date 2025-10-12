@@ -263,6 +263,19 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
                         {nec.servico}
                       </h3>
                       <p className="text-xs space-y-1">
+                        {nec.codigo && (
+                          <>
+                            <strong>Placa:</strong> {nec.codigo}
+                            {nec.tipo && ` (${nec.tipo})`}
+                            <br />
+                          </>
+                        )}
+                        {nec.descricao && (
+                          <>
+                            <strong>Descrição:</strong> {nec.descricao}
+                            <br />
+                          </>
+                        )}
                         <strong>Rodovia:</strong> {rodovia}
                         <br />
                         <strong>KM:</strong> {km}
