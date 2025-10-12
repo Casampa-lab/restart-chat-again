@@ -117,10 +117,11 @@ export function DiagnosticoMatch() {
         .eq("rodovia_id", rodoviaId);
 
       // Para marcas longitudinais, filtrar por Posição = 'E' (eixo)
+      // Para tachas, não filtrar (todas são necessidades)
       // Para outros tipos, filtrar por solucao_planilha contendo "substitu"
       if (tipoServico === "marcas_longitudinais") {
         query = query.eq("posicao", "E");
-      } else {
+      } else if (tipoServico !== "tachas") {
         query = query.ilike("solucao_planilha", "%substitu%");
       }
 
@@ -128,9 +129,12 @@ export function DiagnosticoMatch() {
 
       if (necError) throw necError;
       if (!necessidades || necessidades.length === 0) {
-        const descricao = tipoServico === "marcas_longitudinais"
-          ? "Nenhuma marca longitudinal de eixo (Posição = E) encontrada"
-          : "Nenhuma necessidade de substituição encontrada";
+        let descricao = "Nenhuma necessidade encontrada";
+        if (tipoServico === "marcas_longitudinais") {
+          descricao = "Nenhuma marca longitudinal de eixo (Posição = E) encontrada";
+        } else if (tipoServico === "tachas") {
+          descricao = "Nenhuma tacha encontrada para este lote/rodovia";
+        }
         toast({
           title: "Sem dados",
           description: descricao,
