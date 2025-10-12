@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from "react-leaflet";
+import L, { LatLngExpression } from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MapPin, AlertCircle } from "lucide-react";
+import { MapPin, AlertCircle, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Necessidade {
   id: string;
@@ -30,12 +30,23 @@ interface NecessidadesMapProps {
   tipo: string;
 }
 
+// Componente auxiliar para ajustar bounds do mapa
+const MapBounds = ({ coordinates }: { coordinates: LatLngExpression[] }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (coordinates.length > 0) {
+      const bounds = L.latLngBounds(coordinates as any);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [coordinates, map]);
+  
+  return null;
+};
+
 export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
-  const [mapboxToken, setMapboxToken] = useState<string>("");
-  const [tokenSalvo, setTokenSalvo] = useState(false);
+  const [geojsonData, setGeojsonData] = useState<any>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Filtrar necessidades com coordenadas válidas
   const necessidadesComCoordenadas = necessidades.filter(n => {
@@ -57,208 +68,105 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
     }
   };
 
-  const getMarkerIcon = (servico: string) => {
-    switch (servico) {
-      case "Inclusão":
-        return "🟢";
-      case "Substituição":
-        return "🟡";
-      case "Remoção":
-        return "🔴";
-      default:
-        return "⚪";
-    }
-  };
-
-  const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken || map.current) return;
-
-    try {
-      mapboxgl.accessToken = mapboxToken;
-
-      // Centro do Brasil como ponto inicial
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: "mapbox://styles/mapbox/streets-v12",
-        center: [-47.9292, -15.7801], // Brasília
-        zoom: 4,
-      });
-
-      map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
-      map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
-
-      // Adicionar marcadores
-      addMarkers();
-
-      toast.success("Mapa carregado com sucesso!");
-    } catch (error: any) {
-      console.error("Erro ao inicializar mapa:", error);
-      toast.error("Erro ao carregar mapa: " + error.message);
-    }
-  };
-
-  const addMarkers = () => {
-    if (!map.current) return;
-
-    // Limpar marcadores anteriores
-    markers.current.forEach(marker => marker.remove());
-    markers.current = [];
-
-    if (necessidadesComCoordenadas.length === 0) {
-      toast.info("Nenhuma necessidade com coordenadas para exibir");
-      return;
-    }
-
-    // Adicionar novo marcador para cada necessidade
-    necessidadesComCoordenadas.forEach(nec => {
-      const lat = nec.latitude_inicial || nec.latitude || 0;
-      const lng = nec.longitude_inicial || nec.longitude || 0;
-
-      // Criar elemento customizado do marcador
-      const el = document.createElement("div");
-      el.className = "custom-marker";
-      el.style.backgroundColor = getMarkerColor(nec.servico);
-      el.style.width = "30px";
-      el.style.height = "30px";
-      el.style.borderRadius = "50%";
-      el.style.border = "3px solid white";
-      el.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
-      el.style.cursor = "pointer";
-      el.style.display = "flex";
-      el.style.alignItems = "center";
-      el.style.justifyContent = "center";
-      el.style.fontSize = "14px";
-      el.textContent = getMarkerIcon(nec.servico).substring(0, 2);
-
-      // Criar popup
-      const km = nec.km_inicial || nec.km || "N/A";
-      const rodovia = nec.rodovia?.codigo || "N/A";
-      const match = nec.distancia_match_metros 
-        ? `<br><strong>Match:</strong> ${nec.distancia_match_metros.toFixed(0)}m`
-        : "";
-      
-      const popupContent = `
-        <div style="font-family: system-ui, -apple-system, sans-serif;">
-          <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">
-            ${getMarkerIcon(nec.servico)} ${nec.servico}
-          </h3>
-          <p style="margin: 4px 0; font-size: 12px;">
-            <strong>Rodovia:</strong> ${rodovia}<br>
-            <strong>KM:</strong> ${km}${match}
-          </p>
-          ${nec.observacao ? `<p style="margin: 4px 0; font-size: 11px; color: #666;"><em>${nec.observacao}</em></p>` : ""}
-        </div>
-      `;
-
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(popupContent);
-
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([lng, lat])
-        .setPopup(popup)
-        .addTo(map.current!);
-
-      markers.current.push(marker);
+  // Criar ícones customizados do Leaflet
+  const createCustomIcon = (servico: string) => {
+    const color = getMarkerColor(servico);
+    const emoji = servico === "Inclusão" ? "➕" : servico === "Substituição" ? "🔄" : "➖";
+    
+    return L.divIcon({
+      className: "custom-marker",
+      html: `
+        <div style="
+          background-color: ${color};
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+        ">${emoji}</div>
+      `,
+      iconSize: [32, 32] as [number, number],
+      iconAnchor: [16, 16] as [number, number],
+      popupAnchor: [0, -16] as [number, number],
     });
-
-    // Ajustar zoom para mostrar todos os marcadores
-    if (necessidadesComCoordenadas.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      necessidadesComCoordenadas.forEach(nec => {
-        const lat = nec.latitude_inicial || nec.latitude || 0;
-        const lng = nec.longitude_inicial || nec.longitude || 0;
-        bounds.extend([lng, lat]);
-      });
-      map.current?.fitBounds(bounds, { padding: 50 });
-    }
   };
 
+  // Carregar GeoJSON salvo ao montar
   useEffect(() => {
-    // Verificar se há token salvo no localStorage
-    const savedToken = localStorage.getItem("mapbox_token");
-    if (savedToken) {
-      setMapboxToken(savedToken);
-      setTokenSalvo(true);
-    }
+    const loadGeojson = async () => {
+      const { data } = await supabase
+        .from("configuracoes")
+        .select("valor")
+        .eq("chave", "mapa_geojson_rodovias")
+        .maybeSingle();
+      
+      if (data?.valor) {
+        try {
+          setGeojsonData(JSON.parse(data.valor));
+          toast.success("Camada base da rodovia carregada");
+        } catch (error) {
+          console.error("Erro ao carregar GeoJSON:", error);
+        }
+      }
+    };
+    loadGeojson();
   }, []);
 
-  useEffect(() => {
-    if (tokenSalvo && mapboxToken) {
-      initializeMap();
-    }
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-    return () => {
-      markers.current.forEach(marker => marker.remove());
-      map.current?.remove();
-      map.current = null;
-    };
-  }, [tokenSalvo, mapboxToken]);
-
-  useEffect(() => {
-    if (map.current) {
-      addMarkers();
-    }
-  }, [necessidades]);
-
-  const handleSaveToken = () => {
-    if (!mapboxToken.trim()) {
-      toast.error("Digite um token válido");
+    if (!file.name.endsWith(".geojson") && !file.name.endsWith(".json")) {
+      toast.error("Por favor, selecione um arquivo GeoJSON (.geojson ou .json)");
       return;
     }
-    localStorage.setItem("mapbox_token", mapboxToken);
-    setTokenSalvo(true);
-    toast.success("Token salvo! Inicializando mapa...");
+
+    setUploading(true);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      
+      // Validar se é um GeoJSON válido
+      if (!data.type || (data.type !== "FeatureCollection" && data.type !== "Feature")) {
+        throw new Error("Arquivo não é um GeoJSON válido");
+      }
+
+      // Salvar no banco
+      const { error } = await supabase
+        .from("configuracoes")
+        .upsert({
+          chave: "mapa_geojson_rodovias",
+          valor: text,
+        });
+
+      if (error) throw error;
+
+      setGeojsonData(data);
+      toast.success("Camada base importada com sucesso!");
+    } catch (error: any) {
+      console.error("Erro ao importar GeoJSON:", error);
+      toast.error("Erro ao importar arquivo: " + error.message);
+    } finally {
+      setUploading(false);
+    }
   };
 
-  if (!tokenSalvo) {
-    return (
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-lg font-semibold">
-            <MapPin className="h-5 w-5" />
-            Configuração do Mapa
-          </div>
-          
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Para usar o mapa, você precisa de um token Mapbox gratuito.
-              <br />
-              <a 
-                href="https://account.mapbox.com/access-tokens/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-primary underline hover:text-primary/80"
-              >
-                Clique aqui para obter seu token gratuito
-              </a>
-            </AlertDescription>
-          </Alert>
+  const coordinates: LatLngExpression[] = necessidadesComCoordenadas.map(n => {
+    const lat = n.latitude_inicial || n.latitude || 0;
+    const lng = n.longitude_inicial || n.longitude || 0;
+    return [lat, lng] as LatLngExpression;
+  });
 
-          <div className="space-y-2">
-            <Label htmlFor="mapbox-token">Token Mapbox</Label>
-            <Input
-              id="mapbox-token"
-              type="text"
-              placeholder="pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbG..."
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              O token será salvo localmente no seu navegador
-            </p>
-          </div>
-
-          <Button onClick={handleSaveToken} className="w-full">
-            Salvar e Inicializar Mapa
-          </Button>
-        </div>
-      </Card>
-    );
-  }
+  // Centro padrão: Brasil
+  const defaultCenter: LatLngExpression = [-15.7801, -47.9292];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-2">
           <MapPin className="h-5 w-5" />
           <span className="font-semibold">
@@ -266,18 +174,49 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
           </span>
         </div>
         
-        <div className="flex gap-2 text-sm">
-          <span className="flex items-center gap-1">
-            🟢 <strong>{necessidades.filter(n => n.servico === "Inclusão").length}</strong> Inclusões
-          </span>
-          <span className="flex items-center gap-1">
-            🟡 <strong>{necessidades.filter(n => n.servico === "Substituição").length}</strong> Substituições
-          </span>
-          <span className="flex items-center gap-1">
-            🔴 <strong>{necessidades.filter(n => n.servico === "Remoção").length}</strong> Remoções
-          </span>
+        <div className="flex gap-4 items-center flex-wrap">
+          <div className="flex gap-2 text-sm">
+            <span className="flex items-center gap-1">
+              ➕ <strong>{necessidades.filter(n => n.servico === "Inclusão").length}</strong> Inclusões
+            </span>
+            <span className="flex items-center gap-1">
+              🔄 <strong>{necessidades.filter(n => n.servico === "Substituição").length}</strong> Substituições
+            </span>
+            <span className="flex items-center gap-1">
+              ➖ <strong>{necessidades.filter(n => n.servico === "Remoção").length}</strong> Remoções
+            </span>
+          </div>
+
+          <div className="relative">
+            <input
+              type="file"
+              id="geojson-upload"
+              accept=".geojson,.json"
+              onChange={handleFileUpload}
+              className="hidden"
+              disabled={uploading}
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => document.getElementById("geojson-upload")?.click()}
+              disabled={uploading}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {geojsonData ? "Trocar" : "Importar"} GeoJSON VGeo
+            </Button>
+          </div>
         </div>
       </div>
+
+      {geojsonData && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Camada base da rodovia carregada do VGeo DNIT ✓
+          </AlertDescription>
+        </Alert>
+      )}
 
       {necessidadesComCoordenadas.length === 0 && (
         <Alert>
@@ -288,11 +227,71 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
         </Alert>
       )}
 
-      <div 
-        ref={mapContainer} 
-        className="w-full h-[600px] rounded-lg border shadow-lg"
-        style={{ minHeight: "600px" }}
-      />
+      <div className="w-full h-[600px] rounded-lg border shadow-lg overflow-hidden">
+        <MapContainer
+          center={coordinates[0] || defaultCenter}
+          zoom={13}
+          style={{ width: "100%", height: "100%" }}
+          scrollWheelZoom={true}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+
+          {/* Camada GeoJSON da rodovia (VGeo) */}
+          {geojsonData && (
+            <GeoJSON
+              data={geojsonData}
+              pathOptions={{
+                color: "#1e40af",
+                weight: 4,
+                opacity: 0.7,
+              }}
+            />
+          )}
+
+          {/* Marcadores das necessidades */}
+          {necessidadesComCoordenadas.map((nec) => {
+            const lat = nec.latitude_inicial || nec.latitude || 0;
+            const lng = nec.longitude_inicial || nec.longitude || 0;
+            const km = nec.km_inicial || nec.km || "N/A";
+            const rodovia = nec.rodovia?.codigo || "N/A";
+            const match = nec.distancia_match_metros 
+              ? `Match: ${nec.distancia_match_metros.toFixed(0)}m\n`
+              : "";
+
+            return (
+              <Marker
+                key={nec.id}
+                position={[lat, lng] as LatLngExpression}
+                icon={createCustomIcon(nec.servico)}
+              >
+                <Popup>
+                  <div className="font-sans">
+                    <h3 className="font-semibold text-sm mb-2">
+                      {nec.servico === "Inclusão" ? "➕" : nec.servico === "Substituição" ? "🔄" : "➖"} {nec.servico}
+                    </h3>
+                    <p className="text-xs space-y-1">
+                      <strong>Rodovia:</strong> {rodovia}<br />
+                      <strong>KM:</strong> {km}<br />
+                      {match && <><strong>{match}</strong><br /></>}
+                      {nec.observacao && (
+                        <span className="text-muted-foreground italic">
+                          {nec.observacao}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+
+          {/* Ajustar bounds automaticamente */}
+          {coordinates.length > 0 && <MapBounds coordinates={coordinates} />}
+        </MapContainer>
+      </div>
     </div>
   );
 };

@@ -104,6 +104,30 @@ export type Database = {
           },
         ]
       }
+      configuracoes: {
+        Row: {
+          chave: string
+          created_at: string | null
+          descricao: string | null
+          updated_at: string | null
+          valor: string
+        }
+        Insert: {
+          chave: string
+          created_at?: string | null
+          descricao?: string | null
+          updated_at?: string | null
+          valor: string
+        }
+        Update: {
+          chave?: string
+          created_at?: string | null
+          descricao?: string | null
+          updated_at?: string | null
+          valor?: string
+        }
+        Relationships: []
+      }
       coordinator_assignments: {
         Row: {
           created_at: string
