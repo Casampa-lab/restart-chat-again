@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, useMap } from "react-leaflet";
+import { MapContainer } from "react-leaflet";
 import L, { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
@@ -29,19 +29,6 @@ interface NecessidadesMapProps {
   necessidades: Necessidade[];
   tipo: string;
 }
-
-const MapBounds = ({ coordinates }: { coordinates: LatLngExpression[] }) => {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (coordinates.length > 0) {
-      const bounds = L.latLngBounds(coordinates as any);
-      map.fitBounds(bounds, { padding: [50, 50] });
-    }
-  }, [coordinates, map]);
-  
-  return null;
-};
 
 const createCustomIcon = (servico: string) => {
   const color = servico === "Inclusão" ? "#22c55e" : servico === "Substituição" ? "#eab308" : "#ef4444";
@@ -136,14 +123,13 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
     }
   };
 
-  const coordinates: LatLngExpression[] = necessidadesComCoordenadas.map(n => {
-    const lat = n.latitude_inicial || n.latitude || 0;
-    const lng = n.longitude_inicial || n.longitude || 0;
-    return [lat, lng] as LatLngExpression;
-  });
-
   const defaultCenter: LatLngExpression = [-15.7801, -47.9292];
-  const mapCenter = coordinates.length > 0 ? coordinates[0] : defaultCenter;
+  const mapCenter = necessidadesComCoordenadas.length > 0 
+    ? [
+        necessidadesComCoordenadas[0].latitude_inicial || necessidadesComCoordenadas[0].latitude || -15.7801,
+        necessidadesComCoordenadas[0].longitude_inicial || necessidadesComCoordenadas[0].longitude || -47.9292
+      ] as LatLngExpression
+    : defaultCenter;
 
   return (
     <div className="space-y-4">
@@ -220,7 +206,6 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
             necessidadesComCoordenadas={necessidadesComCoordenadas}
             createCustomIcon={createCustomIcon}
           />
-          {coordinates.length > 0 && <MapBounds coordinates={coordinates} />}
         </MapContainer>
       </div>
     </div>

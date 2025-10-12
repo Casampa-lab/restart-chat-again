@@ -1,5 +1,19 @@
-import { TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
-import { LatLngExpression } from "leaflet";
+import { useEffect } from "react";
+import { TileLayer, GeoJSON, Marker, Popup, useMap } from "react-leaflet";
+import L, { LatLngExpression } from "leaflet";
+
+const MapBounds = ({ coordinates }: { coordinates: LatLngExpression[] }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (coordinates.length > 0) {
+      const bounds = L.latLngBounds(coordinates as any);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [coordinates, map]);
+  
+  return null;
+};
 
 interface Necessidade {
   id: string;
@@ -28,6 +42,12 @@ export const NecessidadesMapLayers = ({
   necessidadesComCoordenadas,
   createCustomIcon,
 }: NecessidadesMapLayersProps) => {
+  const coordinates: LatLngExpression[] = necessidadesComCoordenadas.map(n => {
+    const lat = n.latitude_inicial || n.latitude || 0;
+    const lng = n.longitude_inicial || n.longitude || 0;
+    return [lat, lng] as LatLngExpression;
+  });
+
   return (
     <>
       <TileLayer
@@ -86,6 +106,8 @@ export const NecessidadesMapLayers = ({
           </Marker>
         );
       })}
+      
+      {coordinates.length > 0 && <MapBounds coordinates={coordinates} />}
     </>
   );
 };
