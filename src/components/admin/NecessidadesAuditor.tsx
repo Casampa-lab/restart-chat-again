@@ -123,12 +123,21 @@ export function NecessidadesAuditor() {
       const auditoriaData: AuditoriaItem[] = [];
 
       for (const nec of (necessidades as any[])) {
+        // Construir código descritivo para tachas
+        let necCodigo = nec.codigo || nec.tipo_demarcacao || nec.tipo || "-";
+        if (tipo === "tachas") {
+          const necParts = [];
+          if (nec.descricao) necParts.push(nec.descricao);
+          if (nec.quantidade) necParts.push(`Qtd: ${nec.quantidade}`);
+          necCodigo = necParts.length > 0 ? necParts.join(" | ") : "-";
+        }
+
         const item: AuditoriaItem = {
           necessidade_id: nec.id,
           linha_planilha: nec.linha_planilha || 0,
           km: nec.km || nec.km_inicial || 0,
-          codigo: nec.codigo || nec.tipo_demarcacao || nec.tipo || "-",
-          solucao_planilha: nec.solucao_planilha || "-",
+          codigo: necCodigo,
+          solucao_planilha: nec.solucao_planilha || nec.servico || "-",
           servico: nec.servico || "-",
           tem_match: !!nec.cadastro_id,
           distancia_match: nec.distancia_match_metros,
@@ -149,7 +158,16 @@ export function NecessidadesAuditor() {
             item.latitude_cad = converterCoordenada((cadastro as any).latitude || (cadastro as any).latitude_inicial) || undefined;
             item.longitude_cad = converterCoordenada((cadastro as any).longitude || (cadastro as any).longitude_inicial) || undefined;
             item.km_cad = (cadastro as any).km || (cadastro as any).km_inicial;
-            item.codigo_cad = (cadastro as any).codigo || (cadastro as any).tipo_demarcacao || (cadastro as any).tipo || "-";
+            
+            // Construir código descritivo para tachas do cadastro
+            if (tipo === "tachas") {
+              const cadParts = [];
+              if ((cadastro as any).descricao) cadParts.push((cadastro as any).descricao);
+              if ((cadastro as any).quantidade) cadParts.push(`Qtd: ${(cadastro as any).quantidade}`);
+              item.codigo_cad = cadParts.length > 0 ? cadParts.join(" | ") : "-";
+            } else {
+              item.codigo_cad = (cadastro as any).codigo || (cadastro as any).tipo_demarcacao || (cadastro as any).tipo || "-";
+            }
           }
         }
 
@@ -159,12 +177,21 @@ export function NecessidadesAuditor() {
       setAuditoria(auditoriaData);
 
       // Estatísticas
-      const totalSubstituicoes = auditoriaData.filter(i => 
-        i.solucao_planilha?.toLowerCase().includes("substitu")
-      ).length;
-      const substituicoesSemMatch = auditoriaData.filter(i => 
-        i.solucao_planilha?.toLowerCase().includes("substitu") && !i.tem_match
-      ).length;
+      let totalSubstituicoes, substituicoesSemMatch;
+      
+      if (tipo === "tachas") {
+        // Para tachas, todas são necessidades válidas (não filtramos por substituição)
+        totalSubstituicoes = auditoriaData.length;
+        substituicoesSemMatch = auditoriaData.filter(i => !i.tem_match).length;
+      } else {
+        // Para outros tipos, contar apenas substituições
+        totalSubstituicoes = auditoriaData.filter(i => 
+          i.solucao_planilha?.toLowerCase().includes("substitu")
+        ).length;
+        substituicoesSemMatch = auditoriaData.filter(i => 
+          i.solucao_planilha?.toLowerCase().includes("substitu") && !i.tem_match
+        ).length;
+      }
 
       toast({
         title: "Auditoria concluída",
@@ -184,6 +211,15 @@ export function NecessidadesAuditor() {
   };
 
   const getStatusBadge = (item: AuditoriaItem) => {
+    if (tipo === "tachas") {
+      // Para tachas, todas são necessidades válidas
+      if (!item.tem_match) {
+        return <Badge variant="destructive">❌ Sem Match</Badge>;
+      }
+      return <Badge variant="default">✅ Com Match</Badge>;
+    }
+    
+    // Lógica original para outros tipos
     const ehSubstituicao = item.solucao_planilha?.toLowerCase().includes("substitu");
     
     if (ehSubstituicao && !item.tem_match) {
@@ -279,13 +315,23 @@ export function NecessidadesAuditor() {
               <AlertDescription>
                 <strong>Legenda:</strong>
                 <br />
-                ❌ = Planilha diz "Substituir" mas não há match (PROBLEMA!)
-                <br />
-                ✅ = Substituir com match correto
-                <br />
-                ⚠️ = Implantar mas achou match (pode ser duplicata)
-                <br />
-                🟢 = Implantar sem match (normal)
+                {tipo === "tachas" ? (
+                  <>
+                    ❌ = Sem match no cadastro (precisa verificar)
+                    <br />
+                    ✅ = Com match no cadastro
+                  </>
+                ) : (
+                  <>
+                    ❌ = Planilha diz "Substituir" mas não há match (PROBLEMA!)
+                    <br />
+                    ✅ = Substituir com match correto
+                    <br />
+                    ⚠️ = Implantar mas achou match (pode ser duplicata)
+                    <br />
+                    🟢 = Implantar sem match (normal)
+                  </>
+                )}
               </AlertDescription>
             </Alert>
 
@@ -308,9 +354,11 @@ export function NecessidadesAuditor() {
                     <TableRow 
                       key={item.necessidade_id}
                       className={
-                        item.solucao_planilha?.toLowerCase().includes("substitu") && !item.tem_match
-                          ? "bg-destructive/10"
-                          : ""
+                        tipo === "tachas"
+                          ? (!item.tem_match ? "bg-destructive/10" : "")
+                          : (item.solucao_planilha?.toLowerCase().includes("substitu") && !item.tem_match
+                              ? "bg-destructive/10"
+                              : "")
                       }
                     >
                       <TableCell>{item.linha_planilha}</TableCell>
