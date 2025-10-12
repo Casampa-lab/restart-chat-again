@@ -736,3 +736,107 @@ export const exportRegistroNC = async () => {
     throw error;
   }
 };
+
+// Exportar Dados das Rodovias
+export const exportDadosRodovias = async () => {
+  try {
+    // Buscar lotes com rodovias vinculadas
+    const { data: lotesData, error: lotesError } = await supabase
+      .from('lotes')
+      .select(`
+        id,
+        numero,
+        empresas(nome),
+        lotes_rodovias(
+          km_inicial,
+          km_final,
+          rodovias(id, codigo, uf, nome, trecho_inicio, trecho_fim)
+        )
+      `)
+      .order('numero');
+
+    if (lotesError) throw lotesError;
+
+    // Preparar dados agrupados por estado
+    const dadosPorEstado: Record<string, any[]> = {};
+    
+    (lotesData || []).forEach((lote: any) => {
+      const empresaNome = lote.empresas?.nome || 'N/A';
+      
+      (lote.lotes_rodovias || []).forEach((lr: any) => {
+        const rodovia = lr.rodovias;
+        if (!rodovia) return;
+        
+        const uf = rodovia.uf || 'N/A';
+        const extensao = lr.km_final && lr.km_inicial 
+          ? (lr.km_final - lr.km_inicial).toFixed(2)
+          : 'N/A';
+        
+        const trecho = rodovia.trecho_inicio && rodovia.trecho_fim
+          ? `${rodovia.trecho_inicio} - ${rodovia.trecho_fim}`
+          : rodovia.nome || 'N/A';
+        
+        if (!dadosPorEstado[uf]) {
+          dadosPorEstado[uf] = [];
+        }
+        
+        dadosPorEstado[uf].push({
+          lote: `Lote ${lote.numero}`,
+          rodovia: rodovia.codigo,
+          trecho: trecho,
+          extensao: extensao,
+          empresa: empresaNome
+        });
+      });
+    });
+
+    const wb = XLSX.utils.book_new();
+    
+    // Criar uma sheet para cada estado
+    Object.entries(dadosPorEstado).forEach(([uf, dados]) => {
+      const wsData = [
+        ['DADOS DAS RODOVIAS'],
+        [`ESTADO: ${uf}`],
+        [],
+        ['Lote', 'Rodovia', 'Trecho', 'Extensão (km)'],
+        ...dados.map(d => [d.lote, d.rodovia, d.trecho, d.extensao])
+      ];
+      
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      // Definir larguras das colunas
+      ws['!cols'] = [
+        { wch: 15 },  // Lote
+        { wch: 15 },  // Rodovia
+        { wch: 40 },  // Trecho
+        { wch: 15 },  // Extensão
+      ];
+      
+      // Mesclar células do título
+      ws['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },  // DADOS DAS RODOVIAS
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }   // ESTADO
+      ];
+      
+      XLSX.utils.book_append_sheet(wb, ws, uf);
+    });
+    
+    // Se não houver dados, criar uma sheet vazia
+    if (Object.keys(dadosPorEstado).length === 0) {
+      const wsData = [
+        ['DADOS DAS RODOVIAS'],
+        ['ESTADO:'],
+        [],
+        ['Lote', 'Rodovia', 'Trecho', 'Extensão (km)'],
+        ['Nenhum dado encontrado']
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      XLSX.utils.book_append_sheet(wb, ws, 'Dados');
+    }
+    
+    XLSX.writeFile(wb, `1.3_Dados_Rodovias_${new Date().toISOString().split('T')[0]}.xlsx`);
+  } catch (error) {
+    console.error('Erro ao exportar dados das rodovias:', error);
+    throw error;
+  }
+};
