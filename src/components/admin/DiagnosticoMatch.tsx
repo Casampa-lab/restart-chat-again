@@ -57,9 +57,13 @@ export function DiagnosticoMatch() {
 
   const converterCoordenada = (valor: any): number | null => {
     if (valor === null || valor === undefined || valor === "") return null;
-    if (typeof valor === "number") return valor;
+    if (typeof valor === "number") {
+      console.log(`  converterCoordenada: ${valor} é NUMBER, retornando direto`);
+      return valor;
+    }
     const valorStr = String(valor).replace(",", ".");
     const numero = parseFloat(valorStr);
+    console.log(`  converterCoordenada: "${valor}" (${typeof valor}) -> string="${valorStr}" -> numero=${numero}`);
     return isNaN(numero) ? null : numero;
   };
 
