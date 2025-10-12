@@ -171,24 +171,6 @@ const MinhasNecessidades = () => {
             </div>
             <div className="flex gap-2">
               <Button 
-                variant="secondary" 
-                size="lg"
-                onClick={() => navigate("/dashboard-necessidades")}
-                className="font-semibold shadow-md"
-              >
-                <BarChart3 className="mr-2 h-5 w-5" />
-                Dashboard
-              </Button>
-              <Button 
-                variant="secondary" 
-                size="lg"
-                onClick={() => navigate("/minhas-necessidades-relatorios")}
-                className="font-semibold shadow-md"
-              >
-                <FileSpreadsheet className="mr-2 h-5 w-5" />
-                Relatórios
-              </Button>
-              <Button 
                 variant="default" 
                 size="lg"
                 onClick={() => navigate("/")}

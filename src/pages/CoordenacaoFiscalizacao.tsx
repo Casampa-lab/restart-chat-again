@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Download } from "lucide-react";
+import { BarChart3, FileSpreadsheet } from "lucide-react";
 import {
   exportFrentesLiberadas,
   exportNaoConformidades,
@@ -407,18 +408,30 @@ const CoordenacaoFiscalizacao = () => {
 
               <TabsContent value="programa-ssv" className="mt-6">
                 <div className="text-center py-8 space-y-4">
-                  <h3 className="text-lg font-semibold">Relatórios de Programa de Sinalização e Segurança Viária</h3>
-                  <p className="text-muted-foreground">
-                    Gere relatórios inicial e permanente do cadastro para análise e planejamento
+                  <h3 className="text-lg font-semibold">Programa de Sinalização e Segurança Viária</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Ferramentas de análise e geração de relatórios do programa
                   </p>
-                  <Button 
-                    size="lg"
-                    variant="default"
-                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                    onClick={() => navigate("/minhas-necessidades-relatorios")}
-                  >
-                    Acessar Relatórios do Programa
-                  </Button>
+                  <div className="flex gap-4 justify-center">
+                    <Button 
+                      size="lg"
+                      variant="default"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/dashboard-necessidades")}
+                    >
+                      <BarChart3 className="mr-2 h-5 w-5" />
+                      Dashboard
+                    </Button>
+                    <Button 
+                      size="lg"
+                      variant="secondary"
+                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
+                      onClick={() => navigate("/minhas-necessidades-relatorios")}
+                    >
+                      <FileSpreadsheet className="mr-2 h-5 w-5" />
+                      Relatórios
+                    </Button>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>
