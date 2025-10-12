@@ -7,11 +7,7 @@ import { MapPin, AlertCircle, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-const MapContainer = lazy(() => import("react-leaflet").then(module => ({ default: module.MapContainer })));
-const TileLayer = lazy(() => import("react-leaflet").then(module => ({ default: module.TileLayer })));
-const GeoJSON = lazy(() => import("react-leaflet").then(module => ({ default: module.GeoJSON })));
-const Marker = lazy(() => import("react-leaflet").then(module => ({ default: module.Marker })));
-const Popup = lazy(() => import("react-leaflet").then(module => ({ default: module.Popup })));
+const LeafletMap = lazy(() => import("./LeafletMap").then(module => ({ default: module.LeafletMap })));
 
 interface Necessidade {
   id: string;
@@ -63,7 +59,6 @@ const createCustomIcon = (servico: string) => {
 export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) => {
   const [geojsonData, setGeojsonData] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
-  const [showMap, setShowMap] = useState(false);
 
   const necessidadesComCoordenadas = necessidades.filter(n => {
     const lat = n.latitude_inicial || n.latitude;
@@ -89,12 +84,6 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
       }
     };
     loadGeojson();
-  }, []);
-
-  useEffect(() => {
-    // Delay map initialization to avoid context issues
-    const timer = setTimeout(() => setShowMap(true), 100);
-    return () => clearTimeout(timer);
   }, []);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,72 +194,22 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
         </Alert>
       )}
 
-      {necessidadesComCoordenadas.length > 0 && showMap && (
+      {necessidadesComCoordenadas.length > 0 && (
         <div className="w-full h-[600px] rounded-lg border shadow-lg overflow-hidden">
-          <Suspense fallback={<div className="flex items-center justify-center h-full">Carregando mapa...</div>}>
-            <MapContainer
+          <Suspense fallback={
+            <div className="flex items-center justify-center h-full bg-muted">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Carregando mapa...</p>
+              </div>
+            </div>
+          }>
+            <LeafletMap
               center={mapCenter}
-              zoom={13}
-              style={{ width: "100%", height: "100%" }}
-              scrollWheelZoom={true}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              
-              {geojsonData && (
-                <GeoJSON
-                  key={JSON.stringify(geojsonData)}
-                  data={geojsonData}
-                  pathOptions={{
-                    color: "#1e40af",
-                    weight: 4,
-                    opacity: 0.7,
-                  }}
-                />
-              )}
-
-              {necessidadesComCoordenadas.map((nec) => {
-                const lat = nec.latitude_inicial || nec.latitude || 0;
-                const lng = nec.longitude_inicial || nec.longitude || 0;
-                const km = nec.km_inicial || nec.km || "N/A";
-                const rodovia = nec.rodovia?.codigo || "N/A";
-                const match = nec.distancia_match_metros 
-                  ? `Match: ${nec.distancia_match_metros.toFixed(0)}m` 
-                  : "";
-
-                return (
-                  <Marker
-                    key={nec.id}
-                    position={[lat, lng] as LatLngExpression}
-                    icon={createCustomIcon(nec.servico)}
-                  >
-                    <Popup>
-                      <div className="font-sans">
-                        <h3 className="font-semibold text-sm mb-2">
-                          {nec.servico === "Inclusão" ? "➕" : nec.servico === "Substituição" ? "🔄" : "➖"} {nec.servico}
-                        </h3>
-                        <p className="text-xs space-y-1">
-                          <strong>Rodovia:</strong> {rodovia}<br />
-                          <strong>KM:</strong> {km}<br />
-                          {match && (
-                            <>
-                              <strong>{match}</strong><br />
-                            </>
-                          )}
-                          {nec.observacao && (
-                            <span className="text-muted-foreground italic">
-                              {nec.observacao}
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                    </Popup>
-                  </Marker>
-                );
-              })}
-            </MapContainer>
+              geojsonData={geojsonData}
+              necessidadesComCoordenadas={necessidadesComCoordenadas}
+              createCustomIcon={createCustomIcon}
+            />
           </Suspense>
         </div>
       )}
