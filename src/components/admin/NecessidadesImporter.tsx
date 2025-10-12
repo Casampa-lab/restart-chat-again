@@ -136,12 +136,12 @@ export function NecessidadesImporter() {
 
     // Mapeamento básico para outros tipos (com inicial/final)
     const baseMap: any = {
-      km_inicial: row["Km Inicial"] || row["KM Inicial"] || row["km_inicial"],
-      km_final: row["Km Final"] || row["KM Final"] || row["km_final"],
-      latitude_inicial: converterCoordenada(row["Latitude Inicial"] || row["Lat Inicial"] || row["latitude_inicial"]),
-      longitude_inicial: converterCoordenada(row["Longitude Inicial"] || row["Long Inicial"] || row["longitude_inicial"]),
-      latitude_final: converterCoordenada(row["Latitude Final"] || row["Lat Final"] || row["latitude_final"]),
-      longitude_final: converterCoordenada(row["Longitude Final"] || row["Long Final"] || row["longitude_final"]),
+      km_inicial: row["Km Inicial"] || row["KM Inicial"] || row["km inicial"] || row["km_inicial"],
+      km_final: row["Km Final"] || row["KM Final"] || row["km final"] || row["km_final"],
+      latitude_inicial: converterCoordenada(row["Latitude Inicial"] || row["Lat Inicial"] || row["Latitude inicial"] || row["latitude_inicial"]),
+      longitude_inicial: converterCoordenada(row["Longitude Inicial"] || row["Long Inicial"] || row["Longitude inicial"] || row["longitude_inicial"]),
+      latitude_final: converterCoordenada(row["Latitude Final"] || row["Lat Final"] || row["Latitude final"] || row["latitude_final"]),
+      longitude_final: converterCoordenada(row["Longitude Final"] || row["Long Final"] || row["Longitude final"] || row["longitude_final"]),
       observacao: row["Observação"] || row["Observacao"] || row["observacao"],
       snv: row["SNV"] || row["snv"],
       solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
