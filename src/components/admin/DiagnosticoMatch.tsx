@@ -144,11 +144,13 @@ export function DiagnosticoMatch() {
 
         if (cadastros && necLat !== null && necLong !== null) {
           let comparacoes = 0;
+          let cadastrosValidos = 0;
           for (const cad of (cadastros as any[])) {
             const cadLat = converterCoordenada(cad.latitude);
             const cadLong = converterCoordenada(cad.longitude);
             
             if (cadLat !== null && cadLong !== null) {
+              cadastrosValidos++;
               comparacoes++;
               const dist = calcularDistancia(
                 necLat, 
@@ -167,9 +169,14 @@ export function DiagnosticoMatch() {
                 maisProximo = cad;
                 console.log(`  ✅ NOVO MELHOR MATCH: ${cad.codigo} dist=${dist.toFixed(2)}m`);
               }
+            } else {
+              // Log se cadastro não tem coordenadas válidas
+              if (comparacoes < 3) {
+                console.log(`  ⚠️ Cadastro ${cad.codigo} sem coords: lat=${cad.latitude} (${cadLat}), long=${cad.longitude} (${cadLong})`);
+              }
             }
           }
-          console.log(`  Total comparações: ${comparacoes}`);
+          console.log(`  Total comparações: ${comparacoes} de ${cadastros.length} cadastros (${cadastrosValidos} válidos)`);
         } else {
           console.log(`  ❌ Necessidade sem coordenadas válidas`);
         }
