@@ -18,7 +18,7 @@ const NecessidadesMap = lazy(() => import("@/components/NecessidadesMap").then(m
 
 interface Necessidade {
   id: string;
-  servico: "Inclusão" | "Substituição" | "Remoção";
+  servico: "Implantar" | "Substituir" | "Remover" | "Manter";
   cadastro_id: string | null;
   distancia_match_metros: number | null;
   arquivo_origem: string;
@@ -119,12 +119,13 @@ const MinhasNecessidades = () => {
 
   const getServicoBadge = (servico: string) => {
     const configs = {
-      "Inclusão": { variant: "default" as const, className: "bg-green-500 hover:bg-green-600", icon: "🟢" },
-      "Substituição": { variant: "secondary" as const, className: "bg-yellow-500 hover:bg-yellow-600", icon: "🟡" },
-      "Remoção": { variant: "destructive" as const, className: "", icon: "🔴" },
+      "Implantar": { variant: "default" as const, className: "bg-green-500 hover:bg-green-600", icon: "🟢" },
+      "Substituir": { variant: "secondary" as const, className: "bg-yellow-500 hover:bg-yellow-600", icon: "🟡" },
+      "Remover": { variant: "destructive" as const, className: "", icon: "🔴" },
+      "Manter": { variant: "outline" as const, className: "bg-blue-500 hover:bg-blue-600 text-white", icon: "🔵" },
     };
 
-    const config = configs[servico as keyof typeof configs] || configs["Inclusão"];
+    const config = configs[servico as keyof typeof configs] || configs["Implantar"];
 
     return (
       <Badge variant={config.variant} className={config.className}>
@@ -240,9 +241,10 @@ const MinhasNecessidades = () => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="todos">Todos os serviços</SelectItem>
-                          <SelectItem value="Inclusão">🟢 Inclusão</SelectItem>
-                          <SelectItem value="Substituição">🟡 Substituição</SelectItem>
-                          <SelectItem value="Remoção">🔴 Remoção</SelectItem>
+                          <SelectItem value="Implantar">🟢 Implantar</SelectItem>
+                          <SelectItem value="Substituir">🟡 Substituir</SelectItem>
+                          <SelectItem value="Remover">🔴 Remover</SelectItem>
+                          <SelectItem value="Manter">🔵 Manter</SelectItem>
                         </SelectContent>
                       </Select>
 

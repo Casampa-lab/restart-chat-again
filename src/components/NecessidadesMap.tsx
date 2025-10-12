@@ -10,7 +10,7 @@ import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from "react-l
 
 interface Necessidade {
   id: string;
-  servico: "Inclusão" | "Substituição" | "Remoção";
+  servico: "Implantar" | "Substituir" | "Remover" | "Manter";
   km_inicial?: number;
   km_final?: number;
   km?: number;
@@ -21,6 +21,9 @@ interface Necessidade {
   rodovia?: { codigo: string };
   observacao?: string;
   distancia_match_metros?: number;
+  codigo?: string;
+  tipo?: string;
+  descricao?: string;
   [key: string]: any;
 }
 
@@ -49,8 +52,8 @@ function MapBoundsUpdater({ necessidades }: { necessidades: Necessidade[] }) {
 }
 
 const createCustomIcon = (servico: string) => {
-  const color = servico === "Inclusão" ? "#22c55e" : servico === "Substituição" ? "#eab308" : "#ef4444";
-  const emoji = servico === "Inclusão" ? "➕" : servico === "Substituição" ? "🔄" : "➖";
+  const color = servico === "Implantar" ? "#22c55e" : servico === "Substituir" ? "#eab308" : servico === "Remover" ? "#ef4444" : "#3b82f6";
+  const emoji = servico === "Implantar" ? "➕" : servico === "Substituir" ? "🔄" : servico === "Remover" ? "➖" : "✓";
   
   return L.divIcon({
     className: "custom-marker",
@@ -162,13 +165,16 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
         <div className="flex gap-4 items-center flex-wrap">
           <div className="flex gap-2 text-sm">
             <span className="flex items-center gap-1">
-              ➕ <strong>{necessidades.filter(n => n.servico === "Inclusão").length}</strong> Inclusões
+              ➕ <strong>{necessidades.filter(n => n.servico === "Implantar").length}</strong> Implantar
             </span>
             <span className="flex items-center gap-1">
-              🔄 <strong>{necessidades.filter(n => n.servico === "Substituição").length}</strong> Substituições
+              🔄 <strong>{necessidades.filter(n => n.servico === "Substituir").length}</strong> Substituir
             </span>
             <span className="flex items-center gap-1">
-              ➖ <strong>{necessidades.filter(n => n.servico === "Remoção").length}</strong> Remoções
+              ➖ <strong>{necessidades.filter(n => n.servico === "Remover").length}</strong> Remover
+            </span>
+            <span className="flex items-center gap-1">
+              ✓ <strong>{necessidades.filter(n => n.servico === "Manter").length}</strong> Manter
             </span>
           </div>
 
@@ -255,11 +261,13 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
                   <Popup>
                     <div className="font-sans">
                       <h3 className="font-semibold text-sm mb-2">
-                        {nec.servico === "Inclusão"
+                        {nec.servico === "Implantar"
                           ? "➕"
-                          : nec.servico === "Substituição"
+                          : nec.servico === "Substituir"
                           ? "🔄"
-                          : "➖"}{" "}
+                          : nec.servico === "Remover"
+                          ? "➖"
+                          : "✓"}{" "}
                         {nec.servico}
                       </h3>
                       <p className="text-xs space-y-1">
