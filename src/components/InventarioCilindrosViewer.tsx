@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText } from "lucide-react";
+import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 
 interface Cilindro {
@@ -56,6 +56,8 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
   const [selectedCilindro, setSelectedCilindro] = useState<Cilindro | null>(null);
   const [intervencoes, setIntervencoes] = useState<IntervencaoCilindro[]>([]);
   const [rodovia, setRodovia] = useState<{ codigo: string } | null>(null);
+  const [sortColumn, setSortColumn] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371e3; // Earth radius in meters
@@ -142,6 +144,45 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
     },
   });
 
+  // Função para ordenar dados
+  const sortedCilindros = cilindros ? [...cilindros].sort((a: any, b: any) => {
+    if (!sortColumn) return 0;
+    
+    let aVal: any = a[sortColumn];
+    let bVal: any = b[sortColumn];
+    
+    if (aVal == null) aVal = "";
+    if (bVal == null) bVal = "";
+    
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return sortDirection === "asc" 
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+    }
+    
+    return 0;
+  }) : [];
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const SortIcon = ({ column }: { column: string }) => {
+    if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3 ml-1" />;
+    return sortDirection === "asc" 
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
+
   const handleViewDetails = async (cilindro: Cilindro) => {
     setSelectedCilindro(cilindro);
     const { data } = await supabase
@@ -213,20 +254,84 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                 <TableHeader>
                   <TableRow>
                     {searchLat && searchLon && <TableHead>Distância</TableHead>}
-                    <TableHead>SNV</TableHead>
-                    <TableHead>Km Inicial</TableHead>
-                    <TableHead>Km Final</TableHead>
-                    <TableHead>Cor Corpo</TableHead>
-                    <TableHead>Cor Refletivo</TableHead>
-                    <TableHead>Quantidade</TableHead>
-                    <TableHead>Espaçamento (m)</TableHead>
-                    <TableHead>Data</TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("snv")}
+                    >
+                      <div className="flex items-center">
+                        SNV
+                        <SortIcon column="snv" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("km_inicial")}
+                    >
+                      <div className="flex items-center">
+                        Km Inicial
+                        <SortIcon column="km_inicial" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("km_final")}
+                    >
+                      <div className="flex items-center">
+                        Km Final
+                        <SortIcon column="km_final" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("cor_corpo")}
+                    >
+                      <div className="flex items-center">
+                        Cor Corpo
+                        <SortIcon column="cor_corpo" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("cor_refletivo")}
+                    >
+                      <div className="flex items-center">
+                        Cor Refletivo
+                        <SortIcon column="cor_refletivo" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("quantidade")}
+                    >
+                      <div className="flex items-center">
+                        Quantidade
+                        <SortIcon column="quantidade" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("espacamento_m")}
+                    >
+                      <div className="flex items-center">
+                        Espaçamento (m)
+                        <SortIcon column="espacamento_m" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50"
+                      onClick={() => handleSort("data_vistoria")}
+                    >
+                      <div className="flex items-center">
+                        Data
+                        <SortIcon column="data_vistoria" />
+                      </div>
+                    </TableHead>
                     <TableHead className="text-center">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {cilindros && cilindros.length > 0 ? (
-                    cilindros.map((cilindro: any) => (
+                  {sortedCilindros && sortedCilindros.length > 0 ? (
+                    sortedCilindros.map((cilindro: any) => (
                       <TableRow key={cilindro.id}>
                         {searchLat && searchLon && (
                           <TableCell>

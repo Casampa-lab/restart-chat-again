@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, FileText } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 interface FichaTacha {
   id: string;
@@ -50,6 +50,8 @@ export function InventarioTachasViewer({
   const [searchLng, setSearchLng] = useState("");
   const [selectedTacha, setSelectedTacha] = useState<FichaTacha | null>(null);
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
+  const [sortColumn, setSortColumn] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -109,6 +111,45 @@ export function InventarioTachasViewer({
       return filteredData;
     },
   });
+
+  // Função para ordenar dados
+  const sortedTachas = tachas ? [...tachas].sort((a, b) => {
+    if (!sortColumn) return 0;
+    
+    let aVal: any = a[sortColumn as keyof FichaTacha];
+    let bVal: any = b[sortColumn as keyof FichaTacha];
+    
+    if (aVal == null) aVal = "";
+    if (bVal == null) bVal = "";
+    
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return sortDirection === "asc" 
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+    }
+    
+    return 0;
+  }) : [];
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const SortIcon = ({ column }: { column: string }) => {
+    if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3 ml-1" />;
+    return sortDirection === "asc" 
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
 
   return (
     <>
@@ -184,7 +225,7 @@ export function InventarioTachasViewer({
             <div className="text-center py-8 text-muted-foreground">
               Carregando inventário...
             </div>
-          ) : tachas && tachas.length > 0 ? (
+          ) : sortedTachas && sortedTachas.length > 0 ? (
             <div className="border rounded-lg overflow-hidden">
               <div className="max-h-[600px] overflow-y-auto">
                 <Table>
@@ -192,19 +233,83 @@ export function InventarioTachasViewer({
                     <TableRow>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead>Descrição</TableHead>
-                      <TableHead>Corpo</TableHead>
-                      <TableHead>Refletivo</TableHead>
-                      <TableHead>Cor Refletivo</TableHead>
-                      <TableHead>Km Inicial</TableHead>
-                      <TableHead>Extensão (km)</TableHead>
-                      <TableHead>Local</TableHead>
-                      <TableHead>Espaçamento (m)</TableHead>
-                      <TableHead>Quantidade</TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("corpo")}
+                      >
+                        <div className="flex items-center">
+                          Corpo
+                          <SortIcon column="corpo" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("refletivo")}
+                      >
+                        <div className="flex items-center">
+                          Refletivo
+                          <SortIcon column="refletivo" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("cor_refletivo")}
+                      >
+                        <div className="flex items-center">
+                          Cor Refletivo
+                          <SortIcon column="cor_refletivo" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("km_inicial")}
+                      >
+                        <div className="flex items-center">
+                          Km Inicial
+                          <SortIcon column="km_inicial" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("extensao_km")}
+                      >
+                        <div className="flex items-center">
+                          Extensão (km)
+                          <SortIcon column="extensao_km" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("local_implantacao")}
+                      >
+                        <div className="flex items-center">
+                          Local
+                          <SortIcon column="local_implantacao" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("espacamento_m")}
+                      >
+                        <div className="flex items-center">
+                          Espaçamento (m)
+                          <SortIcon column="espacamento_m" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("quantidade")}
+                      >
+                        <div className="flex items-center">
+                          Quantidade
+                          <SortIcon column="quantidade" />
+                        </div>
+                      </TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tachas.map((tacha) => (
+                    {sortedTachas.map((tacha) => (
                       <TableRow key={tacha.id} className="hover:bg-muted/50">
                         {searchLat && searchLng && (
                           <TableCell>
@@ -253,9 +358,9 @@ export function InventarioTachasViewer({
             </div>
           )}
 
-          {tachas && tachas.length > 0 && (
+          {sortedTachas && sortedTachas.length > 0 && (
             <p className="text-sm text-muted-foreground text-center">
-              {tachas.length} {tachas.length === 1 ? "tacha encontrada" : "tachas encontradas"}
+              {sortedTachas.length} {sortedTachas.length === 1 ? "tacha encontrada" : "tachas encontradas"}
             </p>
           )}
         </CardContent>

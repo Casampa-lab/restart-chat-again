@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, FileText } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 interface FichaInscricao {
   id: string;
@@ -84,6 +84,8 @@ export function InventarioInscricoesViewer({
   const [searchLng, setSearchLng] = useState("");
   const [selectedInscricao, setSelectedInscricao] = useState<FichaInscricao | null>(null);
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
+  const [sortColumn, setSortColumn] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Buscar informações da rodovia
   const { data: rodovia } = useQuery({
@@ -157,6 +159,45 @@ export function InventarioInscricoesViewer({
       return filteredData;
     },
   });
+
+  // Função para ordenar dados
+  const sortedInscricoes = inscricoes ? [...inscricoes].sort((a, b) => {
+    if (!sortColumn) return 0;
+    
+    let aVal: any = a[sortColumn as keyof FichaInscricao];
+    let bVal: any = b[sortColumn as keyof FichaInscricao];
+    
+    if (aVal == null) aVal = "";
+    if (bVal == null) bVal = "";
+    
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return sortDirection === "asc" 
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+    }
+    
+    return 0;
+  }) : [];
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const SortIcon = ({ column }: { column: string }) => {
+    if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3 ml-1" />;
+    return sortDirection === "asc" 
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
 
   return (
     <>
@@ -232,7 +273,7 @@ export function InventarioInscricoesViewer({
             <div className="text-center py-8 text-muted-foreground">
               Carregando inventário...
             </div>
-          ) : inscricoes && inscricoes.length > 0 ? (
+          ) : sortedInscricoes && sortedInscricoes.length > 0 ? (
             <div className="border rounded-lg overflow-hidden">
               <div className="max-h-[600px] overflow-y-auto">
                 <Table>
@@ -241,15 +282,47 @@ export function InventarioInscricoesViewer({
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead>Sigla</TableHead>
                       <TableHead>Descrição</TableHead>
-                      <TableHead>Cor</TableHead>
-                      <TableHead>Km</TableHead>
-                      <TableHead>Material</TableHead>
-                      <TableHead>Área (m²)</TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("cor")}
+                      >
+                        <div className="flex items-center">
+                          Cor
+                          <SortIcon column="cor" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("km_inicial")}
+                      >
+                        <div className="flex items-center">
+                          Km
+                          <SortIcon column="km_inicial" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("material_utilizado")}
+                      >
+                        <div className="flex items-center">
+                          Material
+                          <SortIcon column="material_utilizado" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("area_m2")}
+                      >
+                        <div className="flex items-center">
+                          Área (m²)
+                          <SortIcon column="area_m2" />
+                        </div>
+                      </TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {inscricoes.map((inscricao) => {
+                    {sortedInscricoes.map((inscricao) => {
                       const { sigla, descricao } = parseTipoInscricao(inscricao.tipo_inscricao);
                       return (
                         <TableRow key={inscricao.id} className="hover:bg-muted/50">
@@ -302,9 +375,9 @@ export function InventarioInscricoesViewer({
             </div>
           )}
 
-          {inscricoes && inscricoes.length > 0 && (
+          {sortedInscricoes && sortedInscricoes.length > 0 && (
             <p className="text-sm text-muted-foreground text-center">
-              {inscricoes.length} {inscricoes.length === 1 ? "inscrição encontrada" : "inscrições encontradas"}
+              {sortedInscricoes.length} {sortedInscricoes.length === 1 ? "inscrição encontrada" : "inscrições encontradas"}
             </p>
           )}
         </CardContent>

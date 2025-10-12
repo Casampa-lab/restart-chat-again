@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, FileText } from "lucide-react";
+import { Search, MapPin, Eye, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface FichaDefensa {
@@ -53,6 +53,8 @@ export const InventarioDefensasViewer = ({
   const [gpsLong, setGpsLong] = useState("");
   const [selectedDefensa, setSelectedDefensa] = useState<FichaDefensa | null>(null);
   const [intervencoes, setIntervencoes] = useState<IntervencaoDefensa[]>([]);
+  const [sortColumn, setSortColumn] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const { data: defensas, isLoading } = useQuery({
     queryKey: ["inventario-defensas", loteId, rodoviaId, searchTerm],
@@ -120,6 +122,45 @@ export const InventarioDefensasViewer = ({
         })
     : defensas;
 
+  // Função para ordenar dados
+  const sortedDefensas = filteredDefensas ? [...filteredDefensas].sort((a, b) => {
+    if (!sortColumn) return 0;
+    
+    let aVal: any = a[sortColumn as keyof FichaDefensa];
+    let bVal: any = b[sortColumn as keyof FichaDefensa];
+    
+    if (aVal == null) aVal = "";
+    if (bVal == null) bVal = "";
+    
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return sortDirection === "asc" 
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+    }
+    
+    return 0;
+  }) : [];
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const SortIcon = ({ column }: { column: string }) => {
+    if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3 ml-1" />;
+    return sortDirection === "asc" 
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
+
   return (
     <div className="space-y-4">
       {/* Botão Ver Necessidades */}
@@ -172,20 +213,50 @@ export const InventarioDefensasViewer = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">
-                  <div className="whitespace-normal leading-tight">Tramo</div>
+                <TableHead 
+                  className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                  onClick={() => handleSort("tramo")}
+                >
+                  <div className="whitespace-normal leading-tight flex items-center justify-center">
+                    Tramo
+                    <SortIcon column="tramo" />
+                  </div>
                 </TableHead>
-                <TableHead className="text-center">
-                  <div className="whitespace-normal leading-tight">Lado</div>
+                <TableHead 
+                  className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                  onClick={() => handleSort("lado")}
+                >
+                  <div className="whitespace-normal leading-tight flex items-center justify-center">
+                    Lado
+                    <SortIcon column="lado" />
+                  </div>
                 </TableHead>
-                <TableHead className="text-center">
-                  <div className="whitespace-normal leading-tight">Km<br/>Inicial</div>
+                <TableHead 
+                  className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                  onClick={() => handleSort("km_inicial")}
+                >
+                  <div className="whitespace-normal leading-tight flex items-center justify-center">
+                    Km<br/>Inicial
+                    <SortIcon column="km_inicial" />
+                  </div>
                 </TableHead>
-                <TableHead className="text-center">
-                  <div className="whitespace-normal leading-tight">Km<br/>Final</div>
+                <TableHead 
+                  className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                  onClick={() => handleSort("km_final")}
+                >
+                  <div className="whitespace-normal leading-tight flex items-center justify-center">
+                    Km<br/>Final
+                    <SortIcon column="km_final" />
+                  </div>
                 </TableHead>
-                <TableHead className="text-center">
-                  <div className="whitespace-normal leading-tight">Comprimento<br/>Total (m)</div>
+                <TableHead 
+                  className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                  onClick={() => handleSort("extensao_metros")}
+                >
+                  <div className="whitespace-normal leading-tight flex items-center justify-center">
+                    Comprimento<br/>Total (m)
+                    <SortIcon column="extensao_metros" />
+                  </div>
                 </TableHead>
                 <TableHead className="text-center">
                   <div className="whitespace-normal leading-tight">Qtde<br/>Lâminas</div>
@@ -193,11 +264,23 @@ export const InventarioDefensasViewer = ({
                 <TableHead className="text-center">
                   <div className="whitespace-normal leading-tight">Nível de<br/>Contenção</div>
                 </TableHead>
-                <TableHead className="text-center">
-                  <div className="whitespace-normal leading-tight">Estado<br/>Conservação</div>
+                <TableHead 
+                  className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                  onClick={() => handleSort("estado_conservacao")}
+                >
+                  <div className="whitespace-normal leading-tight flex items-center justify-center">
+                    Estado<br/>Conservação
+                    <SortIcon column="estado_conservacao" />
+                  </div>
                 </TableHead>
-                <TableHead className="text-center">
-                  <div className="whitespace-normal leading-tight">Necessita<br/>Intervenção</div>
+                <TableHead 
+                  className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                  onClick={() => handleSort("necessita_intervencao")}
+                >
+                  <div className="whitespace-normal leading-tight flex items-center justify-center">
+                    Necessita<br/>Intervenção
+                    <SortIcon column="necessita_intervencao" />
+                  </div>
                 </TableHead>
                 <TableHead className="text-center w-[80px]">
                   <div className="whitespace-normal leading-tight">Ações</div>
@@ -205,7 +288,7 @@ export const InventarioDefensasViewer = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredDefensas?.map((defensa) => (
+              {sortedDefensas?.map((defensa) => (
                 <TableRow key={defensa.id}>
                   <TableCell className="text-center">{(defensa as any).tramo || "-"}</TableCell>
                   <TableCell className="text-center">{defensa.lado}</TableCell>

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText } from "lucide-react";
+import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface FichaPlaca {
@@ -79,6 +79,8 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   const [searchLng, setSearchLng] = useState("");
   const [selectedPlaca, setSelectedPlaca] = useState<FichaPlaca | null>(null);
   const [intervencoes, setIntervencoes] = useState<Intervencao[]>([]);
+  const [sortColumn, setSortColumn] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Função para calcular distância entre dois pontos (Haversine)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -134,13 +136,59 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
             .sort((a, b) => a.distance - b.distance);
         }
       } else {
-        // Se não houver busca por coordenadas, ordena por km
+        // Se não houver busca por coordenadas, ordena por km por padrão
         filteredData = filteredData.sort((a, b) => (a.km || 0) - (b.km || 0));
       }
 
       return filteredData;
     },
   });
+
+  // Função para ordenar dados
+  const sortedPlacas = placas ? [...placas].sort((a, b) => {
+    if (!sortColumn) return 0;
+    
+    let aVal: any = a[sortColumn as keyof FichaPlaca];
+    let bVal: any = b[sortColumn as keyof FichaPlaca];
+    
+    // Handle null/undefined
+    if (aVal == null) aVal = "";
+    if (bVal == null) bVal = "";
+    
+    // String comparison
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return sortDirection === "asc" 
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    
+    // Number comparison
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+    }
+    
+    return 0;
+  }) : [];
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const SortIcon = ({ column }: { column: string }) => {
+    if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3 ml-1" />;
+    return sortDirection === "asc" 
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
+
+  const handleViewPlacaDetails = (placa: FichaPlaca) => {
+    openPlacaDetail(placa);
+  };
 
   const openPlacaDetail = async (placa: FichaPlaca) => {
     setSelectedPlaca(placa);
@@ -245,24 +293,72 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
             <div className="text-center py-8 text-muted-foreground">
               Carregando inventário...
             </div>
-          ) : placas && placas.length > 0 ? (
+          ) : sortedPlacas && sortedPlacas.length > 0 ? (
             <div className="border rounded-lg overflow-hidden">
               <div className="max-h-[600px] overflow-y-auto">
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
-                      <TableHead>SNV</TableHead>
-                      <TableHead>Código da placa</TableHead>
-                      <TableHead>Tipo de placa</TableHead>
-                      <TableHead>Km</TableHead>
-                      <TableHead>Lado</TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("snv")}
+                      >
+                        <div className="flex items-center">
+                          SNV
+                          <SortIcon column="snv" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("codigo")}
+                      >
+                        <div className="flex items-center">
+                          Código da placa
+                          <SortIcon column="codigo" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("tipo")}
+                      >
+                        <div className="flex items-center">
+                          Tipo de placa
+                          <SortIcon column="tipo" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("km")}
+                      >
+                        <div className="flex items-center">
+                          Km
+                          <SortIcon column="km" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("lado")}
+                      >
+                        <div className="flex items-center">
+                          Lado
+                          <SortIcon column="lado" />
+                        </div>
+                      </TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
-                      <TableHead>Data Vistoria</TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("data_vistoria")}
+                      >
+                        <div className="flex items-center">
+                          Data Vistoria
+                          <SortIcon column="data_vistoria" />
+                        </div>
+                      </TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {placas.map((placa) => (
+                    {sortedPlacas.map((placa) => (
                       <TableRow key={placa.id} className="hover:bg-muted/50">
                         <TableCell className="font-medium">{placa.snv || "-"}</TableCell>
                         <TableCell>{placa.codigo || "-"}</TableCell>
@@ -287,7 +383,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => openPlacaDetail(placa)}
+                            onClick={() => handleViewPlacaDetails(placa)}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -306,9 +402,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
             </div>
           )}
 
-          {placas && placas.length > 0 && (
+          {sortedPlacas && sortedPlacas.length > 0 && (
             <p className="text-sm text-muted-foreground text-center">
-              {placas.length} {placas.length === 1 ? "placa encontrada" : "placas encontradas"}
+              {sortedPlacas.length} {sortedPlacas.length === 1 ? "placa encontrada" : "placas encontradas"}
             </p>
           )}
         </CardContent>

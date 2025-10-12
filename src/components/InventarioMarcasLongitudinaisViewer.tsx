@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, FileText } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 interface FichaMarcaLongitudinal {
   id: string;
@@ -52,6 +52,8 @@ export function InventarioMarcasLongitudinaisViewer({
   const [searchLng, setSearchLng] = useState("");
   const [selectedMarca, setSelectedMarca] = useState<FichaMarcaLongitudinal | null>(null);
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
+  const [sortColumn, setSortColumn] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -111,6 +113,45 @@ export function InventarioMarcasLongitudinaisViewer({
       return filteredData;
     },
   });
+
+  // Função para ordenar dados
+  const sortedMarcas = marcas ? [...marcas].sort((a, b) => {
+    if (!sortColumn) return 0;
+    
+    let aVal: any = a[sortColumn as keyof FichaMarcaLongitudinal];
+    let bVal: any = b[sortColumn as keyof FichaMarcaLongitudinal];
+    
+    if (aVal == null) aVal = "";
+    if (bVal == null) bVal = "";
+    
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return sortDirection === "asc" 
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+    }
+    
+    return 0;
+  }) : [];
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const SortIcon = ({ column }: { column: string }) => {
+    if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3 ml-1" />;
+    return sortDirection === "asc" 
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
 
   return (
     <>
@@ -186,27 +227,83 @@ export function InventarioMarcasLongitudinaisViewer({
             <div className="text-center py-8 text-muted-foreground">
               Carregando inventário...
             </div>
-          ) : marcas && marcas.length > 0 ? (
+          ) : sortedMarcas && sortedMarcas.length > 0 ? (
             <div className="border rounded-lg overflow-hidden">
               <div className="max-h-[600px] overflow-y-auto">
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
-                      <TableHead>Código</TableHead>
-                      <TableHead>Cor</TableHead>
-                      <TableHead>Material</TableHead>
-                      <TableHead>Km Inicial</TableHead>
-                      <TableHead>Km Final</TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("tipo_demarcacao")}
+                      >
+                        <div className="flex items-center">
+                          Código
+                          <SortIcon column="tipo_demarcacao" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("cor")}
+                      >
+                        <div className="flex items-center">
+                          Cor
+                          <SortIcon column="cor" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("material")}
+                      >
+                        <div className="flex items-center">
+                          Material
+                          <SortIcon column="material" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("km_inicial")}
+                      >
+                        <div className="flex items-center">
+                          Km Inicial
+                          <SortIcon column="km_inicial" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("km_final")}
+                      >
+                        <div className="flex items-center">
+                          Km Final
+                          <SortIcon column="km_final" />
+                        </div>
+                      </TableHead>
                       <TableHead>Traço (m)</TableHead>
                       <TableHead>Espaçamento (m)</TableHead>
-                      <TableHead>Extensão (km)</TableHead>
-                      <TableHead>Data Vistoria</TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("extensao_metros")}
+                      >
+                        <div className="flex items-center">
+                          Extensão (km)
+                          <SortIcon column="extensao_metros" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("data_vistoria")}
+                      >
+                        <div className="flex items-center">
+                          Data Vistoria
+                          <SortIcon column="data_vistoria" />
+                        </div>
+                      </TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {marcas.map((marca) => (
+                    {sortedMarcas.map((marca) => (
                       <TableRow key={marca.id} className="hover:bg-muted/50">
                         {searchLat && searchLng && (
                           <TableCell>
@@ -265,9 +362,9 @@ export function InventarioMarcasLongitudinaisViewer({
             </div>
           )}
 
-          {marcas && marcas.length > 0 && (
+          {sortedMarcas && sortedMarcas.length > 0 && (
             <p className="text-sm text-muted-foreground text-center">
-              {marcas.length} {marcas.length === 1 ? "marca encontrada" : "marcas encontradas"}
+              {sortedMarcas.length} {sortedMarcas.length === 1 ? "marca encontrada" : "marcas encontradas"}
             </p>
           )}
         </CardContent>
