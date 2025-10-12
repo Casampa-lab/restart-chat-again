@@ -82,7 +82,11 @@ const MinhasNecessidades = () => {
 
       if (error) throw error;
 
-      setNecessidades((data as any) || []);
+      const necessidadesData = (data as any) || [];
+      console.log("Necessidades carregadas:", necessidadesData.length, "registros");
+      console.log("Serviços encontrados:", [...new Set(necessidadesData.map((d: any) => d.servico))]);
+      
+      setNecessidades(necessidadesData);
     } catch (error: any) {
       toast.error("Erro ao carregar necessidades: " + error.message);
     } finally {
