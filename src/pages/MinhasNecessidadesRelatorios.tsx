@@ -362,7 +362,7 @@ export default function MinhasNecessidadesRelatorios() {
                   size="lg"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  {gerando ? "Gerando..." : "Gerar Relatório Permanente"}
+                  {gerando ? "Gerando..." : "Gerar Planilha para o Relatório Permanente"}
                 </Button>
               </CardContent>
             </Card>
