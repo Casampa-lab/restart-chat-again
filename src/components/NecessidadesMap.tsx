@@ -239,7 +239,6 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {/* Camada GeoJSON da rodovia (VGeo) */}
           {geojsonData && (
             <GeoJSON
               data={geojsonData}
@@ -251,7 +250,6 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
             />
           )}
 
-          {/* Marcadores das necessidades */}
           {necessidadesComCoordenadas.map((nec) => {
             const lat = nec.latitude_inicial || nec.latitude || 0;
             const lng = nec.longitude_inicial || nec.longitude || 0;
@@ -288,7 +286,6 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
             );
           })}
 
-          {/* Ajustar bounds automaticamente */}
           {coordinates.length > 0 && <MapBounds coordinates={coordinates} />}
         </MapContainer>
       </div>
