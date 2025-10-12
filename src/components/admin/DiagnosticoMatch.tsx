@@ -236,7 +236,7 @@ export function DiagnosticoMatch() {
   };
 
   const getDistanciaColor = (distancia: number | null) => {
-    if (!distancia) return "destructive";
+    if (distancia === null || distancia === undefined) return "destructive";
     if (distancia <= 100) return "default";
     if (distancia <= 500) return "secondary";
     return "destructive";
@@ -325,7 +325,7 @@ export function DiagnosticoMatch() {
                     <TableCell>{item.cad_codigo || "-"}</TableCell>
                     <TableCell>
                       <Badge variant={getDistanciaColor(item.distancia_metros)}>
-                        {item.distancia_metros 
+                        {item.distancia_metros !== null && item.distancia_metros !== undefined
                           ? `${Math.round(item.distancia_metros)}m`
                           : "Sem match"}
                       </Badge>
