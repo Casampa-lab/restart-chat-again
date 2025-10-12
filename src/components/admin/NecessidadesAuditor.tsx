@@ -26,6 +26,8 @@ interface AuditoriaItem {
   necessidade_id: string;
   linha_planilha: number;
   km: number;
+  km_inicial?: number;
+  km_final?: number;
   codigo: string;
   sigla: string;
   descricao: string;
@@ -42,6 +44,15 @@ interface AuditoriaItem {
   codigo_cad?: string;
   sigla_cad?: string;
   descricao_cad?: string;
+  // Campos específicos para defensas
+  tramo?: string;
+  lado?: string;
+  quantidade_laminas?: number;
+  comprimento_total_m?: number;
+  tramo_cad?: string;
+  lado_cad?: string;
+  quantidade_laminas_cad?: number;
+  comprimento_total_m_cad?: number;
 }
 
 export function NecessidadesAuditor() {
@@ -180,6 +191,8 @@ export function NecessidadesAuditor() {
           necessidade_id: nec.id,
           linha_planilha: nec.linha_planilha || 0,
           km: nec.km || nec.km_inicial || 0,
+          km_inicial: nec.km_inicial,
+          km_final: nec.km_final,
           codigo: necCodigo,
           sigla: nec.sigla || "-",
           descricao: nec.descricao || "-",
@@ -190,6 +203,11 @@ export function NecessidadesAuditor() {
           cadastro_id: nec.cadastro_id,
           latitude_nec: converterCoordenada(nec.latitude || nec.latitude_inicial) || 0,
           longitude_nec: converterCoordenada(nec.longitude || nec.longitude_inicial) || 0,
+          // Campos específicos para defensas
+          tramo: nec.tramo,
+          lado: nec.lado,
+          quantidade_laminas: nec.quantidade_laminas,
+          comprimento_total_m: nec.comprimento_total_tramo_m,
         };
 
         // Se tem match, usar dados do cadastro já carregado
@@ -202,6 +220,14 @@ export function NecessidadesAuditor() {
             item.km_cad = (cadastro as any).km || (cadastro as any).km_inicial;
             item.sigla_cad = (cadastro as any).sigla || "-";
             item.descricao_cad = (cadastro as any).descricao || "-";
+            
+            // Campos específicos para defensas
+            if (tipo === "defensas") {
+              item.tramo_cad = (cadastro as any).tramo;
+              item.lado_cad = (cadastro as any).lado;
+              item.quantidade_laminas_cad = (cadastro as any).quantidade_laminas;
+              item.comprimento_total_m_cad = (cadastro as any).comprimento_total_tramo_m;
+            }
             
             // Construir código descritivo para tachas do cadastro
             if (tipo === "tachas") {
@@ -228,18 +254,20 @@ export function NecessidadesAuditor() {
         totalSubstituicoes = auditoriaData.length;
         substituicoesSemMatch = auditoriaData.filter(i => !i.tem_match).length;
       } else {
-        // Para outros tipos, contar apenas substituições
-        totalSubstituicoes = auditoriaData.filter(i => 
-          i.solucao_planilha?.toLowerCase().includes("substitu")
-        ).length;
-        substituicoesSemMatch = auditoriaData.filter(i => 
-          i.solucao_planilha?.toLowerCase().includes("substitu") && !i.tem_match
-        ).length;
+        // Para outros tipos, contar substituições e "manter"
+        totalSubstituicoes = auditoriaData.filter(i => {
+          const solucao = i.solucao_planilha?.toLowerCase() || "";
+          return solucao.includes("substitu") || solucao.includes("manter");
+        }).length;
+        substituicoesSemMatch = auditoriaData.filter(i => {
+          const solucao = i.solucao_planilha?.toLowerCase() || "";
+          return (solucao.includes("substitu") || solucao.includes("manter")) && !i.tem_match;
+        }).length;
       }
 
       toast({
         title: "Auditoria concluída",
-        description: `${auditoriaData.length} necessidades analisadas. ${substituicoesSemMatch} de ${totalSubstituicoes} substituições sem match.`,
+        description: `${auditoriaData.length} necessidades analisadas. ${substituicoesSemMatch} de ${totalSubstituicoes} ${tipo === "tachas" ? "necessidades" : "substituições/manutenções"} sem match.`,
         variant: substituicoesSemMatch > 0 ? "destructive" : "default",
       });
 
@@ -265,8 +293,11 @@ export function NecessidadesAuditor() {
       return <Badge variant="default">✅ Com Match</Badge>;
     }
     
-    // Lógica original para outros tipos
-    const ehSubstituicao = item.solucao_planilha?.toLowerCase().includes("substitu");
+    // Lógica para outros tipos
+    const solucaoLower = item.solucao_planilha?.toLowerCase() || "";
+    const ehSubstituicao = solucaoLower.includes("substitu");
+    const ehManter = solucaoLower.includes("manter");
+    const ehImplantar = solucaoLower.includes("implantar");
     
     if (ehSubstituicao && !item.tem_match) {
       return <Badge variant="destructive">❌ Substituir sem Match</Badge>;
@@ -274,7 +305,13 @@ export function NecessidadesAuditor() {
     if (ehSubstituicao && item.tem_match) {
       return <Badge variant="default">✅ Substituir com Match</Badge>;
     }
-    if (!ehSubstituicao && item.tem_match) {
+    if (ehManter && item.tem_match) {
+      return <Badge variant="default">✅ Manter com Match</Badge>;
+    }
+    if (ehManter && !item.tem_match) {
+      return <Badge variant="destructive">❌ Manter sem Match</Badge>;
+    }
+    if (ehImplantar && item.tem_match) {
       return <Badge variant="secondary">⚠️ Implantar com Match</Badge>;
     }
     return <Badge variant="outline">🟢 Implantar sem Match</Badge>;
@@ -398,9 +435,9 @@ export function NecessidadesAuditor() {
                   </>
                 ) : (
                   <>
-                    ❌ = Planilha diz "Substituir" mas não há match (PROBLEMA!)
+                    ❌ = Substituir ou Manter mas não há match (PROBLEMA!)
                     <br />
-                    ✅ = Substituir com match correto
+                    ✅ = Substituir ou Manter com match correto
                     <br />
                     ⚠️ = Implantar mas achou match (pode ser duplicata)
                     <br />
@@ -414,12 +451,24 @@ export function NecessidadesAuditor() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Linha</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>KM</TableHead>
-                    <TableHead>Sigla</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Planilha</TableHead>
+                    {tipo === "defensas" ? (
+                      <>
+                        <TableHead>KM Inicial</TableHead>
+                        <TableHead>KM Final</TableHead>
+                        <TableHead>Tramo</TableHead>
+                        <TableHead>Lado</TableHead>
+                        <TableHead>Qtd Lâminas</TableHead>
+                        <TableHead>Compr. Total (m)</TableHead>
+                      </>
+                    ) : (
+                      <>
+                        <TableHead>KM</TableHead>
+                        <TableHead>Sigla</TableHead>
+                        <TableHead>Descrição</TableHead>
+                      </>
+                    )}
+                    <TableHead>Solução</TableHead>
                     <TableHead>Distância</TableHead>
                     <TableHead>Coord. Necessidade</TableHead>
                     <TableHead>Coord. Cadastro</TableHead>
@@ -437,32 +486,79 @@ export function NecessidadesAuditor() {
                               : "")
                       }
                     >
-                      <TableCell>{item.linha_planilha}</TableCell>
                       <TableCell>{getStatusBadge(item)}</TableCell>
-                      <TableCell>
-                        {item.km?.toFixed(2)}
-                        {item.km_cad && (
-                          <div className="text-xs text-muted-foreground">
-                            Cad: {item.km_cad?.toFixed(2)}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {item.sigla}
-                        {item.sigla_cad && item.sigla !== item.sigla_cad && (
-                          <div className="text-xs text-muted-foreground">
-                            Cad: {item.sigla_cad}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {item.descricao}
-                        {item.descricao_cad && item.descricao !== item.descricao_cad && (
-                          <div className="text-xs text-muted-foreground">
-                            Cad: {item.descricao_cad}
-                          </div>
-                        )}
-                      </TableCell>
+                      {tipo === "defensas" ? (
+                        <>
+                          <TableCell>
+                            {item.km_inicial?.toFixed(3) || "-"}
+                            {item.tem_match && item.km_cad && (
+                              <div className="text-xs text-muted-foreground">
+                                Cad: {item.km_cad?.toFixed(3)}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>{item.km_final?.toFixed(3) || "-"}</TableCell>
+                          <TableCell>
+                            {item.tramo || "-"}
+                            {item.tramo_cad && item.tramo !== item.tramo_cad && (
+                              <div className="text-xs text-muted-foreground">
+                                Cad: {item.tramo_cad}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {item.lado || "-"}
+                            {item.lado_cad && item.lado !== item.lado_cad && (
+                              <div className="text-xs text-muted-foreground">
+                                Cad: {item.lado_cad}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {item.quantidade_laminas || "-"}
+                            {item.quantidade_laminas_cad && item.quantidade_laminas !== item.quantidade_laminas_cad && (
+                              <div className="text-xs text-muted-foreground">
+                                Cad: {item.quantidade_laminas_cad}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {item.comprimento_total_m?.toFixed(2) || "-"}
+                            {item.comprimento_total_m_cad && (
+                              <div className="text-xs text-muted-foreground">
+                                Cad: {item.comprimento_total_m_cad?.toFixed(2)}
+                              </div>
+                            )}
+                          </TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell>
+                            {item.km?.toFixed(2)}
+                            {item.km_cad && (
+                              <div className="text-xs text-muted-foreground">
+                                Cad: {item.km_cad?.toFixed(2)}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {item.sigla}
+                            {item.sigla_cad && item.sigla !== item.sigla_cad && (
+                              <div className="text-xs text-muted-foreground">
+                                Cad: {item.sigla_cad}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {item.descricao}
+                            {item.descricao_cad && item.descricao !== item.descricao_cad && (
+                              <div className="text-xs text-muted-foreground">
+                                Cad: {item.descricao_cad}
+                              </div>
+                            )}
+                          </TableCell>
+                        </>
+                      )}
                       <TableCell>{item.solucao_planilha}</TableCell>
                       <TableCell>
                         {item.distancia_match !== null 
