@@ -121,6 +121,10 @@ export function DiagnosticoMatch() {
       console.log(`- Necessidades encontradas: ${necessidades.length}`);
       console.log(`- Cadastro de placas encontrado: ${cadastros?.length || 0}`);
       console.log(`- Cadastro com coordenadas: ${cadastros?.filter((c: any) => c.latitude && c.longitude).length || 0}`);
+      
+      // Debug: mostrar primeiras necessidades e cadastros
+      console.log("📋 Primeira necessidade:", necessidades[0]);
+      console.log("📋 Primeiro cadastro:", cadastros?.[0]);
 
       const diagnosticos: ResultadoDiagnostico[] = [];
 
@@ -132,7 +136,7 @@ export function DiagnosticoMatch() {
         const necLat = converterCoordenada(nec.latitude);
         const necLong = converterCoordenada(nec.longitude);
 
-        console.log(`🔍 Nec KM ${nec.km} (${nec.codigo}): lat=${necLat}, long=${necLong}`);
+        console.log(`🔍 Nec KM ${nec.km} (${nec.codigo}): lat BRUTO=${nec.latitude} -> CONVERTIDO=${necLat}, long BRUTO=${nec.longitude} -> CONVERTIDO=${necLong}`);
 
         if (cadastros && necLat !== null && necLong !== null) {
           let comparacoes = 0;
@@ -149,10 +153,15 @@ export function DiagnosticoMatch() {
                 cadLong
               );
               
+              // Log apenas para as primeiras 3 placas do cadastro
+              if (comparacoes <= 3) {
+                console.log(`  Comparando com ${cad.codigo} (KM ${cad.km}): cadLat=${cadLat}, cadLong=${cadLong}, dist=${dist.toFixed(2)}m`);
+              }
+              
               if (dist < menorDistancia) {
                 menorDistancia = dist;
                 maisProximo = cad;
-                console.log(`  ✅ Novo match: ${cad.codigo} dist=${dist.toFixed(2)}m`);
+                console.log(`  ✅ NOVO MELHOR MATCH: ${cad.codigo} dist=${dist.toFixed(2)}m`);
               }
             }
           }
