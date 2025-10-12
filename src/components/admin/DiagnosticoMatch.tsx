@@ -109,20 +109,31 @@ export function DiagnosticoMatch() {
       const latField = usaLatLongInicial ? "latitude_inicial" : "latitude";
       const longField = usaLatLongInicial ? "longitude_inicial" : "longitude";
 
-      // 1. Buscar necessidades de substituição
-      const { data: necessidades, error: necError } = await supabase
+      // 1. Buscar necessidades para match
+      let query = supabase
         .from(tipoConfig.tabela_nec as any)
         .select("*")
         .eq("lote_id", loteId)
-        .eq("rodovia_id", rodoviaId)
-        .ilike("solucao_planilha", "%substitu%")
-        .limit(50);
+        .eq("rodovia_id", rodoviaId);
+
+      // Para marcas longitudinais, filtrar por Posição = 'E' (eixo)
+      // Para outros tipos, filtrar por solucao_planilha contendo "substitu"
+      if (tipoServico === "marcas_longitudinais") {
+        query = query.eq("posicao", "E");
+      } else {
+        query = query.ilike("solucao_planilha", "%substitu%");
+      }
+
+      const { data: necessidades, error: necError } = await query.limit(50);
 
       if (necError) throw necError;
       if (!necessidades || necessidades.length === 0) {
+        const descricao = tipoServico === "marcas_longitudinais"
+          ? "Nenhuma marca longitudinal de eixo (Posição = E) encontrada"
+          : "Nenhuma necessidade de substituição encontrada";
         toast({
           title: "Sem dados",
-          description: "Nenhuma necessidade de substituição encontrada",
+          description: descricao,
         });
         setIsLoading(false);
         return;
@@ -242,7 +253,7 @@ export function DiagnosticoMatch() {
           Diagnóstico de Match de Coordenadas
         </CardTitle>
         <CardDescription>
-          Verificar distâncias reais entre necessidades de substituição e cadastro
+          Verificar distâncias entre necessidades e cadastro (Marcas Longitudinais: apenas eixo | Outros: substituição)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
