@@ -57,13 +57,9 @@ export function DiagnosticoMatch() {
 
   const converterCoordenada = (valor: any): number | null => {
     if (valor === null || valor === undefined || valor === "") return null;
-    if (typeof valor === "number") {
-      console.log(`  converterCoordenada: ${valor} é NUMBER, retornando direto`);
-      return valor;
-    }
+    if (typeof valor === "number") return valor;
     const valorStr = String(valor).replace(",", ".");
     const numero = parseFloat(valorStr);
-    console.log(`  converterCoordenada: "${valor}" (${typeof valor}) -> string="${valorStr}" -> numero=${numero}`);
     return isNaN(numero) ? null : numero;
   };
 
@@ -140,7 +136,7 @@ export function DiagnosticoMatch() {
         const necLat = converterCoordenada(nec.latitude);
         const necLong = converterCoordenada(nec.longitude);
 
-        console.log(`🔍 Nec KM ${nec.km} (${nec.codigo}): lat BRUTO=${nec.latitude} -> CONVERTIDO=${necLat}, long BRUTO=${nec.longitude} -> CONVERTIDO=${necLong}`);
+        console.log(`🔍 Nec KM ${nec.km} (${nec.codigo}): lat=${necLat}, long=${necLong}`);
 
         if (cadastros && necLat !== null && necLong !== null) {
           let comparacoes = 0;
@@ -151,7 +147,6 @@ export function DiagnosticoMatch() {
             
             if (cadLat !== null && cadLong !== null) {
               cadastrosValidos++;
-              comparacoes++;
               const dist = calcularDistancia(
                 necLat, 
                 necLong, 
@@ -159,20 +154,21 @@ export function DiagnosticoMatch() {
                 cadLong
               );
               
-              // Log apenas para as primeiras 3 placas do cadastro
-              if (comparacoes <= 3) {
-                console.log(`  Comparando com ${cad.codigo} (KM ${cad.km}): cadLat=${cadLat}, cadLong=${cadLong}, dist=${dist.toFixed(2)}m`);
+              // Log TODAS as comparações para primeira necessidade
+              if (comparacoes < 5) {
+                console.log(`    [${comparacoes}] ${cad.codigo} KM ${cad.km}: dist=${dist.toFixed(2)}m`);
               }
+              
+              comparacoes++;
               
               if (dist < menorDistancia) {
                 menorDistancia = dist;
                 maisProximo = cad;
-                console.log(`  ✅ NOVO MELHOR MATCH: ${cad.codigo} dist=${dist.toFixed(2)}m`);
+                console.log(`  ✅ MATCH: ${cad.codigo} dist=${dist.toFixed(2)}m`);
               }
             } else {
-              // Log se cadastro não tem coordenadas válidas
               if (comparacoes < 3) {
-                console.log(`  ⚠️ Cadastro ${cad.codigo} sem coords: lat=${cad.latitude} (${cadLat}), long=${cad.longitude} (${cadLong})`);
+                console.log(`  ⚠️ ${cad.codigo} sem coords`);
               }
             }
           }
