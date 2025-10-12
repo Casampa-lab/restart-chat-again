@@ -109,6 +109,11 @@ export function DiagnosticoMatch() {
 
       if (cadError) throw cadError;
 
+      console.log("🔍 Diagnóstico Match:");
+      console.log(`- Necessidades encontradas: ${necessidades.length}`);
+      console.log(`- Cadastro de placas encontrado: ${cadastros?.length || 0}`);
+      console.log(`- Cadastro com coordenadas: ${cadastros?.filter((c: any) => c.latitude && c.longitude).length || 0}`);
+
       const diagnosticos: ResultadoDiagnostico[] = [];
 
       // 3. Para cada necessidade, encontrar a placa mais próxima
@@ -153,16 +158,33 @@ export function DiagnosticoMatch() {
       setResultados(diagnosticos);
 
       // Estatísticas detalhadas
-      const comMatchPerto = diagnosticos.filter(d => d.distancia_metros && d.distancia_metros <= 50).length;
-      const comMatchLonge = diagnosticos.filter(d => d.distancia_metros && d.distancia_metros > 50 && d.distancia_metros <= 500).length;
-      const semMatch = diagnosticos.filter(d => !d.distancia_metros || d.distancia_metros > 500).length;
-      const semCoordenadas = necessidades.filter(n => !n.latitude || !n.longitude).length;
+      const comMatchPerto = diagnosticos.filter(d => d.distancia_metros && d.distancia_metros <= 100).length;
+      const comMatchMedio = diagnosticos.filter(d => d.distancia_metros && d.distancia_metros > 100 && d.distancia_metros <= 500).length;
+      const comMatchLonge = diagnosticos.filter(d => d.distancia_metros && d.distancia_metros > 500 && d.distancia_metros <= 2000).length;
+      const semMatch = diagnosticos.filter(d => !d.distancia_metros || d.distancia_metros > 2000).length;
+      const semCoordenadas = necessidades.filter((n: any) => !n.latitude || !n.longitude).length;
       const cadastroSemCoordenadas = cadastros?.filter((c: any) => !c.latitude || !c.longitude).length || 0;
+      
+      console.log("📊 Resultados:", { comMatchPerto, comMatchMedio, comMatchLonge, semMatch });
 
-      toast({
-        title: "Diagnóstico concluído",
-        description: `Necessidades: ${necessidades.length} (${semCoordenadas} sem coords) | Cadastro: ${cadastros?.length || 0} placas (${cadastroSemCoordenadas} sem coords) | Match < 50m: ${comMatchPerto} | 50-500m: ${comMatchLonge} | > 500m: ${semMatch}`,
-      });
+      if (cadastros?.length === 0) {
+        toast({
+          title: "❌ Sem cadastro de placas",
+          description: `Encontradas ${necessidades.length} necessidades, mas não há placas cadastradas para esta rodovia. É necessário importar o inventário primeiro.`,
+          variant: "destructive",
+        });
+      } else if (cadastroSemCoordenadas === cadastros?.length) {
+        toast({
+          title: "❌ Cadastro sem coordenadas",
+          description: `Há ${cadastros.length} placas cadastradas, mas NENHUMA tem coordenadas. O inventário precisa ter lat/long.`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Diagnóstico concluído",
+          description: `Necessidades: ${necessidades.length} | Cadastro: ${cadastros?.length || 0} placas (${cadastroSemCoordenadas} sem coords) | Match <100m: ${comMatchPerto} | 100-500m: ${comMatchMedio} | 500m-2km: ${comMatchLonge} | >2km: ${semMatch}`,
+        });
+      }
 
     } catch (error: any) {
       toast({
