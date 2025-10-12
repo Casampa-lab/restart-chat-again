@@ -79,7 +79,9 @@ const createCustomIcon = (servico: string) => {
 
 export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) => {
   const [geojsonData, setGeojsonData] = useState<any>(null);
+  const [geojsonSnvData, setGeojsonSnvData] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingSnv, setUploadingSnv] = useState(false);
 
   const necessidadesComCoordenadas = necessidades.filter(n => {
     const lat = n.latitude_inicial || n.latitude;
@@ -89,19 +91,37 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
 
   useEffect(() => {
     const loadGeojson = async () => {
-      const { data } = await supabase
+      // Carregar GeoJSON VGeo (rodovia)
+      const { data: dataVgeo } = await supabase
         .from("configuracoes")
         .select("valor")
         .eq("chave", "mapa_geojson_rodovias")
         .maybeSingle();
       
-      if (data?.valor) {
+      if (dataVgeo?.valor) {
         try {
-          setGeojsonData(JSON.parse(data.valor));
-          toast.success("Camada base da rodovia carregada");
+          setGeojsonData(JSON.parse(dataVgeo.valor));
         } catch (error) {
-          console.error("Erro ao carregar GeoJSON:", error);
+          console.error("Erro ao carregar GeoJSON VGeo:", error);
         }
+      }
+
+      // Carregar GeoJSON SNV
+      const { data: dataSnv } = await supabase
+        .from("configuracoes")
+        .select("valor")
+        .eq("chave", "mapa_geojson_snv")
+        .maybeSingle();
+      
+      if (dataSnv?.valor) {
+        try {
+          setGeojsonSnvData(JSON.parse(dataSnv.valor));
+          toast.success("Camadas VGeo e SNV carregadas");
+        } catch (error) {
+          console.error("Erro ao carregar GeoJSON SNV:", error);
+        }
+      } else if (dataVgeo?.valor) {
+        toast.success("Camada VGeo carregada");
       }
     };
     loadGeojson();
@@ -135,12 +155,49 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
       if (error) throw error;
 
       setGeojsonData(data);
-      toast.success("Camada base importada com sucesso!");
+      toast.success("Camada VGeo importada com sucesso!");
     } catch (error: any) {
       console.error("Erro ao importar GeoJSON:", error);
       toast.error("Erro ao importar arquivo: " + error.message);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleSnvFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith(".geojson") && !file.name.endsWith(".json")) {
+      toast.error("Por favor, selecione um arquivo GeoJSON (.geojson ou .json)");
+      return;
+    }
+
+    setUploadingSnv(true);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      
+      if (!data.type || (data.type !== "FeatureCollection" && data.type !== "Feature")) {
+        throw new Error("Arquivo não é um GeoJSON válido");
+      }
+
+      const { error } = await supabase
+        .from("configuracoes")
+        .upsert({
+          chave: "mapa_geojson_snv",
+          valor: text,
+        });
+
+      if (error) throw error;
+
+      setGeojsonSnvData(data);
+      toast.success("Camada SNV importada com sucesso!");
+    } catch (error: any) {
+      console.error("Erro ao importar GeoJSON SNV:", error);
+      toast.error("Erro ao importar arquivo: " + error.message);
+    } finally {
+      setUploadingSnv(false);
     }
   };
 
@@ -197,14 +254,41 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
               {geojsonData ? "Trocar" : "Importar"} GeoJSON VGeo
             </Button>
           </div>
+
+          <div className="relative">
+            <input
+              type="file"
+              id="geojson-snv-upload"
+              accept=".geojson,.json"
+              onChange={handleSnvFileUpload}
+              className="hidden"
+              disabled={uploadingSnv}
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => document.getElementById("geojson-snv-upload")?.click()}
+              disabled={uploadingSnv}
+              className="border-green-500 text-green-700 hover:bg-green-50"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {geojsonSnvData ? "Trocar" : "Importar"} GeoJSON SNV
+            </Button>
+          </div>
         </div>
       </div>
 
-      {geojsonData && (
+      {(geojsonData || geojsonSnvData) && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Camada base da rodovia carregada do VGeo DNIT ✓
+            {geojsonData && geojsonSnvData ? (
+              <>Camadas VGeo (azul) e SNV (verde) carregadas ✓</>
+            ) : geojsonData ? (
+              <>Camada VGeo carregada ✓</>
+            ) : (
+              <>Camada SNV carregada ✓</>
+            )}
           </AlertDescription>
         </Alert>
       )}
@@ -239,6 +323,18 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
                   color: "#1e40af",
                   weight: 4,
                   opacity: 0.7,
+                }}
+              />
+            )}
+
+            {geojsonSnvData && (
+              <GeoJSON
+                key={JSON.stringify(geojsonSnvData)}
+                data={geojsonSnvData}
+                pathOptions={{
+                  color: "#16a34a",
+                  weight: 3,
+                  opacity: 0.6,
                 }}
               />
             )}
