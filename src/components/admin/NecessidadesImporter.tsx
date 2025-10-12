@@ -180,6 +180,35 @@ export function NecessidadesImporter() {
           descricao: row["Descrição"] || row["descricao"],
         };
 
+      case "cilindros":
+        const solucao = (row["Solução"] || row["Solucao"] || row["solucao"] || "").toLowerCase();
+        let motivo = row["Motivo"] || row["motivo"] || "-";
+        
+        // Aplicar regras do campo Motivo
+        if (solucao.includes("remov") || solucao.includes("substitu")) {
+          // Para Remover ou Substituir, motivo deve ser 1, 2, 3 ou 4
+          // Se não for um desses valores, manter o que está na planilha
+          if (motivo !== "1" && motivo !== "2" && motivo !== "3" && motivo !== "4") {
+            // Se tem motivo mas não é válido, usar "-"
+            motivo = motivo && motivo !== "-" ? motivo : "-";
+          }
+        } else {
+          // Para outras soluções, usar "-"
+          motivo = "-";
+        }
+        
+        return {
+          ...baseMap,
+          cor_corpo: row["Cor (Corpo)"] || row["Cor Corpo"] || row["cor_corpo"],
+          cor_refletivo: row["Cor (Refletivo)"] || row["Cor Refletivo"] || row["cor_refletivo"],
+          tipo_refletivo: row["Tipo Refletivo"] || row["tipo_refletivo"],
+          extensao_km: row["Extensão (km)"] || row["extensao_km"] ? parseFloat(String(row["Extensão (km)"] || row["extensao_km"]).replace(',', '.')) : null,
+          local_implantacao: row["Local de Implantação"] || row["Local Implantação"] || row["local_implantacao"],
+          espacamento_m: row["Espaçamento"] || row["espacamento_m"] ? parseFloat(String(row["Espaçamento"] || row["espacamento_m"]).replace(',', '.')) : null,
+          quantidade: parseInt(row["Quantidade"] || row["quantidade"]) || null,
+          motivo,
+        };
+
       default:
         return baseMap;
     }

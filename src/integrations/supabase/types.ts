@@ -2320,6 +2320,7 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          motivo: string | null
           observacao: string | null
           quantidade: number | null
           rodovia_id: string
@@ -2350,6 +2351,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          motivo?: string | null
           observacao?: string | null
           quantidade?: number | null
           rodovia_id: string
@@ -2380,6 +2382,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          motivo?: string | null
           observacao?: string | null
           quantidade?: number | null
           rodovia_id?: string
