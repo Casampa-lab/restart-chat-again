@@ -27,6 +27,8 @@ interface AuditoriaItem {
   linha_planilha: number;
   km: number;
   codigo: string;
+  sigla: string;
+  descricao: string;
   solucao_planilha: string;
   servico: string;
   tem_match: boolean;
@@ -38,6 +40,8 @@ interface AuditoriaItem {
   longitude_cad?: number;
   km_cad?: number;
   codigo_cad?: string;
+  sigla_cad?: string;
+  descricao_cad?: string;
 }
 
 export function NecessidadesAuditor() {
@@ -99,7 +103,7 @@ export function NecessidadesAuditor() {
     cancelRef.current = false;
 
     try {
-      const tabelaNecessidade = `necessidades_${tipo}`;
+      const tabelaNecessidade = tipo === "marcas_transversais" ? "necessidades_marcas_transversais" : `necessidades_${tipo}`;
       const tabelaCadastro = tipo === "placas" ? "ficha_placa" : 
                            tipo === "marcas_transversais" ? "ficha_inscricoes" :
                            tipo === "marcas_longitudinais" ? "ficha_marcas_longitudinais" :
@@ -177,6 +181,8 @@ export function NecessidadesAuditor() {
           linha_planilha: nec.linha_planilha || 0,
           km: nec.km || nec.km_inicial || 0,
           codigo: necCodigo,
+          sigla: nec.sigla || "-",
+          descricao: nec.descricao || "-",
           solucao_planilha: nec.solucao_planilha || nec.servico || "-",
           servico: nec.servico || "-",
           tem_match: !!nec.cadastro_id,
@@ -194,6 +200,8 @@ export function NecessidadesAuditor() {
             item.latitude_cad = converterCoordenada((cadastro as any).latitude || (cadastro as any).latitude_inicial) || undefined;
             item.longitude_cad = converterCoordenada((cadastro as any).longitude || (cadastro as any).longitude_inicial) || undefined;
             item.km_cad = (cadastro as any).km || (cadastro as any).km_inicial;
+            item.sigla_cad = (cadastro as any).sigla || "-";
+            item.descricao_cad = (cadastro as any).descricao || "-";
             
             // Construir código descritivo para tachas do cadastro
             if (tipo === "tachas") {
@@ -409,7 +417,8 @@ export function NecessidadesAuditor() {
                     <TableHead>Linha</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>KM</TableHead>
-                    <TableHead>Código</TableHead>
+                    <TableHead>Sigla</TableHead>
+                    <TableHead>Descrição</TableHead>
                     <TableHead>Planilha</TableHead>
                     <TableHead>Distância</TableHead>
                     <TableHead>Coord. Necessidade</TableHead>
@@ -439,10 +448,18 @@ export function NecessidadesAuditor() {
                         )}
                       </TableCell>
                       <TableCell>
-                        {item.codigo}
-                        {item.codigo_cad && item.codigo !== item.codigo_cad && (
+                        {item.sigla}
+                        {item.sigla_cad && item.sigla !== item.sigla_cad && (
                           <div className="text-xs text-muted-foreground">
-                            Cad: {item.codigo_cad}
+                            Cad: {item.sigla_cad}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {item.descricao}
+                        {item.descricao_cad && item.descricao !== item.descricao_cad && (
+                          <div className="text-xs text-muted-foreground">
+                            Cad: {item.descricao_cad}
                           </div>
                         )}
                       </TableCell>
