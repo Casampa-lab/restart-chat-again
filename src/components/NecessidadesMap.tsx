@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from "react-leaflet";
 import L, { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,19 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, AlertCircle, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { NecessidadesMapLayers } from "./NecessidadesMapLayers";
+
+const MapBounds = ({ coordinates }: { coordinates: LatLngExpression[] }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (coordinates.length > 0) {
+      const bounds = L.latLngBounds(coordinates as any);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [coordinates, map]);
+  
+  return null;
+};
 
 interface Necessidade {
   id: string;
@@ -123,12 +135,15 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
     }
   };
 
+  const coordinates: LatLngExpression[] = necessidadesComCoordenadas.map(n => {
+    const lat = n.latitude_inicial || n.latitude || 0;
+    const lng = n.longitude_inicial || n.longitude || 0;
+    return [lat, lng] as LatLngExpression;
+  });
+
   const defaultCenter: LatLngExpression = [-15.7801, -47.9292];
   const mapCenter = necessidadesComCoordenadas.length > 0 
-    ? [
-        necessidadesComCoordenadas[0].latitude_inicial || necessidadesComCoordenadas[0].latitude || -15.7801,
-        necessidadesComCoordenadas[0].longitude_inicial || necessidadesComCoordenadas[0].longitude || -47.9292
-      ] as LatLngExpression
+    ? coordinates[0]
     : defaultCenter;
 
   return (
@@ -194,20 +209,75 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
         </Alert>
       )}
 
-      <div className="w-full h-[600px] rounded-lg border shadow-lg overflow-hidden">
-        <MapContainer
-          center={mapCenter}
-          zoom={13}
-          style={{ width: "100%", height: "100%" }}
-          scrollWheelZoom={true}
-        >
-          <NecessidadesMapLayers
-            geojsonData={geojsonData}
-            necessidadesComCoordenadas={necessidadesComCoordenadas}
-            createCustomIcon={createCustomIcon}
-          />
-        </MapContainer>
-      </div>
+      {necessidadesComCoordenadas.length > 0 && (
+        <div className="w-full h-[600px] rounded-lg border shadow-lg overflow-hidden">
+          <MapContainer
+            center={mapCenter}
+            zoom={13}
+            style={{ width: "100%", height: "100%" }}
+            scrollWheelZoom={true}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            
+            {geojsonData && (
+              <GeoJSON
+                key={JSON.stringify(geojsonData)}
+                data={geojsonData}
+                pathOptions={{
+                  color: "#1e40af",
+                  weight: 4,
+                  opacity: 0.7,
+                }}
+              />
+            )}
+
+            {necessidadesComCoordenadas.map((nec) => {
+              const lat = nec.latitude_inicial || nec.latitude || 0;
+              const lng = nec.longitude_inicial || nec.longitude || 0;
+              const km = nec.km_inicial || nec.km || "N/A";
+              const rodovia = nec.rodovia?.codigo || "N/A";
+              const match = nec.distancia_match_metros 
+                ? `Match: ${nec.distancia_match_metros.toFixed(0)}m` 
+                : "";
+
+              return (
+                <Marker
+                  key={nec.id}
+                  position={[lat, lng] as LatLngExpression}
+                  icon={createCustomIcon(nec.servico)}
+                >
+                  <Popup>
+                    <div className="font-sans">
+                      <h3 className="font-semibold text-sm mb-2">
+                        {nec.servico === "Inclusão" ? "➕" : nec.servico === "Substituição" ? "🔄" : "➖"} {nec.servico}
+                      </h3>
+                      <p className="text-xs space-y-1">
+                        <strong>Rodovia:</strong> {rodovia}<br />
+                        <strong>KM:</strong> {km}<br />
+                        {match && (
+                          <>
+                            <strong>{match}</strong><br />
+                          </>
+                        )}
+                        {nec.observacao && (
+                          <span className="text-muted-foreground italic">
+                            {nec.observacao}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+            
+            {coordinates.length > 0 && <MapBounds coordinates={coordinates} />}
+          </MapContainer>
+        </div>
+      )}
     </div>
   );
 };
