@@ -2685,15 +2685,20 @@ export type Database = {
           cor: string | null
           created_at: string | null
           data_importacao: string | null
+          descricao: string | null
           dimensoes: string | null
           distancia_match_metros: number | null
+          espessura_mm: number | null
           estado_conservacao: string | null
           id: string
+          km: number | null
           km_final: number | null
           km_inicial: number | null
+          latitude: number | null
           latitude_final: number | null
           latitude_inicial: number | null
           linha_planilha: number | null
+          longitude: number | null
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
@@ -2701,6 +2706,8 @@ export type Database = {
           observacao: string | null
           rodovia_id: string
           servico: string
+          sigla: string | null
+          snv: string | null
           solucao_planilha: string | null
           tipo_inscricao: string | null
           updated_at: string | null
@@ -2713,15 +2720,20 @@ export type Database = {
           cor?: string | null
           created_at?: string | null
           data_importacao?: string | null
+          descricao?: string | null
           dimensoes?: string | null
           distancia_match_metros?: number | null
+          espessura_mm?: number | null
           estado_conservacao?: string | null
           id?: string
+          km?: number | null
           km_final?: number | null
           km_inicial?: number | null
+          latitude?: number | null
           latitude_final?: number | null
           latitude_inicial?: number | null
           linha_planilha?: number | null
+          longitude?: number | null
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
@@ -2729,6 +2741,8 @@ export type Database = {
           observacao?: string | null
           rodovia_id: string
           servico: string
+          sigla?: string | null
+          snv?: string | null
           solucao_planilha?: string | null
           tipo_inscricao?: string | null
           updated_at?: string | null
@@ -2741,15 +2755,20 @@ export type Database = {
           cor?: string | null
           created_at?: string | null
           data_importacao?: string | null
+          descricao?: string | null
           dimensoes?: string | null
           distancia_match_metros?: number | null
+          espessura_mm?: number | null
           estado_conservacao?: string | null
           id?: string
+          km?: number | null
           km_final?: number | null
           km_inicial?: number | null
+          latitude?: number | null
           latitude_final?: number | null
           latitude_inicial?: number | null
           linha_planilha?: number | null
+          longitude?: number | null
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
@@ -2757,6 +2776,8 @@ export type Database = {
           observacao?: string | null
           rodovia_id?: string
           servico?: string
+          sigla?: string | null
+          snv?: string | null
           solucao_planilha?: string | null
           tipo_inscricao?: string | null
           updated_at?: string | null

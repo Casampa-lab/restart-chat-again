@@ -209,6 +209,21 @@ export function NecessidadesImporter() {
           motivo,
         };
 
+      case "marcas_transversais":
+        return {
+          ...baseMap,
+          sigla: row["Sigla"] || row["sigla"],
+          descricao: row["Descrição"] || row["Descricao"] || row["descricao"],
+          tipo_inscricao: row["Sigla"] || row["sigla"], // tipo_inscricao usa a sigla
+          cor: row["Cor"] || row["cor"],
+          km: row["Km"] || row["KM"] || row["km"] ? parseFloat(String(row["Km"] || row["KM"] || row["km"]).replace(',', '.')) : null,
+          latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
+          longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
+          material_utilizado: row["Material"] || row["material"],
+          espessura_mm: row["Espessura (mm)"] || row["Espessura"] || row["espessura_mm"] ? parseFloat(String(row["Espessura (mm)"] || row["Espessura"] || row["espessura_mm"]).replace(',', '.')) : null,
+          area_m2: row["Área (m²)"] || row["Área"] || row["area_m2"] ? parseFloat(String(row["Área (m²)"] || row["Área"] || row["area_m2"]).replace(',', '.')) : null,
+        };
+
       default:
         return baseMap;
     }
@@ -260,7 +275,7 @@ export function NecessidadesImporter() {
 
       // Filtrar linhas vazias (que não têm KM)
       const dadosFiltrados = dadosComHeader.filter((row: any) => {
-        const kmValue = tipo === "placas" 
+        const kmValue = (tipo === "placas" || tipo === "marcas_transversais")
           ? (row["Km"] || row["KM"] || row["km"])
           : (row["Km Inicial"] || row["KM Inicial"] || row["km_inicial"]);
         return kmValue !== undefined && kmValue !== null && kmValue !== "";
@@ -342,8 +357,12 @@ export function NecessidadesImporter() {
           const dados = mapearColunas(row, tipo);
 
           // Buscar match no cadastro localmente (sem chamar RPC)
-          const lat = tipo === "placas" ? converterCoordenada(dados.latitude) : converterCoordenada(dados.latitude_inicial);
-          const long = tipo === "placas" ? converterCoordenada(dados.longitude) : converterCoordenada(dados.longitude_inicial);
+          const lat = (tipo === "placas" || tipo === "marcas_transversais") 
+            ? converterCoordenada(dados.latitude) 
+            : converterCoordenada(dados.latitude_inicial);
+          const long = (tipo === "placas" || tipo === "marcas_transversais") 
+            ? converterCoordenada(dados.longitude) 
+            : converterCoordenada(dados.longitude_inicial);
 
           let match = null;
           let distancia = null;
