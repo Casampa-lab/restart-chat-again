@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Search, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Search, AlertCircle, CheckCircle2, XCircle, StopCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -45,6 +46,9 @@ export function NecessidadesAuditor() {
   const [rodoviaId, setRodoviaId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [auditoria, setAuditoria] = useState<AuditoriaItem[]>([]);
+  const [progress, setProgress] = useState(0);
+  const [progressInfo, setProgressInfo] = useState<{ current: number; total: number } | null>(null);
+  const cancelRef = useRef(false);
   const { toast } = useToast();
 
   // Buscar lotes
@@ -90,6 +94,9 @@ export function NecessidadesAuditor() {
 
     setIsLoading(true);
     setAuditoria([]);
+    setProgress(0);
+    setProgressInfo(null);
+    cancelRef.current = false;
 
     try {
       const tabelaNecessidade = `necessidades_${tipo}`;
@@ -119,10 +126,43 @@ export function NecessidadesAuditor() {
         return;
       }
 
-      // Para cada necessidade, buscar dados do cadastro se houver match
-      const auditoriaData: AuditoriaItem[] = [];
+      // Buscar TODOS os cadastros de uma vez para otimizar
+      const cadastrosIds = necessidades
+        .filter((n: any) => n.cadastro_id)
+        .map((n: any) => n.cadastro_id);
 
-      for (const nec of (necessidades as any[])) {
+      let cadastrosMap = new Map();
+      if (cadastrosIds.length > 0) {
+        const { data: cadastrosData } = await supabase
+          .from(tabelaCadastro as any)
+          .select("*")
+          .in("id", cadastrosIds);
+        
+        if (cadastrosData) {
+          cadastrosData.forEach((cad: any) => {
+            cadastrosMap.set(cad.id, cad);
+          });
+        }
+      }
+
+      // Para cada necessidade, processar com os dados já carregados
+      const auditoriaData: AuditoriaItem[] = [];
+      const total = necessidades.length;
+      setProgressInfo({ current: 0, total });
+
+      for (let i = 0; i < necessidades.length; i++) {
+        // Verificar cancelamento
+        if (cancelRef.current) {
+          toast({
+            title: "Auditoria Cancelada",
+            description: `Processadas ${i} de ${total} necessidades`,
+          });
+          break;
+        }
+
+        const nec = necessidades[i] as any;
+        setProgressInfo({ current: i + 1, total });
+        setProgress(Math.round(((i + 1) / total) * 100));
         // Construir código descritivo para tachas
         let necCodigo = nec.codigo || nec.tipo_demarcacao || nec.tipo || "-";
         if (tipo === "tachas") {
@@ -146,13 +186,9 @@ export function NecessidadesAuditor() {
           longitude_nec: converterCoordenada(nec.longitude || nec.longitude_inicial) || 0,
         };
 
-        // Se tem match, buscar dados do cadastro
+        // Se tem match, usar dados do cadastro já carregado
         if (nec.cadastro_id) {
-          const { data: cadastro } = await supabase
-            .from(tabelaCadastro as any)
-            .select("*")
-            .eq("id", nec.cadastro_id)
-            .maybeSingle();
+          const cadastro = cadastrosMap.get(nec.cadastro_id);
 
           if (cadastro) {
             item.latitude_cad = converterCoordenada((cadastro as any).latitude || (cadastro as any).latitude_inicial) || undefined;
@@ -207,6 +243,8 @@ export function NecessidadesAuditor() {
       });
     } finally {
       setIsLoading(false);
+      setProgressInfo(null);
+      setProgress(0);
     }
   };
 
@@ -297,15 +335,44 @@ export function NecessidadesAuditor() {
           </Select>
         </div>
 
-        {/* Botão auditar */}
-        <Button
-          onClick={handleAuditar}
-          disabled={!tipo || !loteId || !rodoviaId || isLoading}
-          className="w-full"
-        >
-          <Search className="mr-2 h-4 w-4" />
-          {isLoading ? "Auditando..." : "Auditar"}
-        </Button>
+        {/* Botões auditar/cancelar */}
+        <div className="flex gap-2">
+          <Button
+            onClick={handleAuditar}
+            disabled={!tipo || !loteId || !rodoviaId || isLoading}
+            className="flex-1"
+          >
+            <Search className="mr-2 h-4 w-4" />
+            {isLoading ? "Auditando..." : "Auditar"}
+          </Button>
+
+          {isLoading && (
+            <Button
+              onClick={() => {
+                cancelRef.current = true;
+                toast({
+                  title: "Cancelando...",
+                  description: "A auditoria será interrompida",
+                });
+              }}
+              variant="destructive"
+              className="flex-shrink-0"
+            >
+              <StopCircle className="mr-2 h-4 w-4" />
+              Cancelar
+            </Button>
+          )}
+        </div>
+
+        {/* Barra de progresso */}
+        {isLoading && progressInfo && (
+          <div className="space-y-2">
+            <Progress value={progress} />
+            <p className="text-sm text-center text-muted-foreground">
+              Processando: <span className="font-semibold">{progressInfo.current}</span> / {progressInfo.total} necessidades ({progress}%)
+            </p>
+          </div>
+        )}
 
         {/* Resultados */}
         {auditoria.length > 0 && (
