@@ -103,8 +103,8 @@ export function NecessidadesImporter() {
       latitude_final: row["Latitude Final"] || row["Lat Final"] || row["latitude_final"],
       longitude_final: row["Longitude Final"] || row["Long Final"] || row["longitude_final"],
       observacao: row["Observação"] || row["Observacao"] || row["observacao"],
-      snv: row["SNV"] || row["snv"],
-      solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
+      snv: row["SNV"] || row["snv"] || row["__EMPTY"],
+      solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"] || row["__EMPTY_25"],
     };
 
     // Campos específicos por tipo
@@ -137,18 +137,18 @@ export function NecessidadesImporter() {
       case "placas":
         return {
           ...baseMap, // IMPORTANTE: incluir os campos do baseMap (snv, observacao, solucao_planilha)
-          km: row["Km"] || row["KM"] || row["km"],
-          latitude: row["Latitude"] || row["latitude"],
-          longitude: row["Longitude"] || row["longitude"],
-          codigo: row["Código da placa"] || row["Código"] || row["codigo"],
+          km: row["Km"] || row["KM"] || row["km"] || row["__EMPTY_6"],
+          latitude: row["Latitude"] || row["latitude"] || row["__EMPTY_7"],
+          longitude: row["Longitude"] || row["longitude"] || row["__EMPTY_8"],
+          codigo: row["Código da placa"] || row["Código"] || row["codigo"] || row["__EMPTY_2"],
           modelo: row["Modelo"] || row["modelo"],
-          tipo: row["Tipo de placa"] || row["Tipo"] || row["tipo"],
-          velocidade: row["Velocidade"] || row["velocidade"],
+          tipo: row["Tipo de placa"] || row["Tipo"] || row["tipo"] || row["__EMPTY_1"],
+          velocidade: row["Velocidade"] || row["velocidade"] || row["__EMPTY_3"],
           descricao: row["Descrição"] || row["descricao"],
-          lado: row["Lado"] || row["lado"],
+          lado: row["Lado"] || row["lado"] || row["__EMPTY_4"],
           dimensoes_mm: row["Dimensões (mm)"] || row["dimensoes_mm"],
-          substrato: row["Tipo de Substrato"] || row["Substrato"] || row["substrato"],
-          suporte: row["Tipo de Suporte"] || row["Suporte"] || row["suporte"],
+          substrato: row["Tipo de Substrato"] || row["Substrato"] || row["substrato"] || row["__EMPTY_14"],
+          suporte: row["Tipo de Suporte"] || row["Suporte"] || row["suporte"] || row["__EMPTY_10"],
           pelicula: row["Película"] || row["pelicula"],
         };
 
@@ -214,11 +214,6 @@ export function NecessidadesImporter() {
         try {
           // Mapear colunas
           const dados = mapearColunas(row, tipo);
-
-          // DEBUG: Verificar o valor de solucao_planilha
-          console.log(`Linha ${linhaExcel}: solucao_planilha =`, dados.solucao_planilha);
-          console.log(`Linha ${linhaExcel}: row["Solução"] =`, row["Solução"]);
-          console.log(`Linha ${linhaExcel}: row =`, row);
 
           // Buscar match no cadastro (apenas se houver coordenadas)
           const lat = tipo === "placas" ? dados.latitude : dados.latitude_inicial;
