@@ -172,10 +172,10 @@ export function NecessidadesImporter() {
           quantidade: parseInt(row["Quantidade"] || row["quantidade"]) || null,
           corpo: row["Corpo"] || row["corpo"],
           refletivo: row["Refletivo"] || row["refletivo"],
-          cor_refletivo: row["Cor Refletivo"] || row["cor_refletivo"],
-          espacamento_m: row["Espaçamento (m)"] || row["espacamento_m"],
-          extensao_km: row["Extensão (km)"] || row["extensao_km"],
-          local_implantacao: row["Local Implantação"] || row["local_implantacao"],
+          cor_refletivo: row["Cor do refletivo"] || row["Cor Refletivo"] || row["cor_refletivo"],
+          espacamento_m: row["Espaçamento"] || row["espacamento_m"] ? parseFloat(String(row["Espaçamento"] || row["espacamento_m"]).replace(',', '.')) : null,
+          extensao_km: row["Extensão (km)"] || row["extensao_km"] ? parseFloat(String(row["Extensão (km)"] || row["extensao_km"]).replace(',', '.')) : null,
+          local_implantacao: row["Local de implantação"] || row["Local Implantação"] || row["local_implantacao"],
           descricao: row["Descrição"] || row["descricao"],
         };
 
