@@ -356,7 +356,7 @@ export function NecessidadesImporter() {
       const dadosFiltrados = dadosComHeader.filter((row: any) => {
         const kmValue = (tipo === "placas" || tipo === "marcas_transversais" || tipo === "porticos")
           ? (row["Km"] || row["KM"] || row["km"])
-          : (row["Km Inicial"] || row["KM Inicial"] || row["km_inicial"]);
+          : (row["Km Inicial"] || row["KM Inicial"] || row["km inicial"] || row["km_inicial"]);
         return kmValue !== undefined && kmValue !== null && kmValue !== "";
       });
 
