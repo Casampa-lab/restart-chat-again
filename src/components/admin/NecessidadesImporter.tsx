@@ -136,6 +136,7 @@ export function NecessidadesImporter() {
 
       case "placas":
         return {
+          ...baseMap, // IMPORTANTE: incluir os campos do baseMap (snv, observacao, solucao_planilha)
           km: row["Km"] || row["KM"] || row["km"],
           latitude: row["Latitude"] || row["latitude"],
           longitude: row["Longitude"] || row["longitude"],
@@ -149,7 +150,6 @@ export function NecessidadesImporter() {
           substrato: row["Tipo de Substrato"] || row["Substrato"] || row["substrato"],
           suporte: row["Tipo de Suporte"] || row["Suporte"] || row["suporte"],
           pelicula: row["Película"] || row["pelicula"],
-          solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
         };
 
       default:
