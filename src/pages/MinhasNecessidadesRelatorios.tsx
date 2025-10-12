@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { criarWorkbookComLogos } from "@/lib/excelLogoHelper";
 import { useSupervisora } from "@/hooks/useSupervisora";
+import { exportFrentesLiberadas } from "@/lib/excelExport";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
 const TIPOS_RELATORIO = [
@@ -201,6 +202,19 @@ export default function MinhasNecessidadesRelatorios() {
     }
   };
 
+  const gerarRelatorioFrentesLiberadas = async () => {
+    try {
+      setGerando(true);
+      await exportFrentesLiberadas();
+      toast.success("Relatório de Frentes Liberadas gerado com sucesso!");
+    } catch (error: any) {
+      console.error("Erro ao gerar relatório de frentes:", error);
+      toast.error("Erro ao gerar relatório: " + error.message);
+    } finally {
+      setGerando(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       {/* Header */}
@@ -227,9 +241,10 @@ export default function MinhasNecessidadesRelatorios() {
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="inicial" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-[400px] mx-auto">
+          <TabsList className="grid w-full grid-cols-3 max-w-[600px] mx-auto">
             <TabsTrigger value="inicial">Relatório Inicial</TabsTrigger>
             <TabsTrigger value="permanente">Relatório Permanente</TabsTrigger>
+            <TabsTrigger value="frentes">Frentes Liberadas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="inicial" className="mt-6">
@@ -329,6 +344,41 @@ export default function MinhasNecessidadesRelatorios() {
                 >
                   <Download className="mr-2 h-4 w-4" />
                   {gerando ? "Gerando..." : "Gerar Relatório Permanente"}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="frentes" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileSpreadsheet className="h-5 w-5" />
+                  Frente Liberada das Rodovias
+                </CardTitle>
+                <CardDescription>
+                  Planilha 2.2 - Exporta as frentes de serviço liberadas para execução
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                  <h4 className="font-medium text-sm">O que será exportado:</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Lote, Rodovia, SNV</li>
+                    <li>Km inicial e final da rodovia</li>
+                    <li>Frente liberada (km inicial, km final, extensão)</li>
+                    <li>Data de liberação e observações</li>
+                  </ul>
+                </div>
+
+                <Button
+                  onClick={gerarRelatorioFrentesLiberadas}
+                  disabled={gerando}
+                  className="w-full"
+                  size="lg"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  {gerando ? "Gerando..." : "Gerar Planilha 2.2 - Frentes Liberadas"}
                 </Button>
               </CardContent>
             </Card>
