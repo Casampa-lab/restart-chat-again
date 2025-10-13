@@ -30,6 +30,9 @@ const formSchema = z.object({
   cor: z.string().optional(),
   material: z.string().optional(),
   quantidade: z.string().optional(),
+  observacao: z.string().optional(),
+  foto_url: z.string().optional(),
+  descricao: z.string().optional(),
   fora_plano_manutencao: z.boolean().default(false),
   justificativa_fora_plano: z.string().optional(),
 });
@@ -45,6 +48,9 @@ export function IntervencoesTachaForm({ tachaSelecionada, onIntervencaoRegistrad
       cor: "",
       material: "",
       quantidade: "",
+      observacao: "",
+      foto_url: "",
+      descricao: "",
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
     },
@@ -66,6 +72,9 @@ export function IntervencoesTachaForm({ tachaSelecionada, onIntervencaoRegistrad
         cor: values.cor || null,
         material: values.material || null,
         quantidade: values.quantidade ? parseInt(values.quantidade) : null,
+        observacao: values.observacao || null,
+        foto_url: values.foto_url || null,
+        descricao: values.descricao || null,
         fora_plano_manutencao: values.fora_plano_manutencao,
         justificativa_fora_plano: values.justificativa_fora_plano || null,
       });
@@ -242,6 +251,48 @@ export function IntervencoesTachaForm({ tachaSelecionada, onIntervencaoRegistrad
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="descricao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Descrição da intervenção..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="observacao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Observações</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Observações adicionais..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="foto_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL da Foto</FormLabel>
+              <FormControl>
+                <Input placeholder="Caminho da foto no storage..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

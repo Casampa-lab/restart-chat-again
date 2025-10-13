@@ -21,7 +21,6 @@ interface FichaTacha {
   longitude_final: number | null;
   data_vistoria: string;
   snv: string | null;
-  descricao: string | null;
   corpo: string | null;
   refletivo: string | null;
   cor_refletivo: string | null;
@@ -29,8 +28,6 @@ interface FichaTacha {
   local_implantacao: string | null;
   espacamento_m: number | null;
   quantidade: number;
-  observacao: string | null;
-  foto_url: string | null;
 }
 
 interface InventarioTachasViewerProps {
@@ -80,7 +77,7 @@ export function InventarioTachasViewer({
 
       if (searchTerm) {
         query = query.or(
-          `snv.ilike.%${searchTerm}%,descricao.ilike.%${searchTerm}%,corpo.ilike.%${searchTerm}%,cor_refletivo.ilike.%${searchTerm}%,local_implantacao.ilike.%${searchTerm}%`
+          `snv.ilike.%${searchTerm}%,corpo.ilike.%${searchTerm}%,cor_refletivo.ilike.%${searchTerm}%,local_implantacao.ilike.%${searchTerm}%`
         );
       }
 
@@ -241,7 +238,6 @@ export function InventarioTachasViewer({
                           <SortIcon column="snv" />
                         </div>
                       </TableHead>
-                      <TableHead>Descrição</TableHead>
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("corpo")}
@@ -328,7 +324,6 @@ export function InventarioTachasViewer({
                           </TableCell>
                         )}
                         <TableCell className="font-mono text-sm">{tacha.snv || "-"}</TableCell>
-                        <TableCell className="max-w-[200px] truncate">{tacha.descricao || "Tacha bidirecional"}</TableCell>
                         <TableCell>{tacha.corpo || "-"}</TableCell>
                         <TableCell>{tacha.refletivo || "-"}</TableCell>
                         <TableCell>{tacha.cor_refletivo || "-"}</TableCell>
@@ -427,10 +422,6 @@ export function InventarioTachasViewer({
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">SNV:</span>
                       <p className="text-sm">{selectedTacha.snv || "-"}</p>
-                    </div>
-                    <div className="col-span-2">
-                      <span className="text-sm font-medium text-muted-foreground">Descrição:</span>
-                      <p className="text-sm">{selectedTacha.descricao || "Tacha bidirecional"}</p>
                     </div>
                   </div>
                 </div>
@@ -539,30 +530,12 @@ export function InventarioTachasViewer({
                     {new Date(selectedTacha.data_vistoria).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
-
-                {/* Observações */}
-                {selectedTacha.observacao && (
-                  <div className="border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3">Observações</h3>
-                    <p className="text-sm whitespace-pre-wrap">{selectedTacha.observacao}</p>
-                  </div>
-                )}
               </TabsContent>
 
               <TabsContent value="foto" className="mt-4">
-                {selectedTacha.foto_url ? (
-                  <div className="flex justify-center">
-                    <img
-                      src={supabase.storage.from('tachas').getPublicUrl(selectedTacha.foto_url).data.publicUrl}
-                      alt="Tacha"
-                      className="rounded-lg max-w-full h-auto"
-                    />
-                  </div>
-                ) : (
-                  <p className="text-center py-8 text-muted-foreground">
-                    Nenhuma foto disponível
-                  </p>
-                )}
+                <p className="text-center py-8 text-muted-foreground">
+                  Fotos de intervenções estão disponíveis no histórico
+                </p>
               </TabsContent>
 
               <TabsContent value="historico" className="space-y-4 mt-4">
@@ -572,7 +545,7 @@ export function InventarioTachasViewer({
                 ) : (
                   <div className="space-y-4">
                     {intervencoes.map((intervencao) => (
-                      <div key={intervencao.id} className="border rounded-lg p-4">
+                      <div key={intervencao.id} className="border rounded-lg p-4 space-y-2">
                         <p><strong>Data:</strong> {new Date(intervencao.data_intervencao).toLocaleDateString('pt-BR')}</p>
                         <p><strong>Motivo:</strong> {intervencao.motivo}</p>
                         {intervencao.quantidade && (
@@ -586,6 +559,22 @@ export function InventarioTachasViewer({
                         )}
                         {intervencao.material && (
                           <p><strong>Material:</strong> {intervencao.material}</p>
+                        )}
+                        {intervencao.descricao && (
+                          <p><strong>Descrição:</strong> {intervencao.descricao}</p>
+                        )}
+                        {intervencao.observacao && (
+                          <p><strong>Observações:</strong> {intervencao.observacao}</p>
+                        )}
+                        {intervencao.foto_url && (
+                          <div className="mt-2">
+                            <strong>Foto:</strong>
+                            <img
+                              src={supabase.storage.from('tachas').getPublicUrl(intervencao.foto_url).data.publicUrl}
+                              alt="Intervenção"
+                              className="rounded-lg mt-2 max-w-sm"
+                            />
+                          </div>
                         )}
                       </div>
                     ))}

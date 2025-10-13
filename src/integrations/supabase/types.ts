@@ -1159,11 +1159,9 @@ export type Database = {
           corpo: string | null
           created_at: string
           data_vistoria: string
-          descricao: string | null
           enviado_coordenador: boolean | null
           espacamento_m: number | null
           extensao_km: number | null
-          foto_url: string | null
           id: string
           km_final: number
           km_inicial: number
@@ -1173,7 +1171,6 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
-          observacao: string | null
           quantidade: number
           refletivo: string | null
           rodovia_id: string
@@ -1186,11 +1183,9 @@ export type Database = {
           corpo?: string | null
           created_at?: string
           data_vistoria: string
-          descricao?: string | null
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
-          foto_url?: string | null
           id?: string
           km_final: number
           km_inicial: number
@@ -1200,7 +1195,6 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
-          observacao?: string | null
           quantidade?: number
           refletivo?: string | null
           rodovia_id: string
@@ -1213,11 +1207,9 @@ export type Database = {
           corpo?: string | null
           created_at?: string
           data_vistoria?: string
-          descricao?: string | null
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
-          foto_url?: string | null
           id?: string
           km_final?: number
           km_inicial?: number
@@ -1227,7 +1219,6 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
-          observacao?: string | null
           quantidade?: number
           refletivo?: string | null
           rodovia_id?: string
@@ -1242,13 +1233,16 @@ export type Database = {
           cor: string | null
           created_at: string
           data_intervencao: string
+          descricao: string | null
           ficha_tachas_id: string
           fora_plano_manutencao: boolean | null
+          foto_url: string | null
           id: string
           justificativa_fora_plano: string | null
           lado: string | null
           material: string | null
           motivo: string
+          observacao: string | null
           quantidade: number | null
           tipo_tacha: string | null
         }
@@ -1256,13 +1250,16 @@ export type Database = {
           cor?: string | null
           created_at?: string
           data_intervencao: string
+          descricao?: string | null
           ficha_tachas_id: string
           fora_plano_manutencao?: boolean | null
+          foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
           lado?: string | null
           material?: string | null
           motivo: string
+          observacao?: string | null
           quantidade?: number | null
           tipo_tacha?: string | null
         }
@@ -1270,13 +1267,16 @@ export type Database = {
           cor?: string | null
           created_at?: string
           data_intervencao?: string
+          descricao?: string | null
           ficha_tachas_id?: string
           fora_plano_manutencao?: boolean | null
+          foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
           lado?: string | null
           material?: string | null
           motivo?: string
+          observacao?: string | null
           quantidade?: number | null
           tipo_tacha?: string | null
         }
