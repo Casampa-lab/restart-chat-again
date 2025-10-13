@@ -155,26 +155,6 @@ export default function DashboardNecessidades() {
         // Detectar coordenadas suspeitas
         let suspeitasEncontradas = 0;
         
-        // Calcular centroid (centro aproximado) das coordenadas para detectar outliers
-        const coordsValidas = necessidades.filter((n: any) => {
-          const lat = n.latitude_inicial || n.latitude;
-          const long = n.longitude_inicial || n.longitude;
-          return lat && long;
-        });
-        
-        let centroidLat = 0;
-        let centroidLong = 0;
-        if (coordsValidas.length > 0) {
-          coordsValidas.forEach((n: any) => {
-            const lat = n.latitude_inicial || n.latitude;
-            const long = n.longitude_inicial || n.longitude;
-            centroidLat += typeof lat === 'string' ? parseFloat(lat) : lat;
-            centroidLong += typeof long === 'string' ? parseFloat(long) : long;
-          });
-          centroidLat /= coordsValidas.length;
-          centroidLong /= coordsValidas.length;
-        }
-        
         necessidades.forEach((n: any) => {
           // Tentar todos os possíveis campos de coordenadas
           const lat = n.latitude_inicial || n.latitude;
@@ -189,28 +169,13 @@ export default function DashboardNecessidades() {
             const longForaBrasil = longNum < -75 || longNum > -33;
             const longPositiva = longNum > 0; // Brasil está no hemisfério oeste (long negativa)
             
-            // Calcular distância do centroid (aproximação em graus)
-            // 1 grau ~ 111km, então 0.9 graus ~ 100km
-            let muitoDistante = false;
-            let distanciaKm = 0;
-            if (coordsValidas.length > 5) {
-              const distLat = Math.abs(latNum - centroidLat);
-              const distLong = Math.abs(longNum - centroidLong);
-              const distGraus = Math.sqrt(distLat * distLat + distLong * distLong);
-              distanciaKm = Math.round(distGraus * 111);
-              
-              // Considera suspeito se está a mais de 100km do centro
-              muitoDistante = distGraus > 0.9;
-            }
-            
-            if (latForaBrasil || longForaBrasil || longPositiva || muitoDistante) {
+            if (latForaBrasil || longForaBrasil || longPositiva) {
               suspeitasEncontradas++;
               
               let motivo = "";
               if (longPositiva) motivo = "Longitude positiva (deveria ser negativa)";
               else if (latForaBrasil) motivo = "Latitude fora do Brasil";
               else if (longForaBrasil) motivo = "Longitude fora do Brasil";
-              else if (muitoDistante) motivo = `Muito distante do grupo (~${distanciaKm}km)`;
               
               allStats.coordenadasSuspeitas.push({
                 tipo: tipo.label,
