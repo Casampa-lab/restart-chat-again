@@ -32,6 +32,132 @@ export default function MinhasNecessidadesRelatorios() {
   const [dataInicio, setDataInicio] = useState<string>("");
   const [dataFim, setDataFim] = useState<string>("");
 
+  const exportarAnalise = async (tipo: "placas" | "porticos") => {
+    setGerando(true);
+    try {
+      const tabela = tipo === "placas" ? "ficha_placa" : "ficha_porticos";
+      const orderBy = tipo === "placas" ? "km" : "km";
+      
+      // Buscar todos os dados
+      const { data, error } = await supabase
+        .from(tabela)
+        .select("*")
+        .order(orderBy);
+
+      if (error) throw error;
+
+      // Buscar lotes e rodovias para nomes legíveis
+      const { data: lotes } = await supabase.from("lotes").select("id, numero");
+      const { data: rodovias } = await supabase.from("rodovias").select("id, codigo, nome");
+      
+      const lotesMap = new Map((lotes || []).map(l => [l.id, l.numero]));
+      const rodoviasMap = new Map((rodovias || []).map(r => [r.id, { codigo: r.codigo, nome: r.nome }]));
+
+      // Analisar cada registro
+      const dadosAnalise = (data || []).map((item: any) => {
+        const alertas: string[] = [];
+        
+        if (tipo === "placas") {
+          // Análise específica para placas
+          if (item.modelo && item.codigo && item.modelo.trim() === item.codigo.trim()) {
+            alertas.push("MODELO=CODIGO");
+          }
+          if (item.descricao && item.codigo && item.descricao.trim() === item.codigo.trim()) {
+            alertas.push("DESCRICAO=CODIGO");
+          }
+          if (item.descricao && item.tipo && item.descricao.trim() === item.tipo.trim()) {
+            alertas.push("DESCRICAO=TIPO");
+          }
+          
+          const fotosPreenchidas = [
+            item.foto_url,
+            item.foto_frontal_url,
+            item.foto_lateral_url,
+            item.foto_posterior_url,
+            item.foto_base_url,
+            item.foto_identificacao_url
+          ].filter(f => f && f.trim() !== "").length;
+          
+          if (fotosPreenchidas === 0) {
+            alertas.push("SEM_FOTOS");
+          } else if (fotosPreenchidas > 2) {
+            alertas.push("MULTIPLAS_FOTOS");
+          }
+          
+          if (!item.modelo || item.modelo.trim() === "") {
+            alertas.push("MODELO_VAZIO");
+          }
+        }
+
+        const rodovia = rodoviasMap.get(item.rodovia_id);
+        
+        return {
+          lote: lotesMap.get(item.lote_id) || "",
+          rodovia: rodovia?.codigo || rodovia?.nome || "",
+          ...item,
+          ALERTA_MODELO: (tipo === "placas" && item.modelo === item.codigo) ? "SIM" : "",
+          ALERTA_DESCRICAO: (tipo === "placas" && (item.descricao === item.codigo || item.descricao === item.tipo)) ? "SIM" : "",
+          ALERTA_FOTO: (tipo === "placas") ? (
+            !item.foto_url && !item.foto_frontal_url ? "VAZIO" : 
+            ([item.foto_url, item.foto_frontal_url, item.foto_lateral_url, item.foto_posterior_url, item.foto_base_url].filter(f => f).length > 2) ? "MULTIPLAS" : ""
+          ) : "",
+          STATUS_REVISAO: alertas.length > 0 ? alertas.join(" | ") : "OK",
+        };
+      });
+
+      // Criar workbook
+      const ExcelJS = (await import("exceljs")).default;
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet("Análise");
+
+      // Adicionar dados
+      if (dadosAnalise.length > 0) {
+        const colunas = Object.keys(dadosAnalise[0]);
+        sheet.columns = colunas.map(col => ({ header: col, key: col, width: 20 }));
+        dadosAnalise.forEach(row => sheet.addRow(row));
+
+        // Formatar header
+        sheet.getRow(1).font = { bold: true };
+        sheet.getRow(1).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF4472C4' }
+        };
+
+        // Destacar linhas com alertas
+        sheet.eachRow((row, rowNumber) => {
+          if (rowNumber > 1) {
+            const statusCell = row.getCell('STATUS_REVISAO');
+            if (statusCell.value && statusCell.value !== "OK") {
+              row.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFFFEB9C' }
+              };
+            }
+          }
+        });
+      }
+
+      // Download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `analise_${tipo}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      toast.success(`Análise de ${tipo} exportada com sucesso!`);
+    } catch (error) {
+      console.error("Erro ao exportar análise:", error);
+      toast.error("Erro ao exportar análise");
+    } finally {
+      setGerando(false);
+    }
+  };
+
   const gerarRelatorioInicial = async () => {
     try {
       setGerando(true);
@@ -371,9 +497,10 @@ export default function MinhasNecessidadesRelatorios() {
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="inicial" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-[400px] mx-auto">
+          <TabsList className="grid w-full grid-cols-3 max-w-[600px] mx-auto">
             <TabsTrigger value="inicial">Relatório Inicial</TabsTrigger>
             <TabsTrigger value="permanente">Relatório Permanente</TabsTrigger>
+            <TabsTrigger value="analise">Análise de Dados</TabsTrigger>
           </TabsList>
 
           <TabsContent value="inicial" className="mt-6">
@@ -504,6 +631,59 @@ export default function MinhasNecessidadesRelatorios() {
                   <Download className="mr-2 h-4 w-4" />
                   {gerando ? "Gerando..." : "Gerar Planilha para o Relatório Permanente"}
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analise" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Download className="h-5 w-5" />
+                  Exportar Dados para Análise Manual
+                </CardTitle>
+                <CardDescription>
+                  Exporte os dados brutos com análise automática de inconsistências para revisão manual
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Button 
+                    onClick={() => exportarAnalise("placas")} 
+                    disabled={gerando}
+                    className="w-full"
+                  >
+                    {gerando ? "Exportando..." : "Exportar Análise de Placas"}
+                  </Button>
+                  <p className="text-sm text-muted-foreground">
+                    Exporta todos os dados de placas com colunas de análise destacando possíveis duplicações e campos vazios
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Button 
+                    onClick={() => exportarAnalise("porticos")} 
+                    disabled={gerando}
+                    className="w-full"
+                  >
+                    {gerando ? "Exportando..." : "Exportar Análise de Pórticos"}
+                  </Button>
+                  <p className="text-sm text-muted-foreground">
+                    Exporta todos os dados de pórticos com colunas de análise destacando possíveis inconsistências
+                  </p>
+                </div>
+
+                <div className="mt-6 p-4 bg-muted rounded-lg">
+                  <h4 className="font-semibold mb-2">O que será exportado:</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    <li>Todos os campos atuais do cadastro</li>
+                    <li>Coluna "ALERTA_MODELO" - identifica quando modelo = codigo</li>
+                    <li>Coluna "ALERTA_DESCRICAO" - identifica quando descricao = codigo ou tipo</li>
+                    <li>Coluna "ALERTA_FOTO" - identifica campos de foto vazios ou duplicados</li>
+                    <li>Coluna "STATUS_REVISAO" - resumo das inconsistências encontradas</li>
+                    <li>Linhas com problemas destacadas em amarelo</li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
