@@ -398,7 +398,7 @@ export function InventarioInscricoesViewer({
       <Dialog open={showRegistrarNaoCadastrado} onOpenChange={setShowRegistrarNaoCadastrado}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <RegistrarItemNaoCadastrado
-            tipo_elemento="inscricoes"
+            tipo_elemento="marcas_transversais"
             loteId={loteId}
             rodoviaId={rodoviaId}
             onSuccess={() => {

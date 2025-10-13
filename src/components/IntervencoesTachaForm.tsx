@@ -20,6 +20,11 @@ interface IntervencoesTachaFormProps {
     snv?: string;
   };
   onIntervencaoRegistrada?: () => void;
+  modo?: 'normal' | 'controlado';
+  onDataChange?: (data: any) => void;
+  hideSubmitButton?: boolean;
+  loteId?: string;
+  rodoviaId?: string;
 }
 
 const formSchema = z.object({
@@ -37,7 +42,15 @@ const formSchema = z.object({
   justificativa_fora_plano: z.string().optional(),
 });
 
-export function IntervencoesTachaForm({ tachaSelecionada, onIntervencaoRegistrada }: IntervencoesTachaFormProps) {
+export function IntervencoesTachaForm({ 
+  tachaSelecionada, 
+  onIntervencaoRegistrada,
+  modo = 'normal',
+  onDataChange,
+  hideSubmitButton = false,
+  loteId,
+  rodoviaId
+}: IntervencoesTachaFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
@@ -57,6 +70,11 @@ export function IntervencoesTachaForm({ tachaSelecionada, onIntervencaoRegistrad
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (modo === 'controlado') {
+      if (onDataChange) onDataChange(values);
+      return;
+    }
+    
     if (!tachaSelecionada) {
       toast.error("Selecione uma tacha do inventário primeiro");
       return;
@@ -330,10 +348,12 @@ export function IntervencoesTachaForm({ tachaSelecionada, onIntervencaoRegistrad
           />
         )}
 
-        <Button type="submit" className="w-full" disabled={!tachaSelecionada}>
-          {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Salvar Intervenção
-        </Button>
+        {!hideSubmitButton && (
+          <Button type="submit" className="w-full" disabled={!tachaSelecionada && modo !== 'controlado'}>
+            {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Salvar Intervenção
+          </Button>
+        )}
       </form>
     </Form>
       </CardContent>

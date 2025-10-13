@@ -10,7 +10,7 @@ import { Loader2, Upload, X } from "lucide-react";
 import { IntervencoesSHForm } from "./IntervencoesSHForm";
 import { IntervencoesSVForm } from "./IntervencoesSVForm";
 import { IntervencoesTachaForm } from "./IntervencoesTachaForm";
-import { IntervencoesInscricoesForm } from "./IntervencoesInscricoesForm";
+import IntervencoesInscricoesForm from "./IntervencoesInscricoesForm";
 import { IntervencoesCilindrosForm } from "./IntervencoesCilindrosForm";
 import { IntervencoesPorticosForm } from "./IntervencoesPorticosForm";
 import DefensasIntervencoesForm from "./DefensasIntervencoesForm";

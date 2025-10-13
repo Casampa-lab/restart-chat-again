@@ -17,6 +17,11 @@ interface IntervencoesInscricoesFormProps {
     tipo_inscricao: string;
   };
   onIntervencaoRegistrada?: () => void;
+  modo?: 'normal' | 'controlado';
+  onDataChange?: (data: any) => void;
+  hideSubmitButton?: boolean;
+  loteId?: string;
+  rodoviaId?: string;
 }
 
 const MATERIAIS = [
@@ -41,7 +46,15 @@ const TIPOS_INSCRICAO = [
   "Outros"
 ];
 
-const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistrada }: IntervencoesInscricoesFormProps) => {
+const IntervencoesInscricoesForm = ({ 
+  inscricaoSelecionada, 
+  onIntervencaoRegistrada,
+  modo = 'normal',
+  onDataChange,
+  hideSubmitButton = false,
+  loteId,
+  rodoviaId
+}: IntervencoesInscricoesFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     data_intervencao: new Date().toISOString().split('T')[0],
@@ -58,8 +71,22 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
     justificativa_fora_plano: "",
   });
 
+  const handleChange = (field: string, value: any) => {
+    const newData = { ...formData, [field]: value };
+    setFormData(newData);
+    
+    if (modo === 'controlado' && onDataChange) {
+      onDataChange(newData);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (modo === 'controlado') {
+      if (onDataChange) onDataChange(formData);
+      return;
+    }
     
     if (!inscricaoSelecionada) {
       toast({
@@ -156,9 +183,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
                 id="data_intervencao"
                 type="date"
                 value={formData.data_intervencao}
-                onChange={(e) =>
-                  setFormData({ ...formData, data_intervencao: e.target.value })
-                }
+                onChange={(e) => handleChange("data_intervencao", e.target.value)}
                 required
               />
             </div>
@@ -167,9 +192,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
               <Label htmlFor="motivo">Motivo da Intervenção *</Label>
               <Select
                 value={formData.motivo}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, motivo: value })
-                }
+                onValueChange={(value) => handleChange("motivo", value)}
                 required
               >
                 <SelectTrigger>
@@ -189,9 +212,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
               <Label htmlFor="tipo_inscricao">Tipo de Inscrição</Label>
               <Select
                 value={formData.tipo_inscricao}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, tipo_inscricao: value })
-                }
+                onValueChange={(value) => handleChange("tipo_inscricao", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
@@ -210,9 +231,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
               <Label htmlFor="cor">Cor</Label>
               <Select
                 value={formData.cor}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, cor: value })
-                }
+                onValueChange={(value) => handleChange("cor", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a cor" />
@@ -234,9 +253,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
                 type="number"
                 step="0.01"
                 value={formData.area_m2}
-                onChange={(e) =>
-                  setFormData({ ...formData, area_m2: e.target.value })
-                }
+                onChange={(e) => handleChange("area_m2", e.target.value)}
                 placeholder="0.00"
               />
             </div>
@@ -246,9 +263,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
               <Input
                 id="dimensoes"
                 value={formData.dimensoes}
-                onChange={(e) =>
-                  setFormData({ ...formData, dimensoes: e.target.value })
-                }
+                onChange={(e) => handleChange("dimensoes", e.target.value)}
                 placeholder="Ex: 3x2m, 10x1,5m"
               />
             </div>
@@ -257,9 +272,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
               <Label htmlFor="material_utilizado">Material Utilizado</Label>
               <Select
                 value={formData.material_utilizado}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, material_utilizado: value })
-                }
+                onValueChange={(value) => handleChange("material_utilizado", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o material" />
@@ -278,9 +291,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
               <Label htmlFor="estado_conservacao">Estado de Conservação</Label>
               <Select
                 value={formData.estado_conservacao}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, estado_conservacao: value })
-                }
+                onValueChange={(value) => handleChange("estado_conservacao", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o estado" />
@@ -298,9 +309,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
               <Textarea
                 id="observacao"
                 value={formData.observacao}
-                onChange={(e) =>
-                  setFormData({ ...formData, observacao: e.target.value })
-                }
+                onChange={(e) => handleChange("observacao", e.target.value)}
                 placeholder="Observações sobre a intervenção..."
                 rows={3}
               />
@@ -311,9 +320,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
               <Input
                 id="foto_url"
                 value={formData.foto_url}
-                onChange={(e) =>
-                  setFormData({ ...formData, foto_url: e.target.value })
-                }
+                onChange={(e) => handleChange("foto_url", e.target.value)}
                 placeholder="Caminho da foto no storage..."
               />
             </div>
@@ -324,9 +331,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
               type="checkbox"
               id="fora_plano"
               checked={formData.fora_plano_manutencao}
-              onChange={(e) =>
-                setFormData({ ...formData, fora_plano_manutencao: e.target.checked })
-              }
+              onChange={(e) => handleChange("fora_plano_manutencao", e.target.checked)}
               className="h-4 w-4 mt-1"
             />
             <div className="space-y-1 leading-none">
@@ -340,9 +345,7 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
               <Textarea
                 id="justificativa_fora_plano"
                 value={formData.justificativa_fora_plano}
-                onChange={(e) =>
-                  setFormData({ ...formData, justificativa_fora_plano: e.target.value })
-                }
+                onChange={(e) => handleChange("justificativa_fora_plano", e.target.value)}
                 placeholder="Explique o motivo da intervenção fora do plano..."
                 rows={3}
                 required={formData.fora_plano_manutencao}
@@ -350,10 +353,12 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={isLoading || !inscricaoSelecionada}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Salvar Intervenção
-          </Button>
+          {!hideSubmitButton && (
+            <Button type="submit" className="w-full" disabled={isLoading || (!inscricaoSelecionada && modo !== 'controlado')}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Salvar Intervenção
+            </Button>
+          )}
         </form>
       </CardContent>
     </Card>
@@ -361,3 +366,4 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
 };
 
 export default IntervencoesInscricoesForm;
+export { IntervencoesInscricoesForm };

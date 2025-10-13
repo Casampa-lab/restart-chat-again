@@ -33,9 +33,22 @@ interface IntervencoesPorticosFormProps {
     tipo: string;
   };
   onIntervencaoRegistrada?: () => void;
+  modo?: 'normal' | 'controlado';
+  onDataChange?: (data: any) => void;
+  hideSubmitButton?: boolean;
+  loteId?: string;
+  rodoviaId?: string;
 }
 
-export function IntervencoesPorticosForm({ porticoSelecionado, onIntervencaoRegistrada }: IntervencoesPorticosFormProps) {
+export function IntervencoesPorticosForm({ 
+  porticoSelecionado, 
+  onIntervencaoRegistrada,
+  modo = 'normal',
+  onDataChange,
+  hideSubmitButton = false,
+  loteId,
+  rodoviaId
+}: IntervencoesPorticosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormData>({
@@ -53,6 +66,11 @@ export function IntervencoesPorticosForm({ porticoSelecionado, onIntervencaoRegi
   });
 
   const onSubmit = async (data: FormData) => {
+    if (modo === 'controlado') {
+      if (onDataChange) onDataChange(data);
+      return;
+    }
+    
     if (!porticoSelecionado) {
       toast.error("Selecione um pórtico do inventário primeiro");
       return;
@@ -244,10 +262,12 @@ export function IntervencoesPorticosForm({ porticoSelecionado, onIntervencaoRegi
               />
             )}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting || !porticoSelecionado}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Registrar Intervenção
-            </Button>
+            {!hideSubmitButton && (
+              <Button type="submit" className="w-full" disabled={isSubmitting || (!porticoSelecionado && modo !== 'controlado')}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Registrar Intervenção
+              </Button>
+            )}
           </form>
         </Form>
       </CardContent>

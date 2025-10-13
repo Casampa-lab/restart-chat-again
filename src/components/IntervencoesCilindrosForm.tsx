@@ -34,9 +34,22 @@ interface IntervencoesCilindrosFormProps {
     snv?: string;
   };
   onIntervencaoRegistrada?: () => void;
+  modo?: 'normal' | 'controlado';
+  onDataChange?: (data: any) => void;
+  hideSubmitButton?: boolean;
+  loteId?: string;
+  rodoviaId?: string;
 }
 
-export function IntervencoesCilindrosForm({ cilindroSelecionado, onIntervencaoRegistrada }: IntervencoesCilindrosFormProps) {
+export function IntervencoesCilindrosForm({ 
+  cilindroSelecionado, 
+  onIntervencaoRegistrada,
+  modo = 'normal',
+  onDataChange,
+  hideSubmitButton = false,
+  loteId,
+  rodoviaId
+}: IntervencoesCilindrosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormData>({
@@ -55,6 +68,11 @@ export function IntervencoesCilindrosForm({ cilindroSelecionado, onIntervencaoRe
   });
 
   const onSubmit = async (data: FormData) => {
+    if (modo === 'controlado') {
+      if (onDataChange) onDataChange(data);
+      return;
+    }
+    
     if (!cilindroSelecionado) {
       toast.error("Selecione um cilindro do inventário primeiro");
       return;
@@ -266,10 +284,12 @@ export function IntervencoesCilindrosForm({ cilindroSelecionado, onIntervencaoRe
               />
             )}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting || !cilindroSelecionado}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Registrar Intervenção
-            </Button>
+            {!hideSubmitButton && (
+              <Button type="submit" className="w-full" disabled={isSubmitting || (!cilindroSelecionado && modo !== 'controlado')}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Registrar Intervenção
+              </Button>
+            )}
           </form>
         </Form>
       </CardContent>
