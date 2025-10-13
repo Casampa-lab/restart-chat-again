@@ -667,9 +667,7 @@ export type Database = {
           enviado_coordenador: boolean | null
           espacamento_m: number | null
           espessura_cm: number | null
-          estado_conservacao: string | null
           extensao_metros: number | null
-          foto_url: string | null
           id: string
           km_final: number | null
           km_inicial: number | null
@@ -680,7 +678,6 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           material: string | null
-          observacao: string | null
           posicao: string | null
           rodovia_id: string
           snv: string | null
@@ -698,9 +695,7 @@ export type Database = {
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
           espessura_cm?: number | null
-          estado_conservacao?: string | null
           extensao_metros?: number | null
-          foto_url?: string | null
           id?: string
           km_final?: number | null
           km_inicial?: number | null
@@ -711,7 +706,6 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           material?: string | null
-          observacao?: string | null
           posicao?: string | null
           rodovia_id: string
           snv?: string | null
@@ -729,9 +723,7 @@ export type Database = {
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
           espessura_cm?: number | null
-          estado_conservacao?: string | null
           extensao_metros?: number | null
-          foto_url?: string | null
           id?: string
           km_final?: number | null
           km_inicial?: number | null
@@ -742,7 +734,6 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           material?: string | null
-          observacao?: string | null
           posicao?: string | null
           rodovia_id?: string
           snv?: string | null
@@ -759,13 +750,16 @@ export type Database = {
           created_at: string
           data_intervencao: string
           espessura_cm: number | null
+          estado_conservacao: string | null
           ficha_marcas_longitudinais_id: string
           fora_plano_manutencao: boolean | null
+          foto_url: string | null
           id: string
           justificativa_fora_plano: string | null
           largura_cm: number | null
           material: string | null
           motivo: string
+          observacao: string | null
           tipo_demarcacao: string | null
         }
         Insert: {
@@ -773,13 +767,16 @@ export type Database = {
           created_at?: string
           data_intervencao: string
           espessura_cm?: number | null
+          estado_conservacao?: string | null
           ficha_marcas_longitudinais_id: string
           fora_plano_manutencao?: boolean | null
+          foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
           largura_cm?: number | null
           material?: string | null
           motivo: string
+          observacao?: string | null
           tipo_demarcacao?: string | null
         }
         Update: {
@@ -787,13 +784,16 @@ export type Database = {
           created_at?: string
           data_intervencao?: string
           espessura_cm?: number | null
+          estado_conservacao?: string | null
           ficha_marcas_longitudinais_id?: string
           fora_plano_manutencao?: boolean | null
+          foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
           largura_cm?: number | null
           material?: string | null
           motivo?: string
+          observacao?: string | null
           tipo_demarcacao?: string | null
         }
         Relationships: []

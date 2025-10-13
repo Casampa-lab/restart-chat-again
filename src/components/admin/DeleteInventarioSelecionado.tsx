@@ -87,12 +87,7 @@ export function DeleteInventarioSelecionado() {
       // Definir colunas de fotos por tabela
       const fotoColumns: Record<string, string> = {
         "ficha_placa": "foto_frontal_url, foto_lateral_url, foto_posterior_url, foto_base_url, foto_identificacao_url",
-        "ficha_marcas_longitudinais": "foto_url",
-        "ficha_cilindros": "foto_url",
-        "ficha_inscricoes": "foto_url",
-        "ficha_tachas": "foto_url",
         "ficha_porticos": "foto_url",
-        "defensas": "foto_url",
       };
       
       const selectColumns = `id, ${fotoColumns[selectedTabela] || 'foto_url'}`;

@@ -27,12 +27,14 @@ interface FichaMarcaLongitudinal {
   extensao_metros: number | null;
   espessura_cm: number | null;
   material: string | null;
-  estado_conservacao: string | null;
-  observacao: string | null;
-  foto_url: string | null;
   // Campos adicionais do dicionário
   rodovia_id: string;
   lote_id: string;
+  traco_m: number | null;
+  espacamento_m: number | null;
+  area_m2: number | null;
+  codigo: string | null;
+  posicao: string | null;
 }
 
 interface InventarioMarcasLongitudinaisViewerProps {
@@ -329,12 +331,8 @@ export function InventarioMarcasLongitudinaisViewer({
                         <TableCell>{marca.material || "-"}</TableCell>
                         <TableCell>{marca.km_inicial?.toFixed(2) || "-"}</TableCell>
                         <TableCell>{marca.km_final?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>
-                          {marca.observacao?.match(/Traço:\s*([^m|]+)m?/)?.[1]?.trim() || "-"}
-                        </TableCell>
-                        <TableCell>
-                          {marca.observacao?.match(/Espaçamento:\s*([^m|]+)m?/)?.[1]?.trim() || "-"}
-                        </TableCell>
+                        <TableCell>{marca.traco_m?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>{marca.espacamento_m?.toFixed(2) || "-"}</TableCell>
                         <TableCell>{marca.extensao_metros ? (marca.extensao_metros / 1000).toFixed(2) : "-"}</TableCell>
                         <TableCell>
                           {marca.data_vistoria
@@ -423,24 +421,20 @@ export function InventarioMarcasLongitudinaisViewer({
                   <h3 className="font-semibold mb-3">Identificação</h3>
                   <div className="grid grid-cols-4 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">BR:</span>
-                      <p className="text-sm">
-                        {selectedMarca.observacao?.match(/BR:\s*([^|]+)/)?.[1]?.trim() || "-"}
-                      </p>
-                    </div>
-                    <div>
                       <span className="text-sm font-medium text-muted-foreground">SNV:</span>
                       <p className="text-sm">{selectedMarca.snv || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Código:</span>
-                      <p className="text-sm">{selectedMarca.tipo_demarcacao || "-"}</p>
+                      <p className="text-sm">{selectedMarca.codigo || selectedMarca.tipo_demarcacao || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Posição:</span>
-                      <p className="text-sm">
-                        {selectedMarca.observacao?.match(/Posição:\s*([^|]+)/)?.[1]?.trim() || "-"}
-                      </p>
+                      <p className="text-sm">{selectedMarca.posicao || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Cor:</span>
+                      <p className="text-sm">{selectedMarca.cor || "-"}</p>
                     </div>
                   </div>
                 </div>
@@ -524,19 +518,11 @@ export function InventarioMarcasLongitudinaisViewer({
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Traço (m):</span>
-                      <p className="text-sm">
-                        {selectedMarca.observacao?.includes("Traço:") 
-                          ? selectedMarca.observacao.match(/Traço:\s*([^|]+)/)?.[1]?.trim() || "-"
-                          : "-"}
-                      </p>
+                      <p className="text-sm">{selectedMarca.traco_m?.toFixed(2) || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Espaçamento (m):</span>
-                      <p className="text-sm">
-                        {selectedMarca.observacao?.includes("Espaçamento:") 
-                          ? selectedMarca.observacao.match(/Espaçamento:\s*([^|]+)/)?.[1]?.trim() || "-"
-                          : "-"}
-                      </p>
+                      <p className="text-sm">{selectedMarca.espacamento_m?.toFixed(2) || "-"}</p>
                     </div>
                   </div>
                 </div>
@@ -574,9 +560,7 @@ export function InventarioMarcasLongitudinaisViewer({
                   <h3 className="font-semibold mb-3">Área</h3>
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Área (m²):</span>
-                    <p className="text-sm">
-                      {selectedMarca.observacao?.match(/Área:\s*([^\s|]+)/)?.[1]?.trim() || "-"}
-                    </p>
+                    <p className="text-sm">{selectedMarca.area_m2?.toFixed(2) || "-"}</p>
                   </div>
                 </div>
 
@@ -596,19 +580,9 @@ export function InventarioMarcasLongitudinaisViewer({
               </TabsContent>
 
               <TabsContent value="foto" className="mt-4">
-                {selectedMarca.foto_url ? (
-                  <div className="flex justify-center">
-                    <img
-                      src={supabase.storage.from('marcas-longitudinais').getPublicUrl(selectedMarca.foto_url).data.publicUrl}
-                      alt="Marca Longitudinal"
-                      className="rounded-lg max-w-full h-auto"
-                    />
-                  </div>
-                ) : (
-                  <p className="text-center py-8 text-muted-foreground">
-                    Nenhuma foto disponível
-                  </p>
-                )}
+                <p className="text-center py-8 text-muted-foreground">
+                  As fotos de intervenções estão disponíveis no histórico de intervenções.
+                </p>
               </TabsContent>
 
               <TabsContent value="historico" className="mt-4">
@@ -661,6 +635,28 @@ export function InventarioMarcasLongitudinaisViewer({
                               <div>
                                 <span className="text-sm font-medium">Espessura:</span>
                                 <p className="text-sm">{intervencao.espessura_cm} cm</p>
+                              </div>
+                            )}
+                            {intervencao.estado_conservacao && (
+                              <div>
+                                <span className="text-sm font-medium">Estado:</span>
+                                <p className="text-sm">{intervencao.estado_conservacao}</p>
+                              </div>
+                            )}
+                            {intervencao.observacao && (
+                              <div className="col-span-2">
+                                <span className="text-sm font-medium">Observação:</span>
+                                <p className="text-sm">{intervencao.observacao}</p>
+                              </div>
+                            )}
+                            {intervencao.foto_url && (
+                              <div className="col-span-2">
+                                <span className="text-sm font-medium">Foto:</span>
+                                <img
+                                  src={supabase.storage.from('marcas-longitudinais').getPublicUrl(intervencao.foto_url).data.publicUrl}
+                                  alt="Intervenção"
+                                  className="mt-2 rounded-lg max-w-full h-auto"
+                                />
                               </div>
                             )}
                           </div>
