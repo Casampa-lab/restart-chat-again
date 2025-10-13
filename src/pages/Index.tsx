@@ -705,19 +705,17 @@ const Index = () => {
                           <TabsTrigger value="transversais" className="flex items-center gap-2">
                             <span>Cilindros</span>
                             <div className="flex items-center gap-1">
-                              {countCilindros! > 0 && (
-                                <Badge 
-                                  variant="secondary" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Cadastro - Clique para ver Necessidades"
-                                >
-                                  {countCilindros}
-                                </Badge>
-                              )}
+                              <Badge 
+                                variant="secondary" 
+                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Cadastro - Clique para ver Necessidades"
+                              >
+                                {countCilindros || 0}
+                              </Badge>
                               {countNecCilindros! > 0 && (
                                 <Badge 
                                   className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
