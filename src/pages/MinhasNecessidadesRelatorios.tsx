@@ -57,25 +57,30 @@ export default function MinhasNecessidadesRelatorios() {
           rodovia: lr.rodovias?.codigo || lr.rodovias?.nome || "",
         }));
       } else {
-        // Buscar dados do CADASTRO normal com nomes legíveis de lote e rodovia
+        // Buscar dados do CADASTRO normal
         const orderByColumn = (tipoSelecionado === "placas" || tipoSelecionado === "porticos") ? "km" : "km_inicial";
         const { data, error } = await supabase
           .from(tipoConfig.tabelaCadastro as any)
-          .select(`
-            *,
-            lotes (numero),
-            rodovias (codigo, nome)
-          `)
+          .select("*")
           .order(orderByColumn);
 
         if (error) throw error;
         
+        // Buscar lotes e rodovias separadamente para mapear os nomes
+        const { data: lotes } = await supabase.from("lotes").select("id, numero");
+        const { data: rodovias } = await supabase.from("rodovias").select("id, codigo, nome");
+        
+        // Criar mapa de lotes e rodovias
+        const lotesMap = new Map((lotes || []).map(l => [l.id, l.numero]));
+        const rodoviasMap = new Map((rodovias || []).map(r => [r.id, { codigo: r.codigo, nome: r.nome }]));
+        
         // Transformar dados: remover IDs técnicos e adicionar nomes legíveis
         cadastro = (data || []).map((item: any) => {
-          const { id, user_id, lote_id, rodovia_id, created_at, updated_at, enviado_coordenador, lotes, rodovias, ...resto } = item;
+          const { id, user_id, lote_id, rodovia_id, created_at, updated_at, enviado_coordenador, ...resto } = item;
+          const rodovia = rodoviasMap.get(rodovia_id);
           return {
-            lote: lotes?.numero || "",
-            rodovia: rodovias?.codigo || rodovias?.nome || "",
+            lote: lotesMap.get(lote_id) || "",
+            rodovia: rodovia?.codigo || rodovia?.nome || "",
             ...resto,
           };
         });
@@ -220,25 +225,30 @@ export default function MinhasNecessidadesRelatorios() {
         return;
       }
 
-      // Buscar CADASTRO com nomes legíveis
+      // Buscar CADASTRO
       const orderByColumn = (tipoSelecionado === "placas" || tipoSelecionado === "porticos") ? "km" : "km_inicial";
       const { data: cadastroRaw, error: erroCadastro } = await supabase
         .from(tipoConfig.tabelaCadastro as any)
-        .select(`
-          *,
-          lotes (numero),
-          rodovias (codigo, nome)
-        `)
+        .select("*")
         .order(orderByColumn);
 
       if (erroCadastro) throw erroCadastro;
       
+      // Buscar lotes e rodovias separadamente para mapear os nomes
+      const { data: lotes } = await supabase.from("lotes").select("id, numero");
+      const { data: rodovias } = await supabase.from("rodovias").select("id, codigo, nome");
+      
+      // Criar mapa de lotes e rodovias
+      const lotesMap = new Map((lotes || []).map(l => [l.id, l.numero]));
+      const rodoviasMap = new Map((rodovias || []).map(r => [r.id, { codigo: r.codigo, nome: r.nome }]));
+      
       // Transformar cadastro: remover IDs técnicos e adicionar nomes legíveis
       const cadastro = (cadastroRaw || []).map((item: any) => {
-        const { id, user_id, lote_id, rodovia_id, created_at, updated_at, enviado_coordenador, lotes, rodovias, ...resto } = item;
+        const { id, user_id, lote_id, rodovia_id, created_at, updated_at, enviado_coordenador, ...resto } = item;
+        const rodovia = rodoviasMap.get(rodovia_id);
         return {
-          lote: lotes?.numero || "",
-          rodovia: rodovias?.codigo || rodovias?.nome || "",
+          lote: lotesMap.get(lote_id) || "",
+          rodovia: rodovia?.codigo || rodovia?.nome || "",
           ...resto,
         };
       });
