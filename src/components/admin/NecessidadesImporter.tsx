@@ -360,6 +360,18 @@ export function NecessidadesImporter() {
         return kmValue !== undefined && kmValue !== null && kmValue !== "";
       });
 
+      // Validar se há dados após filtro
+      if (dadosFiltrados.length === 0) {
+        toast({
+          title: "Planilha vazia",
+          description: "Nenhum registro válido encontrado",
+          variant: "destructive",
+        });
+        setIsImporting(false);
+        setProgressInfo(null);
+        return;
+      }
+
       // 2. Buscar user_id
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");

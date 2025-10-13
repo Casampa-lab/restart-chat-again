@@ -179,6 +179,12 @@ export function InventarioImporterManager() {
         });
       });
 
+      // Validar se há dados após filtro
+      if (dataRows.length === 0) {
+        toast.error("Planilha vazia: nenhum registro válido encontrado");
+        return;
+      }
+
       // Log para debug
       console.log(`=== COLUNAS DISPONÍVEIS NO EXCEL (${inventoryType}) ===`);
       console.log("Total de registros após filtrar vazios:", dataRows.length);
