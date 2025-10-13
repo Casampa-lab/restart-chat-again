@@ -52,6 +52,78 @@ export default function DashboardNecessidades() {
     try {
       console.log("Carregando stats para usuário:", user?.id);
 
+      // Primeiro, encontrar o lote_id do usuário
+      let loteIdFiltro: string | null = null;
+      let loteInfo: any = null;
+      let rodoviaInfo: any = null;
+
+      // Buscar em uma das tabelas para descobrir o lote
+      const { data: sampleData } = await supabase
+        .from("necessidades_marcas_longitudinais")
+        .select(`
+          lote_id,
+          rodovia:rodovias(codigo, nome),
+          lote:lotes(numero)
+        `)
+        .eq("user_id", user?.id)
+        .limit(1)
+        .maybeSingle();
+
+      if (sampleData?.lote_id) {
+        loteIdFiltro = sampleData.lote_id;
+        loteInfo = sampleData.lote;
+        rodoviaInfo = sampleData.rodovia;
+      }
+
+      // Se não encontrou em marcas longitudinais, tenta nas outras tabelas
+      if (!loteIdFiltro) {
+        for (const tipo of TIPOS_NECESSIDADES) {
+          try {
+            const { data, error } = await supabase
+              .from(`necessidades_${tipo.value}` as any)
+              .select(`
+                lote_id,
+                rodovia:rodovias(codigo, nome),
+                lote:lotes(numero)
+              `)
+              .eq("user_id", user?.id)
+              .limit(1)
+              .maybeSingle();
+
+            if (!error && data && 'lote_id' in data && data.lote_id) {
+              loteIdFiltro = data.lote_id as string;
+              loteInfo = 'lote' in data ? data.lote : null;
+              rodoviaInfo = 'rodovia' in data ? data.rodovia : null;
+              break;
+            }
+          } catch (e) {
+            // Continua para próxima tabela se houver erro
+            continue;
+          }
+        }
+      }
+
+      if (!loteIdFiltro) {
+        console.error("Nenhum lote encontrado para o usuário");
+        setStats({
+          porTipo: [],
+          porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
+          porRodovia: [],
+          porLote: [],
+          taxaMatch: 0,
+          timeline: [],
+          totalGeral: 0,
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Definir info do lote para o header
+      setLoteInfo({
+        numero: loteInfo.numero,
+        rodovia: rodoviaInfo
+      });
+
       const allStats: any = {
         porTipo: [],
         porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
@@ -64,12 +136,10 @@ export default function DashboardNecessidades() {
 
       let totalComMatch = 0;
       let totalSemMatch = 0;
-      let primeiraRodovia: any = null;
-      let primeiroLote: any = null;
 
-      // Buscar dados de cada tipo diretamente por user_id
+      // Buscar dados de cada tipo filtrado por lote_id
       for (const tipo of TIPOS_NECESSIDADES) {
-        console.log(`Buscando necessidades de ${tipo.label}`);
+        console.log(`Buscando necessidades de ${tipo.label} para lote ${loteIdFiltro}`);
         
         const { data, error } = await supabase
           .from(`necessidades_${tipo.value}` as any)
@@ -78,7 +148,8 @@ export default function DashboardNecessidades() {
             rodovia:rodovias(codigo, nome),
             lote:lotes(numero)
           `)
-          .eq("user_id", user?.id);
+          .eq("user_id", user?.id)
+          .eq("lote_id", loteIdFiltro);
 
         if (error) {
           console.error(`Erro ao carregar ${tipo.label}:`, error);
@@ -87,12 +158,6 @@ export default function DashboardNecessidades() {
 
         const necessidades = (data as any[]) || [];
         console.log(`${tipo.label}: ${necessidades.length} necessidades encontradas`);
-
-        // Armazenar info do primeiro lote/rodovia encontrado
-        if (!primeiroLote && necessidades.length > 0) {
-          primeiroLote = necessidades[0].lote;
-          primeiraRodovia = necessidades[0].rodovia;
-        }
 
 
         // Stats por tipo
@@ -159,14 +224,6 @@ export default function DashboardNecessidades() {
           } else {
             allStats.timeline.push({ mes, total: 1 });
           }
-        });
-      }
-
-      // Definir info do lote para o header
-      if (primeiroLote && primeiraRodovia) {
-        setLoteInfo({
-          numero: primeiroLote.numero,
-          rodovia: primeiraRodovia
         });
       }
 
