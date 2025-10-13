@@ -29,7 +29,6 @@ interface Cilindro {
   espacamento_m: number | null;
   quantidade: number | null;
   observacao: string | null;
-  foto_url: string | null;
   data_vistoria: string;
 }
 
@@ -41,6 +40,7 @@ interface IntervencaoCilindro {
   cor_refletivo: string | null;
   tipo_refletivo: string | null;
   quantidade: number | null;
+  foto_url: string | null;
 }
 
 interface InventarioCilindrosViewerProps {
@@ -542,19 +542,9 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
               </TabsContent>
 
               <TabsContent value="foto" className="mt-4">
-                {selectedCilindro.foto_url ? (
-                  <div className="flex justify-center">
-                    <img
-                      src={supabase.storage.from('cilindros').getPublicUrl(selectedCilindro.foto_url).data.publicUrl}
-                      alt="Cilindro"
-                      className="rounded-lg max-w-full h-auto"
-                    />
-                  </div>
-                ) : (
-                  <p className="text-center py-8 text-muted-foreground">
-                    Nenhuma foto disponível
-                  </p>
-                )}
+                <p className="text-center py-8 text-muted-foreground">
+                  Fotos de intervenções estão disponíveis no histórico
+                </p>
               </TabsContent>
 
               <TabsContent value="historico" className="mt-4">
@@ -604,6 +594,18 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                               </div>
                             )}
                           </div>
+                          {intervencao.foto_url && (
+                            <div className="mt-3 pt-3 border-t">
+                              <span className="text-sm font-medium">Foto da Intervenção:</span>
+                              <div className="mt-2">
+                                <img
+                                  src={supabase.storage.from('cilindros').getPublicUrl(intervencao.foto_url).data.publicUrl}
+                                  alt="Intervenção"
+                                  className="rounded-lg max-w-sm"
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

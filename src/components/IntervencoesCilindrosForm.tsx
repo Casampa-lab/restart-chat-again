@@ -19,6 +19,7 @@ const formSchema = z.object({
   cor_refletivo: z.string().optional(),
   tipo_refletivo: z.string().optional(),
   quantidade: z.string().optional(),
+  foto_url: z.string().optional(),
   fora_plano_manutencao: z.boolean().default(false),
   justificativa_fora_plano: z.string().optional(),
 });
@@ -47,6 +48,7 @@ export function IntervencoesCilindrosForm({ cilindroSelecionado, onIntervencaoRe
       cor_refletivo: "",
       tipo_refletivo: "",
       quantidade: "",
+      foto_url: "",
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
     },
@@ -70,6 +72,7 @@ export function IntervencoesCilindrosForm({ cilindroSelecionado, onIntervencaoRe
           cor_refletivo: data.cor_refletivo || null,
           tipo_refletivo: data.tipo_refletivo || null,
           quantidade: data.quantidade ? parseInt(data.quantidade) : null,
+          foto_url: data.foto_url || null,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
         });
@@ -212,6 +215,20 @@ export function IntervencoesCilindrosForm({ cilindroSelecionado, onIntervencaoRe
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="foto_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL da Foto</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Caminho da foto no storage..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

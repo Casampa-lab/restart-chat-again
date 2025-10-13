@@ -423,7 +423,6 @@ export type Database = {
           enviado_coordenador: boolean | null
           espacamento_m: number | null
           extensao_km: number | null
-          foto_url: string | null
           id: string
           km_final: number
           km_inicial: number
@@ -449,7 +448,6 @@ export type Database = {
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
-          foto_url?: string | null
           id?: string
           km_final?: number
           km_inicial?: number
@@ -475,7 +473,6 @@ export type Database = {
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
-          foto_url?: string | null
           id?: string
           km_final?: number
           km_inicial?: number
@@ -503,6 +500,7 @@ export type Database = {
           data_intervencao: string
           ficha_cilindros_id: string
           fora_plano_manutencao: boolean | null
+          foto_url: string | null
           id: string
           justificativa_fora_plano: string | null
           motivo: string
@@ -516,6 +514,7 @@ export type Database = {
           data_intervencao: string
           ficha_cilindros_id: string
           fora_plano_manutencao?: boolean | null
+          foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
           motivo: string
@@ -529,6 +528,7 @@ export type Database = {
           data_intervencao?: string
           ficha_cilindros_id?: string
           fora_plano_manutencao?: boolean | null
+          foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
           motivo?: string
