@@ -4,22 +4,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { ArrowLeft, Download, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { criarWorkbookComLogos } from "@/lib/excelLogoHelper";
 import { useSupervisora } from "@/hooks/useSupervisora";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
+import { format } from "date-fns";
 
 const TIPOS_RELATORIO = [
-  { value: "dados_rodovias", label: "Dados das Rodovias", tabelaCadastro: "dados_rodovias" },
-  { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabelaCadastro: "ficha_marcas_longitudinais" },
-  { value: "tachas", label: "Tachas", tabelaCadastro: "ficha_tachas" },
-  { value: "marcas_transversais", label: "Zebrados", tabelaCadastro: "ficha_inscricoes" },
-  { value: "cilindros", label: "Cilindros", tabelaCadastro: "ficha_cilindros" },
-  { value: "placas", label: "Placas", tabelaCadastro: "ficha_placa" },
-  { value: "porticos", label: "Pórticos", tabelaCadastro: "ficha_porticos" },
-  { value: "defensas", label: "Defensas", tabelaCadastro: "defensas" },
+  { value: "dados_rodovias", label: "Dados das Rodovias", tabelaCadastro: "dados_rodovias", tabelaIntervencoes: null },
+  { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabelaCadastro: "ficha_marcas_longitudinais", tabelaIntervencoes: "ficha_marcas_longitudinais_intervencoes" },
+  { value: "tachas", label: "Tachas", tabelaCadastro: "ficha_tachas", tabelaIntervencoes: "ficha_tachas_intervencoes" },
+  { value: "marcas_transversais", label: "Zebrados", tabelaCadastro: "ficha_inscricoes", tabelaIntervencoes: "ficha_inscricoes_intervencoes" },
+  { value: "cilindros", label: "Cilindros", tabelaCadastro: "ficha_cilindros", tabelaIntervencoes: "ficha_cilindros_intervencoes" },
+  { value: "placas", label: "Placas", tabelaCadastro: "ficha_placa", tabelaIntervencoes: "ficha_placa_intervencoes" },
+  { value: "porticos", label: "Pórticos", tabelaCadastro: "ficha_porticos", tabelaIntervencoes: "ficha_porticos_intervencoes" },
+  { value: "defensas", label: "Defensas", tabelaCadastro: "defensas", tabelaIntervencoes: "defensas_intervencoes" },
 ];
 
 export default function MinhasNecessidadesRelatorios() {
@@ -27,6 +29,8 @@ export default function MinhasNecessidadesRelatorios() {
   const { data: supervisora } = useSupervisora();
   const [tipoSelecionado, setTipoSelecionado] = useState<string>("dados_rodovias");
   const [gerando, setGerando] = useState(false);
+  const [dataInicio, setDataInicio] = useState<string>("");
+  const [dataFim, setDataFim] = useState<string>("");
 
   const gerarRelatorioInicial = async () => {
     try {
@@ -80,18 +84,82 @@ export default function MinhasNecessidadesRelatorios() {
           }));
 
       // Gerar Excel com logos
-      const workbook = await criarWorkbookComLogos(dadosComServico, "Dados", {
+      const workbook = await criarWorkbookComLogos(dadosComServico, "CADASTRO INICIAL", {
         logoSupervisoraUrl: supervisora?.logo_url,
         logoOrgaoUrl: (supervisora as any)?.logo_orgao_fiscalizador_url,
         nomeEmpresa: supervisora?.nome_empresa,
         contrato: (supervisora as any)?.contrato,
       });
 
+      // NOVA: Buscar intervenções se houver tabela de intervenções E filtro de data
+      if (tipoConfig.tabelaIntervencoes && (dataInicio || dataFim)) {
+        let query = supabase
+          .from(tipoConfig.tabelaIntervencoes as any)
+          .select("*")
+          .order("data_intervencao", { ascending: false });
+
+        if (dataInicio) {
+          query = query.gte("data_intervencao", dataInicio);
+        }
+        if (dataFim) {
+          query = query.lte("data_intervencao", dataFim);
+        }
+
+        const { data: intervencoes, error: erroIntervencoes } = await query;
+
+        if (!erroIntervencoes && intervencoes && intervencoes.length > 0) {
+          // Criar aba de MANUTENÇÃO EXECUTADA
+          const manutencaoSheet = workbook.addWorksheet("MANUTENÇÃO EXECUTADA");
+          
+          // Headers baseados nas colunas das intervenções
+          const headers = Object.keys(intervencoes[0]);
+          manutencaoSheet.addRow(headers);
+
+          // Adicionar dados
+          intervencoes.forEach((int: any) => {
+            const row = headers.map(h => {
+              const value = int[h];
+              // Formatar datas
+              if (h.includes("data") && value) {
+                return format(new Date(value), "dd/MM/yyyy");
+              }
+              // Destacar serviços fora do plano
+              if (h === "fora_plano_manutencao") {
+                return value ? "⚠️ SIM" : "Não";
+              }
+              return value;
+            });
+            manutencaoSheet.addRow(row);
+          });
+
+          // Aplicar estilo nas linhas "fora do plano"
+          intervencoes.forEach((int: any, index: number) => {
+            if (int.fora_plano_manutencao) {
+              const rowNum = index + 2; // +2 porque header é row 1 e dados começam em 2
+              const row = manutencaoSheet.getRow(rowNum);
+              row.eachCell((cell) => {
+                cell.fill = {
+                  type: "pattern",
+                  pattern: "solid",
+                  fgColor: { argb: "FFFFF3CD" }, // amarelo claro
+                };
+                cell.font = {
+                  bold: true,
+                  color: { argb: "FF856404" }, // laranja escuro
+                };
+              });
+            }
+          });
+        }
+      }
+
       // Sheet DIC (dicionário)
       const dicData = [
         { Campo: "servico", Descrição: "Tipo de serviço (Inclusão/Substituição/Remoção)" },
         { Campo: "km_inicial", Descrição: "Quilômetro inicial" },
         { Campo: "km_final", Descrição: "Quilômetro final" },
+        { Campo: "fora_plano_manutencao", Descrição: "Serviço executado fora do plano de manutenção" },
+        { Campo: "justificativa_fora_plano", Descrição: "Justificativa para serviço fora do plano" },
       ];
       const dicSheet = workbook.addWorksheet("DIC");
       dicSheet.addRow(Object.keys(dicData[0]));
@@ -294,12 +362,42 @@ export default function MinhasNecessidadesRelatorios() {
                   </Select>
                 </div>
 
+                {/* Filtro de datas para incluir aba de manutenção executada */}
+                {tipoSelecionado !== "dados_rodovias" && (
+                  <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                    <h4 className="text-sm font-medium">Período de Manutenção (opcional)</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Informe o período para incluir aba "MANUTENÇÃO EXECUTADA" no relatório
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Data Início</label>
+                        <Input
+                          type="date"
+                          value={dataInicio}
+                          onChange={(e) => setDataInicio(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Data Fim</label>
+                        <Input
+                          type="date"
+                          value={dataFim}
+                          onChange={(e) => setDataFim(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="bg-muted/50 p-4 rounded-lg space-y-2">
                   <h4 className="font-medium text-sm">O que será exportado:</h4>
                   <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                    <li>Todos os registros do cadastro atual</li>
-                    <li>Coluna "serviço" vazia (para preenchimento)</li>
-                    <li>Sheet DIC com dicionário de campos</li>
+                    <li>Aba "CADASTRO INICIAL": Todos os registros do cadastro atual</li>
+                    {dataInicio || dataFim ? (
+                      <li>Aba "MANUTENÇÃO EXECUTADA": Serviços realizados no período (com destaque para serviços fora do plano)</li>
+                    ) : null}
+                    <li>Aba "DIC": Dicionário de campos</li>
                   </ul>
                 </div>
 
