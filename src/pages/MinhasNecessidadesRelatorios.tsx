@@ -57,16 +57,28 @@ export default function MinhasNecessidadesRelatorios() {
           rodovia: lr.rodovias?.codigo || lr.rodovias?.nome || "",
         }));
       } else {
-        // Buscar dados do CADASTRO normal
-        // Ordenação condicional: placas e porticos usam 'km', outros usam 'km_inicial'
+        // Buscar dados do CADASTRO normal com nomes legíveis de lote e rodovia
         const orderByColumn = (tipoSelecionado === "placas" || tipoSelecionado === "porticos") ? "km" : "km_inicial";
         const { data, error } = await supabase
           .from(tipoConfig.tabelaCadastro as any)
-          .select("*")
+          .select(`
+            *,
+            lotes (numero),
+            rodovias (codigo, nome)
+          `)
           .order(orderByColumn);
 
         if (error) throw error;
-        cadastro = data || [];
+        
+        // Transformar dados: remover IDs técnicos e adicionar nomes legíveis
+        cadastro = (data || []).map((item: any) => {
+          const { id, user_id, lote_id, rodovia_id, created_at, updated_at, enviado_coordenador, lotes, rodovias, ...resto } = item;
+          return {
+            lote: lotes?.numero || "",
+            rodovia: rodovias?.codigo || rodovias?.nome || "",
+            ...resto,
+          };
+        });
       }
 
       if (!cadastro || cadastro.length === 0) {
@@ -104,9 +116,15 @@ export default function MinhasNecessidadesRelatorios() {
           query = query.lte("data_intervencao", dataFim);
         }
 
-        const { data: intervencoes, error: erroIntervencoes } = await query;
+        const { data: intervencoesRaw, error: erroIntervencoes } = await query;
 
-        if (!erroIntervencoes && intervencoes && intervencoes.length > 0) {
+        if (!erroIntervencoes && intervencoesRaw && intervencoesRaw.length > 0) {
+          // Transformar intervenções: remover IDs técnicos
+          const intervencoes = intervencoesRaw.map((item: any) => {
+            const { id, created_at, ...resto } = item;
+            return resto;
+          });
+          
           // Criar aba de MANUTENÇÃO EXECUTADA
           const manutencaoSheet = workbook.addWorksheet("MANUTENÇÃO EXECUTADA");
           
@@ -202,15 +220,28 @@ export default function MinhasNecessidadesRelatorios() {
         return;
       }
 
-      // Buscar CADASTRO
-      // Ordenação condicional: placas e porticos usam 'km', outros usam 'km_inicial'
+      // Buscar CADASTRO com nomes legíveis
       const orderByColumn = (tipoSelecionado === "placas" || tipoSelecionado === "porticos") ? "km" : "km_inicial";
-      const { data: cadastro, error: erroCadastro } = await supabase
+      const { data: cadastroRaw, error: erroCadastro } = await supabase
         .from(tipoConfig.tabelaCadastro as any)
-        .select("*")
+        .select(`
+          *,
+          lotes (numero),
+          rodovias (codigo, nome)
+        `)
         .order(orderByColumn);
 
       if (erroCadastro) throw erroCadastro;
+      
+      // Transformar cadastro: remover IDs técnicos e adicionar nomes legíveis
+      const cadastro = (cadastroRaw || []).map((item: any) => {
+        const { id, user_id, lote_id, rodovia_id, created_at, updated_at, enviado_coordenador, lotes, rodovias, ...resto } = item;
+        return {
+          lote: lotes?.numero || "",
+          rodovia: rodovias?.codigo || rodovias?.nome || "",
+          ...resto,
+        };
+      });
 
       if (!cadastro || cadastro.length === 0) {
         toast.warning("Nenhum dado de cadastro encontrado para este tipo");
