@@ -18,7 +18,7 @@ import RetrorrefletividadeDinamicaForm from "@/components/RetrorrefletividadeDin
 import DefensasForm from "@/components/DefensasForm";
 import IntervencoesSHForm from "@/components/IntervencoesSHForm";
 import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm";
-import IntervencoesSVForm from "@/components/IntervencoesSVForm";
+import { IntervencoesSVForm } from "@/components/IntervencoesSVForm";
 import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
 import { IntervencoesCilindrosForm } from "@/components/IntervencoesCilindrosForm";
 import { IntervencoesPorticosForm } from "@/components/IntervencoesPorticosForm";
@@ -576,16 +576,16 @@ const Index = () => {
                           </TabsTrigger>
                         </TabsList>
                         <TabsContent value="longitudinais" className="mt-4">
-                          <IntervencoesSHForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                          <IntervencoesSHForm />
                         </TabsContent>
                         <TabsContent value="transversais" className="mt-4">
-                          <IntervencoesCilindrosForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                          <IntervencoesCilindrosForm />
                         </TabsContent>
                         <TabsContent value="inscricoes" className="mt-4">
-                          <IntervencoesInscricoesForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                          <IntervencoesInscricoesForm />
                         </TabsContent>
                         <TabsContent value="tachas" className="mt-4">
-                          <IntervencoesTachaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                          <IntervencoesTachaForm />
                         </TabsContent>
                       </Tabs>
                     </TabsContent>
@@ -608,10 +608,7 @@ const Index = () => {
                           />
                         </TabsContent>
                         <TabsContent value="porticos" className="mt-4">
-                          <IntervencoesPorticosForm 
-                            loteId={activeSession.lote_id} 
-                            rodoviaId={activeSession.rodovia_id}
-                          />
+                          <IntervencoesPorticosForm />
                         </TabsContent>
                       </Tabs>
                     </TabsContent>
