@@ -53,11 +53,6 @@ interface Defensa {
   lado: string;
   tipo_defensa: string;
   extensao_metros: number;
-  estado_conservacao: string;
-  tipo_avaria: string | null;
-  necessita_intervencao: boolean;
-  nivel_risco: string | null;
-  observacao: string | null;
   lote_id: string;
   rodovia_id: string;
   enviado_coordenador: boolean;
@@ -211,11 +206,6 @@ const MinhasDefensas = () => {
           lado: defensaToEdit.lado,
           tipo_defensa: defensaToEdit.tipo_defensa,
           extensao_metros: defensaToEdit.extensao_metros,
-          estado_conservacao: defensaToEdit.estado_conservacao,
-          tipo_avaria: defensaToEdit.tipo_avaria,
-          necessita_intervencao: defensaToEdit.necessita_intervencao,
-          nivel_risco: defensaToEdit.nivel_risco,
-          observacao: defensaToEdit.observacao,
         })
         .eq("id", defensaToEdit.id);
 
@@ -314,10 +304,6 @@ const MinhasDefensas = () => {
                       <TableHead>Lado</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead>Extensão</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Avaria</TableHead>
-                      <TableHead>Intervenção</TableHead>
-                      <TableHead>Risco</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
@@ -345,26 +331,6 @@ const MinhasDefensas = () => {
                         <TableCell>{defensa.lado}</TableCell>
                         <TableCell className="max-w-xs truncate">{defensa.tipo_defensa}</TableCell>
                         <TableCell>{defensa.extensao_metros.toFixed(1)}m</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                            ["Ótimo", "Bom"].includes(defensa.estado_conservacao)
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
-                              : defensa.estado_conservacao === "Regular"
-                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100"
-                              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
-                          }`}>
-                            {defensa.estado_conservacao}
-                          </span>
-                        </TableCell>
-                        <TableCell>{defensa.tipo_avaria || "-"}</TableCell>
-                        <TableCell>
-                          {defensa.necessita_intervencao ? (
-                            <XCircle className="h-5 w-5 text-red-500" />
-                          ) : (
-                            <CheckCircle2 className="h-5 w-5 text-green-500" />
-                          )}
-                        </TableCell>
-                        <TableCell>{defensa.nivel_risco || "-"}</TableCell>
                         <TableCell>
                           {defensa.enviado_coordenador ? (
                             <Badge variant="outline" className="bg-green-50">
@@ -493,42 +459,6 @@ const MinhasDefensas = () => {
                   step="0.1"
                   value={defensaToEdit.extensao_metros}
                   onChange={(e) => setDefensaToEdit({...defensaToEdit, extensao_metros: parseFloat(e.target.value)})}
-                />
-              </div>
-              <div>
-                <Label>Estado de Conservação</Label>
-                <Select value={defensaToEdit.estado_conservacao} onValueChange={(value) => setDefensaToEdit({...defensaToEdit, estado_conservacao: value})}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Ótimo">Ótimo</SelectItem>
-                    <SelectItem value="Bom">Bom</SelectItem>
-                    <SelectItem value="Regular">Regular</SelectItem>
-                    <SelectItem value="Ruim">Ruim</SelectItem>
-                    <SelectItem value="Péssimo">Péssimo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Tipo de Avaria</Label>
-                <Input
-                  value={defensaToEdit.tipo_avaria || ""}
-                  onChange={(e) => setDefensaToEdit({...defensaToEdit, tipo_avaria: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label>Nível de Risco</Label>
-                <Input
-                  value={defensaToEdit.nivel_risco || ""}
-                  onChange={(e) => setDefensaToEdit({...defensaToEdit, nivel_risco: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label>Observação</Label>
-                <Textarea
-                  value={defensaToEdit.observacao || ""}
-                  onChange={(e) => setDefensaToEdit({...defensaToEdit, observacao: e.target.value})}
                 />
               </div>
             </div>

@@ -76,11 +76,6 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
     link_fotografia: "",
     tipo_defensa: "",
     extensao_metros: "",
-    estado_conservacao: "",
-    tipo_avaria: "",
-    necessita_intervencao: false,
-    nivel_risco: "",
-    observacao: "",
   });
 
   const capturarCoordenadas = (tipo: 'inicial' | 'final') => {
@@ -199,11 +194,6 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
           link_fotografia: formData.link_fotografia || null,
           tipo_defensa: formData.tipo_defensa || null,
           extensao_metros: formData.extensao_metros ? parseFloat(formData.extensao_metros) : null,
-          estado_conservacao: formData.estado_conservacao || null,
-          tipo_avaria: formData.tipo_avaria || null,
-          necessita_intervencao: formData.necessita_intervencao,
-          nivel_risco: formData.nivel_risco || null,
-          observacao: formData.observacao || null,
         });
 
       if (error) throw error;
@@ -252,11 +242,6 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
         link_fotografia: "",
         tipo_defensa: "",
         extensao_metros: "",
-        estado_conservacao: "",
-        tipo_avaria: "",
-        necessita_intervencao: false,
-        nivel_risco: "",
-        observacao: "",
       });
     } catch (error) {
       console.error("Erro ao salvar inspeção:", error);

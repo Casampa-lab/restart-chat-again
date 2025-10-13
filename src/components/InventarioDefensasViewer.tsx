@@ -17,11 +17,6 @@ interface FichaDefensa {
   km_inicial: number;
   km_final: number;
   extensao_metros: number;
-  estado_conservacao: string;
-  necessita_intervencao: boolean;
-  tipo_avaria?: string;
-  nivel_risco?: string;
-  observacao?: string;
   data_inspecao: string;
   rodovia_id: string;
   lote_id: string;
@@ -34,6 +29,11 @@ interface IntervencaoDefensa {
   extensao_metros?: number;
   tipo_defensa?: string;
   estado_conservacao?: string;
+  tipo_avaria?: string;
+  necessita_intervencao?: boolean;
+  nivel_risco?: string;
+  observacao?: string;
+  foto_url?: string;
 }
 
 interface InventarioDefensasViewerProps {
@@ -67,7 +67,7 @@ export const InventarioDefensasViewer = ({
         .range(0, 9999);
 
       if (searchTerm) {
-        query = query.or(`tipo_defensa.ilike.%${searchTerm}%,lado.ilike.%${searchTerm}%,estado_conservacao.ilike.%${searchTerm}%`);
+        query = query.or(`tipo_defensa.ilike.%${searchTerm}%,lado.ilike.%${searchTerm}%`);
       }
 
       const { data, error } = await query;
@@ -264,24 +264,6 @@ export const InventarioDefensasViewer = ({
                 <TableHead className="text-center">
                   <div className="whitespace-normal leading-tight">Nível de<br/>Contenção</div>
                 </TableHead>
-                <TableHead 
-                  className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                  onClick={() => handleSort("estado_conservacao")}
-                >
-                  <div className="whitespace-normal leading-tight flex items-center justify-center">
-                    Estado<br/>Conservação
-                    <SortIcon column="estado_conservacao" />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                  onClick={() => handleSort("necessita_intervencao")}
-                >
-                  <div className="whitespace-normal leading-tight flex items-center justify-center">
-                    Necessita<br/>Intervenção
-                    <SortIcon column="necessita_intervencao" />
-                  </div>
-                </TableHead>
                 <TableHead className="text-center w-[80px]">
                   <div className="whitespace-normal leading-tight">Ações</div>
                 </TableHead>
@@ -297,8 +279,6 @@ export const InventarioDefensasViewer = ({
                   <TableCell className="text-center">{defensa.extensao_metros}</TableCell>
                   <TableCell className="text-center">{(defensa as any).quantidade_laminas || "-"}</TableCell>
                   <TableCell className="text-center">{(defensa as any).nivel_contencao_en1317 || "-"}</TableCell>
-                  <TableCell className="text-center">{defensa.estado_conservacao || "-"}</TableCell>
-                  <TableCell className="text-center">{defensa.necessita_intervencao ? "Sim" : "Não"}</TableCell>
                   <TableCell className="text-center">
                     <Button
                       variant="ghost"
@@ -393,20 +373,6 @@ export const InventarioDefensasViewer = ({
                       <span className="text-sm font-medium text-muted-foreground">Função:</span>
                       <p className="text-sm">{(selectedDefensa as any).funcao || "-"}</p>
                     </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Estado:</span>
-                      <p className="text-sm">{selectedDefensa.estado_conservacao || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Necessita Intervenção:</span>
-                      <p className="text-sm">{selectedDefensa.necessita_intervencao ? "Sim" : "Não"}</p>
-                    </div>
-                    {selectedDefensa.tipo_avaria && (
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Tipo de Avaria:</span>
-                        <p className="text-sm">{selectedDefensa.tipo_avaria}</p>
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -489,14 +455,10 @@ export const InventarioDefensasViewer = ({
                   </div>
                 </div>
 
-                {/* Níveis e Risco */}
+                {/* Níveis */}
                 <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-3">Níveis e Risco</h3>
+                  <h3 className="font-semibold mb-3">Níveis</h3>
                   <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Nível de Risco:</span>
-                      <p className="text-sm">{selectedDefensa.nivel_risco || "-"}</p>
-                    </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Risco:</span>
                       <p className="text-sm">{(selectedDefensa as any).risco || "-"}</p>
@@ -619,14 +581,6 @@ export const InventarioDefensasViewer = ({
                     <p className="text-sm">{new Date(selectedDefensa.data_inspecao).toLocaleDateString('pt-BR')}</p>
                   </div>
                 </div>
-
-                {/* Observações */}
-                {selectedDefensa.observacao && (
-                  <div className="border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3">Observações</h3>
-                    <p className="text-sm">{selectedDefensa.observacao}</p>
-                  </div>
-                )}
               </TabsContent>
 
               <TabsContent value="foto" className="mt-4">
@@ -714,6 +668,36 @@ export const InventarioDefensasViewer = ({
                             <div>
                               <span className="text-sm font-medium text-muted-foreground">Estado:</span>
                               <p className="text-sm">{intervencao.estado_conservacao}</p>
+                            </div>
+                          )}
+                          {intervencao.tipo_avaria && (
+                            <div>
+                              <span className="text-sm font-medium text-muted-foreground">Tipo Avaria:</span>
+                              <p className="text-sm">{intervencao.tipo_avaria}</p>
+                            </div>
+                          )}
+                          {intervencao.necessita_intervencao !== undefined && (
+                            <div>
+                              <span className="text-sm font-medium text-muted-foreground">Necessita Intervenção:</span>
+                              <p className="text-sm">{intervencao.necessita_intervencao ? 'Sim' : 'Não'}</p>
+                            </div>
+                          )}
+                          {intervencao.nivel_risco && (
+                            <div>
+                              <span className="text-sm font-medium text-muted-foreground">Nível Risco:</span>
+                              <p className="text-sm">{intervencao.nivel_risco}</p>
+                            </div>
+                          )}
+                          {intervencao.observacao && (
+                            <div>
+                              <span className="text-sm font-medium text-muted-foreground">Observação:</span>
+                              <p className="text-sm">{intervencao.observacao}</p>
+                            </div>
+                          )}
+                          {intervencao.foto_url && (
+                            <div className="col-span-2">
+                              <span className="text-sm font-medium text-muted-foreground">Foto:</span>
+                              <p className="text-sm break-all">{intervencao.foto_url}</p>
                             </div>
                           )}
                         </div>

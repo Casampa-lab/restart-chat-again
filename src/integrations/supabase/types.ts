@@ -174,9 +174,7 @@ export type Database = {
           enviado_coordenador: boolean | null
           espaco_trabalho: string | null
           especificacao_obstaculo_fixo: string | null
-          estado_conservacao: string
           extensao_metros: number
-          foto_url: string | null
           funcao: string | null
           geometria: string | null
           id: string
@@ -190,11 +188,8 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
-          necessita_intervencao: boolean
           nivel_contencao_en1317: string | null
           nivel_contencao_nchrp350: string | null
-          nivel_risco: string | null
-          observacao: string | null
           percentual_veiculos_pesados: number | null
           quantidade_laminas: number | null
           risco: string | null
@@ -202,7 +197,6 @@ export type Database = {
           snv: string | null
           terminal_entrada: string | null
           terminal_saida: string | null
-          tipo_avaria: string | null
           tipo_defensa: string
           tramo: string | null
           updated_at: string
@@ -226,9 +220,7 @@ export type Database = {
           enviado_coordenador?: boolean | null
           espaco_trabalho?: string | null
           especificacao_obstaculo_fixo?: string | null
-          estado_conservacao: string
           extensao_metros: number
-          foto_url?: string | null
           funcao?: string | null
           geometria?: string | null
           id?: string
@@ -242,11 +234,8 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
-          necessita_intervencao?: boolean
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
-          nivel_risco?: string | null
-          observacao?: string | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
           risco?: string | null
@@ -254,7 +243,6 @@ export type Database = {
           snv?: string | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
-          tipo_avaria?: string | null
           tipo_defensa: string
           tramo?: string | null
           updated_at?: string
@@ -278,9 +266,7 @@ export type Database = {
           enviado_coordenador?: boolean | null
           espaco_trabalho?: string | null
           especificacao_obstaculo_fixo?: string | null
-          estado_conservacao?: string
           extensao_metros?: number
-          foto_url?: string | null
           funcao?: string | null
           geometria?: string | null
           id?: string
@@ -294,11 +280,8 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
-          necessita_intervencao?: boolean
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
-          nivel_risco?: string | null
-          observacao?: string | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
           risco?: string | null
@@ -306,7 +289,6 @@ export type Database = {
           snv?: string | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
-          tipo_avaria?: string | null
           tipo_defensa?: string
           tramo?: string | null
           updated_at?: string
@@ -324,9 +306,14 @@ export type Database = {
           estado_conservacao: string | null
           extensao_metros: number | null
           fora_plano_manutencao: boolean | null
+          foto_url: string | null
           id: string
           justificativa_fora_plano: string | null
           motivo: string
+          necessita_intervencao: boolean | null
+          nivel_risco: string | null
+          observacao: string | null
+          tipo_avaria: string | null
           tipo_defensa: string | null
         }
         Insert: {
@@ -336,9 +323,14 @@ export type Database = {
           estado_conservacao?: string | null
           extensao_metros?: number | null
           fora_plano_manutencao?: boolean | null
+          foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
           motivo: string
+          necessita_intervencao?: boolean | null
+          nivel_risco?: string | null
+          observacao?: string | null
+          tipo_avaria?: string | null
           tipo_defensa?: string | null
         }
         Update: {
@@ -348,9 +340,14 @@ export type Database = {
           estado_conservacao?: string | null
           extensao_metros?: number | null
           fora_plano_manutencao?: boolean | null
+          foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
           motivo?: string
+          necessita_intervencao?: boolean | null
+          nivel_risco?: string | null
+          observacao?: string | null
+          tipo_avaria?: string | null
           tipo_defensa?: string | null
         }
         Relationships: []

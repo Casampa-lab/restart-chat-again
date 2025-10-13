@@ -343,7 +343,7 @@ export const exportDefensas = async () => {
     const wsData = [
       ['3.1.4 - INSPEÇÃO DE DEFENSAS'],
       [],
-      ['Data', 'Lote', 'Rodovia', 'km Inicial', 'km Final', 'Extensão (m)', 'Tipo', 'Lado', 'Estado', 'Tipo Avaria', 'Nível Risco', 'Necessita Intervenção', 'Observação'],
+      ['Data', 'Lote', 'Rodovia', 'km Inicial', 'km Final', 'Extensão (m)', 'Tipo', 'Lado'],
       ...(data || []).map(item => {
         const lote = lotesMap.get(item.lote_id);
         const rodovia = rodoviasMap.get(item.rodovia_id);
@@ -355,18 +355,13 @@ export const exportDefensas = async () => {
           formatNumber(item.km_final),
           formatNumber(item.extensao_metros),
           item.tipo_defensa || '',
-          item.lado || '',
-          item.estado_conservacao || '',
-          item.tipo_avaria || '',
-          item.nivel_risco || '',
-          item.necessita_intervencao ? 'Sim' : 'Não',
-          item.observacao || ''
+          item.lado || ''
         ];
       })
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 12 } }];
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }];
     ws['!cols'] = [
       { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 12 }, { wch: 12 },
       { wch: 12 }, { wch: 20 }, { wch: 12 }, { wch: 15 }, { wch: 20 },
