@@ -155,7 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Determinar email de envio (usa o configurado na supervisora ou padrão)
     const emailFrom = supervisoraData.email_envio 
       ? `${supervisoraData.nome_empresa} <${supervisoraData.email_envio}>`
-      : `${supervisoraData.nome_empresa} <noreply@operavia.online>`;
+      : `${supervisoraData.nome_empresa} - Notificações <notificacao@operavia.online>`;
 
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
