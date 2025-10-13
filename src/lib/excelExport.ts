@@ -13,6 +13,24 @@ const formatNumber = (num: number | null) => {
   return num.toString().replace('.', ',');
 };
 
+// Função auxiliar para aplicar estilo de destaque em células
+const aplicarEstiloForaPlano = (ws: XLSX.WorkSheet, rowIndex: number, numCols: number) => {
+  for (let col = 0; col < numCols; col++) {
+    const cellAddress = XLSX.utils.encode_cell({ r: rowIndex, c: col });
+    if (!ws[cellAddress]) continue;
+    
+    ws[cellAddress].s = {
+      fill: {
+        fgColor: { rgb: "FFF3CD" } // Amarelo claro
+      },
+      font: {
+        bold: true,
+        color: { rgb: "856404" }
+      }
+    };
+  }
+};
+
 // Função auxiliar para buscar dados relacionados
 const fetchRelatedData = async () => {
   const [{ data: lotes }, { data: empresas }, { data: rodovias }] = await Promise.all([
@@ -379,7 +397,7 @@ export const exportIntervencoesSH = async () => {
     const wsData = [
       ['3.1.5 - INTERVENÇÕES - SINALIZAÇÃO HORIZONTAL'],
       [],
-      ['Data', 'Lote', 'Rodovia', 'km Inicial', 'km Final', 'Tipo Intervenção', 'Tipo Demarcação', 'Cor', 'Área (m²)', 'Espessura (cm)', 'Material', 'Observação'],
+      ['Data', 'Lote', 'Rodovia', 'km Inicial', 'km Final', 'Tipo Intervenção', 'Tipo Demarcação', 'Cor', 'Área (m²)', 'Espessura (cm)', 'Material', 'Fora do Plano', 'Justificativa', 'Observação'],
       ...(data || []).map(item => {
         const lote = lotesMap.get(item.lote_id);
         const rodovia = rodoviasMap.get(item.rodovia_id);
@@ -395,17 +413,27 @@ export const exportIntervencoesSH = async () => {
           formatNumber(item.area_m2),
           formatNumber(item.espessura_cm),
           item.material_utilizado || '',
+          item.fora_plano_manutencao ? 'SIM' : 'NÃO',
+          item.justificativa_fora_plano || '',
           item.observacao || ''
         ];
       })
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 11 } }];
+    
+    // Destacar linhas marcadas como fora do plano
+    (data || []).forEach((item, index) => {
+      if (item.fora_plano_manutencao) {
+        aplicarEstiloForaPlano(ws, index + 3, 14); // +3 por causa do título e cabeçalho
+      }
+    });
+    
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 13 } }];
     ws['!cols'] = [
       { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 12 }, { wch: 12 },
       { wch: 20 }, { wch: 20 }, { wch: 12 }, { wch: 12 }, { wch: 15 },
-      { wch: 20 }, { wch: 40 }
+      { wch: 20 }, { wch: 12 }, { wch: 40 }, { wch: 40 }
     ];
 
     const wb = XLSX.utils.book_new();
@@ -432,7 +460,7 @@ export const exportIntervencoesInscricoes = async () => {
     const wsData = [
       ['3.1.5 - INTERVENÇÕES - INSCRIÇÕES'],
       [],
-      ['Data', 'Lote', 'Rodovia', 'km Inicial', 'km Final', 'Tipo Intervenção', 'Tipo Inscrição', 'Cor', 'Área (m²)', 'Dimensões', 'Material', 'Observação'],
+      ['Data', 'Lote', 'Rodovia', 'km Inicial', 'km Final', 'Tipo Intervenção', 'Tipo Inscrição', 'Cor', 'Área (m²)', 'Dimensões', 'Material', 'Fora do Plano', 'Justificativa', 'Observação'],
       ...(data || []).map(item => {
         const lote = lotesMap.get(item.lote_id);
         const rodovia = rodoviasMap.get(item.rodovia_id);
@@ -448,17 +476,27 @@ export const exportIntervencoesInscricoes = async () => {
           formatNumber(item.area_m2),
           item.dimensoes || '',
           item.material_utilizado || '',
+          item.fora_plano_manutencao ? 'SIM' : 'NÃO',
+          item.justificativa_fora_plano || '',
           item.observacao || ''
         ];
       })
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 11 } }];
+    
+    // Destacar linhas marcadas como fora do plano
+    (data || []).forEach((item, index) => {
+      if (item.fora_plano_manutencao) {
+        aplicarEstiloForaPlano(ws, index + 3, 14);
+      }
+    });
+    
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 13 } }];
     ws['!cols'] = [
       { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 12 }, { wch: 12 },
       { wch: 20 }, { wch: 25 }, { wch: 12 }, { wch: 12 }, { wch: 15 },
-      { wch: 20 }, { wch: 40 }
+      { wch: 20 }, { wch: 12 }, { wch: 40 }, { wch: 40 }
     ];
 
     const wb = XLSX.utils.book_new();
@@ -485,7 +523,7 @@ export const exportIntervencoesSV = async () => {
     const wsData = [
       ['3.1.5 - INTERVENÇÕES - SINALIZAÇÃO VERTICAL'],
       [],
-      ['Data', 'Lote', 'Rodovia', 'km', 'Tipo Intervenção', 'Tipo Placa', 'Código', 'Lado', 'Dimensões', 'Material', 'Suporte', 'Estado', 'Qtd', 'Observação'],
+      ['Data', 'Lote', 'Rodovia', 'km', 'Tipo Intervenção', 'Tipo Placa', 'Código', 'Lado', 'Dimensões', 'Material', 'Suporte', 'Estado', 'Qtd', 'Fora do Plano', 'Justificativa', 'Observação'],
       ...(data || []).map(item => {
         const lote = lotesMap.get(item.lote_id);
         const rodovia = rodoviasMap.get(item.rodovia_id);
@@ -503,17 +541,27 @@ export const exportIntervencoesSV = async () => {
           item.tipo_suporte || '',
           item.estado_conservacao || '',
           item.quantidade || '',
+          item.fora_plano_manutencao ? 'SIM' : 'NÃO',
+          item.justificativa_fora_plano || '',
           item.observacao || ''
         ];
       })
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 13 } }];
+    
+    // Destacar linhas marcadas como fora do plano
+    (data || []).forEach((item, index) => {
+      if (item.fora_plano_manutencao) {
+        aplicarEstiloForaPlano(ws, index + 3, 16);
+      }
+    });
+    
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 15 } }];
     ws['!cols'] = [
       { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 10 }, { wch: 20 },
       { wch: 20 }, { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 15 },
-      { wch: 20 }, { wch: 15 }, { wch: 8 }, { wch: 40 }
+      { wch: 20 }, { wch: 15 }, { wch: 8 }, { wch: 12 }, { wch: 40 }, { wch: 40 }
     ];
 
     const wb = XLSX.utils.book_new();
@@ -540,7 +588,7 @@ export const exportIntervencoesTacha = async () => {
     const wsData = [
       ['3.1.5 - INTERVENÇÕES - TACHAS'],
       [],
-      ['Data', 'Lote', 'Rodovia', 'KM Inicial', 'KM Final', 'Tipo Intervenção', 'SNV', 'Descrição', 'Corpo', 'Refletivo', 'Cor Refletivo', 'Local', 'Quantidade', 'Espaçamento', 'Observação'],
+      ['Data', 'Lote', 'Rodovia', 'KM Inicial', 'KM Final', 'Tipo Intervenção', 'SNV', 'Descrição', 'Corpo', 'Refletivo', 'Cor Refletivo', 'Local', 'Quantidade', 'Espaçamento', 'Fora do Plano', 'Justificativa', 'Observação'],
       ...(data || []).map(item => {
         const lote = lotesMap.get(item.lote_id);
         const rodovia = rodoviasMap.get(item.rodovia_id);
@@ -559,17 +607,27 @@ export const exportIntervencoesTacha = async () => {
           item.local_implantacao || '',
           item.quantidade || '',
           item.espacamento_m || '',
+          item.fora_plano_manutencao ? 'SIM' : 'NÃO',
+          item.justificativa_fora_plano || '',
           item.observacao || ''
         ];
       })
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 12 } }];
+    
+    // Destacar linhas marcadas como fora do plano
+    (data || []).forEach((item, index) => {
+      if (item.fora_plano_manutencao) {
+        aplicarEstiloForaPlano(ws, index + 3, 17);
+      }
+    });
+    
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 16 } }];
     ws['!cols'] = [
       { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 12 }, { wch: 12 },
-      { wch: 20 }, { wch: 20 }, { wch: 12 }, { wch: 12 }, { wch: 10 },
-      { wch: 15 }, { wch: 20 }, { wch: 40 }
+      { wch: 20 }, { wch: 10 }, { wch: 25 }, { wch: 12 }, { wch: 12 },
+      { wch: 15 }, { wch: 20 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 40 }, { wch: 40 }
     ];
 
     const wb = XLSX.utils.book_new();

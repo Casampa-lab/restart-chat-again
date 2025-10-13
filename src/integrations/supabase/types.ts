@@ -323,7 +323,9 @@ export type Database = {
           defensa_id: string
           estado_conservacao: string | null
           extensao_metros: number | null
+          fora_plano_manutencao: boolean | null
           id: string
+          justificativa_fora_plano: string | null
           motivo: string
           tipo_defensa: string | null
         }
@@ -333,7 +335,9 @@ export type Database = {
           defensa_id: string
           estado_conservacao?: string | null
           extensao_metros?: number | null
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           motivo: string
           tipo_defensa?: string | null
         }
@@ -343,7 +347,9 @@ export type Database = {
           defensa_id?: string
           estado_conservacao?: string | null
           extensao_metros?: number | null
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           motivo?: string
           tipo_defensa?: string | null
         }
@@ -496,7 +502,9 @@ export type Database = {
           created_at: string
           data_intervencao: string
           ficha_cilindros_id: string
+          fora_plano_manutencao: boolean | null
           id: string
+          justificativa_fora_plano: string | null
           motivo: string
           quantidade: number | null
           tipo_refletivo: string | null
@@ -507,7 +515,9 @@ export type Database = {
           created_at?: string
           data_intervencao: string
           ficha_cilindros_id: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           motivo: string
           quantidade?: number | null
           tipo_refletivo?: string | null
@@ -518,7 +528,9 @@ export type Database = {
           created_at?: string
           data_intervencao?: string
           ficha_cilindros_id?: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           motivo?: string
           quantidade?: number | null
           tipo_refletivo?: string | null
@@ -608,7 +620,9 @@ export type Database = {
           data_intervencao: string
           dimensoes: string | null
           ficha_inscricoes_id: string
+          fora_plano_manutencao: boolean | null
           id: string
+          justificativa_fora_plano: string | null
           material_utilizado: string | null
           motivo: string
           tipo_inscricao: string | null
@@ -620,7 +634,9 @@ export type Database = {
           data_intervencao: string
           dimensoes?: string | null
           ficha_inscricoes_id: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           material_utilizado?: string | null
           motivo: string
           tipo_inscricao?: string | null
@@ -632,7 +648,9 @@ export type Database = {
           data_intervencao?: string
           dimensoes?: string | null
           ficha_inscricoes_id?: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           material_utilizado?: string | null
           motivo?: string
           tipo_inscricao?: string | null
@@ -742,7 +760,9 @@ export type Database = {
           data_intervencao: string
           espessura_cm: number | null
           ficha_marcas_longitudinais_id: string
+          fora_plano_manutencao: boolean | null
           id: string
+          justificativa_fora_plano: string | null
           largura_cm: number | null
           material: string | null
           motivo: string
@@ -754,7 +774,9 @@ export type Database = {
           data_intervencao: string
           espessura_cm?: number | null
           ficha_marcas_longitudinais_id: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           largura_cm?: number | null
           material?: string | null
           motivo: string
@@ -766,7 +788,9 @@ export type Database = {
           data_intervencao?: string
           espessura_cm?: number | null
           ficha_marcas_longitudinais_id?: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           largura_cm?: number | null
           material?: string | null
           motivo?: string
@@ -979,7 +1003,9 @@ export type Database = {
           created_at: string
           data_intervencao: string
           ficha_placa_id: string
+          fora_plano_manutencao: boolean | null
           id: string
+          justificativa_fora_plano: string | null
           motivo: string
           pelicula: string | null
           placa_recuperada: boolean | null
@@ -992,7 +1018,9 @@ export type Database = {
           created_at?: string
           data_intervencao: string
           ficha_placa_id: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           motivo: string
           pelicula?: string | null
           placa_recuperada?: boolean | null
@@ -1005,7 +1033,9 @@ export type Database = {
           created_at?: string
           data_intervencao?: string
           ficha_placa_id?: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           motivo?: string
           pelicula?: string | null
           placa_recuperada?: boolean | null
@@ -1096,7 +1126,9 @@ export type Database = {
           created_at: string
           data_intervencao: string
           ficha_porticos_id: string
+          fora_plano_manutencao: boolean | null
           id: string
+          justificativa_fora_plano: string | null
           motivo: string
           tipo: string | null
           vao_horizontal_m: number | null
@@ -1106,7 +1138,9 @@ export type Database = {
           created_at?: string
           data_intervencao: string
           ficha_porticos_id: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           motivo: string
           tipo?: string | null
           vao_horizontal_m?: number | null
@@ -1116,7 +1150,9 @@ export type Database = {
           created_at?: string
           data_intervencao?: string
           ficha_porticos_id?: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           motivo?: string
           tipo?: string | null
           vao_horizontal_m?: number | null
@@ -1213,7 +1249,9 @@ export type Database = {
           created_at: string
           data_intervencao: string
           ficha_tachas_id: string
+          fora_plano_manutencao: boolean | null
           id: string
+          justificativa_fora_plano: string | null
           lado: string | null
           material: string | null
           motivo: string
@@ -1225,7 +1263,9 @@ export type Database = {
           created_at?: string
           data_intervencao: string
           ficha_tachas_id: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           lado?: string | null
           material?: string | null
           motivo: string
@@ -1237,7 +1277,9 @@ export type Database = {
           created_at?: string
           data_intervencao?: string
           ficha_tachas_id?: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           lado?: string | null
           material?: string | null
           motivo?: string
@@ -1661,7 +1703,9 @@ export type Database = {
           data_intervencao: string
           dimensoes: string | null
           enviado_coordenador: boolean | null
+          fora_plano_manutencao: boolean | null
           id: string
+          justificativa_fora_plano: string | null
           km_final: number
           km_inicial: number
           latitude_final: number | null
@@ -1684,7 +1728,9 @@ export type Database = {
           data_intervencao: string
           dimensoes?: string | null
           enviado_coordenador?: boolean | null
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           km_final: number
           km_inicial: number
           latitude_final?: number | null
@@ -1707,7 +1753,9 @@ export type Database = {
           data_intervencao?: string
           dimensoes?: string | null
           enviado_coordenador?: boolean | null
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           km_final?: number
           km_inicial?: number
           latitude_final?: number | null
@@ -1799,7 +1847,9 @@ export type Database = {
           data_intervencao: string
           enviado_coordenador: boolean | null
           espessura_cm: number | null
+          fora_plano_manutencao: boolean | null
           id: string
+          justificativa_fora_plano: string | null
           km_final: number
           km_inicial: number
           latitude_final: number | null
@@ -1822,7 +1872,9 @@ export type Database = {
           data_intervencao: string
           enviado_coordenador?: boolean | null
           espessura_cm?: number | null
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           km_final: number
           km_inicial: number
           latitude_final?: number | null
@@ -1845,7 +1897,9 @@ export type Database = {
           data_intervencao?: string
           enviado_coordenador?: boolean | null
           espessura_cm?: number | null
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           km_final?: number
           km_inicial?: number
           latitude_final?: number | null
@@ -1871,7 +1925,9 @@ export type Database = {
           dimensoes: string | null
           enviado_coordenador: boolean | null
           estado_conservacao: string
+          fora_plano_manutencao: boolean | null
           id: string
+          justificativa_fora_plano: string | null
           km_referencia: number
           lado: string
           latitude: number | null
@@ -1894,7 +1950,9 @@ export type Database = {
           dimensoes?: string | null
           enviado_coordenador?: boolean | null
           estado_conservacao: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           km_referencia: number
           lado: string
           latitude?: number | null
@@ -1917,7 +1975,9 @@ export type Database = {
           dimensoes?: string | null
           enviado_coordenador?: boolean | null
           estado_conservacao?: string
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           km_referencia?: number
           lado?: string
           latitude?: number | null
@@ -1944,7 +2004,9 @@ export type Database = {
           descricao: string | null
           enviado_coordenador: boolean | null
           espacamento_m: number | null
+          fora_plano_manutencao: boolean | null
           id: string
+          justificativa_fora_plano: string | null
           km_final: number
           km_inicial: number
           latitude_final: number | null
@@ -1970,7 +2032,9 @@ export type Database = {
           descricao?: string | null
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           km_final: number
           km_inicial: number
           latitude_final?: number | null
@@ -1996,7 +2060,9 @@ export type Database = {
           descricao?: string | null
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
+          fora_plano_manutencao?: boolean | null
           id?: string
+          justificativa_fora_plano?: string | null
           km_final?: number
           km_inicial?: number
           latitude_final?: number | null

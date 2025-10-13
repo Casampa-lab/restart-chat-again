@@ -24,6 +24,7 @@ import MinhasFichasVerificacao from "./pages/MinhasFichasVerificacao";
 import MinhasFichasPlaca from "./pages/MinhasFichasPlaca";
 import MinhasNecessidades from "./pages/MinhasNecessidades";
 import MinhasNecessidadesRelatorios from "./pages/MinhasNecessidadesRelatorios";
+import RevisaoIntervencoes from "./pages/RevisaoIntervencoes";
 import DashboardNecessidades from "./pages/DashboardNecessidades";
 import Modulos from "./pages/Modulos";
 import ResetAdminPassword from "./pages/ResetAdminPassword";
