@@ -10,6 +10,7 @@ export const PROBLEMAS_POR_TIPO: Record<string, string[]> = {
     "Limpeza de tachas refletivas",
     "Ausência pintura de faixa",
     "Retrorrefletância abaixo do parâmetro",
+    "Item Implantado Fora do Projeto",
     "Outros",
   ],
   [TIPOS_NC.SINALIZACAO_VERTICAL]: [
@@ -20,6 +21,7 @@ export const PROBLEMAS_POR_TIPO: Record<string, string[]> = {
     "Retrorrefletividade abaixo do parâmetro",
     "Capina de Placa",
     "Limpeza de Placa",
+    "Item Implantado Fora do Projeto",
     "Outros",
   ],
   [TIPOS_NC.DISPOSITIVOS_SEGURANCA]: [
@@ -30,6 +32,7 @@ export const PROBLEMAS_POR_TIPO: Record<string, string[]> = {
     "Limpeza de defensas",
     "Ausência de terminal",
     "Terminal danificado",
+    "Item Implantado Fora do Projeto",
     "Outros",
   ],
 };

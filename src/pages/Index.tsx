@@ -252,6 +252,19 @@ const Index = () => {
     enabled: !!activeSession,
   });
 
+  // Contador de elementos pendentes (para coordenadores)
+  const { data: countPendentes } = useQuery({
+    queryKey: ["count-elementos-pendentes"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("elementos_pendentes_aprovacao")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pendente_aprovacao");
+      return count || 0;
+    },
+    enabled: isAdminOrCoordinator,
+  });
+
   useEffect(() => {
     const checkAdminOrCoordinator = async () => {
       if (!user) return;
@@ -350,9 +363,14 @@ const Index = () => {
                 <Boxes className="mr-2 h-5 w-5" />
                 Módulos
               </Button>
-              <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/coordenacao-fiscalizacao")}>
+              <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow relative" onClick={() => navigate("/coordenacao-fiscalizacao")}>
                 <ClipboardList className="mr-2 h-5 w-5" />
                 Gestão
+                {isAdminOrCoordinator && countPendentes && countPendentes > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white">
+                    {countPendentes}
+                  </Badge>
+                )}
               </Button>
               {isAdminOrCoordinator && <Button variant="default" size="lg" className="font-semibold bg-accent text-accent-foreground shadow-md hover:shadow-lg transition-shadow hover:bg-accent/90" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-5 w-5" />

@@ -190,6 +190,7 @@ export type Database = {
           lote_id: string
           nivel_contencao_en1317: string | null
           nivel_contencao_nchrp350: string | null
+          origem: string | null
           percentual_veiculos_pesados: number | null
           quantidade_laminas: number | null
           risco: string | null
@@ -236,6 +237,7 @@ export type Database = {
           lote_id: string
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
+          origem?: string | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
           risco?: string | null
@@ -282,6 +284,7 @@ export type Database = {
           lote_id?: string
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
+          origem?: string | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
           risco?: string | null
@@ -379,6 +382,72 @@ export type Database = {
         }
         Relationships: []
       }
+      elementos_pendentes_aprovacao: {
+        Row: {
+          coordenador_id: string | null
+          created_at: string | null
+          dados_elemento: Json
+          data_decisao: string | null
+          fotos_urls: string[] | null
+          id: string
+          justificativa: string
+          lote_id: string
+          observacao_coordenador: string | null
+          rodovia_id: string
+          status: string
+          tipo_elemento: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          coordenador_id?: string | null
+          created_at?: string | null
+          dados_elemento: Json
+          data_decisao?: string | null
+          fotos_urls?: string[] | null
+          id?: string
+          justificativa: string
+          lote_id: string
+          observacao_coordenador?: string | null
+          rodovia_id: string
+          status?: string
+          tipo_elemento: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          coordenador_id?: string | null
+          created_at?: string | null
+          dados_elemento?: Json
+          data_decisao?: string | null
+          fotos_urls?: string[] | null
+          id?: string
+          justificativa?: string
+          lote_id?: string
+          observacao_coordenador?: string | null
+          rodovia_id?: string
+          status?: string
+          tipo_elemento?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "elementos_pendentes_aprovacao_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "elementos_pendentes_aprovacao_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas: {
         Row: {
           cnpj: string
@@ -430,6 +499,7 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           observacao: string | null
+          origem: string | null
           quantidade: number | null
           rodovia_id: string
           snv: string | null
@@ -455,6 +525,7 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           observacao?: string | null
+          origem?: string | null
           quantidade?: number | null
           rodovia_id: string
           snv?: string | null
@@ -480,6 +551,7 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           observacao?: string | null
+          origem?: string | null
           quantidade?: number | null
           rodovia_id?: string
           snv?: string | null
@@ -552,6 +624,7 @@ export type Database = {
           lote_id: string
           material_utilizado: string | null
           observacao: string | null
+          origem: string | null
           rodovia_id: string
           tipo_inscricao: string
           updated_at: string
@@ -574,6 +647,7 @@ export type Database = {
           lote_id: string
           material_utilizado?: string | null
           observacao?: string | null
+          origem?: string | null
           rodovia_id: string
           tipo_inscricao: string
           updated_at?: string
@@ -596,6 +670,7 @@ export type Database = {
           lote_id?: string
           material_utilizado?: string | null
           observacao?: string | null
+          origem?: string | null
           rodovia_id?: string
           tipo_inscricao?: string
           updated_at?: string
@@ -678,6 +753,7 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           material: string | null
+          origem: string | null
           posicao: string | null
           rodovia_id: string
           snv: string | null
@@ -706,6 +782,7 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           material?: string | null
+          origem?: string | null
           posicao?: string | null
           rodovia_id: string
           snv?: string | null
@@ -734,6 +811,7 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           material?: string | null
+          origem?: string | null
           posicao?: string | null
           rodovia_id?: string
           snv?: string | null
@@ -831,6 +909,7 @@ export type Database = {
           lote_id: string
           modelo: string | null
           numero_patrimonio: string | null
+          origem: string | null
           posicao: string | null
           qtde_suporte: number | null
           retro_pelicula_fundo: number | null
@@ -882,6 +961,7 @@ export type Database = {
           lote_id: string
           modelo?: string | null
           numero_patrimonio?: string | null
+          origem?: string | null
           posicao?: string | null
           qtde_suporte?: number | null
           retro_pelicula_fundo?: number | null
@@ -933,6 +1013,7 @@ export type Database = {
           lote_id?: string
           modelo?: string | null
           numero_patrimonio?: string | null
+          origem?: string | null
           posicao?: string | null
           qtde_suporte?: number | null
           retro_pelicula_fundo?: number | null
@@ -1064,6 +1145,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           lote_id: string
+          origem: string | null
           rodovia_id: string
           snv: string | null
           tipo: string
@@ -1083,6 +1165,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           lote_id: string
+          origem?: string | null
           rodovia_id: string
           snv?: string | null
           tipo: string
@@ -1102,6 +1185,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           lote_id?: string
+          origem?: string | null
           rodovia_id?: string
           snv?: string | null
           tipo?: string
@@ -1171,6 +1255,7 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          origem: string | null
           quantidade: number
           refletivo: string | null
           rodovia_id: string
@@ -1195,6 +1280,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          origem?: string | null
           quantidade?: number
           refletivo?: string | null
           rodovia_id: string
@@ -1219,6 +1305,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          origem?: string | null
           quantidade?: number
           refletivo?: string | null
           rodovia_id?: string

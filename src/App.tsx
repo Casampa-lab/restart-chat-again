@@ -29,6 +29,8 @@ import DashboardNecessidades from "./pages/DashboardNecessidades";
 import Modulos from "./pages/Modulos";
 import ResetAdminPassword from "./pages/ResetAdminPassword";
 import TestePDF from "./pages/TestePDF";
+import ElementosPendentes from "./pages/ElementosPendentes";
+import MeusElementosPendentes from "./pages/MeusElementosPendentes";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +66,8 @@ const App = () => (
           <Route path="/modulos" element={<Modulos />} />
           <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
           <Route path="/teste-pdf" element={<TestePDF />} />
+          <Route path="/elementos-pendentes" element={<ElementosPendentes />} />
+          <Route path="/meus-elementos-pendentes" element={<MeusElementosPendentes />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

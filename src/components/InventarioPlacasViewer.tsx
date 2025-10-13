@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
 interface FichaPlaca {
   id: string;
   br: string | null;
@@ -81,6 +82,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   const [intervencoes, setIntervencoes] = useState<Intervencao[]>([]);
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
 
   // Função para calcular distância entre dois pontos (Haversine)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -225,15 +227,26 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
               <Library className="h-5 w-5" />
               Inventário de Placas
             </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/minhas-necessidades?tipo=placas")}
-              className="gap-2"
-            >
-              <FileText className="h-4 w-4" />
-              Ver Necessidades
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/minhas-necessidades?tipo=placas")}
+                className="gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Ver Necessidades
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setShowRegistrarNaoCadastrado(true)}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Item Não Cadastrado
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -409,6 +422,19 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
           )}
         </CardContent>
       </Card>
+
+      {/* Dialog Registrar Não Cadastrado */}
+      <Dialog open={showRegistrarNaoCadastrado} onOpenChange={setShowRegistrarNaoCadastrado}>
+        <DialogContent className="max-w-3xl">
+          <RegistrarItemNaoCadastrado
+            tipo_elemento="placas"
+            loteId={loteId}
+            rodoviaId={rodoviaId}
+            onSuccess={() => setShowRegistrarNaoCadastrado(false)}
+            onCancel={() => setShowRegistrarNaoCadastrado(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog de Detalhes */}
       <Dialog open={!!selectedPlaca} onOpenChange={() => setSelectedPlaca(null)}>
