@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +68,20 @@ const IntervencoesSHForm = ({
     fora_plano_manutencao: false,
     justificativa_fora_plano: "",
   });
+
+  // Preencher formulário com dados da marca selecionada
+  useEffect(() => {
+    if (marcaSelecionada && modo === 'normal') {
+      setFormData(prev => ({
+        ...prev,
+        tipo_demarcacao: (marcaSelecionada as any).tipo_demarcacao || "",
+        cor: (marcaSelecionada as any).cor || "",
+        largura_cm: (marcaSelecionada as any).largura_cm?.toString() || "",
+        espessura_cm: (marcaSelecionada as any).espessura_cm?.toString() || "",
+        material: (marcaSelecionada as any).material || "",
+      }));
+    }
+  }, [marcaSelecionada, modo]);
 
   const handleChange = (field: string, value: any) => {
     const newData = { ...formData, [field]: value };

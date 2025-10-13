@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,6 +74,17 @@ const DefensasIntervencoesForm = ({
     fora_plano_manutencao: false,
     justificativa_fora_plano: "",
   });
+
+  // Preencher formulário com dados da defensa selecionada
+  useEffect(() => {
+    if (defensaSelecionada && modo === 'normal') {
+      setFormData(prev => ({
+        ...prev,
+        tipo_defensa: (defensaSelecionada as any).tipo_defensa || "",
+        extensao_metros: (defensaSelecionada as any).extensao_metros?.toString() || "",
+      }));
+    }
+  }, [defensaSelecionada, modo]);
 
   const handleChange = (field: string, value: any) => {
     const newData = { ...formData, [field]: value };

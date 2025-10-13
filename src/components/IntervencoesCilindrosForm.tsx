@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -66,6 +66,23 @@ export function IntervencoesCilindrosForm({
       justificativa_fora_plano: "",
     },
   });
+
+  // Preencher formulário com dados do cilindro selecionado
+  useEffect(() => {
+    if (cilindroSelecionado && modo === 'normal') {
+      form.reset({
+        data_intervencao: new Date().toISOString().split('T')[0],
+        motivo: "",
+        cor_corpo: (cilindroSelecionado as any).cor_corpo || "",
+        cor_refletivo: (cilindroSelecionado as any).cor_refletivo || "",
+        tipo_refletivo: (cilindroSelecionado as any).tipo_refletivo || "",
+        quantidade: (cilindroSelecionado as any).quantidade?.toString() || "",
+        foto_url: "",
+        fora_plano_manutencao: false,
+        justificativa_fora_plano: "",
+      });
+    }
+  }, [cilindroSelecionado, modo, form]);
 
   const onSubmit = async (data: FormData) => {
     if (modo === 'controlado') {

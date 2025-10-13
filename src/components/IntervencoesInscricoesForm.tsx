@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +70,20 @@ const IntervencoesInscricoesForm = ({
     fora_plano_manutencao: false,
     justificativa_fora_plano: "",
   });
+
+  // Preencher formulário com dados da inscrição selecionada
+  useEffect(() => {
+    if (inscricaoSelecionada && modo === 'normal') {
+      setFormData(prev => ({
+        ...prev,
+        tipo_inscricao: (inscricaoSelecionada as any).tipo_inscricao || "",
+        cor: (inscricaoSelecionada as any).cor || "",
+        dimensoes: (inscricaoSelecionada as any).dimensoes || "",
+        area_m2: (inscricaoSelecionada as any).area_m2?.toString() || "",
+        material_utilizado: (inscricaoSelecionada as any).material_utilizado || "",
+      }));
+    }
+  }, [inscricaoSelecionada, modo]);
 
   const handleChange = (field: string, value: any) => {
     const newData = { ...formData, [field]: value };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -68,6 +68,26 @@ export function IntervencoesTachaForm({
       justificativa_fora_plano: "",
     },
   });
+
+  // Preencher formulário com dados da tacha selecionada
+  useEffect(() => {
+    if (tachaSelecionada && modo === 'normal') {
+      form.reset({
+        data_intervencao: new Date().toISOString().split('T')[0],
+        motivo: "",
+        tipo_tacha: (tachaSelecionada as any).corpo || "",
+        lado: (tachaSelecionada as any).local_implantacao || "",
+        cor: (tachaSelecionada as any).cor_refletivo || "",
+        material: (tachaSelecionada as any).refletivo || "",
+        quantidade: (tachaSelecionada as any).quantidade?.toString() || "",
+        observacao: "",
+        foto_url: "",
+        descricao: "",
+        fora_plano_manutencao: false,
+        justificativa_fora_plano: "",
+      });
+    }
+  }, [tachaSelecionada, modo, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (modo === 'controlado') {

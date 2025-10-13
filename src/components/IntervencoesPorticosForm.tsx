@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -64,6 +64,22 @@ export function IntervencoesPorticosForm({
       justificativa_fora_plano: "",
     },
   });
+
+  // Preencher formulário com dados do pórtico selecionado
+  useEffect(() => {
+    if (porticoSelecionado && modo === 'normal') {
+      form.reset({
+        data_intervencao: new Date().toISOString().split('T')[0],
+        motivo: "",
+        tipo: porticoSelecionado.tipo || "",
+        altura_livre_m: (porticoSelecionado as any).altura_livre_m?.toString() || "",
+        vao_horizontal_m: (porticoSelecionado as any).vao_horizontal_m?.toString() || "",
+        observacao: "",
+        fora_plano_manutencao: false,
+        justificativa_fora_plano: "",
+      });
+    }
+  }, [porticoSelecionado, modo, form]);
 
   const onSubmit = async (data: FormData) => {
     if (modo === 'controlado') {
