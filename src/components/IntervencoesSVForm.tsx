@@ -38,9 +38,20 @@ interface IntervencoesSVFormProps {
   loteId?: string;
   rodoviaId?: string;
   onIntervencaoRegistrada?: () => void;
+  modo?: 'normal' | 'controlado';
+  onDataChange?: (data: any) => void;
+  hideSubmitButton?: boolean;
 }
 
-export function IntervencoesSVForm({ placaSelecionada, loteId, rodoviaId, onIntervencaoRegistrada }: IntervencoesSVFormProps) {
+export function IntervencoesSVForm({ 
+  placaSelecionada, 
+  loteId, 
+  rodoviaId, 
+  onIntervencaoRegistrada,
+  modo = 'normal',
+  onDataChange,
+  hideSubmitButton = false 
+}: IntervencoesSVFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [coordenadas, setCoordenadas] = useState({ latitude: "", longitude: "" });
@@ -109,7 +120,22 @@ export function IntervencoesSVForm({ placaSelecionada, loteId, rodoviaId, onInte
     }
   }, [placaSelecionada, form]);
 
+  // Modo controlado: envia dados para componente pai
+  useEffect(() => {
+    if (modo === 'controlado' && onDataChange) {
+      const subscription = form.watch((values) => {
+        onDataChange(values);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [modo, onDataChange, form]);
+
   const onSubmit = async (data: FormValues) => {
+    // Em modo controlado, não faz submit direto
+    if (modo === 'controlado') {
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -207,20 +233,9 @@ export function IntervencoesSVForm({ placaSelecionada, loteId, rodoviaId, onInte
     }
   };
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Intervenção em Sinalização Vertical</CardTitle>
-        <CardDescription>
-          {placaSelecionada 
-            ? `Registrando intervenção para placa ${placaSelecionada.tipo} ${placaSelecionada.codigo} no KM ${placaSelecionada.km}`
-            : "Selecione uma placa do inventário ou preencha os dados para criar nova"
-          }
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+  const formContent = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -501,12 +516,35 @@ export function IntervencoesSVForm({ placaSelecionada, loteId, rodoviaId, onInte
               />
             )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Registrar Intervenção
-            </Button>
+            {!hideSubmitButton && (
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Registrar Intervenção
+              </Button>
+            )}
           </form>
         </Form>
+  );
+
+  // Modo controlado: retorna apenas o conteúdo do formulário sem Card
+  if (modo === 'controlado') {
+    return formContent;
+  }
+
+  // Modo normal: retorna com Card
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Intervenção em Sinalização Vertical</CardTitle>
+        <CardDescription>
+          {placaSelecionada 
+            ? `Registrando intervenção para placa ${placaSelecionada.tipo} ${placaSelecionada.codigo} no KM ${placaSelecionada.km}`
+            : "Selecione uma placa do inventário ou preencha os dados para criar nova"
+          }
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {formContent}
       </CardContent>
     </Card>
   );
