@@ -303,11 +303,11 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
       )}
 
       {necessidadesComCoordenadas.length > 0 && (
-        <div className="w-full h-[600px] rounded-lg border shadow-lg overflow-hidden">
+        <div className="w-full h-[600px] rounded-lg border shadow-lg overflow-hidden relative z-0">
           <MapContainer
             center={mapCenter}
             zoom={13}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: "100%", height: "100%", position: "relative", zIndex: 1 }}
             scrollWheelZoom={true}
           >
             <TileLayer

@@ -210,9 +210,9 @@ const MinhasNecessidades = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs value={tipoAtivo} onValueChange={setTipoAtivo} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-6">
+          <TabsList className="grid w-full grid-cols-7 mb-6 relative z-20 bg-background">
             {TIPOS_NECESSIDADES.map(tipo => (
-              <TabsTrigger key={tipo.value} value={tipo.value}>
+              <TabsTrigger key={tipo.value} value={tipo.value} className="relative z-20">
                 {tipo.label}
               </TabsTrigger>
             ))}
