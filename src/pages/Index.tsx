@@ -656,8 +656,7 @@ const Index = () => {
                           )}
                           {countNecDefensas! > 0 && (
                             <Badge 
-                              variant="outline" 
-                              className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                              className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate("/dashboard-necessidades");
@@ -689,10 +688,9 @@ const Index = () => {
                                   {countMarcasLong}
                                 </Badge>
                               )}
-                              {countNecMarcasLong! > 0 && (
+                          {countNecMarcasLong! > 0 && (
                                 <Badge 
-                                  variant="outline" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate("/dashboard-necessidades");
@@ -722,8 +720,7 @@ const Index = () => {
                               )}
                               {countNecCilindros! > 0 && (
                                 <Badge 
-                                  variant="outline" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate("/dashboard-necessidades");
@@ -753,8 +750,7 @@ const Index = () => {
                               )}
                               {countNecInscricoes! > 0 && (
                                 <Badge 
-                                  variant="outline" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate("/dashboard-necessidades");
@@ -784,8 +780,7 @@ const Index = () => {
                               )}
                               {countNecTachas! > 0 && (
                                 <Badge 
-                                  variant="outline" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate("/dashboard-necessidades");
@@ -848,8 +843,7 @@ const Index = () => {
                               )}
                               {countNecPlacas! > 0 && (
                                 <Badge 
-                                  variant="outline" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate("/dashboard-necessidades");
@@ -879,8 +873,7 @@ const Index = () => {
                               )}
                               {countNecPorticos! > 0 && (
                                 <Badge 
-                                  variant="outline" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate("/dashboard-necessidades");
