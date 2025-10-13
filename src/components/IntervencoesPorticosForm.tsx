@@ -81,6 +81,19 @@ export function IntervencoesPorticosForm({
     }
   }, [porticoSelecionado, modo, form]);
 
+  // Em modo controlado, repassar dados em tempo real
+  useEffect(() => {
+    if (modo === 'controlado' && onDataChange) {
+      const subscription = form.watch((values) => {
+        // Só repassar se campos obrigatórios estiverem preenchidos
+        if (values.data_intervencao && values.motivo) {
+          onDataChange(values);
+        }
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [modo, onDataChange, form]);
+
   const onSubmit = async (data: FormData) => {
     if (modo === 'controlado') {
       if (onDataChange) onDataChange(data);
