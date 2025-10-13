@@ -3,9 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, MapPin } from "lucide-react";
@@ -23,16 +21,6 @@ const TIPOS_DEFENSA = [
   "Defensa Tipo F",
   "Outros"
 ];
-const ESTADOS_CONSERVACAO = ["Ótimo", "Bom", "Regular", "Ruim", "Péssimo"];
-const TIPOS_AVARIA = [
-  "Deformação",
-  "Corrosão",
-  "Falta de Elementos",
-  "Fixação Comprometida",
-  "Pintura Deteriorada",
-  "Outros"
-];
-const NIVEIS_RISCO = ["Baixo", "Médio", "Alto", "Crítico"];
 
 const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -728,96 +716,6 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="estado_conservacao">Estado de Conservação *</Label>
-              <Select
-                value={formData.estado_conservacao}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, estado_conservacao: value })
-                }
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ESTADOS_CONSERVACAO.map((estado) => (
-                    <SelectItem key={estado} value={estado}>
-                      {estado}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="tipo_avaria">Tipo de Avaria</Label>
-              <Select
-                value={formData.tipo_avaria}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, tipo_avaria: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo de avaria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIPOS_AVARIA.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>
-                      {tipo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="nivel_risco">Nível de Risco</Label>
-              <Select
-                value={formData.nivel_risco}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, nivel_risco: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o nível" />
-                </SelectTrigger>
-                <SelectContent>
-                  {NIVEIS_RISCO.map((nivel) => (
-                    <SelectItem key={nivel} value={nivel}>
-                      {nivel}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2 flex items-center gap-2 pt-8">
-              <Checkbox
-                id="necessita_intervencao"
-                checked={formData.necessita_intervencao}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, necessita_intervencao: checked as boolean })
-                }
-              />
-              <Label htmlFor="necessita_intervencao" className="cursor-pointer">
-                Necessita Intervenção Imediata
-              </Label>
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="observacao">Observações</Label>
-              <Textarea
-                id="observacao"
-                value={formData.observacao}
-                onChange={(e) =>
-                  setFormData({ ...formData, observacao: e.target.value })
-                }
-                placeholder="Observações sobre a inspeção da defensa"
-                rows={3}
-              />
             </div>
           </div>
 
