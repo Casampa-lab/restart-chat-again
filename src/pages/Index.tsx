@@ -16,12 +16,6 @@ import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
 import RetrorrefletividadeEstaticaForm from "@/components/RetrorrefletividadeEstaticaForm";
 import RetrorrefletividadeDinamicaForm from "@/components/RetrorrefletividadeDinamicaForm";
 import DefensasForm from "@/components/DefensasForm";
-import IntervencoesSHForm from "@/components/IntervencoesSHForm";
-import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm";
-import { IntervencoesSVForm } from "@/components/IntervencoesSVForm";
-import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
-import { IntervencoesCilindrosForm } from "@/components/IntervencoesCilindrosForm";
-import { IntervencoesPorticosForm } from "@/components/IntervencoesPorticosForm";
 import { RegistroNCForm } from "@/components/RegistroNCForm";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
@@ -54,19 +48,11 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('activeTab') || 'prontuario';
   });
-  const [intervencaoSubTab, setIntervencaoSubTab] = useState("sv");
-  const [shSubTab, setShSubTab] = useState("longitudinais");
-  const [intervencaoSvSubTab, setIntervencaoSvSubTab] = useState("placas");
   const [inventarioShSubTab, setInventarioShSubTab] = useState("longitudinais");
   const [inventarioSvSubTab, setInventarioSvSubTab] = useState("placas");
   const [showInviteCode, setShowInviteCode] = useState(() => {
     return localStorage.getItem('hideInviteCode') !== 'true';
   });
-  const [selectedPlacaForIntervencao, setSelectedPlacaForIntervencao] = useState<any>(null);
-  const [selectedMarcaSHForIntervencao, setSelectedMarcaSHForIntervencao] = useState<any>(null);
-  const [selectedInscricaoForIntervencao, setSelectedInscricaoForIntervencao] = useState<any>(null);
-  const [selectedTachaForIntervencao, setSelectedTachaForIntervencao] = useState<any>(null);
-  const [selectedDefensaForIntervencao, setSelectedDefensaForIntervencao] = useState<any>(null);
 
   // Queries para contar registros de inventário (CADASTRO)
   const { data: countMarcasLong } = useQuery({
@@ -299,40 +285,6 @@ const Index = () => {
     localStorage.setItem('activeTab', value);
   };
 
-  const handleRegistrarIntervencao = (placaData: any) => {
-    setSelectedPlacaForIntervencao(placaData);
-    setActiveTab('intervencoes');
-    setIntervencaoSubTab('sv');
-    localStorage.setItem('activeTab', 'intervencoes');
-  };
-
-  const handleRegistrarIntervencaoSH = (marcaSHData: any) => {
-    setSelectedMarcaSHForIntervencao(marcaSHData);
-    setActiveTab('intervencoes');
-    setIntervencaoSubTab('sh');
-    localStorage.setItem('activeTab', 'intervencoes');
-  };
-
-  const handleRegistrarIntervencaoInscricao = (inscricaoData: any) => {
-    setSelectedInscricaoForIntervencao(inscricaoData);
-    setActiveTab('intervencoes');
-    setIntervencaoSubTab('inscricoes');
-    localStorage.setItem('activeTab', 'intervencoes');
-  };
-
-  const handleRegistrarIntervencaoTacha = (tachaData: any) => {
-    setSelectedTachaForIntervencao(tachaData);
-    setActiveTab('intervencoes');
-    setIntervencaoSubTab('tacha');
-    localStorage.setItem('activeTab', 'intervencoes');
-  };
-
-  const handleRegistrarIntervencaoDefensa = (defensaData: any) => {
-    setSelectedDefensaForIntervencao(defensaData);
-    setActiveTab('intervencoes');
-    setIntervencaoSubTab('defensas');
-    localStorage.setItem('activeTab', 'intervencoes');
-  };
   if (authLoading || sessionLoading) {
     return <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -460,18 +412,15 @@ const Index = () => {
             </Card>
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-5 h-auto bg-muted p-2 gap-1">
+              <TabsList className="grid w-full grid-cols-4 h-auto bg-muted p-2 gap-1">
                 <TabsTrigger value="prontuario" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Inventário Dinâmico</span>
                 </TabsTrigger>
                 <TabsTrigger value="frentes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Frente de Serviço</span>
                 </TabsTrigger>
-                <TabsTrigger value="intervencoes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Intervenções</span>
-                </TabsTrigger>
-                <TabsTrigger value="retrorrefletividade" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Retrorefletividade</span>
+                <TabsTrigger value="controle-qualidade" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
+                  <span className="text-xs">Controle de Qualidade</span>
                 </TabsTrigger>
                 <TabsTrigger value="ncs" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Não Conformidade</span>
@@ -515,11 +464,11 @@ const Index = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
-              <TabsContent value="retrorrefletividade" className="mt-6">
+              <TabsContent value="controle-qualidade" className="mt-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Medição de Retrorrefletividade</CardTitle>
-                    <CardDescription>Registre as medições de retrorrefletividade da sinalização horizontal e vertical</CardDescription>
+                    <CardTitle>Controle de Qualidade</CardTitle>
+                    <CardDescription>Registre medições de retrorefletividade e inspeções de qualidade dos elementos de sinalização</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -547,93 +496,6 @@ const Index = () => {
                           <RetrorrefletividadeDinamicaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                         </TabsContent>
                       </Tabs>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="intervencoes" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Registro de Intervenções</CardTitle>
-                    <CardDescription>Documente as intervenções realizadas na sinalização viária</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-end">
-                        <Button variant="secondary" onClick={() => navigate("/minhas-intervencoes")} className="shadow-md hover:shadow-lg transition-shadow">
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver meus registros
-                        </Button>
-                      </div>
-                  <Tabs value={intervencaoSubTab} onValueChange={setIntervencaoSubTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="sh">
-                        Sinalização Horizontal (SH)
-                      </TabsTrigger>
-                      <TabsTrigger value="sv">
-                        Sinalização Vertical (SV)
-                      </TabsTrigger>
-                      <TabsTrigger value="defensas">
-                        Defensas
-                      </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="sh" className="mt-4">
-                      <Tabs value={shSubTab} onValueChange={setShSubTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-4">
-                          <TabsTrigger value="longitudinais">
-                            Marcas Longitudinais
-                          </TabsTrigger>
-                          <TabsTrigger value="transversais">
-                            Cilindros
-                          </TabsTrigger>
-                          <TabsTrigger value="inscricoes">
-                            Zebrados, Setas, Símbolos e Legendas
-                          </TabsTrigger>
-                          <TabsTrigger value="tachas">
-                            Tachas
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="longitudinais" className="mt-4">
-                          <IntervencoesSHForm />
-                        </TabsContent>
-                        <TabsContent value="transversais" className="mt-4">
-                          <IntervencoesCilindrosForm />
-                        </TabsContent>
-                        <TabsContent value="inscricoes" className="mt-4">
-                          <IntervencoesInscricoesForm />
-                        </TabsContent>
-                        <TabsContent value="tachas" className="mt-4">
-                          <IntervencoesTachaForm />
-                        </TabsContent>
-                      </Tabs>
-                    </TabsContent>
-                    <TabsContent value="sv" className="mt-4">
-                      <Tabs value={intervencaoSvSubTab} onValueChange={setIntervencaoSvSubTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="placas">
-                            Placas
-                          </TabsTrigger>
-                          <TabsTrigger value="porticos">
-                            Pórticos (P/SM) e Braços Projetados
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="placas" className="mt-4">
-                          <IntervencoesSVForm 
-                            loteId={activeSession.lote_id} 
-                            rodoviaId={activeSession.rodovia_id}
-                            placaSelecionada={selectedPlacaForIntervencao}
-                            onIntervencaoRegistrada={() => setSelectedPlacaForIntervencao(null)}
-                          />
-                        </TabsContent>
-                        <TabsContent value="porticos" className="mt-4">
-                          <IntervencoesPorticosForm />
-                        </TabsContent>
-                      </Tabs>
-                    </TabsContent>
-                    <TabsContent value="defensas" className="mt-4">
-                      <DefensasForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                    </TabsContent>
-                  </Tabs>
                     </div>
                   </CardContent>
                 </Card>
@@ -800,7 +662,6 @@ const Index = () => {
                           <InventarioMarcasLongitudinaisViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
-                            onRegistrarIntervencao={handleRegistrarIntervencaoSH}
                           />
                         </TabsContent>
                         <TabsContent value="transversais" className="mt-4">
@@ -813,14 +674,12 @@ const Index = () => {
                           <InventarioInscricoesViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
-                            onRegistrarIntervencao={handleRegistrarIntervencaoInscricao}
                           />
                         </TabsContent>
                         <TabsContent value="tachas" className="mt-4">
                           <InventarioTachasViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
-                            onRegistrarIntervencao={handleRegistrarIntervencaoTacha}
                           />
                         </TabsContent>
                       </Tabs>
@@ -889,7 +748,6 @@ const Index = () => {
                           <InventarioPlacasViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
-                            onRegistrarIntervencao={handleRegistrarIntervencao}
                           />
                         </TabsContent>
                         <TabsContent value="porticos" className="mt-4">
@@ -904,7 +762,6 @@ const Index = () => {
                       <InventarioDefensasViewer 
                         loteId={activeSession.lote_id} 
                         rodoviaId={activeSession.rodovia_id}
-                        onRegistrarIntervencao={handleRegistrarIntervencaoDefensa}
                       />
                     </TabsContent>
                   </Tabs>
