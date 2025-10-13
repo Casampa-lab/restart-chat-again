@@ -59,6 +59,7 @@ const App = () => (
           <Route path="/minhas-fichas-placa" element={<MinhasFichasPlaca />} />
           <Route path="/minhas-necessidades" element={<MinhasNecessidades />} />
           <Route path="/minhas-necessidades-relatorios" element={<MinhasNecessidadesRelatorios />} />
+          <Route path="/revisao-intervencoes" element={<RevisaoIntervencoes />} />
           <Route path="/dashboard-necessidades" element={<DashboardNecessidades />} />
           <Route path="/modulos" element={<Modulos />} />
           <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
