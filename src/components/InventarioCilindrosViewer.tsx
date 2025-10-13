@@ -47,9 +47,10 @@ interface IntervencaoCilindro {
 interface InventarioCilindrosViewerProps {
   loteId: string;
   rodoviaId: string;
+  onRegistrarIntervencao?: (cilindroData: any) => void;
 }
 
-export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilindrosViewerProps) {
+export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarIntervencao }: InventarioCilindrosViewerProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchLat, setSearchLat] = useState("");
@@ -412,10 +413,15 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
                   variant="default" 
                   size="sm"
                   onClick={() => {
-                    toast.info("Funcionalidade em desenvolvimento");
+                    if (onRegistrarIntervencao) {
+                      onRegistrarIntervencao(selectedCilindro);
+                      setSelectedCilindro(null);
+                    } else {
+                      toast.info("Funcionalidade em desenvolvimento");
+                    }
                   }}
                 >
-                  Registrar Intervenção
+                  Implementar Intervenção
                 </Button>
                 <Button 
                   variant="ghost" 

@@ -28,6 +28,14 @@ import { InventarioTachasViewer } from "@/components/InventarioTachasViewer";
 import { InventarioDefensasViewer } from "@/components/InventarioDefensasViewer";
 import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import IntervencoesSHForm from "@/components/IntervencoesSHForm";
+import { IntervencoesSVForm } from "@/components/IntervencoesSVForm";
+import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm";
+import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
+import { IntervencoesCilindrosForm } from "@/components/IntervencoesCilindrosForm";
+import { IntervencoesPorticosForm } from "@/components/IntervencoesPorticosForm";
+import DefensasIntervencoesForm from "@/components/DefensasIntervencoesForm";
 const Index = () => {
   const navigate = useNavigate();
   const {
@@ -53,6 +61,14 @@ const Index = () => {
   const [showInviteCode, setShowInviteCode] = useState(() => {
     return localStorage.getItem('hideInviteCode') !== 'true';
   });
+
+  // Estados para controle de diálogo de intervenção
+  const [intervencaoDialogOpen, setIntervencaoDialogOpen] = useState(false);
+  const [elementoParaIntervencao, setElementoParaIntervencao] = useState<any>(null);
+  const [tipoIntervencao, setTipoIntervencao] = useState<
+    "marcas_longitudinais" | "placas" | "tachas" | "cilindros" | 
+    "porticos" | "inscricoes" | "defensas" | null
+  >(null);
 
   // Queries para contar registros de inventário (CADASTRO)
   const { data: countMarcasLong } = useQuery({
@@ -250,6 +266,17 @@ const Index = () => {
     },
     enabled: isAdminOrCoordinator,
   });
+
+  // Handler genérico para abrir diálogo de intervenção
+  const handleAbrirIntervencao = (
+    elemento: any, 
+    tipo: "marcas_longitudinais" | "placas" | "tachas" | "cilindros" | 
+         "porticos" | "inscricoes" | "defensas"
+  ) => {
+    setElementoParaIntervencao(elemento);
+    setTipoIntervencao(tipo);
+    setIntervencaoDialogOpen(true);
+  };
 
   useEffect(() => {
     const checkAdminOrCoordinator = async () => {
@@ -670,24 +697,28 @@ const Index = () => {
                           <InventarioMarcasLongitudinaisViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
+                            onRegistrarIntervencao={(marca) => handleAbrirIntervencao(marca, "marcas_longitudinais")}
                           />
                         </TabsContent>
                         <TabsContent value="transversais" className="mt-4">
                           <InventarioCilindrosViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
+                            onRegistrarIntervencao={(cilindro) => handleAbrirIntervencao(cilindro, "cilindros")}
                           />
                         </TabsContent>
                         <TabsContent value="inscricoes" className="mt-4">
                           <InventarioInscricoesViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
+                            onRegistrarIntervencao={(inscricao) => handleAbrirIntervencao(inscricao, "inscricoes")}
                           />
                         </TabsContent>
                         <TabsContent value="tachas" className="mt-4">
                           <InventarioTachasViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
+                            onRegistrarIntervencao={(tacha) => handleAbrirIntervencao(tacha, "tachas")}
                           />
                         </TabsContent>
                       </Tabs>
@@ -756,12 +787,14 @@ const Index = () => {
                           <InventarioPlacasViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
+                            onRegistrarIntervencao={(placa) => handleAbrirIntervencao(placa, "placas")}
                           />
                         </TabsContent>
                         <TabsContent value="porticos" className="mt-4">
                           <InventarioPorticosViewer 
                             loteId={activeSession.lote_id} 
                             rodoviaId={activeSession.rodovia_id}
+                            onRegistrarIntervencao={(portico) => handleAbrirIntervencao(portico, "porticos")}
                           />
                         </TabsContent>
                       </Tabs>
@@ -770,6 +803,7 @@ const Index = () => {
                       <InventarioDefensasViewer 
                         loteId={activeSession.lote_id} 
                         rodoviaId={activeSession.rodovia_id}
+                        onRegistrarIntervencao={(defensa) => handleAbrirIntervencao(defensa, "defensas")}
                       />
                     </TabsContent>
                   </Tabs>
@@ -779,6 +813,94 @@ const Index = () => {
             </Tabs>
           </> : <SessionSelector userId={user?.id} onSessionStarted={handleSessionStarted} />}
       </main>
+
+      {/* Dialog de Implementar Intervenção */}
+      <Dialog open={intervencaoDialogOpen} onOpenChange={setIntervencaoDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Implementar Intervenção</DialogTitle>
+            <DialogDescription>
+              Registre a intervenção executada neste elemento do inventário
+            </DialogDescription>
+          </DialogHeader>
+
+          {tipoIntervencao === "marcas_longitudinais" && elementoParaIntervencao && (
+            <IntervencoesSHForm
+              marcaSelecionada={elementoParaIntervencao}
+              modo="normal"
+              onIntervencaoRegistrada={() => {
+                setIntervencaoDialogOpen(false);
+                toast.success("Intervenção em Marca Longitudinal registrada com sucesso!");
+              }}
+            />
+          )}
+
+          {tipoIntervencao === "placas" && elementoParaIntervencao && (
+            <IntervencoesSVForm
+              placaSelecionada={elementoParaIntervencao}
+              onIntervencaoRegistrada={() => {
+                setIntervencaoDialogOpen(false);
+                toast.success("Intervenção em Placa registrada com sucesso!");
+              }}
+            />
+          )}
+
+          {tipoIntervencao === "tachas" && elementoParaIntervencao && (
+            <IntervencoesTachaForm
+              tachaSelecionada={elementoParaIntervencao}
+              modo="normal"
+              onIntervencaoRegistrada={() => {
+                setIntervencaoDialogOpen(false);
+                toast.success("Intervenção em Tacha registrada com sucesso!");
+              }}
+            />
+          )}
+
+          {tipoIntervencao === "inscricoes" && elementoParaIntervencao && (
+            <IntervencoesInscricoesForm
+              inscricaoSelecionada={elementoParaIntervencao}
+              modo="normal"
+              onIntervencaoRegistrada={() => {
+                setIntervencaoDialogOpen(false);
+                toast.success("Intervenção em Inscrição registrada com sucesso!");
+              }}
+            />
+          )}
+
+          {tipoIntervencao === "cilindros" && elementoParaIntervencao && (
+            <IntervencoesCilindrosForm
+              cilindroSelecionado={elementoParaIntervencao}
+              modo="normal"
+              onIntervencaoRegistrada={() => {
+                setIntervencaoDialogOpen(false);
+                toast.success("Intervenção em Cilindro registrada com sucesso!");
+              }}
+            />
+          )}
+
+          {tipoIntervencao === "porticos" && elementoParaIntervencao && (
+            <IntervencoesPorticosForm
+              porticoSelecionado={elementoParaIntervencao}
+              modo="normal"
+              onIntervencaoRegistrada={() => {
+                setIntervencaoDialogOpen(false);
+                toast.success("Intervenção em Pórtico registrada com sucesso!");
+              }}
+            />
+          )}
+
+          {tipoIntervencao === "defensas" && elementoParaIntervencao && (
+            <DefensasIntervencoesForm
+              defensaSelecionada={elementoParaIntervencao}
+              modo="normal"
+              onIntervencaoRegistrada={() => {
+                setIntervencaoDialogOpen(false);
+                toast.success("Intervenção em Defensa registrada com sucesso!");
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <div className="container mx-auto px-4 pb-6">
         <Card className="bg-card shadow-lg border-primary/20">
