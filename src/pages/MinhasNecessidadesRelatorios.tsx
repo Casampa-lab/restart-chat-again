@@ -32,6 +32,198 @@ export default function MinhasNecessidadesRelatorios() {
   const [dataInicio, setDataInicio] = useState<string>("");
   const [dataFim, setDataFim] = useState<string>("");
 
+  const exportarAuditoriaGeral = async () => {
+    setGerando(true);
+    try {
+      const ExcelJS = (await import("exceljs")).default;
+      const workbook = new ExcelJS.Workbook();
+
+      // Configurações de análise para cada tabela
+      const tabelasAuditoria = [
+        { nome: "Placas", inventario: "ficha_placa", intervencoes: "ficha_placa_intervencoes" },
+        { nome: "Pórticos", inventario: "ficha_porticos", intervencoes: "ficha_porticos_intervencoes" },
+        { nome: "Tachas", inventario: "ficha_tachas", intervencoes: "ficha_tachas_intervencoes" },
+        { nome: "Cilindros", inventario: "ficha_cilindros", intervencoes: "ficha_cilindros_intervencoes" },
+        { nome: "Inscrições", inventario: "ficha_inscricoes", intervencoes: "ficha_inscricoes_intervencoes" },
+        { nome: "Marcas Longitudinais", inventario: "ficha_marcas_longitudinais", intervencoes: "ficha_marcas_longitudinais_intervencoes" },
+        { nome: "Defensas", inventario: "defensas", intervencoes: "defensas_intervencoes" },
+      ];
+
+      for (const tabela of tabelasAuditoria) {
+        const sheet = workbook.addWorksheet(tabela.nome);
+
+        // Buscar dados do inventário
+        const { data: dadosInventario, error: errorInv } = await supabase
+          .from(tabela.inventario as any)
+          .select("*")
+          .limit(1000);
+
+        if (errorInv) {
+          console.error(`Erro ao buscar ${tabela.nome}:`, errorInv);
+          continue;
+        }
+
+        // Buscar dados das intervenções
+        const { data: dadosIntervencoes, error: errorInt } = await supabase
+          .from(tabela.intervencoes as any)
+          .select("*")
+          .limit(1000);
+
+        const totalRegistros = dadosInventario?.length || 0;
+        const totalIntervencoes = dadosIntervencoes?.length || 0;
+
+        // Campos excluídos da análise (técnicos)
+        const camposExcluidos = ['id', 'user_id', 'created_at', 'updated_at', 'enviado_coordenador'];
+
+        // Obter campos do inventário
+        const camposInventario = totalRegistros > 0 
+          ? Object.keys(dadosInventario[0]).filter(k => !camposExcluidos.includes(k))
+          : [];
+
+        // Obter campos das intervenções
+        const camposIntervencoes = totalIntervencoes > 0
+          ? Object.keys(dadosIntervencoes[0]).filter(k => !camposExcluidos.includes(k))
+          : [];
+
+        // Identificar campos duplicados
+        const camposDuplicados = camposInventario.filter(c => camposIntervencoes.includes(c));
+
+        // Análise de uso dos campos
+        const analiseInventario = camposInventario.map(campo => {
+          const vazios = dadosInventario?.filter((r: any) => !r[campo] || r[campo] === "").length || 0;
+          const preenchidos = totalRegistros - vazios;
+          const percentualVazio = totalRegistros > 0 ? Math.round((vazios / totalRegistros) * 100) : 0;
+
+          // Verificar valores duplicados com outros campos
+          const valoresDuplicados: string[] = [];
+          if (preenchidos > 0 && dadosInventario) {
+            camposInventario.forEach(outroCampo => {
+              if (outroCampo !== campo) {
+                const duplicados = dadosInventario.filter((r: any) => 
+                  r[campo] && r[outroCampo] && 
+                  String(r[campo]).trim() === String(r[outroCampo]).trim()
+                ).length;
+                if (duplicados > preenchidos * 0.3) { // >30% duplicados
+                  valoresDuplicados.push(`${outroCampo} (${Math.round((duplicados/preenchidos)*100)}%)`);
+                }
+              }
+            });
+          }
+
+          return {
+            campo,
+            totalRegistros,
+            vazios,
+            preenchidos,
+            percentualVazio: `${percentualVazio}%`,
+            presente_em_intervencoes: camposDuplicados.includes(campo) ? "SIM" : "NÃO",
+            valores_duplicados_com: valoresDuplicados.join(", ") || "-",
+            status: percentualVazio > 80 ? "⚠️ CAMPO QUASE VAZIO" : percentualVazio > 50 ? "⚠️ POUCO USADO" : "OK",
+          };
+        });
+
+        // Adicionar estatísticas gerais
+        sheet.addRow(["=== ESTATÍSTICAS GERAIS ==="]);
+        sheet.addRow(["Total de Registros no Inventário", totalRegistros]);
+        sheet.addRow(["Total de Intervenções", totalIntervencoes]);
+        sheet.addRow(["Total de Campos no Inventário", camposInventario.length]);
+        sheet.addRow(["Total de Campos nas Intervenções", camposIntervencoes.length]);
+        sheet.addRow(["Campos Duplicados (ambas tabelas)", camposDuplicados.length]);
+        sheet.addRow([]);
+        
+        sheet.addRow(["=== CAMPOS DUPLICADOS ENTRE INVENTÁRIO E INTERVENÇÕES ==="]);
+        camposDuplicados.forEach(c => sheet.addRow([c]));
+        sheet.addRow([]);
+
+        sheet.addRow(["=== ANÁLISE DETALHADA DOS CAMPOS DO INVENTÁRIO ==="]);
+        sheet.addRow([]);
+
+        // Adicionar análise detalhada
+        if (analiseInventario.length > 0) {
+          const headers = Object.keys(analiseInventario[0]);
+          sheet.addRow(headers);
+          
+          const headerRow = sheet.lastRow;
+          if (headerRow) {
+            headerRow.font = { bold: true };
+            headerRow.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FF4472C4' }
+            };
+          }
+
+          analiseInventario.forEach(analise => {
+            const row = sheet.addRow(Object.values(analise));
+            
+            // Destacar campos problemáticos
+            if (analise.status.includes("⚠️")) {
+              row.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFFFEB9C' }
+              };
+            }
+            if (analise.valores_duplicados_com !== "-") {
+              row.getCell(7).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFFFE699' }
+              };
+            }
+          });
+        }
+
+        // Auto-ajustar largura das colunas
+        sheet.columns.forEach(column => {
+          if (column) {
+            let maxLength = 10;
+            column.eachCell?.({ includeEmpty: true }, (cell) => {
+              const cellValue = cell.value ? cell.value.toString() : '';
+              maxLength = Math.max(maxLength, cellValue.length);
+            });
+            column.width = Math.min(maxLength + 2, 50);
+          }
+        });
+      }
+
+      // Criar aba de resumo executivo
+      const resumoSheet = workbook.addWorksheet("RESUMO EXECUTIVO");
+      resumoSheet.addRow(["AUDITORIA COMPLETA DE INVENTÁRIO"]);
+      resumoSheet.addRow(["Data da Auditoria", new Date().toLocaleString('pt-BR')]);
+      resumoSheet.addRow([]);
+      resumoSheet.addRow(["Esta auditoria analisa todas as tabelas de inventário para identificar:"]);
+      resumoSheet.addRow(["• Campos duplicados entre inventário e intervenções"]);
+      resumoSheet.addRow(["• Campos vazios ou pouco utilizados (>80% vazios = ⚠️ QUASE VAZIO)"]);
+      resumoSheet.addRow(["• Campos com valores idênticos a outros campos (possível redundância)"]);
+      resumoSheet.addRow(["• Estatísticas de uso de cada campo"]);
+      resumoSheet.addRow([]);
+      resumoSheet.addRow(["LEGENDA DE STATUS:"]);
+      resumoSheet.addRow(["⚠️ CAMPO QUASE VAZIO", ">80% dos registros sem valor"]);
+      resumoSheet.addRow(["⚠️ POUCO USADO", "50-80% dos registros sem valor"]);
+      resumoSheet.addRow(["OK", "<50% dos registros sem valor"]);
+      resumoSheet.addRow([]);
+      resumoSheet.addRow(["Cada aba contém a análise detalhada de um tipo de inventário."]);
+
+      // Download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `auditoria_completa_inventario_${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Auditoria completa exportada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao exportar auditoria:", error);
+      toast.error("Erro ao exportar auditoria completa");
+    } finally {
+      setGerando(false);
+    }
+  };
+
   const exportarAnalise = async (tipo: "placas" | "porticos") => {
     setGerando(true);
     try {
@@ -646,43 +838,73 @@ export default function MinhasNecessidadesRelatorios() {
                   Exporte os dados brutos com análise automática de inconsistências para revisão manual
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
+              <CardContent className="space-y-6">
+                {/* NOVA: Auditoria Geral */}
+                <div className="p-6 bg-primary/5 border-2 border-primary/20 rounded-lg space-y-4">
+                  <div className="flex items-center gap-3">
+                    <FileSpreadsheet className="h-6 w-6 text-primary" />
+                    <div>
+                      <h3 className="font-semibold text-lg">Auditoria Completa de Inventário</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Análise detalhada de TODAS as 7 tabelas de inventário
+                      </p>
+                    </div>
+                  </div>
+                  
                   <Button 
-                    onClick={() => exportarAnalise("placas")} 
+                    onClick={exportarAuditoriaGeral} 
                     disabled={gerando}
                     className="w-full"
+                    size="lg"
                   >
-                    {gerando ? "Exportando..." : "Exportar Análise de Placas"}
+                    {gerando ? "Gerando Auditoria..." : "🔍 Gerar Auditoria Completa"}
                   </Button>
-                  <p className="text-sm text-muted-foreground">
-                    Exporta todos os dados de placas com colunas de análise destacando possíveis duplicações e campos vazios
-                  </p>
+
+                  <div className="p-4 bg-background rounded-lg">
+                    <h4 className="font-semibold mb-2">O que será exportado:</h4>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li><strong>7 abas</strong> (uma para cada tipo: Placas, Pórticos, Tachas, Cilindros, Inscrições, Marcas, Defensas)</li>
+                      <li><strong>Estatísticas gerais</strong>: total de registros, campos, intervenções</li>
+                      <li><strong>Campos duplicados</strong>: presentes no inventário E nas intervenções</li>
+                      <li><strong>Análise campo a campo</strong>: quantos vazios, % de uso, valores duplicados</li>
+                      <li><strong>Status de cada campo</strong>: OK, ⚠️ POUCO USADO, ⚠️ CAMPO QUASE VAZIO</li>
+                      <li><strong>Campos problemáticos</strong> destacados em amarelo</li>
+                      <li><strong>Resumo executivo</strong> com instruções de leitura</li>
+                    </ul>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Button 
-                    onClick={() => exportarAnalise("porticos")} 
-                    disabled={gerando}
-                    className="w-full"
-                  >
-                    {gerando ? "Exportando..." : "Exportar Análise de Pórticos"}
-                  </Button>
-                  <p className="text-sm text-muted-foreground">
-                    Exporta todos os dados de pórticos com colunas de análise destacando possíveis inconsistências
-                  </p>
-                </div>
+                {/* Análises individuais */}
+                <div className="space-y-4 pt-4 border-t">
+                  <h3 className="font-semibold">Análises Individuais (Detalhadas)</h3>
+                  
+                  <div className="space-y-2">
+                    <Button 
+                      onClick={() => exportarAnalise("placas")} 
+                      disabled={gerando}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      {gerando ? "Exportando..." : "Exportar Análise de Placas"}
+                    </Button>
+                    <p className="text-sm text-muted-foreground">
+                      Exporta todos os dados de placas com colunas de análise destacando possíveis duplicações e campos vazios
+                    </p>
+                  </div>
 
-                <div className="mt-6 p-4 bg-muted rounded-lg">
-                  <h4 className="font-semibold mb-2">O que será exportado:</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
-                    <li>Todos os campos atuais do cadastro</li>
-                    <li>Coluna "ALERTA_MODELO" - identifica quando modelo = codigo</li>
-                    <li>Coluna "ALERTA_DESCRICAO" - identifica quando descricao = codigo ou tipo</li>
-                    <li>Coluna "ALERTA_FOTO" - identifica campos de foto vazios ou duplicados</li>
-                    <li>Coluna "STATUS_REVISAO" - resumo das inconsistências encontradas</li>
-                    <li>Linhas com problemas destacadas em amarelo</li>
-                  </ul>
+                  <div className="space-y-2">
+                    <Button 
+                      onClick={() => exportarAnalise("porticos")} 
+                      disabled={gerando}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      {gerando ? "Exportando..." : "Exportar Análise de Pórticos"}
+                    </Button>
+                    <p className="text-sm text-muted-foreground">
+                      Exporta todos os dados de pórticos com colunas de análise destacando possíveis inconsistências
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
