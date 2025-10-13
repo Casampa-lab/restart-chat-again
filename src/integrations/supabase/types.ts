@@ -545,8 +545,6 @@ export type Database = {
           data_vistoria: string
           dimensoes: string | null
           enviado_coordenador: boolean | null
-          estado_conservacao: string | null
-          foto_url: string | null
           id: string
           km_final: number | null
           km_inicial: number | null
@@ -569,8 +567,6 @@ export type Database = {
           data_vistoria: string
           dimensoes?: string | null
           enviado_coordenador?: boolean | null
-          estado_conservacao?: string | null
-          foto_url?: string | null
           id?: string
           km_final?: number | null
           km_inicial?: number | null
@@ -593,8 +589,6 @@ export type Database = {
           data_vistoria?: string
           dimensoes?: string | null
           enviado_coordenador?: boolean | null
-          estado_conservacao?: string | null
-          foto_url?: string | null
           id?: string
           km_final?: number | null
           km_inicial?: number | null
@@ -619,12 +613,15 @@ export type Database = {
           created_at: string
           data_intervencao: string
           dimensoes: string | null
+          estado_conservacao: string | null
           ficha_inscricoes_id: string
           fora_plano_manutencao: boolean | null
+          foto_url: string | null
           id: string
           justificativa_fora_plano: string | null
           material_utilizado: string | null
           motivo: string
+          observacao: string | null
           tipo_inscricao: string | null
         }
         Insert: {
@@ -633,12 +630,15 @@ export type Database = {
           created_at?: string
           data_intervencao: string
           dimensoes?: string | null
+          estado_conservacao?: string | null
           ficha_inscricoes_id: string
           fora_plano_manutencao?: boolean | null
+          foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
           material_utilizado?: string | null
           motivo: string
+          observacao?: string | null
           tipo_inscricao?: string | null
         }
         Update: {
@@ -647,12 +647,15 @@ export type Database = {
           created_at?: string
           data_intervencao?: string
           dimensoes?: string | null
+          estado_conservacao?: string | null
           ficha_inscricoes_id?: string
           fora_plano_manutencao?: boolean | null
+          foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
           material_utilizado?: string | null
           motivo?: string
+          observacao?: string | null
           tipo_inscricao?: string | null
         }
         Relationships: []

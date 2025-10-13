@@ -25,9 +25,7 @@ interface FichaInscricao {
   dimensoes: string | null;
   area_m2: number | null;
   material_utilizado: string | null;
-  estado_conservacao: string | null;
   observacao: string | null;
-  foto_url: string | null;
   rodovia_id: string;
 }
 
@@ -454,10 +452,6 @@ export function InventarioInscricoesViewer({
                         <span className="text-sm font-medium text-muted-foreground">Material:</span>
                         <p className="text-sm">{selectedInscricao.material_utilizado || "-"}</p>
                       </div>
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Estado:</span>
-                        <p className="text-sm">{selectedInscricao.estado_conservacao || "-"}</p>
-                      </div>
                     </div>
                   </div>
 
@@ -549,19 +543,9 @@ export function InventarioInscricoesViewer({
                 </TabsContent>
 
               <TabsContent value="foto" className="mt-4">
-                {selectedInscricao.foto_url ? (
-                  <div className="flex justify-center">
-                    <img
-                      src={supabase.storage.from('inscricoes').getPublicUrl(selectedInscricao.foto_url).data.publicUrl}
-                      alt="Inscrição"
-                      className="rounded-lg max-w-full h-auto"
-                    />
-                  </div>
-                ) : (
-                  <p className="text-center py-8 text-muted-foreground">
-                    Nenhuma foto disponível
-                  </p>
-                )}
+                <p className="text-center py-8 text-muted-foreground">
+                  Fotos de intervenções estão disponíveis no histórico
+                </p>
               </TabsContent>
 
               <TabsContent value="historico" className="mt-4">

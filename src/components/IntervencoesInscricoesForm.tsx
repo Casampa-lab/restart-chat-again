@@ -51,6 +51,9 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
     dimensoes: "",
     area_m2: "",
     material_utilizado: "",
+    estado_conservacao: "",
+    observacao: "",
+    foto_url: "",
     fora_plano_manutencao: false,
     justificativa_fora_plano: "",
   });
@@ -90,6 +93,9 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
           dimensoes: formData.dimensoes || null,
           area_m2: formData.area_m2 ? parseFloat(formData.area_m2) : null,
           material_utilizado: formData.material_utilizado || null,
+          estado_conservacao: formData.estado_conservacao || null,
+          observacao: formData.observacao || null,
+          foto_url: formData.foto_url || null,
           fora_plano_manutencao: formData.fora_plano_manutencao,
           justificativa_fora_plano: formData.justificativa_fora_plano || null,
         });
@@ -110,6 +116,9 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
         dimensoes: "",
         area_m2: "",
         material_utilizado: "",
+        estado_conservacao: "",
+        observacao: "",
+        foto_url: "",
         fora_plano_manutencao: false,
         justificativa_fora_plano: "",
       });
@@ -263,6 +272,50 @@ const IntervencoesInscricoesForm = ({ inscricaoSelecionada, onIntervencaoRegistr
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="estado_conservacao">Estado de Conservação</Label>
+              <Select
+                value={formData.estado_conservacao}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, estado_conservacao: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Bom">Bom</SelectItem>
+                  <SelectItem value="Regular">Regular</SelectItem>
+                  <SelectItem value="Ruim">Ruim</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="observacao">Observações</Label>
+              <Textarea
+                id="observacao"
+                value={formData.observacao}
+                onChange={(e) =>
+                  setFormData({ ...formData, observacao: e.target.value })
+                }
+                placeholder="Observações sobre a intervenção..."
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="foto_url">URL da Foto</Label>
+              <Input
+                id="foto_url"
+                value={formData.foto_url}
+                onChange={(e) =>
+                  setFormData({ ...formData, foto_url: e.target.value })
+                }
+                placeholder="Caminho da foto no storage..."
+              />
             </div>
           </div>
 
