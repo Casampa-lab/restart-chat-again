@@ -246,9 +246,9 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Inspeção de Defensas</CardTitle>
+        <CardTitle>Cadastro de Defensas</CardTitle>
         <CardDescription>
-          Registre inspeções e avaliações de estado das defensas metálicas e dispositivos de proteção
+          Registre defensas metálicas e dispositivos de proteção no inventário
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -721,7 +721,7 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Salvar Inspeção
+            Salvar Cadastro
           </Button>
         </form>
       </CardContent>

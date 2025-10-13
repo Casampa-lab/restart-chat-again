@@ -17,6 +17,11 @@ interface IntervencoesSHFormProps {
     snv?: string;
   };
   onIntervencaoRegistrada?: () => void;
+  modo?: 'normal' | 'controlado';
+  onDataChange?: (data: any) => void;
+  hideSubmitButton?: boolean;
+  loteId?: string;
+  rodoviaId?: string;
 }
 
 const MATERIAIS = [
@@ -42,7 +47,15 @@ const TIPOS_DEMARCACAO = [
   "Linha de Bordo"
 ];
 
-const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: IntervencoesSHFormProps) => {
+const IntervencoesSHForm = ({ 
+  marcaSelecionada, 
+  onIntervencaoRegistrada,
+  modo = 'normal',
+  onDataChange,
+  hideSubmitButton = false,
+  loteId,
+  rodoviaId
+}: IntervencoesSHFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     data_intervencao: new Date().toISOString().split('T')[0],
@@ -56,8 +69,22 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
     justificativa_fora_plano: "",
   });
 
+  const handleChange = (field: string, value: any) => {
+    const newData = { ...formData, [field]: value };
+    setFormData(newData);
+    
+    if (modo === 'controlado' && onDataChange) {
+      onDataChange(newData);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (modo === 'controlado') {
+      if (onDataChange) onDataChange(formData);
+      return;
+    }
     
     if (!marcaSelecionada) {
       toast({
@@ -148,9 +175,7 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
                 id="data_intervencao"
                 type="date"
                 value={formData.data_intervencao}
-                onChange={(e) =>
-                  setFormData({ ...formData, data_intervencao: e.target.value })
-                }
+                onChange={(e) => handleChange("data_intervencao", e.target.value)}
                 required
               />
             </div>
@@ -159,9 +184,7 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
               <Label htmlFor="motivo">Motivo da Intervenção *</Label>
               <Select
                 value={formData.motivo}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, motivo: value })
-                }
+                onValueChange={(value) => handleChange("motivo", value)}
                 required
               >
                 <SelectTrigger>
@@ -182,9 +205,7 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
               <Label htmlFor="tipo_demarcacao">Tipo de Demarcação</Label>
               <Select
                 value={formData.tipo_demarcacao}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, tipo_demarcacao: value })
-                }
+                onValueChange={(value) => handleChange("tipo_demarcacao", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
@@ -203,9 +224,7 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
               <Label htmlFor="cor">Cor</Label>
               <Select
                 value={formData.cor}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, cor: value })
-                }
+                onValueChange={(value) => handleChange("cor", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a cor" />
@@ -227,9 +246,7 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
                 type="number"
                 step="0.1"
                 value={formData.largura_cm}
-                onChange={(e) =>
-                  setFormData({ ...formData, largura_cm: e.target.value })
-                }
+                onChange={(e) => handleChange("largura_cm", e.target.value)}
                 placeholder="0.0"
               />
             </div>
@@ -241,9 +258,7 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
                 type="number"
                 step="0.1"
                 value={formData.espessura_cm}
-                onChange={(e) =>
-                  setFormData({ ...formData, espessura_cm: e.target.value })
-                }
+                onChange={(e) => handleChange("espessura_cm", e.target.value)}
                 placeholder="0.0"
               />
             </div>
@@ -252,9 +267,7 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
               <Label htmlFor="material">Material Utilizado</Label>
               <Select
                 value={formData.material}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, material: value })
-                }
+                onValueChange={(value) => handleChange("material", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o material" />
@@ -275,9 +288,7 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
               type="checkbox"
               id="fora_plano"
               checked={formData.fora_plano_manutencao}
-              onChange={(e) =>
-                setFormData({ ...formData, fora_plano_manutencao: e.target.checked })
-              }
+              onChange={(e) => handleChange("fora_plano_manutencao", e.target.checked)}
               className="h-4 w-4 mt-1"
             />
             <div className="space-y-1 leading-none">
@@ -291,9 +302,7 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
               <Textarea
                 id="justificativa_fora_plano"
                 value={formData.justificativa_fora_plano}
-                onChange={(e) =>
-                  setFormData({ ...formData, justificativa_fora_plano: e.target.value })
-                }
+                onChange={(e) => handleChange("justificativa_fora_plano", e.target.value)}
                 placeholder="Explique o motivo da intervenção fora do plano..."
                 rows={3}
                 required={formData.fora_plano_manutencao}
@@ -301,10 +310,12 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={isLoading || !marcaSelecionada}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Salvar Intervenção
-          </Button>
+          {!hideSubmitButton && (
+            <Button type="submit" className="w-full" disabled={isLoading || (!marcaSelecionada && modo !== 'controlado')}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Salvar Intervenção
+            </Button>
+          )}
         </form>
       </CardContent>
     </Card>
@@ -312,3 +323,4 @@ const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: Inter
 };
 
 export default IntervencoesSHForm;
+export { IntervencoesSHForm };

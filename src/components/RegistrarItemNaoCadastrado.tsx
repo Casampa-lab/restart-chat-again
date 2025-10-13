@@ -1,15 +1,22 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Camera, Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
+import { IntervencoesSHForm } from "./IntervencoesSHForm";
+import { IntervencoesSVForm } from "./IntervencoesSVForm";
+import { IntervencoesTachaForm } from "./IntervencoesTachaForm";
+import { IntervencoesInscricoesForm } from "./IntervencoesInscricoesForm";
+import { IntervencoesCilindrosForm } from "./IntervencoesCilindrosForm";
+import { IntervencoesPorticosForm } from "./IntervencoesPorticosForm";
+import DefensasIntervencoesForm from "./DefensasIntervencoesForm";
 
 interface RegistrarItemNaoCadastradoProps {
-  tipo_elemento: string;
+  tipo_elemento: 'marcas_longitudinais' | 'tachas' | 'marcas_transversais' | 'cilindros' | 'placas' | 'porticos' | 'defensas';
   loteId: string;
   rodoviaId: string;
   onSuccess?: () => void;
@@ -21,155 +28,216 @@ export function RegistrarItemNaoCadastrado({
   loteId,
   rodoviaId,
   onSuccess,
-  onCancel
+  onCancel,
 }: RegistrarItemNaoCadastradoProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [justificativa, setJustificativa] = useState("");
   const [fotos, setFotos] = useState<File[]>([]);
-  const [dadosElemento, setDadosElemento] = useState<any>({});
+  const [dadosIntervencao, setDadosIntervencao] = useState<any>(null);
 
   const handleFotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const novosArquivos = Array.from(e.target.files);
-      setFotos(prev => [...prev, ...novosArquivos]);
+      const newFiles = Array.from(e.target.files);
+      setFotos([...fotos, ...newFiles]);
     }
   };
 
   const removeFoto = (index: number) => {
-    setFotos(prev => prev.filter((_, i) => i !== index));
+    setFotos(fotos.filter((_, i) => i !== index));
+  };
+
+  const handleDataChange = (data: any) => {
+    setDadosIntervencao(data);
+  };
+
+  const getTipoLabel = () => {
+    const labels: Record<string, string> = {
+      marcas_longitudinais: 'Sinalização Horizontal - Marcas Longitudinais',
+      tachas: 'Tachas',
+      marcas_transversais: 'Sinalização Horizontal - Inscrições/Transversais',
+      cilindros: 'Cilindros Delimitadores',
+      placas: 'Sinalização Vertical - Placas',
+      porticos: 'Pórticos',
+      defensas: 'Defensas'
+    };
+    return labels[tipo_elemento] || tipo_elemento;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     if (!justificativa.trim()) {
-      toast.error("Justificativa é obrigatória");
+      toast.error("Preencha a justificativa");
       return;
     }
 
     if (fotos.length === 0) {
-      toast.error("É necessário anexar pelo menos uma foto");
+      toast.error("Adicione pelo menos uma foto");
       return;
+    }
+
+    if (!dadosIntervencao) {
+      toast.error("Preencha os dados da intervenção");
+      return;
+    }
+
+    // Validar campos obrigatórios específicos por tipo
+    if (tipo_elemento === 'marcas_longitudinais' || tipo_elemento === 'marcas_transversais' || 
+        tipo_elemento === 'tachas' || tipo_elemento === 'cilindros' || tipo_elemento === 'porticos' || 
+        tipo_elemento === 'defensas') {
+      if (!dadosIntervencao.data_intervencao || !dadosIntervencao.motivo) {
+        toast.error("Preencha os campos obrigatórios (Data e Motivo) da intervenção");
+        return;
+      }
     }
 
     setIsLoading(true);
 
     try {
-      // 1. Upload das fotos
+      // Upload das fotos
       const fotosUrls: string[] = [];
       for (const foto of fotos) {
-        const fileName = `${Date.now()}_${foto.name}`;
-        const { error: uploadError, data } = await supabase.storage
+        const timestamp = Date.now();
+        const fileName = `${timestamp}_${foto.name}`;
+        const filePath = `${loteId}/${tipo_elemento}/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
           .from('verificacao-photos')
-          .upload(fileName, foto);
+          .upload(filePath, foto);
 
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage
+        const { data: { publicUrl } } = supabase.storage
           .from('verificacao-photos')
-          .getPublicUrl(fileName);
+          .getPublicUrl(filePath);
 
-        fotosUrls.push(urlData.publicUrl);
+        fotosUrls.push(publicUrl);
       }
 
-      // 2. Obter usuário atual
+      // Obter usuário autenticado
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // 3. Capturar coordenadas GPS
-      let coordenadas: { latitude: number; longitude: number } | null = null;
-      try {
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 5000
+      // Capturar coordenadas GPS se disponível
+      let latitude: number | null = null;
+      let longitude: number | null = null;
+      
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
           });
-        });
-        coordenadas = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        };
-      } catch (error) {
-        console.warn("Não foi possível obter coordenadas GPS:", error);
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        } catch (err) {
+          console.log("Não foi possível capturar localização");
+        }
       }
 
-      // 4. Montar dados do elemento com coordenadas se disponíveis
-      const dadosCompletos = {
-        ...dadosElemento,
-        data_vistoria: new Date().toISOString().split('T')[0],
-        ...(coordenadas && {
-          latitude: coordenadas.latitude,
-          longitude: coordenadas.longitude,
-          latitude_inicial: coordenadas.latitude,
-          longitude_inicial: coordenadas.longitude
-        })
+      // Preparar dados_elemento com estrutura completa da intervenção
+      const dados_elemento = {
+        ...dadosIntervencao,
+        lote_id: loteId,
+        rodovia_id: rodoviaId,
+        latitude,
+        longitude,
       };
 
-      // 5. Criar registro pendente de aprovação
-      const { error } = await supabase
+      // Inserir no banco
+      const { error: insertError } = await supabase
         .from('elementos_pendentes_aprovacao')
         .insert({
           user_id: user.id,
-          tipo_elemento,
-          rodovia_id: rodoviaId,
           lote_id: loteId,
-          dados_elemento: dadosCompletos,
+          rodovia_id: rodoviaId,
+          tipo_elemento,
           justificativa,
           fotos_urls: fotosUrls,
-          status: 'pendente_aprovacao'
+          dados_elemento,
+          status: 'pendente_aprovacao',
         });
 
-      if (error) throw error;
+      if (insertError) throw insertError;
 
-      toast.success("Registro enviado para aprovação do coordenador");
-      onSuccess?.();
+      toast.success("Solicitação enviada para aprovação do coordenador!");
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+
+      // Limpar formulário
+      setJustificativa("");
+      setFotos([]);
+      setDadosIntervencao(null);
+
     } catch (error: any) {
-      console.error("Erro ao registrar elemento:", error);
-      toast.error(`Erro: ${error.message}`);
+      console.error("Erro ao enviar solicitação:", error);
+      toast.error("Erro ao enviar solicitação: " + error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getTipoLabel = () => {
-    const labels: Record<string, string> = {
-      marcas_longitudinais: 'Marca Longitudinal',
-      placas: 'Placa',
-      tachas: 'Tachas',
-      inscricoes: 'Inscrição/Marca Transversal',
-      cilindros: 'Cilindro',
-      porticos: 'Pórtico',
-      defensas: 'Defensa'
+  const renderFormulario = () => {
+    const sharedProps = {
+      modo: 'controlado' as const,
+      onDataChange: handleDataChange,
+      hideSubmitButton: true,
+      loteId,
+      rodoviaId,
     };
-    return labels[tipo_elemento] || 'Elemento';
+
+    switch (tipo_elemento) {
+      case 'marcas_longitudinais':
+        return <IntervencoesSHForm {...sharedProps} />;
+      
+      case 'tachas':
+        return <IntervencoesTachaForm {...sharedProps} />;
+      
+      case 'marcas_transversais':
+        return <IntervencoesInscricoesForm {...sharedProps} />;
+      
+      case 'cilindros':
+        return <IntervencoesCilindrosForm {...sharedProps} />;
+      
+      case 'placas':
+        return <IntervencoesSVForm {...sharedProps} />;
+      
+      case 'porticos':
+        return <IntervencoesPorticosForm {...sharedProps} />;
+      
+      case 'defensas':
+        return <DefensasIntervencoesForm {...sharedProps} />;
+      
+      default:
+        return <div>Tipo de elemento não suportado</div>;
+    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Camera className="h-5 w-5" />
-            Registrar {getTipoLabel()} Não Cadastrado
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Este elemento não está no cadastro inicial. Preencha os dados e aguarde aprovação do coordenador.
-          </p>
+          <CardTitle>Registrar Item Não Cadastrado</CardTitle>
+          <CardDescription>
+            Tipo: {getTipoLabel()}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          {/* Formulário de Intervenção */}
+          <div className="border rounded-lg p-4 bg-muted/50">
+            <h3 className="font-semibold mb-4">Dados da Intervenção</h3>
+            {renderFormulario()}
+          </div>
+
           {/* Justificativa */}
           <div className="space-y-2">
-            <Label htmlFor="justificativa" className="text-sm font-medium">
-              Justificativa para inclusão *
-              <span className="text-xs text-muted-foreground ml-1">
-                (Explique por que este elemento foi implantado fora do projeto)
-              </span>
-            </Label>
+            <Label htmlFor="justificativa">Justificativa para Inclusão *</Label>
             <Textarea
               id="justificativa"
               value={justificativa}
               onChange={(e) => setJustificativa(e.target.value)}
-              placeholder="Descreva detalhadamente a situação e necessidade de implantação deste elemento..."
+              placeholder="Explique o motivo pelo qual este elemento não está no cadastro e deve ser incluído"
               rows={4}
               required
             />
@@ -177,91 +245,70 @@ export function RegistrarItemNaoCadastrado({
 
           {/* Upload de Fotos */}
           <div className="space-y-2">
-            <Label htmlFor="fotos" className="text-sm font-medium">
-              Fotos do Elemento *
-              <span className="text-xs text-muted-foreground ml-1">
-                (Mínimo 1 foto obrigatória)
-              </span>
-            </Label>
-            <div className="border-2 border-dashed rounded-lg p-4">
-              <input
-                id="fotos"
-                type="file"
-                accept="image/*"
-                multiple
-                capture="environment"
-                onChange={handleFotoUpload}
-                className="hidden"
-              />
+            <Label>Fotos Comprobatórias *</Label>
+            <div className="flex gap-2">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => document.getElementById('fotos')?.click()}
-                className="w-full"
+                onClick={() => document.getElementById('foto-upload')?.click()}
               >
-                <Upload className="h-4 w-4 mr-2" />
+                <Upload className="mr-2 h-4 w-4" />
                 Adicionar Fotos
               </Button>
-              
-              {fotos.length > 0 && (
-                <div className="mt-3 grid grid-cols-3 gap-2">
-                  {fotos.map((foto, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={URL.createObjectURL(foto)}
-                        alt={`Foto ${index + 1}`}
-                        className="w-full h-24 object-cover rounded"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-1 right-1 h-6 w-6 p-0"
-                        onClick={() => removeFoto(index)}
-                      >
-                        ×
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <input
+                id="foto-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFotoUpload}
+                className="hidden"
+              />
             </div>
-            <p className="text-xs text-muted-foreground">
-              {fotos.length} {fotos.length === 1 ? 'foto anexada' : 'fotos anexadas'}
-            </p>
+            
+            {fotos.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                {fotos.map((foto, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={URL.createObjectURL(foto)}
+                      alt={`Foto ${index + 1}`}
+                      className="w-full h-24 object-cover rounded"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-1 right-1 h-6 w-6 p-0"
+                      onClick={() => removeFoto(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Observações */}
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <p className="text-sm font-medium text-amber-900">⚠️ Atenção</p>
-            <ul className="text-xs text-amber-800 mt-2 space-y-1 list-disc list-inside">
-              <li>Este registro ficará pendente até aprovação do coordenador</li>
-              <li>Se aprovado, será incluído no inventário dinâmico automaticamente</li>
-              <li>Se rejeitado, será criada uma NC (Não Conformidade) automaticamente</li>
-              <li>As coordenadas GPS serão capturadas automaticamente se disponíveis</li>
-            </ul>
+          {/* Mensagem de Atenção */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p className="text-sm text-yellow-800">
+              <strong>Atenção:</strong> Esta solicitação será enviada para análise do coordenador. 
+              Após a aprovação, o elemento será incluído no inventário dinâmico e você poderá 
+              registrar intervenções normalmente.
+            </p>
           </div>
         </CardContent>
       </Card>
 
       <DialogFooter className="mt-4">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={onCancel}
-          disabled={isLoading}
-        >
-          Cancelar
-        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+        )}
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Enviando...
-            </>
-          ) : (
-            "Enviar para Aprovação"
-          )}
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Enviar para Aprovação
         </Button>
       </DialogFooter>
     </form>

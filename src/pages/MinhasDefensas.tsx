@@ -279,9 +279,9 @@ const MinhasDefensas = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>3.1.4 - Minhas Inspeções de Defensas</CardTitle>
+            <CardTitle>3.1.4 - Meus Cadastros de Defensas</CardTitle>
             <CardDescription>
-              Histórico de inspeções de defensas registradas
+              Histórico de cadastros de defensas registrados
             </CardDescription>
           </CardHeader>
           <CardContent>
