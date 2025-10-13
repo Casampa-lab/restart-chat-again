@@ -43,13 +43,13 @@ const MinhasIntervencoes = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="sh">
-              Marcas Longitudinais
+              Sinalização Horizontal
             </TabsTrigger>
             <TabsTrigger value="sv">
-              Marcas Transversais
+              Sinalização Vertical
             </TabsTrigger>
             <TabsTrigger value="inscricoes">
-              Setas, Símbolos e Legendas
+              Inscrições
             </TabsTrigger>
             <TabsTrigger value="tacha">
               Tachas
@@ -64,19 +64,19 @@ const MinhasIntervencoes = () => {
             />
           </TabsContent>
           
-          <TabsContent value="inscricoes">
-            <iframe 
-              src="/minhas-intervencoes-inscricoes" 
-              className="w-full h-[calc(100vh-200px)] border-0"
-              title="Intervenções Inscrições"
-            />
-          </TabsContent>
-          
           <TabsContent value="sv">
             <iframe 
               src="/minhas-intervencoes-sv" 
               className="w-full h-[calc(100vh-200px)] border-0"
               title="Intervenções SV"
+            />
+          </TabsContent>
+          
+          <TabsContent value="inscricoes">
+            <iframe 
+              src="/minhas-intervencoes-inscricoes" 
+              className="w-full h-[calc(100vh-200px)] border-0"
+              title="Intervenções Inscrições"
             />
           </TabsContent>
           
