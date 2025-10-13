@@ -50,61 +50,7 @@ export default function DashboardNecessidades() {
   const loadStats = async () => {
     setLoading(true);
     try {
-      // Buscar empresa_id do usuário
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("empresa_id")
-        .eq("id", user?.id)
-        .single();
-
-      if (!profile?.empresa_id) {
-        console.error("Usuário não tem empresa associada");
-        setStats({
-          porTipo: [],
-          porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
-          porRodovia: [],
-          porLote: [],
-          taxaMatch: 0,
-          timeline: [],
-          totalGeral: 0,
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Buscar lotes da empresa
-      const { data: lotesData } = await supabase
-        .from("lotes")
-        .select(`
-          id,
-          numero,
-          rodovias!inner(codigo, nome)
-        `)
-        .eq("empresa_id", profile.empresa_id);
-
-      if (!lotesData || lotesData.length === 0) {
-        console.error("Nenhum lote encontrado para a empresa");
-        setStats({
-          porTipo: [],
-          porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
-          porRodovia: [],
-          porLote: [],
-          taxaMatch: 0,
-          timeline: [],
-          totalGeral: 0,
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Armazenar info do lote para exibir no header
-      const primeiroLote = lotesData[0];
-      setLoteInfo({
-        numero: primeiroLote.numero,
-        rodovia: Array.isArray(primeiroLote.rodovias) ? primeiroLote.rodovias[0] : primeiroLote.rodovias
-      });
-
-      const loteIds = lotesData.map((l: any) => l.id);
+      console.log("Carregando stats para usuário:", user?.id);
 
       const allStats: any = {
         porTipo: [],
@@ -118,10 +64,12 @@ export default function DashboardNecessidades() {
 
       let totalComMatch = 0;
       let totalSemMatch = 0;
+      let primeiraRodovia: any = null;
+      let primeiroLote: any = null;
 
-      // Buscar dados de cada tipo
+      // Buscar dados de cada tipo diretamente por user_id
       for (const tipo of TIPOS_NECESSIDADES) {
-        console.log(`Buscando necessidades de ${tipo.label} para lotes:`, loteIds);
+        console.log(`Buscando necessidades de ${tipo.label}`);
         
         const { data, error } = await supabase
           .from(`necessidades_${tipo.value}` as any)
@@ -130,7 +78,7 @@ export default function DashboardNecessidades() {
             rodovia:rodovias(codigo, nome),
             lote:lotes(numero)
           `)
-          .in("lote_id", loteIds);
+          .eq("user_id", user?.id);
 
         if (error) {
           console.error(`Erro ao carregar ${tipo.label}:`, error);
@@ -139,6 +87,13 @@ export default function DashboardNecessidades() {
 
         const necessidades = (data as any[]) || [];
         console.log(`${tipo.label}: ${necessidades.length} necessidades encontradas`);
+
+        // Armazenar info do primeiro lote/rodovia encontrado
+        if (!primeiroLote && necessidades.length > 0) {
+          primeiroLote = necessidades[0].lote;
+          primeiraRodovia = necessidades[0].rodovia;
+        }
+
 
         // Stats por tipo
         allStats.porTipo.push({
@@ -207,6 +162,14 @@ export default function DashboardNecessidades() {
         });
       }
 
+      // Definir info do lote para o header
+      if (primeiroLote && primeiraRodovia) {
+        setLoteInfo({
+          numero: primeiroLote.numero,
+          rodovia: primeiraRodovia
+        });
+      }
+
       // Calcular taxa de match
       const totalNecessidades = totalComMatch + totalSemMatch;
       allStats.taxaMatch = totalNecessidades > 0 
@@ -227,6 +190,16 @@ export default function DashboardNecessidades() {
       setStats(allStats);
     } catch (error: any) {
       console.error("Erro ao carregar estatísticas:", error);
+      console.error("Stack trace:", error.stack);
+      setStats({
+        porTipo: [],
+        porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
+        porRodovia: [],
+        porLote: [],
+        taxaMatch: 0,
+        timeline: [],
+        totalGeral: 0,
+      });
     } finally {
       setLoading(false);
     }
