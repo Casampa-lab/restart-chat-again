@@ -1,0 +1,471 @@
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Send, Trash2, Pencil } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { format } from "date-fns";
+
+interface IntervencaoCilindro {
+  id: string;
+  data_intervencao: string;
+  motivo: string;
+  cor_corpo: string | null;
+  cor_refletivo: string | null;
+  tipo_refletivo: string | null;
+  quantidade: number | null;
+  foto_url: string | null;
+  fora_plano_manutencao: boolean;
+  justificativa_fora_plano: string | null;
+  ficha_cilindros_id: string;
+  ficha_cilindros?: {
+    lote_id: string;
+    rodovia_id: string;
+    km_inicial: number;
+    km_final: number;
+  };
+}
+
+const IntervencoesCilindrosContent = () => {
+  const { user } = useAuth();
+  const [intervencoes, setIntervencoes] = useState<IntervencaoCilindro[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [lotes, setLotes] = useState<Record<string, string>>({});
+  const [rodovias, setRodovias] = useState<Record<string, string>>({});
+  const [selectedIntervencoes, setSelectedIntervencoes] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [intervencaoToDelete, setIntervencaoToDelete] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [intervencaoToEdit, setIntervencaoToEdit] = useState<IntervencaoCilindro | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (!user) return;
+
+      try {
+        // Buscar cilindros do usuário primeiro
+        const { data: userCilindros } = await supabase
+          .from("ficha_cilindros")
+          .select("id, lote_id, rodovia_id, km_inicial, km_final")
+          .eq("user_id", user.id);
+
+        const cilindrosMap = new Map(
+          (userCilindros || []).map(c => [c.id, c])
+        );
+
+        // Buscar intervenções dos cilindros do usuário
+        const { data: intervencoesData, error: intervencoesError } = await supabase
+          .from("ficha_cilindros_intervencoes")
+          .select("*")
+          .in("ficha_cilindros_id", Array.from(cilindrosMap.keys()))
+          .order("data_intervencao", { ascending: false });
+
+        if (intervencoesError) throw intervencoesError;
+
+        // Combinar dados manualmente
+        const intervencoesComDados = (intervencoesData || []).map(i => ({
+          ...i,
+          ficha_cilindros: cilindrosMap.get(i.ficha_cilindros_id)
+        }));
+
+        setIntervencoes(intervencoesComDados as IntervencaoCilindro[]);
+
+        const { data: lotesData } = await supabase
+          .from("lotes")
+          .select("id, numero");
+
+        if (lotesData) {
+          const lotesMap: Record<string, string> = {};
+          lotesData.forEach((lote) => {
+            lotesMap[lote.id] = lote.numero;
+          });
+          setLotes(lotesMap);
+        }
+
+        const { data: rodoviasData } = await supabase
+          .from("rodovias")
+          .select("id, codigo");
+
+        if (rodoviasData) {
+          const rodoviasMap: Record<string, string> = {};
+          rodoviasData.forEach((rodovia) => {
+            rodoviasMap[rodovia.id] = rodovia.codigo;
+          });
+          setRodovias(rodoviasMap);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user]);
+
+  const handleToggleSelect = (id: string) => {
+    const newSelection = new Set(selectedIntervencoes);
+    if (newSelection.has(id)) {
+      newSelection.delete(id);
+    } else {
+      newSelection.add(id);
+    }
+    setSelectedIntervencoes(newSelection);
+  };
+
+  const handleDelete = async () => {
+    if (!intervencaoToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from("ficha_cilindros_intervencoes")
+        .delete()
+        .eq("id", intervencaoToDelete);
+
+      if (error) throw error;
+
+      toast.success("Intervenção excluída com sucesso!");
+      
+      // Recarregar dados
+      const { data: userCilindros } = await supabase
+        .from("ficha_cilindros")
+        .select("id, lote_id, rodovia_id, km_inicial, km_final")
+        .eq("user_id", user!.id);
+
+      const cilindrosMap = new Map(
+        (userCilindros || []).map(c => [c.id, c])
+      );
+
+      const { data: intervencoesData } = await supabase
+        .from("ficha_cilindros_intervencoes")
+        .select("*")
+        .in("ficha_cilindros_id", Array.from(cilindrosMap.keys()))
+        .order("data_intervencao", { ascending: false });
+
+      const intervencoesComDados = (intervencoesData || []).map(i => ({
+        ...i,
+        ficha_cilindros: cilindrosMap.get(i.ficha_cilindros_id)
+      }));
+
+      setIntervencoes(intervencoesComDados as IntervencaoCilindro[]);
+    } catch (error: any) {
+      toast.error("Erro ao excluir intervenção: " + error.message);
+    } finally {
+      setDeleteDialogOpen(false);
+      setIntervencaoToDelete(null);
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!intervencaoToEdit) return;
+
+    try {
+      const { error } = await supabase
+        .from("ficha_cilindros_intervencoes")
+        .update({
+          data_intervencao: intervencaoToEdit.data_intervencao,
+          motivo: intervencaoToEdit.motivo,
+          cor_corpo: intervencaoToEdit.cor_corpo,
+          cor_refletivo: intervencaoToEdit.cor_refletivo,
+          tipo_refletivo: intervencaoToEdit.tipo_refletivo,
+          quantidade: intervencaoToEdit.quantidade,
+          foto_url: intervencaoToEdit.foto_url,
+          fora_plano_manutencao: intervencaoToEdit.fora_plano_manutencao,
+          justificativa_fora_plano: intervencaoToEdit.justificativa_fora_plano,
+        })
+        .eq("id", intervencaoToEdit.id);
+
+      if (error) throw error;
+
+      toast.success("Intervenção atualizada com sucesso!");
+      
+      // Recarregar dados
+      const { data: userCilindros } = await supabase
+        .from("ficha_cilindros")
+        .select("id, lote_id, rodovia_id, km_inicial, km_final")
+        .eq("user_id", user!.id);
+
+      const cilindrosMap = new Map(
+        (userCilindros || []).map(c => [c.id, c])
+      );
+
+      const { data: intervencoesData } = await supabase
+        .from("ficha_cilindros_intervencoes")
+        .select("*")
+        .in("ficha_cilindros_id", Array.from(cilindrosMap.keys()))
+        .order("data_intervencao", { ascending: false });
+
+      const intervencoesComDados = (intervencoesData || []).map(i => ({
+        ...i,
+        ficha_cilindros: cilindrosMap.get(i.ficha_cilindros_id)
+      }));
+
+      setIntervencoes(intervencoesComDados as IntervencaoCilindro[]);
+    } catch (error: any) {
+      toast.error("Erro ao atualizar intervenção: " + error.message);
+    } finally {
+      setEditDialogOpen(false);
+      setIntervencaoToEdit(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Minhas Intervenções em Cilindros</CardTitle>
+          <CardDescription>
+            Histórico de intervenções em cilindros delimitadores registradas
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {intervencoes.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhuma intervenção registrada ainda.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Lote</TableHead>
+                    <TableHead>Rodovia</TableHead>
+                    <TableHead>Trecho (KM)</TableHead>
+                    <TableHead>Motivo</TableHead>
+                    <TableHead>Quantidade</TableHead>
+                    <TableHead>Cor Corpo</TableHead>
+                    <TableHead>Cor Refletivo</TableHead>
+                    <TableHead>Tipo Refletivo</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {intervencoes.map((intervencao) => (
+                    <TableRow key={intervencao.id}>
+                      <TableCell>
+                        {format(new Date(intervencao.data_intervencao), "dd/MM/yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        {intervencao.ficha_cilindros && lotes[intervencao.ficha_cilindros.lote_id] || "-"}
+                      </TableCell>
+                      <TableCell>
+                        {intervencao.ficha_cilindros && rodovias[intervencao.ficha_cilindros.rodovia_id] || "-"}
+                      </TableCell>
+                      <TableCell>
+                        {intervencao.ficha_cilindros 
+                          ? `${intervencao.ficha_cilindros.km_inicial.toFixed(3)} - ${intervencao.ficha_cilindros.km_final.toFixed(3)}`
+                          : "-"}
+                      </TableCell>
+                      <TableCell>{intervencao.motivo}</TableCell>
+                      <TableCell>{intervencao.quantidade || "-"}</TableCell>
+                      <TableCell>{intervencao.cor_corpo || "-"}</TableCell>
+                      <TableCell>{intervencao.cor_refletivo || "-"}</TableCell>
+                      <TableCell>{intervencao.tipo_refletivo || "-"}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setIntervencaoToEdit(intervencao);
+                              setEditDialogOpen(true);
+                            }}
+                            title="Editar intervenção"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setIntervencaoToDelete(intervencao.id);
+                              setDeleteDialogOpen(true);
+                            }}
+                            title="Excluir intervenção"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta intervenção? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Intervenção em Cilindros</DialogTitle>
+          </DialogHeader>
+          {intervencaoToEdit && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Data da Intervenção</Label>
+                  <Input
+                    type="date"
+                    value={intervencaoToEdit.data_intervencao}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, data_intervencao: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Motivo (SNV)</Label>
+                  <Input
+                    value={intervencaoToEdit.motivo}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, motivo: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>Cor Corpo</Label>
+                  <Select
+                    value={intervencaoToEdit.cor_corpo || ""}
+                    onValueChange={(value) => setIntervencaoToEdit({...intervencaoToEdit, cor_corpo: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Branco">Branco</SelectItem>
+                      <SelectItem value="Amarelo">Amarelo</SelectItem>
+                      <SelectItem value="Laranja">Laranja</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Cor Refletivo</Label>
+                  <Select
+                    value={intervencaoToEdit.cor_refletivo || ""}
+                    onValueChange={(value) => setIntervencaoToEdit({...intervencaoToEdit, cor_refletivo: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Branco">Branco</SelectItem>
+                      <SelectItem value="Amarelo">Amarelo</SelectItem>
+                      <SelectItem value="Laranja">Laranja</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Tipo Refletivo</Label>
+                  <Select
+                    value={intervencaoToEdit.tipo_refletivo || ""}
+                    onValueChange={(value) => setIntervencaoToEdit({...intervencaoToEdit, tipo_refletivo: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Alta Intensidade">Alta Intensidade</SelectItem>
+                      <SelectItem value="Grau Engenharia">Grau Engenharia</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Quantidade</Label>
+                <Input
+                  type="number"
+                  value={intervencaoToEdit.quantidade || ""}
+                  onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, quantidade: e.target.value ? parseInt(e.target.value) : null})}
+                />
+              </div>
+              <div>
+                <Label>URL da Foto</Label>
+                <Input
+                  value={intervencaoToEdit.foto_url || ""}
+                  onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, foto_url: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label>Justificativa (se fora do plano)</Label>
+                <Textarea
+                  value={intervencaoToEdit.justificativa_fora_plano || ""}
+                  onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, justificativa_fora_plano: e.target.value})}
+                  rows={3}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleEdit}>
+                  Salvar Alterações
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default IntervencoesCilindrosContent;

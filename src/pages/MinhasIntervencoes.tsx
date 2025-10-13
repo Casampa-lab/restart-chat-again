@@ -9,6 +9,9 @@ import IntervencoesSHContent from "@/components/IntervencoesSHContent";
 import IntervencoesSVContent from "@/components/IntervencoesSVContent";
 import IntervencoesInscricoesContent from "@/components/IntervencoesInscricoesContent";
 import IntervencoesTachaContent from "@/components/IntervencoesTachaContent";
+import IntervencoesCilindrosContent from "@/components/IntervencoesCilindrosContent";
+import IntervencoesPorticosContent from "@/components/IntervencoesPorticosContent";
+import IntervencoesDefensasContent from "@/components/IntervencoesDefensasContent";
 
 const MinhasIntervencoes = () => {
   const navigate = useNavigate();
@@ -45,18 +48,27 @@ const MinhasIntervencoes = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-7 mb-6">
             <TabsTrigger value="sh">
-              Sinalização Horizontal
+              SH
             </TabsTrigger>
             <TabsTrigger value="sv">
-              Sinalização Vertical
+              SV
             </TabsTrigger>
             <TabsTrigger value="inscricoes">
               Inscrições
             </TabsTrigger>
             <TabsTrigger value="tacha">
               Tachas
+            </TabsTrigger>
+            <TabsTrigger value="cilindros">
+              Cilindros
+            </TabsTrigger>
+            <TabsTrigger value="porticos">
+              Pórticos
+            </TabsTrigger>
+            <TabsTrigger value="defensas">
+              Defensas
             </TabsTrigger>
           </TabsList>
           
@@ -74,6 +86,18 @@ const MinhasIntervencoes = () => {
           
           <TabsContent value="tacha">
             <IntervencoesTachaContent />
+          </TabsContent>
+          
+          <TabsContent value="cilindros">
+            <IntervencoesCilindrosContent />
+          </TabsContent>
+          
+          <TabsContent value="porticos">
+            <IntervencoesPorticosContent />
+          </TabsContent>
+          
+          <TabsContent value="defensas">
+            <IntervencoesDefensasContent />
           </TabsContent>
         </Tabs>
       </main>

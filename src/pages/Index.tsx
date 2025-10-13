@@ -308,6 +308,14 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={() => navigate("/minhas-intervencoes")}
+                className="hidden sm:flex"
+              >
+                📋 Minhas Intervenções
+              </Button>
               {user?.email && <div className="bg-white/20 text-primary-foreground px-3 py-2 rounded-lg text-sm font-medium border border-white/30">
                   👤 {user.email}
                 </div>}
