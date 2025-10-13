@@ -169,11 +169,22 @@ export default function DashboardNecessidades() {
             const longForaBrasil = longNum < -75 || longNum > -33;
             const longPositiva = longNum > 0; // Brasil está no hemisfério oeste (long negativa)
             
-            if (latForaBrasil || longForaBrasil || longPositiva) {
+            // Detectar extensões absurdas (marcas longitudinais com >50km)
+            let extensaoAbsurda = false;
+            let extensaoKm = 0;
+            if (tipo.value === 'marcas_longitudinais' && n.km_inicial && n.km_final) {
+              const kmIni = typeof n.km_inicial === 'string' ? parseFloat(n.km_inicial) : n.km_inicial;
+              const kmFim = typeof n.km_final === 'string' ? parseFloat(n.km_final) : n.km_final;
+              extensaoKm = Math.abs(kmFim - kmIni);
+              extensaoAbsurda = extensaoKm > 50;
+            }
+            
+            if (latForaBrasil || longForaBrasil || longPositiva || extensaoAbsurda) {
               suspeitasEncontradas++;
               
               let motivo = "";
-              if (longPositiva) motivo = "Longitude positiva (deveria ser negativa)";
+              if (extensaoAbsurda) motivo = `Extensão absurda: ${extensaoKm.toFixed(1)}km`;
+              else if (longPositiva) motivo = "Longitude positiva (deveria ser negativa)";
               else if (latForaBrasil) motivo = "Latitude fora do Brasil";
               else if (longForaBrasil) motivo = "Longitude fora do Brasil";
               
@@ -182,6 +193,8 @@ export default function DashboardNecessidades() {
                 lote: n.lote?.numero || "N/A",
                 rodovia: n.rodovia?.codigo || "N/A",
                 km: n.km_inicial || n.km || "N/A",
+                kmFinal: n.km_final || null,
+                extensaoKm: extensaoKm > 0 ? extensaoKm.toFixed(1) : null,
                 latitude: latNum.toFixed(6),
                 longitude: longNum.toFixed(6),
                 servico: n.servico,
@@ -586,7 +599,7 @@ export default function DashboardNecessidades() {
                   Coordenadas Suspeitas
                 </CardTitle>
                 <CardDescription>
-                  Necessidades com coordenadas fora do território brasileiro (possíveis erros de digitação)
+                  Necessidades com coordenadas fora do Brasil ou extensões absurdas (possíveis erros)
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -602,7 +615,7 @@ export default function DashboardNecessidades() {
                       <div className="flex items-center gap-2">
                         <AlertCircle className="h-5 w-5 text-orange-600" />
                         <span className="font-semibold text-orange-800">
-                          {stats.coordenadasSuspeitas.length} registro(s) com coordenadas fora do Brasil
+                          {stats.coordenadasSuspeitas.length} registro(s) com problemas detectados
                         </span>
                       </div>
                     </div>
@@ -615,6 +628,7 @@ export default function DashboardNecessidades() {
                             <th className="border p-2 text-left text-xs font-semibold">Lote</th>
                             <th className="border p-2 text-left text-xs font-semibold">Rodovia</th>
                             <th className="border p-2 text-left text-xs font-semibold">KM</th>
+                            <th className="border p-2 text-left text-xs font-semibold">Extensão</th>
                             <th className="border p-2 text-left text-xs font-semibold">Serviço</th>
                             <th className="border p-2 text-left text-xs font-semibold">Latitude</th>
                             <th className="border p-2 text-left text-xs font-semibold">Longitude</th>
@@ -627,7 +641,16 @@ export default function DashboardNecessidades() {
                               <td className="border p-2 text-xs">{coord.tipo}</td>
                               <td className="border p-2 text-xs">{coord.lote}</td>
                               <td className="border p-2 text-xs">{coord.rodovia}</td>
-                              <td className="border p-2 text-xs">{coord.km}</td>
+                              <td className="border p-2 text-xs">
+                                {coord.kmFinal ? `${coord.km} → ${coord.kmFinal}` : coord.km}
+                              </td>
+                              <td className="border p-2 text-xs font-semibold">
+                                {coord.extensaoKm ? (
+                                  <span className={coord.extensaoKm > 50 ? 'text-red-600' : ''}>
+                                    {coord.extensaoKm} km
+                                  </span>
+                                ) : '-'}
+                              </td>
                               <td className="border p-2 text-xs">
                                 <span className={`px-2 py-1 rounded text-xs ${
                                   coord.servico === 'Implantar' ? 'bg-green-100 text-green-800' :
@@ -640,7 +663,7 @@ export default function DashboardNecessidades() {
                               </td>
                               <td className="border p-2 text-xs font-mono">{coord.latitude}</td>
                               <td className="border p-2 text-xs font-mono">{coord.longitude}</td>
-                              <td className="border p-2 text-xs text-orange-700">{coord.motivo}</td>
+                              <td className="border p-2 text-xs text-orange-700 font-medium">{coord.motivo}</td>
                             </tr>
                           ))}
                         </tbody>
