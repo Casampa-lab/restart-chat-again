@@ -5,6 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from "lucide-react";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
+import IntervencoesSHContent from "@/components/IntervencoesSHContent";
+import IntervencoesSVContent from "@/components/IntervencoesSVContent";
+import IntervencoesInscricoesContent from "@/components/IntervencoesInscricoesContent";
+import IntervencoesTachaContent from "@/components/IntervencoesTachaContent";
 
 const MinhasIntervencoes = () => {
   const navigate = useNavigate();
@@ -57,35 +61,19 @@ const MinhasIntervencoes = () => {
           </TabsList>
           
           <TabsContent value="sh">
-            <iframe 
-              src="/minhas-intervencoes-sh" 
-              className="w-full h-[calc(100vh-200px)] border-0"
-              title="Intervenções SH"
-            />
+            <IntervencoesSHContent />
           </TabsContent>
           
           <TabsContent value="sv">
-            <iframe 
-              src="/minhas-intervencoes-sv" 
-              className="w-full h-[calc(100vh-200px)] border-0"
-              title="Intervenções SV"
-            />
+            <IntervencoesSVContent />
           </TabsContent>
           
           <TabsContent value="inscricoes">
-            <iframe 
-              src="/minhas-intervencoes-inscricoes" 
-              className="w-full h-[calc(100vh-200px)] border-0"
-              title="Intervenções Inscrições"
-            />
+            <IntervencoesInscricoesContent />
           </TabsContent>
           
           <TabsContent value="tacha">
-            <iframe 
-              src="/minhas-intervencoes-tacha" 
-              className="w-full h-[calc(100vh-200px)] border-0"
-              title="Intervenções Tacha"
-            />
+            <IntervencoesTachaContent />
           </TabsContent>
         </Tabs>
       </main>
