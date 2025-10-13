@@ -7,21 +7,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface IntervencoesSHFormProps {
-  loteId: string;
-  rodoviaId: string;
+  marcaSelecionada?: {
+    id: string;
+    km_inicial: number;
+    km_final: number;
+    snv?: string;
+  };
+  onIntervencaoRegistrada?: () => void;
 }
 
-const TIPOS_INTERVENCAO = [
-  "Pintura Nova",
-  "Repintura",
-  "Reforço",
-  "Implantação",
-  "Recuperação",
-  "Manutenção"
+const MATERIAIS = [
+  "Tinta Acrílica",
+  "Tinta Termoplástica",
+  "Resina Acrílica",
+  "Película Pré-fabricada",
+  "Outros"
 ];
+
+const CORES = ["Branca", "Amarela", "Azul", "Vermelha"];
 
 const TIPOS_DEMARCACAO = [
   "Linha Contínua",
@@ -36,94 +42,33 @@ const TIPOS_DEMARCACAO = [
   "Linha de Bordo"
 ];
 
-const CORES = ["Branca", "Amarela", "Azul", "Vermelha"];
-
-const MATERIAIS = [
-  "Tinta Acrílica",
-  "Tinta Termoplástica",
-  "Resina Acrílica",
-  "Película Pré-fabricada",
-  "Outros"
-];
-
-const IntervencoesSHForm = ({ loteId, rodoviaId }: IntervencoesSHFormProps) => {
+const IntervencoesSHForm = ({ marcaSelecionada, onIntervencaoRegistrada }: IntervencoesSHFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isCapturingInicial, setIsCapturingInicial] = useState(false);
-  const [isCapturingFinal, setIsCapturingFinal] = useState(false);
   const [formData, setFormData] = useState({
     data_intervencao: new Date().toISOString().split('T')[0],
-    km_inicial: "",
-    km_final: "",
-    tipo_intervencao: "",
+    motivo: "",
     tipo_demarcacao: "",
     cor: "",
+    largura_cm: "",
     espessura_cm: "",
-    area_m2: "",
-    material_utilizado: "",
-    observacao: "",
-    latitude_inicial: "",
-    longitude_inicial: "",
-    latitude_final: "",
-    longitude_final: "",
+    material: "",
+    fora_plano_manutencao: false,
+    justificativa_fora_plano: "",
   });
-
-  const capturarCoordenadas = (tipo: 'inicial' | 'final') => {
-    if (tipo === 'inicial') setIsCapturingInicial(true);
-    else setIsCapturingFinal(true);
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          if (tipo === 'inicial') {
-            setFormData({
-              ...formData,
-              latitude_inicial: position.coords.latitude.toString(),
-              longitude_inicial: position.coords.longitude.toString(),
-            });
-            toast({
-              title: "Coordenadas capturadas!",
-              description: `Ponto inicial: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
-            });
-            setIsCapturingInicial(false);
-          } else {
-            setFormData({
-              ...formData,
-              latitude_final: position.coords.latitude.toString(),
-              longitude_final: position.coords.longitude.toString(),
-            });
-            toast({
-              title: "Coordenadas capturadas!",
-              description: `Ponto final: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
-            });
-            setIsCapturingFinal(false);
-          }
-        },
-        (error) => {
-          toast({
-            title: "Erro ao capturar localização",
-            description: "Verifique se você permitiu acesso à localização",
-            variant: "destructive",
-          });
-          if (tipo === 'inicial') setIsCapturingInicial(false);
-          else setIsCapturingFinal(false);
-        }
-      );
-    } else {
-      toast({
-        title: "Geolocalização não suportada",
-        description: "Seu navegador não suporta geolocalização",
-        variant: "destructive",
-      });
-      if (tipo === 'inicial') setIsCapturingInicial(false);
-      else setIsCapturingFinal(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.km_inicial || !formData.km_final || !formData.tipo_intervencao || 
-        !formData.tipo_demarcacao || !formData.cor || !formData.area_m2) {
+    if (!marcaSelecionada) {
+      toast({
+        title: "Erro",
+        description: "Selecione uma marca longitudinal do inventário primeiro",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.motivo || !formData.cor) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",
@@ -135,32 +80,19 @@ const IntervencoesSHForm = ({ loteId, rodoviaId }: IntervencoesSHFormProps) => {
     setIsLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        throw new Error("Usuário não autenticado");
-      }
-
       const { error } = await supabase
-        .from("intervencoes_sh")
+        .from("ficha_marcas_longitudinais_intervencoes")
         .insert({
-          user_id: user.id,
-          lote_id: loteId,
-          rodovia_id: rodoviaId,
+          ficha_marcas_longitudinais_id: marcaSelecionada.id,
           data_intervencao: formData.data_intervencao,
-          km_inicial: parseFloat(formData.km_inicial),
-          km_final: parseFloat(formData.km_final),
-          tipo_intervencao: formData.tipo_intervencao,
-          tipo_demarcacao: formData.tipo_demarcacao,
-          cor: formData.cor,
+          motivo: formData.motivo,
+          tipo_demarcacao: formData.tipo_demarcacao || null,
+          cor: formData.cor || null,
+          largura_cm: formData.largura_cm ? parseFloat(formData.largura_cm) : null,
           espessura_cm: formData.espessura_cm ? parseFloat(formData.espessura_cm) : null,
-          area_m2: parseFloat(formData.area_m2),
-          material_utilizado: formData.material_utilizado || null,
-          observacao: formData.observacao || null,
-          latitude_inicial: formData.latitude_inicial ? parseFloat(formData.latitude_inicial) : null,
-          longitude_inicial: formData.longitude_inicial ? parseFloat(formData.longitude_inicial) : null,
-          latitude_final: formData.latitude_final ? parseFloat(formData.latitude_final) : null,
-          longitude_final: formData.longitude_final ? parseFloat(formData.longitude_final) : null,
+          material: formData.material || null,
+          fora_plano_manutencao: formData.fora_plano_manutencao,
+          justificativa_fora_plano: formData.justificativa_fora_plano || null,
         });
 
       if (error) throw error;
@@ -173,20 +105,17 @@ const IntervencoesSHForm = ({ loteId, rodoviaId }: IntervencoesSHFormProps) => {
       // Reset form
       setFormData({
         data_intervencao: new Date().toISOString().split('T')[0],
-        km_inicial: "",
-        km_final: "",
-        tipo_intervencao: "",
+        motivo: "",
         tipo_demarcacao: "",
         cor: "",
+        largura_cm: "",
         espessura_cm: "",
-        area_m2: "",
-        material_utilizado: "",
-        observacao: "",
-        latitude_inicial: "",
-        longitude_inicial: "",
-        latitude_final: "",
-        longitude_final: "",
+        material: "",
+        fora_plano_manutencao: false,
+        justificativa_fora_plano: "",
       });
+      
+      onIntervencaoRegistrada?.();
     } catch (error) {
       console.error("Erro ao salvar intervenção:", error);
       toast({
@@ -202,9 +131,12 @@ const IntervencoesSHForm = ({ loteId, rodoviaId }: IntervencoesSHFormProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Intervenções - Marcas Longitudinais</CardTitle>
+        <CardTitle>Intervenção em Marcas Longitudinais</CardTitle>
         <CardDescription>
-          Registre intervenções realizadas em marcas longitudinais (linhas de bordo, divisórias, etc.)
+          {marcaSelecionada 
+            ? `Registrando intervenção para marca entre KM ${marcaSelecionada.km_inicial} - ${marcaSelecionada.km_final}${marcaSelecionada.snv ? ` (SNV: ${marcaSelecionada.snv})` : ''}`
+            : "Selecione uma marca longitudinal do inventário para registrar intervenção"
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -224,127 +156,35 @@ const IntervencoesSHForm = ({ loteId, rodoviaId }: IntervencoesSHFormProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tipo_intervencao">Tipo de Intervenção *</Label>
+              <Label htmlFor="motivo">Motivo da Intervenção *</Label>
               <Select
-                value={formData.tipo_intervencao}
+                value={formData.motivo}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, tipo_intervencao: value })
+                  setFormData({ ...formData, motivo: value })
                 }
                 required
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
+                  <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {TIPOS_INTERVENCAO.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>
-                      {tipo}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="Implantação">Implantação</SelectItem>
+                  <SelectItem value="Pintura Nova">Pintura Nova</SelectItem>
+                  <SelectItem value="Repintura">Repintura</SelectItem>
+                  <SelectItem value="Reforço">Reforço</SelectItem>
+                  <SelectItem value="Recuperação">Recuperação</SelectItem>
+                  <SelectItem value="Manutenção">Manutenção</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="km_inicial">km Inicial *</Label>
-              <Input
-                id="km_inicial"
-                type="number"
-                step="0.001"
-                value={formData.km_inicial}
-                onChange={(e) =>
-                  setFormData({ ...formData, km_inicial: e.target.value })
-                }
-                placeholder="0.000"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="km_final">km Final *</Label>
-              <Input
-                id="km_final"
-                type="number"
-                step="0.001"
-                value={formData.km_final}
-                onChange={(e) =>
-                  setFormData({ ...formData, km_final: e.target.value })
-                }
-                placeholder="0.000"
-                required
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label>Coordenadas GPS do Ponto Inicial</Label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => capturarCoordenadas('inicial')}
-                  disabled={isCapturingInicial}
-                >
-                  {isCapturingInicial ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <MapPin className="mr-2 h-4 w-4" />
-                  )}
-                  Capturar Ponto Inicial
-                </Button>
-                <Input
-                  placeholder="Latitude"
-                  value={formData.latitude_inicial}
-                  onChange={(e) => setFormData({ ...formData, latitude_inicial: e.target.value })}
-                  className="flex-1"
-                />
-                <Input
-                  placeholder="Longitude"
-                  value={formData.longitude_inicial}
-                  onChange={(e) => setFormData({ ...formData, longitude_inicial: e.target.value })}
-                  className="flex-1"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label>Coordenadas GPS do Ponto Final</Label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => capturarCoordenadas('final')}
-                  disabled={isCapturingFinal}
-                >
-                  {isCapturingFinal ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <MapPin className="mr-2 h-4 w-4" />
-                  )}
-                  Capturar Ponto Final
-                </Button>
-                <Input
-                  placeholder="Latitude"
-                  value={formData.latitude_final}
-                  onChange={(e) => setFormData({ ...formData, latitude_final: e.target.value })}
-                  className="flex-1"
-                />
-                <Input
-                  placeholder="Longitude"
-                  value={formData.longitude_final}
-                  onChange={(e) => setFormData({ ...formData, longitude_final: e.target.value })}
-                  className="flex-1"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="tipo_demarcacao">Tipo de Demarcação *</Label>
+              <Label htmlFor="tipo_demarcacao">Tipo de Demarcação</Label>
               <Select
                 value={formData.tipo_demarcacao}
                 onValueChange={(value) =>
                   setFormData({ ...formData, tipo_demarcacao: value })
                 }
-                required
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
@@ -360,13 +200,12 @@ const IntervencoesSHForm = ({ loteId, rodoviaId }: IntervencoesSHFormProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cor">Cor *</Label>
+              <Label htmlFor="cor">Cor</Label>
               <Select
                 value={formData.cor}
                 onValueChange={(value) =>
                   setFormData({ ...formData, cor: value })
                 }
-                required
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a cor" />
@@ -382,17 +221,16 @@ const IntervencoesSHForm = ({ loteId, rodoviaId }: IntervencoesSHFormProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="area_m2">Área Executada (m²) *</Label>
+              <Label htmlFor="largura_cm">Largura (cm)</Label>
               <Input
-                id="area_m2"
+                id="largura_cm"
                 type="number"
-                step="0.01"
-                value={formData.area_m2}
+                step="0.1"
+                value={formData.largura_cm}
                 onChange={(e) =>
-                  setFormData({ ...formData, area_m2: e.target.value })
+                  setFormData({ ...formData, largura_cm: e.target.value })
                 }
-                placeholder="0.00"
-                required
+                placeholder="0.0"
               />
             </div>
 
@@ -411,11 +249,11 @@ const IntervencoesSHForm = ({ loteId, rodoviaId }: IntervencoesSHFormProps) => {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="material_utilizado">Material Utilizado</Label>
+              <Label htmlFor="material">Material Utilizado</Label>
               <Select
-                value={formData.material_utilizado}
+                value={formData.material}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, material_utilizado: value })
+                  setFormData({ ...formData, material: value })
                 }
               >
                 <SelectTrigger>
@@ -430,22 +268,40 @@ const IntervencoesSHForm = ({ loteId, rodoviaId }: IntervencoesSHFormProps) => {
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="observacao">Observações</Label>
-              <Textarea
-                id="observacao"
-                value={formData.observacao}
-                onChange={(e) =>
-                  setFormData({ ...formData, observacao: e.target.value })
-                }
-                placeholder="Observações sobre a intervenção realizada"
-                rows={3}
-              />
+          <div className="flex items-start space-x-3 rounded-md border p-4">
+            <input
+              type="checkbox"
+              id="fora_plano"
+              checked={formData.fora_plano_manutencao}
+              onChange={(e) =>
+                setFormData({ ...formData, fora_plano_manutencao: e.target.checked })
+              }
+              className="h-4 w-4 mt-1"
+            />
+            <div className="space-y-1 leading-none">
+              <Label htmlFor="fora_plano">Fora do Plano de Manutenção</Label>
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          {formData.fora_plano_manutencao && (
+            <div className="space-y-2">
+              <Label htmlFor="justificativa_fora_plano">Justificativa *</Label>
+              <Textarea
+                id="justificativa_fora_plano"
+                value={formData.justificativa_fora_plano}
+                onChange={(e) =>
+                  setFormData({ ...formData, justificativa_fora_plano: e.target.value })
+                }
+                placeholder="Explique o motivo da intervenção fora do plano..."
+                rows={3}
+                required={formData.fora_plano_manutencao}
+              />
+            </div>
+          )}
+
+          <Button type="submit" className="w-full" disabled={isLoading || !marcaSelecionada}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar Intervenção
           </Button>

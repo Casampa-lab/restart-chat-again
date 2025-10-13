@@ -14,94 +14,68 @@ import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
-  km: z.string().min(1, "KM é obrigatório"),
-  tipo_intervencao: z.string().min(1, "Tipo de intervenção é obrigatório"),
-  tipo: z.string().min(1, "Tipo de estrutura é obrigatório"),
-  lado: z.string().optional(),
+  motivo: z.string().min(1, "Motivo é obrigatório"),
+  tipo: z.string().optional(),
   altura_livre_m: z.string().optional(),
   vao_horizontal_m: z.string().optional(),
-  snv: z.string().optional(),
-  estado_conservacao: z.string().min(1, "Estado de conservação é obrigatório"),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
-  observacao: z.string().optional(),
+  fora_plano_manutencao: z.boolean().default(false),
+  justificativa_fora_plano: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 interface IntervencoesPorticosFormProps {
-  loteId: string;
-  rodoviaId: string;
+  porticoSelecionado?: {
+    id: string;
+    km: number;
+    snv?: string;
+    tipo: string;
+  };
+  onIntervencaoRegistrada?: () => void;
 }
 
-export function IntervencoesPorticosForm({ loteId, rodoviaId }: IntervencoesPorticosFormProps) {
+export function IntervencoesPorticosForm({ porticoSelecionado, onIntervencaoRegistrada }: IntervencoesPorticosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
-      km: "",
-      tipo_intervencao: "",
+      motivo: "",
       tipo: "",
-      lado: "",
       altura_livre_m: "",
       vao_horizontal_m: "",
-      snv: "",
-      estado_conservacao: "",
-      latitude: "",
-      longitude: "",
-      observacao: "",
+      fora_plano_manutencao: false,
+      justificativa_fora_plano: "",
     },
   });
 
   const onSubmit = async (data: FormData) => {
+    if (!porticoSelecionado) {
+      toast.error("Selecione um pórtico do inventário primeiro");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast.error("Usuário não autenticado");
-        return;
-      }
-
       const { error } = await supabase
-        .from("intervencoes_porticos")
+        .from("ficha_porticos_intervencoes")
         .insert({
-          user_id: user.id,
-          lote_id: loteId,
-          rodovia_id: rodoviaId,
+          ficha_porticos_id: porticoSelecionado.id,
           data_intervencao: data.data_intervencao,
-          km: parseFloat(data.km),
-          tipo_intervencao: data.tipo_intervencao,
-          tipo: data.tipo,
-          lado: data.lado || null,
+          motivo: data.motivo,
+          tipo: data.tipo || null,
           altura_livre_m: data.altura_livre_m ? parseFloat(data.altura_livre_m) : null,
           vao_horizontal_m: data.vao_horizontal_m ? parseFloat(data.vao_horizontal_m) : null,
-          snv: data.snv || null,
-          estado_conservacao: data.estado_conservacao,
-          latitude: data.latitude ? parseFloat(data.latitude) : null,
-          longitude: data.longitude ? parseFloat(data.longitude) : null,
-          observacao: data.observacao || null,
+          fora_plano_manutencao: data.fora_plano_manutencao,
+          justificativa_fora_plano: data.justificativa_fora_plano || null,
         });
 
       if (error) throw error;
 
-      toast.success("Intervenção de Pórtico/Semipórtico/Braço registrada com sucesso!");
-      form.reset({
-        data_intervencao: new Date().toISOString().split('T')[0],
-        km: "",
-        tipo_intervencao: "",
-        tipo: "",
-        lado: "",
-        altura_livre_m: "",
-        vao_horizontal_m: "",
-        snv: "",
-        estado_conservacao: "",
-        latitude: "",
-        longitude: "",
-        observacao: "",
-      });
+      toast.success("Intervenção registrada com sucesso!");
+      form.reset();
+      onIntervencaoRegistrada?.();
     } catch (error: any) {
       console.error("Erro ao registrar intervenção:", error);
       toast.error("Erro ao registrar intervenção: " + error.message);
@@ -113,9 +87,12 @@ export function IntervencoesPorticosForm({ loteId, rodoviaId }: IntervencoesPort
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Intervenções - Pórticos, Semipórticos e Braços Projetados</CardTitle>
+        <CardTitle>Intervenção em Pórticos, Semipórticos e Braços</CardTitle>
         <CardDescription>
-          Registre intervenções realizadas em pórticos, semipórticos e braços projetados
+          {porticoSelecionado 
+            ? `Registrando intervenção para ${porticoSelecionado.tipo} no KM ${porticoSelecionado.km}${porticoSelecionado.snv ? ` (SNV: ${porticoSelecionado.snv})` : ''}`
+            : "Selecione um pórtico do inventário para registrar intervenção"
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -138,24 +115,10 @@ export function IntervencoesPorticosForm({ loteId, rodoviaId }: IntervencoesPort
 
               <FormField
                 control={form.control}
-                name="km"
+                name="motivo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>KM *</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.001" placeholder="Ex: 123.456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="tipo_intervencao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Intervenção *</FormLabel>
+                    <FormLabel>Motivo da Intervenção *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -163,11 +126,11 @@ export function IntervencoesPorticosForm({ loteId, rodoviaId }: IntervencoesPort
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="implantacao">Implantação</SelectItem>
-                        <SelectItem value="manutencao">Manutenção</SelectItem>
-                        <SelectItem value="substituicao">Substituição</SelectItem>
-                        <SelectItem value="remocao">Remoção</SelectItem>
-                        <SelectItem value="recuperacao">Recuperação</SelectItem>
+                        <SelectItem value="Implantação">Implantação</SelectItem>
+                        <SelectItem value="Manutenção">Manutenção</SelectItem>
+                        <SelectItem value="Substituição">Substituição</SelectItem>
+                        <SelectItem value="Remoção">Remoção</SelectItem>
+                        <SelectItem value="Recuperação">Recuperação</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -180,7 +143,7 @@ export function IntervencoesPorticosForm({ loteId, rodoviaId }: IntervencoesPort
                 name="tipo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tipo de Estrutura *</FormLabel>
+                    <FormLabel>Tipo de Estrutura</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -194,66 +157,6 @@ export function IntervencoesPorticosForm({ loteId, rodoviaId }: IntervencoesPort
                         <SelectItem value="Braço Projetado">Braço Projetado</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="lado"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Lado</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="-">- (Pórtico)</SelectItem>
-                        <SelectItem value="Direito">Direito</SelectItem>
-                        <SelectItem value="Esquerdo">Esquerdo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="estado_conservacao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado de Conservação *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Bom">Bom</SelectItem>
-                        <SelectItem value="Regular">Regular</SelectItem>
-                        <SelectItem value="Ruim">Ruim</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="snv"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SNV</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: 116BMG1010" {...field} />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -286,51 +189,45 @@ export function IntervencoesPorticosForm({ loteId, rodoviaId }: IntervencoesPort
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="latitude"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Latitude</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.000001" placeholder="Ex: -23.550520" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="longitude"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Longitude</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.000001" placeholder="Ex: -46.633308" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <FormField
               control={form.control}
-              name="observacao"
+              name="fora_plano_manutencao"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Observações</FormLabel>
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Textarea placeholder="Observações adicionais..." {...field} />
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={field.onChange}
+                      className="h-4 w-4"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Fora do Plano de Manutenção</FormLabel>
+                  </div>
                 </FormItem>
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {form.watch("fora_plano_manutencao") && (
+              <FormField
+                control={form.control}
+                name="justificativa_fora_plano"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Justificativa *</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Explique o motivo da intervenção fora do plano..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <Button type="submit" className="w-full" disabled={isSubmitting || !porticoSelecionado}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Registrar Intervenção
             </Button>

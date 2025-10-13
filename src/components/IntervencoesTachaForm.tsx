@@ -5,140 +5,76 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface IntervencoesTachaFormProps {
-  loteId: string;
-  rodoviaId: string;
+  tachaSelecionada?: {
+    id: string;
+    km_inicial: number;
+    km_final: number;
+    snv?: string;
+  };
+  onIntervencaoRegistrada?: () => void;
 }
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
-  km_inicial: z.string().min(1, "KM inicial é obrigatório"),
-  km_final: z.string().min(1, "KM final é obrigatório"),
-  tipo_intervencao: z.string().min(1, "Tipo de intervenção é obrigatório"),
-  snv: z.string().optional(),
-  descricao: z.string().optional(),
-  corpo: z.string().optional(),
-  refletivo: z.string().optional(),
-  cor_refletivo: z.string().optional(),
-  local_implantacao: z.string().optional(),
-  quantidade: z.string().min(1, "Quantidade é obrigatória"),
-  espacamento_m: z.string().optional(),
-  observacao: z.string().optional(),
+  motivo: z.string().min(1, "Motivo é obrigatório"),
+  tipo_tacha: z.string().optional(),
+  lado: z.string().optional(),
+  cor: z.string().optional(),
+  material: z.string().optional(),
+  quantidade: z.string().optional(),
+  fora_plano_manutencao: z.boolean().default(false),
+  justificativa_fora_plano: z.string().optional(),
 });
 
-export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFormProps) {
-  const [isCapturingInicial, setIsCapturingInicial] = useState(false);
-  const [isCapturingFinal, setIsCapturingFinal] = useState(false);
-  const [coordenadas, setCoordenadas] = useState({
-    latitude_inicial: "",
-    longitude_inicial: "",
-    latitude_final: "",
-    longitude_final: "",
-  });
-
-  const capturarCoordenadas = (tipo: 'inicial' | 'final') => {
-    if (tipo === 'inicial') setIsCapturingInicial(true);
-    else setIsCapturingFinal(true);
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          if (tipo === 'inicial') {
-            setCoordenadas({
-              ...coordenadas,
-              latitude_inicial: position.coords.latitude.toString(),
-              longitude_inicial: position.coords.longitude.toString(),
-            });
-            toast.success(`Ponto inicial: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
-            setIsCapturingInicial(false);
-          } else {
-            setCoordenadas({
-              ...coordenadas,
-              latitude_final: position.coords.latitude.toString(),
-              longitude_final: position.coords.longitude.toString(),
-            });
-            toast.success(`Ponto final: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
-            setIsCapturingFinal(false);
-          }
-        },
-        (error) => {
-          toast.error("Erro ao capturar localização. Verifique as permissões.");
-          if (tipo === 'inicial') setIsCapturingInicial(false);
-          else setIsCapturingFinal(false);
-        }
-      );
-    } else {
-      toast.error("Geolocalização não suportada pelo navegador");
-      if (tipo === 'inicial') setIsCapturingInicial(false);
-      else setIsCapturingFinal(false);
-    }
-  };
-
+export function IntervencoesTachaForm({ tachaSelecionada, onIntervencaoRegistrada }: IntervencoesTachaFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
-      km_inicial: "",
-      km_final: "",
-      tipo_intervencao: "",
-      snv: "",
-      descricao: "",
-      corpo: "",
-      refletivo: "",
-      cor_refletivo: "",
-      local_implantacao: "",
-      quantidade: "1",
-      espacamento_m: "",
-      observacao: "",
+      motivo: "",
+      tipo_tacha: "",
+      lado: "",
+      cor: "",
+      material: "",
+      quantidade: "",
+      fora_plano_manutencao: false,
+      justificativa_fora_plano: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
+    if (!tachaSelecionada) {
+      toast.error("Selecione uma tacha do inventário primeiro");
+      return;
+    }
 
-      const { error } = await supabase.from("intervencoes_tacha").insert({
-        lote_id: loteId,
-        rodovia_id: rodoviaId,
-        user_id: user.id,
+    try {
+      const { error } = await supabase.from("ficha_tachas_intervencoes").insert({
+        ficha_tachas_id: tachaSelecionada.id,
         data_intervencao: values.data_intervencao,
-        km_inicial: parseFloat(values.km_inicial),
-        km_final: parseFloat(values.km_final),
-        tipo_intervencao: values.tipo_intervencao,
-        snv: values.snv || null,
-        descricao: values.descricao || null,
-        corpo: values.corpo || null,
-        refletivo: values.refletivo || null,
-        cor_refletivo: values.cor_refletivo || null,
-        local_implantacao: values.local_implantacao || null,
-        quantidade: parseInt(values.quantidade),
-        espacamento_m: values.espacamento_m ? parseFloat(values.espacamento_m) : null,
-        observacao: values.observacao || null,
-        latitude_inicial: coordenadas.latitude_inicial ? parseFloat(coordenadas.latitude_inicial) : null,
-        longitude_inicial: coordenadas.longitude_inicial ? parseFloat(coordenadas.longitude_inicial) : null,
-        latitude_final: coordenadas.latitude_final ? parseFloat(coordenadas.latitude_final) : null,
-        longitude_final: coordenadas.longitude_final ? parseFloat(coordenadas.longitude_final) : null,
+        motivo: values.motivo,
+        tipo_tacha: values.tipo_tacha || null,
+        lado: values.lado || null,
+        cor: values.cor || null,
+        material: values.material || null,
+        quantidade: values.quantidade ? parseInt(values.quantidade) : null,
+        fora_plano_manutencao: values.fora_plano_manutencao,
+        justificativa_fora_plano: values.justificativa_fora_plano || null,
       });
 
       if (error) throw error;
 
-      toast.success("Intervenção em tacha salva com sucesso!");
+      toast.success("Intervenção em tacha registrada com sucesso!");
       form.reset();
-      setCoordenadas({
-        latitude_inicial: "",
-        longitude_inicial: "",
-        latitude_final: "",
-        longitude_final: "",
-      });
+      onIntervencaoRegistrada?.();
     } catch (error: any) {
       toast.error("Erro ao salvar intervenção: " + error.message);
     }
@@ -147,9 +83,12 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Intervenções - Tachas Refletivas</CardTitle>
+        <CardTitle>Intervenção em Tachas Refletivas</CardTitle>
         <CardDescription>
-          Registre intervenções realizadas em tachas refletivas (monodirecional e bidirecional)
+          {tachaSelecionada 
+            ? `Registrando intervenção para tachas entre KM ${tachaSelecionada.km_inicial} - ${tachaSelecionada.km_final}${tachaSelecionada.snv ? ` (SNV: ${tachaSelecionada.snv})` : ''}`
+            : "Selecione uma tacha do inventário para registrar intervenção"
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -172,10 +111,10 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
 
           <FormField
             control={form.control}
-            name="tipo_intervencao"
+            name="motivo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Intervenção</FormLabel>
+                <FormLabel>Motivo da Intervenção *</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -196,114 +135,10 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
 
           <FormField
             control={form.control}
-            name="km_inicial"
+            name="tipo_tacha"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>KM Inicial</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.001" placeholder="Ex: 10.500" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="km_final"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>KM Final</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.001" placeholder="Ex: 10.800" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="md:col-span-2 space-y-2">
-            <Label>Coordenadas GPS do Ponto Inicial</Label>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => capturarCoordenadas('inicial')}
-                disabled={isCapturingInicial}
-              >
-                {isCapturingInicial ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <MapPin className="mr-2 h-4 w-4" />
-                )}
-                Capturar Ponto Inicial
-              </Button>
-              <Input
-                placeholder="Latitude"
-                value={coordenadas.latitude_inicial}
-                onChange={(e) => setCoordenadas({ ...coordenadas, latitude_inicial: e.target.value })}
-                className="flex-1"
-              />
-              <Input
-                placeholder="Longitude"
-                value={coordenadas.longitude_inicial}
-                onChange={(e) => setCoordenadas({ ...coordenadas, longitude_inicial: e.target.value })}
-                className="flex-1"
-              />
-            </div>
-          </div>
-
-          <div className="md:col-span-2 space-y-2">
-            <Label>Coordenadas GPS do Ponto Final</Label>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => capturarCoordenadas('final')}
-                disabled={isCapturingFinal}
-              >
-                {isCapturingFinal ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <MapPin className="mr-2 h-4 w-4" />
-                )}
-                Capturar Ponto Final
-              </Button>
-              <Input
-                placeholder="Latitude"
-                value={coordenadas.latitude_final}
-                onChange={(e) => setCoordenadas({ ...coordenadas, latitude_final: e.target.value })}
-                className="flex-1"
-              />
-              <Input
-                placeholder="Longitude"
-                value={coordenadas.longitude_final}
-                onChange={(e) => setCoordenadas({ ...coordenadas, longitude_final: e.target.value })}
-                className="flex-1"
-              />
-            </div>
-          </div>
-
-          <FormField
-            control={form.control}
-            name="snv"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>SNV</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ex: 116BMG1010" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="descricao"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descrição</FormLabel>
+                <FormLabel>Tipo de Tacha</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -322,10 +157,10 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
 
           <FormField
             control={form.control}
-            name="corpo"
+            name="material"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Corpo</FormLabel>
+                <FormLabel>Material (Corpo)</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -345,30 +180,7 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
 
           <FormField
             control={form.control}
-            name="refletivo"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Refletivo</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione (opcional)" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="I">I</SelectItem>
-                    <SelectItem value="II">II</SelectItem>
-                    <SelectItem value="III">III</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="cor_refletivo"
+            name="cor"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Cor Refletivo</FormLabel>
@@ -392,7 +204,7 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
 
           <FormField
             control={form.control}
-            name="local_implantacao"
+            name="lado"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Local de Implantação</FormLabel>
@@ -429,37 +241,48 @@ export function IntervencoesTachaForm({ loteId, rodoviaId }: IntervencoesTachaFo
               </FormItem>
             )}
           />
+        </div>
 
+        <FormField
+          control={form.control}
+          name="fora_plano_manutencao"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <input
+                  type="checkbox"
+                  checked={field.value}
+                  onChange={field.onChange}
+                  className="h-4 w-4"
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Fora do Plano de Manutenção</FormLabel>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        {form.watch("fora_plano_manutencao") && (
           <FormField
             control={form.control}
-            name="espacamento_m"
+            name="justificativa_fora_plano"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Espaçamento (m)</FormLabel>
+                <FormLabel>Justificativa *</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.1" placeholder="Ex: 16" {...field} />
+                  <Textarea placeholder="Explique o motivo da intervenção fora do plano..." {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
+        )}
 
-        <FormField
-          control={form.control}
-          name="observacao"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Observações</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Informações adicionais..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit" className="w-full">Salvar Intervenção</Button>
+        <Button type="submit" className="w-full" disabled={!tachaSelecionada}>
+          {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Salvar Intervenção
+        </Button>
       </form>
     </Form>
       </CardContent>

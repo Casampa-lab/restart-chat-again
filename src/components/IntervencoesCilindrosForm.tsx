@@ -14,113 +14,74 @@ import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
-  snv: z.string().optional(),
+  motivo: z.string().min(1, "Motivo é obrigatório"),
   cor_corpo: z.string().min(1, "Cor do corpo é obrigatória"),
   cor_refletivo: z.string().optional(),
   tipo_refletivo: z.string().optional(),
-  km_inicial: z.string().min(1, "KM Inicial é obrigatório"),
-  latitude_inicial: z.string().optional(),
-  longitude_inicial: z.string().optional(),
-  km_final: z.string().min(1, "KM Final é obrigatório"),
-  latitude_final: z.string().optional(),
-  longitude_final: z.string().optional(),
-  extensao_km: z.string().optional(),
-  local_implantacao: z.string().optional(),
-  espacamento_m: z.string().optional(),
   quantidade: z.string().optional(),
-  observacao: z.string().optional(),
+  fora_plano_manutencao: z.boolean().default(false),
+  justificativa_fora_plano: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 interface IntervencoesCilindrosFormProps {
-  loteId: string;
-  rodoviaId: string;
+  cilindroSelecionado?: {
+    id: string;
+    km_inicial: number;
+    km_final: number;
+    snv?: string;
+  };
+  onIntervencaoRegistrada?: () => void;
 }
 
-export function IntervencoesCilindrosForm({ loteId, rodoviaId }: IntervencoesCilindrosFormProps) {
+export function IntervencoesCilindrosForm({ cilindroSelecionado, onIntervencaoRegistrada }: IntervencoesCilindrosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
-      snv: "",
+      motivo: "",
       cor_corpo: "",
       cor_refletivo: "",
       tipo_refletivo: "",
-      km_inicial: "",
-      latitude_inicial: "",
-      longitude_inicial: "",
-      km_final: "",
-      latitude_final: "",
-      longitude_final: "",
-      extensao_km: "",
-      local_implantacao: "",
-      espacamento_m: "",
       quantidade: "",
-      observacao: "",
+      fora_plano_manutencao: false,
+      justificativa_fora_plano: "",
     },
   });
 
   const onSubmit = async (data: FormData) => {
+    if (!cilindroSelecionado) {
+      toast.error("Selecione um cilindro do inventário primeiro");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast.error("Usuário não autenticado");
-        return;
-      }
-
       const { error } = await supabase
-        .from("intervencoes_cilindros")
+        .from("ficha_cilindros_intervencoes")
         .insert({
-          user_id: user.id,
-          lote_id: loteId,
-          rodovia_id: rodoviaId,
+          ficha_cilindros_id: cilindroSelecionado.id,
           data_intervencao: data.data_intervencao,
-          snv: data.snv || null,
-          cor_corpo: data.cor_corpo,
+          motivo: data.motivo,
+          cor_corpo: data.cor_corpo || null,
           cor_refletivo: data.cor_refletivo || null,
           tipo_refletivo: data.tipo_refletivo || null,
-          km_inicial: parseFloat(data.km_inicial),
-          latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
-          longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
-          km_final: parseFloat(data.km_final),
-          latitude_final: data.latitude_final ? parseFloat(data.latitude_final) : null,
-          longitude_final: data.longitude_final ? parseFloat(data.longitude_final) : null,
-          extensao_km: data.extensao_km ? parseFloat(data.extensao_km) : null,
-          local_implantacao: data.local_implantacao || null,
-          espacamento_m: data.espacamento_m ? parseFloat(data.espacamento_m) : null,
           quantidade: data.quantidade ? parseInt(data.quantidade) : null,
-          observacao: data.observacao || null,
+          fora_plano_manutencao: data.fora_plano_manutencao,
+          justificativa_fora_plano: data.justificativa_fora_plano || null,
         });
 
       if (error) throw error;
 
-      toast.success("Cilindro delimitador registrado com sucesso!");
-      form.reset({
-        data_intervencao: new Date().toISOString().split('T')[0],
-        snv: "",
-        cor_corpo: "",
-        cor_refletivo: "",
-        tipo_refletivo: "",
-        km_inicial: "",
-        latitude_inicial: "",
-        longitude_inicial: "",
-        km_final: "",
-        latitude_final: "",
-        longitude_final: "",
-        extensao_km: "",
-        local_implantacao: "",
-        espacamento_m: "",
-        quantidade: "",
-        observacao: "",
-      });
+      toast.success("Intervenção registrada com sucesso!");
+      form.reset();
+      onIntervencaoRegistrada?.();
     } catch (error: any) {
-      console.error("Erro ao registrar cilindro:", error);
-      toast.error("Erro ao registrar cilindro: " + error.message);
+      console.error("Erro ao registrar intervenção:", error);
+      toast.error("Erro ao registrar intervenção: " + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -129,9 +90,12 @@ export function IntervencoesCilindrosForm({ loteId, rodoviaId }: IntervencoesCil
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cadastro de Cilindros Delimitadores</CardTitle>
+        <CardTitle>Intervenção em Cilindros Delimitadores</CardTitle>
         <CardDescription>
-          Registre os cilindros delimitadores implantados na rodovia
+          {cilindroSelecionado 
+            ? `Registrando intervenção para cilindro entre KM ${cilindroSelecionado.km_inicial} - ${cilindroSelecionado.km_final}${cilindroSelecionado.snv ? ` (SNV: ${cilindroSelecionado.snv})` : ''}`
+            : "Selecione um cilindro do inventário para registrar intervenção"
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -154,7 +118,7 @@ export function IntervencoesCilindrosForm({ loteId, rodoviaId }: IntervencoesCil
 
               <FormField
                 control={form.control}
-                name="snv"
+                name="motivo"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>SNV</FormLabel>
@@ -236,132 +200,6 @@ export function IntervencoesCilindrosForm({ loteId, rodoviaId }: IntervencoesCil
 
               <FormField
                 control={form.control}
-                name="km_inicial"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>KM Inicial *</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.001" placeholder="Ex: 123.456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="latitude_inicial"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Latitude Inicial</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.000001" placeholder="Ex: -23.550520" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="longitude_inicial"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Longitude Inicial</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.000001" placeholder="Ex: -46.633308" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="km_final"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>KM Final *</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.001" placeholder="Ex: 123.456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="latitude_final"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Latitude Final</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.000001" placeholder="Ex: -23.550520" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="longitude_final"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Longitude Final</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.000001" placeholder="Ex: -46.633308" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="extensao_km"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Extensão (km)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.001" placeholder="Ex: 1.500" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="local_implantacao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Local de Implantação</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: Pista simples, Canteiro central" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="espacamento_m"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Espaçamento (m)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" placeholder="Ex: 1.20" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="quantidade"
                 render={({ field }) => (
                   <FormItem>
@@ -377,21 +215,43 @@ export function IntervencoesCilindrosForm({ loteId, rodoviaId }: IntervencoesCil
 
             <FormField
               control={form.control}
-              name="observacao"
+              name="fora_plano_manutencao"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Observações</FormLabel>
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Textarea placeholder="Observações adicionais..." {...field} />
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={field.onChange}
+                      className="h-4 w-4"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Fora do Plano de Manutenção</FormLabel>
+                  </div>
                 </FormItem>
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {form.watch("fora_plano_manutencao") && (
+              <FormField
+                control={form.control}
+                name="justificativa_fora_plano"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Justificativa *</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Explique o motivo da intervenção fora do plano..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <Button type="submit" className="w-full" disabled={isSubmitting || !cilindroSelecionado}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Registrar Cilindro Delimitador
+              Registrar Intervenção
             </Button>
           </form>
         </Form>
