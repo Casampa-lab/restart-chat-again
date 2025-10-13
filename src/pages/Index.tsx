@@ -342,15 +342,17 @@ const Index = () => {
                 <Boxes className="mr-2 h-5 w-5" />
                 Módulos
               </Button>
-              <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow relative" onClick={() => navigate("/coordenacao-fiscalizacao")}>
-                <ClipboardList className="mr-2 h-5 w-5" />
-                Gestão
+              <div className="relative">
+                <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/coordenacao-fiscalizacao")}>
+                  <ClipboardList className="mr-2 h-5 w-5" />
+                  Gestão
+                </Button>
                 {isAdminOrCoordinator && countPendentes && countPendentes > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white">
+                  <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white pointer-events-none">
                     {countPendentes}
                   </Badge>
                 )}
-              </Button>
+              </div>
               {isAdminOrCoordinator && <Button variant="default" size="lg" className="font-semibold bg-accent text-accent-foreground shadow-md hover:shadow-lg transition-shadow hover:bg-accent/90" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-5 w-5" />
                   Admin
