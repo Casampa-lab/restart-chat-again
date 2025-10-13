@@ -125,7 +125,6 @@ export default function DashboardNecessidades() {
         taxaMatch: 0,
         timeline: [],
         totalGeral: 0,
-        coordenadasSuspeitas: [],
       };
 
       let totalComMatch = 0;
@@ -151,63 +150,6 @@ export default function DashboardNecessidades() {
 
         const necessidades = (data as any[]) || [];
         console.log(`${tipo.label}: ${necessidades.length} necessidades encontradas`);
-
-        // Detectar coordenadas suspeitas
-        let suspeitasEncontradas = 0;
-        
-        necessidades.forEach((n: any) => {
-          // Tentar todos os possíveis campos de coordenadas
-          const lat = n.latitude_inicial || n.latitude;
-          const long = n.longitude_inicial || n.longitude;
-          
-          if (lat !== null && lat !== undefined && long !== null && long !== undefined) {
-            const latNum = typeof lat === 'string' ? parseFloat(lat) : lat;
-            const longNum = typeof long === 'string' ? parseFloat(long) : long;
-            
-            // Brasil: lat entre -34 e 6, long entre -75 e -33 (sempre negativa!)
-            const latForaBrasil = latNum < -34 || latNum > 6;
-            const longForaBrasil = longNum < -75 || longNum > -33;
-            const longPositiva = longNum > 0; // Brasil está no hemisfério oeste (long negativa)
-            
-            // Detectar extensões absurdas (marcas longitudinais com >50km)
-            let extensaoAbsurda = false;
-            let extensaoKm = 0;
-            if (tipo.value === 'marcas_longitudinais' && n.km_inicial && n.km_final) {
-              const kmIni = typeof n.km_inicial === 'string' ? parseFloat(n.km_inicial) : n.km_inicial;
-              const kmFim = typeof n.km_final === 'string' ? parseFloat(n.km_final) : n.km_final;
-              extensaoKm = Math.abs(kmFim - kmIni);
-              extensaoAbsurda = extensaoKm > 50;
-            }
-            
-            if (latForaBrasil || longForaBrasil || longPositiva || extensaoAbsurda) {
-              suspeitasEncontradas++;
-              
-              let motivo = "";
-              if (extensaoAbsurda) motivo = `Extensão absurda: ${extensaoKm.toFixed(1)}km`;
-              else if (longPositiva) motivo = "Longitude positiva (deveria ser negativa)";
-              else if (latForaBrasil) motivo = "Latitude fora do Brasil";
-              else if (longForaBrasil) motivo = "Longitude fora do Brasil";
-              
-              allStats.coordenadasSuspeitas.push({
-                tipo: tipo.label,
-                lote: n.lote?.numero || "N/A",
-                rodovia: n.rodovia?.codigo || "N/A",
-                km: n.km_inicial || n.km || "N/A",
-                kmFinal: n.km_final || null,
-                extensaoKm: extensaoKm > 0 ? extensaoKm.toFixed(1) : null,
-                latitude: latNum.toFixed(6),
-                longitude: longNum.toFixed(6),
-                servico: n.servico,
-                id: n.id,
-                motivo: motivo
-              });
-            }
-          }
-        });
-        
-        if (suspeitasEncontradas > 0) {
-          console.log(`${tipo.label}: ${suspeitasEncontradas} coordenadas suspeitas encontradas`);
-        }
 
         // Stats por tipo
         allStats.porTipo.push({
@@ -292,8 +234,6 @@ export default function DashboardNecessidades() {
         const [mesB, anoB] = b.mes.split(" ");
         return new Date(`${mesA} 1, ${anoA}`).getTime() - new Date(`${mesB} 1, ${anoB}`).getTime();
       });
-
-      console.log(`TOTAL de coordenadas suspeitas: ${allStats.coordenadasSuspeitas.length}`);
       
       setStats(allStats);
     } catch (error: any) {
@@ -592,92 +532,6 @@ export default function DashboardNecessidades() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-orange-600" />
-                  Coordenadas Suspeitas
-                </CardTitle>
-                <CardDescription>
-                  Necessidades com coordenadas fora do Brasil ou extensões absurdas (possíveis erros)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {stats.coordenadasSuspeitas.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <AlertCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
-                    <p>Nenhuma coordenada suspeita encontrada!</p>
-                    <p className="text-sm mt-1">Todas as coordenadas estão dentro do território brasileiro.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="h-5 w-5 text-orange-600" />
-                        <span className="font-semibold text-orange-800">
-                          {stats.coordenadasSuspeitas.length} registro(s) com problemas detectados
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse">
-                        <thead>
-                          <tr className="bg-muted">
-                            <th className="border p-2 text-left text-xs font-semibold">Tipo</th>
-                            <th className="border p-2 text-left text-xs font-semibold">Lote</th>
-                            <th className="border p-2 text-left text-xs font-semibold">Rodovia</th>
-                            <th className="border p-2 text-left text-xs font-semibold">KM</th>
-                            <th className="border p-2 text-left text-xs font-semibold">Extensão</th>
-                            <th className="border p-2 text-left text-xs font-semibold">Serviço</th>
-                            <th className="border p-2 text-left text-xs font-semibold">Latitude</th>
-                            <th className="border p-2 text-left text-xs font-semibold">Longitude</th>
-                            <th className="border p-2 text-left text-xs font-semibold">Motivo</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {stats.coordenadasSuspeitas.map((coord: any, idx: number) => (
-                            <tr key={idx} className="hover:bg-muted/50">
-                              <td className="border p-2 text-xs">{coord.tipo}</td>
-                              <td className="border p-2 text-xs">{coord.lote}</td>
-                              <td className="border p-2 text-xs">{coord.rodovia}</td>
-                              <td className="border p-2 text-xs">
-                                {coord.kmFinal ? `${coord.km} → ${coord.kmFinal}` : coord.km}
-                              </td>
-                              <td className="border p-2 text-xs font-semibold">
-                                {coord.extensaoKm ? (
-                                  <span className={coord.extensaoKm > 50 ? 'text-red-600' : ''}>
-                                    {coord.extensaoKm} km
-                                  </span>
-                                ) : '-'}
-                              </td>
-                              <td className="border p-2 text-xs">
-                                <span className={`px-2 py-1 rounded text-xs ${
-                                  coord.servico === 'Implantar' ? 'bg-green-100 text-green-800' :
-                                  coord.servico === 'Substituir' ? 'bg-yellow-100 text-yellow-800' :
-                                  coord.servico === 'Remover' ? 'bg-red-100 text-red-800' :
-                                  'bg-blue-100 text-blue-800'
-                                }`}>
-                                  {coord.servico}
-                                </span>
-                              </td>
-                              <td className="border p-2 text-xs font-mono">{coord.latitude}</td>
-                              <td className="border p-2 text-xs font-mono">{coord.longitude}</td>
-                              <td className="border p-2 text-xs text-orange-700 font-medium">{coord.motivo}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <div className="text-xs text-muted-foreground bg-blue-50 p-3 rounded border border-blue-200">
-                      <strong>Como corrigir:</strong> Entre em contato com os projetistas para verificar e corrigir as coordenadas listadas acima.
-                      Coordenadas válidas para o Brasil: Latitude entre -34° e 6°, Longitude entre -75° e -33°.
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
       </main>
