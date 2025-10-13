@@ -49,6 +49,74 @@ export default function DashboardNecessidades() {
   const loadStats = async () => {
     setLoading(true);
     try {
+      // Buscar supervisora_id do usuário
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("supervisora_id")
+        .eq("id", user?.id)
+        .single();
+
+      if (!profile?.supervisora_id) {
+        console.error("Usuário não tem supervisora associada");
+        setStats({
+          porTipo: [],
+          porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
+          porRodovia: [],
+          porLote: [],
+          taxaMatch: 0,
+          timeline: [],
+          totalGeral: 0,
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Buscar empresas da supervisora
+      const { data: empresas } = await supabase
+        .from("empresas")
+        .select("id")
+        .eq("supervisora_id", profile.supervisora_id);
+
+      if (!empresas || empresas.length === 0) {
+        console.error("Nenhuma empresa encontrada para a supervisora");
+        setStats({
+          porTipo: [],
+          porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
+          porRodovia: [],
+          porLote: [],
+          taxaMatch: 0,
+          timeline: [],
+          totalGeral: 0,
+        });
+        setLoading(false);
+        return;
+      }
+
+      const empresaIds = empresas.map(e => e.id);
+
+      // Buscar lotes das empresas
+      const { data: lotes } = await supabase
+        .from("lotes")
+        .select("id")
+        .in("empresa_id", empresaIds);
+
+      if (!lotes || lotes.length === 0) {
+        console.error("Nenhum lote encontrado para as empresas");
+        setStats({
+          porTipo: [],
+          porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
+          porRodovia: [],
+          porLote: [],
+          taxaMatch: 0,
+          timeline: [],
+          totalGeral: 0,
+        });
+        setLoading(false);
+        return;
+      }
+
+      const loteIds = lotes.map(l => l.id);
+
       const allStats: any = {
         porTipo: [],
         porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
@@ -62,7 +130,7 @@ export default function DashboardNecessidades() {
       let totalComMatch = 0;
       let totalSemMatch = 0;
 
-      // Buscar dados de cada tipo
+      // Buscar dados de cada tipo, filtrados por lotes da supervisora
       for (const tipo of TIPOS_NECESSIDADES) {
         const { data, error } = await supabase
           .from(`necessidades_${tipo.value}` as any)
@@ -71,7 +139,7 @@ export default function DashboardNecessidades() {
             rodovia:rodovias(codigo, nome),
             lote:lotes(numero)
           `)
-          .eq("user_id", user?.id);
+          .in("lote_id", loteIds);
 
         if (error) {
           console.error(`Erro ao carregar ${tipo.label}:`, error);
