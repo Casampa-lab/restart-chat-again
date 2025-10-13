@@ -165,12 +165,57 @@ export function InventarioImporterManager() {
       const headers = jsonData[config.headerRow] as any[];
       let dataRows = jsonData.slice(config.dataStartRow);
 
-      // Filtrar linhas vazias - uma linha é considerada vazia se TODOS os campos são null/undefined/empty
+      // Filtrar linhas vazias - verificar campos obrigatórios específicos por tipo
       dataRows = dataRows.filter((row: any) => {
         // Se a linha não existe ou é vazia, retornar false
         if (!row || !Array.isArray(row)) return false;
         
-        // Verificar se há pelo menos um valor não vazio na linha
+        // Função auxiliar para buscar valor em coluna (case insensitive)
+        const getColumnValue = (columnNames: string[]): any => {
+          for (let i = 0; i < headers.length; i++) {
+            const header = String(headers[i] || '').trim().toLowerCase();
+            if (columnNames.some(name => header === name.toLowerCase())) {
+              const value = row[i];
+              if (value !== null && value !== undefined && String(value).trim() !== '') {
+                return value;
+              }
+            }
+          }
+          return null;
+        };
+        
+        // Verificar campos obrigatórios específicos por tipo de inventário
+        if (inventoryType === "placas") {
+          const km = getColumnValue(["Km", "km"]);
+          const codigo = getColumnValue(["Código da Placa", "Codigo da Placa", "codigo"]);
+          return km !== null || codigo !== null;
+        } else if (inventoryType === "cilindros") {
+          const kmInicial = getColumnValue(["Km Inicial", "km inicial", "km_inicial"]);
+          const corCorpo = getColumnValue(["Cor (Corpo)", "Cor Corpo", "cor_corpo"]);
+          return kmInicial !== null || corCorpo !== null;
+        } else if (inventoryType === "tachas") {
+          const kmInicial = getColumnValue(["Km Inicial", "km inicial", "km_inicial"]);
+          const quantidade = getColumnValue(["Quantidade", "quantidade"]);
+          return kmInicial !== null || quantidade !== null;
+        } else if (inventoryType === "marcas_longitudinais") {
+          const kmInicial = getColumnValue(["Km Inicial", "km inicial", "km_inicial"]);
+          const codigo = getColumnValue(["Código", "Codigo", "codigo"]);
+          return kmInicial !== null || codigo !== null;
+        } else if (inventoryType === "inscricoes") {
+          const km = getColumnValue(["Km", "km"]);
+          const sigla = getColumnValue(["Sigla", "sigla"]);
+          return km !== null || sigla !== null;
+        } else if (inventoryType === "porticos") {
+          const km = getColumnValue(["Km", "km"]);
+          const tipo = getColumnValue(["Tipo", "tipo"]);
+          return km !== null || tipo !== null;
+        } else if (inventoryType === "defensas") {
+          const kmInicial = getColumnValue(["Km Inicial", "km inicial", "km_inicial"]);
+          const tramo = getColumnValue(["Tramo", "tramo"]);
+          return kmInicial !== null || tramo !== null;
+        }
+        
+        // Fallback: verificar se há pelo menos um valor não vazio na linha
         return row.some((cell: any) => {
           return cell !== null && 
                  cell !== undefined && 
