@@ -46,25 +46,24 @@ export default function MinhasNecessidadesRelatorios() {
           .from("lotes_rodovias")
           .select(`
             *,
-            lotes (nome, uf),
+            lotes (numero),
             rodovias (nome, codigo)
           `);
 
         if (error) throw error;
 
         cadastro = (lotesRodovias || []).map((lr: any) => ({
-          estado: lr.lotes?.uf || "",
-          lote: lr.lotes?.nome || "",
+          lote: lr.lotes?.numero || "",
           rodovia: lr.rodovias?.codigo || lr.rodovias?.nome || "",
-          trecho: lr.trecho || "",
-          extensao: lr.extensao_km || 0,
         }));
       } else {
         // Buscar dados do CADASTRO normal
+        // Ordenação condicional: placas e porticos usam 'km', outros usam 'km_inicial'
+        const orderByColumn = (tipoSelecionado === "placas" || tipoSelecionado === "porticos") ? "km" : "km_inicial";
         const { data, error } = await supabase
           .from(tipoConfig.tabelaCadastro as any)
           .select("*")
-          .order("km_inicial");
+          .order(orderByColumn);
 
         if (error) throw error;
         cadastro = data || [];
@@ -204,10 +203,12 @@ export default function MinhasNecessidadesRelatorios() {
       }
 
       // Buscar CADASTRO
+      // Ordenação condicional: placas e porticos usam 'km', outros usam 'km_inicial'
+      const orderByColumn = (tipoSelecionado === "placas" || tipoSelecionado === "porticos") ? "km" : "km_inicial";
       const { data: cadastro, error: erroCadastro } = await supabase
         .from(tipoConfig.tabelaCadastro as any)
         .select("*")
-        .order("km_inicial");
+        .order(orderByColumn);
 
       if (erroCadastro) throw erroCadastro;
 
