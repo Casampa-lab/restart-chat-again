@@ -31,7 +31,7 @@ interface FichaPlaca {
   si_sinal_impresso: string | null;
   tipo_pelicula_fundo: string | null;
   cor_pelicula_fundo: string | null;
-  retrorrefletividade: number | null;
+  retro_pelicula_fundo: number | null;
   tipo_pelicula_legenda_orla: string | null;
   cor_pelicula_legenda_orla: string | null;
   retro_pelicula_legenda_orla: number | null;
@@ -60,7 +60,7 @@ interface Intervencao {
   placa_recuperada: boolean;
   suporte: string | null;
   substrato: string | null;
-  pelicula: string | null;
+  tipo_pelicula_fundo_novo: string | null;
   retro_fundo: number | null;
   retro_orla_legenda: number | null;
   created_at: string;
@@ -567,8 +567,12 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       <p className="text-sm">{selectedPlaca.cor_pelicula_fundo || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Retrorrefletância (película fundo) cd.lux/m²:</span>
-                      <p className="text-sm">{selectedPlaca.retrorrefletividade || "-"}</p>
+                      <span className="text-sm font-medium text-muted-foreground">Retro Fundo (cd.lux/m²):</span>
+                      <p className="text-sm">{selectedPlaca.retro_pelicula_fundo || "-"}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Retro Orla/Legenda (cd.lux/m²):</span>
+                      <p className="text-sm">{selectedPlaca.retro_pelicula_legenda_orla || "-"}</p>
                     </div>
                   </div>
                 </div>
@@ -698,10 +702,10 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                 <p className="text-sm">{intervencao.substrato}</p>
                               </div>
                             )}
-                            {intervencao.pelicula && (
+                            {intervencao.tipo_pelicula_fundo_novo && (
                               <div>
-                                <span className="text-sm font-medium">Película:</span>
-                                <p className="text-sm">{intervencao.pelicula}</p>
+                                <span className="text-sm font-medium">Película de Fundo (novo):</span>
+                                <p className="text-sm">{intervencao.tipo_pelicula_fundo_novo}</p>
                               </div>
                             )}
                             {intervencao.retro_fundo && (

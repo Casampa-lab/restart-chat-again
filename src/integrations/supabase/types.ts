@@ -831,11 +831,10 @@ export type Database = {
           lote_id: string
           modelo: string | null
           numero_patrimonio: string | null
-          pelicula: string | null
           posicao: string | null
           qtde_suporte: number | null
+          retro_pelicula_fundo: number | null
           retro_pelicula_legenda_orla: number | null
-          retrorrefletividade: number | null
           rodovia_id: string
           secao_suporte_mm: string | null
           si_sinal_impresso: string | null
@@ -883,11 +882,10 @@ export type Database = {
           lote_id: string
           modelo?: string | null
           numero_patrimonio?: string | null
-          pelicula?: string | null
           posicao?: string | null
           qtde_suporte?: number | null
+          retro_pelicula_fundo?: number | null
           retro_pelicula_legenda_orla?: number | null
-          retrorrefletividade?: number | null
           rodovia_id: string
           secao_suporte_mm?: string | null
           si_sinal_impresso?: string | null
@@ -935,11 +933,10 @@ export type Database = {
           lote_id?: string
           modelo?: string | null
           numero_patrimonio?: string | null
-          pelicula?: string | null
           posicao?: string | null
           qtde_suporte?: number | null
+          retro_pelicula_fundo?: number | null
           retro_pelicula_legenda_orla?: number | null
-          retrorrefletividade?: number | null
           rodovia_id?: string
           secao_suporte_mm?: string | null
           si_sinal_impresso?: string | null
@@ -1007,12 +1004,12 @@ export type Database = {
           id: string
           justificativa_fora_plano: string | null
           motivo: string
-          pelicula: string | null
           placa_recuperada: boolean | null
           retro_fundo: number | null
           retro_orla_legenda: number | null
           substrato: string | null
           suporte: string | null
+          tipo_pelicula_fundo_novo: string | null
         }
         Insert: {
           created_at?: string
@@ -1022,12 +1019,12 @@ export type Database = {
           id?: string
           justificativa_fora_plano?: string | null
           motivo: string
-          pelicula?: string | null
           placa_recuperada?: boolean | null
           retro_fundo?: number | null
           retro_orla_legenda?: number | null
           substrato?: string | null
           suporte?: string | null
+          tipo_pelicula_fundo_novo?: string | null
         }
         Update: {
           created_at?: string
@@ -1037,12 +1034,12 @@ export type Database = {
           id?: string
           justificativa_fora_plano?: string | null
           motivo?: string
-          pelicula?: string | null
           placa_recuperada?: boolean | null
           retro_fundo?: number | null
           retro_orla_legenda?: number | null
           substrato?: string | null
           suporte?: string | null
+          tipo_pelicula_fundo_novo?: string | null
         }
         Relationships: [
           {
@@ -2967,7 +2964,6 @@ export type Database = {
           codigo: string | null
           created_at: string | null
           data_importacao: string | null
-          descricao: string | null
           dimensoes_mm: string | null
           distancia_m: number | null
           distancia_match_metros: number | null
@@ -2978,10 +2974,7 @@ export type Database = {
           linha_planilha: number | null
           longitude: number | null
           lote_id: string
-          modelo: string | null
           observacao: string | null
-          pelicula: string | null
-          retrorrefletividade: number | null
           rodovia_id: string
           servico: string
           snv: string | null
@@ -3003,7 +2996,6 @@ export type Database = {
           codigo?: string | null
           created_at?: string | null
           data_importacao?: string | null
-          descricao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
           distancia_match_metros?: number | null
@@ -3014,10 +3006,7 @@ export type Database = {
           linha_planilha?: number | null
           longitude?: number | null
           lote_id: string
-          modelo?: string | null
           observacao?: string | null
-          pelicula?: string | null
-          retrorrefletividade?: number | null
           rodovia_id: string
           servico: string
           snv?: string | null
@@ -3039,7 +3028,6 @@ export type Database = {
           codigo?: string | null
           created_at?: string | null
           data_importacao?: string | null
-          descricao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
           distancia_match_metros?: number | null
@@ -3050,10 +3038,7 @@ export type Database = {
           linha_planilha?: number | null
           longitude?: number | null
           lote_id?: string
-          modelo?: string | null
           observacao?: string | null
-          pelicula?: string | null
-          retrorrefletividade?: number | null
           rodovia_id?: string
           servico?: string
           snv?: string | null

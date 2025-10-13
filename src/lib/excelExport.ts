@@ -715,7 +715,7 @@ export const exportFichasPlaca = async () => {
           item.codigo || '',
           item.lado || '',
           item.dimensoes_mm || '',
-          item.pelicula || '',
+          item.tipo_pelicula_fundo || '',
           item.substrato || '',
           item.suporte || '',
           formatNumber(item.area_m2),

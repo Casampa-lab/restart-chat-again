@@ -18,7 +18,7 @@ const intervencaoSchema = z.object({
   placa_recuperada: z.boolean().default(false),
   suporte: z.string().optional(),
   substrato: z.string().optional(),
-  pelicula: z.string().optional(),
+  tipo_pelicula_fundo_novo: z.string().optional(),
   retro_fundo: z.string().optional(),
   retro_orla_legenda: z.string().optional(),
 });
@@ -54,7 +54,7 @@ export function IntervencaoInventarioForm({
       placa_recuperada: false,
       suporte: "",
       substrato: "",
-      pelicula: "",
+      tipo_pelicula_fundo_novo: "",
       retro_fundo: "",
       retro_orla_legenda: "",
     },
@@ -100,7 +100,7 @@ export function IntervencaoInventarioForm({
         placa_recuperada: values.placa_recuperada,
         suporte: values.suporte || null,
         substrato: values.substrato || null,
-        pelicula: values.pelicula || null,
+        tipo_pelicula_fundo_novo: values.tipo_pelicula_fundo_novo || null,
         retro_fundo: values.retro_fundo ? parseFloat(values.retro_fundo) : null,
         retro_orla_legenda: values.retro_orla_legenda ? parseFloat(values.retro_orla_legenda) : null,
       };
@@ -245,12 +245,12 @@ export function IntervencaoInventarioForm({
 
         <FormField
           control={form.control}
-          name="pelicula"
+          name="tipo_pelicula_fundo_novo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Película</FormLabel>
+              <FormLabel>Película de Fundo (novo)</FormLabel>
               <FormControl>
-                <Input placeholder="Tipo de película" {...field} />
+                <Input placeholder="Tipo de película de fundo instalada" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -33,12 +33,13 @@ const fichaPlacaSchema = z.object({
   suporte: z.string().optional(),
   qtde_suporte: z.string().optional(),
   substrato: z.string().optional(),
-  pelicula: z.string().optional(),
+  tipo_pelicula_fundo: z.string().optional(),
   altura_m: z.string().optional(),
   distancia_m: z.string().optional(),
   dimensoes_mm: z.string().optional(),
   area_m2: z.string().optional(),
-  retrorrefletividade: z.string().optional(),
+  retro_pelicula_fundo: z.string().optional(),
+  retro_pelicula_legenda_orla: z.string().optional(),
 });
 
 const danoSchema = z.object({
@@ -55,7 +56,7 @@ const intervencaoSchema = z.object({
   placa_recuperada: z.boolean(),
   suporte: z.string().optional(),
   substrato: z.string().optional(),
-  pelicula: z.string().optional(),
+  tipo_pelicula_fundo_novo: z.string().optional(),
   retro_fundo: z.string().optional(),
   retro_orla_legenda: z.string().optional(),
 });
@@ -195,12 +196,13 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
           suporte: values.suporte || null,
           qtde_suporte: values.qtde_suporte ? parseInt(values.qtde_suporte) : null,
           substrato: values.substrato || null,
-          pelicula: values.pelicula || null,
+          tipo_pelicula_fundo: values.tipo_pelicula_fundo || null,
+          retro_pelicula_fundo: values.retro_pelicula_fundo ? parseFloat(values.retro_pelicula_fundo) : null,
+          retro_pelicula_legenda_orla: values.retro_pelicula_legenda_orla ? parseFloat(values.retro_pelicula_legenda_orla) : null,
           altura_m: values.altura_m ? parseFloat(values.altura_m) : null,
           distancia_m: values.distancia_m ? parseFloat(values.distancia_m) : null,
           dimensoes_mm: values.dimensoes_mm || null,
           area_m2: values.area_m2 ? parseFloat(values.area_m2) : null,
-          retrorrefletividade: values.retrorrefletividade ? parseFloat(values.retrorrefletividade) : null,
           foto_frontal_url: photoUrls.frontal || null,
           foto_lateral_url: photoUrls.lateral || null,
           foto_posterior_url: photoUrls.posterior || null,
@@ -238,7 +240,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
             placa_recuperada: intervencao.placa_recuperada,
             suporte: intervencao.suporte || null,
             substrato: intervencao.substrato || null,
-            pelicula: intervencao.pelicula || null,
+            tipo_pelicula_fundo_novo: intervencao.tipo_pelicula_fundo_novo || null,
             retro_fundo: intervencao.retro_fundo ? parseFloat(intervencao.retro_fundo) : null,
             retro_orla_legenda: intervencao.retro_orla_legenda ? parseFloat(intervencao.retro_orla_legenda) : null,
           })));
@@ -574,10 +576,10 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                   />
                   <FormField
                     control={form.control}
-                    name="pelicula"
+                    name="tipo_pelicula_fundo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Película</FormLabel>
+                        <FormLabel>Película de Fundo</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -639,10 +641,23 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                   />
                   <FormField
                     control={form.control}
-                    name="retrorrefletividade"
+                    name="retro_pelicula_fundo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Retrorrefletividade (mcd/m².lx)</FormLabel>
+                        <FormLabel>Retrorrefletividade Fundo (cd.lux/m²)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="retro_pelicula_legenda_orla"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Retrorrefletividade Orla/Legenda (cd.lux/m²)</FormLabel>
                         <FormControl>
                           <Input type="number" step="0.01" {...field} />
                         </FormControl>
@@ -906,10 +921,10 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                               />
                               <FormField
                                 control={intervencaoForm.control}
-                                name="pelicula"
+                                name="tipo_pelicula_fundo_novo"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Película</FormLabel>
+                                    <FormLabel>Película de Fundo (novo)</FormLabel>
                                     <FormControl>
                                       <Input {...field} />
                                     </FormControl>

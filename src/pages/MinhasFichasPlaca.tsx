@@ -18,6 +18,8 @@ interface FichaPlaca {
   foto_url: string | null;
   foto_frontal_url: string | null;
   foto_identificacao_url: string | null;
+  retro_pelicula_fundo: number | null;
+  retro_pelicula_legenda_orla: number | null;
   created_at: string;
   rodovias: { nome: string; codigo: string } | null;
   lotes: { numero: string } | null;
