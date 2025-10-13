@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, MapPin, Eye, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
+import { toast } from "sonner";
 
 interface FichaDefensa {
   id: string;
@@ -55,6 +57,7 @@ export const InventarioDefensasViewer = ({
   const [intervencoes, setIntervencoes] = useState<IntervencaoDefensa[]>([]);
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
 
   const { data: defensas, isLoading } = useQuery({
     queryKey: ["inventario-defensas", loteId, rodoviaId, searchTerm],
@@ -164,7 +167,7 @@ export const InventarioDefensasViewer = ({
   return (
     <div className="space-y-4">
       {/* Botão Ver Necessidades */}
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
         <Button
           variant="outline"
           size="sm"
@@ -173,6 +176,15 @@ export const InventarioDefensasViewer = ({
         >
           <FileText className="h-4 w-4" />
           Ver Necessidades
+        </Button>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => setShowRegistrarNaoCadastrado(true)}
+          className="gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Item Não Cadastrado
         </Button>
       </div>
 
@@ -295,6 +307,21 @@ export const InventarioDefensasViewer = ({
           </Table>
         </div>
       )}
+
+      <Dialog open={showRegistrarNaoCadastrado} onOpenChange={setShowRegistrarNaoCadastrado}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <RegistrarItemNaoCadastrado
+            tipo_elemento="defensas"
+            loteId={loteId}
+            rodoviaId={rodoviaId}
+            onSuccess={() => {
+              setShowRegistrarNaoCadastrado(false);
+              toast.success("Registro enviado para aprovação");
+            }}
+            onCancel={() => setShowRegistrarNaoCadastrado(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!selectedDefensa} onOpenChange={() => setSelectedDefensa(null)}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">

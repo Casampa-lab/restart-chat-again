@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
+import { toast } from "sonner";
 
 interface FichaMarcaLongitudinal {
   id: string;
@@ -390,6 +391,21 @@ export function InventarioMarcasLongitudinaisViewer({
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={showRegistrarNaoCadastrado} onOpenChange={setShowRegistrarNaoCadastrado}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <RegistrarItemNaoCadastrado
+            tipo_elemento="marcas_longitudinais"
+            loteId={loteId}
+            rodoviaId={rodoviaId}
+            onSuccess={() => {
+              setShowRegistrarNaoCadastrado(false);
+              toast.success("Registro enviado para aprovação");
+            }}
+            onCancel={() => setShowRegistrarNaoCadastrado(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!selectedMarca} onOpenChange={() => setSelectedMarca(null)}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">

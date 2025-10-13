@@ -9,8 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 
 interface Cilindro {
   id: string;
@@ -58,6 +59,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
   const [rodovia, setRodovia] = useState<{ codigo: string } | null>(null);
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371e3; // Earth radius in meters
@@ -210,15 +212,26 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
               <Library className="h-5 w-5" />
               Inventário de Cilindros Delineadores
             </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/minhas-necessidades?tipo=cilindros")}
-              className="gap-2"
-            >
-              <FileText className="h-4 w-4" />
-              Ver Necessidades
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/minhas-necessidades?tipo=cilindros")}
+                className="gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Ver Necessidades
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setShowRegistrarNaoCadastrado(true)}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Item Não Cadastrado
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -373,6 +386,21 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId }: InventarioCilin
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showRegistrarNaoCadastrado} onOpenChange={setShowRegistrarNaoCadastrado}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <RegistrarItemNaoCadastrado
+            tipo_elemento="cilindros"
+            loteId={loteId}
+            rodoviaId={rodoviaId}
+            onSuccess={() => {
+              setShowRegistrarNaoCadastrado(false);
+              toast.success("Registro enviado para aprovação");
+            }}
+            onCancel={() => setShowRegistrarNaoCadastrado(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!selectedCilindro} onOpenChange={() => setSelectedCilindro(null)}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">

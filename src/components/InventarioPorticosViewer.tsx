@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
+import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
+import { toast } from "sonner";
 
 interface FichaPortico {
   id: string;
@@ -44,6 +46,7 @@ export function InventarioPorticosViewer({
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -185,15 +188,26 @@ export function InventarioPorticosViewer({
               <Library className="h-5 w-5" />
               Inventário de Pórticos, Semipórticos e Braços Projetados
             </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/minhas-necessidades?tipo=porticos")}
-              className="gap-2"
-            >
-              <FileText className="h-4 w-4" />
-              Ver Necessidades
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/minhas-necessidades?tipo=porticos")}
+                className="gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Ver Necessidades
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setShowRegistrarNaoCadastrado(true)}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Item Não Cadastrado
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -343,6 +357,21 @@ export function InventarioPorticosViewer({
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={showRegistrarNaoCadastrado} onOpenChange={setShowRegistrarNaoCadastrado}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <RegistrarItemNaoCadastrado
+            tipo_elemento="porticos"
+            loteId={loteId}
+            rodoviaId={rodoviaId}
+            onSuccess={() => {
+              setShowRegistrarNaoCadastrado(false);
+              toast.success("Registro enviado para aprovação");
+            }}
+            onCancel={() => setShowRegistrarNaoCadastrado(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!selectedPortico} onOpenChange={() => setSelectedPortico(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
