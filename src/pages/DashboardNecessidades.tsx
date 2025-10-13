@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, TrendingUp, MapPin, FileCheck, AlertCircle, Calendar, Target } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, TrendingUp, MapPin, FileCheck, Calendar, Filter } from "lucide-react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
@@ -33,6 +34,10 @@ export default function DashboardNecessidades() {
   const { data: supervisora } = useSupervisora();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
+  const [lotes, setLotes] = useState<any[]>([]);
+  const [rodovias, setRodovias] = useState<any[]>([]);
+  const [selectedLoteId, setSelectedLoteId] = useState<string>("all");
+  const [selectedRodoviaId, setSelectedRodoviaId] = useState<string>("all");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -42,22 +47,78 @@ export default function DashboardNecessidades() {
 
   useEffect(() => {
     if (user) {
-      loadStats();
+      loadAvailableFilters();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user && lotes.length > 0) {
+      loadStats();
+    }
+  }, [user, selectedLoteId, selectedRodoviaId, lotes]);
+
+  const loadAvailableFilters = async () => {
+    try {
+      // Buscar empresa_id do usuário
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("empresa_id")
+        .eq("id", user?.id)
+        .single();
+
+      if (!profile?.empresa_id) {
+        console.error("Usuário não tem empresa associada");
+        return;
+      }
+
+      // Buscar lotes da empresa com rodovias
+      const { data: lotesData } = await supabase
+        .from("lotes")
+        .select(`
+          id,
+          numero,
+          rodovia_id,
+          rodovias!inner(id, codigo, nome)
+        `)
+        .eq("empresa_id", profile.empresa_id);
+
+      if (lotesData && lotesData.length > 0) {
+        // Transformar dados para ter a estrutura correta
+        const lotesTransformados = lotesData.map((lote: any) => ({
+          id: lote.id,
+          numero: lote.numero,
+          rodovia: Array.isArray(lote.rodovias) ? lote.rodovias[0] : lote.rodovias
+        }));
+        
+        setLotes(lotesTransformados);
+        
+        // Extrair rodovias únicas
+        const rodoviasMap = new Map();
+        lotesTransformados.forEach(lote => {
+          if (lote.rodovia) {
+            rodoviasMap.set(lote.rodovia.id, lote.rodovia);
+          }
+        });
+        setRodovias(Array.from(rodoviasMap.values()));
+      }
+    } catch (error) {
+      console.error("Erro ao carregar filtros disponíveis:", error);
+    }
+  };
 
   const loadStats = async () => {
     setLoading(true);
     try {
-      // Buscar supervisora_id do usuário
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("supervisora_id")
-        .eq("id", user?.id)
-        .single();
+      // Definir quais lotes usar baseado no filtro
+      let loteIds: string[] = [];
+      
+      if (selectedLoteId === "all") {
+        loteIds = lotes.map(l => l.id);
+      } else {
+        loteIds = [selectedLoteId];
+      }
 
-      if (!profile?.supervisora_id) {
-        console.error("Usuário não tem supervisora associada");
+      if (loteIds.length === 0) {
         setStats({
           porTipo: [],
           porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
@@ -70,52 +131,6 @@ export default function DashboardNecessidades() {
         setLoading(false);
         return;
       }
-
-      // Buscar empresas da supervisora
-      const { data: empresas } = await supabase
-        .from("empresas")
-        .select("id")
-        .eq("supervisora_id", profile.supervisora_id);
-
-      if (!empresas || empresas.length === 0) {
-        console.error("Nenhuma empresa encontrada para a supervisora");
-        setStats({
-          porTipo: [],
-          porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
-          porRodovia: [],
-          porLote: [],
-          taxaMatch: 0,
-          timeline: [],
-          totalGeral: 0,
-        });
-        setLoading(false);
-        return;
-      }
-
-      const empresaIds = empresas.map(e => e.id);
-
-      // Buscar lotes das empresas
-      const { data: lotes } = await supabase
-        .from("lotes")
-        .select("id")
-        .in("empresa_id", empresaIds);
-
-      if (!lotes || lotes.length === 0) {
-        console.error("Nenhum lote encontrado para as empresas");
-        setStats({
-          porTipo: [],
-          porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
-          porRodovia: [],
-          porLote: [],
-          taxaMatch: 0,
-          timeline: [],
-          totalGeral: 0,
-        });
-        setLoading(false);
-        return;
-      }
-
-      const loteIds = lotes.map(l => l.id);
 
       const allStats: any = {
         porTipo: [],
@@ -130,11 +145,11 @@ export default function DashboardNecessidades() {
       let totalComMatch = 0;
       let totalSemMatch = 0;
 
-      // Buscar dados de cada tipo, filtrados por lotes da supervisora
+      // Buscar dados de cada tipo
       for (const tipo of TIPOS_NECESSIDADES) {
         console.log(`Buscando necessidades de ${tipo.label} para lotes:`, loteIds);
         
-        const { data, error } = await supabase
+        let query = supabase
           .from(`necessidades_${tipo.value}` as any)
           .select(`
             *,
@@ -142,6 +157,13 @@ export default function DashboardNecessidades() {
             lote:lotes(numero)
           `)
           .in("lote_id", loteIds);
+
+        // Aplicar filtro de rodovia se selecionado
+        if (selectedRodoviaId !== "all") {
+          query = query.eq("rodovia_id", selectedRodoviaId);
+        }
+
+        const { data, error } = await query;
 
         if (error) {
           console.error(`Erro ao carregar ${tipo.label}:`, error);
@@ -293,6 +315,53 @@ export default function DashboardNecessidades() {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-6">
+        {/* Filtros */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filtros
+            </CardTitle>
+            <CardDescription>Selecione o lote ou rodovia para visualizar os dados</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Lote</label>
+                <Select value={selectedLoteId} onValueChange={setSelectedLoteId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um lote" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os lotes</SelectItem>
+                    {lotes.map((lote) => (
+                      <SelectItem key={lote.id} value={lote.id}>
+                        Lote {lote.numero}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Rodovia</label>
+                <Select value={selectedRodoviaId} onValueChange={setSelectedRodoviaId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma rodovia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as rodovias</SelectItem>
+                    {rodovias.map((rodovia) => (
+                      <SelectItem key={rodovia.id} value={rodovia.id}>
+                        {rodovia.codigo} - {rodovia.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Cards de Métricas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <Card className="border-l-4 border-l-blue-500">
@@ -497,7 +566,7 @@ export default function DashboardNecessidades() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
+                  <TrendingUp className="h-5 w-5" />
                   Performance do Algoritmo de Match
                 </CardTitle>
                 <CardDescription>Taxa de sucesso do match automático por coordenadas</CardDescription>
