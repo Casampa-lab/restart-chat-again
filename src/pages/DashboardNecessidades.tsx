@@ -133,6 +133,8 @@ export default function DashboardNecessidades() {
 
       // Buscar dados de cada tipo, filtrados por lotes da supervisora
       for (const tipo of TIPOS_NECESSIDADES) {
+        console.log(`Buscando necessidades de ${tipo.label} para lotes:`, loteIds);
+        
         const { data, error } = await supabase
           .from(`necessidades_${tipo.value}` as any)
           .select(`
@@ -148,8 +150,31 @@ export default function DashboardNecessidades() {
         }
 
         const necessidades = (data as any[]) || [];
+        console.log(`${tipo.label}: ${necessidades.length} necessidades encontradas`);
 
         // Detectar coordenadas suspeitas
+        let suspeitasEncontradas = 0;
+        
+        // Calcular centroid (centro aproximado) das coordenadas para detectar outliers
+        const coordsValidas = necessidades.filter((n: any) => {
+          const lat = n.latitude_inicial || n.latitude;
+          const long = n.longitude_inicial || n.longitude;
+          return lat && long;
+        });
+        
+        let centroidLat = 0;
+        let centroidLong = 0;
+        if (coordsValidas.length > 0) {
+          coordsValidas.forEach((n: any) => {
+            const lat = n.latitude_inicial || n.latitude;
+            const long = n.longitude_inicial || n.longitude;
+            centroidLat += typeof lat === 'string' ? parseFloat(lat) : lat;
+            centroidLong += typeof long === 'string' ? parseFloat(long) : long;
+          });
+          centroidLat /= coordsValidas.length;
+          centroidLong /= coordsValidas.length;
+        }
+        
         necessidades.forEach((n: any) => {
           // Tentar todos os possíveis campos de coordenadas
           const lat = n.latitude_inicial || n.latitude;
@@ -159,24 +184,34 @@ export default function DashboardNecessidades() {
             const latNum = typeof lat === 'string' ? parseFloat(lat) : lat;
             const longNum = typeof long === 'string' ? parseFloat(long) : long;
             
-            // Log para debug
-            if (longNum > 0) {
-              console.log('Coordenada suspeita encontrada:', {
-                tipo: tipo.label,
-                lat: latNum,
-                long: longNum,
-                lote: n.lote?.numero,
-                rodovia: n.rodovia?.codigo
-              });
-            }
-            
             // Brasil: lat entre -34 e 6, long entre -75 e -33 (sempre negativa!)
-            // Detecta se está fora do Brasil OU se longitude é positiva (erro comum)
             const latForaBrasil = latNum < -34 || latNum > 6;
             const longForaBrasil = longNum < -75 || longNum > -33;
             const longPositiva = longNum > 0; // Brasil está no hemisfério oeste (long negativa)
             
-            if (latForaBrasil || longForaBrasil || longPositiva) {
+            // Calcular distância do centroid (aproximação em graus)
+            // 1 grau ~ 111km, então 0.9 graus ~ 100km
+            let muitoDistante = false;
+            let distanciaKm = 0;
+            if (coordsValidas.length > 5) {
+              const distLat = Math.abs(latNum - centroidLat);
+              const distLong = Math.abs(longNum - centroidLong);
+              const distGraus = Math.sqrt(distLat * distLat + distLong * distLong);
+              distanciaKm = Math.round(distGraus * 111);
+              
+              // Considera suspeito se está a mais de 100km do centro
+              muitoDistante = distGraus > 0.9;
+            }
+            
+            if (latForaBrasil || longForaBrasil || longPositiva || muitoDistante) {
+              suspeitasEncontradas++;
+              
+              let motivo = "";
+              if (longPositiva) motivo = "Longitude positiva (deveria ser negativa)";
+              else if (latForaBrasil) motivo = "Latitude fora do Brasil";
+              else if (longForaBrasil) motivo = "Longitude fora do Brasil";
+              else if (muitoDistante) motivo = `Muito distante do grupo (~${distanciaKm}km)`;
+              
               allStats.coordenadasSuspeitas.push({
                 tipo: tipo.label,
                 lote: n.lote?.numero || "N/A",
@@ -186,13 +221,15 @@ export default function DashboardNecessidades() {
                 longitude: longNum.toFixed(6),
                 servico: n.servico,
                 id: n.id,
-                motivo: longPositiva ? "Longitude positiva (deveria ser negativa)" : 
-                        latForaBrasil ? "Latitude fora do Brasil" : 
-                        "Longitude fora do Brasil"
+                motivo: motivo
               });
             }
           }
         });
+        
+        if (suspeitasEncontradas > 0) {
+          console.log(`${tipo.label}: ${suspeitasEncontradas} coordenadas suspeitas encontradas`);
+        }
 
         // Stats por tipo
         allStats.porTipo.push({
@@ -278,6 +315,8 @@ export default function DashboardNecessidades() {
         return new Date(`${mesA} 1, ${anoA}`).getTime() - new Date(`${mesB} 1, ${anoB}`).getTime();
       });
 
+      console.log(`TOTAL de coordenadas suspeitas: ${allStats.coordenadasSuspeitas.length}`);
+      
       setStats(allStats);
     } catch (error: any) {
       console.error("Erro ao carregar estatísticas:", error);
