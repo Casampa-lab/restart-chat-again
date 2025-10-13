@@ -1057,7 +1057,6 @@ export type Database = {
           created_at: string
           data_vistoria: string
           enviado_coordenador: boolean | null
-          estado_conservacao: string | null
           foto_url: string | null
           id: string
           km: number | null
@@ -1065,7 +1064,6 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           lote_id: string
-          observacao: string | null
           rodovia_id: string
           snv: string | null
           tipo: string
@@ -1078,7 +1076,6 @@ export type Database = {
           created_at?: string
           data_vistoria: string
           enviado_coordenador?: boolean | null
-          estado_conservacao?: string | null
           foto_url?: string | null
           id?: string
           km?: number | null
@@ -1086,7 +1083,6 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           lote_id: string
-          observacao?: string | null
           rodovia_id: string
           snv?: string | null
           tipo: string
@@ -1099,7 +1095,6 @@ export type Database = {
           created_at?: string
           data_vistoria?: string
           enviado_coordenador?: boolean | null
-          estado_conservacao?: string | null
           foto_url?: string | null
           id?: string
           km?: number | null
@@ -1107,7 +1102,6 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           lote_id?: string
-          observacao?: string | null
           rodovia_id?: string
           snv?: string | null
           tipo?: string
@@ -1127,6 +1121,7 @@ export type Database = {
           id: string
           justificativa_fora_plano: string | null
           motivo: string
+          observacao: string | null
           tipo: string | null
           vao_horizontal_m: number | null
         }
@@ -1139,6 +1134,7 @@ export type Database = {
           id?: string
           justificativa_fora_plano?: string | null
           motivo: string
+          observacao?: string | null
           tipo?: string | null
           vao_horizontal_m?: number | null
         }
@@ -1151,6 +1147,7 @@ export type Database = {
           id?: string
           justificativa_fora_plano?: string | null
           motivo?: string
+          observacao?: string | null
           tipo?: string | null
           vao_horizontal_m?: number | null
         }
@@ -3083,7 +3080,6 @@ export type Database = {
           created_at: string | null
           data_importacao: string | null
           distancia_match_metros: number | null
-          estado_conservacao: string | null
           id: string
           km: number | null
           lado: string | null
@@ -3092,7 +3088,6 @@ export type Database = {
           longitude: number | null
           lote_id: string
           motivo: string | null
-          observacao: string | null
           rodovia_id: string
           servico: string
           snv: string | null
@@ -3109,7 +3104,6 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           distancia_match_metros?: number | null
-          estado_conservacao?: string | null
           id?: string
           km?: number | null
           lado?: string | null
@@ -3118,7 +3112,6 @@ export type Database = {
           longitude?: number | null
           lote_id: string
           motivo?: string | null
-          observacao?: string | null
           rodovia_id: string
           servico: string
           snv?: string | null
@@ -3135,7 +3128,6 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           distancia_match_metros?: number | null
-          estado_conservacao?: string | null
           id?: string
           km?: number | null
           lado?: string | null
@@ -3144,7 +3136,6 @@ export type Database = {
           longitude?: number | null
           lote_id?: string
           motivo?: string | null
-          observacao?: string | null
           rodovia_id?: string
           servico?: string
           snv?: string | null

@@ -18,6 +18,7 @@ const formSchema = z.object({
   tipo: z.string().optional(),
   altura_livre_m: z.string().optional(),
   vao_horizontal_m: z.string().optional(),
+  observacao: z.string().optional(),
   fora_plano_manutencao: z.boolean().default(false),
   justificativa_fora_plano: z.string().optional(),
 });
@@ -45,6 +46,7 @@ export function IntervencoesPorticosForm({ porticoSelecionado, onIntervencaoRegi
       tipo: "",
       altura_livre_m: "",
       vao_horizontal_m: "",
+      observacao: "",
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
     },
@@ -67,6 +69,7 @@ export function IntervencoesPorticosForm({ porticoSelecionado, onIntervencaoRegi
           tipo: data.tipo || null,
           altura_livre_m: data.altura_livre_m ? parseFloat(data.altura_livre_m) : null,
           vao_horizontal_m: data.vao_horizontal_m ? parseFloat(data.vao_horizontal_m) : null,
+          observacao: data.observacao || null,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
         });
@@ -190,6 +193,20 @@ export function IntervencoesPorticosForm({ porticoSelecionado, onIntervencaoRegi
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="observacao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Observações</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Observações sobre a intervenção..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

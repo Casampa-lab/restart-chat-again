@@ -22,8 +22,6 @@ interface FichaPortico {
   altura_livre_m: number | null;
   vao_horizontal_m: number | null;
   lado: string | null;
-  estado_conservacao: string | null;
-  observacao: string | null;
   foto_url: string | null;
 }
 
@@ -293,15 +291,6 @@ export function InventarioPorticosViewer({
                     </TableHead>
                     <TableHead 
                       className="cursor-pointer select-none hover:bg-muted/50"
-                      onClick={() => handleSort("estado_conservacao")}
-                    >
-                      <div className="flex items-center">
-                        Estado
-                        <SortIcon column="estado_conservacao" />
-                      </div>
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("data_vistoria")}
                     >
                       <div className="flex items-center">
@@ -330,17 +319,6 @@ export function InventarioPorticosViewer({
                       <TableCell>{portico.altura_livre_m?.toFixed(2) || "-"}</TableCell>
                       <TableCell>{portico.vao_horizontal_m?.toFixed(2) || "-"}</TableCell>
                       <TableCell>{portico.lado || "-"}</TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={
-                            portico.estado_conservacao === "Bom" ? "default" :
-                            portico.estado_conservacao === "Regular" ? "secondary" :
-                            "destructive"
-                          }
-                        >
-                          {portico.estado_conservacao || "-"}
-                        </Badge>
-                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-3 w-3" />
@@ -386,7 +364,7 @@ export function InventarioPorticosViewer({
                 {/* Identificação */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3">Identificação</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">SNV:</span>
                       <p className="text-sm">{selectedPortico.snv || "-"}</p>
@@ -400,20 +378,6 @@ export function InventarioPorticosViewer({
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Lado:</span>
                       <p className="text-sm">{selectedPortico.lado || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Estado de Conservação:</span>
-                      <p className="text-sm">
-                        <Badge 
-                          variant={
-                            selectedPortico.estado_conservacao === "Bom" ? "default" :
-                            selectedPortico.estado_conservacao === "Regular" ? "secondary" :
-                            "destructive"
-                          }
-                        >
-                          {selectedPortico.estado_conservacao || "-"}
-                        </Badge>
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -459,7 +423,6 @@ export function InventarioPorticosViewer({
                   </div>
                 </div>
 
-                {/* Data */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
@@ -470,14 +433,6 @@ export function InventarioPorticosViewer({
                     <p className="text-sm">{new Date(selectedPortico.data_vistoria).toLocaleDateString("pt-BR")}</p>
                   </div>
                 </div>
-
-                {/* Observações */}
-                {selectedPortico.observacao && (
-                  <div className="border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3">Observações</h3>
-                    <p className="text-sm">{selectedPortico.observacao}</p>
-                  </div>
-                )}
 
                 {onRegistrarIntervencao && (
                   <div className="pt-4 border-t">
@@ -558,6 +513,12 @@ export function InventarioPorticosViewer({
                               </div>
                             )}
                           </div>
+                          {intervencao.observacao && (
+                            <div className="mt-2 pt-2 border-t">
+                              <span className="text-sm font-medium">Observações:</span>
+                              <p className="text-sm text-muted-foreground">{intervencao.observacao}</p>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
