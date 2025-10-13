@@ -226,7 +226,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate("/minhas-intervencoes")}
+                onClick={() => navigate("/minhas-intervencoes?tab=cilindros")}
                 className="gap-2"
               >
                 <ClipboardList className="h-4 w-4" />

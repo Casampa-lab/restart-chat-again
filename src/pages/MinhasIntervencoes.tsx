@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,9 @@ import IntervencoesDefensasContent from "@/components/IntervencoesDefensasConten
 const MinhasIntervencoes = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState("sh");
+  const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(tabFromUrl || "sh");
 
   useEffect(() => {
     if (!authLoading && !user) {

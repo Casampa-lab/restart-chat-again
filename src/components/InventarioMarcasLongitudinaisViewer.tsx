@@ -180,7 +180,7 @@ export function InventarioMarcasLongitudinaisViewer({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate("/minhas-intervencoes")}
+                onClick={() => navigate("/minhas-intervencoes?tab=sh")}
                 className="gap-2"
               >
                 <ClipboardList className="h-4 w-4" />
