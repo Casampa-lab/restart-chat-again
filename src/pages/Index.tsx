@@ -328,7 +328,7 @@ const Index = () => {
 
   // Determinar qual logo usar
   const logoToDisplay = supervisora?.usar_logo_customizado && supervisora?.logo_url ? supervisora.logo_url : logoOperaVia;
-  const logoAlt = supervisora?.usar_logo_customizado && supervisora?.logo_url ? `${supervisora.nome_empresa} - Sistema de Supervisão` : "OperaVia - Sistema Nacional de Supervisão de Operação Rodoviária";
+  const logoAlt = supervisora?.usar_logo_customizado && supervisora?.logo_url ? `${supervisora.nome_empresa} - Sistema de Supervisão` : "OperaVia - Sistema de Supervisão de Operação Rodoviária";
   return <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10 overflow-y-auto">
       <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3">
@@ -339,7 +339,7 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-primary-foreground">OperaVia</h1>
-                <p className="text-sm text-primary-foreground/80">Sistema Nacional de Supervisão de Operação Rodoviária</p>
+                <p className="text-sm text-primary-foreground/80">Sistema de Supervisão de Operação Rodoviária</p>
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">

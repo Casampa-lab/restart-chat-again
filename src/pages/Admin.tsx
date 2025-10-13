@@ -84,7 +84,7 @@ const Admin = () => {
     : logoOperaVia;
   const logoAlt = supervisora?.usar_logo_customizado && supervisora?.logo_url
     ? `${supervisora.nome_empresa} - Sistema de Supervisão`
-    : "OperaVia - Sistema Nacional de Supervisão de Operação Rodoviária";
+    : "OperaVia - Sistema de Supervisão de Operação Rodoviária";
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/5 to-secondary/5">
