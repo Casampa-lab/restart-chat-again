@@ -654,18 +654,16 @@ const Index = () => {
                               {countDefensas}
                             </Badge>
                           )}
-                          {countNecDefensas! > 0 && (
-                            <Badge 
-                              className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate("/dashboard-necessidades");
-                              }}
-                              title="Necessidades - Clique para acessar"
-                            >
-                              {countNecDefensas}
-                            </Badge>
-                          )}
+                          <Badge 
+                            className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate("/dashboard-necessidades");
+                            }}
+                            title="Necessidades - Clique para acessar"
+                          >
+                            {countNecDefensas || 0}
+                          </Badge>
                         </div>
                       </TabsTrigger>
                     </TabsList>
@@ -688,18 +686,16 @@ const Index = () => {
                                   {countMarcasLong}
                                 </Badge>
                               )}
-                          {countNecMarcasLong! > 0 && (
-                                <Badge 
-                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Necessidades - Clique para acessar"
-                                >
-                                  {countNecMarcasLong}
-                                </Badge>
-                              )}
+                              <Badge 
+                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Necessidades - Clique para acessar"
+                              >
+                                {countNecMarcasLong || 0}
+                              </Badge>
                             </div>
                           </TabsTrigger>
                           <TabsTrigger value="transversais" className="flex items-center gap-2">
@@ -716,18 +712,16 @@ const Index = () => {
                               >
                                 {countCilindros || 0}
                               </Badge>
-                              {countNecCilindros! > 0 && (
-                                <Badge 
-                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Necessidades - Clique para acessar"
-                                >
-                                  {countNecCilindros}
-                                </Badge>
-                              )}
+                              <Badge 
+                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Necessidades - Clique para acessar"
+                              >
+                                {countNecCilindros || 0}
+                              </Badge>
                             </div>
                           </TabsTrigger>
                           <TabsTrigger value="inscricoes" className="flex items-center gap-2">
@@ -746,18 +740,16 @@ const Index = () => {
                                   {countInscricoes}
                                 </Badge>
                               )}
-                              {countNecInscricoes! > 0 && (
-                                <Badge 
-                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Necessidades - Clique para acessar"
-                                >
-                                  {countNecInscricoes}
-                                </Badge>
-                              )}
+                              <Badge 
+                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Necessidades - Clique para acessar"
+                              >
+                                {countNecInscricoes || 0}
+                              </Badge>
                             </div>
                           </TabsTrigger>
                           <TabsTrigger value="tachas" className="flex items-center gap-2">
@@ -776,18 +768,16 @@ const Index = () => {
                                   {countTachas}
                                 </Badge>
                               )}
-                              {countNecTachas! > 0 && (
-                                <Badge 
-                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Necessidades - Clique para acessar"
-                                >
-                                  {countNecTachas}
-                                </Badge>
-                              )}
+                              <Badge 
+                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Necessidades - Clique para acessar"
+                              >
+                                {countNecTachas || 0}
+                              </Badge>
                             </div>
                           </TabsTrigger>
                         </TabsList>
@@ -839,18 +829,16 @@ const Index = () => {
                                   {countPlacas}
                                 </Badge>
                               )}
-                              {countNecPlacas! > 0 && (
-                                <Badge 
-                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Necessidades - Clique para acessar"
-                                >
-                                  {countNecPlacas}
-                                </Badge>
-                              )}
+                              <Badge 
+                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Necessidades - Clique para acessar"
+                              >
+                                {countNecPlacas || 0}
+                              </Badge>
                             </div>
                           </TabsTrigger>
                           <TabsTrigger value="porticos" className="flex items-center gap-2">
@@ -869,18 +857,16 @@ const Index = () => {
                                   {countPorticos}
                                 </Badge>
                               )}
-                              {countNecPorticos! > 0 && (
-                                <Badge 
-                                  className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Necessidades - Clique para acessar"
-                                >
-                                  {countNecPorticos}
-                                </Badge>
-                              )}
+                              <Badge 
+                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Necessidades - Clique para acessar"
+                              >
+                                {countNecPorticos || 0}
+                              </Badge>
                             </div>
                           </TabsTrigger>
                         </TabsList>
