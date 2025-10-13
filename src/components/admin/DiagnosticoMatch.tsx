@@ -109,23 +109,43 @@ export function DiagnosticoMatch() {
       const latField = usaLatLongInicial ? "latitude_inicial" : "latitude";
       const longField = usaLatLongInicial ? "longitude_inicial" : "longitude";
 
-      // 1. Buscar necessidades para match
-      let query = supabase
-        .from(tipoConfig.tabela_nec as any)
-        .select("*")
-        .eq("lote_id", loteId)
-        .eq("rodovia_id", rodoviaId);
+      // 1. Buscar TODAS as necessidades para match (com paginação até 10.000)
+      let necessidades: any[] = [];
+      let offset = 0;
+      const pageSize = 1000;
+      let hasMore = true;
 
-      // Para marcas longitudinais, filtrar por Posição = 'E' (eixo)
-      // Para tachas, não filtrar (todas são necessidades)
-      // Para outros tipos, filtrar por solucao_planilha contendo "substitu"
-      if (tipoServico === "marcas_longitudinais") {
-        query = query.eq("posicao", "E");
-      } else if (tipoServico !== "tachas") {
-        query = query.ilike("solucao_planilha", "%substitu%");
+      while (hasMore) {
+        let query = supabase
+          .from(tipoConfig.tabela_nec as any)
+          .select("*")
+          .eq("lote_id", loteId)
+          .eq("rodovia_id", rodoviaId);
+
+        // Para marcas longitudinais, filtrar por Posição = 'E' (eixo)
+        // Para tachas, não filtrar (todas são necessidades)
+        // Para outros tipos, filtrar por solucao_planilha contendo "substitu"
+        if (tipoServico === "marcas_longitudinais") {
+          query = query.eq("posicao", "E");
+        } else if (tipoServico !== "tachas") {
+          query = query.ilike("solucao_planilha", "%substitu%");
+        }
+
+        const { data: page, error: necError } = await query
+          .range(offset, offset + pageSize - 1);
+
+        if (necError) throw necError;
+        
+        if (page && page.length > 0) {
+          necessidades = [...necessidades, ...page];
+          offset += pageSize;
+          hasMore = page.length === pageSize;
+        } else {
+          hasMore = false;
+        }
       }
 
-      const { data: necessidades, error: necError } = await query.limit(50);
+      const necError = null;
 
       if (necError) throw necError;
       if (!necessidades || necessidades.length === 0) {
@@ -343,7 +363,7 @@ export function DiagnosticoMatch() {
           className="w-full"
         >
           <Search className="mr-2 h-4 w-4" />
-          {isLoading ? "Diagnosticando..." : "Executar Diagnóstico (50 primeiras)"}
+          {isLoading ? "Diagnosticando..." : "Executar Diagnóstico (até 10.000)"}
         </Button>
 
         {resultados.length > 0 && (
