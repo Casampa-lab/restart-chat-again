@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
+import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
@@ -238,6 +238,15 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                 Ver Necessidades
               </Button>
               <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/minhas-intervencoes")}
+                className="gap-2"
+              >
+                <ClipboardList className="h-4 w-4" />
+                Ver Intervenções
+              </Button>
+              <Button
                 variant="default"
                 size="sm"
                 onClick={() => setShowRegistrarNaoCadastrado(true)}
@@ -425,14 +434,16 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
 
       {/* Dialog Registrar Não Cadastrado */}
       <Dialog open={showRegistrarNaoCadastrado} onOpenChange={setShowRegistrarNaoCadastrado}>
-        <DialogContent className="max-w-3xl">
-          <RegistrarItemNaoCadastrado
-            tipo_elemento="placas"
-            loteId={loteId}
-            rodoviaId={rodoviaId}
-            onSuccess={() => setShowRegistrarNaoCadastrado(false)}
-            onCancel={() => setShowRegistrarNaoCadastrado(false)}
-          />
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
+          <div className="overflow-y-auto flex-1">
+            <RegistrarItemNaoCadastrado
+              tipo_elemento="placas"
+              loteId={loteId}
+              rodoviaId={rodoviaId}
+              onSuccess={() => setShowRegistrarNaoCadastrado(false)}
+              onCancel={() => setShowRegistrarNaoCadastrado(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 

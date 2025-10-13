@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
+import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 
@@ -224,6 +224,15 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                 Ver Necessidades
               </Button>
               <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/minhas-intervencoes")}
+                className="gap-2"
+              >
+                <ClipboardList className="h-4 w-4" />
+                Ver Intervenções
+              </Button>
+              <Button
                 variant="default"
                 size="sm"
                 onClick={() => setShowRegistrarNaoCadastrado(true)}
@@ -389,17 +398,19 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
       </Card>
 
       <Dialog open={showRegistrarNaoCadastrado} onOpenChange={setShowRegistrarNaoCadastrado}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <RegistrarItemNaoCadastrado
-            tipo_elemento="cilindros"
-            loteId={loteId}
-            rodoviaId={rodoviaId}
-            onSuccess={() => {
-              setShowRegistrarNaoCadastrado(false);
-              toast.success("Registro enviado para aprovação");
-            }}
-            onCancel={() => setShowRegistrarNaoCadastrado(false)}
-          />
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
+          <div className="overflow-y-auto flex-1">
+            <RegistrarItemNaoCadastrado
+              tipo_elemento="cilindros"
+              loteId={loteId}
+              rodoviaId={rodoviaId}
+              onSuccess={() => {
+                setShowRegistrarNaoCadastrado(false);
+                toast.success("Registro enviado para aprovação");
+              }}
+              onCancel={() => setShowRegistrarNaoCadastrado(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 

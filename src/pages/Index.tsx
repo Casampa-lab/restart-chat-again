@@ -335,14 +335,6 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
-              <Button 
-                variant="secondary" 
-                size="sm"
-                onClick={() => navigate("/minhas-intervencoes")}
-                className="hidden sm:flex"
-              >
-                📋 Minhas Intervenções
-              </Button>
               {user?.email && <div className="bg-white/20 text-primary-foreground px-3 py-2 rounded-lg text-sm font-medium border border-white/30">
                   👤 {user.email}
                 </div>}
@@ -816,7 +808,7 @@ const Index = () => {
 
       {/* Dialog de Implementar Intervenção */}
       <Dialog open={intervencaoDialogOpen} onOpenChange={setIntervencaoDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Implementar Intervenção</DialogTitle>
             <DialogDescription>
@@ -824,81 +816,83 @@ const Index = () => {
             </DialogDescription>
           </DialogHeader>
 
-          {tipoIntervencao === "marcas_longitudinais" && elementoParaIntervencao && (
-            <IntervencoesSHForm
-              marcaSelecionada={elementoParaIntervencao}
-              modo="normal"
-              onIntervencaoRegistrada={() => {
-                setIntervencaoDialogOpen(false);
-                toast.success("Intervenção em Marca Longitudinal registrada com sucesso!");
-              }}
-            />
-          )}
+          <div className="overflow-y-auto flex-1 px-1">
+            {tipoIntervencao === "marcas_longitudinais" && elementoParaIntervencao && (
+              <IntervencoesSHForm
+                marcaSelecionada={elementoParaIntervencao}
+                modo="normal"
+                onIntervencaoRegistrada={() => {
+                  setIntervencaoDialogOpen(false);
+                  toast.success("Intervenção em Marca Longitudinal registrada com sucesso!");
+                }}
+              />
+            )}
 
-          {tipoIntervencao === "placas" && elementoParaIntervencao && (
-            <IntervencoesSVForm
-              placaSelecionada={elementoParaIntervencao}
-              onIntervencaoRegistrada={() => {
-                setIntervencaoDialogOpen(false);
-                toast.success("Intervenção em Placa registrada com sucesso!");
-              }}
-            />
-          )}
+            {tipoIntervencao === "placas" && elementoParaIntervencao && (
+              <IntervencoesSVForm
+                placaSelecionada={elementoParaIntervencao}
+                onIntervencaoRegistrada={() => {
+                  setIntervencaoDialogOpen(false);
+                  toast.success("Intervenção em Placa registrada com sucesso!");
+                }}
+              />
+            )}
 
-          {tipoIntervencao === "tachas" && elementoParaIntervencao && (
-            <IntervencoesTachaForm
-              tachaSelecionada={elementoParaIntervencao}
-              modo="normal"
-              onIntervencaoRegistrada={() => {
-                setIntervencaoDialogOpen(false);
-                toast.success("Intervenção em Tacha registrada com sucesso!");
-              }}
-            />
-          )}
+            {tipoIntervencao === "tachas" && elementoParaIntervencao && (
+              <IntervencoesTachaForm
+                tachaSelecionada={elementoParaIntervencao}
+                modo="normal"
+                onIntervencaoRegistrada={() => {
+                  setIntervencaoDialogOpen(false);
+                  toast.success("Intervenção em Tacha registrada com sucesso!");
+                }}
+              />
+            )}
 
-          {tipoIntervencao === "inscricoes" && elementoParaIntervencao && (
-            <IntervencoesInscricoesForm
-              inscricaoSelecionada={elementoParaIntervencao}
-              modo="normal"
-              onIntervencaoRegistrada={() => {
-                setIntervencaoDialogOpen(false);
-                toast.success("Intervenção em Inscrição registrada com sucesso!");
-              }}
-            />
-          )}
+            {tipoIntervencao === "inscricoes" && elementoParaIntervencao && (
+              <IntervencoesInscricoesForm
+                inscricaoSelecionada={elementoParaIntervencao}
+                modo="normal"
+                onIntervencaoRegistrada={() => {
+                  setIntervencaoDialogOpen(false);
+                  toast.success("Intervenção em Inscrição registrada com sucesso!");
+                }}
+              />
+            )}
 
-          {tipoIntervencao === "cilindros" && elementoParaIntervencao && (
-            <IntervencoesCilindrosForm
-              cilindroSelecionado={elementoParaIntervencao}
-              modo="normal"
-              onIntervencaoRegistrada={() => {
-                setIntervencaoDialogOpen(false);
-                toast.success("Intervenção em Cilindro registrada com sucesso!");
-              }}
-            />
-          )}
+            {tipoIntervencao === "cilindros" && elementoParaIntervencao && (
+              <IntervencoesCilindrosForm
+                cilindroSelecionado={elementoParaIntervencao}
+                modo="normal"
+                onIntervencaoRegistrada={() => {
+                  setIntervencaoDialogOpen(false);
+                  toast.success("Intervenção em Cilindro registrada com sucesso!");
+                }}
+              />
+            )}
 
-          {tipoIntervencao === "porticos" && elementoParaIntervencao && (
-            <IntervencoesPorticosForm
-              porticoSelecionado={elementoParaIntervencao}
-              modo="normal"
-              onIntervencaoRegistrada={() => {
-                setIntervencaoDialogOpen(false);
-                toast.success("Intervenção em Pórtico registrada com sucesso!");
-              }}
-            />
-          )}
+            {tipoIntervencao === "porticos" && elementoParaIntervencao && (
+              <IntervencoesPorticosForm
+                porticoSelecionado={elementoParaIntervencao}
+                modo="normal"
+                onIntervencaoRegistrada={() => {
+                  setIntervencaoDialogOpen(false);
+                  toast.success("Intervenção em Pórtico registrada com sucesso!");
+                }}
+              />
+            )}
 
-          {tipoIntervencao === "defensas" && elementoParaIntervencao && (
-            <DefensasIntervencoesForm
-              defensaSelecionada={elementoParaIntervencao}
-              modo="normal"
-              onIntervencaoRegistrada={() => {
-                setIntervencaoDialogOpen(false);
-                toast.success("Intervenção em Defensa registrada com sucesso!");
-              }}
-            />
-          )}
+            {tipoIntervencao === "defensas" && elementoParaIntervencao && (
+              <DefensasIntervencoesForm
+                defensaSelecionada={elementoParaIntervencao}
+                modo="normal"
+                onIntervencaoRegistrada={() => {
+                  setIntervencaoDialogOpen(false);
+                  toast.success("Intervenção em Defensa registrada com sucesso!");
+                }}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
