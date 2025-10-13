@@ -21,9 +21,10 @@ const TIPOS_NECESSIDADES = [
 ];
 
 const COLORS = {
-  Inclusão: "#22c55e",
-  Substituição: "#eab308",
-  Remoção: "#ef4444",
+  Implantar: "#22c55e",
+  Substituir: "#eab308",
+  Remover: "#ef4444",
+  Manter: "#3b82f6",
 };
 
 export default function DashboardNecessidades() {
@@ -50,7 +51,7 @@ export default function DashboardNecessidades() {
     try {
       const allStats: any = {
         porTipo: [],
-        porServico: { Inclusão: 0, Substituição: 0, Remoção: 0 },
+        porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
         porRodovia: [],
         porLote: [],
         taxaMatch: 0,
@@ -83,15 +84,17 @@ export default function DashboardNecessidades() {
         allStats.porTipo.push({
           tipo: tipo.label,
           total: necessidades.length,
-          Inclusão: necessidades.filter((n: any) => n.servico === "Inclusão").length,
-          Substituição: necessidades.filter((n: any) => n.servico === "Substituição").length,
-          Remoção: necessidades.filter((n: any) => n.servico === "Remoção").length,
+          Implantar: necessidades.filter((n: any) => n.servico === "Implantar").length,
+          Substituir: necessidades.filter((n: any) => n.servico === "Substituir").length,
+          Remover: necessidades.filter((n: any) => n.servico === "Remover").length,
+          Manter: necessidades.filter((n: any) => n.servico === "Manter").length,
         });
 
         // Stats por serviço
-        allStats.porServico.Inclusão += necessidades.filter((n: any) => n.servico === "Inclusão").length;
-        allStats.porServico.Substituição += necessidades.filter((n: any) => n.servico === "Substituição").length;
-        allStats.porServico.Remoção += necessidades.filter((n: any) => n.servico === "Remoção").length;
+        allStats.porServico.Implantar += necessidades.filter((n: any) => n.servico === "Implantar").length;
+        allStats.porServico.Substituir += necessidades.filter((n: any) => n.servico === "Substituir").length;
+        allStats.porServico.Remover += necessidades.filter((n: any) => n.servico === "Remover").length;
+        allStats.porServico.Manter += necessidades.filter((n: any) => n.servico === "Manter").length;
 
         // Taxa de match
         totalComMatch += necessidades.filter((n: any) => n.cadastro_id).length;
@@ -108,9 +111,10 @@ export default function DashboardNecessidades() {
               allStats.porRodovia.push({
                 rodovia: n.rodovia.codigo,
                 total: 1,
-                Inclusão: n.servico === "Inclusão" ? 1 : 0,
-                Substituição: n.servico === "Substituição" ? 1 : 0,
-                Remoção: n.servico === "Remoção" ? 1 : 0,
+                Implantar: n.servico === "Implantar" ? 1 : 0,
+                Substituir: n.servico === "Substituir" ? 1 : 0,
+                Remover: n.servico === "Remover" ? 1 : 0,
+                Manter: n.servico === "Manter" ? 1 : 0,
               });
             }
           }
@@ -219,7 +223,7 @@ export default function DashboardNecessidades() {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         {/* Cards de Métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <Card className="border-l-4 border-l-blue-500">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Geral</CardTitle>
@@ -232,36 +236,48 @@ export default function DashboardNecessidades() {
 
           <Card className="border-l-4 border-l-green-500">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Inclusões</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Implantar</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">{stats.porServico.Inclusão}</div>
+              <div className="text-3xl font-bold text-green-600">{stats.porServico.Implantar || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {stats.totalGeral > 0 ? Math.round((stats.porServico.Inclusão / stats.totalGeral) * 100) : 0}% do total
+                {stats.totalGeral > 0 ? Math.round((stats.porServico.Implantar / stats.totalGeral) * 100) : 0}% do total
               </p>
             </CardContent>
           </Card>
 
           <Card className="border-l-4 border-l-yellow-500">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Substituições</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Substituir</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-yellow-600">{stats.porServico.Substituição}</div>
+              <div className="text-3xl font-bold text-yellow-600">{stats.porServico.Substituir || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {stats.totalGeral > 0 ? Math.round((stats.porServico.Substituição / stats.totalGeral) * 100) : 0}% do total
+                {stats.totalGeral > 0 ? Math.round((stats.porServico.Substituir / stats.totalGeral) * 100) : 0}% do total
               </p>
             </CardContent>
           </Card>
 
           <Card className="border-l-4 border-l-red-500">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Remoções</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Remover</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-red-600">{stats.porServico.Remoção}</div>
+              <div className="text-3xl font-bold text-red-600">{stats.porServico.Remover || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {stats.totalGeral > 0 ? Math.round((stats.porServico.Remoção / stats.totalGeral) * 100) : 0}% do total
+                {stats.totalGeral > 0 ? Math.round((stats.porServico.Remover / stats.totalGeral) * 100) : 0}% do total
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-blue-400">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Manter</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-blue-600">{stats.porServico.Manter || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {stats.totalGeral > 0 ? Math.round((stats.porServico.Manter / stats.totalGeral) * 100) : 0}% do total
               </p>
             </CardContent>
           </Card>
@@ -350,9 +366,10 @@ export default function DashboardNecessidades() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="Inclusão" fill={COLORS.Inclusão} />
-                    <Bar dataKey="Substituição" fill={COLORS.Substituição} />
-                    <Bar dataKey="Remoção" fill={COLORS.Remoção} />
+                    <Bar dataKey="Implantar" fill={COLORS.Implantar} />
+                    <Bar dataKey="Substituir" fill={COLORS.Substituir} />
+                    <Bar dataKey="Remover" fill={COLORS.Remover} />
+                    <Bar dataKey="Manter" fill={COLORS.Manter} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -426,10 +443,10 @@ export default function DashboardNecessidades() {
                       style={{ width: `${stats.taxaMatch}%` }}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4 pt-4">
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">
-                        {stats.totalGeral - stats.porServico.Inclusão}
+                    <div className="grid grid-cols-2 gap-4 pt-4">
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {stats.totalGeral - (stats.porServico.Implantar || 0)}
                       </div>
                       <div className="text-sm text-muted-foreground mt-1">Com Match no Cadastro</div>
                     </div>
