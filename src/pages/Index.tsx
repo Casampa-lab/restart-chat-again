@@ -68,12 +68,26 @@ const Index = () => {
   const [selectedTachaForIntervencao, setSelectedTachaForIntervencao] = useState<any>(null);
   const [selectedDefensaForIntervencao, setSelectedDefensaForIntervencao] = useState<any>(null);
 
-  // Queries para contar registros de inventário
+  // Queries para contar registros de inventário (CADASTRO)
   const { data: countMarcasLong } = useQuery({
     queryKey: ["count-marcas-long", activeSession?.lote_id, activeSession?.rodovia_id],
     queryFn: async () => {
       const { count } = await supabase
         .from("ficha_marcas_longitudinais")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
+  // Queries para contar registros de NECESSIDADES
+  const { data: countNecMarcasLong } = useQuery({
+    queryKey: ["count-nec-marcas-long", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("necessidades_marcas_longitudinais")
         .select("*", { count: "exact", head: true })
         .eq("lote_id", activeSession!.lote_id)
         .eq("rodovia_id", activeSession!.rodovia_id);
@@ -95,11 +109,37 @@ const Index = () => {
     enabled: !!activeSession,
   });
 
+  const { data: countNecCilindros } = useQuery({
+    queryKey: ["count-nec-cilindros", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("necessidades_cilindros")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
   const { data: countInscricoes } = useQuery({
     queryKey: ["count-inscricoes", activeSession?.lote_id, activeSession?.rodovia_id],
     queryFn: async () => {
       const { count } = await supabase
         .from("ficha_inscricoes")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
+  const { data: countNecInscricoes } = useQuery({
+    queryKey: ["count-nec-inscricoes", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("necessidades_marcas_transversais")
         .select("*", { count: "exact", head: true })
         .eq("lote_id", activeSession!.lote_id)
         .eq("rodovia_id", activeSession!.rodovia_id);
@@ -121,11 +161,37 @@ const Index = () => {
     enabled: !!activeSession,
   });
 
+  const { data: countNecTachas } = useQuery({
+    queryKey: ["count-nec-tachas", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("necessidades_tachas")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
   const { data: countPlacas } = useQuery({
     queryKey: ["count-placas", activeSession?.lote_id, activeSession?.rodovia_id],
     queryFn: async () => {
       const { count } = await supabase
         .from("ficha_placa")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
+  const { data: countNecPlacas } = useQuery({
+    queryKey: ["count-nec-placas", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("necessidades_placas")
         .select("*", { count: "exact", head: true })
         .eq("lote_id", activeSession!.lote_id)
         .eq("rodovia_id", activeSession!.rodovia_id);
@@ -147,11 +213,37 @@ const Index = () => {
     enabled: !!activeSession,
   });
 
+  const { data: countNecPorticos } = useQuery({
+    queryKey: ["count-nec-porticos", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("necessidades_porticos")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
   const { data: countDefensas } = useQuery({
     queryKey: ["count-defensas", activeSession?.lote_id, activeSession?.rodovia_id],
     queryFn: async () => {
       const { count } = await supabase
         .from("defensas")
+        .select("*", { count: "exact", head: true })
+        .eq("lote_id", activeSession!.lote_id)
+        .eq("rodovia_id", activeSession!.rodovia_id);
+      return count || 0;
+    },
+    enabled: !!activeSession,
+  });
+
+  const { data: countNecDefensas } = useQuery({
+    queryKey: ["count-nec-defensas", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("necessidades_defensas")
         .select("*", { count: "exact", head: true })
         .eq("lote_id", activeSession!.lote_id)
         .eq("rodovia_id", activeSession!.rodovia_id);
@@ -548,11 +640,34 @@ const Index = () => {
                       </TabsTrigger>
                       <TabsTrigger value="defensas-pront" className="flex items-center gap-2">
                         <span>Defensas</span>
-                        {countDefensas! > 0 && (
-                          <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                            {countDefensas}
-                          </Badge>
-                        )}
+                        <div className="flex items-center gap-1">
+                          {countDefensas! > 0 && (
+                            <Badge 
+                              variant="secondary" 
+                              className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate("/dashboard-necessidades");
+                              }}
+                              title="Cadastro - Clique para ver Necessidades"
+                            >
+                              {countDefensas}
+                            </Badge>
+                          )}
+                          {countNecDefensas! > 0 && (
+                            <Badge 
+                              variant="outline" 
+                              className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate("/dashboard-necessidades");
+                              }}
+                              title="Necessidades - Clique para acessar"
+                            >
+                              {countNecDefensas}
+                            </Badge>
+                          )}
+                        </div>
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="sh" className="mt-4">
@@ -560,35 +675,127 @@ const Index = () => {
                         <TabsList className="grid w-full grid-cols-4">
                           <TabsTrigger value="longitudinais" className="flex items-center gap-2">
                             <span>Marcas Longitudinais</span>
-                            {countMarcasLong! > 0 && (
-                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                                {countMarcasLong}
-                              </Badge>
-                            )}
+                            <div className="flex items-center gap-1">
+                              {countMarcasLong! > 0 && (
+                                <Badge 
+                                  variant="secondary" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Cadastro - Clique para ver Necessidades"
+                                >
+                                  {countMarcasLong}
+                                </Badge>
+                              )}
+                              {countNecMarcasLong! > 0 && (
+                                <Badge 
+                                  variant="outline" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Necessidades - Clique para acessar"
+                                >
+                                  {countNecMarcasLong}
+                                </Badge>
+                              )}
+                            </div>
                           </TabsTrigger>
                           <TabsTrigger value="transversais" className="flex items-center gap-2">
                             <span>Cilindros</span>
-                            {countCilindros! > 0 && (
-                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                                {countCilindros}
-                              </Badge>
-                            )}
+                            <div className="flex items-center gap-1">
+                              {countCilindros! > 0 && (
+                                <Badge 
+                                  variant="secondary" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Cadastro - Clique para ver Necessidades"
+                                >
+                                  {countCilindros}
+                                </Badge>
+                              )}
+                              {countNecCilindros! > 0 && (
+                                <Badge 
+                                  variant="outline" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Necessidades - Clique para acessar"
+                                >
+                                  {countNecCilindros}
+                                </Badge>
+                              )}
+                            </div>
                           </TabsTrigger>
                           <TabsTrigger value="inscricoes" className="flex items-center gap-2">
                             <span>Zebrados, Setas, Símbolos e Legendas</span>
-                            {countInscricoes! > 0 && (
-                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                                {countInscricoes}
-                              </Badge>
-                            )}
+                            <div className="flex items-center gap-1">
+                              {countInscricoes! > 0 && (
+                                <Badge 
+                                  variant="secondary" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Cadastro - Clique para ver Necessidades"
+                                >
+                                  {countInscricoes}
+                                </Badge>
+                              )}
+                              {countNecInscricoes! > 0 && (
+                                <Badge 
+                                  variant="outline" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Necessidades - Clique para acessar"
+                                >
+                                  {countNecInscricoes}
+                                </Badge>
+                              )}
+                            </div>
                           </TabsTrigger>
                           <TabsTrigger value="tachas" className="flex items-center gap-2">
                             <span>Tachas</span>
-                            {countTachas! > 0 && (
-                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                                {countTachas}
-                              </Badge>
-                            )}
+                            <div className="flex items-center gap-1">
+                              {countTachas! > 0 && (
+                                <Badge 
+                                  variant="secondary" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Cadastro - Clique para ver Necessidades"
+                                >
+                                  {countTachas}
+                                </Badge>
+                              )}
+                              {countNecTachas! > 0 && (
+                                <Badge 
+                                  variant="outline" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Necessidades - Clique para acessar"
+                                >
+                                  {countNecTachas}
+                                </Badge>
+                              )}
+                            </div>
                           </TabsTrigger>
                         </TabsList>
                         <TabsContent value="longitudinais" className="mt-4">
@@ -625,19 +832,65 @@ const Index = () => {
                         <TabsList className="grid w-full grid-cols-2">
                           <TabsTrigger value="placas" className="flex items-center gap-2">
                             <span>Placas</span>
-                            {countPlacas! > 0 && (
-                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                                {countPlacas}
-                              </Badge>
-                            )}
+                            <div className="flex items-center gap-1">
+                              {countPlacas! > 0 && (
+                                <Badge 
+                                  variant="secondary" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Cadastro - Clique para ver Necessidades"
+                                >
+                                  {countPlacas}
+                                </Badge>
+                              )}
+                              {countNecPlacas! > 0 && (
+                                <Badge 
+                                  variant="outline" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Necessidades - Clique para acessar"
+                                >
+                                  {countNecPlacas}
+                                </Badge>
+                              )}
+                            </div>
                           </TabsTrigger>
                           <TabsTrigger value="porticos" className="flex items-center gap-2">
                             <span>Pórticos (P/SM) e Braços Projetados</span>
-                            {countPorticos! > 0 && (
-                              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                                {countPorticos}
-                              </Badge>
-                            )}
+                            <div className="flex items-center gap-1">
+                              {countPorticos! > 0 && (
+                                <Badge 
+                                  variant="secondary" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Cadastro - Clique para ver Necessidades"
+                                >
+                                  {countPorticos}
+                                </Badge>
+                              )}
+                              {countNecPorticos! > 0 && (
+                                <Badge 
+                                  variant="outline" 
+                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/dashboard-necessidades");
+                                  }}
+                                  title="Necessidades - Clique para acessar"
+                                >
+                                  {countNecPorticos}
+                                </Badge>
+                              )}
+                            </div>
                           </TabsTrigger>
                         </TabsList>
                         <TabsContent value="placas" className="mt-4">
