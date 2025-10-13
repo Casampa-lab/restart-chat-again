@@ -149,18 +149,34 @@ export default function DashboardNecessidades() {
 
         const necessidades = (data as any[]) || [];
 
-        // Detectar coordenadas suspeitas (latitude/longitude fora do Brasil)
-        // Brasil: lat entre -34 e 5, long entre -74 e -34
+        // Detectar coordenadas suspeitas
         necessidades.forEach((n: any) => {
+          // Tentar todos os possíveis campos de coordenadas
           const lat = n.latitude_inicial || n.latitude;
           const long = n.longitude_inicial || n.longitude;
           
-          if (lat && long) {
-            const latNum = parseFloat(lat);
-            const longNum = parseFloat(long);
+          if (lat !== null && lat !== undefined && long !== null && long !== undefined) {
+            const latNum = typeof lat === 'string' ? parseFloat(lat) : lat;
+            const longNum = typeof long === 'string' ? parseFloat(long) : long;
             
-            // Verifica se está muito fora do Brasil
-            if (latNum < -34 || latNum > 6 || longNum < -75 || longNum > -33) {
+            // Log para debug
+            if (longNum > 0) {
+              console.log('Coordenada suspeita encontrada:', {
+                tipo: tipo.label,
+                lat: latNum,
+                long: longNum,
+                lote: n.lote?.numero,
+                rodovia: n.rodovia?.codigo
+              });
+            }
+            
+            // Brasil: lat entre -34 e 6, long entre -75 e -33 (sempre negativa!)
+            // Detecta se está fora do Brasil OU se longitude é positiva (erro comum)
+            const latForaBrasil = latNum < -34 || latNum > 6;
+            const longForaBrasil = longNum < -75 || longNum > -33;
+            const longPositiva = longNum > 0; // Brasil está no hemisfério oeste (long negativa)
+            
+            if (latForaBrasil || longForaBrasil || longPositiva) {
               allStats.coordenadasSuspeitas.push({
                 tipo: tipo.label,
                 lote: n.lote?.numero || "N/A",
@@ -170,6 +186,9 @@ export default function DashboardNecessidades() {
                 longitude: longNum.toFixed(6),
                 servico: n.servico,
                 id: n.id,
+                motivo: longPositiva ? "Longitude positiva (deveria ser negativa)" : 
+                        latForaBrasil ? "Latitude fora do Brasil" : 
+                        "Longitude fora do Brasil"
               });
             }
           }
@@ -595,6 +614,7 @@ export default function DashboardNecessidades() {
                             <th className="border p-2 text-left text-xs font-semibold">Serviço</th>
                             <th className="border p-2 text-left text-xs font-semibold">Latitude</th>
                             <th className="border p-2 text-left text-xs font-semibold">Longitude</th>
+                            <th className="border p-2 text-left text-xs font-semibold">Motivo</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -616,6 +636,7 @@ export default function DashboardNecessidades() {
                               </td>
                               <td className="border p-2 text-xs font-mono">{coord.latitude}</td>
                               <td className="border p-2 text-xs font-mono">{coord.longitude}</td>
+                              <td className="border p-2 text-xs text-orange-700">{coord.motivo}</td>
                             </tr>
                           ))}
                         </tbody>
