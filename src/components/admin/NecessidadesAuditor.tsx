@@ -123,16 +123,33 @@ export function NecessidadesAuditor() {
                            tipo === "porticos" ? "ficha_porticos" :
                            "defensas";
 
-      // Buscar necessidades
-      const { data: necessidades, error: necError } = await supabase
-        .from(tabelaNecessidade as any)
-        .select("*")
-        .eq("lote_id", loteId)
-        .eq("rodovia_id", rodoviaId)
-        .order("linha_planilha");
+      // Buscar TODAS as necessidades com paginação (suporte até 10.000 registros)
+      let necessidades: any[] = [];
+      let offset = 0;
+      const pageSize = 1000;
+      let hasMore = true;
 
-      if (necError) throw necError;
-      if (!necessidades || necessidades.length === 0) {
+      while (hasMore) {
+        const { data: page, error: necError } = await supabase
+          .from(tabelaNecessidade as any)
+          .select("*")
+          .eq("lote_id", loteId)
+          .eq("rodovia_id", rodoviaId)
+          .order("linha_planilha")
+          .range(offset, offset + pageSize - 1);
+
+        if (necError) throw necError;
+        
+        if (page && page.length > 0) {
+          necessidades = [...necessidades, ...page];
+          offset += pageSize;
+          hasMore = page.length === pageSize;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      if (necessidades.length === 0) {
         toast({
           title: "Nenhuma necessidade encontrada",
           description: "Não há necessidades importadas para este lote/rodovia",
@@ -141,22 +158,27 @@ export function NecessidadesAuditor() {
         return;
       }
 
-      // Buscar TODOS os cadastros de uma vez para otimizar
+      // Buscar TODOS os cadastros de uma vez para otimizar (com suporte para mais de 1000)
       const cadastrosIds = necessidades
         .filter((n: any) => n.cadastro_id)
         .map((n: any) => n.cadastro_id);
 
       let cadastrosMap = new Map();
       if (cadastrosIds.length > 0) {
-        const { data: cadastrosData } = await supabase
-          .from(tabelaCadastro as any)
-          .select("*")
-          .in("id", cadastrosIds);
-        
-        if (cadastrosData) {
-          cadastrosData.forEach((cad: any) => {
-            cadastrosMap.set(cad.id, cad);
-          });
+        // Dividir em chunks de 1000 IDs para a query .in()
+        const chunkSize = 1000;
+        for (let i = 0; i < cadastrosIds.length; i += chunkSize) {
+          const chunk = cadastrosIds.slice(i, i + chunkSize);
+          const { data: cadastrosData } = await supabase
+            .from(tabelaCadastro as any)
+            .select("*")
+            .in("id", chunk);
+          
+          if (cadastrosData) {
+            cadastrosData.forEach((cad: any) => {
+              cadastrosMap.set(cad.id, cad);
+            });
+          }
         }
       }
 
