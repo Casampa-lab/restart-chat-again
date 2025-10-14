@@ -456,7 +456,7 @@ const CoordenacaoFiscalizacao = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col items-center justify-center gap-4">
             <p className="text-sm text-muted-foreground text-center">
-              Críticas e sugestões: <a href="mailto:operavia.online@gmail.com" className="text-primary hover:underline">operavia.online@gmail.com</a>
+              Críticas e sugestões: <a href="mailto:contato@operavia.online" className="text-primary hover:underline">contato@operavia.online</a>
             </p>
           </div>
         </div>

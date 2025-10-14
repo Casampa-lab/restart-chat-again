@@ -123,10 +123,10 @@ const ResetPassword = () => {
               <p className="text-sm text-center">
                 <span className="font-semibold text-foreground">Contato:</span>{" "}
                 <a 
-                  href="mailto:operavia.online@gmail.com" 
+                  href="mailto:contato@operavia.online" 
                   className="text-primary hover:underline font-medium"
                 >
-                  operavia.online@gmail.com
+                  contato@operavia.online
                 </a>
               </p>
             </CardContent>

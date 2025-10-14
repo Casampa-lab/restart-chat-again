@@ -903,8 +903,8 @@ const Index = () => {
           <CardContent className="py-4">
             <p className="text-sm text-center">
               <span className="font-semibold text-foreground">Contato:</span>{" "}
-              <a href="mailto:operavia.online@gmail.com" className="text-primary hover:underline font-medium">
-                operavia.online@gmail.com
+              <a href="mailto:contato@operavia.online" className="text-primary hover:underline font-medium">
+                contato@operavia.online
               </a>
             </p>
           </CardContent>

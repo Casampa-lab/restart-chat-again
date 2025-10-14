@@ -512,7 +512,7 @@ const MinhasIntervencoesSH = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-center">
             <p className="text-sm text-muted-foreground">
-              Críticas e sugestões: <a href="mailto:operavia.online@gmail.com" className="text-primary hover:underline">operavia.online@gmail.com</a>
+              Críticas e sugestões: <a href="mailto:contato@operavia.online" className="text-primary hover:underline">contato@operavia.online</a>
             </p>
           </div>
         </div>
