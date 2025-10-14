@@ -86,6 +86,7 @@ export function DeleteInventarioSelecionado() {
         "ficha_placa": "foto_frontal_url, foto_lateral_url, foto_posterior_url, foto_base_url, foto_identificacao_url",
         "ficha_porticos": "foto_url",
         "defensas": "link_fotografia",
+        // Estas tabelas NÃO possuem colunas de foto no banco
         "ficha_marcas_longitudinais": null,
         "ficha_tachas": null,
         "ficha_inscricoes": null,
