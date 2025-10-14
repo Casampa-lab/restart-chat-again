@@ -329,9 +329,9 @@ serve(async (req) => {
         "vao_horizontal_m"
       ],
       defensas: [
-        "data_inspecao", "extensao_metros", "km_final",
+        "data_vistoria", "extensao_metros", "km_final",
         "km_inicial", "lado", "necessita_intervencao", "nivel_risco",
-        "observacao", "tipo_avaria", "tipo_defensa", "br", "snv", "tramo",
+        "tipo_defensa", "br", "snv", "tramo",
         "funcao", "especificacao_obstaculo_fixo", "id_defensa",
         "distancia_pista_obstaculo_m", "risco", "velocidade_kmh",
         "vmd_veic_dia", "percentual_veiculos_pesados", "geometria",
