@@ -9,8 +9,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter } from "lucide-react";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
+import { NecessidadeBadge } from "@/components/NecessidadeBadge";
+import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 interface FichaPortico {
@@ -47,6 +51,9 @@ export function InventarioPorticosViewer({
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
+  const [showOnlyDivergencias, setShowOnlyDivergencias] = useState(false);
+  const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
+  const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -111,8 +118,45 @@ export function InventarioPorticosViewer({
     },
   });
 
+  // Query de necessidades relacionadas (apenas matches <= 20m)
+  const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
+    queryKey: ["necessidades-match-porticos", loteId, rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("necessidades_porticos")
+        .select("*")
+        .eq("lote_id", loteId)
+        .eq("rodovia_id", rodoviaId)
+        .not("cadastro_id", "is", null)
+        .lte("distancia_match_metros", 20);
+      
+      if (error) throw error;
+      
+      // Indexar por cadastro_id para busca O(1)
+      const map = new Map<string, any>();
+      data?.forEach(nec => {
+        map.set(nec.cadastro_id, nec);
+      });
+      
+      return map;
+    },
+    enabled: !!loteId && !!rodoviaId,
+  });
+
+  // Contar divergências pendentes
+  const divergenciasPendentes = Array.from(necessidadesMap?.values() || []).filter(
+    nec => nec.divergencia === true && nec.reconciliado !== true
+  ).length;
+
+  // Filtrar pórticos com divergências se necessário
+  const filteredPorticos = porticos?.filter(portico => {
+    if (!showOnlyDivergencias) return true;
+    const nec = necessidadesMap?.get(portico.id);
+    return nec?.divergencia === true && nec?.reconciliado !== true;
+  }) || [];
+
   // Função para ordenar dados
-  const sortedPorticos = porticos ? [...porticos].sort((a, b) => {
+  const sortedPorticos = filteredPorticos ? [...filteredPorticos].sort((a, b) => {
     if (!sortColumn) return 0;
     
     let aVal: any = a[sortColumn as keyof FichaPortico];
@@ -181,6 +225,19 @@ export function InventarioPorticosViewer({
     await loadIntervencoes(portico.id);
   };
 
+  const handleOpenReconciliacao = (portico: FichaPortico) => {
+    const nec = necessidadesMap?.get(portico.id);
+    if (nec) {
+      setSelectedNecessidade(nec);
+      setSelectedPortico(portico);
+      setReconciliacaoOpen(true);
+    }
+  };
+
+  const handleReconciliar = () => {
+    refetchNecessidades();
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -234,6 +291,37 @@ export function InventarioPorticosViewer({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Contador de Matches a Reconciliar */}
+          {divergenciasPendentes > 0 && (
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
+                  <AlertCircle className="h-6 w-6 text-warning" />
+                </div>
+                <div>
+                  <div className="font-bold text-base flex items-center gap-2">
+                    <span className="text-2xl font-extrabold text-warning">{divergenciasPendentes}</span>
+                    <span>{divergenciasPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-0.5">
+                    🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showOnlyDivergencias}
+                  onCheckedChange={setShowOnlyDivergencias}
+                  id="filtro-divergencias"
+                />
+                <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
+                  <Filter className="h-4 w-4 inline mr-1" />
+                  Apenas divergências
+                </Label>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-3">
             <Input
               placeholder="Pesquisar por tipo, SNV ou lado..."
@@ -299,6 +387,11 @@ export function InventarioPorticosViewer({
                         <SortIcon column="tipo" />
                       </div>
                     </TableHead>
+                    <TableHead className="text-center">
+                      <div className="whitespace-normal leading-tight">
+                        Necessidade
+                      </div>
+                    </TableHead>
                     <TableHead 
                       className="cursor-pointer select-none hover:bg-muted/50 text-center"
                       onClick={() => handleSort("lado")}
@@ -359,6 +452,16 @@ export function InventarioPorticosViewer({
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
+                        {necessidadesMap?.has(portico.id) ? (
+                          <NecessidadeBadge 
+                            necessidade={necessidadesMap.get(portico.id)} 
+                            tipo="porticos"
+                          />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
                         {portico.lado || "-"}
                       </TableCell>
                       {searchLat && searchLng && (
@@ -383,15 +486,31 @@ export function InventarioPorticosViewer({
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewDetails(portico)}
-                          className="gap-2"
-                        >
-                          <Eye className="h-4 w-4" />
-                          Ver Detalhes
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          {(() => {
+                            const nec = necessidadesMap?.get(portico.id);
+                            return nec?.divergencia === true && nec?.reconciliado !== true ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleOpenReconciliacao(portico)}
+                                className="gap-2 border-warning text-warning hover:bg-warning/10"
+                              >
+                                <AlertCircle className="h-4 w-4" />
+                                Reconciliar
+                              </Button>
+                            ) : null;
+                          })()}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewDetails(portico)}
+                            className="gap-2"
+                          >
+                            <Eye className="h-4 w-4" />
+                            Ver Detalhes
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -418,6 +537,14 @@ export function InventarioPorticosViewer({
           </div>
         </DialogContent>
       </Dialog>
+
+      <ReconciliacaoDrawer
+        open={reconciliacaoOpen}
+        onOpenChange={setReconciliacaoOpen}
+        necessidade={selectedNecessidade}
+        cadastro={selectedPortico}
+        onReconciliar={handleReconciliar}
+      />
 
       <Dialog open={!!selectedPortico} onOpenChange={() => setSelectedPortico(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
