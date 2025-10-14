@@ -102,6 +102,211 @@ export function NecessidadesImporter() {
     return "Substituir";
   };
 
+  // ============= FUNÇÕES DE MATCH POR SOBREPOSIÇÃO (ELEMENTOS LINEARES) =============
+
+  /**
+   * Calcula sobreposição entre dois segmentos em KM
+   * Retorna overlap absoluto (km) e porcentagem relativa à necessidade
+   */
+  const calcularSobreposicaoKm = (
+    nec_km_ini: number, 
+    nec_km_fim: number,
+    cad_km_ini: number, 
+    cad_km_fim: number
+  ): { overlap_km: number; porcentagem: number } => {
+    const inicio = Math.max(nec_km_ini, cad_km_ini);
+    const fim = Math.min(nec_km_fim, cad_km_fim);
+    
+    // Sem sobreposição
+    if (inicio >= fim) {
+      return { overlap_km: 0, porcentagem: 0 };
+    }
+    
+    const overlap_km = fim - inicio;
+    const tamanho_necessidade = nec_km_fim - nec_km_ini;
+    
+    // Evitar divisão por zero
+    const porcentagem = tamanho_necessidade > 0 
+      ? (overlap_km / tamanho_necessidade) * 100 
+      : 0;
+    
+    return { 
+      overlap_km: Math.round(overlap_km * 1000) / 1000, // 3 decimais
+      porcentagem: Math.round(porcentagem * 10) / 10 // 1 decimal
+    };
+  };
+
+  /**
+   * Normaliza valores de "lado" para comparação
+   */
+  const normalizarLado = (lado: string): string => {
+    if (!lado) return "";
+    const l = lado.toLowerCase().trim();
+    if (l.includes("esq") || l === "e") return "esquerdo";
+    if (l.includes("dir") || l === "d") return "direito";
+    if (l.includes("eix") || l === "c" || l === "central") return "eixo";
+    if (l.includes("amb") || l === "ambos") return "ambos";
+    return lado;
+  };
+
+  /**
+   * Define se o lado deve ser validado de forma estrita por tipo
+   * Marcas e Defensas: lado CRÍTICO
+   * Tachas: mais flexível (permite matches cross-lado em alguns casos)
+   */
+  const validarLadoPorTipo = (
+    tipo: string, 
+    ladoNec: string, 
+    ladoCad: string
+  ): boolean => {
+    const config: Record<string, { validar: boolean; estrito: boolean }> = {
+      marcas_longitudinais: { validar: true, estrito: true },
+      defensas: { validar: true, estrito: true },
+      tachas: { validar: true, estrito: false }
+    };
+    
+    const tipoConfig = config[tipo];
+    if (!tipoConfig || !tipoConfig.validar) return true; // Não validar
+    
+    const ladoNecNorm = normalizarLado(ladoNec);
+    const ladoCadNorm = normalizarLado(ladoCad);
+    
+    // Se algum não tem lado, aceitar
+    if (!ladoNecNorm || !ladoCadNorm) return true;
+    
+    // Validação estrita
+    if (tipoConfig.estrito) {
+      return ladoNecNorm === ladoCadNorm;
+    }
+    
+    // Validação flexível (tachas)
+    // Aceitar "ambos" ou match exato
+    return ladoNecNorm === ladoCadNorm || 
+           ladoNecNorm === "ambos" || 
+           ladoCadNorm === "ambos";
+  };
+
+  /**
+   * Busca matches para elementos lineares baseado em sobreposição de segmento
+   * Retorna array de matches ordenados por maior sobreposição
+   */
+  const buscarMatchSegmento = (
+    necessidade: { 
+      km_inicial: number; 
+      km_final: number; 
+      lado?: string 
+    },
+    cadastros: any[],
+    tipo: string,
+    thresholdOverlap: number = 50 // % mínimo de sobreposição
+  ): Array<{
+    cadastro_id: string;
+    overlap_porcentagem: number;
+    overlap_km: number;
+    tipo_match: string;
+  }> => {
+    
+    const matches = [];
+    
+    for (const cad of cadastros) {
+      // Validar lado (se aplicável ao tipo)
+      const ladoValido = validarLadoPorTipo(tipo, necessidade.lado || "", cad.lado || "");
+      if (!ladoValido) {
+        continue;
+      }
+      
+      // Calcular sobreposição
+      const { overlap_km, porcentagem } = calcularSobreposicaoKm(
+        necessidade.km_inicial,
+        necessidade.km_final,
+        cad.km_inicial,
+        cad.km_final
+      );
+      
+      // Se overlap >= threshold, considerar match
+      if (porcentagem >= thresholdOverlap) {
+        let tipo_match = '';
+        
+        if (porcentagem >= 95) {
+          tipo_match = 'exato'; // Praticamente idêntico
+        } else if (porcentagem >= 75) {
+          tipo_match = 'alto'; // Grande sobreposição
+        } else {
+          tipo_match = 'parcial'; // Sobreposição parcial (50-75%)
+        }
+        
+        matches.push({
+          cadastro_id: cad.id,
+          overlap_porcentagem: porcentagem,
+          overlap_km,
+          tipo_match
+        });
+      }
+    }
+    
+    // Ordenar por maior sobreposição primeiro
+    return matches.sort((a, b) => b.overlap_porcentagem - a.overlap_porcentagem);
+  };
+
+  /**
+   * Identifica o tipo de serviço (Implantar/Substituir/Remover) baseado em matches
+   * Considera também sinais na planilha (quantidade=0, solucao=remover, etc)
+   */
+  const identificarServicoSegmento = (
+    dados: any, 
+    matches: any[]
+  ): { 
+    servico: string; 
+    match_usado?: any;
+    status_revisao: string;
+    motivo_revisao?: string;
+  } => {
+    
+    // SEM match = nova instalação
+    if (!matches || matches.length === 0) {
+      return { 
+        servico: "Implantar",
+        status_revisao: "ok"
+      };
+    }
+    
+    // COM match - usar o melhor match (maior sobreposição)
+    const melhorMatch = matches[0];
+    
+    // Verificar sinais de remoção na planilha
+    const sinaisRemocao = [
+      dados.quantidade === 0 || dados.quantidade === "0",
+      dados.extensao_metros === 0 || dados.extensao_metros === "0",
+      dados.solucao_planilha?.toLowerCase().includes("remov"),
+      dados.solucao_planilha?.toLowerCase().includes("desativ")
+    ];
+    
+    if (sinaisRemocao.some(Boolean)) {
+      return { 
+        servico: "Remover", 
+        match_usado: melhorMatch,
+        status_revisao: "ok"
+      };
+    }
+    
+    // Match parcial (<75%) = PENDENTE REVISÃO
+    if (melhorMatch.overlap_porcentagem < 75) {
+      return {
+        servico: "Substituir",
+        match_usado: melhorMatch,
+        status_revisao: "pendente_coordenador",
+        motivo_revisao: `Sobreposição parcial (${melhorMatch.overlap_porcentagem}%) - requer revisão manual`
+      };
+    }
+    
+    // Match exato/alto (≥75%) = Substituir automático
+    return { 
+      servico: "Substituir", 
+      match_usado: melhorMatch,
+      status_revisao: "ok"
+    };
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
@@ -429,6 +634,7 @@ export function NecessidadesImporter() {
       let falhas = 0;
       let matchesEncontrados = 0;
       let divergenciasPendentes = 0;
+      let pendentesRevisao = 0; // Contador para matches parciais
       setProgressInfo({ current: 0, total });
 
       for (let i = 0; i < dadosFiltrados.length; i++) {
@@ -456,18 +662,78 @@ export function NecessidadesImporter() {
           // Mapear colunas
           const dados = mapearColunas(row, tipo);
 
-          // Buscar match no cadastro localmente (sem chamar RPC)
-          const lat = (tipo === "placas" || tipo === "marcas_transversais" || tipo === "porticos") 
-            ? converterCoordenada(dados.latitude) 
-            : converterCoordenada(dados.latitude_inicial);
-          const long = (tipo === "placas" || tipo === "marcas_transversais" || tipo === "porticos") 
-            ? converterCoordenada(dados.longitude) 
-            : converterCoordenada(dados.longitude_inicial);
-
+          // ========== BIFURCAÇÃO: MATCH POR GPS (PLACAS) vs MATCH POR SOBREPOSIÇÃO (LINEARES) ==========
+          
           let match = null;
           let distancia = null;
+          let overlap_porcentagem = null;
+          let tipo_match_resultado = null;
+          let status_revisao = "ok";
+          let motivo_revisao = null;
 
-          if (lat && long && cadastros && cadastros.length > 0) {
+          // ===== TIPO 1: ELEMENTOS LINEARES (Match por sobreposição de segmento KM) =====
+          if (["marcas_longitudinais", "tachas", "defensas"].includes(tipo)) {
+            const temKmsValidos = dados.km_inicial && 
+                                  dados.km_final && 
+                                  !isNaN(parseFloat(dados.km_inicial)) && 
+                                  !isNaN(parseFloat(dados.km_final));
+            
+            if (temKmsValidos && cadastros && cadastros.length > 0) {
+              // Buscar todos os matches possíveis (threshold 50%)
+              const matches = buscarMatchSegmento(
+                {
+                  km_inicial: parseFloat(dados.km_inicial),
+                  km_final: parseFloat(dados.km_final),
+                  lado: dados.lado
+                },
+                cadastros,
+                tipo,
+                50 // Threshold de 50%
+              );
+              
+              // Identificar serviço baseado nos matches
+              const resultado = identificarServicoSegmento(dados, matches);
+              
+              // Atribuir valores do resultado
+              match = resultado.match_usado?.cadastro_id || null;
+              overlap_porcentagem = resultado.match_usado?.overlap_porcentagem || null;
+              tipo_match_resultado = resultado.match_usado?.tipo_match || null;
+              status_revisao = resultado.status_revisao;
+              motivo_revisao = resultado.motivo_revisao || null;
+              
+              // Contabilizar matches e pendências
+              if (match) {
+                matchesEncontrados++;
+              }
+              
+              if (status_revisao === "pendente_coordenador") {
+                pendentesRevisao++;
+              }
+              
+              // Log de múltiplos matches
+              if (matches.length > 1 && i % 50 === 0) {
+                console.log(`⚠️ Linha ${linhaExcel}: Múltiplos matches (${matches.length}). Usando melhor: ${overlap_porcentagem}% overlap`);
+              }
+              
+              // Log de progresso
+              if (i % 50 === 0) {
+                if (resultado.match_usado) {
+                  console.log(`✅ Processando linha ${linhaExcel}: Match encontrado! overlap=${overlap_porcentagem}% (${tipo_match_resultado}) [${i+1}/${total}]`);
+                } else {
+                  console.log(`⚠️ Processando linha ${linhaExcel}: Sem match - nova instalação [${i+1}/${total}]`);
+                }
+              }
+            } else if (i % 50 === 0) {
+              console.log(`⚠️ Processando linha ${linhaExcel}: Sem KMs válidos - importado como Implantar [${i+1}/${total}]`);
+            }
+          }
+          
+          // ===== TIPO 2: PLACAS (Match por GPS - ponto único) =====
+          else if (tipo === "placas") {
+            const lat = converterCoordenada(dados.latitude);
+            const long = converterCoordenada(dados.longitude);
+
+            if (lat && long && cadastros && cadastros.length > 0) {
             // Buscar o cadastro mais próximo localmente
             let menorDistancia = Infinity;
             let cadastroMaisProximo = null;
@@ -501,25 +767,32 @@ export function NecessidadesImporter() {
               }
             }
 
-            if (cadastroMaisProximo) {
-              match = cadastroMaisProximo.id;
-              distancia = Math.round(menorDistancia);
-              matchesEncontrados++;
-              if (i % 50 === 0) { // Log a cada 50 linhas para não sobrecarregar
-                const ladoInfo = tipo === "placas" && dados.lado && cadastroMaisProximo.lado 
-                  ? ` lado=${dados.lado}/${cadastroMaisProximo.lado}`
-                  : '';
-                console.log(`✅ Processando linha ${linhaExcel}: Match encontrado! distancia=${distancia}m${ladoInfo} [${i+1}/${total}]`);
+              if (cadastroMaisProximo) {
+                match = cadastroMaisProximo.id;
+                distancia = Math.round(menorDistancia);
+                matchesEncontrados++;
+                if (i % 50 === 0) { // Log a cada 50 linhas para não sobrecarregar
+                  const ladoInfo = dados.lado && cadastroMaisProximo.lado 
+                    ? ` lado=${dados.lado}/${cadastroMaisProximo.lado}`
+                    : '';
+                  console.log(`✅ Processando linha ${linhaExcel}: Match GPS encontrado! distancia=${distancia}m${ladoInfo} [${i+1}/${total}]`);
+                }
+              } else if (i % 50 === 0) {
+                const ladoInfo = dados.lado ? ` (lado=${dados.lado})` : '';
+                console.log(`⚠️ Processando linha ${linhaExcel}: Sem match dentro de ${tolerancia}m${ladoInfo} [${i+1}/${total}]`);
               }
-            } else if (i % 50 === 0) {
-              const ladoInfo = tipo === "placas" && dados.lado ? ` (lado=${dados.lado})` : '';
-              console.log(`⚠️ Processando linha ${linhaExcel}: Sem match dentro de ${tolerancia}m${ladoInfo} [${i+1}/${total}]`);
-            }
-          } else if (!lat || !long) {
-            if (i % 50 === 0) {
-              console.log(`⚠️ Processando linha ${linhaExcel}: Sem coordenadas válidas [${i+1}/${total}]`);
+            } else if (!lat || !long) {
+              if (i % 50 === 0) {
+                console.log(`⚠️ Processando linha ${linhaExcel}: Sem coordenadas válidas [${i+1}/${total}]`);
+              }
             }
           }
+          
+          // ===== TIPO 3: OUTROS (Marcas Transversais, Cilindros, Pórticos) =====
+          // Para estes tipos, não fazemos match por sobreposição
+          // Mantém lógica existente ou importação simples
+
+          // ========== FIM DA BIFURCAÇÃO DE MATCH ==========
 
           // SISTEMA DE RECONCILIAÇÃO
           // 1. Calcular servico_inferido (análise automática GPS)
@@ -567,23 +840,34 @@ export function NecessidadesImporter() {
             | "necessidades_porticos"
             | "necessidades_defensas";
 
+          // Preparar dados para inserção
+          const dadosInsercao: any = {
+            user_id: user.id,
+            lote_id: loteId,
+            rodovia_id: rodoviaId,
+            cadastro_id: match,
+            servico,
+            servico_inferido: servicoInferido,
+            servico_final: servicoFinal,
+            divergencia,
+            reconciliado: false,
+            ...dados,
+            arquivo_origem: file.name,
+            linha_planilha: linhaExcel,
+            distancia_match_metros: distancia,
+          };
+
+          // Adicionar campos específicos de match por sobreposição (só para lineares)
+          if (["marcas_longitudinais", "tachas", "defensas"].includes(tipo)) {
+            dadosInsercao.overlap_porcentagem = overlap_porcentagem;
+            dadosInsercao.tipo_match = tipo_match_resultado;
+            dadosInsercao.status_revisao = status_revisao;
+            dadosInsercao.motivo_revisao = motivo_revisao;
+          }
+
           const { error } = await supabase
             .from(tabelaNecessidade)
-            .insert({
-              user_id: user.id,
-              lote_id: loteId,
-              rodovia_id: rodoviaId,
-              cadastro_id: match,
-              servico,
-              servico_inferido: servicoInferido,
-              servico_final: servicoFinal,
-              divergencia,
-              reconciliado: false,
-              ...dados,
-              arquivo_origem: file.name,
-              linha_planilha: linhaExcel,
-              distancia_match_metros: distancia,
-            });
+            .insert(dadosInsercao);
 
           if (error) throw error;
 
@@ -613,10 +897,14 @@ export function NecessidadesImporter() {
       }
 
       // Resultado final com estatísticas detalhadas
+      const isLinear = ["marcas_longitudinais", "tachas", "defensas"].includes(tipo);
       const mensagemResultado = [
         `✅ ${sucessos} registros importados`,
         `❌ ${falhas} falhas`,
-        `🔗 ${matchesEncontrados} matches GPS encontrados`,
+        isLinear 
+          ? `🔗 ${matchesEncontrados} matches por sobreposição` 
+          : `🔗 ${matchesEncontrados} matches GPS encontrados`,
+        pendentesRevisao > 0 ? `🟡 ${pendentesRevisao} matches parciais pendentes de revisão` : null,
         divergenciasPendentes > 0 ? `⚠️ ${divergenciasPendentes} divergências a reconciliar` : null
       ].filter(Boolean).join(' • ');
 

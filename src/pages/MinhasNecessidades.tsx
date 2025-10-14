@@ -22,6 +22,10 @@ interface Necessidade {
   servico: "Implantar" | "Substituir" | "Remover" | "Manter";
   cadastro_id: string | null;
   distancia_match_metros: number | null;
+  overlap_porcentagem: number | null;
+  tipo_match: string | null;
+  status_revisao: string;
+  motivo_revisao: string | null;
   arquivo_origem: string;
   linha_planilha: number;
   created_at: string;
@@ -124,6 +128,7 @@ const MinhasNecessidades = () => {
   const [necessidades, setNecessidades] = useState<Necessidade[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtroServico, setFiltroServico] = useState<string>("todos");
+  const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [busca, setBusca] = useState("");
   const [visualizacao, setVisualizacao] = useState<"tabela" | "mapa">("tabela");
 
@@ -252,6 +257,7 @@ const MinhasNecessidades = () => {
 
   const necessidadesFiltradas = necessidades.filter(n => {
     if (filtroServico !== "todos" && n.servico !== filtroServico) return false;
+    if (filtroStatus !== "todos" && n.status_revisao !== filtroStatus) return false;
     if (busca && !JSON.stringify(n).toLowerCase().includes(busca.toLowerCase())) return false;
     return true;
   });
@@ -364,6 +370,20 @@ const MinhasNecessidades = () => {
                         </SelectContent>
                       </Select>
 
+                      {/* Filtro de Status de Revisão (só para elementos lineares) */}
+                      {["marcas_longitudinais", "tachas", "defensas"].includes(tipoAtivo) && (
+                        <Select value={filtroStatus} onValueChange={setFiltroStatus}>
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Status de Revisão" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="todos">Todos os Status</SelectItem>
+                            <SelectItem value="ok">✅ OK</SelectItem>
+                            <SelectItem value="pendente_coordenador">⚠️ Pendentes</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+
                       <Input
                         placeholder="Buscar..."
                         value={busca}
@@ -440,11 +460,42 @@ const MinhasNecessidades = () => {
                               ))}
                               <TableCell>
                                 {nec.cadastro_id ? (
-                                  <div className="text-sm">
-                                    <Badge variant="outline" className="gap-1">
-                                      <ExternalLink className="h-3 w-3" />
-                                      {nec.distancia_match_metros?.toFixed(0)}m
-                                    </Badge>
+                                  <div className="space-y-1">
+                                    {/* Match por GPS (placas e outros pontos únicos) */}
+                                    {nec.distancia_match_metros !== null && nec.distancia_match_metros !== undefined && (
+                                      <Badge variant="outline" className="text-xs gap-1">
+                                        <ExternalLink className="h-3 w-3" />
+                                        {nec.distancia_match_metros.toFixed(0)}m
+                                      </Badge>
+                                    )}
+                                    
+                                    {/* Match por Overlap (elementos lineares) */}
+                                    {nec.overlap_porcentagem !== null && nec.overlap_porcentagem !== undefined && (
+                                      <div className="flex flex-col gap-1">
+                                        <Badge 
+                                          variant={
+                                            nec.tipo_match === 'exato' ? 'default' : 
+                                            nec.tipo_match === 'alto' ? 'secondary' : 
+                                            'outline'
+                                          }
+                                          className="text-xs"
+                                        >
+                                          📏 {nec.overlap_porcentagem.toFixed(1)}% overlap
+                                        </Badge>
+                                        {nec.tipo_match && (
+                                          <span className="text-xs text-muted-foreground">
+                                            ({nec.tipo_match})
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                    
+                                    {/* Status de Revisão */}
+                                    {nec.status_revisao === 'pendente_coordenador' && (
+                                      <Badge variant="destructive" className="text-xs">
+                                        ⚠️ Requer Revisão
+                                      </Badge>
+                                    )}
                                   </div>
                                 ) : (
                                   <span className="text-xs text-muted-foreground">Sem match</span>

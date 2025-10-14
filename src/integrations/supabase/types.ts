@@ -3165,10 +3165,12 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           motivo: string | null
+          motivo_revisao: string | null
           nivel_contencao_en1317: string | null
           nivel_contencao_nchrp350: string | null
           nivel_risco: string | null
           observacao: string | null
+          overlap_porcentagem: number | null
           percentual_veiculos_pesados: number | null
           quantidade_laminas: number | null
           risco: string | null
@@ -3176,10 +3178,12 @@ export type Database = {
           servico: string
           snv: string | null
           solucao_planilha: string | null
+          status_revisao: string | null
           terminal_entrada: string | null
           terminal_saida: string | null
           tipo_avaria: string | null
           tipo_defensa: string | null
+          tipo_match: string | null
           tramo: string | null
           updated_at: string | null
           user_id: string
@@ -3220,10 +3224,12 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           motivo?: string | null
+          motivo_revisao?: string | null
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
           nivel_risco?: string | null
           observacao?: string | null
+          overlap_porcentagem?: number | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
           risco?: string | null
@@ -3231,10 +3237,12 @@ export type Database = {
           servico: string
           snv?: string | null
           solucao_planilha?: string | null
+          status_revisao?: string | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
+          tipo_match?: string | null
           tramo?: string | null
           updated_at?: string | null
           user_id: string
@@ -3275,10 +3283,12 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           motivo?: string | null
+          motivo_revisao?: string | null
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
           nivel_risco?: string | null
           observacao?: string | null
+          overlap_porcentagem?: number | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
           risco?: string | null
@@ -3286,10 +3296,12 @@ export type Database = {
           servico?: string
           snv?: string | null
           solucao_planilha?: string | null
+          status_revisao?: string | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
+          tipo_match?: string | null
           tramo?: string | null
           updated_at?: string | null
           user_id?: string
@@ -3345,13 +3357,17 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           material: string | null
+          motivo_revisao: string | null
           observacao: string | null
+          overlap_porcentagem: number | null
           posicao: string | null
           rodovia_id: string
           servico: string
           snv: string | null
           solucao_planilha: string | null
+          status_revisao: string | null
           tipo_demarcacao: string | null
+          tipo_match: string | null
           traco_m: number | null
           updated_at: string | null
           user_id: string
@@ -3380,13 +3396,17 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           material?: string | null
+          motivo_revisao?: string | null
           observacao?: string | null
+          overlap_porcentagem?: number | null
           posicao?: string | null
           rodovia_id: string
           servico: string
           snv?: string | null
           solucao_planilha?: string | null
+          status_revisao?: string | null
           tipo_demarcacao?: string | null
+          tipo_match?: string | null
           traco_m?: number | null
           updated_at?: string | null
           user_id: string
@@ -3415,13 +3435,17 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           material?: string | null
+          motivo_revisao?: string | null
           observacao?: string | null
+          overlap_porcentagem?: number | null
           posicao?: string | null
           rodovia_id?: string
           servico?: string
           snv?: string | null
           solucao_planilha?: string | null
+          status_revisao?: string | null
           tipo_demarcacao?: string | null
+          tipo_match?: string | null
           traco_m?: number | null
           updated_at?: string | null
           user_id?: string
@@ -3880,13 +3904,17 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          motivo_revisao: string | null
           observacao: string | null
+          overlap_porcentagem: number | null
           quantidade: number | null
           refletivo: string | null
           rodovia_id: string
           servico: string
           snv: string | null
           solucao_planilha: string | null
+          status_revisao: string | null
+          tipo_match: string | null
           updated_at: string | null
           user_id: string
         }
@@ -3911,13 +3939,17 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          motivo_revisao?: string | null
           observacao?: string | null
+          overlap_porcentagem?: number | null
           quantidade?: number | null
           refletivo?: string | null
           rodovia_id: string
           servico: string
           snv?: string | null
           solucao_planilha?: string | null
+          status_revisao?: string | null
+          tipo_match?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -3942,13 +3974,17 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          motivo_revisao?: string | null
           observacao?: string | null
+          overlap_porcentagem?: number | null
           quantidade?: number | null
           refletivo?: string | null
           rodovia_id?: string
           servico?: string
           snv?: string | null
           solucao_planilha?: string | null
+          status_revisao?: string | null
+          tipo_match?: string | null
           updated_at?: string | null
           user_id?: string
         }
