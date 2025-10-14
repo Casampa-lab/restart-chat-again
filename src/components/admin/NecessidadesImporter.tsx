@@ -429,6 +429,8 @@ export function NecessidadesImporter() {
       const total = dadosFiltrados.length;
       let sucessos = 0;
       let falhas = 0;
+      let matchesEncontrados = 0;
+      let divergenciasPendentes = 0;
       setProgressInfo({ current: 0, total });
 
       for (let i = 0; i < dadosFiltrados.length; i++) {
@@ -504,6 +506,7 @@ export function NecessidadesImporter() {
             if (cadastroMaisProximo) {
               match = cadastroMaisProximo.id;
               distancia = Math.round(menorDistancia);
+              matchesEncontrados++;
               if (i % 50 === 0) { // Log a cada 50 linhas para não sobrecarregar
                 const ladoInfo = tipo === "placas" && dados.lado && cadastroMaisProximo.lado 
                   ? ` lado=${dados.lado}/${cadastroMaisProximo.lado}`
@@ -548,6 +551,10 @@ export function NecessidadesImporter() {
           const divergencia = solucaoPlanilhaNormalizada 
             ? solucaoPlanilhaNormalizada !== servicoInferido
             : false;
+          
+          if (divergencia) {
+            divergenciasPendentes++;
+          }
           
           // 5. Manter compatibilidade com campo "servico" legado
           const servico = servicoFinal;
@@ -607,10 +614,23 @@ export function NecessidadesImporter() {
         setProgress(Math.round(((i + 1) / total) * 100));
       }
 
-      // Resultado final
+      // Resultado final com estatísticas detalhadas
+      const mensagemResultado = [
+        `✅ ${sucessos} registros importados`,
+        `❌ ${falhas} falhas`,
+        `🔗 ${matchesEncontrados} matches GPS encontrados`,
+        divergenciasPendentes > 0 ? `⚠️ ${divergenciasPendentes} divergências a reconciliar` : null
+      ].filter(Boolean).join(' • ');
+
+      setLogs(prev => [...prev, {
+        tipo: divergenciasPendentes > 0 ? "warning" : "success",
+        linha: null,
+        mensagem: `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📊 RESUMO DA IMPORTAÇÃO\n${mensagemResultado}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+      }]);
+
       toast({
         title: "Importação concluída",
-        description: `${sucessos} registros importados, ${falhas} falhas`,
+        description: mensagemResultado,
         variant: falhas > 0 ? "destructive" : "default",
       });
 
