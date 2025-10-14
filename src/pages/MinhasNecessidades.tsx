@@ -40,6 +40,72 @@ const TIPOS_NECESSIDADES = [
   { value: "defensas", label: "Defensas", table: "necessidades_defensas" },
 ];
 
+const COLUNAS_POR_TIPO: Record<string, { header: string[]; fields: string[] }> = {
+  marcas_longitudinais: {
+    header: ["Tipo", "Material", "Extensão (m)"],
+    fields: ["tipo_demarcacao", "material", "extensao_metros"]
+  },
+  tachas: {
+    header: ["Refletivo", "Corpo", "Quantidade"],
+    fields: ["refletivo", "corpo", "quantidade"]
+  },
+  marcas_transversais: {
+    header: ["Tipo", "Cor", "Área (m²)"],
+    fields: ["tipo_marca", "cor", "area_m2"]
+  },
+  cilindros: {
+    header: ["Cor Corpo", "Cor Refletivo", "Quantidade"],
+    fields: ["cor_corpo", "cor_refletivo", "quantidade"]
+  },
+  placas: {
+    header: ["Código", "Tipo", "Dimensões"],
+    fields: ["codigo", "tipo", "dimensoes_mm"]
+  },
+  porticos: {
+    header: ["Tipo", "Altura (m)", "Vão (m)"],
+    fields: ["tipo", "altura_livre_m", "vao_horizontal_m"]
+  },
+  defensas: {
+    header: ["Tipo", "Nível", "Extensão (m)"],
+    fields: ["tipo_defensa", "nivel_contencao_nchrp350", "extensao_metros"]
+  }
+};
+
+const renderCelulaPorTipo = (nec: any, field: string) => {
+  const valor = nec[field];
+  
+  if (!valor && valor !== 0) return "N/A";
+  
+  // Formatação especial para campos numéricos
+  if (field.includes("extensao_metros")) {
+    return `${Number(valor).toFixed(2)}m`;
+  }
+  
+  if (field.includes("area_m2")) {
+    return `${Number(valor).toFixed(2)}m²`;
+  }
+  
+  if (field.includes("extensao_km")) {
+    return `${Number(valor).toFixed(3)}km`;
+  }
+  
+  if (field.includes("altura") || field.includes("vao")) {
+    return `${Number(valor).toFixed(2)}m`;
+  }
+  
+  // Badge para campos de tipo/código
+  if (field.includes("tipo") || field.includes("codigo") || field.includes("refletivo")) {
+    return <Badge variant="outline" className="font-mono text-xs">{valor}</Badge>;
+  }
+  
+  // Quantidade em destaque
+  if (field === "quantidade") {
+    return <span className="font-medium">{valor}</span>;
+  }
+  
+  return valor;
+};
+
 const MinhasNecessidades = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -316,9 +382,9 @@ const MinhasNecessidades = () => {
                             <TableHead>Serviço</TableHead>
                             <TableHead>Rodovia/Lote</TableHead>
                             <TableHead>Localização</TableHead>
-                            <TableHead>Tipo</TableHead>
-                            <TableHead>Material</TableHead>
-                            <TableHead>Extensão (m)</TableHead>
+                            {COLUNAS_POR_TIPO[tipoAtivo]?.header.map(col => (
+                              <TableHead key={col}>{col}</TableHead>
+                            ))}
                             <TableHead>Match</TableHead>
                             <TableHead className="text-right">Ações</TableHead>
                           </TableRow>
@@ -346,17 +412,12 @@ const MinhasNecessidades = () => {
                                   )}
                                 </div>
                               </TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="font-mono text-xs">
-                                  {nec.tipo_demarcacao || "N/A"}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-sm">
-                                {nec.material || "N/A"}
-                              </TableCell>
-                              <TableCell className="text-sm font-medium">
-                                {nec.extensao_metros ? Number(nec.extensao_metros).toFixed(2) : "N/A"}m
-                              </TableCell>
+                              {/* Colunas dinâmicas baseadas no tipo */}
+                              {COLUNAS_POR_TIPO[tipoAtivo]?.fields.map(field => (
+                                <TableCell key={field} className="text-sm">
+                                  {renderCelulaPorTipo(nec, field)}
+                                </TableCell>
+                              ))}
                               <TableCell>
                                 {nec.cadastro_id ? (
                                   <div className="text-sm">
