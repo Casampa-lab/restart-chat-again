@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 
 interface IntervencoesTachaFormProps {
   tachaSelecionada?: {
@@ -38,6 +38,8 @@ const formSchema = z.object({
   observacao: z.string().optional(),
   foto_url: z.string().optional(),
   descricao: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
   fora_plano_manutencao: z.boolean().default(false),
   justificativa_fora_plano: z.string().optional(),
 });
@@ -51,6 +53,28 @@ export function IntervencoesTachaForm({
   loteId,
   rodoviaId
 }: IntervencoesTachaFormProps) {
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const capturarCoordenadas = () => {
+    setIsCapturing(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude.toString();
+          const lng = position.coords.longitude.toString();
+          form.setValue("latitude", lat);
+          form.setValue("longitude", lng);
+          toast.success(`Coordenadas capturadas: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+          setIsCapturing(false);
+        },
+        (error) => {
+          toast.error("Erro ao capturar localização");
+          setIsCapturing(false);
+        }
+      );
+    }
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
@@ -64,6 +88,8 @@ export function IntervencoesTachaForm({
       observacao: "",
       foto_url: "",
       descricao: "",
+      latitude: "",
+      longitude: "",
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
     },
@@ -83,11 +109,23 @@ export function IntervencoesTachaForm({
         observacao: "",
         foto_url: "",
         descricao: "",
+        latitude: "",
+        longitude: "",
         fora_plano_manutencao: false,
         justificativa_fora_plano: "",
       });
     }
   }, [tachaSelecionada, modo, form]);
+
+  // Propagar mudanças em tempo real no modo controlado
+  useEffect(() => {
+    if (modo === 'controlado' && onDataChange) {
+      const subscription = form.watch((value) => {
+        onDataChange(value);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [form, modo, onDataChange]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (modo === 'controlado') {
@@ -326,6 +364,50 @@ export function IntervencoesTachaForm({
               <FormLabel>URL da Foto</FormLabel>
               <FormControl>
                 <Input placeholder="Caminho da foto no storage..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="col-span-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={capturarCoordenadas}
+            disabled={isCapturing}
+            className="w-full"
+          >
+            {isCapturing ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
+            ) : (
+              <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS</>
+            )}
+          </Button>
+        </div>
+
+        <FormField
+          control={form.control}
+          name="latitude"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Latitude</FormLabel>
+              <FormControl>
+                <Input type="number" step="any" placeholder="-15.123456" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="longitude"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Longitude</FormLabel>
+              <FormControl>
+                <Input type="number" step="any" placeholder="-47.123456" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

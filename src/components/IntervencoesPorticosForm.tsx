@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
@@ -19,6 +19,8 @@ const formSchema = z.object({
   altura_livre_m: z.string().optional(),
   vao_horizontal_m: z.string().optional(),
   observacao: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
   fora_plano_manutencao: z.boolean().default(false),
   justificativa_fora_plano: z.string().optional(),
 });
@@ -50,6 +52,27 @@ export function IntervencoesPorticosForm({
   rodoviaId
 }: IntervencoesPorticosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const capturarCoordenadas = () => {
+    setIsCapturing(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude.toString();
+          const lng = position.coords.longitude.toString();
+          form.setValue("latitude", lat);
+          form.setValue("longitude", lng);
+          toast.success(`Coordenadas capturadas: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+          setIsCapturing(false);
+        },
+        (error) => {
+          toast.error("Erro ao capturar localização");
+          setIsCapturing(false);
+        }
+      );
+    }
+  };
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -60,6 +83,8 @@ export function IntervencoesPorticosForm({
       altura_livre_m: "",
       vao_horizontal_m: "",
       observacao: "",
+      latitude: "",
+      longitude: "",
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
     },
@@ -75,6 +100,8 @@ export function IntervencoesPorticosForm({
         altura_livre_m: (porticoSelecionado as any).altura_livre_m?.toString() || "",
         vao_horizontal_m: (porticoSelecionado as any).vao_horizontal_m?.toString() || "",
         observacao: "",
+        latitude: "",
+        longitude: "",
         fora_plano_manutencao: false,
         justificativa_fora_plano: "",
       });
@@ -254,6 +281,52 @@ export function IntervencoesPorticosForm({
                 </FormItem>
               )}
             />
+
+            <div className="col-span-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={capturarCoordenadas}
+                disabled={isCapturing}
+                className="w-full"
+              >
+                {isCapturing ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
+                ) : (
+                  <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS</>
+                )}
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="latitude"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Latitude</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="-15.123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="longitude"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Longitude</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="-47.123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}

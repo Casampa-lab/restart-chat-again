@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Loader2, MapPin } from "lucide-react";
 
 interface IntervencoesSHFormProps {
   marcaSelecionada?: {
@@ -47,6 +50,20 @@ const TIPOS_DEMARCACAO = [
   "Linha de Bordo"
 ];
 
+const formSchema = z.object({
+  data_intervencao: z.string().min(1, "Data é obrigatória"),
+  motivo: z.string().min(1, "Motivo é obrigatório"),
+  tipo_demarcacao: z.string().optional(),
+  cor: z.string().optional(),
+  largura_cm: z.string().optional(),
+  espessura_cm: z.string().optional(),
+  material: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  fora_plano_manutencao: z.boolean().default(false),
+  justificativa_fora_plano: z.string().optional(),
+});
+
 const IntervencoesSHForm = ({ 
   marcaSelecionada, 
   onIntervencaoRegistrada,
@@ -56,116 +73,110 @@ const IntervencoesSHForm = ({
   loteId,
   rodoviaId
 }: IntervencoesSHFormProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    data_intervencao: new Date().toISOString().split('T')[0],
-    motivo: "",
-    tipo_demarcacao: "",
-    cor: "",
-    largura_cm: "",
-    espessura_cm: "",
-    material: "",
-    fora_plano_manutencao: false,
-    justificativa_fora_plano: "",
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      data_intervencao: new Date().toISOString().split('T')[0],
+      motivo: "",
+      tipo_demarcacao: "",
+      cor: "",
+      largura_cm: "",
+      espessura_cm: "",
+      material: "",
+      latitude: "",
+      longitude: "",
+      fora_plano_manutencao: false,
+      justificativa_fora_plano: "",
+    },
   });
+
+  const capturarCoordenadas = () => {
+    setIsCapturing(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude.toString();
+          const lng = position.coords.longitude.toString();
+          form.setValue("latitude", lat);
+          form.setValue("longitude", lng);
+          toast.success(`Coordenadas capturadas: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+          setIsCapturing(false);
+        },
+        (error) => {
+          toast.error("Erro ao capturar localização");
+          setIsCapturing(false);
+        }
+      );
+    }
+  };
 
   // Preencher formulário com dados da marca selecionada
   useEffect(() => {
     if (marcaSelecionada && modo === 'normal') {
-      setFormData(prev => ({
-        ...prev,
+      form.reset({
+        data_intervencao: new Date().toISOString().split('T')[0],
+        motivo: "",
         tipo_demarcacao: (marcaSelecionada as any).tipo_demarcacao || "",
         cor: (marcaSelecionada as any).cor || "",
         largura_cm: (marcaSelecionada as any).largura_cm?.toString() || "",
         espessura_cm: (marcaSelecionada as any).espessura_cm?.toString() || "",
         material: (marcaSelecionada as any).material || "",
-      }));
+        latitude: "",
+        longitude: "",
+        fora_plano_manutencao: false,
+        justificativa_fora_plano: "",
+      });
     }
-  }, [marcaSelecionada, modo]);
+  }, [marcaSelecionada, modo, form]);
 
-  const handleChange = (field: string, value: any) => {
-    const newData = { ...formData, [field]: value };
-    setFormData(newData);
-    
+  // Propagar mudanças em tempo real no modo controlado
+  useEffect(() => {
     if (modo === 'controlado' && onDataChange) {
-      onDataChange(newData);
+      const subscription = form.watch((value) => {
+        onDataChange(value);
+      });
+      return () => subscription.unsubscribe();
     }
-  };
+  }, [form, modo, onDataChange]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (modo === 'controlado') {
-      if (onDataChange) onDataChange(formData);
+      if (onDataChange) onDataChange(data);
       return;
     }
     
     if (!marcaSelecionada) {
-      toast({
-        title: "Erro",
-        description: "Selecione uma marca longitudinal do inventário primeiro",
-        variant: "destructive",
-      });
+      toast.error("Selecione uma marca longitudinal do inventário primeiro");
       return;
     }
-
-    if (!formData.motivo || !formData.cor) {
-      toast({
-        title: "Erro",
-        description: "Preencha todos os campos obrigatórios",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
 
     try {
       const { error } = await supabase
         .from("ficha_marcas_longitudinais_intervencoes")
         .insert({
           ficha_marcas_longitudinais_id: marcaSelecionada.id,
-          data_intervencao: formData.data_intervencao,
-          motivo: formData.motivo,
-          tipo_demarcacao: formData.tipo_demarcacao || null,
-          cor: formData.cor || null,
-          largura_cm: formData.largura_cm ? parseFloat(formData.largura_cm) : null,
-          espessura_cm: formData.espessura_cm ? parseFloat(formData.espessura_cm) : null,
-          material: formData.material || null,
-          fora_plano_manutencao: formData.fora_plano_manutencao,
-          justificativa_fora_plano: formData.justificativa_fora_plano || null,
+          data_intervencao: data.data_intervencao,
+          motivo: data.motivo,
+          tipo_demarcacao: data.tipo_demarcacao || null,
+          cor: data.cor || null,
+          largura_cm: data.largura_cm ? parseFloat(data.largura_cm) : null,
+          espessura_cm: data.espessura_cm ? parseFloat(data.espessura_cm) : null,
+          material: data.material || null,
+          fora_plano_manutencao: data.fora_plano_manutencao,
+          justificativa_fora_plano: data.justificativa_fora_plano || null,
         });
 
       if (error) throw error;
 
-      toast({
-        title: "Sucesso!",
-        description: "Intervenção em sinalização horizontal registrada com sucesso",
-      });
+      toast.success("Intervenção em sinalização horizontal registrada com sucesso");
 
-      // Reset form
-      setFormData({
-        data_intervencao: new Date().toISOString().split('T')[0],
-        motivo: "",
-        tipo_demarcacao: "",
-        cor: "",
-        largura_cm: "",
-        espessura_cm: "",
-        material: "",
-        fora_plano_manutencao: false,
-        justificativa_fora_plano: "",
-      });
-      
+      form.reset();
       onIntervencaoRegistrada?.();
     } catch (error) {
       console.error("Erro ao salvar intervenção:", error);
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar intervenção. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      toast.error("Erro ao salvar intervenção. Tente novamente.");
     }
   };
 
@@ -181,156 +192,241 @@ const IntervencoesSHForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="data_intervencao">Data da Intervenção *</Label>
-              <Input
-                id="data_intervencao"
-                type="date"
-                value={formData.data_intervencao}
-                onChange={(e) => handleChange("data_intervencao", e.target.value)}
-                required
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="data_intervencao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data da Intervenção *</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="motivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Motivo da Intervenção *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Implantação">Implantação</SelectItem>
+                        <SelectItem value="Pintura Nova">Pintura Nova</SelectItem>
+                        <SelectItem value="Repintura">Repintura</SelectItem>
+                        <SelectItem value="Reforço">Reforço</SelectItem>
+                        <SelectItem value="Recuperação">Recuperação</SelectItem>
+                        <SelectItem value="Manutenção">Manutenção</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tipo_demarcacao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de Demarcação</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TIPOS_DEMARCACAO.map((tipo) => (
+                          <SelectItem key={tipo} value={tipo}>
+                            {tipo}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cor"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cor</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a cor" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CORES.map((cor) => (
+                          <SelectItem key={cor} value={cor}>
+                            {cor}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="largura_cm"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Largura (cm)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.1" placeholder="0.0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="espessura_cm"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Espessura (cm)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.1" placeholder="0.0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="material"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Material Utilizado</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o material" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {MATERIAIS.map((material) => (
+                          <SelectItem key={material} value={material}>
+                            {material}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="col-span-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={capturarCoordenadas}
+                  disabled={isCapturing}
+                  className="w-full"
+                >
+                  {isCapturing ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
+                  ) : (
+                    <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS</>
+                  )}
+                </Button>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="latitude"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Latitude</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="-15.123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="longitude"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Longitude</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="-47.123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="motivo">Motivo da Intervenção *</Label>
-              <Select
-                value={formData.motivo}
-                onValueChange={(value) => handleChange("motivo", value)}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Implantação">Implantação</SelectItem>
-                  <SelectItem value="Pintura Nova">Pintura Nova</SelectItem>
-                  <SelectItem value="Repintura">Repintura</SelectItem>
-                  <SelectItem value="Reforço">Reforço</SelectItem>
-                  <SelectItem value="Recuperação">Recuperação</SelectItem>
-                  <SelectItem value="Manutenção">Manutenção</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="tipo_demarcacao">Tipo de Demarcação</Label>
-              <Select
-                value={formData.tipo_demarcacao}
-                onValueChange={(value) => handleChange("tipo_demarcacao", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIPOS_DEMARCACAO.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>
-                      {tipo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cor">Cor</Label>
-              <Select
-                value={formData.cor}
-                onValueChange={(value) => handleChange("cor", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a cor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CORES.map((cor) => (
-                    <SelectItem key={cor} value={cor}>
-                      {cor}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="largura_cm">Largura (cm)</Label>
-              <Input
-                id="largura_cm"
-                type="number"
-                step="0.1"
-                value={formData.largura_cm}
-                onChange={(e) => handleChange("largura_cm", e.target.value)}
-                placeholder="0.0"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="espessura_cm">Espessura (cm)</Label>
-              <Input
-                id="espessura_cm"
-                type="number"
-                step="0.1"
-                value={formData.espessura_cm}
-                onChange={(e) => handleChange("espessura_cm", e.target.value)}
-                placeholder="0.0"
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="material">Material Utilizado</Label>
-              <Select
-                value={formData.material}
-                onValueChange={(value) => handleChange("material", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o material" />
-                </SelectTrigger>
-                <SelectContent>
-                  {MATERIAIS.map((material) => (
-                    <SelectItem key={material} value={material}>
-                      {material}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3 rounded-md border p-4">
-            <input
-              type="checkbox"
-              id="fora_plano"
-              checked={formData.fora_plano_manutencao}
-              onChange={(e) => handleChange("fora_plano_manutencao", e.target.checked)}
-              className="h-4 w-4 mt-1"
+            <FormField
+              control={form.control}
+              name="fora_plano_manutencao"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={field.onChange}
+                      className="h-4 w-4"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Fora do Plano de Manutenção</FormLabel>
+                  </div>
+                </FormItem>
+              )}
             />
-            <div className="space-y-1 leading-none">
-              <Label htmlFor="fora_plano">Fora do Plano de Manutenção</Label>
-            </div>
-          </div>
 
-          {formData.fora_plano_manutencao && (
-            <div className="space-y-2">
-              <Label htmlFor="justificativa_fora_plano">Justificativa *</Label>
-              <Textarea
-                id="justificativa_fora_plano"
-                value={formData.justificativa_fora_plano}
-                onChange={(e) => handleChange("justificativa_fora_plano", e.target.value)}
-                placeholder="Explique o motivo da intervenção fora do plano..."
-                rows={3}
-                required={formData.fora_plano_manutencao}
+            {form.watch("fora_plano_manutencao") && (
+              <FormField
+                control={form.control}
+                name="justificativa_fora_plano"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Justificativa *</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Explique o motivo da intervenção fora do plano..." {...field} rows={3} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-          )}
+            )}
 
-          {!hideSubmitButton && (
-            <Button type="submit" className="w-full" disabled={isLoading || (!marcaSelecionada && modo !== 'controlado')}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Salvar Intervenção
-            </Button>
-          )}
-        </form>
+            {!hideSubmitButton && (
+              <Button type="submit" className="w-full" disabled={!marcaSelecionada && modo !== 'controlado'}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Salvar Intervenção
+              </Button>
+            )}
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

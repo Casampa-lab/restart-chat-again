@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
@@ -23,6 +23,8 @@ const formSchema = z.object({
   tipo_refletivo: z.string().optional(),
   quantidade: z.string().optional(),
   foto_url: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
   fora_plano_manutencao: z.boolean().default(false),
   justificativa_fora_plano: z.string().optional(),
 });
@@ -54,6 +56,27 @@ export function IntervencoesCilindrosForm({
   rodoviaId
 }: IntervencoesCilindrosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const capturarCoordenadas = () => {
+    setIsCapturing(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude.toString();
+          const lng = position.coords.longitude.toString();
+          form.setValue("latitude", lat);
+          form.setValue("longitude", lng);
+          toast.success(`Coordenadas capturadas: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+          setIsCapturing(false);
+        },
+        (error) => {
+          toast.error("Erro ao capturar localização");
+          setIsCapturing(false);
+        }
+      );
+    }
+  };
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -68,6 +91,8 @@ export function IntervencoesCilindrosForm({
       tipo_refletivo: "",
       quantidade: "",
       foto_url: "",
+      latitude: "",
+      longitude: "",
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
     },
@@ -87,11 +112,23 @@ export function IntervencoesCilindrosForm({
         tipo_refletivo: (cilindroSelecionado as any).tipo_refletivo || "",
         quantidade: (cilindroSelecionado as any).quantidade?.toString() || "",
         foto_url: "",
+        latitude: "",
+        longitude: "",
         fora_plano_manutencao: false,
         justificativa_fora_plano: "",
       });
     }
   }, [cilindroSelecionado, modo, form]);
+
+  // Propagar mudanças em tempo real no modo controlado
+  useEffect(() => {
+    if (modo === 'controlado' && onDataChange) {
+      const subscription = form.watch((value) => {
+        onDataChange(value);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [form, modo, onDataChange]);
 
   const onSubmit = async (data: FormData) => {
     if (modo === 'controlado') {
@@ -336,6 +373,52 @@ export function IntervencoesCilindrosForm({
                 </FormItem>
               )}
             />
+
+            <div className="col-span-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={capturarCoordenadas}
+                disabled={isCapturing}
+                className="w-full"
+              >
+                {isCapturing ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
+                ) : (
+                  <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS</>
+                )}
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="latitude"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Latitude</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="-15.123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="longitude"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Longitude</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="-47.123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}

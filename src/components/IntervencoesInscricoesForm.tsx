@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Loader2, MapPin } from "lucide-react";
 
 interface IntervencoesInscricoesFormProps {
   inscricaoSelecionada?: {
@@ -46,6 +49,23 @@ const TIPOS_INSCRICAO = [
   "Outros"
 ];
 
+const formSchema = z.object({
+  data_intervencao: z.string().min(1, "Data é obrigatória"),
+  motivo: z.string().min(1, "Motivo é obrigatório"),
+  tipo_inscricao: z.string().optional(),
+  cor: z.string().optional(),
+  dimensoes: z.string().optional(),
+  area_m2: z.string().optional(),
+  material_utilizado: z.string().optional(),
+  estado_conservacao: z.string().optional(),
+  observacao: z.string().optional(),
+  foto_url: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  fora_plano_manutencao: z.boolean().default(false),
+  justificativa_fora_plano: z.string().optional(),
+});
+
 const IntervencoesInscricoesForm = ({ 
   inscricaoSelecionada, 
   onIntervencaoRegistrada,
@@ -55,125 +75,119 @@ const IntervencoesInscricoesForm = ({
   loteId,
   rodoviaId
 }: IntervencoesInscricoesFormProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    data_intervencao: new Date().toISOString().split('T')[0],
-    motivo: "",
-    tipo_inscricao: "",
-    cor: "",
-    dimensoes: "",
-    area_m2: "",
-    material_utilizado: "",
-    estado_conservacao: "",
-    observacao: "",
-    foto_url: "",
-    fora_plano_manutencao: false,
-    justificativa_fora_plano: "",
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      data_intervencao: new Date().toISOString().split('T')[0],
+      motivo: "",
+      tipo_inscricao: "",
+      cor: "",
+      dimensoes: "",
+      area_m2: "",
+      material_utilizado: "",
+      estado_conservacao: "",
+      observacao: "",
+      foto_url: "",
+      latitude: "",
+      longitude: "",
+      fora_plano_manutencao: false,
+      justificativa_fora_plano: "",
+    },
   });
+
+  const capturarCoordenadas = () => {
+    setIsCapturing(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude.toString();
+          const lng = position.coords.longitude.toString();
+          form.setValue("latitude", lat);
+          form.setValue("longitude", lng);
+          toast.success(`Coordenadas capturadas: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+          setIsCapturing(false);
+        },
+        (error) => {
+          toast.error("Erro ao capturar localização");
+          setIsCapturing(false);
+        }
+      );
+    }
+  };
 
   // Preencher formulário com dados da inscrição selecionada
   useEffect(() => {
     if (inscricaoSelecionada && modo === 'normal') {
-      setFormData(prev => ({
-        ...prev,
+      form.reset({
+        data_intervencao: new Date().toISOString().split('T')[0],
+        motivo: "",
         tipo_inscricao: (inscricaoSelecionada as any).tipo_inscricao || "",
         cor: (inscricaoSelecionada as any).cor || "",
         dimensoes: (inscricaoSelecionada as any).dimensoes || "",
         area_m2: (inscricaoSelecionada as any).area_m2?.toString() || "",
         material_utilizado: (inscricaoSelecionada as any).material_utilizado || "",
-      }));
+        estado_conservacao: "",
+        observacao: "",
+        foto_url: "",
+        latitude: "",
+        longitude: "",
+        fora_plano_manutencao: false,
+        justificativa_fora_plano: "",
+      });
     }
-  }, [inscricaoSelecionada, modo]);
+  }, [inscricaoSelecionada, modo, form]);
 
-  const handleChange = (field: string, value: any) => {
-    const newData = { ...formData, [field]: value };
-    setFormData(newData);
-    
+  // Propagar mudanças em tempo real no modo controlado
+  useEffect(() => {
     if (modo === 'controlado' && onDataChange) {
-      onDataChange(newData);
+      const subscription = form.watch((value) => {
+        onDataChange(value);
+      });
+      return () => subscription.unsubscribe();
     }
-  };
+  }, [form, modo, onDataChange]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (modo === 'controlado') {
-      if (onDataChange) onDataChange(formData);
+      if (onDataChange) onDataChange(data);
       return;
     }
     
     if (!inscricaoSelecionada) {
-      toast({
-        title: "Erro",
-        description: "Selecione uma inscrição do inventário primeiro",
-        variant: "destructive",
-      });
+      toast.error("Selecione uma inscrição do inventário primeiro");
       return;
     }
-
-    if (!formData.motivo) {
-      toast({
-        title: "Erro",
-        description: "Preencha o motivo da intervenção",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
 
     try {
       const { error } = await supabase
         .from("ficha_inscricoes_intervencoes")
         .insert({
           ficha_inscricoes_id: inscricaoSelecionada.id,
-          data_intervencao: formData.data_intervencao,
-          motivo: formData.motivo,
-          tipo_inscricao: formData.tipo_inscricao || null,
-          cor: formData.cor || null,
-          dimensoes: formData.dimensoes || null,
-          area_m2: formData.area_m2 ? parseFloat(formData.area_m2) : null,
-          material_utilizado: formData.material_utilizado || null,
-          estado_conservacao: formData.estado_conservacao || null,
-          observacao: formData.observacao || null,
-          foto_url: formData.foto_url || null,
-          fora_plano_manutencao: formData.fora_plano_manutencao,
-          justificativa_fora_plano: formData.justificativa_fora_plano || null,
+          data_intervencao: data.data_intervencao,
+          motivo: data.motivo,
+          tipo_inscricao: data.tipo_inscricao || null,
+          cor: data.cor || null,
+          dimensoes: data.dimensoes || null,
+          area_m2: data.area_m2 ? parseFloat(data.area_m2) : null,
+          material_utilizado: data.material_utilizado || null,
+          estado_conservacao: data.estado_conservacao || null,
+          observacao: data.observacao || null,
+          foto_url: data.foto_url || null,
+          fora_plano_manutencao: data.fora_plano_manutencao,
+          justificativa_fora_plano: data.justificativa_fora_plano || null,
         });
 
       if (error) throw error;
 
-      toast({
-        title: "Sucesso!",
-        description: "Intervenção em inscrições registrada com sucesso",
-      });
+      toast.success("Intervenção em inscrições registrada com sucesso");
 
-      // Reset form
-      setFormData({
-        data_intervencao: new Date().toISOString().split('T')[0],
-        motivo: "",
-        tipo_inscricao: "",
-        cor: "",
-        dimensoes: "",
-        area_m2: "",
-        material_utilizado: "",
-        estado_conservacao: "",
-        observacao: "",
-        foto_url: "",
-        fora_plano_manutencao: false,
-        justificativa_fora_plano: "",
-      });
-      
+      form.reset();
       onIntervencaoRegistrada?.();
     } catch (error) {
       console.error("Erro ao salvar intervenção:", error);
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar intervenção. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      toast.error("Erro ao salvar intervenção. Tente novamente.");
     }
   };
 
@@ -189,191 +203,291 @@ const IntervencoesInscricoesForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="data_intervencao">Data da Intervenção *</Label>
-              <Input
-                id="data_intervencao"
-                type="date"
-                value={formData.data_intervencao}
-                onChange={(e) => handleChange("data_intervencao", e.target.value)}
-                required
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="data_intervencao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data da Intervenção *</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="motivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Motivo da Intervenção *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Implantação">Implantação</SelectItem>
+                        <SelectItem value="Pintura Nova">Pintura Nova</SelectItem>
+                        <SelectItem value="Repintura">Repintura</SelectItem>
+                        <SelectItem value="Recuperação">Recuperação</SelectItem>
+                        <SelectItem value="Manutenção">Manutenção</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tipo_inscricao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de Inscrição</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TIPOS_INSCRICAO.map((tipo) => (
+                          <SelectItem key={tipo} value={tipo}>
+                            {tipo}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cor"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cor</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a cor" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CORES.map((cor) => (
+                          <SelectItem key={cor} value={cor}>
+                            {cor}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="area_m2"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Área Executada (m²)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="dimensoes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dimensões</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: 3x2m, 10x1,5m" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="material_utilizado"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Material Utilizado</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o material" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {MATERIAIS.map((material) => (
+                          <SelectItem key={material} value={material}>
+                            {material}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="estado_conservacao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estado de Conservação</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o estado" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Bom">Bom</SelectItem>
+                        <SelectItem value="Regular">Regular</SelectItem>
+                        <SelectItem value="Ruim">Ruim</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="observacao"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Observações</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Observações sobre a intervenção..." {...field} rows={3} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="foto_url"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>URL da Foto</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Caminho da foto no storage..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="col-span-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={capturarCoordenadas}
+                  disabled={isCapturing}
+                  className="w-full"
+                >
+                  {isCapturing ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
+                  ) : (
+                    <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS</>
+                  )}
+                </Button>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="latitude"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Latitude</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="-15.123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="longitude"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Longitude</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="-47.123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="motivo">Motivo da Intervenção *</Label>
-              <Select
-                value={formData.motivo}
-                onValueChange={(value) => handleChange("motivo", value)}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Implantação">Implantação</SelectItem>
-                  <SelectItem value="Pintura Nova">Pintura Nova</SelectItem>
-                  <SelectItem value="Repintura">Repintura</SelectItem>
-                  <SelectItem value="Recuperação">Recuperação</SelectItem>
-                  <SelectItem value="Manutenção">Manutenção</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="tipo_inscricao">Tipo de Inscrição</Label>
-              <Select
-                value={formData.tipo_inscricao}
-                onValueChange={(value) => handleChange("tipo_inscricao", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIPOS_INSCRICAO.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>
-                      {tipo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cor">Cor</Label>
-              <Select
-                value={formData.cor}
-                onValueChange={(value) => handleChange("cor", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a cor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CORES.map((cor) => (
-                    <SelectItem key={cor} value={cor}>
-                      {cor}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="area_m2">Área Executada (m²)</Label>
-              <Input
-                id="area_m2"
-                type="number"
-                step="0.01"
-                value={formData.area_m2}
-                onChange={(e) => handleChange("area_m2", e.target.value)}
-                placeholder="0.00"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="dimensoes">Dimensões</Label>
-              <Input
-                id="dimensoes"
-                value={formData.dimensoes}
-                onChange={(e) => handleChange("dimensoes", e.target.value)}
-                placeholder="Ex: 3x2m, 10x1,5m"
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="material_utilizado">Material Utilizado</Label>
-              <Select
-                value={formData.material_utilizado}
-                onValueChange={(value) => handleChange("material_utilizado", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o material" />
-                </SelectTrigger>
-                <SelectContent>
-                  {MATERIAIS.map((material) => (
-                    <SelectItem key={material} value={material}>
-                      {material}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="estado_conservacao">Estado de Conservação</Label>
-              <Select
-                value={formData.estado_conservacao}
-                onValueChange={(value) => handleChange("estado_conservacao", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Bom">Bom</SelectItem>
-                  <SelectItem value="Regular">Regular</SelectItem>
-                  <SelectItem value="Ruim">Ruim</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="observacao">Observações</Label>
-              <Textarea
-                id="observacao"
-                value={formData.observacao}
-                onChange={(e) => handleChange("observacao", e.target.value)}
-                placeholder="Observações sobre a intervenção..."
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="foto_url">URL da Foto</Label>
-              <Input
-                id="foto_url"
-                value={formData.foto_url}
-                onChange={(e) => handleChange("foto_url", e.target.value)}
-                placeholder="Caminho da foto no storage..."
-              />
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3 rounded-md border p-4">
-            <input
-              type="checkbox"
-              id="fora_plano"
-              checked={formData.fora_plano_manutencao}
-              onChange={(e) => handleChange("fora_plano_manutencao", e.target.checked)}
-              className="h-4 w-4 mt-1"
+            <FormField
+              control={form.control}
+              name="fora_plano_manutencao"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={field.onChange}
+                      className="h-4 w-4"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Fora do Plano de Manutenção</FormLabel>
+                  </div>
+                </FormItem>
+              )}
             />
-            <div className="space-y-1 leading-none">
-              <Label htmlFor="fora_plano">Fora do Plano de Manutenção</Label>
-            </div>
-          </div>
 
-          {formData.fora_plano_manutencao && (
-            <div className="space-y-2">
-              <Label htmlFor="justificativa_fora_plano">Justificativa *</Label>
-              <Textarea
-                id="justificativa_fora_plano"
-                value={formData.justificativa_fora_plano}
-                onChange={(e) => handleChange("justificativa_fora_plano", e.target.value)}
-                placeholder="Explique o motivo da intervenção fora do plano..."
-                rows={3}
-                required={formData.fora_plano_manutencao}
+            {form.watch("fora_plano_manutencao") && (
+              <FormField
+                control={form.control}
+                name="justificativa_fora_plano"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Justificativa *</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Explique o motivo da intervenção fora do plano..." {...field} rows={3} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-          )}
+            )}
 
-          {!hideSubmitButton && (
-            <Button type="submit" className="w-full" disabled={isLoading || (!inscricaoSelecionada && modo !== 'controlado')}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Salvar Intervenção
-            </Button>
-          )}
-        </form>
+            {!hideSubmitButton && (
+              <Button type="submit" className="w-full" disabled={!inscricaoSelecionada && modo !== 'controlado'}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Salvar Intervenção
+              </Button>
+            )}
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
