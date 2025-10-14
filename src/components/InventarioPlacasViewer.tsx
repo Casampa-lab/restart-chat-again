@@ -522,11 +522,11 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("km")}
                       >
-                        <div className="flex items-center">
-                          Km
+                        <div className="flex items-center justify-center">
+                          km
                           <SortIcon column="km" />
                         </div>
                       </TableHead>
@@ -539,8 +539,24 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="lado" />
                         </div>
                       </TableHead>
-                      <TableHead className="text-center">Projeto</TableHead>
-                      <TableHead className="text-center">Status</TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("servico")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Projeto
+                          <SortIcon column="servico" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("status_reconciliacao")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Status
+                          <SortIcon column="status_reconciliacao" />
+                        </div>
+                      </TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
@@ -581,7 +597,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <TableCell>
                             <Badge variant="secondary">{placa.suporte || "-"}</Badge>
                           </TableCell>
-                          <TableCell>{placa.km?.toFixed(2) || "-"}</TableCell>
+                          <TableCell className="text-center">{placa.km?.toFixed(2) || "-"}</TableCell>
                           <TableCell>{placa.lado || "-"}</TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,6 +24,24 @@ export function ReconciliacaoDrawer({
 }: ReconciliacaoDrawerProps) {
   const [observacao, setObservacao] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isCoordenador, setIsCoordenador] = useState(false);
+
+  // Verificar se usuário é coordenador
+  useEffect(() => {
+    const checkRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .in("role", ["coordenador", "admin"]);
+
+      setIsCoordenador(!!roles && roles.length > 0);
+    };
+    checkRole();
+  }, []);
 
   const handleSolicitarReconciliacao = async () => {
     setLoading(true);
@@ -31,25 +49,46 @@ export function ReconciliacaoDrawer({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      const { error } = await supabase
-        .from("necessidades_placas")
-        .update({
-          status_reconciliacao: 'pendente_aprovacao',
-          solicitado_por: user.id,
-          solicitado_em: new Date().toISOString(),
-          observacao_usuario: observacao,
-          localizado_em_campo: true,
-        })
-        .eq("id", necessidade.id);
+      if (isCoordenador) {
+        // Coordenador aprova diretamente
+        const { error } = await supabase
+          .from("necessidades_placas")
+          .update({
+            status_reconciliacao: 'aprovado',
+            aprovado_por: user.id,
+            aprovado_em: new Date().toISOString(),
+            observacao_coordenador: observacao,
+            servico_final: "Substituir",
+            servico: "Substituir",
+            reconciliado: true,
+            localizado_em_campo: true,
+          })
+          .eq("id", necessidade.id);
 
-      if (error) throw error;
+        if (error) throw error;
+        toast.success("✓ Substituição aprovada com sucesso!");
+      } else {
+        // Técnico envia para aprovação
+        const { error } = await supabase
+          .from("necessidades_placas")
+          .update({
+            status_reconciliacao: 'pendente_aprovacao',
+            solicitado_por: user.id,
+            solicitado_em: new Date().toISOString(),
+            observacao_usuario: observacao,
+            localizado_em_campo: true,
+          })
+          .eq("id", necessidade.id);
 
-      toast.success("✓ Reconciliação enviada ao coordenador!");
+        if (error) throw error;
+        toast.success("✓ Reconciliação enviada ao coordenador!");
+      }
+
       onReconciliar();
       onOpenChange(false);
     } catch (error) {
       console.error("Erro:", error);
-      toast.error("Erro ao enviar reconciliação");
+      toast.error("Erro ao processar reconciliação");
     } finally {
       setLoading(false);
     }
@@ -149,12 +188,14 @@ export function ReconciliacaoDrawer({
           {/* Campo de observação */}
           <div className="space-y-2">
             <label className="text-sm font-medium">
-              Observação (opcional para revisão)
+              Observação (opcional)
             </label>
             <Textarea
               value={observacao}
               onChange={(e) => setObservacao(e.target.value)}
-              placeholder="Descreva o que você viu no local ou qualquer dúvida..."
+              placeholder={isCoordenador 
+                ? "Ex: Confirmado em campo que é a mesma placa..." 
+                : "Ex: Placa R-1 no local, apesar do projeto indicar R-1A..."}
               rows={3}
             />
           </div>
@@ -169,7 +210,9 @@ export function ReconciliacaoDrawer({
             className="w-full bg-green-600 hover:bg-green-700 text-white"
           >
             <CheckCircle2 className="h-5 w-5 mr-2" />
-            ✓ Confirmar: É a mesma placa (Substituição)
+            {isCoordenador 
+              ? "✓ Aprovar Substituição" 
+              : "✓ Confirmar: É a mesma placa (Substituição)"}
           </Button>
 
           {/* Ação Secundária: Não é a mesma */}
