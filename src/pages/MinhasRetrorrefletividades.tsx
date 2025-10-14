@@ -359,7 +359,7 @@ const MinhasRetrorrefletividades = () => {
                                 <TableHead>Data</TableHead>
                                 <TableHead>Lote</TableHead>
                                 <TableHead>Rodovia</TableHead>
-                                <TableHead>KM</TableHead>
+                                <TableHead>km</TableHead>
                                 <TableHead>Posição</TableHead>
                                 <TableHead>Cor</TableHead>
                                 <TableHead>Média</TableHead>
@@ -469,7 +469,7 @@ const MinhasRetrorrefletividades = () => {
                                 <TableHead>Data</TableHead>
                                 <TableHead>Lote</TableHead>
                                 <TableHead>Rodovia</TableHead>
-                                <TableHead>KM</TableHead>
+                                <TableHead>km</TableHead>
                                 <TableHead>Lado</TableHead>
                                 <TableHead>Tipo</TableHead>
                                 <TableHead>Código</TableHead>
@@ -629,8 +629,8 @@ const MinhasRetrorrefletividades = () => {
                           <TableRow>
                             <TableHead className="w-12">Sel.</TableHead>
                             <TableHead>Data</TableHead>
-                            <TableHead>KM Inicial</TableHead>
-                            <TableHead>KM Final</TableHead>
+                            <TableHead>km Inicial</TableHead>
+                            <TableHead>km Final</TableHead>
                             <TableHead>FAIXA</TableHead>
                             <TableHead>Tipo</TableHead>
                             <TableHead>Cor</TableHead>
@@ -762,7 +762,7 @@ const MinhasRetrorrefletividades = () => {
                 />
               </div>
               <div>
-                <Label>KM de Referência</Label>
+                <Label>km de Referência</Label>
                 <Input
                   type="number"
                   step="0.001"

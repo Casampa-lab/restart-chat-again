@@ -167,7 +167,7 @@ export function IntervencoesPorticosForm({
         <CardTitle>Intervenção em Pórticos, Semipórticos e Braços</CardTitle>
         <CardDescription>
           {porticoSelecionado 
-            ? `Registrando intervenção para ${porticoSelecionado.tipo} no KM ${porticoSelecionado.km}${porticoSelecionado.snv ? ` (SNV: ${porticoSelecionado.snv})` : ''}`
+            ? `Registrando intervenção para ${porticoSelecionado.tipo} no km ${porticoSelecionado.km}${porticoSelecionado.snv ? ` (SNV: ${porticoSelecionado.snv})` : ''}`
             : "Selecione um pórtico do inventário para registrar intervenção"
           }
         </CardDescription>

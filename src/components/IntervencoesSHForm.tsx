@@ -186,7 +186,7 @@ const IntervencoesSHForm = ({
         <CardTitle>Intervenção em Marcas Longitudinais</CardTitle>
         <CardDescription>
           {marcaSelecionada 
-            ? `Registrando intervenção para marca entre KM ${marcaSelecionada.km_inicial} - ${marcaSelecionada.km_final}${marcaSelecionada.snv ? ` (SNV: ${marcaSelecionada.snv})` : ''}`
+            ? `Registrando intervenção para marca entre km ${marcaSelecionada.km_inicial} - ${marcaSelecionada.km_final}${marcaSelecionada.snv ? ` (SNV: ${marcaSelecionada.snv})` : ''}`
             : "Selecione uma marca longitudinal do inventário para registrar intervenção"
           }
         </CardDescription>

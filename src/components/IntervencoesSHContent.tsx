@@ -276,7 +276,7 @@ const IntervencoesSHContent = () => {
                     <TableHead>Data</TableHead>
                     <TableHead>Lote</TableHead>
                     <TableHead>Rodovia</TableHead>
-                    <TableHead>Trecho (KM)</TableHead>
+                    <TableHead>Trecho (km)</TableHead>
                     <TableHead>Tipo Intervenção</TableHead>
                     <TableHead>Tipo Demarcação</TableHead>
                     <TableHead>Cor</TableHead>
@@ -400,7 +400,7 @@ const IntervencoesSHContent = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>KM Inicial</Label>
+                  <Label>km Inicial</Label>
                   <Input
                     type="number"
                     step="0.001"
@@ -409,7 +409,7 @@ const IntervencoesSHContent = () => {
                   />
                 </div>
                 <div>
-                  <Label>KM Final</Label>
+                  <Label>km Final</Label>
                   <Input
                     type="number"
                     step="0.001"

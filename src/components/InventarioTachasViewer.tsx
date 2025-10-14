@@ -356,7 +356,7 @@ export function InventarioTachasViewer({
                         onClick={() => handleSort("km_inicial")}
                       >
                         <div className="flex items-center">
-                          Km Inicial
+                          km Inicial
                           <SortIcon column="km_inicial" />
                         </div>
                       </TableHead>
@@ -566,7 +566,7 @@ export function InventarioTachasViewer({
                   </h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">KM Inicial:</span>
+                      <span className="text-sm font-medium text-muted-foreground">km Inicial:</span>
                       <p className="text-sm">{selectedTacha.km_inicial.toFixed(2)}</p>
                     </div>
                     {selectedTacha.latitude_inicial && (
@@ -592,7 +592,7 @@ export function InventarioTachasViewer({
                   </h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">KM Final:</span>
+                      <span className="text-sm font-medium text-muted-foreground">km Final:</span>
                       <p className="text-sm">{selectedTacha.km_final.toFixed(2)}</p>
                     </div>
                     {selectedTacha.latitude_final && (

@@ -145,7 +145,7 @@ export function IntervencaoInventarioForm({
               <span className="font-medium">{placaInfo.codigo || "-"}</span>
             </div>
             <div>
-              <span className="text-muted-foreground">KM:</span>{" "}
+              <span className="text-muted-foreground">km:</span>{" "}
               <span className="font-medium">{placaInfo.km?.toFixed(2) || "-"}</span>
             </div>
             <div>

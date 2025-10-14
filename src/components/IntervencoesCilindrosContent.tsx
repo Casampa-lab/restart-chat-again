@@ -275,7 +275,7 @@ const IntervencoesCilindrosContent = () => {
                     <TableHead>Data</TableHead>
                     <TableHead>Lote</TableHead>
                     <TableHead>Rodovia</TableHead>
-                    <TableHead>Trecho (KM)</TableHead>
+                    <TableHead>Trecho (km)</TableHead>
                     <TableHead>Motivo</TableHead>
                     <TableHead>Quantidade</TableHead>
                     <TableHead>Cor Corpo</TableHead>

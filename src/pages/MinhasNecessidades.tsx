@@ -444,9 +444,9 @@ const MinhasNecessidades = () => {
                               <TableCell>
                                 <div className="text-sm">
                                   {nec.km_inicial && nec.km_final ? (
-                                    <>KM {Number(nec.km_inicial).toFixed(3)} - {Number(nec.km_final).toFixed(3)}</>
+                                    <>km {Number(nec.km_inicial).toFixed(3)} - {Number(nec.km_final).toFixed(3)}</>
                                   ) : nec.km ? (
-                                    <>KM {Number(nec.km).toFixed(3)}</>
+                                    <>km {Number(nec.km).toFixed(3)}</>
                                   ) : (
                                     "-"
                                   )}

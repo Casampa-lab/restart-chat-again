@@ -135,7 +135,7 @@ const IntervencoesInscricoesContent = () => {
                     <TableHead>Data</TableHead>
                     <TableHead>Lote</TableHead>
                     <TableHead>Rodovia</TableHead>
-                    <TableHead>Trecho (KM)</TableHead>
+                    <TableHead>Trecho (km)</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead>Cor</TableHead>
                     <TableHead>Área (m²)</TableHead>

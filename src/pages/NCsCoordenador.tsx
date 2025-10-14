@@ -238,7 +238,7 @@ const NCsCoordenador = () => {
                         <TableHead>Rodovia</TableHead>
                         <TableHead>Lote</TableHead>
                         <TableHead>Empresa</TableHead>
-                        <TableHead>KM</TableHead>
+                        <TableHead>km</TableHead>
                         <TableHead>Tipo</TableHead>
                         <TableHead>Problema</TableHead>
                         <TableHead>Situação</TableHead>

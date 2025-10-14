@@ -133,7 +133,7 @@ export default function MeusRegistrosNC() {
                     <TableRow>
                       <TableHead>Número</TableHead>
                       <TableHead>Data</TableHead>
-                      <TableHead>KM</TableHead>
+                      <TableHead>km</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead>Natureza</TableHead>
                       <TableHead>Grau</TableHead>
@@ -192,7 +192,7 @@ export default function MeusRegistrosNC() {
                   <p>{new Date(selectedRegistro.data_registro).toLocaleDateString('pt-BR')}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">KM:</p>
+                  <p className="text-sm font-semibold">km:</p>
                   <p>{selectedRegistro.km_inicial} ao {selectedRegistro.km_final}</p>
                 </div>
                 <div>
@@ -239,7 +239,7 @@ export default function MeusRegistrosNC() {
                         </CardHeader>
                         <CardContent className="space-y-1 text-sm">
                           {foto.snv && <p><strong>SNV:</strong> {foto.snv}</p>}
-                          {foto.km && <p><strong>KM:</strong> {foto.km}</p>}
+                          {foto.km && <p><strong>km:</strong> {foto.km}</p>}
                           {foto.sentido && <p><strong>Sentido:</strong> {foto.sentido}</p>}
                           {foto.latitude && foto.longitude && (
                             <p><strong>Coordenadas:</strong> {foto.latitude}, {foto.longitude}</p>

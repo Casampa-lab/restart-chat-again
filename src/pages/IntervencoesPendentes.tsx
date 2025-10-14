@@ -222,7 +222,7 @@ export default function IntervencoesPendentes() {
                   <TableRow>
                     <TableHead>Tipo</TableHead>
                     <TableHead>Data</TableHead>
-                    <TableHead>KM</TableHead>
+                    <TableHead>km</TableHead>
                     <TableHead>Motivo</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Ações</TableHead>
@@ -288,7 +288,7 @@ export default function IntervencoesPendentes() {
                   <strong>Motivo:</strong> {selectedIntervencao.motivo}
                 </div>
                 <div>
-                  <strong>KM:</strong> {selectedIntervencao.cadastro?.km || selectedIntervencao.cadastro?.km_inicial || "-"}
+                  <strong>km:</strong> {selectedIntervencao.cadastro?.km || selectedIntervencao.cadastro?.km_inicial || "-"}
                 </div>
               </div>
 

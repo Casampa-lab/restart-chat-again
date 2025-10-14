@@ -779,7 +779,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   </h3>
                   <div className="grid grid-cols-4 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Km:</span>
+                      <span className="text-sm font-medium text-muted-foreground">km:</span>
                       <p className="text-sm">{selectedPlaca.km?.toFixed(2) || "-"}</p>
                     </div>
                     <div>

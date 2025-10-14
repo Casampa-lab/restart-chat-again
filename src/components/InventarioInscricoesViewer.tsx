@@ -400,7 +400,7 @@ export function InventarioInscricoesViewer({
                         onClick={() => handleSort("km_inicial")}
                       >
                         <div className="flex items-center">
-                          Km
+                          km
                           <SortIcon column="km_inicial" />
                         </div>
                       </TableHead>
@@ -620,7 +620,7 @@ export function InventarioInscricoesViewer({
                     </h3>
                     <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <span className="text-sm font-medium text-muted-foreground">KM Inicial:</span>
+                        <span className="text-sm font-medium text-muted-foreground">km Inicial:</span>
                         <p className="text-sm">{selectedInscricao.km_inicial?.toFixed(2) || "-"}</p>
                       </div>
                       {selectedInscricao.latitude_inicial && (
@@ -646,7 +646,7 @@ export function InventarioInscricoesViewer({
                     </h3>
                     <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <span className="text-sm font-medium text-muted-foreground">KM Final:</span>
+                        <span className="text-sm font-medium text-muted-foreground">km Final:</span>
                         <p className="text-sm">{selectedInscricao.km_final?.toFixed(2) || "-"}</p>
                       </div>
                       {selectedInscricao.latitude_final && (

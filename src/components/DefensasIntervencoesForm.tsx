@@ -489,7 +489,7 @@ const DefensasIntervencoesForm = ({
         <CardTitle>Intervenção em Defensas</CardTitle>
         <CardDescription>
           {defensaSelecionada 
-            ? `Registre uma intervenção para a defensa KM ${defensaSelecionada.km_inicial?.toFixed(3)} - ${defensaSelecionada.km_final?.toFixed(3)}`
+            ? `Registre uma intervenção para a defensa km ${defensaSelecionada.km_inicial?.toFixed(3)} - ${defensaSelecionada.km_final?.toFixed(3)}`
             : "Selecione uma defensa no mapa ou na lista para registrar uma intervenção"}
         </CardDescription>
       </CardHeader>

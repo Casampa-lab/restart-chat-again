@@ -322,7 +322,7 @@ export const InventarioDefensasViewer = ({
                   onClick={() => handleSort("km_inicial")}
                 >
                   <div className="whitespace-normal leading-tight flex items-center justify-center">
-                    Km<br/>Inicial
+                    km<br/>Inicial
                     <SortIcon column="km_inicial" />
                   </div>
                 </TableHead>
@@ -331,7 +331,7 @@ export const InventarioDefensasViewer = ({
                   onClick={() => handleSort("km_final")}
                 >
                   <div className="whitespace-normal leading-tight flex items-center justify-center">
-                    Km<br/>Final
+                    km<br/>Final
                     <SortIcon column="km_final" />
                   </div>
                 </TableHead>
@@ -499,7 +499,7 @@ export const InventarioDefensasViewer = ({
                   </h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Km Inicial:</span>
+                      <span className="text-sm font-medium text-muted-foreground">km Inicial:</span>
                       <p className="text-sm">{selectedDefensa.km_inicial}</p>
                     </div>
                     <div>
@@ -529,7 +529,7 @@ export const InventarioDefensasViewer = ({
                   </h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Km Final:</span>
+                      <span className="text-sm font-medium text-muted-foreground">km Final:</span>
                       <p className="text-sm">{selectedDefensa.km_final}</p>
                     </div>
                     <div>

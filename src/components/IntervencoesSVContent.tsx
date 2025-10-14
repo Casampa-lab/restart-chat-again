@@ -246,7 +246,7 @@ const IntervencoesSVContent = () => {
                     <TableHead>Data</TableHead>
                     <TableHead>Lote</TableHead>
                     <TableHead>Rodovia</TableHead>
-                    <TableHead>KM</TableHead>
+                    <TableHead>km</TableHead>
                     <TableHead>Tipo Intervenção</TableHead>
                     <TableHead>Tipo Placa</TableHead>
                     <TableHead>Código</TableHead>
@@ -371,7 +371,7 @@ const IntervencoesSVContent = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>KM de Referência</Label>
+                  <Label>km de Referência</Label>
                   <Input
                     type="number"
                     step="0.001"

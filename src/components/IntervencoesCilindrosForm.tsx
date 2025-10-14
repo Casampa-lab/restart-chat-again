@@ -16,8 +16,8 @@ const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   snv: z.string().optional(),
   motivo: z.string().min(1, "Motivo é obrigatório"),
-  km_inicial: z.string().min(1, "KM Inicial é obrigatório"),
-  km_final: z.string().min(1, "KM Final é obrigatório"),
+  km_inicial: z.string().min(1, "km Inicial é obrigatório"),
+  km_final: z.string().min(1, "km Final é obrigatório"),
   cor_corpo: z.string().min(1, "Cor do corpo é obrigatória"),
   cor_refletivo: z.string().optional(),
   tipo_refletivo: z.string().optional(),
@@ -177,7 +177,7 @@ export function IntervencoesCilindrosForm({
         <CardTitle>Intervenção em Cilindros Delimitadores</CardTitle>
         <CardDescription>
           {cilindroSelecionado 
-            ? `Registrando intervenção para cilindro entre KM ${cilindroSelecionado.km_inicial} - ${cilindroSelecionado.km_final}${cilindroSelecionado.snv ? ` (SNV: ${cilindroSelecionado.snv})` : ''}`
+            ? `Registrando intervenção para cilindro entre km ${cilindroSelecionado.km_inicial} - ${cilindroSelecionado.km_final}${cilindroSelecionado.snv ? ` (SNV: ${cilindroSelecionado.snv})` : ''}`
             : "Selecione um cilindro do inventário para registrar intervenção"
           }
         </CardDescription>
@@ -244,7 +244,7 @@ export function IntervencoesCilindrosForm({
                 name="km_inicial"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>KM Inicial *</FormLabel>
+                    <FormLabel>km Inicial *</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -263,7 +263,7 @@ export function IntervencoesCilindrosForm({
                 name="km_final"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>KM Final *</FormLabel>
+                    <FormLabel>km Final *</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 

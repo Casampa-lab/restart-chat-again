@@ -243,8 +243,8 @@ const MinhasFrentesLiberadas = () => {
                     <TableRow>
                       <TableHead className="w-12">Sel.</TableHead>
                       <TableHead>Data Liberação</TableHead>
-                      <TableHead>KM Inicial</TableHead>
-                      <TableHead>KM Final</TableHead>
+                      <TableHead>km Inicial</TableHead>
+                      <TableHead>km Final</TableHead>
                       <TableHead>Extensão (km)</TableHead>
                       <TableHead>Portaria</TableHead>
                       <TableHead>Observações</TableHead>
@@ -352,7 +352,7 @@ const MinhasFrentesLiberadas = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>KM Inicial</Label>
+                  <Label>km Inicial</Label>
                   <Input
                     type="number"
                     step="0.001"
@@ -361,7 +361,7 @@ const MinhasFrentesLiberadas = () => {
                   />
                 </div>
                 <div>
-                  <Label>KM Final</Label>
+                  <Label>km Final</Label>
                   <Input
                     type="number"
                     step="0.001"

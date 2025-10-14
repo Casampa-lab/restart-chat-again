@@ -391,7 +391,7 @@ export function InventarioPorticosViewer({
                       onClick={() => handleSort("km")}
                     >
                       <div className="whitespace-normal leading-tight flex items-center justify-center">
-                        Km
+                        km
                         <SortIcon column="km" />
                       </div>
                     </TableHead>
@@ -632,7 +632,7 @@ export function InventarioPorticosViewer({
                   </h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">KM:</span>
+                      <span className="text-sm font-medium text-muted-foreground">km:</span>
                       <p className="text-sm font-mono">{selectedPortico.km?.toFixed(3) || "-"}</p>
                     </div>
                     {selectedPortico.latitude && (

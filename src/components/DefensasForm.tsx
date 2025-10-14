@@ -124,7 +124,7 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
     if (!formData.km_inicial || !formData.km_final || !formData.lado) {
       toast({
         title: "Erro",
-        description: "Preencha todos os campos obrigatórios (KM Inicial, KM Final, Lado)",
+        description: "Preencha todos os campos obrigatórios (km Inicial, km Final, Lado)",
         variant: "destructive",
       });
       return;

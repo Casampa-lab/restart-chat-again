@@ -197,7 +197,7 @@ const IntervencoesInscricoesForm = ({
         <CardTitle>Intervenção em Zebrados, Setas, Símbolos e Legendas</CardTitle>
         <CardDescription>
           {inscricaoSelecionada 
-            ? `Registrando intervenção para ${inscricaoSelecionada.tipo_inscricao} entre KM ${inscricaoSelecionada.km_inicial} - ${inscricaoSelecionada.km_final}`
+            ? `Registrando intervenção para ${inscricaoSelecionada.tipo_inscricao} entre km ${inscricaoSelecionada.km_inicial} - ${inscricaoSelecionada.km_final}`
             : "Selecione uma inscrição do inventário para registrar intervenção"
           }
         </CardDescription>

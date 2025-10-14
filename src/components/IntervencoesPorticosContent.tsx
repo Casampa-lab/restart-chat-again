@@ -254,7 +254,7 @@ const IntervencoesPorticosContent = () => {
                     <TableHead>Data</TableHead>
                     <TableHead>Lote</TableHead>
                     <TableHead>Rodovia</TableHead>
-                    <TableHead>KM</TableHead>
+                    <TableHead>km</TableHead>
                     <TableHead>Motivo</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead>Altura Livre (m)</TableHead>

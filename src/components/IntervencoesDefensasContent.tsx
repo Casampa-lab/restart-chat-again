@@ -263,7 +263,7 @@ const IntervencoesDefensasContent = () => {
                     <TableHead>Data</TableHead>
                     <TableHead>Lote</TableHead>
                     <TableHead>Rodovia</TableHead>
-                    <TableHead>Trecho (KM)</TableHead>
+                    <TableHead>Trecho (km)</TableHead>
                     <TableHead>Motivo</TableHead>
                     <TableHead>Tipo Defensa</TableHead>
                     <TableHead>Extensão (m)</TableHead>

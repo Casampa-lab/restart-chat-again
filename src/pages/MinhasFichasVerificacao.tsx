@@ -204,7 +204,7 @@ export default function MinhasFichasVerificacao() {
                           />
                         </CardHeader>
                         <CardContent className="space-y-2 text-sm">
-                          {item.km && <p><strong>KM:</strong> {item.km}</p>}
+                          {item.km && <p><strong>km:</strong> {item.km}</p>}
                           {item.sentido && <p><strong>Sentido:</strong> {item.sentido}</p>}
                           {item.latitude && item.longitude && (
                             <p><strong>Coordenadas:</strong> {item.latitude}, {item.longitude}</p>

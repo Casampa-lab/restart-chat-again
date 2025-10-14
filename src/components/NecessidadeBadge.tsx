@@ -94,7 +94,7 @@ export function NecessidadeBadge({ necessidade, tipo }: NecessidadeBadgeProps) {
             <p className="font-semibold">{necessidade.servico} previsto em projeto</p>
             {necessidade.codigo && <p><strong>Código:</strong> {necessidade.codigo}</p>}
             {necessidade.tipo && <p><strong>Tipo:</strong> {necessidade.tipo}</p>}
-            {necessidade.km && <p><strong>KM:</strong> {necessidade.km.toFixed(2)}</p>}
+            {necessidade.km && <p><strong>km:</strong> {necessidade.km.toFixed(2)}</p>}
             
             {/* Alerta de Divergência */}
             {temDivergencia && (

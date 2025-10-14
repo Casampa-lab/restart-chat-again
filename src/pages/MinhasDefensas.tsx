@@ -300,7 +300,7 @@ const MinhasDefensas = () => {
                       <TableHead>Data</TableHead>
                       <TableHead>Lote</TableHead>
                       <TableHead>Rodovia</TableHead>
-                      <TableHead>Trecho (KM)</TableHead>
+                      <TableHead>Trecho (km)</TableHead>
                       <TableHead>Lado</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead>Extensão</TableHead>
@@ -427,7 +427,7 @@ const MinhasDefensas = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>KM Inicial</Label>
+                  <Label>km Inicial</Label>
                   <Input
                     type="number"
                     step="0.001"
@@ -436,7 +436,7 @@ const MinhasDefensas = () => {
                   />
                 </div>
                 <div>
-                  <Label>KM Final</Label>
+                  <Label>km Final</Label>
                   <Input
                     type="number"
                     step="0.001"

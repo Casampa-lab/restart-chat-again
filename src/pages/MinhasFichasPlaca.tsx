@@ -176,7 +176,7 @@ export default function MinhasFichasPlaca() {
                 <p className="font-semibold">{selectedFicha.tipo || '-'}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">KM</p>
+                <p className="text-sm text-muted-foreground">km</p>
                 <p className="font-semibold">{selectedFicha.km || '-'} {selectedFicha.lado && `(${selectedFicha.lado})`}</p>
               </div>
             </div>
@@ -308,7 +308,7 @@ export default function MinhasFichasPlaca() {
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <MapPin className="mr-2 h-4 w-4" />
-                  KM {ficha.km || '-'}
+                  km {ficha.km || '-'}
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="mr-2 h-4 w-4" />

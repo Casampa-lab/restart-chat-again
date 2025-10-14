@@ -137,7 +137,7 @@ export default function ReconciliacoesPendentes() {
               <CardTitle className="flex items-center justify-between text-lg">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-primary" />
-                  <span>KM {item.km?.toFixed(2)} - {item.rodovia?.codigo || "N/A"} ({item.rodovia?.uf || ""})</span>
+                  <span>km {item.km?.toFixed(2)} - {item.rodovia?.codigo || "N/A"} ({item.rodovia?.uf || ""})</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">
@@ -164,7 +164,7 @@ export default function ReconciliacoesPendentes() {
                   <div className="text-sm space-y-1">
                     <div><strong>Código:</strong> {item.cadastro?.codigo || "N/A"}</div>
                     <div><strong>Tipo:</strong> {item.cadastro?.tipo || "N/A"}</div>
-                    <div><strong>KM:</strong> {item.cadastro?.km?.toFixed(3) || "N/A"}</div>
+                    <div><strong>km:</strong> {item.cadastro?.km?.toFixed(3) || "N/A"}</div>
                     <div><strong>Lado:</strong> {item.cadastro?.lado || "N/A"}</div>
                     <div><strong>Suporte:</strong> {item.cadastro?.suporte || "N/A"}</div>
                   </div>
@@ -189,7 +189,7 @@ export default function ReconciliacoesPendentes() {
                   <div className="text-sm space-y-1">
                     <div><strong>Código:</strong> {item.codigo || "N/A"}</div>
                     <div><strong>Tipo:</strong> {item.tipo || "N/A"}</div>
-                    <div><strong>KM projeto:</strong> {item.km?.toFixed(3) || "N/A"}</div>
+                    <div><strong>km projeto:</strong> {item.km?.toFixed(3) || "N/A"}</div>
                     <div><strong>Lado:</strong> {item.lado || "N/A"}</div>
                     <div className="pt-2 border-t">
                       <Badge variant="outline" className="text-xs">
