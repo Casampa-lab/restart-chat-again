@@ -3205,17 +3205,25 @@ export type Database = {
           cadastro_id: string | null
           created_at: string | null
           data_importacao: string | null
+          data_reconciliacao: string | null
           distancia_match_metros: number | null
+          divergencia: boolean | null
           id: string
           km: number | null
           lado: string | null
           latitude: number | null
           linha_planilha: number | null
+          localizado_em_campo: boolean | null
           longitude: number | null
           lote_id: string
           motivo: string | null
+          reconciliado: boolean | null
+          reconciliado_por: string | null
+          revisao_solicitada: boolean | null
           rodovia_id: string
           servico: string
+          servico_final: string | null
+          servico_inferido: string | null
           snv: string | null
           solucao_planilha: string | null
           tipo: string | null
@@ -3229,17 +3237,25 @@ export type Database = {
           cadastro_id?: string | null
           created_at?: string | null
           data_importacao?: string | null
+          data_reconciliacao?: string | null
           distancia_match_metros?: number | null
+          divergencia?: boolean | null
           id?: string
           km?: number | null
           lado?: string | null
           latitude?: number | null
           linha_planilha?: number | null
+          localizado_em_campo?: boolean | null
           longitude?: number | null
           lote_id: string
           motivo?: string | null
+          reconciliado?: boolean | null
+          reconciliado_por?: string | null
+          revisao_solicitada?: boolean | null
           rodovia_id: string
           servico: string
+          servico_final?: string | null
+          servico_inferido?: string | null
           snv?: string | null
           solucao_planilha?: string | null
           tipo?: string | null
@@ -3253,17 +3269,25 @@ export type Database = {
           cadastro_id?: string | null
           created_at?: string | null
           data_importacao?: string | null
+          data_reconciliacao?: string | null
           distancia_match_metros?: number | null
+          divergencia?: boolean | null
           id?: string
           km?: number | null
           lado?: string | null
           latitude?: number | null
           linha_planilha?: number | null
+          localizado_em_campo?: boolean | null
           longitude?: number | null
           lote_id?: string
           motivo?: string | null
+          reconciliado?: boolean | null
+          reconciliado_por?: string | null
+          revisao_solicitada?: boolean | null
           rodovia_id?: string
           servico?: string
+          servico_final?: string | null
+          servico_inferido?: string | null
           snv?: string | null
           solucao_planilha?: string | null
           tipo?: string | null

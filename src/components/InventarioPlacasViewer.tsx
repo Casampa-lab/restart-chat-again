@@ -128,8 +128,25 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     return R * c; // Distância em metros
   };
 
+  // Query da configuração da rodovia para pegar tolerância
+  const { data: rodoviaConfig } = useQuery({
+    queryKey: ["rodovia-config", rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rodovias")
+        .select("tolerancia_match_metros")
+        .eq("id", rodoviaId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!rodoviaId,
+  });
+
+  const toleranciaRodovia = rodoviaConfig?.tolerancia_match_metros || 50;
+
   const { data: placas, isLoading, refetch } = useQuery({
-    queryKey: ["inventario-placas", loteId, rodoviaId, searchTerm, searchLat, searchLng],
+    queryKey: ["inventario-placas", loteId, rodoviaId, searchTerm, searchLat, searchLng, toleranciaRodovia],
     queryFn: async () => {
       let query = supabase
         .from("ficha_placa")
@@ -162,7 +179,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                 ? calculateDistance(lat, lng, placa.latitude, placa.longitude)
                 : Infinity,
             }))
-            .filter((placa) => placa.distance <= 50) // 50 metros de raio
+            .filter((placa) => placa.distance <= toleranciaRodovia)
             .sort((a, b) => a.distance - b.distance);
         }
       } else {
@@ -174,9 +191,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     },
   });
 
-  // Query de necessidades relacionadas (apenas matches <= 20m)
+  // Query de necessidades relacionadas
   const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
-    queryKey: ["necessidades-match-placas", loteId, rodoviaId],
+    queryKey: ["necessidades-match-placas", loteId, rodoviaId, toleranciaRodovia],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_placas")
@@ -184,7 +201,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null)
-        .lte("distancia_match_metros", 20);
+        .lte("distancia_match_metros", toleranciaRodovia);
       
       if (error) throw error;
       

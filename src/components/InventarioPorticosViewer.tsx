@@ -70,8 +70,25 @@ export function InventarioPorticosViewer({
     return R * c;
   };
 
+  // Query da configuração da rodovia para pegar tolerância
+  const { data: rodoviaConfig } = useQuery({
+    queryKey: ["rodovia-config", rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rodovias")
+        .select("tolerancia_match_metros")
+        .eq("id", rodoviaId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!rodoviaId,
+  });
+
+  const toleranciaRodovia = rodoviaConfig?.tolerancia_match_metros || 50;
+
   const { data: porticos, isLoading } = useQuery({
-    queryKey: ["inventario-porticos", loteId, rodoviaId, searchTerm, searchLat, searchLng],
+    queryKey: ["inventario-porticos", loteId, rodoviaId, searchTerm, searchLat, searchLng, toleranciaRodovia],
     queryFn: async () => {
       let query = supabase
         .from("ficha_porticos")
@@ -103,7 +120,7 @@ export function InventarioPorticosViewer({
                 ? calculateDistance(lat, lng, portico.latitude, portico.longitude)
                 : Infinity,
             }))
-            .filter((portico) => portico.distance <= 50)
+            .filter((portico) => portico.distance <= toleranciaRodovia)
             .sort((a, b) => a.distance - b.distance);
         }
       } else {
@@ -118,9 +135,9 @@ export function InventarioPorticosViewer({
     },
   });
 
-  // Query de necessidades relacionadas (apenas matches <= 20m)
+  // Query de necessidades relacionadas
   const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
-    queryKey: ["necessidades-match-porticos", loteId, rodoviaId],
+    queryKey: ["necessidades-match-porticos", loteId, rodoviaId, toleranciaRodovia],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_porticos")
@@ -128,7 +145,7 @@ export function InventarioPorticosViewer({
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null)
-        .lte("distancia_match_metros", 20);
+        .lte("distancia_match_metros", toleranciaRodovia);
       
       if (error) throw error;
       
