@@ -46,15 +46,8 @@ function getMatchColorClasses(servico: string, matchLevel: "confirmado" | "prova
     return "bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200";
   }
   
-  // Match confirmado - cores por tipo de serviço
-  const colorMap = {
-    Implantar: "bg-green-100 text-green-800 border-green-300 hover:bg-green-200",
-    Substituir: "bg-blue-100 text-blue-800 border-blue-300 hover:bg-blue-200",
-    Remover: "bg-red-100 text-red-800 border-red-300 hover:bg-red-200",
-    Manter: "bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200"
-  };
-  
-  return colorMap[servico as keyof typeof colorMap] || colorMap.Implantar;
+  // Match confirmado - TODOS verdes (independente do tipo de serviço)
+  return "bg-green-100 text-green-800 border-green-300 hover:bg-green-200";
 }
 
 export function NecessidadeBadge({ necessidade, tipo }: NecessidadeBadgeProps) {

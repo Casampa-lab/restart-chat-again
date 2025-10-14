@@ -152,40 +152,26 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   const { data: necessidadesMap } = useQuery({
     queryKey: ["necessidades-match-placas", loteId, rodoviaId],
     queryFn: async () => {
-      console.log("🔍 DEBUG: Buscando necessidades com loteId:", loteId, "rodoviaId:", rodoviaId);
-      
       const { data, error } = await supabase
         .from("necessidades_placas")
         .select("id, servico, cadastro_id, distancia_match_metros, codigo, tipo, km")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null)
-        .lte("distancia_match_metros", 20); // FILTRO: Apenas até 20m
+        .lte("distancia_match_metros", 20);
       
-      if (error) {
-        console.error("❌ DEBUG: Erro ao buscar necessidades:", error);
-        throw error;
-      }
-      
-      console.log("✅ DEBUG: Necessidades encontradas:", data?.length || 0);
-      console.log("📋 DEBUG: Dados das necessidades:", data);
+      if (error) throw error;
       
       // Indexar por cadastro_id para busca O(1)
       const map = new Map<string, any>();
       data?.forEach(nec => {
-        console.log("➕ DEBUG: Adicionando ao map - cadastro_id:", nec.cadastro_id, "servico:", nec.servico);
         map.set(nec.cadastro_id, nec);
       });
-      
-      console.log("🗺️ DEBUG: Map final com", map.size, "entradas");
-      console.log("🔑 DEBUG: Keys no map:", Array.from(map.keys()));
       
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
   });
-
-  console.log("📊 DEBUG: necessidadesMap atual:", necessidadesMap);
 
   // Função para ordenar dados
   const sortedPlacas = placas ? [...placas].sort((a, b) => {
@@ -424,7 +410,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <TableBody>
                     {sortedPlacas.map((placa) => {
                       const necessidade = necessidadesMap?.get(placa.id);
-                      console.log(`🎯 DEBUG: Placa ${placa.codigo} (id: ${placa.id}) - Necessidade encontrada:`, necessidade ? "SIM" : "NÃO");
                       
                       return (
                         <TableRow key={placa.id} className="hover:bg-muted/50">
