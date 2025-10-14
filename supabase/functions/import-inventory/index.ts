@@ -330,7 +330,7 @@ serve(async (req) => {
       ],
       defensas: [
         "data_vistoria", "extensao_metros", "km_final",
-        "km_inicial", "lado", "nivel_risco",
+        "km_inicial", "lado",
         "tipo_defensa", "br", "snv", "tramo",
         "funcao", "especificacao_obstaculo_fixo", "id_defensa",
         "distancia_pista_obstaculo_m", "risco", "velocidade_kmh",

@@ -595,7 +595,6 @@ export function InventarioImporterManager() {
           record.classificacao_nivel_contencao = getVal("Classificação do nível de Contenção", "Classificacao do nivel de Contencao");
           record.nivel_contencao_en1317 = getVal("Nível de contenção EN 1317-2", "Nivel de contencao EN 1317-2");
           record.nivel_contencao_nchrp350 = getVal("Nível de contenção NCHRP 350", "Nivel de contencao NCHRP 350");
-          record.nivel_risco = getVal("Classificação do nível de Contenção", "Classificacao do nivel de Contencao");
           record.espaco_trabalho = getVal("Espaço de Trabalho", "Espaco de Trabalho");
           record.terminal_entrada = getVal("Terminal de Entrada", "terminal_entrada");
           record.terminal_saida = getVal("Terminal de Saída", "Terminal de Saida", "terminal_saida");
