@@ -672,8 +672,7 @@ export function InventarioImporterManager() {
           // Material
           record.material = getVal("Material", "material");
           
-          // Montar observações com campos adicionais do dicionário
-          const observacoes = [];
+          // Montar campos adicionais do dicionário
           const br = getVal("BR", "br");
           const posicao = getVal("Posição", "Posicao", "posição", "posicao");
           const traco = getVal("Traço (m)", "Traço", "traco_m", "traco");
@@ -681,14 +680,12 @@ export function InventarioImporterManager() {
           const outrosMat = getVal("Outros materiais", "Outros Materiais", "outros_materiais");
           const area = getVal("Área (m²)", "Área", "area_m2", "area");
           
-          if (br && br !== "-") observacoes.push(`BR: ${br}`);
-          if (posicao && posicao !== "-") observacoes.push(`Posição: ${posicao}`);
-          if (traco && traco !== "-") observacoes.push(`Traço: ${traco}m`);
-          if (espacamento && espacamento !== "-") observacoes.push(`Espaçamento: ${espacamento}m`);
-          if (outrosMat && outrosMat !== "-") observacoes.push(`Outros materiais: ${outrosMat}`);
-          if (area && area !== "-") observacoes.push(`Área: ${area}m²`);
+          // Mapear para campos corretos da tabela
+          if (posicao && posicao !== "-") record.posicao = posicao;
+          if (traco && traco !== "-") record.traco_m = Number(traco);
+          if (espacamento && espacamento !== "-") record.espacamento_m = Number(espacamento);
+          if (area && area !== "-") record.area_m2 = Number(area);
           
-          record.observacao = observacoes.length > 0 ? observacoes.join(" | ") : null;
           record.espessura_cm = null;
           record.data_vistoria = new Date().toISOString().split('T')[0];
         }
