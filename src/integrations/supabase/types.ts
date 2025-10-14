@@ -769,6 +769,7 @@ export type Database = {
           data_vistoria: string
           dimensoes: string | null
           enviado_coordenador: boolean | null
+          espessura_mm: number | null
           id: string
           km_final: number | null
           km_inicial: number | null
@@ -782,6 +783,7 @@ export type Database = {
           observacao: string | null
           origem: string | null
           rodovia_id: string
+          sigla: string | null
           tipo_inscricao: string
           ultima_intervencao_id: string | null
           updated_at: string
@@ -795,6 +797,7 @@ export type Database = {
           data_vistoria: string
           dimensoes?: string | null
           enviado_coordenador?: boolean | null
+          espessura_mm?: number | null
           id?: string
           km_final?: number | null
           km_inicial?: number | null
@@ -808,6 +811,7 @@ export type Database = {
           observacao?: string | null
           origem?: string | null
           rodovia_id: string
+          sigla?: string | null
           tipo_inscricao: string
           ultima_intervencao_id?: string | null
           updated_at?: string
@@ -821,6 +825,7 @@ export type Database = {
           data_vistoria?: string
           dimensoes?: string | null
           enviado_coordenador?: boolean | null
+          espessura_mm?: number | null
           id?: string
           km_final?: number | null
           km_inicial?: number | null
@@ -834,6 +839,7 @@ export type Database = {
           observacao?: string | null
           origem?: string | null
           rodovia_id?: string
+          sigla?: string | null
           tipo_inscricao?: string
           ultima_intervencao_id?: string | null
           updated_at?: string
@@ -904,6 +910,7 @@ export type Database = {
           data_aprovacao_coordenador: string | null
           data_intervencao: string
           dimensoes: string | null
+          espessura_mm: number | null
           estado_conservacao: string | null
           ficha_inscricoes_id: string
           fora_plano_manutencao: boolean | null
@@ -915,6 +922,7 @@ export type Database = {
           observacao: string | null
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
+          sigla: string | null
           tipo_inscricao: string | null
         }
         Insert: {
@@ -926,6 +934,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
           dimensoes?: string | null
+          espessura_mm?: number | null
           estado_conservacao?: string | null
           ficha_inscricoes_id: string
           fora_plano_manutencao?: boolean | null
@@ -937,6 +946,7 @@ export type Database = {
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          sigla?: string | null
           tipo_inscricao?: string | null
         }
         Update: {
@@ -948,6 +958,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           dimensoes?: string | null
+          espessura_mm?: number | null
           estado_conservacao?: string | null
           ficha_inscricoes_id?: string
           fora_plano_manutencao?: boolean | null
@@ -959,6 +970,7 @@ export type Database = {
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          sigla?: string | null
           tipo_inscricao?: string | null
         }
         Relationships: []

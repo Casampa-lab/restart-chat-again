@@ -37,7 +37,12 @@ const MATERIAIS = [
 
 const CORES = ["Branca", "Amarela", "Azul", "Vermelha", "Verde"];
 
+const SIGLAS_INSCRICAO = ["ZPA", "MOF", "PEM", "LEGENDA", "Outros"];
+
 const TIPOS_INSCRICAO = [
+  "Zebrado de preenchimento da área de pavimento não utilizável",
+  "Seta indicativa de mudança obrigatória de faixa",
+  "Setas indicativas de posicionamento na pista para a execução de movimentos",
   "Passagem de Pedestre",
   "Faixa Zebrada",
   "Área de Conflito",
@@ -52,10 +57,12 @@ const TIPOS_INSCRICAO = [
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
+  sigla: z.string().optional(),
   tipo_inscricao: z.string().optional(),
   cor: z.string().optional(),
   dimensoes: z.string().optional(),
   area_m2: z.string().optional(),
+  espessura_mm: z.string().optional(),
   material_utilizado: z.string().optional(),
   estado_conservacao: z.string().optional(),
   observacao: z.string().optional(),
@@ -82,11 +89,13 @@ const IntervencoesInscricoesForm = ({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       motivo: "",
+      sigla: "",
       tipo_inscricao: "",
       cor: "",
       dimensoes: "",
       area_m2: "",
-      material_utilizado: "",
+      espessura_mm: "3.00",
+      material_utilizado: "Termoplástico",
       estado_conservacao: "",
       observacao: "",
       foto_url: "",
@@ -123,11 +132,13 @@ const IntervencoesInscricoesForm = ({
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
         motivo: "",
+        sigla: (inscricaoSelecionada as any).sigla || "",
         tipo_inscricao: (inscricaoSelecionada as any).tipo_inscricao || "",
         cor: (inscricaoSelecionada as any).cor || "",
         dimensoes: (inscricaoSelecionada as any).dimensoes || "",
         area_m2: (inscricaoSelecionada as any).area_m2?.toString() || "",
-        material_utilizado: (inscricaoSelecionada as any).material_utilizado || "",
+        espessura_mm: (inscricaoSelecionada as any).espessura_mm?.toString() || "3.00",
+        material_utilizado: (inscricaoSelecionada as any).material_utilizado || "Termoplástico",
         estado_conservacao: "",
         observacao: "",
         foto_url: "",
@@ -167,10 +178,12 @@ const IntervencoesInscricoesForm = ({
           ficha_inscricoes_id: inscricaoSelecionada.id,
           data_intervencao: data.data_intervencao,
           motivo: data.motivo,
+          sigla: data.sigla || null,
           tipo_inscricao: data.tipo_inscricao || null,
           cor: data.cor || null,
           dimensoes: data.dimensoes || null,
           area_m2: data.area_m2 ? parseFloat(data.area_m2) : null,
+          espessura_mm: data.espessura_mm ? parseFloat(data.espessura_mm) : null,
           material_utilizado: data.material_utilizado || null,
           estado_conservacao: data.estado_conservacao || null,
           observacao: data.observacao || null,
@@ -247,10 +260,35 @@ const IntervencoesInscricoesForm = ({
 
               <FormField
                 control={form.control}
+                name="sigla"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sigla</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a sigla" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {SIGLAS_INSCRICAO.map((sigla) => (
+                          <SelectItem key={sigla} value={sigla}>
+                            {sigla}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="tipo_inscricao"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tipo de Inscrição</FormLabel>
+                    <FormLabel>Descrição / Tipo de Inscrição</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -303,6 +341,20 @@ const IntervencoesInscricoesForm = ({
                     <FormLabel>Área Executada (m²)</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="espessura_mm"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Espessura (mm)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" placeholder="3.00" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
