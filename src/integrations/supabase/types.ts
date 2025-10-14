@@ -4637,11 +4637,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aplicar_intervencao_cilindros: {
+        Args: { p_coordenador_id: string; p_intervencao_id: string }
+        Returns: undefined
+      }
+      aplicar_intervencao_defensas: {
+        Args: { p_coordenador_id: string; p_intervencao_id: string }
+        Returns: undefined
+      }
+      aplicar_intervencao_inscricoes: {
+        Args: { p_coordenador_id: string; p_intervencao_id: string }
+        Returns: undefined
+      }
+      aplicar_intervencao_marcas_longitudinais: {
+        Args: { p_coordenador_id: string; p_intervencao_id: string }
+        Returns: undefined
+      }
       aplicar_intervencao_placa: {
         Args: { p_coordenador_id: string; p_intervencao_id: string }
         Returns: undefined
       }
       aplicar_intervencao_portico: {
+        Args: { p_coordenador_id: string; p_intervencao_id: string }
+        Returns: undefined
+      }
+      aplicar_intervencao_tachas: {
         Args: { p_coordenador_id: string; p_intervencao_id: string }
         Returns: undefined
       }
