@@ -21,7 +21,7 @@ interface FichaPlaca {
   retro_pelicula_fundo: number | null;
   retro_pelicula_legenda_orla: number | null;
   created_at: string;
-  rodovias: { nome: string; codigo: string } | null;
+  rodovias: { codigo: string } | null;
   lotes: { numero: string } | null;
 }
 
@@ -75,7 +75,7 @@ export default function MinhasFichasPlaca() {
       const fichasWithRelations = await Promise.all(
         (data || []).map(async (ficha) => {
           const [rodoviasResult, lotesResult] = await Promise.all([
-            supabase.from('rodovias').select('nome, codigo').eq('id', ficha.rodovia_id).single(),
+            supabase.from('rodovias').select('codigo').eq('id', ficha.rodovia_id).single(),
             supabase.from('lotes').select('numero').eq('id', ficha.lote_id).single(),
           ]);
 
@@ -157,7 +157,7 @@ export default function MinhasFichasPlaca() {
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <p className="text-sm text-muted-foreground">Rodovia</p>
-                <p className="font-semibold">{selectedFicha.rodovias?.codigo} - {selectedFicha.rodovias?.nome}</p>
+                <p className="font-semibold">{selectedFicha.rodovias?.codigo}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Lote</p>
@@ -304,7 +304,7 @@ export default function MinhasFichasPlaca() {
               <CardContent className="space-y-2">
                 <div className="flex items-center text-sm text-muted-foreground">
                   <FileText className="mr-2 h-4 w-4" />
-                  {ficha.rodovias?.codigo} - {ficha.rodovias?.nome}
+                  {ficha.rodovias?.codigo}
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <MapPin className="mr-2 h-4 w-4" />

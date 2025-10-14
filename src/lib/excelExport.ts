@@ -36,7 +36,7 @@ const fetchRelatedData = async () => {
   const [{ data: lotes }, { data: empresas }, { data: rodovias }] = await Promise.all([
     supabase.from('lotes').select('id, numero, empresa_id'),
     supabase.from('empresas').select('id, nome'),
-    supabase.from('rodovias').select('id, codigo, nome')
+    supabase.from('rodovias').select('id, codigo')
   ]);
 
   return {
@@ -70,7 +70,7 @@ export const exportFrentesLiberadas = async () => {
           formatDate(item.data_liberacao),
           lote?.numero || '',
           empresa?.nome || '',
-          rodovia ? `${rodovia.codigo} - ${rodovia.nome}` : '',
+          rodovia?.codigo || '',
           formatNumber(item.extensao_contratada),
           formatNumber(item.km_inicial),
           formatNumber(item.km_final),
@@ -802,7 +802,7 @@ export const exportDadosRodovias = async () => {
           numero,
           empresas (nome, cnpj)
         ),
-        rodovias (codigo, nome, uf)
+        rodovias (codigo, uf)
       `)
       .order('lotes(numero)');
 

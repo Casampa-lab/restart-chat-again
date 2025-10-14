@@ -16,7 +16,6 @@ export interface WorkSession {
   };
   rodovia?: {
     codigo: string;
-    nome: string;
   };
 }
 
@@ -39,7 +38,7 @@ export const useWorkSession = (userId: string | undefined) => {
             numero,
             empresa:empresas (nome)
           ),
-          rodovia:rodovias (codigo, nome)
+          rodovia:rodovias (codigo)
         `)
         .eq("user_id", userId)
         .eq("ativa", true)
@@ -87,7 +86,7 @@ export const useWorkSession = (userId: string | undefined) => {
             numero,
             empresa:empresas (nome)
           ),
-          rodovia:rodovias (codigo, nome)
+          rodovia:rodovias (codigo)
         `)
         .single();
 

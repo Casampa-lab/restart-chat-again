@@ -52,7 +52,7 @@ export function InventarioImporterManager() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("rodovias")
-        .select("id, codigo, nome")
+        .select("id, codigo")
         .order("codigo");
       if (error) throw error;
       return data;

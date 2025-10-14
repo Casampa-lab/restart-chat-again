@@ -11,7 +11,6 @@ import { Plus, Trash2 } from "lucide-react";
 interface Rodovia {
   id: string;
   codigo: string;
-  nome: string;
   uf: string;
 }
 
@@ -48,7 +47,6 @@ const RodoviasManager = () => {
     try {
       const { error } = await supabase.from("rodovias").insert({
         codigo: formData.codigo,
-        nome: formData.codigo, // Nome igual ao código
         uf: formData.uf || null,
       });
 

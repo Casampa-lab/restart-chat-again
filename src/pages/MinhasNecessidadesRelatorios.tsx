@@ -240,10 +240,10 @@ export default function MinhasNecessidadesRelatorios() {
 
       // Buscar lotes e rodovias para nomes legíveis
       const { data: lotes } = await supabase.from("lotes").select("id, numero");
-      const { data: rodovias } = await supabase.from("rodovias").select("id, codigo, nome");
+      const { data: rodovias } = await supabase.from("rodovias").select("id, codigo");
       
       const lotesMap = new Map((lotes || []).map(l => [l.id, l.numero]));
-      const rodoviasMap = new Map((rodovias || []).map(r => [r.id, { codigo: r.codigo, nome: r.nome }]));
+      const rodoviasMap = new Map((rodovias || []).map(r => [r.id, r.codigo]));
 
       // Analisar cada registro
       const dadosAnalise = (data || []).map((item: any) => {
@@ -285,7 +285,7 @@ export default function MinhasNecessidadesRelatorios() {
         
         return {
           lote: lotesMap.get(item.lote_id) || "",
-          rodovia: rodovia?.codigo || rodovia?.nome || "",
+          rodovia: rodovia || "",
           ...item,
           ALERTA_MODELO: (tipo === "placas" && item.modelo === item.codigo) ? "SIM" : "",
           ALERTA_DESCRICAO: (tipo === "placas" && (item.descricao === item.codigo || item.descricao === item.tipo)) ? "SIM" : "",
@@ -386,11 +386,11 @@ export default function MinhasNecessidadesRelatorios() {
         
         // Buscar lotes e rodovias separadamente para mapear os nomes
         const { data: lotes } = await supabase.from("lotes").select("id, numero");
-        const { data: rodovias } = await supabase.from("rodovias").select("id, codigo, nome");
+        const { data: rodovias } = await supabase.from("rodovias").select("id, codigo");
         
         // Criar mapa de lotes e rodovias
         const lotesMap = new Map((lotes || []).map(l => [l.id, l.numero]));
-        const rodoviasMap = new Map((rodovias || []).map(r => [r.id, { codigo: r.codigo, nome: r.nome }]));
+        const rodoviasMap = new Map((rodovias || []).map(r => [r.id, r.codigo]));
         
         // Transformar dados: remover IDs técnicos e adicionar nomes legíveis
         cadastro = (data || []).map((item: any) => {
@@ -398,7 +398,7 @@ export default function MinhasNecessidadesRelatorios() {
           const rodovia = rodoviasMap.get(rodovia_id);
           return {
             lote: lotesMap.get(lote_id) || "",
-            rodovia: rodovia?.codigo || rodovia?.nome || "",
+            rodovia: rodovia || "",
             ...resto,
           };
         });
@@ -554,11 +554,11 @@ export default function MinhasNecessidadesRelatorios() {
       
       // Buscar lotes e rodovias separadamente para mapear os nomes
       const { data: lotes } = await supabase.from("lotes").select("id, numero");
-      const { data: rodovias } = await supabase.from("rodovias").select("id, codigo, nome");
+      const { data: rodovias } = await supabase.from("rodovias").select("id, codigo");
       
       // Criar mapa de lotes e rodovias
       const lotesMap = new Map((lotes || []).map(l => [l.id, l.numero]));
-      const rodoviasMap = new Map((rodovias || []).map(r => [r.id, { codigo: r.codigo, nome: r.nome }]));
+      const rodoviasMap = new Map((rodovias || []).map(r => [r.id, r.codigo]));
       
       // Transformar cadastro: remover IDs técnicos e adicionar nomes legíveis
       const cadastro = (cadastroRaw || []).map((item: any) => {
@@ -566,7 +566,7 @@ export default function MinhasNecessidadesRelatorios() {
         const rodovia = rodoviasMap.get(rodovia_id);
         return {
           lote: lotesMap.get(lote_id) || "",
-          rodovia: rodovia?.codigo || rodovia?.nome || "",
+          rodovia: rodovia || "",
           ...resto,
         };
       });

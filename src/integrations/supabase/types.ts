@@ -3807,21 +3807,18 @@ export type Database = {
           codigo: string
           created_at: string | null
           id: string
-          nome: string
           uf: string | null
         }
         Insert: {
           codigo: string
           created_at?: string | null
           id?: string
-          nome: string
           uf?: string | null
         }
         Update: {
           codigo?: string
           created_at?: string | null
           id?: string
-          nome?: string
           uf?: string | null
         }
         Relationships: []
