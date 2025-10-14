@@ -462,16 +462,28 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                             if (!nec) return "-";
                             
                             return (
-                              <NecessidadeBadge
-                                tipo="cilindros"
-                                servico={nec.servico}
-                                divergencia={nec.divergencia_encontrada}
+                              <div
+                                className="cursor-pointer"
                                 onClick={() => {
                                   setSelectedNecessidade(nec);
                                   setSelectedCadastroForReconciliacao(cilindro);
                                   setReconciliacaoOpen(true);
                                 }}
-                              />
+                              >
+                                <NecessidadeBadge
+                                  necessidade={{
+                                    id: nec.id,
+                                    servico: nec.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
+                                    distancia_match_metros: nec.distancia_match_metros || 0,
+                                    km: nec.km_inicial,
+                                    divergencia: nec.divergencia,
+                                    reconciliado: nec.solucao_confirmada,
+                                    solucao_planilha: nec.solucao_planilha,
+                                    servico_inferido: nec.servico_inferido,
+                                  }}
+                                  tipo="cilindros"
+                                />
+                              </div>
                             );
                           })()}
                         </TableCell>

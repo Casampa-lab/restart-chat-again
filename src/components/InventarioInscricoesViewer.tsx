@@ -448,33 +448,36 @@ export function InventarioInscricoesViewer({
                           <TableCell>{inscricao.km_inicial?.toFixed(2) || "-"}</TableCell>
                           <TableCell>{inscricao.material_utilizado || "-"}</TableCell>
                           <TableCell>{inscricao.area_m2?.toFixed(2) || "-"}</TableCell>
-                          <TableCell>
-                            {necessidadeMatch && (
-                              <div
-                                className="cursor-pointer"
-                                onClick={() => {
-                                  setSelectedNecessidade(necessidadeMatch);
-                                  setSelectedCadastroForReconciliacao(inscricao);
-                                  setReconciliacaoOpen(true);
-                                }}
-                              >
-                                <NecessidadeBadge 
-                                  necessidade={{
-                                    id: necessidadeMatch.id,
-                                    servico: necessidadeMatch.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
-                                    distancia_match_metros: necessidadeMatch.distancia_match_metros,
-                                    codigo: (necessidadeMatch as any).codigo,
-                                    tipo: (necessidadeMatch as any).tipo,
-                                    km: (necessidadeMatch as any).km,
-                                    divergencia: (necessidadeMatch as any).divergencia,
-                                    reconciliado: (necessidadeMatch as any).reconciliado,
-                                    solucao_planilha: (necessidadeMatch as any).solucao_planilha,
-                                    servico_inferido: (necessidadeMatch as any).servico_inferido,
+                          <TableCell className="text-center">
+                            {(() => {
+                              const nec = necessidadesMap?.get(inscricao.id);
+                              if (!nec) return "-";
+                              
+                              return (
+                                <div
+                                  className="cursor-pointer"
+                                  onClick={() => {
+                                    setSelectedNecessidade(nec);
+                                    setSelectedCadastroForReconciliacao(inscricao);
+                                    setReconciliacaoOpen(true);
                                   }}
-                                  tipo="marcas_transversais" 
-                                />
-                              </div>
-                            )}
+                                >
+                                  <NecessidadeBadge 
+                                    necessidade={{
+                                      id: nec.id,
+                                      servico: nec.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
+                                      distancia_match_metros: nec.distancia_match_metros || 0,
+                                      km: nec.km_inicial,
+                                      divergencia: nec.divergencia,
+                                      reconciliado: nec.solucao_confirmada,
+                                      solucao_planilha: nec.solucao_planilha,
+                                      servico_inferido: nec.servico_inferido,
+                                    }}
+                                    tipo="marcas_transversais" 
+                                  />
+                                </div>
+                              );
+                            })()}
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
