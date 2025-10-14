@@ -1005,13 +1005,6 @@ export function InventarioImporterManager() {
           record.latitude = getVal("Latitude", "latitude");
           record.longitude = getVal("Longitude", "longitude");
           
-          const obs = [];
-          const br = getVal("BR", "br");
-          const linkFoto = getVal("Link da Fotografia", "Link da fotografia", "link_fotografia");
-          if (br) obs.push(`BR: ${br}`);
-          if (linkFoto) obs.push(`Link: ${linkFoto}`);
-          record.observacao = obs.length > 0 ? obs.join(" | ") : null;
-          
           record.data_vistoria = new Date().toISOString().split('T')[0];
         }
 
