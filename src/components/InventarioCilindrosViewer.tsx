@@ -88,24 +88,25 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
   };
 
   // Fetch rodovia data
-  useQuery<any>({
+  useQuery({
     queryKey: ["rodovia", rodoviaId],
     queryFn: async () => {
-      const { data } = await supabase
+      const result = (await supabase
         .from("rodovias")
         .select("codigo")
         .eq("id", rodoviaId)
-        .single();
-      setRodovia(data);
-      return data;
+        .single()) as unknown as { data: any; error: any };
+      setRodovia(result.data);
+      return result.data;
     },
   });
 
   // Query de necessidades matchadas com divergências
-  const necessidadesMatchQuery = useQuery<any[]>({
+  const necessidadesMatchQuery = useQuery({
     queryKey: ["necessidades-match-cilindros", loteId, rodoviaId],
-    queryFn: async () => {
-      const { data, error } = await supabase
+    queryFn: async (): Promise<any[]> => {
+      // @ts-ignore - Evitar inferência profunda de tipos do Supabase
+      const query = supabase
         .from("necessidades_cilindros")
         .select("*")
         .eq("lote_id", loteId)
@@ -113,16 +114,18 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
         .eq("solucao_confirmada", false)
         .not("cadastro_id", "is", null)
         .not("divergencia", "is", null);
+      
+      const result = (await query) as unknown as { data: any; error: any };
 
-      if (error) throw error;
-      return data || [];
+      if (result.error) throw result.error;
+      return result.data || [];
     },
   });
 
-  const necessidadesMatch = necessidadesMatchQuery.data;
+  const necessidadesMatch = necessidadesMatchQuery.data as any[] | undefined;
   const divergenciasCount = necessidadesMatch?.length || 0;
 
-  const { data: cilindros, isLoading } = useQuery<any[]>({
+  const { data: cilindros, isLoading } = useQuery({
     queryKey: ["cilindros", loteId, rodoviaId, searchTerm, searchLat, searchLon],
     queryFn: async () => {
       let query = supabase

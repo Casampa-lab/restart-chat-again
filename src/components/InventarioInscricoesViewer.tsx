@@ -99,24 +99,25 @@ export function InventarioInscricoesViewer({
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
 
   // Buscar informações da rodovia
-  const { data: rodovia } = useQuery<any>({
+  const { data: rodovia } = useQuery({
     queryKey: ["rodovia", rodoviaId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const result = (await supabase
         .from("rodovias")
         .select("codigo")
         .eq("id", rodoviaId)
-        .single();
-      if (error) throw error;
-      return data;
+        .single()) as unknown as { data: any; error: any };
+      if (result.error) throw result.error;
+      return result.data;
     },
   });
 
   // Query de necessidades matchadas com divergências
-  const necessidadesMatchQuery = useQuery<any[]>({
+  const necessidadesMatchQuery = useQuery({
     queryKey: ["necessidades-match-inscricoes", loteId, rodoviaId],
-    queryFn: async () => {
-      const { data, error } = await supabase
+    queryFn: async (): Promise<any[]> => {
+      // @ts-ignore - Evitar inferência profunda de tipos do Supabase
+      const query = supabase
         .from("necessidades_marcas_transversais")
         .select("*")
         .eq("lote_id", loteId)
@@ -124,13 +125,15 @@ export function InventarioInscricoesViewer({
         .eq("solucao_confirmada", false)
         .not("cadastro_id", "is", null)
         .not("divergencia", "is", null);
+      
+      const result = (await query) as unknown as { data: any; error: any };
 
-      if (error) throw error;
-      return data || [];
+      if (result.error) throw result.error;
+      return result.data || [];
     },
   });
 
-  const necessidadesMatch = necessidadesMatchQuery.data;
+  const necessidadesMatch = necessidadesMatchQuery.data as any[] | undefined;
   const divergenciasCount = necessidadesMatch?.length || 0;
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -155,7 +158,7 @@ export function InventarioInscricoesViewer({
     toast.success("Reconciliação processada");
   };
 
-  const { data: inscricoes, isLoading } = useQuery<any[]>({
+  const { data: inscricoes, isLoading } = useQuery({
     queryKey: ["inventario-inscricoes", loteId, rodoviaId, searchTerm, searchLat, searchLng],
     queryFn: async () => {
       let query = supabase
