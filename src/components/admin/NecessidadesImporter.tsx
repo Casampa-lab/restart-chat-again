@@ -488,27 +488,37 @@ export function NecessidadesImporter() {
             }
           }
 
-          // Usar o serviço da planilha (coluna "Solução")
-          let servico: string;
+          // SISTEMA DE RECONCILIAÇÃO
+          // 1. Calcular servico_inferido (análise automática GPS)
+          const servicoInferido = identificarServico(dados, match);
+          
+          // 2. Preservar solucao_planilha (decisão do projetista)
+          let solucaoPlanilhaNormalizada: string | null = null;
           const solucaoPlanilha = dados.solucao_planilha?.toLowerCase();
           
           if (solucaoPlanilha) {
-            // Mapear valores da planilha
+            // Normalizar valores da planilha
             if (solucaoPlanilha.includes("substitu")) {
-              servico = "Substituir";
+              solucaoPlanilhaNormalizada = "Substituir";
             } else if (solucaoPlanilha.includes("implant")) {
-              servico = "Implantar";
+              solucaoPlanilhaNormalizada = "Implantar";
             } else if (solucaoPlanilha.includes("remov")) {
-              servico = "Remover";
+              solucaoPlanilhaNormalizada = "Remover";
             } else if (solucaoPlanilha.includes("manter")) {
-              servico = "Manter";
-            } else {
-              servico = "Implantar"; // Padrão
+              solucaoPlanilhaNormalizada = "Manter";
             }
-          } else {
-            // Se não tem solução na planilha, usar lógica de inferência
-            servico = identificarServico(dados, match);
           }
+          
+          // 3. Definir servico_final (prioridade ao projetista)
+          const servicoFinal = solucaoPlanilhaNormalizada || servicoInferido;
+          
+          // 4. Detectar divergência
+          const divergencia = solucaoPlanilhaNormalizada 
+            ? solucaoPlanilhaNormalizada !== servicoInferido
+            : false;
+          
+          // 5. Manter compatibilidade com campo "servico" legado
+          const servico = servicoFinal;
 
           // Inserir necessidade
           const tabelaNecessidade = `necessidades_${tipo}` as 
@@ -528,6 +538,10 @@ export function NecessidadesImporter() {
               rodovia_id: rodoviaId,
               cadastro_id: match,
               servico,
+              servico_inferido: servicoInferido,
+              servico_final: servicoFinal,
+              divergencia,
+              reconciliado: false,
               ...dados,
               arquivo_origem: file.name,
               linha_planilha: linhaExcel,
@@ -536,14 +550,15 @@ export function NecessidadesImporter() {
 
           if (error) throw error;
 
-          // Log de sucesso (simples e direto)
-          const icon = servico === "Implantar" ? "🟢" : servico === "Substituir" ? "🟡" : servico === "Remover" ? "🔴" : "🔵";
+          // Log de sucesso com indicação de divergência
+          const icon = servicoFinal === "Implantar" ? "🟢" : servicoFinal === "Substituir" ? "🟡" : servicoFinal === "Remover" ? "🔴" : "🔵";
           const matchInfo = match ? ` (${distancia?.toFixed(0)}m)` : "";
+          const divIcon = divergencia ? " ⚠️" : "";
           
           setLogs(prev => [...prev, {
-            tipo: "success",
+            tipo: divergencia ? "warning" : "success",
             linha: linhaExcel,
-            mensagem: `${icon} ${servico}${matchInfo}`
+            mensagem: `${icon} ${servicoFinal}${matchInfo}${divIcon}${divergencia ? ` Projeto: ${solucaoPlanilhaNormalizada} vs Sistema: ${servicoInferido}` : ""}`
           }]);
           sucessos++;
 

@@ -154,7 +154,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_placas")
-        .select("id, servico, cadastro_id, distancia_match_metros, codigo, tipo, km")
+        .select("id, servico, servico_final, cadastro_id, distancia_match_metros, codigo, tipo, km, divergencia, reconciliado, solucao_planilha, servico_inferido")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null)
@@ -163,9 +163,13 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
       if (error) throw error;
       
       // Indexar por cadastro_id para busca O(1)
+      // Usar servico_final como fonte da verdade para o badge
       const map = new Map<string, any>();
       data?.forEach(nec => {
-        map.set(nec.cadastro_id, nec);
+        map.set(nec.cadastro_id, {
+          ...nec,
+          servico: nec.servico_final || nec.servico, // Priorizar servico_final
+        });
       });
       
       return map;

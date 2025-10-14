@@ -3048,10 +3048,13 @@ export type Database = {
           codigo: string | null
           created_at: string | null
           data_importacao: string | null
+          data_reconciliacao: string | null
           dimensoes_mm: string | null
           distancia_m: number | null
           distancia_match_metros: number | null
+          divergencia: boolean | null
           id: string
+          justificativa_reconciliacao: string | null
           km: number | null
           lado: string | null
           latitude: number | null
@@ -3059,8 +3062,12 @@ export type Database = {
           longitude: number | null
           lote_id: string
           observacao: string | null
+          reconciliado: boolean | null
+          reconciliado_por: string | null
           rodovia_id: string
           servico: string
+          servico_final: string | null
+          servico_inferido: string | null
           snv: string | null
           solucao_planilha: string | null
           substrato: string | null
@@ -3080,10 +3087,13 @@ export type Database = {
           codigo?: string | null
           created_at?: string | null
           data_importacao?: string | null
+          data_reconciliacao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
           distancia_match_metros?: number | null
+          divergencia?: boolean | null
           id?: string
+          justificativa_reconciliacao?: string | null
           km?: number | null
           lado?: string | null
           latitude?: number | null
@@ -3091,8 +3101,12 @@ export type Database = {
           longitude?: number | null
           lote_id: string
           observacao?: string | null
+          reconciliado?: boolean | null
+          reconciliado_por?: string | null
           rodovia_id: string
           servico: string
+          servico_final?: string | null
+          servico_inferido?: string | null
           snv?: string | null
           solucao_planilha?: string | null
           substrato?: string | null
@@ -3112,10 +3126,13 @@ export type Database = {
           codigo?: string | null
           created_at?: string | null
           data_importacao?: string | null
+          data_reconciliacao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
           distancia_match_metros?: number | null
+          divergencia?: boolean | null
           id?: string
+          justificativa_reconciliacao?: string | null
           km?: number | null
           lado?: string | null
           latitude?: number | null
@@ -3123,8 +3140,12 @@ export type Database = {
           longitude?: number | null
           lote_id?: string
           observacao?: string | null
+          reconciliado?: boolean | null
+          reconciliado_por?: string | null
           rodovia_id?: string
           servico?: string
+          servico_final?: string | null
+          servico_inferido?: string | null
           snv?: string | null
           solucao_planilha?: string | null
           substrato?: string | null

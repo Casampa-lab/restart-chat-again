@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { PlusCircle, RefreshCw, Trash2, CheckCircle2 } from "lucide-react";
+import { PlusCircle, RefreshCw, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface NecessidadeBadgeProps {
   necessidade: {
@@ -11,6 +11,10 @@ interface NecessidadeBadgeProps {
     codigo?: string;
     tipo?: string;
     km?: number;
+    divergencia?: boolean;
+    reconciliado?: boolean;
+    solucao_planilha?: string;
+    servico_inferido?: string;
   };
   tipo: "placas" | "porticos" | "cilindros" | "marcas_longitudinais" | "tachas" | "defensas";
 }
@@ -62,12 +66,15 @@ export function NecessidadeBadge({ necessidade, tipo }: NecessidadeBadgeProps) {
     navigate(`/minhas-necessidades?tipo=${tipo}&highlight=${necessidade.id}`);
   };
 
+  // Indicador de divergência não reconciliada
+  const temDivergencia = necessidade.divergencia && !necessidade.reconciliado;
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <Badge 
-            className={`${colorClasses} cursor-pointer transition-all text-xs gap-1 border`}
+            className={`${colorClasses} cursor-pointer transition-all text-xs gap-1 border ${temDivergencia ? 'ring-2 ring-yellow-400' : ''}`}
             onClick={handleClick}
           >
             <Icon className="h-3 w-3" />
@@ -77,6 +84,9 @@ export function NecessidadeBadge({ necessidade, tipo }: NecessidadeBadgeProps) {
                 ({distancia.toFixed(0)}m)
               </span>
             )}
+            {temDivergencia && (
+              <AlertCircle className="h-3 w-3 text-yellow-600" />
+            )}
           </Badge>
         </TooltipTrigger>
         <TooltipContent className="max-w-xs">
@@ -85,6 +95,20 @@ export function NecessidadeBadge({ necessidade, tipo }: NecessidadeBadgeProps) {
             {necessidade.codigo && <p><strong>Código:</strong> {necessidade.codigo}</p>}
             {necessidade.tipo && <p><strong>Tipo:</strong> {necessidade.tipo}</p>}
             {necessidade.km && <p><strong>KM:</strong> {necessidade.km.toFixed(2)}</p>}
+            
+            {/* Alerta de Divergência */}
+            {temDivergencia && (
+              <div className="pt-2 pb-1 border-t">
+                <Badge variant="outline" className="bg-yellow-50 text-yellow-800 text-[10px] mb-1">
+                  ⚠️ DIVERGÊNCIA DETECTADA
+                </Badge>
+                <div className="space-y-1 text-[10px]">
+                  <p><strong>Projeto 🎨:</strong> {necessidade.solucao_planilha}</p>
+                  <p><strong>Sistema 🤖:</strong> {necessidade.servico_inferido}</p>
+                  <p className="text-yellow-700 font-medium">Reconciliação pendente</p>
+                </div>
+              </div>
+            )}
             
             <div className="pt-1">
               {matchLevel === "confirmado" ? (
