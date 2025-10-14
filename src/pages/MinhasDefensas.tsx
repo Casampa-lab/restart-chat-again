@@ -47,7 +47,7 @@ import {
 
 interface Defensa {
   id: string;
-  data_inspecao: string;
+  data_vistoria: string;
   km_inicial: number;
   km_final: number;
   lado: string;
@@ -87,11 +87,11 @@ const MinhasDefensas = () => {
           .from("defensas")
           .select("*")
           .eq("user_id", user.id)
-          .order("data_inspecao", { ascending: false });
+          .order("data_vistoria", { ascending: false });
 
         if (defensasError) throw defensasError;
 
-        setDefensas(defensasData || []);
+        setDefensas((defensasData || []) as any);
 
         const { data: lotesData } = await supabase
           .from("lotes")
@@ -158,8 +158,8 @@ const MinhasDefensas = () => {
         .from("defensas")
         .select("*")
         .eq("user_id", user!.id)
-        .order("data_inspecao", { ascending: false });
-      setDefensas(defensasData || []);
+        .order("data_vistoria", { ascending: false });
+      setDefensas((defensasData || []) as any);
     } catch (error: any) {
       toast.error("Erro ao enviar inspeções: " + error.message);
     }
@@ -183,8 +183,8 @@ const MinhasDefensas = () => {
         .from("defensas")
         .select("*")
         .eq("user_id", user!.id)
-        .order("data_inspecao", { ascending: false });
-      setDefensas(defensasData || []);
+        .order("data_vistoria", { ascending: false });
+      setDefensas((defensasData || []) as any);
     } catch (error: any) {
       toast.error("Erro ao excluir inspeção: " + error.message);
     } finally {
@@ -200,7 +200,7 @@ const MinhasDefensas = () => {
       const { error } = await supabase
         .from("defensas")
         .update({
-          data_inspecao: defensaToEdit.data_inspecao,
+          data_vistoria: defensaToEdit.data_vistoria,
           km_inicial: defensaToEdit.km_inicial,
           km_final: defensaToEdit.km_final,
           lado: defensaToEdit.lado,
@@ -217,8 +217,8 @@ const MinhasDefensas = () => {
         .from("defensas")
         .select("*")
         .eq("user_id", user!.id)
-        .order("data_inspecao", { ascending: false });
-      setDefensas(defensasData || []);
+        .order("data_vistoria", { ascending: false });
+      setDefensas((defensasData || []) as any);
     } catch (error: any) {
       toast.error("Erro ao atualizar inspeção: " + error.message);
     } finally {
@@ -321,7 +321,7 @@ const MinhasDefensas = () => {
                           />
                         </TableCell>
                         <TableCell>
-                          {format(new Date(defensa.data_inspecao), "dd/MM/yyyy")}
+                          {format(new Date(defensa.data_vistoria), "dd/MM/yyyy")}
                         </TableCell>
                         <TableCell>{lotes[defensa.lote_id] || "-"}</TableCell>
                         <TableCell>{rodovias[defensa.rodovia_id] || "-"}</TableCell>
@@ -406,8 +406,8 @@ const MinhasDefensas = () => {
                   <Label>Data da Inspeção</Label>
                   <Input
                     type="date"
-                    value={defensaToEdit.data_inspecao}
-                    onChange={(e) => setDefensaToEdit({...defensaToEdit, data_inspecao: e.target.value})}
+                    value={defensaToEdit.data_vistoria}
+                    onChange={(e) => setDefensaToEdit({...defensaToEdit, data_vistoria: e.target.value})}
                   />
                 </div>
                 <div>

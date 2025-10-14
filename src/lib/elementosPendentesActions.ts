@@ -59,8 +59,9 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
     // 2. Preparar dados para inserção
     const dadosElemento = elemento.dados_elemento as any;
     
-    // Remover campos que não existem na tabela de destino
+    // Remover TODOS os campos que não existem nas tabelas de inventário
     const { 
+      // Campos de intervenção que não vão para inventário
       codigo_placa, 
       km_referencia, 
       motivo,
@@ -68,6 +69,11 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
       placa_recuperada,
       fora_plano_manutencao,
       justificativa_fora_plano,
+      
+      // Campos de formulário que não existem nas tabelas
+      pelicula,        // Será mapeado para tipo_pelicula_fundo
+      tipo_placa,      // Usado apenas para filtro, não existe na tabela
+      
       ...dadosLimpos 
     } = dadosElemento;
 
@@ -77,17 +83,39 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
       lote_id: elemento.lote_id,
       rodovia_id: elemento.rodovia_id,
       origem: 'necessidade_campo',
-      // Mapear campos específicos de placas
+      data_vistoria: new Date().toISOString().split('T')[0], // TODOS usam data_vistoria
+      
+      // Mapeamentos específicos de placas
       ...(elemento.tipo_elemento === 'placas' && codigo_placa ? { codigo: codigo_placa } : {}),
       ...(elemento.tipo_elemento === 'placas' && km_referencia ? { km: parseFloat(km_referencia) } : {}),
+      ...(elemento.tipo_elemento === 'placas' && pelicula ? { tipo_pelicula_fundo: pelicula } : {}),
     };
 
-    // Adicionar campo de data conforme tipo de elemento
-    if (elemento.tipo_elemento === 'defensas') {
-      dadosInventario.data_inspecao = new Date().toISOString().split('T')[0];
-    } else {
-      dadosInventario.data_vistoria = new Date().toISOString().split('T')[0];
+    // Validar campos obrigatórios por tipo
+    const camposObrigatorios: Record<string, string[]> = {
+      defensas: ['tipo_defensa', 'lado', 'km_inicial', 'km_final', 'extensao_metros'],
+      placas: ['codigo'],
+      tachas: ['km_inicial', 'km_final', 'quantidade'],
+      marcas_longitudinais: ['km_inicial', 'km_final'],
+      cilindros: ['cor_corpo', 'km_inicial', 'km_final'],
+      porticos: ['tipo'],
+      inscricoes: ['tipo_inscricao', 'cor']
+    };
+
+    const obrigatorios = camposObrigatorios[elemento.tipo_elemento] || [];
+    const faltando = obrigatorios.filter(campo => !dadosInventario[campo]);
+
+    if (faltando.length > 0) {
+      console.error('❌ Campos obrigatórios faltando:', faltando);
+      throw new Error(`Campos obrigatórios faltando para ${elemento.tipo_elemento}: ${faltando.join(', ')}`);
     }
+
+    console.log('📝 APROVAÇÃO - Detalhes:');
+    console.log('  Tipo:', elemento.tipo_elemento);
+    console.log('  Tabela destino:', tabela);
+    console.log('  Dados originais:', JSON.stringify(dadosElemento, null, 2));
+    console.log('  Dados limpos:', JSON.stringify(dadosInventario, null, 2));
+    console.log('  Campos enviados:', Object.keys(dadosInventario));
 
     // 3. Criar no inventário apropriado usando query builder dinâmica
     const { data: novoItem, error: insertError } = await supabase
@@ -96,7 +124,13 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
       .select()
       .single();
 
-    if (insertError) throw insertError;
+    if (insertError) {
+      console.error('❌ ERRO na inserção:', insertError);
+      console.error('   Detalhes:', insertError.details);
+      console.error('   Hint:', insertError.hint);
+      console.error('   Dados tentados:', JSON.stringify(dadosInventario, null, 2));
+      throw new Error(`Falha ao inserir em ${tabela}: ${insertError.message}`);
+    }
     if (!novoItem) throw new Error('Falha ao criar item no inventário');
 
     // 4. Criar intervenção vinculada
@@ -179,6 +213,20 @@ export async function rejeitarElemento(elementoId: string, observacao: string) {
     const { data: ncNumber } = await supabase.rpc('generate_nc_number');
     
     const dadosElemento = elemento.dados_elemento as any;
+    
+    const getTipoLabel = (tipo: string): string => {
+      const labels: Record<string, string> = {
+        marcas_longitudinais: 'Marcas Longitudinais',
+        placas: 'Placas',
+        tachas: 'Tachas',
+        inscricoes: 'Inscrições',
+        cilindros: 'Cilindros',
+        porticos: 'Pórticos',
+        defensas: 'Defensas'
+      };
+      return labels[tipo] || tipo;
+    };
+    
     const ncData: any = {
       numero_nc: ncNumber,
       user_id: elemento.user_id,
@@ -186,14 +234,17 @@ export async function rejeitarElemento(elementoId: string, observacao: string) {
       lote_id: elemento.lote_id,
       tipo_nc: tipoNC,
       problema_identificado: 'Item Implantado Fora do Projeto',
-      descricao_problema: `Elemento não cadastrado rejeitado pelo coordenador.\n\nJustificativa do técnico: ${elemento.justificativa}\n\nMotivo da rejeição: ${observacao}`,
+      descricao_problema: `Elemento não cadastrado rejeitado pelo coordenador.\n\n` +
+                           `Tipo: ${getTipoLabel(elemento.tipo_elemento)}\n` +
+                           `Justificativa do técnico: ${elemento.justificativa}\n\n` +
+                           `Motivo da rejeição: ${observacao}`,
       situacao: 'Não Atendida',
       empresa: 'A definir',
       data_ocorrencia: new Date().toISOString().split('T')[0],
       km_referencia: dadosElemento?.km || dadosElemento?.km_inicial || null,
       latitude: dadosElemento?.latitude || dadosElemento?.latitude_inicial || null,
       longitude: dadosElemento?.longitude || dadosElemento?.longitude_inicial || null,
-      observacao: 'Elemento rejeitado na aprovação coordenador'
+      observacao: `Rejeitado em ${new Date().toLocaleDateString('pt-BR')} - Coordenador`
     };
 
     const { error: ncError } = await supabase

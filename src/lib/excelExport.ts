@@ -334,7 +334,7 @@ export const exportDefensas = async () => {
     const { data, error } = await supabase
       .from('defensas')
       .select('*')
-      .order('data_inspecao', { ascending: false });
+      .order('data_vistoria', { ascending: false });
 
     if (error) throw error;
 
@@ -344,11 +344,11 @@ export const exportDefensas = async () => {
       ['3.1.4 - INSPEÇÃO DE DEFENSAS'],
       [],
       ['Data', 'Lote', 'Rodovia', 'km Inicial', 'km Final', 'Extensão (m)', 'Tipo', 'Lado'],
-      ...(data || []).map(item => {
+      ...(data || []).map((item: any) => {
         const lote = lotesMap.get(item.lote_id);
         const rodovia = rodoviasMap.get(item.rodovia_id);
         return [
-          formatDate(item.data_inspecao),
+          formatDate(item.data_vistoria),
           lote?.numero || '',
           rodovia?.codigo || '',
           formatNumber(item.km_inicial),

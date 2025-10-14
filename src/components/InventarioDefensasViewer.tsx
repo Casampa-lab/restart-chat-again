@@ -19,7 +19,7 @@ interface FichaDefensa {
   km_inicial: number;
   km_final: number;
   extensao_metros: number;
-  data_inspecao: string;
+  data_vistoria: string;
   rodovia_id: string;
   lote_id: string;
 }
@@ -75,7 +75,7 @@ export const InventarioDefensasViewer = ({
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as FichaDefensa[];
+      return (data || []) as any as FichaDefensa[];
     },
     enabled: !!loteId && !!rodoviaId,
   });
@@ -616,7 +616,7 @@ export const InventarioDefensasViewer = ({
                   <h3 className="font-semibold mb-3">Data</h3>
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Data da Foto:</span>
-                    <p className="text-sm">{new Date(selectedDefensa.data_inspecao).toLocaleDateString('pt-BR')}</p>
+                    <p className="text-sm">{new Date(selectedDefensa.data_vistoria).toLocaleDateString('pt-BR')}</p>
                   </div>
                 </div>
               </TabsContent>
