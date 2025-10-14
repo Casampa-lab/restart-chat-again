@@ -387,7 +387,30 @@ export function InventarioPorticosViewer({
       <Dialog open={!!selectedPortico} onOpenChange={() => setSelectedPortico(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Detalhes do Pórtico/Semipórtico/Braço</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Detalhes do Pórtico/Semipórtico/Braço</span>
+              <div className="flex gap-2">
+                {onRegistrarIntervencao && (
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    onClick={() => {
+                      onRegistrarIntervencao(selectedPortico);
+                      setSelectedPortico(null);
+                    }}
+                  >
+                    Registrar Intervenção
+                  </Button>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setSelectedPortico(null)}
+                >
+                  Voltar
+                </Button>
+              </div>
+            </DialogTitle>
           </DialogHeader>
           
           {selectedPortico && (
