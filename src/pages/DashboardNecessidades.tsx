@@ -28,6 +28,16 @@ const COLORS = {
   Manter: "#3b82f6",
 };
 
+const CORES_GRUPOS: Record<string, string> = {
+  "Placas": "#3b82f6",
+  "Marcas Longitudinais": "#10b981",
+  "Tachas": "#f59e0b",
+  "Zebrados": "#8b5cf6",
+  "Cilindros": "#ec4899",
+  "Pórticos": "#06b6d4",
+  "Defensas": "#ef4444",
+};
+
 export default function DashboardNecessidades() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -242,9 +252,9 @@ export default function DashboardNecessidades() {
     ? supervisora.logo_url 
     : logoOperaVia;
 
-  const dadosPizza = Object.entries(stats.porServico).map(([name, value]) => ({
-    name,
-    value,
+  const dadosPizzaPorGrupo = stats.porTipo.map((item: any) => ({
+    name: item.tipo,
+    value: item.total,
   }));
 
   return (
@@ -357,15 +367,15 @@ export default function DashboardNecessidades() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5" />
-                    Distribuição por Tipo de Serviço
+                    Distribuição por Grupo de Elementos
                   </CardTitle>
-                  <CardDescription>Proporção de cada tipo de necessidade</CardDescription>
+                  <CardDescription>Quantidade de necessidades por tipo de elemento</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
-                        data={dadosPizza}
+                        data={dadosPizzaPorGrupo}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
@@ -374,8 +384,8 @@ export default function DashboardNecessidades() {
                         fill="#8884d8"
                         dataKey="value"
                       >
-                        {dadosPizza.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[entry.name as keyof typeof COLORS]} />
+                        {dadosPizzaPorGrupo.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={CORES_GRUPOS[entry.name] || "#888888"} />
                         ))}
                       </Pie>
                       <Tooltip />
