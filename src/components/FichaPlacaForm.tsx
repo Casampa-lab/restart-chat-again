@@ -1001,7 +1001,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
             </TabsContent>
           </Tabs>
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+          <Button type="submit" disabled={isSubmitting} className="w-full mt-6">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar Ficha de Placa
           </Button>
