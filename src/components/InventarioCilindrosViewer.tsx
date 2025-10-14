@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle } from "lucide-react";
+import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
@@ -101,30 +101,35 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
     },
   });
 
-  // Query de necessidades matchadas com divergências
-  const necessidadesMatchQuery = useQuery({
+  // Query de necessidades relacionadas (retorna Map indexado por cadastro_id)
+  const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
     queryKey: ["necessidades-match-cilindros", loteId, rodoviaId],
-    queryFn: async (): Promise<any[]> => {
-      // @ts-ignore - Evitar inferência profunda de tipos do Supabase
-      const query = supabase
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from("necessidades_cilindros")
         .select("*")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .eq("solucao_confirmada", false)
-        .not("cadastro_id", "is", null)
-        .not("divergencia", "is", null);
+        .not("cadastro_id", "is", null);
       
-      const result = (await query) as unknown as { data: any; error: any };
-
-      if (result.error) throw result.error;
-      return result.data || [];
+      if (error) throw error;
+      
+      const map = new Map<string, any>();
+      data?.forEach((nec: any) => {
+        const divergencia = nec.solucao_planilha && nec.servico_inferido && nec.solucao_planilha !== nec.servico_inferido;
+        map.set(nec.cadastro_id, { ...nec, divergencia });
+      });
+      
+      return map;
     },
+    enabled: !!loteId && !!rodoviaId,
   });
 
-  const necessidadesMatch = necessidadesMatchQuery.data as any[] | undefined;
-  const divergenciasCount = necessidadesMatch?.length || 0;
+  const divergenciasPendentes = Array.from(necessidadesMap?.values() || []).filter(
+    (nec: any) => nec.divergencia && !nec.solucao_confirmada
+  ).length;
 
+  // Buscar cilindros do inventário
   const { data: cilindros, isLoading } = useQuery({
     queryKey: ["cilindros", loteId, rodoviaId, searchTerm, searchLat, searchLon],
     queryFn: async () => {
@@ -181,15 +186,22 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
     },
   });
 
-  const handleReconciliar = () => {
-    queryClient.invalidateQueries({ queryKey: ["necessidades-match-cilindros"] });
-    queryClient.invalidateQueries({ queryKey: ["cilindros"] });
+  const handleReconciliar = async () => {
+    await refetchNecessidades();
     setReconciliacaoOpen(false);
+    setSelectedNecessidade(null);
+    setSelectedCadastroForReconciliacao(null);
     toast.success("Reconciliação processada");
   };
 
+  const filteredCilindros = cilindros?.filter(cilindro => {
+    if (!showOnlyDivergencias) return true;
+    const nec = necessidadesMap?.get(cilindro.id);
+    return nec?.divergencia;
+  }) || [];
+
   // Função para ordenar dados
-  const sortedCilindros = cilindros ? [...cilindros].sort((a: any, b: any) => {
+  const sortedCilindros = filteredCilindros ? [...filteredCilindros].sort((a: any, b: any) => {
     if (!sortColumn) return 0;
     
     let aVal: any = a[sortColumn];
@@ -210,13 +222,6 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
     
     return 0;
   }) : [];
-
-  // Filtrar por divergências se necessário
-  const filteredCilindros = showOnlyDivergencias
-    ? sortedCilindros.filter((cilindro: any) =>
-        necessidadesMatch?.some((n: any) => n.cadastro_id === cilindro.id && n.divergencia)
-      )
-    : sortedCilindros;
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -292,28 +297,39 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Banner de alerta de divergências */}
-            {divergenciasCount > 0 && (
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="flex items-center justify-between">
-                    <span>
-                      <strong>{divergenciasCount}</strong> {divergenciasCount === 1 ? "divergência encontrada" : "divergências encontradas"} entre projeto e sistema.
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowOnlyDivergencias(!showOnlyDivergencias)}
-                    >
-                      {showOnlyDivergencias ? "Ver Todos" : "Ver Divergências"}
-                    </Button>
+        <CardContent className="space-y-4">
+          {/* Contador de Matches a Reconciliar */}
+          {divergenciasPendentes > 0 && (
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
+                  <AlertCircle className="h-6 w-6 text-warning" />
+                </div>
+                <div>
+                  <div className="font-bold text-base flex items-center gap-2">
+                    <span className="text-2xl font-extrabold text-warning">{divergenciasPendentes}</span>
+                    <span>{divergenciasPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
                   </div>
-                </AlertDescription>
-              </Alert>
-            )}
+                  <div className="text-sm text-muted-foreground mt-0.5">
+                    🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showOnlyDivergencias}
+                  onCheckedChange={setShowOnlyDivergencias}
+                  id="filtro-divergencias-cilindros"
+                />
+                <Label htmlFor="filtro-divergencias-cilindros" className="cursor-pointer text-sm font-medium">
+                  <Filter className="h-4 w-4 inline mr-1" />
+                  Apenas divergências
+                </Label>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -417,15 +433,13 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <SortIcon column="data_vistoria" />
                       </div>
                     </TableHead>
-                    <TableHead>Necessidade</TableHead>
+                    <TableHead className="text-center">Projeto</TableHead>
                     <TableHead className="text-center">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCilindros && filteredCilindros.length > 0 ? (
-                    filteredCilindros.map((cilindro: any) => {
-                      const necessidadeMatch = necessidadesMatch?.find((n: any) => n.cadastro_id === cilindro.id);
-                      return (
+                  {sortedCilindros && sortedCilindros.length > 0 ? (
+                    sortedCilindros.map((cilindro: any) => (
                       <TableRow key={cilindro.id}>
                         {searchLat && searchLon && (
                           <TableCell>
@@ -442,33 +456,24 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <TableCell>{cilindro.quantidade || "-"}</TableCell>
                         <TableCell>{cilindro.espacamento_m || "-"}</TableCell>
                         <TableCell>{new Date(cilindro.data_vistoria).toLocaleDateString("pt-BR")}</TableCell>
-                        <TableCell>
-                          {necessidadeMatch && (
-                            <div
-                              className="cursor-pointer"
-                              onClick={() => {
-                                setSelectedNecessidade(necessidadeMatch);
-                                setSelectedCadastroForReconciliacao(cilindro);
-                                setReconciliacaoOpen(true);
-                              }}
-                            >
-                              <NecessidadeBadge 
-                                necessidade={{
-                                  id: necessidadeMatch.id,
-                                  servico: necessidadeMatch.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
-                                  distancia_match_metros: necessidadeMatch.distancia_match_metros,
-                                  codigo: (necessidadeMatch as any).codigo,
-                                  tipo: (necessidadeMatch as any).tipo,
-                                  km: (necessidadeMatch as any).km,
-                                  divergencia: (necessidadeMatch as any).divergencia,
-                                  reconciliado: (necessidadeMatch as any).reconciliado,
-                                  solucao_planilha: (necessidadeMatch as any).solucao_planilha,
-                                  servico_inferido: (necessidadeMatch as any).servico_inferido,
+                        <TableCell className="text-center">
+                          {(() => {
+                            const nec = necessidadesMap?.get(cilindro.id);
+                            if (!nec) return "-";
+                            
+                            return (
+                              <NecessidadeBadge
+                                tipo="cilindros"
+                                servico={nec.servico}
+                                divergencia={nec.divergencia_encontrada}
+                                onClick={() => {
+                                  setSelectedNecessidade(nec);
+                                  setSelectedCadastroForReconciliacao(cilindro);
+                                  setReconciliacaoOpen(true);
                                 }}
-                                tipo="cilindros" 
                               />
-                            </div>
-                          )}
+                            );
+                          })()}
                         </TableCell>
                         <TableCell className="text-center">
                           <Button
@@ -481,8 +486,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                           </Button>
                         </TableCell>
                       </TableRow>
-                      );
-                    })
+                    ))
                   ) : (
                     <TableRow>
                       <TableCell colSpan={searchLat && searchLon ? 11 : 10} className="text-center text-muted-foreground py-8">
