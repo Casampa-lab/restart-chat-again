@@ -622,7 +622,10 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => handleOpenReconciliacao(placa)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenReconciliacao(placa);
+                                  }}
                                   className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground"
                                 >
                                   <AlertCircle className="h-4 w-4 mr-1" />
@@ -652,7 +655,10 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleViewPlacaDetails(placa)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewPlacaDetails(placa);
+                            }}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
