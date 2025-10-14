@@ -240,6 +240,8 @@ serve(async (req) => {
         "dimensões_(mm)": "dimensoes_mm",
         "área_(m²)": "area_m2",
         "data": "data_vistoria",
+        "retrorrefletância_(película_fundo)_(cd.lux/m-2)": "retro_pelicula_fundo",
+        "retrorrefletância_(película_legenda/orla)_(cd.lux/m-2)": "retro_pelicula_legenda_orla",
       },
       intervencoes_cilindros: {
         "extensão_(km)": "extensao_km",
@@ -301,9 +303,13 @@ serve(async (req) => {
         "data_vistoria", "descricao", "dimensoes_mm", "distancia_m", "empresa",
         "foto_base_url", "foto_frontal_url", "foto_identificacao_url",
         "foto_lateral_url", "foto_posterior_url", "km", "lado", "latitude",
-        "longitude", "modelo", "numero_patrimonio", "pelicula", "qtde_suporte",
-        "retrorrefletividade", "snv", "substrato", "suporte", "tipo", "uf",
-        "velocidade"
+        "longitude", "modelo", "numero_patrimonio", "qtde_suporte",
+        "retro_pelicula_fundo", "retro_pelicula_legenda_orla",
+        "snv", "substrato", "suporte", "tipo", "uf", "velocidade",
+        "tipo_pelicula_fundo", "cor_pelicula_fundo",
+        "tipo_pelicula_legenda_orla", "cor_pelicula_legenda_orla",
+        "posicao", "si_sinal_impresso", "tipo_secao_suporte", 
+        "secao_suporte_mm", "link_fotografia", "foto_url"
       ],
       intervencoes_cilindros: [
         "cor_corpo", "cor_refletivo", "data_intervencao", "espacamento_m",
