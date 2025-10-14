@@ -33,6 +33,7 @@ import TestePDF from "./pages/TestePDF";
 import ElementosPendentes from "./pages/ElementosPendentes";
 import MeusElementosPendentes from "./pages/MeusElementosPendentes";
 import RelatorioMedicao from "./pages/RelatorioMedicao";
+import ReconciliacoesPendentes from "./pages/ReconciliacoesPendentes";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,7 @@ const App = () => (
           <Route path="/elementos-pendentes" element={<ElementosPendentes />} />
           <Route path="/meus-elementos-pendentes" element={<MeusElementosPendentes />} />
           <Route path="/relatorio-medicao" element={<RelatorioMedicao />} />
+          <Route path="/reconciliacoes-pendentes" element={<ReconciliacoesPendentes />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

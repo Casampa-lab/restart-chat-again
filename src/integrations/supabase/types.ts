@@ -3607,6 +3607,8 @@ export type Database = {
       necessidades_placas: {
         Row: {
           altura_m: number | null
+          aprovado_em: string | null
+          aprovado_por: string | null
           area_m2: number | null
           arquivo_origem: string | null
           br: string | null
@@ -3629,6 +3631,8 @@ export type Database = {
           longitude: number | null
           lote_id: string
           observacao: string | null
+          observacao_coordenador: string | null
+          observacao_usuario: string | null
           reconciliado: boolean | null
           reconciliado_em: string | null
           reconciliado_por: string | null
@@ -3640,7 +3644,10 @@ export type Database = {
           servico_final: string | null
           servico_inferido: string | null
           snv: string | null
+          solicitado_em: string | null
+          solicitado_por: string | null
           solucao_planilha: string | null
+          status_reconciliacao: string | null
           substrato: string | null
           suporte: string | null
           tipo: string | null
@@ -3651,6 +3658,8 @@ export type Database = {
         }
         Insert: {
           altura_m?: number | null
+          aprovado_em?: string | null
+          aprovado_por?: string | null
           area_m2?: number | null
           arquivo_origem?: string | null
           br?: string | null
@@ -3673,6 +3682,8 @@ export type Database = {
           longitude?: number | null
           lote_id: string
           observacao?: string | null
+          observacao_coordenador?: string | null
+          observacao_usuario?: string | null
           reconciliado?: boolean | null
           reconciliado_em?: string | null
           reconciliado_por?: string | null
@@ -3684,7 +3695,10 @@ export type Database = {
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
+          solicitado_em?: string | null
+          solicitado_por?: string | null
           solucao_planilha?: string | null
+          status_reconciliacao?: string | null
           substrato?: string | null
           suporte?: string | null
           tipo?: string | null
@@ -3695,6 +3709,8 @@ export type Database = {
         }
         Update: {
           altura_m?: number | null
+          aprovado_em?: string | null
+          aprovado_por?: string | null
           area_m2?: number | null
           arquivo_origem?: string | null
           br?: string | null
@@ -3717,6 +3733,8 @@ export type Database = {
           longitude?: number | null
           lote_id?: string
           observacao?: string | null
+          observacao_coordenador?: string | null
+          observacao_usuario?: string | null
           reconciliado?: boolean | null
           reconciliado_em?: string | null
           reconciliado_por?: string | null
@@ -3728,7 +3746,10 @@ export type Database = {
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
+          solicitado_em?: string | null
+          solicitado_por?: string | null
           solucao_planilha?: string | null
+          status_reconciliacao?: string | null
           substrato?: string | null
           suporte?: string | null
           tipo?: string | null

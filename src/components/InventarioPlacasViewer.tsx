@@ -15,6 +15,7 @@ import { NecessidadeBadge } from "./NecessidadeBadge";
 import { ReconciliacaoDrawer } from "./ReconciliacaoDrawer";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Helper function to determine badge color based on placa type
 const getPlacaBadgeVariant = (tipo: string | null): { className: string } => {
@@ -35,6 +36,47 @@ const getPlacaBadgeVariant = (tipo: string | null): { className: string } => {
   // Indicação - VERDE (padrão)
   return { className: "bg-green-600 hover:bg-green-700 text-white border-green-700" };
 };
+
+// Component to show reconciliation status badge
+function StatusReconciliacaoBadge({ status }: { status: string | null }) {
+  if (!status) return null;
+
+  const config = {
+    pendente_aprovacao: {
+      color: "bg-yellow-100 text-yellow-800 border-yellow-300",
+      icon: "🟡",
+      label: "Aguardando Coordenação"
+    },
+    aprovado: {
+      color: "bg-green-100 text-green-800 border-green-300",
+      icon: "🟢",
+      label: "Substituição Aprovada"
+    },
+    rejeitado: {
+      color: "bg-red-100 text-red-800 border-red-300",
+      icon: "🔴",
+      label: "Mantido como Implantação"
+    }
+  };
+
+  const item = config[status as keyof typeof config];
+  if (!item) return null;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge className={`${item.color} text-xs border`}>
+            {item.icon}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-xs">{item.label}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 interface FichaPlaca {
   id: string;
@@ -498,6 +540,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                         </div>
                       </TableHead>
                       <TableHead className="text-center">Projeto</TableHead>
+                      <TableHead className="text-center">Status</TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
@@ -542,28 +585,35 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <TableCell>{placa.lado || "-"}</TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (
-                              <div className="flex items-center gap-2 justify-center">
-                                <NecessidadeBadge 
-                                  necessidade={necessidade} 
-                                  tipo="placas"
-                                />
-                                {necessidade.divergencia && !necessidade.reconciliado && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleOpenReconciliacao(placa)}
-                                    className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground"
-                                  >
-                                    <AlertCircle className="h-4 w-4 mr-1" />
-                                    Verificar
-                                  </Button>
-                                )}
-                              </div>
+                              <NecessidadeBadge 
+                                necessidade={necessidade} 
+                                tipo="placas"
+                              />
                             ) : (
                               <Badge variant="outline" className="text-muted-foreground text-xs">
                                 Sem previsão
                               </Badge>
                             )}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex items-center gap-2 justify-center">
+                              {necessidade && (
+                                <StatusReconciliacaoBadge 
+                                  status={necessidade.status_reconciliacao} 
+                                />
+                              )}
+                              {necessidade?.divergencia && !necessidade.reconciliado && !necessidade.status_reconciliacao && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleOpenReconciliacao(placa)}
+                                  className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground"
+                                >
+                                  <AlertCircle className="h-4 w-4 mr-1" />
+                                  Verificar
+                                </Button>
+                              )}
+                            </div>
                           </TableCell>
                           {searchLat && searchLng && (
                             <TableCell>

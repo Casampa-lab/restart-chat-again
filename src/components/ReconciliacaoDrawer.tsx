@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle2, MapPin, Flag } from "lucide-react";
+import { CheckCircle2, MapPin, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 
@@ -25,52 +25,31 @@ export function ReconciliacaoDrawer({
   const [observacao, setObservacao] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleReconciliar = async (decisao: "confirmar_projeto" | "confirmar_sistema" | "solicitar_revisao") => {
+  const handleSolicitarReconciliacao = async () => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      let updateData: any = {
-        reconciliado_por: user.id,
-        reconciliado_em: new Date().toISOString(),
-      };
-
-      if (decisao === "confirmar_projeto") {
-        updateData.reconciliado = true;
-        updateData.servico_final = necessidade.solucao_planilha;
-        updateData.localizado_em_campo = true;
-      } else if (decisao === "confirmar_sistema") {
-        updateData.reconciliado = true;
-        updateData.servico_final = necessidade.servico_inferido;
-        updateData.solucao_planilha = necessidade.servico_inferido;
-        updateData.divergencia = false;
-        updateData.localizado_em_campo = true;
-      } else if (decisao === "solicitar_revisao") {
-        updateData.revisao_solicitada = true;
-        updateData.revisao_solicitada_por = user.id;
-        updateData.revisao_observacao = observacao;
-      }
-
       const { error } = await supabase
         .from("necessidades_placas")
-        .update(updateData)
+        .update({
+          status_reconciliacao: 'pendente_aprovacao',
+          solicitado_por: user.id,
+          solicitado_em: new Date().toISOString(),
+          observacao_usuario: observacao,
+          localizado_em_campo: true,
+        })
         .eq("id", necessidade.id);
 
       if (error) throw error;
 
-      const mensagens = {
-        confirmar_projeto: "Projeto confirmado com sucesso",
-        confirmar_sistema: "Sistema confirmado com sucesso",
-        solicitar_revisao: "Revisão solicitada ao coordenador",
-      };
-
-      toast.success(mensagens[decisao]);
+      toast.success("✓ Reconciliação enviada ao coordenador!");
       onReconciliar();
       onOpenChange(false);
     } catch (error) {
-      console.error("Erro ao reconciliar:", error);
-      toast.error("Erro ao processar reconciliação");
+      console.error("Erro:", error);
+      toast.error("Erro ao enviar reconciliação");
     } finally {
       setLoading(false);
     }
@@ -95,60 +74,79 @@ export function ReconciliacaoDrawer({
             <span>KM {necessidade.km} | Distância do match: {necessidade.distancia_match_metros}m</span>
           </div>
 
-          {/* Comparação: Projeto vs Sistema */}
+          {/* Comparação: Inventário (Esquerda) vs Projeto (Direita) */}
           <div className="grid grid-cols-2 gap-4">
-            {/* Projeto */}
-            <div className="border-2 border-primary rounded-lg p-4 space-y-2">
+            {/* ESQUERDA: Inventário/Cadastro */}
+            <div className="border-2 border-green-500 rounded-lg p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">📷</span>
+                <div>
+                  <div className="font-semibold text-green-700">Inventário (Cadastro)</div>
+                  <div className="text-xs text-muted-foreground">O que existe no local</div>
+                </div>
+              </div>
+              
+              <div className="space-y-2 text-sm">
+                <div><strong>Código:</strong> {cadastro.codigo || "N/A"}</div>
+                <div><strong>Tipo:</strong> {cadastro.tipo || "N/A"}</div>
+                <div><strong>KM:</strong> {cadastro.km?.toFixed(3) || "N/A"}</div>
+                <div><strong>Lado:</strong> {cadastro.lado || "N/A"}</div>
+                <div><strong>Suporte:</strong> {cadastro.suporte || "N/A"}</div>
+                <div><strong>Substrato:</strong> {cadastro.substrato || "N/A"}</div>
+                <div className="text-xs text-muted-foreground">
+                  GPS: {cadastro.latitude?.toFixed(6)}, {cadastro.longitude?.toFixed(6)}
+                </div>
+              </div>
+
+              {/* Foto do Cadastro */}
+              {cadastro.foto_frontal_url && (
+                <div className="space-y-1">
+                  <div className="text-xs font-medium text-muted-foreground">Foto Frontal:</div>
+                  <img 
+                    src={cadastro.foto_frontal_url} 
+                    alt="Placa cadastrada"
+                    className="w-full rounded-lg border"
+                  />
+                </div>
+              )}
+              
+              {/* Espaço reservado para foto do desenho técnico (futuro) */}
+              <div className="bg-gray-50 border-2 border-dashed rounded-lg p-3 text-center text-xs text-muted-foreground">
+                📸 Espaço reservado para<br/>foto do desenho técnico
+              </div>
+            </div>
+
+            {/* DIREITA: Projeto/Necessidade */}
+            <div className="border-2 border-primary rounded-lg p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">🎨</span>
                 <div>
-                  <div className="font-semibold">Projeto</div>
-                  <div className="text-xs text-muted-foreground">Da planilha</div>
+                  <div className="font-semibold text-primary">Projeto (Necessidade)</div>
+                  <div className="text-xs text-muted-foreground">O que prevê a planilha</div>
                 </div>
               </div>
-              <Badge className="w-full justify-center text-base py-2">
-                {necessidade.solucao_planilha}
-              </Badge>
-              {necessidade.codigo && (
-                <div className="text-sm">
-                  <span className="font-medium">Código:</span> {necessidade.codigo}
-                </div>
-              )}
-            </div>
 
-            {/* Sistema */}
-            <div className="border-2 border-blue-500 rounded-lg p-4 space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🤖</span>
-                <div>
-                  <div className="font-semibold">Sistema</div>
-                  <div className="text-xs text-muted-foreground">Match GPS</div>
+              <Badge className="w-full justify-center text-base py-2 bg-primary">
+                {necessidade.solucao_planilha || necessidade.servico}
+              </Badge>
+              
+              <div className="space-y-2 text-sm">
+                <div><strong>Código:</strong> {necessidade.codigo || "N/A"}</div>
+                <div><strong>Tipo:</strong> {necessidade.tipo || "N/A"}</div>
+                <div><strong>KM projeto:</strong> {necessidade.km?.toFixed(3) || "N/A"}</div>
+                <div><strong>Lado:</strong> {necessidade.lado || "N/A"}</div>
+                
+                {/* Info do Match */}
+                <div className="pt-2 border-t">
+                  <Badge variant="outline" className="text-xs">
+                    📍 Match GPS: {necessidade.distancia_match_metros?.toFixed(1) || "0"}m
+                  </Badge>
                 </div>
               </div>
-              <Badge variant="outline" className="w-full justify-center text-base py-2">
-                {necessidade.servico_inferido}
-              </Badge>
-              {cadastro.codigo && (
-                <div className="text-sm">
-                  <span className="font-medium">Código:</span> {cadastro.codigo}
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Foto da placa (se disponível) */}
-          {cadastro.foto_url && (
-            <div className="space-y-2">
-              <div className="font-medium text-sm">Foto do Cadastro:</div>
-              <img 
-                src={cadastro.foto_url} 
-                alt="Placa cadastrada"
-                className="w-full rounded-lg border"
-              />
-            </div>
-          )}
-
-          {/* Campo de observação para revisão */}
+          {/* Campo de observação */}
           <div className="space-y-2">
             <label className="text-sm font-medium">
               Observação (opcional para revisão)
@@ -162,34 +160,26 @@ export function ReconciliacaoDrawer({
           </div>
         </div>
 
-        <DrawerFooter className="flex-col gap-2">
-          <div className="grid grid-cols-2 gap-2 w-full">
-            <Button
-              onClick={() => handleReconciliar("confirmar_projeto")}
-              disabled={loading}
-              className="bg-primary hover:bg-primary/90"
-            >
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              Confirmar Projeto
-            </Button>
-            <Button
-              onClick={() => handleReconciliar("confirmar_sistema")}
-              disabled={loading}
-              variant="outline"
-              className="border-blue-500 text-blue-600 hover:bg-blue-50"
-            >
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              Confirmar Sistema
-            </Button>
-          </div>
+        <DrawerFooter className="flex-col gap-3">
+          {/* Ação Principal: Confirmar que é substituição */}
           <Button
-            onClick={() => handleReconciliar("solicitar_revisao")}
+            onClick={handleSolicitarReconciliacao}
+            disabled={loading}
+            size="lg"
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
+          >
+            <CheckCircle2 className="h-5 w-5 mr-2" />
+            ✓ Confirmar: É a mesma placa (Substituição)
+          </Button>
+
+          {/* Ação Secundária: Não é a mesma */}
+          <Button
+            onClick={() => onOpenChange(false)}
             disabled={loading}
             variant="outline"
             className="w-full"
           >
-            <Flag className="h-4 w-4 mr-2" />
-            Marcar para Revisão
+            ✗ Cancelar - Não é a mesma placa
           </Button>
         </DrawerFooter>
       </DrawerContent>
