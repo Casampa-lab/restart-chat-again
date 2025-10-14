@@ -40,7 +40,8 @@ export interface PlacaData {
   qtde_suporte: number | null;
   substrato: string;
   pelicula: string;
-  retrorrefletividade: number | null;
+  retro_pelicula_fundo: number | null;
+  retro_pelicula_legenda_orla: number | null;
   largura: number | null;
   altura: number | null;
   area_m2: number | null;
@@ -109,7 +110,8 @@ export async function parseExcelFile(file: File): Promise<PlacaData[]> {
               qtde_suporte: row[12] ? parseInt(row[12]) : null,
               substrato: String(row[15] || ''),
               pelicula: `${row[17]} ${row[18]}`, // Tipo + Cor película fundo
-              retrorrefletividade: row[19] ? parseFloat(row[19]) : null,
+              retro_pelicula_fundo: row[19] ? parseFloat(row[19]) : null,
+              retro_pelicula_legenda_orla: row[22] ? parseFloat(row[22]) : null,
               largura: row[23] ? parseFloat(row[23]) : null,
               altura,
               area_m2: row[25] ? parseFloat(row[25]) : null,

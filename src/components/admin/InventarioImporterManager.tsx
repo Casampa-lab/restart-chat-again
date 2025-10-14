@@ -760,7 +760,7 @@ export function InventarioImporterManager() {
           
           record.tipo_pelicula_fundo = getVal("Tipo (película fundo)", "Tipo pelicula fundo", "tipo_pelicula_fundo");
           record.cor_pelicula_fundo = getVal("Cor (película fundo)", "Cor pelicula fundo", "cor_pelicula_fundo");
-          record.retrorrefletividade = getVal("Retrorrefletância (película fundo) (cd.lux/m-2)", "Retrorrefletância (película fundo)", "Retrorrefletancia pelicula fundo", "cd.lux/m-2") ? Number(getVal("Retrorrefletância (película fundo) (cd.lux/m-2)", "Retrorrefletância (película fundo)", "Retrorrefletancia pelicula fundo", "cd.lux/m-2")) : null;
+          record.retro_pelicula_fundo = getVal("Retrorrefletância (película fundo) (cd.lux/m-2)", "Retrorrefletância (película fundo)", "Retrorrefletancia pelicula fundo", "cd.lux/m-2") ? Number(getVal("Retrorrefletância (película fundo) (cd.lux/m-2)", "Retrorrefletância (película fundo)", "Retrorrefletancia pelicula fundo", "cd.lux/m-2")) : null;
           
           record.tipo_pelicula_legenda_orla = getVal("Tipo (película legenda/orla)", "Tipo pelicula legenda/orla", "tipo_pelicula_legenda_orla");
           record.cor_pelicula_legenda_orla = getVal("Cor (película legenda/orla)", "Cor pelicula legenda/orla", "cor_pelicula_legenda_orla");
