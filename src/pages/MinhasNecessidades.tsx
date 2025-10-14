@@ -316,9 +316,10 @@ const MinhasNecessidades = () => {
                             <TableHead>Serviço</TableHead>
                             <TableHead>Rodovia/Lote</TableHead>
                             <TableHead>Localização</TableHead>
+                            <TableHead>Tipo</TableHead>
+                            <TableHead>Material</TableHead>
+                            <TableHead>Extensão (m)</TableHead>
                             <TableHead>Match</TableHead>
-                            <TableHead>Arquivo</TableHead>
-                            <TableHead>Data</TableHead>
                             <TableHead className="text-right">Ações</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -337,13 +338,24 @@ const MinhasNecessidades = () => {
                               <TableCell>
                                 <div className="text-sm">
                                   {nec.km_inicial && nec.km_final ? (
-                                    <>KM {nec.km_inicial} - {nec.km_final}</>
+                                    <>KM {Number(nec.km_inicial).toFixed(3)} - {Number(nec.km_final).toFixed(3)}</>
                                   ) : nec.km ? (
-                                    <>KM {nec.km}</>
+                                    <>KM {Number(nec.km).toFixed(3)}</>
                                   ) : (
                                     "-"
                                   )}
                                 </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="font-mono text-xs">
+                                  {nec.tipo_demarcacao || "N/A"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                {nec.material || "N/A"}
+                              </TableCell>
+                              <TableCell className="text-sm font-medium">
+                                {nec.extensao_metros ? Number(nec.extensao_metros).toFixed(2) : "N/A"}m
                               </TableCell>
                               <TableCell>
                                 {nec.cadastro_id ? (
@@ -356,14 +368,6 @@ const MinhasNecessidades = () => {
                                 ) : (
                                   <span className="text-xs text-muted-foreground">Sem match</span>
                                 )}
-                              </TableCell>
-                              <TableCell className="text-xs text-muted-foreground">
-                                {nec.arquivo_origem}
-                                <br />
-                                Linha {nec.linha_planilha}
-                              </TableCell>
-                              <TableCell className="text-sm text-muted-foreground">
-                                {new Date(nec.created_at).toLocaleDateString("pt-BR")}
                               </TableCell>
                               <TableCell className="text-right">
                                 <Button
