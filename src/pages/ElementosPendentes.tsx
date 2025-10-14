@@ -31,9 +31,9 @@ export default function ElementosPendentes() {
         .from("elementos_pendentes_aprovacao")
         .select(`
           *,
-          profiles:user_id (nome, email),
-          rodovias:rodovia_id (nome),
-          lotes:lote_id (nome)
+          user_profile:profiles!elementos_pendentes_aprovacao_user_id_fkey(nome, email),
+          rodovia:rodovias!elementos_pendentes_aprovacao_rodovia_id_fkey(nome),
+          lote:lotes!elementos_pendentes_aprovacao_lote_id_fkey(nome)
         `)
         .order("created_at", { ascending: false });
 
@@ -197,8 +197,8 @@ export default function ElementosPendentes() {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{elemento.profiles?.nome}</p>
-                        <p className="text-xs text-muted-foreground">{elemento.profiles?.email}</p>
+                        <p className="font-medium">{elemento.user_profile?.nome}</p>
+                        <p className="text-xs text-muted-foreground">{elemento.user_profile?.email}</p>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -206,8 +206,8 @@ export default function ElementosPendentes() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <p>{elemento.rodovias?.nome}</p>
-                        <p className="text-muted-foreground">{elemento.lotes?.nome}</p>
+                        <p>{elemento.rodovia?.nome}</p>
+                        <p className="text-muted-foreground">{elemento.lote?.nome}</p>
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(elemento.status)}</TableCell>
