@@ -610,7 +610,6 @@ export function InventarioImporterManager() {
           if (!record.data_vistoria) {
             record.data_vistoria = new Date().toISOString().split('T')[0];
           }
-          record.necessita_intervencao = false;
         }
 
         // Adicionar mapeamento específico para marcas longitudinais
