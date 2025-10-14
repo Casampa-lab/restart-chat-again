@@ -77,18 +77,20 @@ export default function DashboardNecessidades() {
         .from("lotes")
         .select("numero")
         .eq("id", loteIdFiltro)
-        .single();
+        .maybeSingle();
 
       // Buscar info da rodovia
       const { data: rodoviaData } = await supabase
         .from("rodovias")
-        .select("codigo, nome")
+        .select("codigo")
         .eq("id", activeSession.rodovia_id)
-        .single();
+        .maybeSingle();
 
       setLoteInfo({
-        numero: loteData?.numero,
-        rodovia: rodoviaData
+        numero: loteData?.numero || "N/A",
+        rodovia: rodoviaData ? {
+          codigo: rodoviaData.codigo || "N/A"
+        } : null
       });
 
       const allStats: any = {
@@ -262,7 +264,7 @@ export default function DashboardNecessidades() {
               <div>
                 <h1 className="text-xl font-bold text-primary-foreground">Dashboard de Necessidades</h1>
                 <p className="text-sm text-primary-foreground/80">
-                  {loteInfo ? `Lote ${loteInfo.numero} - ${loteInfo.rodovia?.codigo} ${loteInfo.rodovia?.nome}` : 'Carregando...'}
+                  {loteInfo ? `Lote ${loteInfo.numero} - ${loteInfo.rodovia?.codigo || 'N/A'}` : 'Carregando...'}
                 </p>
               </div>
             </div>
