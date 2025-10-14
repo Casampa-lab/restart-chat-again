@@ -81,16 +81,23 @@ export function DeleteInventarioSelecionado() {
         "defensas": "defensas",
       };
 
-      // 1. Primeiro buscar os registros para pegar as URLs das fotos
-      toast.info("Buscando registros e fotos...");
-      
-      // Definir colunas de fotos por tabela
-      const fotoColumns: Record<string, string> = {
+      // 1. Definir colunas de fotos por tabela (null = sem fotos)
+      const fotoColumns: Record<string, string | null> = {
         "ficha_placa": "foto_frontal_url, foto_lateral_url, foto_posterior_url, foto_base_url, foto_identificacao_url",
         "ficha_porticos": "foto_url",
+        "defensas": "link_fotografia",
+        "ficha_marcas_longitudinais": null,
+        "ficha_tachas": null,
+        "ficha_inscricoes": null,
+        "ficha_cilindros": null,
       };
+
+      const temFotos = fotoColumns[selectedTabela] !== null;
       
-      const selectColumns = `id, ${fotoColumns[selectedTabela] || 'foto_url'}`;
+      // 2. Buscar registros (com ou sem fotos)
+      toast.info("Buscando registros...");
+      
+      const selectColumns = temFotos ? `id, ${fotoColumns[selectedTabela]}` : 'id';
       
       const { data: registros, error: fetchError } = await supabase
         .from(selectedTabela as any)
@@ -100,20 +107,23 @@ export function DeleteInventarioSelecionado() {
 
       if (fetchError) throw fetchError;
 
-      // 2. Coletar os caminhos das fotos
+      // 3. Coletar os caminhos das fotos (só se a tabela tiver fotos)
       const fotosParaDeletar: string[] = [];
-      if (registros && Array.isArray(registros)) {
+      if (temFotos && registros && Array.isArray(registros)) {
         registros.forEach((reg: any) => {
           const bucketName = bucketMap[selectedTabela];
           if (bucketName) {
-            // Para ficha_placa, verificar múltiplas colunas de fotos
             const fotoUrls: string[] = [];
+            
+            // Processar diferentes estruturas de fotos
             if (selectedTabela === 'ficha_placa') {
               if (reg.foto_frontal_url) fotoUrls.push(reg.foto_frontal_url);
               if (reg.foto_lateral_url) fotoUrls.push(reg.foto_lateral_url);
               if (reg.foto_posterior_url) fotoUrls.push(reg.foto_posterior_url);
               if (reg.foto_base_url) fotoUrls.push(reg.foto_base_url);
               if (reg.foto_identificacao_url) fotoUrls.push(reg.foto_identificacao_url);
+            } else if (selectedTabela === 'defensas') {
+              if (reg.link_fotografia) fotoUrls.push(reg.link_fotografia);
             } else {
               if (reg.foto_url) fotoUrls.push(reg.foto_url);
             }
