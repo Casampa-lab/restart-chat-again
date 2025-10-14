@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle } from "lucide-react";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
+import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
+import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 import { toast } from "sonner";
 
 interface FichaInscricao {
@@ -79,6 +84,7 @@ export function InventarioInscricoesViewer({
   onRegistrarIntervencao 
 }: InventarioInscricoesViewerProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchLat, setSearchLat] = useState("");
   const [searchLng, setSearchLng] = useState("");
@@ -87,9 +93,13 @@ export function InventarioInscricoesViewer({
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
+  const [showOnlyDivergencias, setShowOnlyDivergencias] = useState(false);
+  const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
+  const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
+  const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
 
   // Buscar informações da rodovia
-  const { data: rodovia } = useQuery({
+  const { data: rodovia } = useQuery<any>({
     queryKey: ["rodovia", rodoviaId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -101,6 +111,27 @@ export function InventarioInscricoesViewer({
       return data;
     },
   });
+
+  // Query de necessidades matchadas com divergências
+  const necessidadesMatchQuery = useQuery<any[]>({
+    queryKey: ["necessidades-match-inscricoes", loteId, rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("necessidades_marcas_transversais")
+        .select("*")
+        .eq("lote_id", loteId)
+        .eq("rodovia_id", rodoviaId)
+        .eq("solucao_confirmada", false)
+        .not("cadastro_id", "is", null)
+        .not("divergencia", "is", null);
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const necessidadesMatch = necessidadesMatchQuery.data;
+  const divergenciasCount = necessidadesMatch?.length || 0;
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -117,7 +148,14 @@ export function InventarioInscricoesViewer({
     return R * c;
   };
 
-  const { data: inscricoes, isLoading } = useQuery({
+  const handleReconciliar = () => {
+    queryClient.invalidateQueries({ queryKey: ["necessidades-match-inscricoes"] });
+    queryClient.invalidateQueries({ queryKey: ["inventario-inscricoes"] });
+    setReconciliacaoOpen(false);
+    toast.success("Reconciliação processada");
+  };
+
+  const { data: inscricoes, isLoading } = useQuery<any[]>({
     queryKey: ["inventario-inscricoes", loteId, rodoviaId, searchTerm, searchLat, searchLng],
     queryFn: async () => {
       let query = supabase
@@ -184,6 +222,13 @@ export function InventarioInscricoesViewer({
     return 0;
   }) : [];
 
+  // Filtrar por divergências se necessário
+  const filteredInscricoes = showOnlyDivergencias
+    ? sortedInscricoes.filter((inscricao) =>
+        necessidadesMatch?.some((n: any) => n.cadastro_id === inscricao.id && n.divergencia)
+      )
+    : sortedInscricoes;
+
   const handleSort = (column: string) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -241,6 +286,27 @@ export function InventarioInscricoesViewer({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Banner de alerta de divergências */}
+          {divergenciasCount > 0 && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <div className="flex items-center justify-between">
+                  <span>
+                    <strong>{divergenciasCount}</strong> {divergenciasCount === 1 ? "divergência encontrada" : "divergências encontradas"} entre projeto e sistema.
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowOnlyDivergencias(!showOnlyDivergencias)}
+                  >
+                    {showOnlyDivergencias ? "Ver Todos" : "Ver Divergências"}
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
@@ -288,13 +354,27 @@ export function InventarioInscricoesViewer({
                 </Button>
               )}
             </div>
+
+            {/* Switch para filtrar divergências */}
+            {divergenciasCount > 0 && (
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="apenas-divergencias-inscricoes"
+                  checked={showOnlyDivergencias}
+                  onCheckedChange={setShowOnlyDivergencias}
+                />
+                <Label htmlFor="apenas-divergencias-inscricoes" className="cursor-pointer">
+                  Mostrar apenas divergências ({divergenciasCount})
+                </Label>
+              </div>
+            )}
           </div>
 
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">
               Carregando inventário...
             </div>
-          ) : sortedInscricoes && sortedInscricoes.length > 0 ? (
+          ) : filteredInscricoes && filteredInscricoes.length > 0 ? (
             <div className="border rounded-lg overflow-hidden">
               <div className="max-h-[600px] overflow-y-auto">
                 <Table>
@@ -339,12 +419,14 @@ export function InventarioInscricoesViewer({
                           <SortIcon column="area_m2" />
                         </div>
                       </TableHead>
+                      <TableHead>Necessidade</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedInscricoes.map((inscricao) => {
+                    {filteredInscricoes.map((inscricao) => {
                       const { sigla, descricao } = parseTipoInscricao(inscricao.tipo_inscricao);
+                      const necessidadeMatch = necessidadesMatch?.find((n: any) => n.cadastro_id === inscricao.id);
                       return (
                         <TableRow key={inscricao.id} className="hover:bg-muted/50">
                           {searchLat && searchLng && (
@@ -364,6 +446,34 @@ export function InventarioInscricoesViewer({
                           <TableCell>{inscricao.km_inicial?.toFixed(2) || "-"}</TableCell>
                           <TableCell>{inscricao.material_utilizado || "-"}</TableCell>
                           <TableCell>{inscricao.area_m2?.toFixed(2) || "-"}</TableCell>
+                          <TableCell>
+                            {necessidadeMatch && (
+                              <div
+                                className="cursor-pointer"
+                                onClick={() => {
+                                  setSelectedNecessidade(necessidadeMatch);
+                                  setSelectedCadastroForReconciliacao(inscricao);
+                                  setReconciliacaoOpen(true);
+                                }}
+                              >
+                                <NecessidadeBadge 
+                                  necessidade={{
+                                    id: necessidadeMatch.id,
+                                    servico: necessidadeMatch.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
+                                    distancia_match_metros: necessidadeMatch.distancia_match_metros,
+                                    codigo: (necessidadeMatch as any).codigo,
+                                    tipo: (necessidadeMatch as any).tipo,
+                                    km: (necessidadeMatch as any).km,
+                                    divergencia: (necessidadeMatch as any).divergencia,
+                                    reconciliado: (necessidadeMatch as any).reconciliado,
+                                    solucao_planilha: (necessidadeMatch as any).solucao_planilha,
+                                    servico_inferido: (necessidadeMatch as any).servico_inferido,
+                                  }}
+                                  tipo="marcas_transversais" 
+                                />
+                              </div>
+                            )}
+                          </TableCell>
                           <TableCell className="text-right">
                             <Button
                               variant="ghost"
@@ -390,15 +500,17 @@ export function InventarioInscricoesViewer({
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              {searchTerm || (searchLat && searchLng)
+              {showOnlyDivergencias
+                ? "Nenhuma divergência encontrada"
+                : searchTerm || (searchLat && searchLng)
                 ? "Nenhuma inscrição encontrada com esse critério"
                 : "Nenhuma inscrição cadastrada neste inventário"}
             </div>
           )}
 
-          {sortedInscricoes && sortedInscricoes.length > 0 && (
+          {filteredInscricoes && filteredInscricoes.length > 0 && (
             <p className="text-sm text-muted-foreground text-center">
-              {sortedInscricoes.length} {sortedInscricoes.length === 1 ? "inscrição encontrada" : "inscrições encontradas"}
+              {filteredInscricoes.length} {filteredInscricoes.length === 1 ? "inscrição encontrada" : "inscrições encontradas"}
             </p>
           )}
         </CardContent>
@@ -656,6 +768,15 @@ export function InventarioInscricoesViewer({
         })()}
         </DialogContent>
       </Dialog>
+
+      {/* Drawer de Reconciliação */}
+      <ReconciliacaoDrawer
+        open={reconciliacaoOpen}
+        onOpenChange={setReconciliacaoOpen}
+        necessidade={selectedNecessidade}
+        cadastro={selectedCadastroForReconciliacao}
+        onReconciliar={handleReconciliar}
+      />
     </>
   );
 }

@@ -16,7 +16,7 @@ interface NecessidadeBadgeProps {
     solucao_planilha?: string;
     servico_inferido?: string;
   };
-  tipo: "placas" | "porticos" | "cilindros" | "marcas_longitudinais" | "tachas" | "defensas";
+  tipo: "placas" | "porticos" | "cilindros" | "marcas_longitudinais" | "tachas" | "defensas" | "marcas_transversais";
 }
 
 const SERVICO_CONFIG = {

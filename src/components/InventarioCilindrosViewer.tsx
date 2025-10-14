@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,9 +9,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
+import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
+import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 
 interface Cilindro {
   id: string;
@@ -52,6 +57,7 @@ interface InventarioCilindrosViewerProps {
 
 export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarIntervencao }: InventarioCilindrosViewerProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchLat, setSearchLat] = useState("");
   const [searchLon, setSearchLon] = useState("");
@@ -61,6 +67,10 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
+  const [showOnlyDivergencias, setShowOnlyDivergencias] = useState(false);
+  const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
+  const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
+  const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371e3; // Earth radius in meters
@@ -78,7 +88,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
   };
 
   // Fetch rodovia data
-  useQuery({
+  useQuery<any>({
     queryKey: ["rodovia", rodoviaId],
     queryFn: async () => {
       const { data } = await supabase
@@ -91,7 +101,28 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
     },
   });
 
-  const { data: cilindros, isLoading } = useQuery({
+  // Query de necessidades matchadas com divergências
+  const necessidadesMatchQuery = useQuery<any[]>({
+    queryKey: ["necessidades-match-cilindros", loteId, rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("necessidades_cilindros")
+        .select("*")
+        .eq("lote_id", loteId)
+        .eq("rodovia_id", rodoviaId)
+        .eq("solucao_confirmada", false)
+        .not("cadastro_id", "is", null)
+        .not("divergencia", "is", null);
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const necessidadesMatch = necessidadesMatchQuery.data;
+  const divergenciasCount = necessidadesMatch?.length || 0;
+
+  const { data: cilindros, isLoading } = useQuery<any[]>({
     queryKey: ["cilindros", loteId, rodoviaId, searchTerm, searchLat, searchLon],
     queryFn: async () => {
       let query = supabase
@@ -147,6 +178,13 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
     },
   });
 
+  const handleReconciliar = () => {
+    queryClient.invalidateQueries({ queryKey: ["necessidades-match-cilindros"] });
+    queryClient.invalidateQueries({ queryKey: ["cilindros"] });
+    setReconciliacaoOpen(false);
+    toast.success("Reconciliação processada");
+  };
+
   // Função para ordenar dados
   const sortedCilindros = cilindros ? [...cilindros].sort((a: any, b: any) => {
     if (!sortColumn) return 0;
@@ -169,6 +207,13 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
     
     return 0;
   }) : [];
+
+  // Filtrar por divergências se necessário
+  const filteredCilindros = showOnlyDivergencias
+    ? sortedCilindros.filter((cilindro: any) =>
+        necessidadesMatch?.some((n: any) => n.cadastro_id === cilindro.id && n.divergencia)
+      )
+    : sortedCilindros;
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -246,6 +291,26 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            {/* Banner de alerta de divergências */}
+            {divergenciasCount > 0 && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="flex items-center justify-between">
+                    <span>
+                      <strong>{divergenciasCount}</strong> {divergenciasCount === 1 ? "divergência encontrada" : "divergências encontradas"} entre projeto e sistema.
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowOnlyDivergencias(!showOnlyDivergencias)}
+                    >
+                      {showOnlyDivergencias ? "Ver Todos" : "Ver Divergências"}
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -349,12 +414,15 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <SortIcon column="data_vistoria" />
                       </div>
                     </TableHead>
+                    <TableHead>Necessidade</TableHead>
                     <TableHead className="text-center">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedCilindros && sortedCilindros.length > 0 ? (
-                    sortedCilindros.map((cilindro: any) => (
+                  {filteredCilindros && filteredCilindros.length > 0 ? (
+                    filteredCilindros.map((cilindro: any) => {
+                      const necessidadeMatch = necessidadesMatch?.find((n: any) => n.cadastro_id === cilindro.id);
+                      return (
                       <TableRow key={cilindro.id}>
                         {searchLat && searchLon && (
                           <TableCell>
@@ -371,6 +439,34 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <TableCell>{cilindro.quantidade || "-"}</TableCell>
                         <TableCell>{cilindro.espacamento_m || "-"}</TableCell>
                         <TableCell>{new Date(cilindro.data_vistoria).toLocaleDateString("pt-BR")}</TableCell>
+                        <TableCell>
+                          {necessidadeMatch && (
+                            <div
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setSelectedNecessidade(necessidadeMatch);
+                                setSelectedCadastroForReconciliacao(cilindro);
+                                setReconciliacaoOpen(true);
+                              }}
+                            >
+                              <NecessidadeBadge 
+                                necessidade={{
+                                  id: necessidadeMatch.id,
+                                  servico: necessidadeMatch.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
+                                  distancia_match_metros: necessidadeMatch.distancia_match_metros,
+                                  codigo: (necessidadeMatch as any).codigo,
+                                  tipo: (necessidadeMatch as any).tipo,
+                                  km: (necessidadeMatch as any).km,
+                                  divergencia: (necessidadeMatch as any).divergencia,
+                                  reconciliado: (necessidadeMatch as any).reconciliado,
+                                  solucao_planilha: (necessidadeMatch as any).solucao_planilha,
+                                  servico_inferido: (necessidadeMatch as any).servico_inferido,
+                                }}
+                                tipo="cilindros" 
+                              />
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="text-center">
                           <Button
                             variant="ghost"
@@ -382,11 +478,12 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                           </Button>
                         </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={searchLat && searchLon ? 10 : 9} className="text-center text-muted-foreground py-8">
-                        Nenhum cilindro cadastrado
+                      <TableCell colSpan={searchLat && searchLon ? 11 : 10} className="text-center text-muted-foreground py-8">
+                        {showOnlyDivergencias ? "Nenhuma divergência encontrada" : "Nenhum cilindro cadastrado"}
                       </TableCell>
                     </TableRow>
                   )}
@@ -665,6 +762,15 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Drawer de Reconciliação */}
+      <ReconciliacaoDrawer
+        open={reconciliacaoOpen}
+        onOpenChange={setReconciliacaoOpen}
+        necessidade={selectedNecessidade}
+        cadastro={selectedCadastroForReconciliacao}
+        onReconciliar={handleReconciliar}
+      />
     </>
   );
 }
