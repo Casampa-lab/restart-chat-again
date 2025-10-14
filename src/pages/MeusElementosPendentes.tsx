@@ -22,7 +22,7 @@ export default function MeusElementosPendentes() {
         .select(`
           *,
           rodovias:rodovia_id (nome),
-          lotes:lote_id (nome)
+          lotes:lote_id (numero)
         `)
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
@@ -106,7 +106,7 @@ export default function MeusElementosPendentes() {
                     <TableCell>
                       <div className="text-sm">
                         <p>{elemento.rodovias?.nome}</p>
-                        <p className="text-muted-foreground">{elemento.lotes?.nome}</p>
+                        <p className="text-muted-foreground">Lote {elemento.lotes?.numero}</p>
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(elemento.status)}</TableCell>

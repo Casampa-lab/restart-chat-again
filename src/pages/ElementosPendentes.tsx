@@ -36,7 +36,7 @@ export default function ElementosPendentes() {
           *,
           user_profile:profiles!elementos_pendentes_aprovacao_user_id_fkey(nome, email),
           rodovia:rodovias!elementos_pendentes_aprovacao_rodovia_id_fkey(nome),
-          lote:lotes!elementos_pendentes_aprovacao_lote_id_fkey(nome)
+          lote:lotes!elementos_pendentes_aprovacao_lote_id_fkey(numero)
         `)
         .order("created_at", { ascending: false });
 
@@ -230,7 +230,7 @@ export default function ElementosPendentes() {
                     <TableCell>
                       <div className="text-sm">
                         <p>{elemento.rodovia?.nome}</p>
-                        <p className="text-muted-foreground">{elemento.lote?.nome}</p>
+                        <p className="text-muted-foreground">Lote {elemento.lote?.numero}</p>
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(elemento.status)}</TableCell>
