@@ -267,8 +267,8 @@ export const SupervisorasManager = () => {
                 Nova Supervisora
               </Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
+            <DialogContent className="max-h-[90vh] flex flex-col">
+              <DialogHeader className="flex-shrink-0">
                 <DialogTitle>
                   {editingSupervisora ? "Editar Supervisora" : "Nova Supervisora"}
                 </DialogTitle>
@@ -277,7 +277,7 @@ export const SupervisorasManager = () => {
                 </DialogDescription>
               </DialogHeader>
               
-              <div className="space-y-4 py-4">
+              <div className="space-y-4 py-4 overflow-y-auto flex-1 px-1">
                 <div className="space-y-2">
                   <Label htmlFor="nome">Nome da Empresa *</Label>
                   <Input
@@ -377,7 +377,7 @@ export const SupervisorasManager = () => {
                 </div>
               </div>
 
-              <DialogFooter>
+              <DialogFooter className="flex-shrink-0 sticky bottom-0 bg-background pt-4 border-t">
                 <Button variant="outline" onClick={handleCloseDialog}>
                   Cancelar
                 </Button>
