@@ -339,7 +339,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     const nec = necessidadesMap?.get(placa.id);
     if (nec) {
       setSelectedNecessidade(nec);
-      setSelectedPlaca(placa);
       setReconciliacaoOpen(true);
     }
   };
