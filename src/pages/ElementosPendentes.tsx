@@ -64,7 +64,7 @@ export default function ElementosPendentes() {
             // Buscar rodovia
             const { data: rodovia } = await supabase
               .from("rodovias")
-              .select("nome")
+              .select("codigo")
               .eq("id", elemento.rodovia_id)
               .single();
 
@@ -266,7 +266,7 @@ export default function ElementosPendentes() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <p>{elemento.rodovia?.nome}</p>
+                        <p>{elemento.rodovia?.codigo}</p>
                         <p className="text-muted-foreground">Lote {elemento.lote?.numero}</p>
                       </div>
                     </TableCell>
