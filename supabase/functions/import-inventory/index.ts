@@ -318,7 +318,7 @@ serve(async (req) => {
         "quantidade", "snv", "tipo_refletivo"
       ],
       ficha_tachas: [
-        "corpo", "cor_refletivo", "data_vistoria", "descricao", "espacamento_m",
+        "corpo", "cor_refletivo", "data_vistoria", "espacamento_m",
         "extensao_km", "foto_url", "km_final", "km_inicial", "latitude_final",
         "latitude_inicial", "local_implantacao", "longitude_final", "longitude_inicial",
         "observacao", "quantidade", "refletivo", "snv"
