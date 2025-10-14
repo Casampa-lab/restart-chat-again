@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
 import { toast } from "sonner";
 
@@ -59,6 +61,7 @@ export function InventarioMarcasLongitudinaisViewer({
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
+  const [showOnlyPendentes, setShowOnlyPendentes] = useState(false);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -74,6 +77,31 @@ export function InventarioMarcasLongitudinaisViewer({
 
     return R * c;
   };
+
+  const { data: necessidadesMap } = useQuery({
+    queryKey: ["necessidades-match-marcas", loteId, rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("necessidades_marcas_longitudinais")
+        .select("*")
+        .eq("lote_id", loteId)
+        .eq("rodovia_id", rodoviaId)
+        .eq("status_revisao", "pendente_coordenador")
+        .not("cadastro_id", "is", null);
+      
+      if (error) throw error;
+      
+      const map = new Map<string, any>();
+      data?.forEach((nec: any) => {
+        map.set(nec.cadastro_id, nec);
+      });
+      
+      return map;
+    },
+    enabled: !!loteId && !!rodoviaId,
+  });
+
+  const pendentesRevisao = necessidadesMap?.size || 0;
 
   const { data: marcas, isLoading } = useQuery({
     queryKey: ["inventario-marcas-longitudinais", loteId, rodoviaId, searchTerm, searchLat, searchLng],
@@ -119,8 +147,14 @@ export function InventarioMarcasLongitudinaisViewer({
     },
   });
 
+  const filteredMarcas = marcas?.filter(marca => {
+    if (!showOnlyPendentes) return true;
+    const nec = necessidadesMap?.get(marca.id);
+    return nec?.status_revisao === 'pendente_coordenador';
+  }) || [];
+
   // Função para ordenar dados
-  const sortedMarcas = marcas ? [...marcas].sort((a, b) => {
+  const sortedMarcas = filteredMarcas ? [...filteredMarcas].sort((a, b) => {
     if (!sortColumn) return 0;
     
     let aVal: any = a[sortColumn as keyof FichaMarcaLongitudinal];
@@ -199,6 +233,35 @@ export function InventarioMarcasLongitudinaisViewer({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {pendentesRevisao > 0 && (
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-500/20 to-orange-400/10 border-2 border-orange-400/40 rounded-lg shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-500/20 border border-orange-400/40">
+                  <AlertCircle className="h-6 w-6 text-orange-500" />
+                </div>
+                <div>
+                  <div className="font-bold text-base flex items-center gap-2">
+                    <span className="text-2xl font-extrabold text-orange-600">{pendentesRevisao}</span>
+                    <span>{pendentesRevisao === 1 ? 'match parcial a revisar' : 'matches parciais a revisar'}</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-0.5">
+                    📐 Sobreposição &lt;75% - Requer verificação manual
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showOnlyPendentes}
+                  onCheckedChange={setShowOnlyPendentes}
+                  id="filtro-pendentes-marcas"
+                />
+                <Label htmlFor="filtro-pendentes-marcas" className="cursor-pointer text-sm font-medium">
+                  <Filter className="h-4 w-4 inline mr-1" />
+                  Apenas pendentes
+                </Label>
+              </div>
+            </div>
+          )}
           <div className="space-y-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
@@ -315,7 +378,8 @@ export function InventarioMarcasLongitudinaisViewer({
                       </TableHead>
                       <TableHead>Traço (m)</TableHead>
                       <TableHead>Espaçamento (m)</TableHead>
-                      <TableHead 
+                      <TableHead>Status</TableHead>
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("extensao_metros")}
                       >
@@ -356,6 +420,15 @@ export function InventarioMarcasLongitudinaisViewer({
                         <TableCell>{marca.km_final?.toFixed(2) || "-"}</TableCell>
                         <TableCell>{marca.traco_m?.toFixed(2) || "-"}</TableCell>
                         <TableCell>{marca.espacamento_m?.toFixed(2) || "-"}</TableCell>
+                        <TableCell className="text-center">
+                          {necessidadesMap?.get(marca.id) ? (
+                            <Badge variant="outline" className="border-orange-400 text-orange-600">
+                              ⚠️ Requer Revisão
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
                         <TableCell>{marca.extensao_metros ? (marca.extensao_metros / 1000).toFixed(2) : "-"}</TableCell>
                         <TableCell>
                           {marca.data_vistoria
