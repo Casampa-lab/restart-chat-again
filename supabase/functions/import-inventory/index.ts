@@ -343,7 +343,7 @@ serve(async (req) => {
         "adequacao_funcionalidade_terminais_inadequados",
         "distancia_face_defensa_obstaculo_m",
         "distancia_bordo_pista_face_defensa_m", "link_fotografia",
-        "foto_base_url", "quantidade_laminas", "comprimento_total_tramo_m",
+        "quantidade_laminas", "comprimento_total_tramo_m",
         "latitude_inicial", "longitude_inicial", "latitude_final", "longitude_final"
       ],
     };

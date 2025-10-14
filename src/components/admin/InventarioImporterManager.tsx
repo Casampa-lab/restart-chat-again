@@ -480,7 +480,7 @@ export function InventarioImporterManager() {
                 record.foto_url = matchedUrl;
                 record.foto_frontal_url = matchedUrl;
               } else if (inventoryType === "defensas") {
-                record.foto_base_url = matchedUrl;
+                record.link_fotografia = matchedUrl;
               } else {
                 record.foto_url = matchedUrl;
               }
@@ -494,7 +494,7 @@ export function InventarioImporterManager() {
             }
             
             // Para defensas, extrair data da foto do nome do arquivo
-            if (inventoryType === "defensas" && photoFileName && record.foto_base_url) {
+            if (inventoryType === "defensas" && photoFileName && record.link_fotografia) {
               // Tentar extrair data do nome do arquivo (formato: YYYYMMDD ou DD-MM-YYYY)
               const dateMatch = photoFileName.match(/(\d{8})|(\d{2}[-_]\d{2}[-_]\d{4})/);
               if (dateMatch) {
