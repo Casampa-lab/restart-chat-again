@@ -109,6 +109,7 @@ const renderCelulaPorTipo = (nec: any, field: string) => {
 const MinhasNecessidades = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get("highlight");
   const { user, loading: authLoading } = useAuth();
   const { data: supervisora } = useSupervisora();
   const { activeSession } = useWorkSession(user?.id);
@@ -191,6 +192,25 @@ const MinhasNecessidades = () => {
       loadNecessidades(tipoAtivo);
     }
   }, [user, activeSession?.lote_id, tipoAtivo]);
+
+  // Scroll automático + highlight quando houver highlight na URL
+  useEffect(() => {
+    if (highlightId && necessidades && necessidades.length > 0) {
+      const timer = setTimeout(() => {
+        const elemento = document.getElementById(`necessidade-row-${highlightId}`);
+        if (elemento) {
+          elemento.scrollIntoView({ behavior: "smooth", block: "center" });
+          elemento.classList.add("animate-pulse", "bg-yellow-50");
+          
+          setTimeout(() => {
+            elemento.classList.remove("animate-pulse");
+          }, 3000);
+        }
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [highlightId, necessidades]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir esta necessidade?")) return;
@@ -391,7 +411,7 @@ const MinhasNecessidades = () => {
                         </TableHeader>
                         <TableBody>
                           {necessidadesFiltradas.map((nec) => (
-                            <TableRow key={nec.id}>
+                            <TableRow key={nec.id} id={`necessidade-row-${nec.id}`}>
                               <TableCell>
                                 {getServicoBadge(nec.servico)}
                               </TableCell>

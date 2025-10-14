@@ -11,6 +11,8 @@ import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Libr
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
+import { NecessidadeBadge } from "./NecessidadeBadge";
+
 interface FichaPlaca {
   id: string;
   br: string | null;
@@ -144,6 +146,31 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
 
       return filteredData;
     },
+  });
+
+  // Query de necessidades relacionadas (apenas matches <= 20m)
+  const { data: necessidadesMap } = useQuery({
+    queryKey: ["necessidades-match-placas", loteId, rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("necessidades_placas")
+        .select("id, servico, cadastro_id, distancia_match_metros, codigo, tipo, km")
+        .eq("lote_id", loteId)
+        .eq("rodovia_id", rodoviaId)
+        .not("cadastro_id", "is", null)
+        .lte("distancia_match_metros", 20); // FILTRO: Apenas até 20m
+      
+      if (error) throw error;
+      
+      // Indexar por cadastro_id para busca O(1)
+      const map = new Map<string, any>();
+      data?.forEach(nec => {
+        map.set(nec.cadastro_id, nec);
+      });
+      
+      return map;
+    },
+    enabled: !!loteId && !!rodoviaId,
   });
 
   // Função para ordenar dados
@@ -366,8 +393,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="lado" />
                         </div>
                       </TableHead>
+                      <TableHead className="text-center">Projeto</TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("data_vistoria")}
                       >
@@ -380,23 +408,38 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedPlacas.map((placa) => (
-                      <TableRow key={placa.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">{placa.snv || "-"}</TableCell>
-                        <TableCell>{placa.codigo || "-"}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{placa.tipo || "-"}</Badge>
-                        </TableCell>
-                        <TableCell>{placa.km?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>{placa.lado || "-"}</TableCell>
-                        {searchLat && searchLng && (
+                    {sortedPlacas.map((placa) => {
+                      const necessidade = necessidadesMap?.get(placa.id);
+                      
+                      return (
+                        <TableRow key={placa.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium">{placa.snv || "-"}</TableCell>
+                          <TableCell>{placa.codigo || "-"}</TableCell>
                           <TableCell>
-                            <Badge variant="secondary">
-                              {(placa as any).distance?.toFixed(1)}m
-                            </Badge>
+                            <Badge variant="outline">{placa.tipo || "-"}</Badge>
                           </TableCell>
-                        )}
-                        <TableCell>
+                          <TableCell>{placa.km?.toFixed(2) || "-"}</TableCell>
+                          <TableCell>{placa.lado || "-"}</TableCell>
+                          <TableCell className="text-center">
+                            {necessidade ? (
+                              <NecessidadeBadge 
+                                necessidade={necessidade} 
+                                tipo="placas"
+                              />
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground text-xs">
+                                Sem previsão
+                              </Badge>
+                            )}
+                          </TableCell>
+                          {searchLat && searchLng && (
+                            <TableCell>
+                              <Badge variant="secondary">
+                                {(placa as any).distance?.toFixed(1)}m
+                              </Badge>
+                            </TableCell>
+                          )}
+                          <TableCell>
                           {placa.data_vistoria
                             ? new Date(placa.data_vistoria).toLocaleDateString("pt-BR")
                             : "-"}
@@ -409,9 +452,10 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
