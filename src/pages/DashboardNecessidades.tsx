@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupervisora } from "@/hooks/useSupervisora";
+import { useWorkSession } from "@/hooks/useWorkSession";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ export default function DashboardNecessidades() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { data: supervisora } = useSupervisora();
+  const { activeSession } = useWorkSession(user?.id);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
   const [loteInfo, setLoteInfo] = useState<any>(null);
@@ -42,69 +44,21 @@ export default function DashboardNecessidades() {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user) {
+    if (user && activeSession) {
       loadStats();
     }
-  }, [user]);
+  }, [user, activeSession?.lote_id]);
 
   const loadStats = async () => {
     setLoading(true);
     try {
-      console.log("Carregando stats para usuário:", user?.id);
+      console.log("Carregando stats para lote:", activeSession?.lote_id);
 
-      // Primeiro, encontrar o lote_id do usuário
-      let loteIdFiltro: string | null = null;
-      let loteInfo: any = null;
-      let rodoviaInfo: any = null;
-
-      // Buscar em uma das tabelas para descobrir o lote
-      const { data: sampleData } = await supabase
-        .from("necessidades_marcas_longitudinais")
-        .select(`
-          lote_id,
-          rodovia:rodovias(codigo, nome),
-          lote:lotes(numero)
-        `)
-        .eq("user_id", user?.id)
-        .limit(1)
-        .maybeSingle();
-
-      if (sampleData?.lote_id) {
-        loteIdFiltro = sampleData.lote_id;
-        loteInfo = sampleData.lote;
-        rodoviaInfo = sampleData.rodovia;
-      }
-
-      // Se não encontrou em marcas longitudinais, tenta nas outras tabelas
-      if (!loteIdFiltro) {
-        for (const tipo of TIPOS_NECESSIDADES) {
-          try {
-            const { data, error } = await supabase
-              .from(`necessidades_${tipo.value}` as any)
-              .select(`
-                lote_id,
-                rodovia:rodovias(codigo, nome),
-                lote:lotes(numero)
-              `)
-              .eq("user_id", user?.id)
-              .limit(1)
-              .maybeSingle();
-
-            if (!error && data && 'lote_id' in data && data.lote_id) {
-              loteIdFiltro = data.lote_id as string;
-              loteInfo = 'lote' in data ? data.lote : null;
-              rodoviaInfo = 'rodovia' in data ? data.rodovia : null;
-              break;
-            }
-          } catch (e) {
-            // Continua para próxima tabela se houver erro
-            continue;
-          }
-        }
-      }
+      // Usar o lote_id da sessão ativa
+      const loteIdFiltro = activeSession?.lote_id;
 
       if (!loteIdFiltro) {
-        console.error("Nenhum lote encontrado para o usuário");
+        console.error("Nenhuma sessão ativa encontrada");
         setStats({
           porTipo: [],
           porServico: { Implantar: 0, Substituir: 0, Remover: 0, Manter: 0 },
@@ -118,10 +72,23 @@ export default function DashboardNecessidades() {
         return;
       }
 
-      // Definir info do lote para o header
+      // Buscar info do lote
+      const { data: loteData } = await supabase
+        .from("lotes")
+        .select("numero")
+        .eq("id", loteIdFiltro)
+        .single();
+
+      // Buscar info da rodovia
+      const { data: rodoviaData } = await supabase
+        .from("rodovias")
+        .select("codigo, nome")
+        .eq("id", activeSession.rodovia_id)
+        .single();
+
       setLoteInfo({
-        numero: loteInfo.numero,
-        rodovia: rodoviaInfo
+        numero: loteData?.numero,
+        rodovia: rodoviaData
       });
 
       const allStats: any = {
@@ -148,7 +115,6 @@ export default function DashboardNecessidades() {
             rodovia:rodovias(codigo, nome),
             lote:lotes(numero)
           `)
-          .eq("user_id", user?.id)
           .eq("lote_id", loteIdFiltro);
 
         if (error) {

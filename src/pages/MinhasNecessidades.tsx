@@ -2,6 +2,7 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupervisora } from "@/hooks/useSupervisora";
+import { useWorkSession } from "@/hooks/useWorkSession";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -44,6 +45,7 @@ const MinhasNecessidades = () => {
   const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { data: supervisora } = useSupervisora();
+  const { activeSession } = useWorkSession(user?.id);
   
   // Pegar tipo da URL ou usar primeiro como padrão
   const tipoFromUrl = searchParams.get("tipo");
@@ -77,14 +79,20 @@ const MinhasNecessidades = () => {
       let hasMore = true;
 
       while (hasMore) {
-        const { data, error } = await supabase
+        let query = supabase
           .from(tipoConfig.table as any)
           .select(`
             *,
             rodovia:rodovias(codigo, nome),
             lote:lotes(numero)
-          `)
-          .eq("user_id", user?.id)
+          `);
+        
+        // Filtrar por lote se houver sessão ativa
+        if (activeSession?.lote_id) {
+          query = query.eq("lote_id", activeSession.lote_id);
+        }
+        
+        const { data, error } = await query
           .order("created_at", { ascending: false })
           .range(from, from + batchSize - 1);
 
@@ -111,12 +119,12 @@ const MinhasNecessidades = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && activeSession) {
       // Força reload removendo cache anterior
       setNecessidades([]);
       loadNecessidades(tipoAtivo);
     }
-  }, [user, tipoAtivo]);
+  }, [user, activeSession?.lote_id, tipoAtivo]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir esta necessidade?")) return;
