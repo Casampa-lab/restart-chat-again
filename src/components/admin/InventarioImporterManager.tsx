@@ -839,11 +839,6 @@ export function InventarioImporterManager() {
           const qtd = getVal("Quantidade", "quantidade");
           record.quantidade = toNumber(qtd) ?? 1;
           
-          const br = getVal("BR", "br");
-          if (br) {
-            record.observacao = `BR: ${br}`;
-          }
-          
           record.data_vistoria = new Date().toISOString().split('T')[0];
         }
 
