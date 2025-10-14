@@ -7,11 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList } from "lucide-react";
+import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
 import { NecessidadeBadge } from "./NecessidadeBadge";
+import { ReconciliacaoDrawer } from "./ReconciliacaoDrawer";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface FichaPlaca {
   id: string;
@@ -85,6 +88,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
+  const [showOnlyDivergencias, setShowOnlyDivergencias] = useState(false);
+  const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
+  const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
 
   // Função para calcular distância entre dois pontos (Haversine)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -102,7 +108,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     return R * c; // Distância em metros
   };
 
-  const { data: placas, isLoading } = useQuery({
+  const { data: placas, isLoading, refetch } = useQuery({
     queryKey: ["inventario-placas", loteId, rodoviaId, searchTerm, searchLat, searchLng],
     queryFn: async () => {
       let query = supabase
@@ -149,12 +155,12 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   });
 
   // Query de necessidades relacionadas (apenas matches <= 20m)
-  const { data: necessidadesMap } = useQuery({
+  const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
     queryKey: ["necessidades-match-placas", loteId, rodoviaId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_placas")
-        .select("id, servico, servico_final, cadastro_id, distancia_match_metros, codigo, tipo, km, divergencia, reconciliado, solucao_planilha, servico_inferido")
+        .select("id, servico, servico_final, cadastro_id, distancia_match_metros, codigo, tipo, km, divergencia, reconciliado, solucao_planilha, servico_inferido, revisao_solicitada, localizado_em_campo")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null)
@@ -177,8 +183,20 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     enabled: !!loteId && !!rodoviaId,
   });
 
+  // Contar divergências pendentes
+  const divergenciasPendentes = Array.from(necessidadesMap?.values() || []).filter(
+    nec => nec.divergencia && !nec.reconciliado
+  ).length;
+
+  // Filtrar placas com divergências se necessário
+  const filteredPlacas = placas?.filter(placa => {
+    if (!showOnlyDivergencias) return true;
+    const nec = necessidadesMap?.get(placa.id);
+    return nec?.divergencia && !nec?.reconciliado;
+  }) || [];
+
   // Função para ordenar dados
-  const sortedPlacas = placas ? [...placas].sort((a, b) => {
+  const sortedPlacas = filteredPlacas ? [...filteredPlacas].sort((a, b) => {
     if (!sortColumn) return 0;
     
     let aVal: any = a[sortColumn as keyof FichaPlaca];
@@ -238,6 +256,20 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     }
   };
 
+  const handleOpenReconciliacao = (placa: FichaPlaca) => {
+    const nec = necessidadesMap?.get(placa.id);
+    if (nec) {
+      setSelectedNecessidade(nec);
+      setSelectedPlaca(placa);
+      setReconciliacaoOpen(true);
+    }
+  };
+
+  const handleReconciliar = () => {
+    refetchNecessidades();
+    refetch();
+  };
+
   const fotos = selectedPlaca
     ? [
         { label: "Principal", url: selectedPlaca.foto_url },
@@ -290,6 +322,34 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Filtro de Divergências */}
+          {divergenciasPendentes > 0 && (
+            <div className="flex items-center justify-between p-3 bg-warning/10 border border-warning/30 rounded-lg">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-warning" />
+                <div>
+                  <div className="font-semibold text-sm">
+                    {divergenciasPendentes} {divergenciasPendentes === 1 ? 'placa com divergência' : 'placas com divergências'}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Projeto ≠ Sistema GPS - Requer verificação no local
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showOnlyDivergencias}
+                  onCheckedChange={setShowOnlyDivergencias}
+                  id="filtro-divergencias"
+                />
+                <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm">
+                  <Filter className="h-4 w-4 inline mr-1" />
+                  Apenas divergências
+                </Label>
+              </div>
+            </div>
+          )}
+
           {/* Campos de Pesquisa */}
           <div className="space-y-3">
             <div className="flex gap-2">
@@ -426,10 +486,23 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <TableCell>{placa.lado || "-"}</TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (
-                              <NecessidadeBadge 
-                                necessidade={necessidade} 
-                                tipo="placas"
-                              />
+                              <div className="flex items-center gap-2 justify-center">
+                                <NecessidadeBadge 
+                                  necessidade={necessidade} 
+                                  tipo="placas"
+                                />
+                                {necessidade.divergencia && !necessidade.reconciliado && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleOpenReconciliacao(placa)}
+                                    className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground"
+                                  >
+                                    <AlertCircle className="h-4 w-4 mr-1" />
+                                    Verificar
+                                  </Button>
+                                )}
+                              </div>
                             ) : (
                               <Badge variant="outline" className="text-muted-foreground text-xs">
                                 Sem previsão
@@ -820,6 +893,15 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Drawer de Reconciliação */}
+      <ReconciliacaoDrawer
+        open={reconciliacaoOpen}
+        onOpenChange={setReconciliacaoOpen}
+        necessidade={selectedNecessidade}
+        cadastro={selectedPlaca}
+        onReconciliar={handleReconciliar}
+      />
     </>
   );
 }

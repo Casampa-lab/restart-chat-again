@@ -412,6 +412,19 @@ export function NecessidadesImporter() {
         return R * c;
       };
 
+      // Buscar tolerância configurável antes do loop
+      const { data: loteData } = await supabase
+        .from('lotes')
+        .select('tolerancia_match_metros, rodovias(tolerancia_match_metros)')
+        .eq('id', loteId)
+        .single();
+      
+      const tolerancia = loteData?.tolerancia_match_metros || 
+                       (loteData?.rodovias as any)?.tolerancia_match_metros || 
+                       50;
+      
+      console.log(`🎯 Usando tolerância de match: ${tolerancia}m`);
+
       // 4. Processar cada linha
       const total = dadosFiltrados.length;
       let sucessos = 0;
@@ -466,7 +479,7 @@ export function NecessidadesImporter() {
               if (cadLat !== null && cadLong !== null) {
                 const dist = calcularDistancia(lat, long, cadLat, cadLong);
                 
-                if (dist < menorDistancia && dist <= 50) { // Tolerância de 50m
+                if (dist < menorDistancia && dist <= tolerancia) {
                   menorDistancia = dist;
                   cadastroMaisProximo = cad;
                 }

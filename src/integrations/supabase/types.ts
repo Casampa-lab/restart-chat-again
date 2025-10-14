@@ -2174,6 +2174,7 @@ export type Database = {
           nome_fiscal_execucao: string | null
           numero: string
           responsavel_executora: string | null
+          tolerancia_match_metros: number | null
         }
         Insert: {
           contrato?: string | null
@@ -2185,6 +2186,7 @@ export type Database = {
           nome_fiscal_execucao?: string | null
           numero: string
           responsavel_executora?: string | null
+          tolerancia_match_metros?: number | null
         }
         Update: {
           contrato?: string | null
@@ -2196,6 +2198,7 @@ export type Database = {
           nome_fiscal_execucao?: string | null
           numero?: string
           responsavel_executora?: string | null
+          tolerancia_match_metros?: number | null
         }
         Relationships: [
           {
@@ -3059,11 +3062,16 @@ export type Database = {
           lado: string | null
           latitude: number | null
           linha_planilha: number | null
+          localizado_em_campo: boolean | null
           longitude: number | null
           lote_id: string
           observacao: string | null
           reconciliado: boolean | null
+          reconciliado_em: string | null
           reconciliado_por: string | null
+          revisao_observacao: string | null
+          revisao_solicitada: boolean | null
+          revisao_solicitada_por: string | null
           rodovia_id: string
           servico: string
           servico_final: string | null
@@ -3098,11 +3106,16 @@ export type Database = {
           lado?: string | null
           latitude?: number | null
           linha_planilha?: number | null
+          localizado_em_campo?: boolean | null
           longitude?: number | null
           lote_id: string
           observacao?: string | null
           reconciliado?: boolean | null
+          reconciliado_em?: string | null
           reconciliado_por?: string | null
+          revisao_observacao?: string | null
+          revisao_solicitada?: boolean | null
+          revisao_solicitada_por?: string | null
           rodovia_id: string
           servico: string
           servico_final?: string | null
@@ -3137,11 +3150,16 @@ export type Database = {
           lado?: string | null
           latitude?: number | null
           linha_planilha?: number | null
+          localizado_em_campo?: boolean | null
           longitude?: number | null
           lote_id?: string
           observacao?: string | null
           reconciliado?: boolean | null
+          reconciliado_em?: string | null
           reconciliado_por?: string | null
+          revisao_observacao?: string | null
+          revisao_solicitada?: boolean | null
+          revisao_solicitada_por?: string | null
           rodovia_id?: string
           servico?: string
           servico_final?: string | null
@@ -3828,18 +3846,21 @@ export type Database = {
           codigo: string
           created_at: string | null
           id: string
+          tolerancia_match_metros: number | null
           uf: string | null
         }
         Insert: {
           codigo: string
           created_at?: string | null
           id?: string
+          tolerancia_match_metros?: number | null
           uf?: string | null
         }
         Update: {
           codigo?: string
           created_at?: string | null
           id?: string
+          tolerancia_match_metros?: number | null
           uf?: string | null
         }
         Relationships: []
