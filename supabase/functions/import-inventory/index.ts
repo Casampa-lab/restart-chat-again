@@ -286,14 +286,14 @@ serve(async (req) => {
     // Campos válidos por tabela (baseado no schema)
     const VALID_FIELDS: Record<string, string[]> = {
       ficha_marcas_longitudinais: [
-        "codigo", "posicao", "cor", "data_vistoria", "espessura_cm", "estado_conservacao",
+        "codigo", "posicao", "cor", "data_vistoria", "espessura_cm",
         "extensao_metros", "foto_url", "km_final", "km_inicial",
         "largura_cm", "latitude_final", "latitude_inicial",
         "longitude_final", "longitude_inicial", "material",
         "observacao", "tipo_demarcacao", "snv", "traco_m", "espacamento_m", "area_m2"
       ],
       ficha_inscricoes: [
-        "area_m2", "cor", "data_vistoria", "dimensoes", "estado_conservacao",
+        "area_m2", "cor", "data_vistoria", "dimensoes",
         "foto_url", "km_final", "km_inicial", "latitude_final", "latitude_inicial",
         "longitude_final", "longitude_inicial", "material_utilizado",
         "observacao", "tipo_inscricao"
@@ -324,12 +324,12 @@ serve(async (req) => {
         "observacao", "quantidade", "refletivo", "snv"
       ],
       ficha_porticos: [
-        "altura_livre_m", "data_vistoria", "estado_conservacao", "foto_url",
+        "altura_livre_m", "data_vistoria", "foto_url",
         "km", "lado", "latitude", "longitude", "observacao", "snv", "tipo",
         "vao_horizontal_m"
       ],
       defensas: [
-        "data_inspecao", "estado_conservacao", "extensao_metros", "km_final",
+        "data_inspecao", "extensao_metros", "km_final",
         "km_inicial", "lado", "necessita_intervencao", "nivel_risco",
         "observacao", "tipo_avaria", "tipo_defensa", "br", "snv", "tramo",
         "funcao", "especificacao_obstaculo_fixo", "id_defensa",
@@ -382,7 +382,6 @@ serve(async (req) => {
         record.lado = "D";
         record.tipo_defensa = "Metálica";
         record.extensao_metros = 0;
-        record.estado_conservacao = "Bom";
         record.necessita_intervencao = false;
         record.km_inicial = 0;
         record.km_final = 0;
