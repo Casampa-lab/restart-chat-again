@@ -547,19 +547,17 @@ const Index = () => {
                       <TabsTrigger value="defensas-pront" className="flex items-center gap-2">
                         <span>Defensas</span>
                         <div className="flex items-center gap-1">
-                          {countDefensas! > 0 && (
-                            <Badge 
-                              variant="secondary" 
-                              className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate("/dashboard-necessidades");
-                              }}
-                              title="Cadastro - Clique para ver Necessidades"
-                            >
-                              {countDefensas}
-                            </Badge>
-                          )}
+                          <Badge 
+                            variant="secondary" 
+                            className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate("/dashboard-necessidades");
+                            }}
+                            title="Cadastro - Clique para ver Necessidades"
+                          >
+                            {countDefensas || 0}
+                          </Badge>
                           <Badge 
                             className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                             onClick={(e) => {
@@ -579,19 +577,17 @@ const Index = () => {
                           <TabsTrigger value="longitudinais" className="flex items-center gap-2">
                             <span>Marcas Longitudinais</span>
                             <div className="flex items-center gap-1">
-                              {countMarcasLong! > 0 && (
-                                <Badge 
-                                  variant="secondary" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Cadastro - Clique para ver Necessidades"
-                                >
-                                  {countMarcasLong}
-                                </Badge>
-                              )}
+                              <Badge 
+                                variant="secondary" 
+                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Cadastro - Clique para ver Necessidades"
+                              >
+                                {countMarcasLong || 0}
+                              </Badge>
                               <Badge 
                                 className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                                 onClick={(e) => {
@@ -633,19 +629,17 @@ const Index = () => {
                           <TabsTrigger value="inscricoes" className="flex items-center gap-2">
                             <span>Zebrados, Setas, Símbolos e Legendas</span>
                             <div className="flex items-center gap-1">
-                              {countInscricoes! > 0 && (
-                                <Badge 
-                                  variant="secondary" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Cadastro - Clique para ver Necessidades"
-                                >
-                                  {countInscricoes}
-                                </Badge>
-                              )}
+                              <Badge 
+                                variant="secondary" 
+                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Cadastro - Clique para ver Necessidades"
+                              >
+                                {countInscricoes || 0}
+                              </Badge>
                               <Badge 
                                 className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                                 onClick={(e) => {
@@ -661,19 +655,17 @@ const Index = () => {
                           <TabsTrigger value="tachas" className="flex items-center gap-2">
                             <span>Tachas</span>
                             <div className="flex items-center gap-1">
-                              {countTachas! > 0 && (
-                                <Badge 
-                                  variant="secondary" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Cadastro - Clique para ver Necessidades"
-                                >
-                                  {countTachas}
-                                </Badge>
-                              )}
+                              <Badge 
+                                variant="secondary" 
+                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Cadastro - Clique para ver Necessidades"
+                              >
+                                {countTachas || 0}
+                              </Badge>
                               <Badge 
                                 className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                                 onClick={(e) => {
@@ -723,19 +715,17 @@ const Index = () => {
                           <TabsTrigger value="placas" className="flex items-center gap-2">
                             <span>Placas</span>
                             <div className="flex items-center gap-1">
-                              {countPlacas! > 0 && (
-                                <Badge 
-                                  variant="secondary" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Cadastro - Clique para ver Necessidades"
-                                >
-                                  {countPlacas}
-                                </Badge>
-                              )}
+                              <Badge 
+                                variant="secondary" 
+                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Cadastro - Clique para ver Necessidades"
+                              >
+                                {countPlacas || 0}
+                              </Badge>
                               <Badge 
                                 className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                                 onClick={(e) => {
@@ -751,19 +741,17 @@ const Index = () => {
                           <TabsTrigger value="porticos" className="flex items-center gap-2">
                             <span>Pórticos (P/SM) e Braços Projetados</span>
                             <div className="flex items-center gap-1">
-                              {countPorticos! > 0 && (
-                                <Badge 
-                                  variant="secondary" 
-                                  className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate("/dashboard-necessidades");
-                                  }}
-                                  title="Cadastro - Clique para ver Necessidades"
-                                >
-                                  {countPorticos}
-                                </Badge>
-                              )}
+                              <Badge 
+                                variant="secondary" 
+                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate("/dashboard-necessidades");
+                                }}
+                                title="Cadastro - Clique para ver Necessidades"
+                              >
+                                {countPorticos || 0}
+                              </Badge>
                               <Badge 
                                 className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                                 onClick={(e) => {
