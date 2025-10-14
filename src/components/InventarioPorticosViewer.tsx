@@ -496,20 +496,6 @@ export function InventarioPorticosViewer({
                     <p className="text-sm">{new Date(selectedPortico.data_vistoria).toLocaleDateString("pt-BR")}</p>
                   </div>
                 </div>
-
-                {onRegistrarIntervencao && (
-                  <div className="pt-4 border-t">
-                    <Button 
-                      onClick={() => {
-                        onRegistrarIntervencao(selectedPortico);
-                        setSelectedPortico(null);
-                      }}
-                      className="w-full"
-                    >
-                      Registrar Intervenção
-                    </Button>
-                  </div>
-                )}
               </TabsContent>
 
               <TabsContent value="fotos" className="mt-4">
