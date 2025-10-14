@@ -16,6 +16,26 @@ import { ReconciliacaoDrawer } from "./ReconciliacaoDrawer";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
+// Helper function to determine badge color based on placa type
+const getPlacaBadgeVariant = (tipo: string | null): { className: string } => {
+  if (!tipo) return { className: "" };
+  
+  const tipoLower = tipo.toLowerCase();
+  
+  // Regulamentação - VERMELHO
+  if (tipoLower.includes('regulament')) {
+    return { className: "bg-red-500 hover:bg-red-600 text-white border-red-600" };
+  }
+  
+  // Advertência - AMARELO
+  if (tipoLower.includes('advert')) {
+    return { className: "bg-yellow-500 hover:bg-yellow-600 text-black border-yellow-600 font-semibold" };
+  }
+  
+  // Indicação - VERDE (padrão)
+  return { className: "bg-green-600 hover:bg-green-700 text-white border-green-700" };
+};
+
 interface FichaPlaca {
   id: string;
   br: string | null;
@@ -435,15 +455,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       </TableHead>
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("tipo")}
-                      >
-                        <div className="whitespace-normal leading-tight flex items-center justify-center">
-                          Tipo<br/>Placa
-                          <SortIcon column="tipo" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("suporte")}
                       >
                         <div className="whitespace-normal leading-tight flex items-center justify-center">
@@ -490,9 +501,13 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       return (
                         <TableRow key={placa.id} className="hover:bg-muted/50">
                           <TableCell className="font-medium">{placa.snv || "-"}</TableCell>
-                          <TableCell>{placa.codigo || "-"}</TableCell>
                           <TableCell>
-                            <Badge variant="outline">{placa.tipo || "-"}</Badge>
+                            <Badge 
+                              className={getPlacaBadgeVariant(placa.tipo).className}
+                              title={placa.tipo || "Tipo desconhecido"}
+                            >
+                              {placa.codigo || "-"}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge variant="secondary">{placa.suporte || "-"}</Badge>
