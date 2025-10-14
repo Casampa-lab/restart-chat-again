@@ -32,12 +32,7 @@ export default function ElementosPendentes() {
       const startTime = Date.now();
       let query = supabase
         .from("elementos_pendentes_aprovacao")
-        .select(`
-          *,
-          user_profile:profiles!elementos_pendentes_aprovacao_user_id_fkey(nome, email),
-          rodovia:rodovias!elementos_pendentes_aprovacao_rodovia_id_fkey(nome),
-          lote:lotes!elementos_pendentes_aprovacao_lote_id_fkey(numero)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (filtroStatus !== "todos") {
@@ -49,7 +44,20 @@ export default function ElementosPendentes() {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      
+      console.log('📊 Query result:', { 
+        hasError: !!error, 
+        errorMessage: error?.message,
+        errorDetails: error?.details,
+        errorHint: error?.hint,
+        dataLength: data?.length,
+        data: data 
+      });
+      
+      if (error) {
+        console.error('❌ Erro na query:', error);
+        throw error;
+      }
       
       console.log(`✅ ${data?.length || 0} elementos encontrados em ${Date.now() - startTime}ms`);
       setLastUpdate(new Date());
