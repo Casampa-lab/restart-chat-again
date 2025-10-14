@@ -919,6 +919,15 @@ export function InventarioImporterManager() {
             return null;
           };
           
+          // Helper para converter valores numéricos de forma segura
+          const toNumber = (value: any): number | null => {
+            if (value === null || value === undefined || value === "" || value === "-") return null;
+            const str = String(value).trim().toLowerCase();
+            if (str === "não se aplica" || str === "nao se aplica" || str === "n/a") return null;
+            const num = Number(value);
+            return isNaN(num) ? null : num;
+          };
+          
           record.snv = getVal("SNV", "snv");
           record.local_implantacao = getVal("Local de Implantação", "Local de Implantacao", "Local de implantação", "local_implantacao");
           record.cor_corpo = getVal("Cor (Corpo)", "Cor Corpo", "cor_corpo") || "Não especificado";
@@ -926,23 +935,23 @@ export function InventarioImporterManager() {
           record.tipo_refletivo = getVal("Tipo Refletivo", "tipo_refletivo");
           
           const kmIni = getVal("Km Inicial", "Km inicial", "km_inicial", "km inicial");
-          record.km_inicial = kmIni ? Number(kmIni) : 0;
-          record.latitude_inicial = getVal("Latitude Inicial", "Latitude inicial", "latitude_inicial");
-          record.longitude_inicial = getVal("Longitude Inicial", "Longitude inicial", "longitude_inicial");
+          record.km_inicial = toNumber(kmIni) ?? 0;
+          record.latitude_inicial = toNumber(getVal("Latitude Inicial", "Latitude inicial", "latitude_inicial"));
+          record.longitude_inicial = toNumber(getVal("Longitude Inicial", "Longitude inicial", "longitude_inicial"));
           
           const kmFim = getVal("km Final", "Km Final", "Km final", "km_final", "km final");
-          record.km_final = kmFim ? Number(kmFim) : 0;
-          record.latitude_final = getVal("Latitude Final", "Latitude final", "latitude_final");
-          record.longitude_final = getVal("Longitude Final", "Longitude final", "longitude_final");
+          record.km_final = toNumber(kmFim) ?? 0;
+          record.latitude_final = toNumber(getVal("Latitude Final", "Latitude final", "latitude_final"));
+          record.longitude_final = toNumber(getVal("Longitude Final", "Longitude final", "longitude_final"));
           
           const extKm = getVal("Extensão (km)", "Extensão km", "Extensao km", "extensao_km", "extensao");
-          record.extensao_km = extKm ? Number(extKm) : null;
+          record.extensao_km = toNumber(extKm);
           
           const espac = getVal("Espaçamento", "Espacamento", "espaçamento", "espacamento");
-          record.espacamento_m = espac ? Number(espac) : null;
+          record.espacamento_m = toNumber(espac);
           
           const qtd = getVal("Quantidade", "quantidade");
-          record.quantidade = qtd ? Number(qtd) : null;
+          record.quantidade = toNumber(qtd);
           
           const br = getVal("BR", "br");
           if (br) {
