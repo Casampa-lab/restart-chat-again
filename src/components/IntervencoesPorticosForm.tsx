@@ -365,7 +365,7 @@ export function IntervencoesPorticosForm({
             )}
 
             {!hideSubmitButton && (
-              <Button type="submit" className="w-full" disabled={isSubmitting || (!porticoSelecionado && modo !== 'controlado')}>
+              <Button type="submit" className="w-full mt-6" disabled={isSubmitting || (!porticoSelecionado && modo !== 'controlado')}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Registrar Intervenção
               </Button>
