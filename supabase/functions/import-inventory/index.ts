@@ -219,18 +219,37 @@ serve(async (req) => {
     // Mapeamento de campos do Excel para campos da tabela
     const FIELD_MAPPINGS: Record<string, Record<string, string>> = {
       necessidades_placas: {
+        "código_da_placa": "codigo",
+        "codigo_da_placa": "codigo",
         "código": "codigo",
+        "tipo_da_placa": "tipo",
         "tipo": "tipo",
-        "dimensões_(mm)": "dimensoes_mm",
+        "altura_(m)": "altura_m",
+        "altura_m": "altura_m",
+        "altura": "altura_m",
+        "largura_(m)": "", // Ignorado - campo não existe na tabela
+        "área_(m²)": "area_m2",
+        "area_(m²)": "area_m2",
+        "area_m2": "area_m2",
+        "area": "area_m2",
         "km": "km",
         "lado": "lado",
         "latitude": "latitude",
         "longitude": "longitude",
-        "motivo": "motivo",
         "observação": "observacao",
+        "observacao": "observacao",
         "snv": "snv",
-        "data": "data_necessidade",
-        "br": "",
+        "br": "br",
+        "uf": "uf",
+        "velocidade": "velocidade",
+        "substrato": "substrato",
+        "suporte": "suporte",
+        "distância_(m)": "distancia_m",
+        "distancia_m": "distancia_m",
+        "serviço": "servico",
+        "servico": "servico",
+        "solução": "solucao_planilha",
+        "solucao": "solucao_planilha",
       },
       ficha_marcas_longitudinais: {
         "largura_da_faixa_(m)": "largura_cm",
@@ -302,8 +321,9 @@ serve(async (req) => {
     const VALID_FIELDS: Record<string, string[]> = {
       necessidades_placas: [
         "codigo", "tipo", "dimensoes_mm", "km", "lado", "latitude", "longitude",
-        "motivo", "observacao", "snv", "data_necessidade", "estado_conservacao",
-        "divergencia_identificada", "cadastro_id"
+        "observacao", "snv", "br", "uf", "velocidade", "substrato", "suporte",
+        "altura_m", "distancia_m", "area_m2", "servico", "solucao_planilha",
+        "estado_conservacao", "divergencia_identificada", "cadastro_id"
       ],
       ficha_marcas_longitudinais: [
         "codigo", "posicao", "cor", "data_vistoria", "espessura_cm",
@@ -391,8 +411,7 @@ serve(async (req) => {
       
       // Adicionar campos obrigatórios com valores padrão específicos por tabela
       if (tableName === "necessidades_placas") {
-        record.motivo = record.motivo || "Substituição";
-        record.data_necessidade = record.data_necessidade || "2023-01-01";
+        record.servico = record.servico || "Substituição de Placa";
       } else if (tableName === "ficha_inscricoes") {
         record.tipo_inscricao = "Outros";
         record.cor = "Branca";
