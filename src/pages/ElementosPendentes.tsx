@@ -32,7 +32,12 @@ export default function ElementosPendentes() {
       const startTime = Date.now();
       let query = supabase
         .from("elementos_pendentes_aprovacao")
-        .select("*")
+        .select(`
+          *,
+          user_profile:profiles!elementos_pendentes_aprovacao_user_id_fkey(nome, email),
+          rodovia:rodovias!elementos_pendentes_aprovacao_rodovia_id_fkey(nome),
+          lote:lotes!elementos_pendentes_aprovacao_lote_id_fkey(numero)
+        `)
         .order("created_at", { ascending: false });
 
       if (filtroStatus !== "todos") {
