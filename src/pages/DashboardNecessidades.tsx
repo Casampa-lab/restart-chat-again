@@ -112,7 +112,7 @@ export default function DashboardNecessidades() {
           .from(`necessidades_${tipo.value}` as any)
           .select(`
             *,
-            rodovia:rodovias(codigo, nome),
+            rodovia:rodovias(codigo),
             lote:lotes(numero)
           `)
           .eq("lote_id", loteIdFiltro);

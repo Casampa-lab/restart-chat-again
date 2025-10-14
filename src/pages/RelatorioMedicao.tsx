@@ -46,7 +46,7 @@ export default function RelatorioMedicao() {
         .select(`
           *,
           profiles:user_id(nome),
-          rodovias:rodovia_id(nome, codigo),
+          rodovias:rodovia_id(codigo),
           lotes:lote_id(numero)
         `)
         .eq("lote_id", loteId)
@@ -62,7 +62,7 @@ export default function RelatorioMedicao() {
         .select(`
           *,
           profiles:user_id(nome),
-          rodovias:rodovia_id(nome, codigo),
+          rodovias:rodovia_id(codigo),
           lotes:lote_id(numero)
         `)
         .eq("lote_id", loteId)
@@ -78,7 +78,7 @@ export default function RelatorioMedicao() {
         .select(`
           *,
           profiles:user_id(nome),
-          rodovias:rodovia_id(nome, codigo),
+          rodovias:rodovia_id(codigo),
           lotes:lote_id(numero)
         `)
         .eq("lote_id", loteId)
@@ -105,7 +105,7 @@ export default function RelatorioMedicao() {
         wsAprovados.addRow({
           data: new Date(item.data_decisao).toLocaleDateString("pt-BR"),
           tecnico: item.profiles?.nome || "-",
-          rodovia: `${item.rodovias?.codigo} - ${item.rodovias?.nome}` || "-",
+            rodovia: item.rodovias?.codigo || "-",
           tipo: getTipoLabel(item.tipo_elemento),
           justificativa: item.justificativa,
         });
@@ -125,7 +125,7 @@ export default function RelatorioMedicao() {
         wsPendentes.addRow({
           data: new Date(item.created_at).toLocaleDateString("pt-BR"),
           tecnico: item.profiles?.nome || "-",
-          rodovia: `${item.rodovias?.codigo} - ${item.rodovias?.nome}` || "-",
+            rodovia: item.rodovias?.codigo || "-",
           tipo: getTipoLabel(item.tipo_elemento),
           justificativa: item.justificativa,
         });
@@ -146,7 +146,7 @@ export default function RelatorioMedicao() {
         wsRejeitados.addRow({
           data: new Date(item.data_decisao).toLocaleDateString("pt-BR"),
           tecnico: item.profiles?.nome || "-",
-          rodovia: `${item.rodovias?.codigo} - ${item.rodovias?.nome}` || "-",
+          rodovia: item.rodovias?.codigo || "-",
           tipo: getTipoLabel(item.tipo_elemento),
           justificativa: item.justificativa,
           motivo: item.observacao_coordenador || "-",

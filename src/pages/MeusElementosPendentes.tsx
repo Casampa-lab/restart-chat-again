@@ -21,7 +21,7 @@ export default function MeusElementosPendentes() {
         .from("elementos_pendentes_aprovacao")
         .select(`
           *,
-          rodovias:rodovia_id (nome),
+          rodovias:rodovia_id (codigo),
           lotes:lote_id (numero)
         `)
         .eq("user_id", user.id)
@@ -105,7 +105,7 @@ export default function MeusElementosPendentes() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <p>{elemento.rodovias?.nome}</p>
+                        <p className="text-sm text-muted-foreground">{elemento.rodovias?.codigo}</p>
                         <p className="text-muted-foreground">Lote {elemento.lotes?.numero}</p>
                       </div>
                     </TableCell>

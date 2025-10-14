@@ -365,14 +365,14 @@ export default function MinhasNecessidadesRelatorios() {
           .select(`
             *,
             lotes (numero),
-            rodovias (nome, codigo)
+            rodovias (codigo)
           `);
 
         if (error) throw error;
 
         cadastro = (lotesRodovias || []).map((lr: any) => ({
           lote: lr.lotes?.numero || "",
-          rodovia: lr.rodovias?.codigo || lr.rodovias?.nome || "",
+          rodovia: lr.rodovias?.codigo || "",
         }));
       } else {
         // Buscar dados do CADASTRO normal

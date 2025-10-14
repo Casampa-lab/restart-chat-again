@@ -123,7 +123,7 @@ const NCsCoordenador = () => {
           empresa,
           km_referencia,
           user_id,
-          rodovias(codigo, nome),
+          rodovias(codigo),
           lotes(numero)
         `)
         .eq("deleted", false)
@@ -253,7 +253,7 @@ const NCsCoordenador = () => {
                           <TableCell>
                             <div>
                               <div className="font-medium">{nc.rodovias?.codigo}</div>
-                              <div className="text-xs text-muted-foreground">{nc.rodovias?.nome}</div>
+                              <div className="text-xs text-muted-foreground">{nc.rodovias?.codigo}</div>
                             </div>
                           </TableCell>
                           <TableCell>{nc.lotes?.numero}</TableCell>

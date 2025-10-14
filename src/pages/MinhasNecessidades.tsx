@@ -83,7 +83,7 @@ const MinhasNecessidades = () => {
           .from(tipoConfig.table as any)
           .select(`
             *,
-            rodovia:rodovias(codigo, nome),
+            rodovia:rodovias(codigo),
             lote:lotes(numero)
           `);
         
