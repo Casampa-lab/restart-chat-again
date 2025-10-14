@@ -25,6 +25,7 @@ import MinhasFichasPlaca from "./pages/MinhasFichasPlaca";
 import MinhasNecessidades from "./pages/MinhasNecessidades";
 import MinhasNecessidadesRelatorios from "./pages/MinhasNecessidadesRelatorios";
 import RevisaoIntervencoes from "./pages/RevisaoIntervencoes";
+import IntervencoesPendentes from "./pages/IntervencoesPendentes";
 import DashboardNecessidades from "./pages/DashboardNecessidades";
 import Modulos from "./pages/Modulos";
 import ResetAdminPassword from "./pages/ResetAdminPassword";
@@ -63,6 +64,7 @@ const App = () => (
           <Route path="/minhas-necessidades" element={<MinhasNecessidades />} />
           <Route path="/minhas-necessidades-relatorios" element={<MinhasNecessidadesRelatorios />} />
           <Route path="/revisao-intervencoes" element={<RevisaoIntervencoes />} />
+          <Route path="/intervencoes-pendentes" element={<IntervencoesPendentes />} />
           <Route path="/dashboard-necessidades" element={<DashboardNecessidades />} />
           <Route path="/modulos" element={<Modulos />} />
           <Route path="/reset-admin-password" element={<ResetAdminPassword />} />

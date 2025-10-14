@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, ClipboardCheck } from "lucide-react";
 import { BarChart3, FileSpreadsheet } from "lucide-react";
 import {
   exportFrentesLiberadas,
@@ -24,12 +24,36 @@ import {
 } from "@/lib/excelExport";
 import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
+import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
 
 
 const CoordenacaoFiscalizacao = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
+
+  const { data: contadorPendentes = 0 } = useQuery({
+    queryKey: ["contador-pendentes"],
+    queryFn: async () => {
+      const tipos: ("ficha_placa_intervencoes" | "ficha_porticos_intervencoes")[] = [
+        "ficha_placa_intervencoes",
+        "ficha_porticos_intervencoes",
+      ];
+
+      let total = 0;
+      for (const tabela of tipos) {
+        const { count } = await supabase
+          .from(tabela)
+          .select("*", { count: "exact", head: true })
+          .eq("pendente_aprovacao_coordenador", true);
+        total += count || 0;
+      }
+      return total;
+    },
+    enabled: !!user,
+    refetchInterval: 30000,
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -198,6 +222,34 @@ const CoordenacaoFiscalizacao = () => {
               </TabsList>
 
               <TabsContent value="frentes" className="mt-6">
+                <Card className="mb-4 border-2 border-primary/30 shadow-md">
+                  <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
+                    <CardTitle className="flex items-center justify-between text-xl">
+                      <span>Aprovações e Gestão</span>
+                      {contadorPendentes > 0 && (
+                        <Badge className="bg-yellow-500 text-yellow-900 text-base px-3 py-1">
+                          {contadorPendentes} pendente{contadorPendentes > 1 ? "s" : ""}
+                        </Badge>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full justify-start font-semibold border-2 hover:bg-primary/10 hover:border-primary"
+                      onClick={() => navigate("/intervencoes-pendentes")}
+                    >
+                      <ClipboardCheck className="w-5 h-5 mr-3" />
+                      Intervenções Pendentes de Aprovação
+                      {contadorPendentes > 0 && (
+                        <Badge className="ml-auto bg-yellow-500 text-yellow-900">
+                          {contadorPendentes}
+                        </Badge>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
                 <div className="text-center py-8 space-y-4">
                   <div className="space-y-2">
                     <h3 className="text-lg font-semibold">Planilha 2.2 - Frente Liberada</h3>

@@ -167,6 +167,7 @@ export type Database = {
           classificacao_nivel_contencao: string | null
           comprimento_total_tramo_m: number | null
           created_at: string
+          data_ultima_modificacao: string | null
           data_vistoria: string
           distancia_bordo_pista_face_defensa_m: number | null
           distancia_face_defensa_obstaculo_m: number | null
@@ -188,6 +189,7 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          modificado_por_intervencao: boolean | null
           nivel_contencao_en1317: string | null
           nivel_contencao_nchrp350: string | null
           origem: string | null
@@ -200,6 +202,7 @@ export type Database = {
           terminal_saida: string | null
           tipo_defensa: string
           tramo: string | null
+          ultima_intervencao_id: string | null
           updated_at: string
           user_id: string
           velocidade_kmh: number | null
@@ -214,6 +217,7 @@ export type Database = {
           classificacao_nivel_contencao?: string | null
           comprimento_total_tramo_m?: number | null
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria: string
           distancia_bordo_pista_face_defensa_m?: number | null
           distancia_face_defensa_obstaculo_m?: number | null
@@ -235,6 +239,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          modificado_por_intervencao?: boolean | null
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
           origem?: string | null
@@ -247,6 +252,7 @@ export type Database = {
           terminal_saida?: string | null
           tipo_defensa: string
           tramo?: string | null
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id: string
           velocidade_kmh?: number | null
@@ -261,6 +267,7 @@ export type Database = {
           classificacao_nivel_contencao?: string | null
           comprimento_total_tramo_m?: number | null
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria?: string
           distancia_bordo_pista_face_defensa_m?: number | null
           distancia_face_defensa_obstaculo_m?: number | null
@@ -282,6 +289,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          modificado_por_intervencao?: boolean | null
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
           origem?: string | null
@@ -294,16 +302,73 @@ export type Database = {
           terminal_saida?: string | null
           tipo_defensa?: string
           tramo?: string | null
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id?: string
           velocidade_kmh?: number | null
           vmd_veic_dia?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "defensas_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "defensas_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      defensas_historico: {
+        Row: {
+          aplicado_por: string | null
+          cadastro_id: string
+          created_at: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id: string
+          intervencao_id: string
+        }
+        Insert: {
+          aplicado_por?: string | null
+          cadastro_id: string
+          created_at?: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id?: string
+          intervencao_id: string
+        }
+        Update: {
+          aplicado_por?: string | null
+          cadastro_id?: string
+          created_at?: string | null
+          dados_antes?: Json
+          dados_depois?: Json
+          id?: string
+          intervencao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "defensas_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "defensas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "defensas_historico_intervencao_id_fkey"
+            columns: ["intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "defensas_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       defensas_intervencoes: {
         Row: {
+          aplicado_ao_inventario: boolean | null
+          coordenador_id: string | null
           created_at: string
+          data_aprovacao_coordenador: string | null
           data_intervencao: string
           defensa_id: string
           estado_conservacao: string | null
@@ -316,11 +381,16 @@ export type Database = {
           necessita_intervencao: boolean | null
           nivel_risco: string | null
           observacao: string | null
+          observacao_coordenador: string | null
+          pendente_aprovacao_coordenador: boolean | null
           tipo_avaria: string | null
           tipo_defensa: string | null
         }
         Insert: {
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao: string
           defensa_id: string
           estado_conservacao?: string | null
@@ -333,11 +403,16 @@ export type Database = {
           necessita_intervencao?: boolean | null
           nivel_risco?: string | null
           observacao?: string | null
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
         }
         Update: {
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           defensa_id?: string
           estado_conservacao?: string | null
@@ -350,6 +425,8 @@ export type Database = {
           necessita_intervencao?: boolean | null
           nivel_risco?: string | null
           observacao?: string | null
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
         }
@@ -485,6 +562,7 @@ export type Database = {
           cor_corpo: string
           cor_refletivo: string | null
           created_at: string
+          data_ultima_modificacao: string | null
           data_vistoria: string
           enviado_coordenador: boolean | null
           espacamento_m: number | null
@@ -498,12 +576,14 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          modificado_por_intervencao: boolean | null
           observacao: string | null
           origem: string | null
           quantidade: number | null
           rodovia_id: string
           snv: string | null
           tipo_refletivo: string | null
+          ultima_intervencao_id: string | null
           updated_at: string
           user_id: string
         }
@@ -511,6 +591,7 @@ export type Database = {
           cor_corpo: string
           cor_refletivo?: string | null
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria?: string
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
@@ -524,12 +605,14 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          modificado_por_intervencao?: boolean | null
           observacao?: string | null
           origem?: string | null
           quantidade?: number | null
           rodovia_id: string
           snv?: string | null
           tipo_refletivo?: string | null
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -537,6 +620,7 @@ export type Database = {
           cor_corpo?: string
           cor_refletivo?: string | null
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria?: string
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
@@ -550,22 +634,80 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          modificado_por_intervencao?: boolean | null
           observacao?: string | null
           origem?: string | null
           quantidade?: number | null
           rodovia_id?: string
           snv?: string | null
           tipo_refletivo?: string | null
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_cilindros_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_cilindros_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ficha_cilindros_historico: {
+        Row: {
+          aplicado_por: string | null
+          cadastro_id: string
+          created_at: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id: string
+          intervencao_id: string
+        }
+        Insert: {
+          aplicado_por?: string | null
+          cadastro_id: string
+          created_at?: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id?: string
+          intervencao_id: string
+        }
+        Update: {
+          aplicado_por?: string | null
+          cadastro_id?: string
+          created_at?: string | null
+          dados_antes?: Json
+          dados_depois?: Json
+          id?: string
+          intervencao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_cilindros_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_cilindros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_cilindros_historico_intervencao_id_fkey"
+            columns: ["intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_cilindros_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_cilindros_intervencoes: {
         Row: {
+          aplicado_ao_inventario: boolean | null
+          coordenador_id: string | null
           cor_corpo: string | null
           cor_refletivo: string | null
           created_at: string
+          data_aprovacao_coordenador: string | null
           data_intervencao: string
           ficha_cilindros_id: string
           fora_plano_manutencao: boolean | null
@@ -573,13 +715,18 @@ export type Database = {
           id: string
           justificativa_fora_plano: string | null
           motivo: string
+          observacao_coordenador: string | null
+          pendente_aprovacao_coordenador: boolean | null
           quantidade: number | null
           tipo_refletivo: string | null
         }
         Insert: {
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           cor_corpo?: string | null
           cor_refletivo?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao: string
           ficha_cilindros_id: string
           fora_plano_manutencao?: boolean | null
@@ -587,13 +734,18 @@ export type Database = {
           id?: string
           justificativa_fora_plano?: string | null
           motivo: string
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           tipo_refletivo?: string | null
         }
         Update: {
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           cor_corpo?: string | null
           cor_refletivo?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           ficha_cilindros_id?: string
           fora_plano_manutencao?: boolean | null
@@ -601,6 +753,8 @@ export type Database = {
           id?: string
           justificativa_fora_plano?: string | null
           motivo?: string
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           tipo_refletivo?: string | null
         }
@@ -611,6 +765,7 @@ export type Database = {
           area_m2: number | null
           cor: string
           created_at: string
+          data_ultima_modificacao: string | null
           data_vistoria: string
           dimensoes: string | null
           enviado_coordenador: boolean | null
@@ -623,10 +778,12 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           material_utilizado: string | null
+          modificado_por_intervencao: boolean | null
           observacao: string | null
           origem: string | null
           rodovia_id: string
           tipo_inscricao: string
+          ultima_intervencao_id: string | null
           updated_at: string
           user_id: string
         }
@@ -634,6 +791,7 @@ export type Database = {
           area_m2?: number | null
           cor: string
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria: string
           dimensoes?: string | null
           enviado_coordenador?: boolean | null
@@ -646,10 +804,12 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           material_utilizado?: string | null
+          modificado_por_intervencao?: boolean | null
           observacao?: string | null
           origem?: string | null
           rodovia_id: string
           tipo_inscricao: string
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -657,6 +817,7 @@ export type Database = {
           area_m2?: number | null
           cor?: string
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria?: string
           dimensoes?: string | null
           enviado_coordenador?: boolean | null
@@ -669,20 +830,78 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           material_utilizado?: string | null
+          modificado_por_intervencao?: boolean | null
           observacao?: string | null
           origem?: string | null
           rodovia_id?: string
           tipo_inscricao?: string
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_inscricoes_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_inscricoes_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ficha_inscricoes_historico: {
+        Row: {
+          aplicado_por: string | null
+          cadastro_id: string
+          created_at: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id: string
+          intervencao_id: string
+        }
+        Insert: {
+          aplicado_por?: string | null
+          cadastro_id: string
+          created_at?: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id?: string
+          intervencao_id: string
+        }
+        Update: {
+          aplicado_por?: string | null
+          cadastro_id?: string
+          created_at?: string | null
+          dados_antes?: Json
+          dados_depois?: Json
+          id?: string
+          intervencao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_inscricoes_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_inscricoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_inscricoes_historico_intervencao_id_fkey"
+            columns: ["intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_inscricoes_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_inscricoes_intervencoes: {
         Row: {
+          aplicado_ao_inventario: boolean | null
           area_m2: number | null
+          coordenador_id: string | null
           cor: string | null
           created_at: string
+          data_aprovacao_coordenador: string | null
           data_intervencao: string
           dimensoes: string | null
           estado_conservacao: string | null
@@ -694,12 +913,17 @@ export type Database = {
           material_utilizado: string | null
           motivo: string
           observacao: string | null
+          observacao_coordenador: string | null
+          pendente_aprovacao_coordenador: boolean | null
           tipo_inscricao: string | null
         }
         Insert: {
+          aplicado_ao_inventario?: boolean | null
           area_m2?: number | null
+          coordenador_id?: string | null
           cor?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao: string
           dimensoes?: string | null
           estado_conservacao?: string | null
@@ -711,12 +935,17 @@ export type Database = {
           material_utilizado?: string | null
           motivo: string
           observacao?: string | null
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           tipo_inscricao?: string | null
         }
         Update: {
+          aplicado_ao_inventario?: boolean | null
           area_m2?: number | null
+          coordenador_id?: string | null
           cor?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           dimensoes?: string | null
           estado_conservacao?: string | null
@@ -728,6 +957,8 @@ export type Database = {
           material_utilizado?: string | null
           motivo?: string
           observacao?: string | null
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           tipo_inscricao?: string | null
         }
         Relationships: []
@@ -738,6 +969,7 @@ export type Database = {
           codigo: string | null
           cor: string | null
           created_at: string
+          data_ultima_modificacao: string | null
           data_vistoria: string
           enviado_coordenador: boolean | null
           espacamento_m: number | null
@@ -753,12 +985,14 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           material: string | null
+          modificado_por_intervencao: boolean | null
           origem: string | null
           posicao: string | null
           rodovia_id: string
           snv: string | null
           tipo_demarcacao: string | null
           traco_m: number | null
+          ultima_intervencao_id: string | null
           updated_at: string
           user_id: string
         }
@@ -767,6 +1001,7 @@ export type Database = {
           codigo?: string | null
           cor?: string | null
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria: string
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
@@ -782,12 +1017,14 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           material?: string | null
+          modificado_por_intervencao?: boolean | null
           origem?: string | null
           posicao?: string | null
           rodovia_id: string
           snv?: string | null
           tipo_demarcacao?: string | null
           traco_m?: number | null
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -796,6 +1033,7 @@ export type Database = {
           codigo?: string | null
           cor?: string | null
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria?: string
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
@@ -811,21 +1049,79 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           material?: string | null
+          modificado_por_intervencao?: boolean | null
           origem?: string | null
           posicao?: string | null
           rodovia_id?: string
           snv?: string | null
           tipo_demarcacao?: string | null
           traco_m?: number | null
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_marcas_longitudinais_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_marcas_longitudinais_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ficha_marcas_longitudinais_historico: {
+        Row: {
+          aplicado_por: string | null
+          cadastro_id: string
+          created_at: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id: string
+          intervencao_id: string
+        }
+        Insert: {
+          aplicado_por?: string | null
+          cadastro_id: string
+          created_at?: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id?: string
+          intervencao_id: string
+        }
+        Update: {
+          aplicado_por?: string | null
+          cadastro_id?: string
+          created_at?: string | null
+          dados_antes?: Json
+          dados_depois?: Json
+          id?: string
+          intervencao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_marcas_longitudinais_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_marcas_longitudinais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_marcas_longitudinais_historico_intervencao_id_fkey"
+            columns: ["intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_marcas_longitudinais_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_marcas_longitudinais_intervencoes: {
         Row: {
+          aplicado_ao_inventario: boolean | null
+          coordenador_id: string | null
           cor: string | null
           created_at: string
+          data_aprovacao_coordenador: string | null
           data_intervencao: string
           espessura_cm: number | null
           estado_conservacao: string | null
@@ -838,11 +1134,16 @@ export type Database = {
           material: string | null
           motivo: string
           observacao: string | null
+          observacao_coordenador: string | null
+          pendente_aprovacao_coordenador: boolean | null
           tipo_demarcacao: string | null
         }
         Insert: {
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           cor?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao: string
           espessura_cm?: number | null
           estado_conservacao?: string | null
@@ -855,11 +1156,16 @@ export type Database = {
           material?: string | null
           motivo: string
           observacao?: string | null
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           tipo_demarcacao?: string | null
         }
         Update: {
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           cor?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           espessura_cm?: number | null
           estado_conservacao?: string | null
@@ -872,6 +1178,8 @@ export type Database = {
           material?: string | null
           motivo?: string
           observacao?: string | null
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           tipo_demarcacao?: string | null
         }
         Relationships: []
@@ -887,6 +1195,7 @@ export type Database = {
           cor_pelicula_legenda_orla: string | null
           created_at: string
           data_implantacao: string | null
+          data_ultima_modificacao: string | null
           data_vistoria: string
           descricao: string | null
           detalhamento_pagina: number | null
@@ -908,6 +1217,7 @@ export type Database = {
           longitude: number | null
           lote_id: string
           modelo: string | null
+          modificado_por_intervencao: boolean | null
           numero_patrimonio: string | null
           origem: string | null
           posicao: string | null
@@ -925,6 +1235,7 @@ export type Database = {
           tipo_pelicula_legenda_orla: string | null
           tipo_secao_suporte: string | null
           uf: string | null
+          ultima_intervencao_id: string | null
           updated_at: string
           user_id: string
           velocidade: string | null
@@ -939,6 +1250,7 @@ export type Database = {
           cor_pelicula_legenda_orla?: string | null
           created_at?: string
           data_implantacao?: string | null
+          data_ultima_modificacao?: string | null
           data_vistoria: string
           descricao?: string | null
           detalhamento_pagina?: number | null
@@ -960,6 +1272,7 @@ export type Database = {
           longitude?: number | null
           lote_id: string
           modelo?: string | null
+          modificado_por_intervencao?: boolean | null
           numero_patrimonio?: string | null
           origem?: string | null
           posicao?: string | null
@@ -977,6 +1290,7 @@ export type Database = {
           tipo_pelicula_legenda_orla?: string | null
           tipo_secao_suporte?: string | null
           uf?: string | null
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id: string
           velocidade?: string | null
@@ -991,6 +1305,7 @@ export type Database = {
           cor_pelicula_legenda_orla?: string | null
           created_at?: string
           data_implantacao?: string | null
+          data_ultima_modificacao?: string | null
           data_vistoria?: string
           descricao?: string | null
           detalhamento_pagina?: number | null
@@ -1012,6 +1327,7 @@ export type Database = {
           longitude?: number | null
           lote_id?: string
           modelo?: string | null
+          modificado_por_intervencao?: boolean | null
           numero_patrimonio?: string | null
           origem?: string | null
           posicao?: string | null
@@ -1029,11 +1345,20 @@ export type Database = {
           tipo_pelicula_legenda_orla?: string | null
           tipo_secao_suporte?: string | null
           uf?: string | null
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id?: string
           velocidade?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_placa_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_placa_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_placa_danos: {
         Row: {
@@ -1076,15 +1401,65 @@ export type Database = {
           },
         ]
       }
+      ficha_placa_historico: {
+        Row: {
+          aplicado_por: string | null
+          cadastro_id: string
+          created_at: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id: string
+          intervencao_id: string
+        }
+        Insert: {
+          aplicado_por?: string | null
+          cadastro_id: string
+          created_at?: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id?: string
+          intervencao_id: string
+        }
+        Update: {
+          aplicado_por?: string | null
+          cadastro_id?: string
+          created_at?: string | null
+          dados_antes?: Json
+          dados_depois?: Json
+          id?: string
+          intervencao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_placa_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_placa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_placa_historico_intervencao_id_fkey"
+            columns: ["intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_placa_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ficha_placa_intervencoes: {
         Row: {
+          aplicado_ao_inventario: boolean | null
+          coordenador_id: string | null
           created_at: string
+          data_aprovacao_coordenador: string | null
           data_intervencao: string
           ficha_placa_id: string
           fora_plano_manutencao: boolean | null
           id: string
           justificativa_fora_plano: string | null
           motivo: string
+          observacao_coordenador: string | null
+          pendente_aprovacao_coordenador: boolean | null
           placa_recuperada: boolean | null
           retro_fundo: number | null
           retro_orla_legenda: number | null
@@ -1093,13 +1468,18 @@ export type Database = {
           tipo_pelicula_fundo_novo: string | null
         }
         Insert: {
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao: string
           ficha_placa_id: string
           fora_plano_manutencao?: boolean | null
           id?: string
           justificativa_fora_plano?: string | null
           motivo: string
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           placa_recuperada?: boolean | null
           retro_fundo?: number | null
           retro_orla_legenda?: number | null
@@ -1108,13 +1488,18 @@ export type Database = {
           tipo_pelicula_fundo_novo?: string | null
         }
         Update: {
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           ficha_placa_id?: string
           fora_plano_manutencao?: boolean | null
           id?: string
           justificativa_fora_plano?: string | null
           motivo?: string
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           placa_recuperada?: boolean | null
           retro_fundo?: number | null
           retro_orla_legenda?: number | null
@@ -1136,6 +1521,7 @@ export type Database = {
         Row: {
           altura_livre_m: number | null
           created_at: string
+          data_ultima_modificacao: string | null
           data_vistoria: string
           enviado_coordenador: boolean | null
           foto_url: string | null
@@ -1145,10 +1531,12 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           lote_id: string
+          modificado_por_intervencao: boolean | null
           origem: string | null
           rodovia_id: string
           snv: string | null
           tipo: string
+          ultima_intervencao_id: string | null
           updated_at: string
           user_id: string
           vao_horizontal_m: number | null
@@ -1156,6 +1544,7 @@ export type Database = {
         Insert: {
           altura_livre_m?: number | null
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria: string
           enviado_coordenador?: boolean | null
           foto_url?: string | null
@@ -1165,10 +1554,12 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           lote_id: string
+          modificado_por_intervencao?: boolean | null
           origem?: string | null
           rodovia_id: string
           snv?: string | null
           tipo: string
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id: string
           vao_horizontal_m?: number | null
@@ -1176,6 +1567,7 @@ export type Database = {
         Update: {
           altura_livre_m?: number | null
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria?: string
           enviado_coordenador?: boolean | null
           foto_url?: string | null
@@ -1185,20 +1577,78 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           lote_id?: string
+          modificado_por_intervencao?: boolean | null
           origem?: string | null
           rodovia_id?: string
           snv?: string | null
           tipo?: string
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id?: string
           vao_horizontal_m?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_porticos_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_porticos_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ficha_porticos_historico: {
+        Row: {
+          aplicado_por: string | null
+          cadastro_id: string
+          created_at: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id: string
+          intervencao_id: string
+        }
+        Insert: {
+          aplicado_por?: string | null
+          cadastro_id: string
+          created_at?: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id?: string
+          intervencao_id: string
+        }
+        Update: {
+          aplicado_por?: string | null
+          cadastro_id?: string
+          created_at?: string | null
+          dados_antes?: Json
+          dados_depois?: Json
+          id?: string
+          intervencao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_porticos_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_porticos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_porticos_historico_intervencao_id_fkey"
+            columns: ["intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_porticos_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_porticos_intervencoes: {
         Row: {
           altura_livre_m: number | null
+          aplicado_ao_inventario: boolean | null
+          coordenador_id: string | null
           created_at: string
+          data_aprovacao_coordenador: string | null
           data_intervencao: string
           ficha_porticos_id: string
           fora_plano_manutencao: boolean | null
@@ -1206,12 +1656,17 @@ export type Database = {
           justificativa_fora_plano: string | null
           motivo: string
           observacao: string | null
+          observacao_coordenador: string | null
+          pendente_aprovacao_coordenador: boolean | null
           tipo: string | null
           vao_horizontal_m: number | null
         }
         Insert: {
           altura_livre_m?: number | null
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao: string
           ficha_porticos_id: string
           fora_plano_manutencao?: boolean | null
@@ -1219,12 +1674,17 @@ export type Database = {
           justificativa_fora_plano?: string | null
           motivo: string
           observacao?: string | null
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           tipo?: string | null
           vao_horizontal_m?: number | null
         }
         Update: {
           altura_livre_m?: number | null
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           ficha_porticos_id?: string
           fora_plano_manutencao?: boolean | null
@@ -1232,6 +1692,8 @@ export type Database = {
           justificativa_fora_plano?: string | null
           motivo?: string
           observacao?: string | null
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           tipo?: string | null
           vao_horizontal_m?: number | null
         }
@@ -1242,6 +1704,7 @@ export type Database = {
           cor_refletivo: string | null
           corpo: string | null
           created_at: string
+          data_ultima_modificacao: string | null
           data_vistoria: string
           enviado_coordenador: boolean | null
           espacamento_m: number | null
@@ -1255,11 +1718,13 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          modificado_por_intervencao: boolean | null
           origem: string | null
           quantidade: number
           refletivo: string | null
           rodovia_id: string
           snv: string | null
+          ultima_intervencao_id: string | null
           updated_at: string
           user_id: string
         }
@@ -1267,6 +1732,7 @@ export type Database = {
           cor_refletivo?: string | null
           corpo?: string | null
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria: string
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
@@ -1280,11 +1746,13 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          modificado_por_intervencao?: boolean | null
           origem?: string | null
           quantidade?: number
           refletivo?: string | null
           rodovia_id: string
           snv?: string | null
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1292,6 +1760,7 @@ export type Database = {
           cor_refletivo?: string | null
           corpo?: string | null
           created_at?: string
+          data_ultima_modificacao?: string | null
           data_vistoria?: string
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
@@ -1305,20 +1774,78 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          modificado_por_intervencao?: boolean | null
           origem?: string | null
           quantidade?: number
           refletivo?: string | null
           rodovia_id?: string
           snv?: string | null
+          ultima_intervencao_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_tachas_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_tachas_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ficha_tachas_historico: {
+        Row: {
+          aplicado_por: string | null
+          cadastro_id: string
+          created_at: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id: string
+          intervencao_id: string
+        }
+        Insert: {
+          aplicado_por?: string | null
+          cadastro_id: string
+          created_at?: string | null
+          dados_antes: Json
+          dados_depois: Json
+          id?: string
+          intervencao_id: string
+        }
+        Update: {
+          aplicado_por?: string | null
+          cadastro_id?: string
+          created_at?: string | null
+          dados_antes?: Json
+          dados_depois?: Json
+          id?: string
+          intervencao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_tachas_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_tachas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_tachas_historico_intervencao_id_fkey"
+            columns: ["intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_tachas_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_tachas_intervencoes: {
         Row: {
+          aplicado_ao_inventario: boolean | null
+          coordenador_id: string | null
           cor: string | null
           created_at: string
+          data_aprovacao_coordenador: string | null
           data_intervencao: string
           descricao: string | null
           ficha_tachas_id: string
@@ -1330,12 +1857,17 @@ export type Database = {
           material: string | null
           motivo: string
           observacao: string | null
+          observacao_coordenador: string | null
+          pendente_aprovacao_coordenador: boolean | null
           quantidade: number | null
           tipo_tacha: string | null
         }
         Insert: {
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           cor?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao: string
           descricao?: string | null
           ficha_tachas_id: string
@@ -1347,12 +1879,17 @@ export type Database = {
           material?: string | null
           motivo: string
           observacao?: string | null
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           tipo_tacha?: string | null
         }
         Update: {
+          aplicado_ao_inventario?: boolean | null
+          coordenador_id?: string | null
           cor?: string | null
           created_at?: string
+          data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           descricao?: string | null
           ficha_tachas_id?: string
@@ -1364,6 +1901,8 @@ export type Database = {
           material?: string | null
           motivo?: string
           observacao?: string | null
+          observacao_coordenador?: string | null
+          pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           tipo_tacha?: string | null
         }
@@ -4029,6 +4568,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aplicar_intervencao_placa: {
+        Args: { p_coordenador_id: string; p_intervencao_id: string }
+        Returns: undefined
+      }
+      aplicar_intervencao_portico: {
+        Args: { p_coordenador_id: string; p_intervencao_id: string }
+        Returns: undefined
+      }
       coordinator_has_lot_access: {
         Args: { _lote_id: string; _user_id: string }
         Returns: boolean
