@@ -27,7 +27,7 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
   const [isCapturingInicial, setIsCapturingInicial] = useState(false);
   const [isCapturingFinal, setIsCapturingFinal] = useState(false);
   const [formData, setFormData] = useState({
-    data_vistoria: new Date().toISOString().split('T')[0],
+    data_inspecao: new Date().toISOString().split('T')[0],
     br: "",
     snv: "",
     tramo: "",
@@ -145,7 +145,7 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
           user_id: user.id,
           lote_id: loteId,
           rodovia_id: rodoviaId,
-          data_vistoria: formData.data_vistoria,
+          data_inspecao: formData.data_inspecao,
           br: formData.br || null,
           snv: formData.snv || null,
           tramo: formData.tramo || null,
@@ -193,7 +193,7 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
 
       // Reset form
       setFormData({
-        data_vistoria: new Date().toISOString().split('T')[0],
+        data_inspecao: new Date().toISOString().split('T')[0],
         br: "",
         snv: "",
         tramo: "",
@@ -255,13 +255,13 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="data_vistoria">Data da Vistoria *</Label>
+              <Label htmlFor="data_inspecao">Data da Inspeção *</Label>
               <Input
-                id="data_vistoria"
+                id="data_inspecao"
                 type="date"
-                value={formData.data_vistoria}
+                value={formData.data_inspecao}
                 onChange={(e) =>
-                  setFormData({ ...formData, data_vistoria: e.target.value })
+                  setFormData({ ...formData, data_inspecao: e.target.value })
                 }
                 required
               />

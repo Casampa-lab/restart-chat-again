@@ -77,11 +77,17 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
       lote_id: elemento.lote_id,
       rodovia_id: elemento.rodovia_id,
       origem: 'necessidade_campo',
-      data_vistoria: new Date().toISOString().split('T')[0],
       // Mapear campos específicos de placas
       ...(elemento.tipo_elemento === 'placas' && codigo_placa ? { codigo: codigo_placa } : {}),
-      ...(elemento.tipo_elemento === 'placas' && km_referencia ? { km: parseFloat(km_referencia) } : {})
+      ...(elemento.tipo_elemento === 'placas' && km_referencia ? { km: parseFloat(km_referencia) } : {}),
     };
+
+    // Adicionar campo de data conforme tipo de elemento
+    if (elemento.tipo_elemento === 'defensas') {
+      dadosInventario.data_inspecao = new Date().toISOString().split('T')[0];
+    } else {
+      dadosInventario.data_vistoria = new Date().toISOString().split('T')[0];
+    }
 
     // 3. Criar no inventário apropriado usando query builder dinâmica
     const { data: novoItem, error: insertError } = await supabase

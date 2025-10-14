@@ -167,7 +167,7 @@ export type Database = {
           classificacao_nivel_contencao: string | null
           comprimento_total_tramo_m: number | null
           created_at: string
-          data_vistoria: string
+          data_inspecao: string
           distancia_bordo_pista_face_defensa_m: number | null
           distancia_face_defensa_obstaculo_m: number | null
           distancia_pista_obstaculo_m: number | null
@@ -214,7 +214,7 @@ export type Database = {
           classificacao_nivel_contencao?: string | null
           comprimento_total_tramo_m?: number | null
           created_at?: string
-          data_vistoria: string
+          data_inspecao: string
           distancia_bordo_pista_face_defensa_m?: number | null
           distancia_face_defensa_obstaculo_m?: number | null
           distancia_pista_obstaculo_m?: number | null
@@ -261,7 +261,7 @@ export type Database = {
           classificacao_nivel_contencao?: string | null
           comprimento_total_tramo_m?: number | null
           created_at?: string
-          data_vistoria?: string
+          data_inspecao?: string
           distancia_bordo_pista_face_defensa_m?: number | null
           distancia_face_defensa_obstaculo_m?: number | null
           distancia_pista_obstaculo_m?: number | null

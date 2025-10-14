@@ -502,12 +502,12 @@ export function InventarioImporterManager() {
                   const year = dateStr.substring(0, 4);
                   const month = dateStr.substring(4, 6);
                   const day = dateStr.substring(6, 8);
-                  record.data_vistoria = `${year}-${month}-${day}`;
+                  record.data_inspecao = `${year}-${month}-${day}`;
                 } else {
                   // Formato DD-MM-YYYY ou DD_MM_YYYY
                   const parts = dateStr.split(/[-_]/);
                   if (parts.length === 3) {
-                    record.data_vistoria = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    record.data_inspecao = `${parts[2]}-${parts[1]}-${parts[0]}`;
                   }
                 }
               }
@@ -606,8 +606,8 @@ export function InventarioImporterManager() {
           record.distancia_bordo_pista_face_defensa_m = getVal("Distância da linha de bordo da pista à face da defensa (m)", "Distancia da linha de bordo da pista a face da defensa m");
           record.link_fotografia = getVal("Link da Fotografia", "Link da Fotografia", "link_fotografia");
           
-          if (!record.data_vistoria) {
-            record.data_vistoria = new Date().toISOString().split('T')[0];
+          if (!record.data_inspecao) {
+            record.data_inspecao = new Date().toISOString().split('T')[0];
           }
           record.necessita_intervencao = false;
         }
