@@ -32,12 +32,7 @@ export default function ElementosPendentes() {
       const startTime = Date.now();
       let query = supabase
         .from("elementos_pendentes_aprovacao")
-        .select(`
-          *,
-          user_profile:profiles!elementos_pendentes_aprovacao_user_id_fkey(nome, email),
-          rodovia:rodovias!elementos_pendentes_aprovacao_rodovia_id_fkey(nome),
-          lote:lotes!elementos_pendentes_aprovacao_lote_id_fkey(numero)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (filtroStatus !== "todos") {
@@ -50,21 +45,50 @@ export default function ElementosPendentes() {
 
       const { data, error } = await query;
       
-      console.log('📊 Query result:', { 
-        hasError: !!error, 
-        errorMessage: error?.message,
-        errorDetails: error?.details,
-        errorHint: error?.hint,
-        dataLength: data?.length,
-        data: data 
-      });
-      
       if (error) {
         console.error('❌ Erro na query:', error);
         throw error;
       }
+
+      // Buscar dados relacionados para cada elemento
+      if (data && data.length > 0) {
+        const enrichedData = await Promise.all(
+          data.map(async (elemento) => {
+            // Buscar perfil do usuário
+            const { data: userProfile } = await supabase
+              .from("profiles")
+              .select("nome, email")
+              .eq("id", elemento.user_id)
+              .single();
+
+            // Buscar rodovia
+            const { data: rodovia } = await supabase
+              .from("rodovias")
+              .select("nome")
+              .eq("id", elemento.rodovia_id)
+              .single();
+
+            // Buscar lote
+            const { data: lote } = await supabase
+              .from("lotes")
+              .select("numero")
+              .eq("id", elemento.lote_id)
+              .single();
+
+            return {
+              ...elemento,
+              user_profile: userProfile,
+              rodovia,
+              lote
+            };
+          })
+        );
+
+        console.log(`✅ ${enrichedData.length} elementos encontrados em ${Date.now() - startTime}ms`);
+        setLastUpdate(new Date());
+        return enrichedData;
+      }
       
-      console.log(`✅ ${data?.length || 0} elementos encontrados em ${Date.now() - startTime}ms`);
       setLastUpdate(new Date());
       return data;
     },

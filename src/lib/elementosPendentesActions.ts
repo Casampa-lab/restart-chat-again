@@ -58,12 +58,29 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
     
     // 2. Preparar dados para inserção
     const dadosElemento = elemento.dados_elemento as any;
+    
+    // Remover campos que não existem na tabela de destino
+    const { 
+      codigo_placa, 
+      km_referencia, 
+      motivo,
+      data_intervencao,
+      placa_recuperada,
+      fora_plano_manutencao,
+      justificativa_fora_plano,
+      ...dadosLimpos 
+    } = dadosElemento;
+
     const dadosInventario: any = {
-      ...dadosElemento,
+      ...dadosLimpos,
       user_id: elemento.user_id,
       lote_id: elemento.lote_id,
       rodovia_id: elemento.rodovia_id,
-      origem: 'necessidade_campo'
+      origem: 'necessidade_campo',
+      // Mapear campos específicos de placas
+      ...(elemento.tipo_elemento === 'placas' && codigo_placa ? { codigo: codigo_placa } : {}),
+      ...(elemento.tipo_elemento === 'placas' && km_referencia ? { km: parseFloat(km_referencia) } : {}),
+      data_vistoria: new Date().toISOString().split('T')[0]
     };
 
     // 3. Criar no inventário apropriado usando query builder dinâmica
