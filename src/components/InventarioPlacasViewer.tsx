@@ -484,11 +484,20 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("data_vistoria")}
+                        onClick={() => handleSort("tipo_pelicula_fundo")}
                       >
                         <div className="whitespace-normal leading-tight flex items-center justify-center">
-                          Data<br/>Vistoria
-                          <SortIcon column="data_vistoria" />
+                          Tipo<br/>(película fundo)
+                          <SortIcon column="tipo_pelicula_fundo" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("tipo_pelicula_legenda_orla")}
+                      >
+                        <div className="whitespace-normal leading-tight flex items-center justify-center">
+                          Tipo<br/>(película legenda/orla)
+                          <SortIcon column="tipo_pelicula_legenda_orla" />
                         </div>
                       </TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -546,12 +555,17 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                               </Badge>
                             </TableCell>
                           )}
-                          <TableCell>
-                          {placa.data_vistoria
-                            ? new Date(placa.data_vistoria).toLocaleDateString("pt-BR")
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="text-xs">
+                              {placa.tipo_pelicula_fundo || "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="text-xs">
+                              {placa.tipo_pelicula_legenda_orla || "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
                           <Button
                             variant="ghost"
                             size="sm"
