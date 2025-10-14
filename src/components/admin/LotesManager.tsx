@@ -63,7 +63,8 @@ const LotesManager = () => {
     responsavel_executora: "",
     email_executora: "",
     nome_fiscal_execucao: "",
-    email_fiscal_execucao: ""
+    email_fiscal_execucao: "",
+    tolerancia_match_metros: "50"
   });
   const [novaRodovia, setNovaRodovia] = useState({
     rodovia_id: "",
@@ -152,7 +153,8 @@ const LotesManager = () => {
         responsavel_executora: formData.responsavel_executora || null,
         email_executora: formData.email_executora || null,
         nome_fiscal_execucao: formData.nome_fiscal_execucao || null,
-        email_fiscal_execucao: formData.email_fiscal_execucao || null
+        email_fiscal_execucao: formData.email_fiscal_execucao || null,
+        tolerancia_match_metros: formData.tolerancia_match_metros ? parseInt(formData.tolerancia_match_metros) : 50
       }).select().single();
       if (loteError) throw loteError;
 
@@ -179,7 +181,8 @@ const LotesManager = () => {
         responsavel_executora: "",
         email_executora: "",
         nome_fiscal_execucao: "",
-        email_fiscal_execucao: ""
+        email_fiscal_execucao: "",
+        tolerancia_match_metros: "50"
       });
       setRodoviasVinculadas([]);
       loadData();
@@ -193,13 +196,13 @@ const LotesManager = () => {
     setEditingLote(lote.id);
     setFormData({
       numero: lote.numero,
-      empresa_id: lote.id,
-      // Will need to fetch empresa_id
+      empresa_id: lote.empresa_id || lote.id,
       contrato: lote.contrato || "",
       responsavel_executora: lote.responsavel_executora || "",
       email_executora: lote.email_executora || "",
       nome_fiscal_execucao: lote.nome_fiscal_execucao || "",
-      email_fiscal_execucao: lote.email_fiscal_execucao || ""
+      email_fiscal_execucao: lote.email_fiscal_execucao || "",
+      tolerancia_match_metros: lote.tolerancia_match_metros?.toString() || "50"
     });
 
     // Carregar rodovias vinculadas ao lote
@@ -241,7 +244,8 @@ const LotesManager = () => {
         responsavel_executora: formData.responsavel_executora || null,
         email_executora: formData.email_executora || null,
         nome_fiscal_execucao: formData.nome_fiscal_execucao || null,
-        email_fiscal_execucao: formData.email_fiscal_execucao || null
+        email_fiscal_execucao: formData.email_fiscal_execucao || null,
+        tolerancia_match_metros: formData.tolerancia_match_metros ? parseInt(formData.tolerancia_match_metros) : 50
       }).eq("id", editingLote);
       if (loteError) throw loteError;
 
@@ -275,7 +279,8 @@ const LotesManager = () => {
         responsavel_executora: "",
         email_executora: "",
         nome_fiscal_execucao: "",
-        email_fiscal_execucao: ""
+        email_fiscal_execucao: "",
+        tolerancia_match_metros: "50"
       });
       setRodoviasVinculadas([]);
       loadData();
@@ -377,6 +382,32 @@ const LotesManager = () => {
                 email_fiscal_execucao: e.target.value
               })} placeholder="email@fiscal.com" />
               </div>
+            </div>
+
+            {/* Configuração de Tolerância de Match */}
+            <div className="space-y-2 border-t pt-4">
+              <Label htmlFor="tolerancia_match">
+                Tolerância de Match GPS (metros)
+                <span className="text-xs text-muted-foreground ml-2">
+                  (Distância máxima para considerar match automático entre necessidades e cadastro)
+                </span>
+              </Label>
+              <Input
+                id="tolerancia_match"
+                type="number"
+                min="10"
+                max="500"
+                step="5"
+                value={formData.tolerancia_match_metros}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  tolerancia_match_metros: e.target.value
+                })}
+                placeholder="50"
+              />
+              <p className="text-xs text-muted-foreground">
+                Padrão: 50m. Valores entre 10m e 500m. Esta configuração afeta como o sistema vincula automaticamente as necessidades importadas aos elementos cadastrados.
+              </p>
             </div>
 
             {/* Adicionar rodovias */}

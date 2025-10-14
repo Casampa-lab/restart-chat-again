@@ -425,21 +425,30 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("codigo")}
                       >
-                        <div className="flex items-center">
-                          Código da placa
+                        <div className="whitespace-normal leading-tight flex items-center justify-center">
+                          Código<br/>Placa
                           <SortIcon column="codigo" />
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("tipo")}
                       >
-                        <div className="flex items-center">
-                          Tipo de placa
+                        <div className="whitespace-normal leading-tight flex items-center justify-center">
+                          Tipo<br/>Placa
                           <SortIcon column="tipo" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("suporte")}
+                      >
+                        <div className="whitespace-normal leading-tight flex items-center justify-center">
+                          Tipo de<br/>Suporte
+                          <SortIcon column="suporte" />
                         </div>
                       </TableHead>
                       <TableHead 
@@ -462,12 +471,12 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       </TableHead>
                       <TableHead className="text-center">Projeto</TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
-                      <TableHead
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("data_vistoria")}
                       >
-                        <div className="flex items-center">
-                          Data Vistoria
+                        <div className="whitespace-normal leading-tight flex items-center justify-center">
+                          Data<br/>Vistoria
                           <SortIcon column="data_vistoria" />
                         </div>
                       </TableHead>
@@ -484,6 +493,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <TableCell>{placa.codigo || "-"}</TableCell>
                           <TableCell>
                             <Badge variant="outline">{placa.tipo || "-"}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{placa.suporte || "-"}</Badge>
                           </TableCell>
                           <TableCell>{placa.km?.toFixed(2) || "-"}</TableCell>
                           <TableCell>{placa.lado || "-"}</TableCell>

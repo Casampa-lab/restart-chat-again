@@ -20,6 +20,7 @@ const RodoviasManager = () => {
   const [formData, setFormData] = useState({
     codigo: "",
     uf: "",
+    tolerancia_match_metros: "50",
   });
 
   useEffect(() => {
@@ -48,12 +49,13 @@ const RodoviasManager = () => {
       const { error } = await supabase.from("rodovias").insert({
         codigo: formData.codigo,
         uf: formData.uf || null,
+        tolerancia_match_metros: formData.tolerancia_match_metros ? parseInt(formData.tolerancia_match_metros) : 50,
       });
 
       if (error) throw error;
 
       toast.success("Rodovia cadastrada com sucesso!");
-      setFormData({ codigo: "", uf: "" });
+      setFormData({ codigo: "", uf: "", tolerancia_match_metros: "50" });
       loadRodovias();
     } catch (error: any) {
       toast.error("Erro ao cadastrar rodovia: " + error.message);
@@ -108,6 +110,25 @@ const RodoviasManager = () => {
                   onChange={(e) => setFormData({ ...formData, uf: e.target.value })}
                   placeholder="Ex: MG"
                   maxLength={2}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tolerancia_match_rodovia">
+                  Tolerância Match GPS (m)
+                  <span className="text-xs text-muted-foreground ml-2">
+                    (Fallback se lote não especificar)
+                  </span>
+                </Label>
+                <Input
+                  id="tolerancia_match_rodovia"
+                  type="number"
+                  min="10"
+                  max="500"
+                  step="5"
+                  value={formData.tolerancia_match_metros}
+                  onChange={(e) => setFormData({ ...formData, tolerancia_match_metros: e.target.value })}
+                  placeholder="50"
                 />
               </div>
             </div>
