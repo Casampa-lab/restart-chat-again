@@ -561,7 +561,6 @@ export function InventarioImporterManager() {
           record.tramo = getVal("Tramo", "tramo", "Tr") || "";
           record.lado = getVal("Lado", "lado") || "";
           record.tipo_defensa = "Simples";
-          record.estado_conservacao = getVal("Estado de Conservação", "Estado de Conservacao", "estado_conservacao") || "";
           
           // Localização
           const kmIni = getVal("Km Inicial", "Km inicial", "km_inicial", "km inicial");
@@ -690,7 +689,6 @@ export function InventarioImporterManager() {
           if (area && area !== "-") observacoes.push(`Área: ${area}m²`);
           
           record.observacao = observacoes.length > 0 ? observacoes.join(" | ") : null;
-          record.estado_conservacao = "Bom";
           record.espessura_cm = null;
           record.data_vistoria = new Date().toISOString().split('T')[0];
         }
@@ -897,7 +895,6 @@ export function InventarioImporterManager() {
           if (snv) obs.push(`SNV: ${snv}`);
           record.observacao = obs.length > 0 ? obs.join(" | ") : null;
           
-          record.estado_conservacao = "Bom";
           record.data_vistoria = new Date().toISOString().split('T')[0];
         }
 
@@ -1006,7 +1003,6 @@ export function InventarioImporterManager() {
           if (linkFoto) obs.push(`Link: ${linkFoto}`);
           record.observacao = obs.length > 0 ? obs.join(" | ") : null;
           
-          record.estado_conservacao = "Bom";
           record.data_vistoria = new Date().toISOString().split('T')[0];
         }
 
