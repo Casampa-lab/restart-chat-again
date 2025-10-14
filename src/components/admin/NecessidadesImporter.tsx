@@ -479,7 +479,22 @@ export function NecessidadesImporter() {
               if (cadLat !== null && cadLong !== null) {
                 const dist = calcularDistancia(lat, long, cadLat, cadLong);
                 
-                if (dist < menorDistancia && dist <= tolerancia) {
+                // Para placas, validar também o lado da rodovia
+                let ladoValido = true;
+                if (tipo === "placas" && dados.lado && cad.lado) {
+                  const ladoNecessidade = String(dados.lado).toUpperCase().trim();
+                  const ladoCadastro = String(cad.lado).toUpperCase().trim();
+                  // Normalizar variações: D/Direito, E/Esquerdo, C/Centro, etc.
+                  const normalizarLado = (l: string) => {
+                    if (l.startsWith('D')) return 'D';
+                    if (l.startsWith('E')) return 'E';
+                    if (l.startsWith('C')) return 'C';
+                    return l;
+                  };
+                  ladoValido = normalizarLado(ladoNecessidade) === normalizarLado(ladoCadastro);
+                }
+                
+                if (dist < menorDistancia && dist <= tolerancia && ladoValido) {
                   menorDistancia = dist;
                   cadastroMaisProximo = cad;
                 }
@@ -490,10 +505,14 @@ export function NecessidadesImporter() {
               match = cadastroMaisProximo.id;
               distancia = Math.round(menorDistancia);
               if (i % 50 === 0) { // Log a cada 50 linhas para não sobrecarregar
-                console.log(`✅ Processando linha ${linhaExcel}: Match encontrado! distancia=${distancia}m [${i+1}/${total}]`);
+                const ladoInfo = tipo === "placas" && dados.lado && cadastroMaisProximo.lado 
+                  ? ` lado=${dados.lado}/${cadastroMaisProximo.lado}`
+                  : '';
+                console.log(`✅ Processando linha ${linhaExcel}: Match encontrado! distancia=${distancia}m${ladoInfo} [${i+1}/${total}]`);
               }
             } else if (i % 50 === 0) {
-              console.log(`⚠️ Processando linha ${linhaExcel}: Sem match dentro de 50m [${i+1}/${total}]`);
+              const ladoInfo = tipo === "placas" && dados.lado ? ` (lado=${dados.lado})` : '';
+              console.log(`⚠️ Processando linha ${linhaExcel}: Sem match dentro de ${tolerancia}m${ladoInfo} [${i+1}/${total}]`);
             }
           } else if (!lat || !long) {
             if (i % 50 === 0) {
