@@ -10,6 +10,7 @@ const corsHeaders = {
 // Mapeamento de tipos para tabelas
 const INVENTORY_TABLES: Record<string, string> = {
   placas: "ficha_placa",
+  necessidades_placas: "necessidades_placas",
   marcas_longitudinais: "ficha_marcas_longitudinais",
   cilindros: "intervencoes_cilindros",
   inscricoes: "ficha_inscricoes",
@@ -217,6 +218,20 @@ serve(async (req) => {
 
     // Mapeamento de campos do Excel para campos da tabela
     const FIELD_MAPPINGS: Record<string, Record<string, string>> = {
+      necessidades_placas: {
+        "código": "codigo",
+        "tipo": "tipo",
+        "dimensões_(mm)": "dimensoes_mm",
+        "km": "km",
+        "lado": "lado",
+        "latitude": "latitude",
+        "longitude": "longitude",
+        "motivo": "motivo",
+        "observação": "observacao",
+        "snv": "snv",
+        "data": "data_necessidade",
+        "br": "",
+      },
       ficha_marcas_longitudinais: {
         "largura_da_faixa_(m)": "largura_cm",
         "extensão_(km)": "extensao_metros",
@@ -285,6 +300,11 @@ serve(async (req) => {
 
     // Campos válidos por tabela (baseado no schema)
     const VALID_FIELDS: Record<string, string[]> = {
+      necessidades_placas: [
+        "codigo", "tipo", "dimensoes_mm", "km", "lado", "latitude", "longitude",
+        "motivo", "observacao", "snv", "data_necessidade", "estado_conservacao",
+        "divergencia_identificada", "cadastro_id"
+      ],
       ficha_marcas_longitudinais: [
         "codigo", "posicao", "cor", "data_vistoria", "espessura_cm",
         "extensao_metros", "foto_url", "km_final", "km_inicial",
@@ -370,7 +390,10 @@ serve(async (req) => {
       };
       
       // Adicionar campos obrigatórios com valores padrão específicos por tabela
-      if (tableName === "ficha_inscricoes") {
+      if (tableName === "necessidades_placas") {
+        record.motivo = record.motivo || "Substituição";
+        record.data_necessidade = record.data_necessidade || "2023-01-01";
+      } else if (tableName === "ficha_inscricoes") {
         record.tipo_inscricao = "Outros";
         record.cor = "Branca";
       } else if (tableName === "intervencoes_cilindros") {
