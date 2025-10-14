@@ -162,6 +162,20 @@ export function InventarioPorticosViewer({
     }
   };
 
+  const getTipoBadgeColor = (tipo: string) => {
+    const tipoLower = tipo.toLowerCase();
+    if (tipoLower.includes("pórtico") && !tipoLower.includes("semi")) {
+      return "bg-blue-100 text-blue-800 border-blue-300";
+    }
+    if (tipoLower.includes("semi")) {
+      return "bg-purple-100 text-purple-800 border-purple-300";
+    }
+    if (tipoLower.includes("braço")) {
+      return "bg-orange-100 text-orange-800 border-orange-300";
+    }
+    return "bg-gray-100 text-gray-800 border-gray-300";
+  };
+
   const handleViewDetails = async (portico: FichaPortico) => {
     setSelectedPortico(portico);
     await loadIntervencoes(portico.id);
@@ -259,66 +273,64 @@ export function InventarioPorticosViewer({
                 <TableHeader>
                   <TableRow>
                     <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50"
+                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
                       onClick={() => handleSort("snv")}
                     >
-                      <div className="flex items-center">
+                      <div className="whitespace-normal leading-tight flex items-center justify-center">
                         SNV
                         <SortIcon column="snv" />
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50"
+                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
                       onClick={() => handleSort("km")}
                     >
-                      <div className="flex items-center">
+                      <div className="whitespace-normal leading-tight flex items-center justify-center">
                         Km
                         <SortIcon column="km" />
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50"
+                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
                       onClick={() => handleSort("tipo")}
                     >
-                      <div className="flex items-center">
+                      <div className="whitespace-normal leading-tight flex items-center justify-center">
                         Tipo
                         <SortIcon column="tipo" />
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50"
-                      onClick={() => handleSort("altura_livre_m")}
-                    >
-                      <div className="flex items-center">
-                        Altura Livre (m)
-                        <SortIcon column="altura_livre_m" />
-                      </div>
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50"
-                      onClick={() => handleSort("vao_horizontal_m")}
-                    >
-                      <div className="flex items-center">
-                        Vão Horizontal
-                        <SortIcon column="vao_horizontal_m" />
-                      </div>
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50"
+                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
                       onClick={() => handleSort("lado")}
                     >
-                      <div className="flex items-center">
+                      <div className="whitespace-normal leading-tight flex items-center justify-center">
                         Lado
                         <SortIcon column="lado" />
                       </div>
                     </TableHead>
+                    {searchLat && searchLng && (
+                      <TableHead className="text-center">
+                        <div className="whitespace-normal leading-tight">
+                          Distância
+                        </div>
+                      </TableHead>
+                    )}
                     <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50"
-                      onClick={() => handleSort("data_vistoria")}
+                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                      onClick={() => handleSort("altura_livre_m")}
                     >
-                      <div className="flex items-center">
-                        Data Vistoria
-                        <SortIcon column="data_vistoria" />
+                      <div className="whitespace-normal leading-tight flex items-center justify-center">
+                        Altura Livre<br/>(m)
+                        <SortIcon column="altura_livre_m" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                      onClick={() => handleSort("vao_horizontal_m")}
+                    >
+                      <div className="whitespace-normal leading-tight flex items-center justify-center">
+                        Vão<br/>Horizontal (m)
+                        <SortIcon column="vao_horizontal_m" />
                       </div>
                     </TableHead>
                     <TableHead className="text-right">Ações</TableHead>
@@ -327,35 +339,58 @@ export function InventarioPorticosViewer({
                 <TableBody>
                   {sortedPorticos.map((portico) => (
                     <TableRow key={portico.id}>
-                      <TableCell className="font-mono text-sm">{portico.snv || "-"}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
+                      <TableCell className="font-mono text-sm text-center">
+                        {portico.snv || "-"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-1">
                           <MapPin className="h-3 w-3 text-muted-foreground" />
                           <span className="font-mono text-sm">
                             {portico.km?.toFixed(3) || "-"}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{portico.tipo}</Badge>
+                      <TableCell className="text-center">
+                        <Badge 
+                          variant="outline" 
+                          className={getTipoBadgeColor(portico.tipo)}
+                        >
+                          {portico.tipo}
+                        </Badge>
                       </TableCell>
-                      <TableCell>{portico.altura_livre_m?.toFixed(2) || "-"}</TableCell>
-                      <TableCell>{portico.vao_horizontal_m?.toFixed(2) || "-"}</TableCell>
-                      <TableCell>{portico.lado || "-"}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(portico.data_vistoria).toLocaleDateString("pt-BR")}
-                        </div>
+                      <TableCell className="text-center">
+                        {portico.lado || "-"}
+                      </TableCell>
+                      {searchLat && searchLng && (
+                        <TableCell className="text-center">
+                          {(portico as any).distance !== undefined ? (
+                            <Badge variant="outline" className="text-xs">
+                              {Math.round((portico as any).distance)}m
+                            </Badge>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                      )}
+                      <TableCell className="text-center">
+                        <Badge variant="outline" className="text-xs">
+                          {portico.altura_livre_m?.toFixed(2) || "-"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline" className="text-xs">
+                          {portico.vao_horizontal_m?.toFixed(2) || "-"}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
-                          size="icon"
+                          size="sm"
                           onClick={() => handleViewDetails(portico)}
-                          className="h-8 w-8"
+                          className="gap-2"
                         >
                           <Eye className="h-4 w-4" />
+                          Ver Detalhes
                         </Button>
                       </TableCell>
                     </TableRow>
