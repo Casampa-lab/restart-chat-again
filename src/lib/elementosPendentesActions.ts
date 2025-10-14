@@ -72,6 +72,8 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
       
       // Campos de formulário que não existem nas tabelas
       pelicula,        // Será mapeado para tipo_pelicula_fundo
+      retro_fundo,     // Será mapeado para retro_pelicula_fundo (se vier dos forms antigos)
+      retro_orla_legenda, // Será mapeado para retro_pelicula_legenda_orla (se vier dos forms antigos)
       tipo_placa,      // Usado apenas para filtro, não existe na tabela
       
       ...dadosLimpos 
@@ -88,6 +90,10 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
       // Mapeamentos específicos de placas
       ...(elemento.tipo_elemento === 'placas' && codigo_placa ? { codigo: codigo_placa } : {}),
       ...(elemento.tipo_elemento === 'placas' && km_referencia ? { km: parseFloat(km_referencia) } : {}),
+      // Mapear nomes antigos para os corretos (suporte a dados antigos)
+      ...(elemento.tipo_elemento === 'placas' && pelicula ? { tipo_pelicula_fundo: pelicula } : {}),
+      ...(elemento.tipo_elemento === 'placas' && retro_fundo ? { retro_pelicula_fundo: parseFloat(String(retro_fundo)) } : {}),
+      ...(elemento.tipo_elemento === 'placas' && retro_orla_legenda ? { retro_pelicula_legenda_orla: parseFloat(String(retro_orla_legenda)) } : {}),
       ...(elemento.tipo_elemento === 'placas' && pelicula ? { tipo_pelicula_fundo: pelicula } : {}),
     };
 

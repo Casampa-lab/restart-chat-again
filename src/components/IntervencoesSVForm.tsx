@@ -17,9 +17,9 @@ const formSchema = z.object({
   motivo: z.string().min(1, "Motivo é obrigatório"),
   suporte: z.string().optional(),
   substrato: z.string().optional(),
-  pelicula: z.string().optional(),
-  retro_fundo: z.string().optional(),
-  retro_orla_legenda: z.string().optional(),
+  tipo_pelicula_fundo: z.string().optional(),
+  retro_pelicula_fundo: z.string().optional(),
+  retro_pelicula_legenda_orla: z.string().optional(),
   placa_recuperada: z.boolean().default(false),
   fora_plano_manutencao: z.boolean().default(false),
   justificativa_fora_plano: z.string().optional(),
@@ -86,11 +86,11 @@ export function IntervencoesSVForm({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       motivo: "",
-      suporte: "",
-      substrato: "",
-      pelicula: "",
-      retro_fundo: "",
-      retro_orla_legenda: "",
+    suporte: "",
+    substrato: "",
+    tipo_pelicula_fundo: "",
+    retro_pelicula_fundo: "",
+    retro_pelicula_legenda_orla: "",
       placa_recuperada: false,
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
@@ -153,7 +153,7 @@ export function IntervencoesSVForm({
         
         if (data.suporte) updateData.suporte = data.suporte;
         if (data.substrato) updateData.substrato = data.substrato;
-        if (data.pelicula) updateData.pelicula = data.pelicula;
+        if (data.tipo_pelicula_fundo) updateData.tipo_pelicula_fundo = data.tipo_pelicula_fundo;
         
         if (Object.keys(updateData).length > 0) {
           const { error: updateError } = await supabase
@@ -182,7 +182,7 @@ export function IntervencoesSVForm({
             longitude: data.longitude ? parseFloat(data.longitude) : null,
             suporte: data.suporte || null,
             substrato: data.substrato || null,
-            pelicula: data.pelicula || null,
+            tipo_pelicula_fundo: data.tipo_pelicula_fundo || null,
             data_vistoria: data.data_intervencao,
           })
           .select()
@@ -208,9 +208,9 @@ export function IntervencoesSVForm({
           motivo: data.motivo,
           suporte: data.suporte || null,
           substrato: data.substrato || null,
-          pelicula: data.pelicula || null,
-          retro_fundo: data.retro_fundo ? parseFloat(data.retro_fundo) : null,
-          retro_orla_legenda: data.retro_orla_legenda ? parseFloat(data.retro_orla_legenda) : null,
+          tipo_pelicula_fundo_novo: data.tipo_pelicula_fundo || null,
+          retro_fundo: data.retro_pelicula_fundo ? parseFloat(data.retro_pelicula_fundo) : null,
+          retro_orla_legenda: data.retro_pelicula_legenda_orla ? parseFloat(data.retro_pelicula_legenda_orla) : null,
           placa_recuperada: data.placa_recuperada,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
@@ -409,10 +409,10 @@ export function IntervencoesSVForm({
 
               <FormField
                 control={form.control}
-                name="pelicula"
+                name="tipo_pelicula_fundo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tipo de Película</FormLabel>
+                    <FormLabel>Tipo de Película Fundo</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -433,10 +433,10 @@ export function IntervencoesSVForm({
 
               <FormField
                 control={form.control}
-                name="retro_fundo"
+                name="retro_pelicula_fundo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Retrorefletividade Fundo (cd/lx/m²)</FormLabel>
+                    <FormLabel>Retrorefletividade Película Fundo (cd/lx/m²)</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.1" placeholder="0.0" {...field} />
                     </FormControl>
@@ -447,10 +447,10 @@ export function IntervencoesSVForm({
 
               <FormField
                 control={form.control}
-                name="retro_orla_legenda"
+                name="retro_pelicula_legenda_orla"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Retrorefletividade Orla/Legenda (cd/lx/m²)</FormLabel>
+                    <FormLabel>Retrorefletividade Película Legenda/Orla (cd/lx/m²)</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.1" placeholder="0.0" {...field} />
                     </FormControl>
