@@ -412,18 +412,16 @@ export function NecessidadesImporter() {
         return R * c;
       };
 
-      // Buscar tolerância configurável antes do loop
-      const { data: loteData } = await supabase
-        .from('lotes')
-        .select('tolerancia_match_metros, rodovias(tolerancia_match_metros)')
-        .eq('id', loteId)
+      // Buscar tolerância da rodovia selecionada
+      const { data: rodoviaData } = await supabase
+        .from('rodovias')
+        .select('tolerancia_match_metros')
+        .eq('id', rodoviaId)
         .single();
       
-      const tolerancia = loteData?.tolerancia_match_metros || 
-                       (loteData?.rodovias as any)?.tolerancia_match_metros || 
-                       50;
+      const tolerancia = rodoviaData?.tolerancia_match_metros || 50;
       
-      console.log(`🎯 Usando tolerância de match: ${tolerancia}m`);
+      console.log(`🎯 Usando tolerância de match: ${tolerancia}m (rodovia ID: ${rodoviaId})`);
 
       // 4. Processar cada linha
       const total = dadosFiltrados.length;
@@ -708,6 +706,16 @@ export function NecessidadesImporter() {
             </SelectContent>
           </Select>
         </div>
+
+        {/* Alert informativo sobre tolerância */}
+        {rodoviaId && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Esta importação usará a tolerância de match GPS configurada na rodovia selecionada (padrão: 50m se não configurada).
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Upload de arquivo */}
         <div className="space-y-2">
