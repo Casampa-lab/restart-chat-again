@@ -80,8 +80,14 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
       // Mapear campos específicos de placas
       ...(elemento.tipo_elemento === 'placas' && codigo_placa ? { codigo: codigo_placa } : {}),
       ...(elemento.tipo_elemento === 'placas' && km_referencia ? { km: parseFloat(km_referencia) } : {}),
-      data_vistoria: new Date().toISOString().split('T')[0]
     };
+
+    // Adicionar campo de data conforme tipo de elemento
+    if (elemento.tipo_elemento === 'defensas') {
+      dadosInventario.data_inspecao = new Date().toISOString().split('T')[0];
+    } else {
+      dadosInventario.data_vistoria = new Date().toISOString().split('T')[0];
+    }
 
     // 3. Criar no inventário apropriado usando query builder dinâmica
     const { data: novoItem, error: insertError } = await supabase
@@ -174,21 +180,24 @@ export async function rejeitarElemento(elementoId: string, observacao: string) {
     
     const dadosElemento = elemento.dados_elemento as any;
     const ncData: any = {
-      numero_registro: ncNumber,
+      numero_nc: ncNumber,
       user_id: elemento.user_id,
       rodovia_id: elemento.rodovia_id,
       lote_id: elemento.lote_id,
-      tipo: tipoNC,
-      problema: 'Item Implantado Fora do Projeto',
-      descricao: `Elemento não cadastrado rejeitado pelo coordenador.\n\nJustificativa do técnico: ${elemento.justificativa}\n\nMotivo da rejeição: ${observacao}`,
+      tipo_nc: tipoNC,
+      problema_identificado: 'Item Implantado Fora do Projeto',
+      descricao_problema: `Elemento não cadastrado rejeitado pelo coordenador.\n\nJustificativa do técnico: ${elemento.justificativa}\n\nMotivo da rejeição: ${observacao}`,
       situacao: 'Não Atendida',
-      km: dadosElemento?.km || dadosElemento?.km_inicial || null,
+      empresa: 'A definir',
+      data_ocorrencia: new Date().toISOString().split('T')[0],
+      km_referencia: dadosElemento?.km || dadosElemento?.km_inicial || null,
       latitude: dadosElemento?.latitude || dadosElemento?.latitude_inicial || null,
-      longitude: dadosElemento?.longitude || dadosElemento?.longitude_inicial || null
+      longitude: dadosElemento?.longitude || dadosElemento?.longitude_inicial || null,
+      observacao: 'Elemento rejeitado na aprovação coordenador'
     };
 
     const { error: ncError } = await supabase
-      .from('registro_nc')
+      .from('nao_conformidades')
       .insert(ncData as any);
 
     if (ncError) throw ncError;
