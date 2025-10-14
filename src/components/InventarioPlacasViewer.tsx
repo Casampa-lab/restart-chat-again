@@ -322,17 +322,20 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Filtro de Divergências */}
+          {/* Contador de Matches a Reconciliar */}
           {divergenciasPendentes > 0 && (
-            <div className="flex items-center justify-between p-3 bg-warning/10 border border-warning/30 rounded-lg">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-warning" />
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
+                  <AlertCircle className="h-6 w-6 text-warning" />
+                </div>
                 <div>
-                  <div className="font-semibold text-sm">
-                    {divergenciasPendentes} {divergenciasPendentes === 1 ? 'placa com divergência' : 'placas com divergências'}
+                  <div className="font-bold text-base flex items-center gap-2">
+                    <span className="text-2xl font-extrabold text-warning">{divergenciasPendentes}</span>
+                    <span>{divergenciasPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    Projeto ≠ Sistema GPS - Requer verificação no local
+                  <div className="text-sm text-muted-foreground mt-0.5">
+                    🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
                   </div>
                 </div>
               </div>
@@ -342,7 +345,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   onCheckedChange={setShowOnlyDivergencias}
                   id="filtro-divergencias"
                 />
-                <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm">
+                <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
                   <Filter className="h-4 w-4 inline mr-1" />
                   Apenas divergências
                 </Label>
