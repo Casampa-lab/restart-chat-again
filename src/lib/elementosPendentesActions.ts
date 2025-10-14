@@ -1,5 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { QueryClient } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 type TipoElemento = 
   | 'marcas_longitudinais'
@@ -104,6 +107,10 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
     if (updateError) throw updateError;
 
     toast.success('Elemento aprovado e adicionado ao inventário dinâmico');
+    
+    // Invalidar cache para atualizar automaticamente
+    queryClient.invalidateQueries({ queryKey: ['elementos-pendentes'] });
+    
     return { success: true };
   } catch (error: any) {
     console.error('Erro ao aprovar elemento:', error);
@@ -185,6 +192,10 @@ export async function rejeitarElemento(elementoId: string, observacao: string) {
     }
 
     toast.success('Elemento rejeitado e NC criada automaticamente');
+    
+    // Invalidar cache para atualizar automaticamente
+    queryClient.invalidateQueries({ queryKey: ['elementos-pendentes'] });
+    
     return { success: true };
   } catch (error: any) {
     console.error('Erro ao rejeitar elemento:', error);

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -30,6 +31,7 @@ export function RegistrarItemNaoCadastrado({
   onSuccess,
   onCancel,
 }: RegistrarItemNaoCadastradoProps) {
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [justificativa, setJustificativa] = useState("");
   const [fotos, setFotos] = useState<File[]>([]);
@@ -160,6 +162,9 @@ export function RegistrarItemNaoCadastrado({
       if (insertError) throw insertError;
 
       toast.success("Solicitação enviada para aprovação do coordenador!");
+      
+      // Invalidar cache para atualizar lista de pendentes
+      queryClient.invalidateQueries({ queryKey: ['elementos-pendentes'] });
       
       if (onSuccess) {
         onSuccess();

@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle, XCircle, Eye, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Eye, Loader2, RefreshCw } from "lucide-react";
 import { aprovarElemento, rejeitarElemento } from "@/lib/elementosPendentesActions";
 
 export default function ElementosPendentes() {
@@ -23,10 +23,13 @@ export default function ElementosPendentes() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState<string>("pendente_aprovacao");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   const { data: elementos, isLoading, refetch } = useQuery({
     queryKey: ["elementos-pendentes", filtroStatus, filtroTipo],
     queryFn: async () => {
+      console.log('🔄 Buscando elementos pendentes...');
+      const startTime = Date.now();
       let query = supabase
         .from("elementos_pendentes_aprovacao")
         .select(`
@@ -47,8 +50,13 @@ export default function ElementosPendentes() {
 
       const { data, error } = await query;
       if (error) throw error;
+      
+      console.log(`✅ ${data?.length || 0} elementos encontrados em ${Date.now() - startTime}ms`);
+      setLastUpdate(new Date());
       return data;
     },
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const handleAprovar = async () => {
@@ -125,7 +133,22 @@ export default function ElementosPendentes() {
           <p className="text-muted-foreground">
             Revise e aprove elementos não cadastrados registrados pelos técnicos
           </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Última atualização: {lastUpdate.toLocaleTimeString('pt-BR')}
+          </p>
         </div>
+        <Button
+          variant="outline"
+          onClick={() => refetch()}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-2" />
+          )}
+          Atualizar
+        </Button>
       </div>
 
       <Card>
