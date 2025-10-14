@@ -159,6 +159,19 @@ const CoordenacaoFiscalizacao = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
+            {isAdminOrCoordinator && (
+              <div className="mb-6 flex justify-center">
+                <Button
+                  size="lg"
+                  variant="default"
+                  className="font-semibold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all bg-accent text-accent-foreground hover:bg-accent/90"
+                  onClick={() => navigate("/elementos-pendentes")}
+                >
+                  <FileSpreadsheet className="mr-2 h-6 w-6" />
+                  Elementos Pendentes de Aprovação
+                </Button>
+              </div>
+            )}
             <Tabs defaultValue="frentes" className="w-full">
               <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 gap-2 h-auto bg-muted p-2">
                 <TabsTrigger value="frentes" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
