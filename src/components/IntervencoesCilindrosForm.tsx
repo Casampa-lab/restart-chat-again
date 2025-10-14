@@ -14,7 +14,10 @@ import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
+  snv: z.string().optional(),
   motivo: z.string().min(1, "Motivo é obrigatório"),
+  km_inicial: z.string().min(1, "KM Inicial é obrigatório"),
+  km_final: z.string().min(1, "KM Final é obrigatório"),
   cor_corpo: z.string().min(1, "Cor do corpo é obrigatória"),
   cor_refletivo: z.string().optional(),
   tipo_refletivo: z.string().optional(),
@@ -56,7 +59,10 @@ export function IntervencoesCilindrosForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
+      snv: "",
       motivo: "",
+      km_inicial: "",
+      km_final: "",
       cor_corpo: "",
       cor_refletivo: "",
       tipo_refletivo: "",
@@ -72,7 +78,10 @@ export function IntervencoesCilindrosForm({
     if (cilindroSelecionado && modo === 'normal') {
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
+        snv: (cilindroSelecionado as any).snv || "",
         motivo: "",
+        km_inicial: cilindroSelecionado.km_inicial?.toString() || "",
+        km_final: cilindroSelecionado.km_final?.toString() || "",
         cor_corpo: (cilindroSelecionado as any).cor_corpo || "",
         cor_refletivo: (cilindroSelecionado as any).cor_refletivo || "",
         tipo_refletivo: (cilindroSelecionado as any).tipo_refletivo || "",
@@ -156,12 +165,75 @@ export function IntervencoesCilindrosForm({
 
               <FormField
                 control={form.control}
-                name="motivo"
+                name="snv"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>SNV</FormLabel>
                     <FormControl>
                       <Input placeholder="Ex: 116BMG1010" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="motivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Motivo *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o motivo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Implantação">Implantação</SelectItem>
+                        <SelectItem value="Substituição">Substituição</SelectItem>
+                        <SelectItem value="Manutenção">Manutenção</SelectItem>
+                        <SelectItem value="Remoção">Remoção</SelectItem>
+                        <SelectItem value="Inclusão por Necessidade de Campo">Inclusão por Necessidade de Campo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="km_inicial"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>KM Inicial *</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        step="0.001" 
+                        placeholder="Ex: 100.500" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="km_final"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>KM Final *</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        step="0.001" 
+                        placeholder="Ex: 100.800" 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
