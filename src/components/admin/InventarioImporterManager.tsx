@@ -1084,41 +1084,8 @@ export function InventarioImporterManager() {
         </Alert>
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="inventory-type">Tipo de Cadastro *</Label>
-            <Select value={inventoryType} onValueChange={setInventoryType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo de cadastro" />
-              </SelectTrigger>
-              <SelectContent>
-                {INVENTORY_TYPES.map((type) => {
-                  const statusData = inventoryStatus?.find(s => s.tipo === type.value);
-                  const total = statusData?.total || 0;
-                  const status = getStatusIndicator(total);
-                  
-                  return (
-                    <SelectItem key={type.value} value={type.value}>
-                      <div className="flex items-center justify-between w-full gap-2">
-                        <span>{type.label}</span>
-                        {selectedLote && selectedRodovia && (
-                          <span className={`ml-auto text-xs font-medium ${status.color}`}>
-                            {status.icon} {total > 0 ? total : ""}
-                          </span>
-                        )}
-                      </div>
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-            {selectedType && (
-              <p className="text-xs text-muted-foreground">
-                Tabela: {selectedType.table}
-              </p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Coluna 1: Lote */}
             <div className="space-y-2">
               <Label htmlFor="lote">Lote *</Label>
               <Select value={selectedLote} onValueChange={setSelectedLote}>
@@ -1128,18 +1095,23 @@ export function InventarioImporterManager() {
                 <SelectContent>
                   {lotes?.map((lote) => (
                     <SelectItem key={lote.id} value={lote.id}>
-                      {lote.numero}
+                      Lote {lote.numero}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
+            {/* Coluna 2: Rodovia */}
             <div className="space-y-2">
               <Label htmlFor="rodovia">Rodovia *</Label>
-              <Select value={selectedRodovia} onValueChange={setSelectedRodovia}>
+              <Select 
+                value={selectedRodovia} 
+                onValueChange={setSelectedRodovia}
+                disabled={!selectedLote}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione a rodovia" />
+                  <SelectValue placeholder={!selectedLote ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
                 </SelectTrigger>
                 <SelectContent>
                   {rodovias?.map((rodovia) => (
@@ -1149,6 +1121,43 @@ export function InventarioImporterManager() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Coluna 3: Tipo de Cadastro */}
+            <div className="space-y-2">
+              <Label htmlFor="inventory-type">Tipo de Cadastro *</Label>
+              <Select 
+                value={inventoryType} 
+                onValueChange={setInventoryType}
+                disabled={!selectedLote || !selectedRodovia}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={!selectedLote || !selectedRodovia ? "Selecione lote e rodovia primeiro" : "Selecione o tipo"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {INVENTORY_TYPES.map((type) => {
+                    const statusData = inventoryStatus?.find(s => s.tipo === type.value);
+                    const total = statusData?.total || 0;
+                    const status = getStatusIndicator(total);
+                    
+                    return (
+                      <SelectItem key={type.value} value={type.value}>
+                        <div className="flex items-center justify-between w-full gap-2">
+                          <span>{type.label}</span>
+                          <span className={`ml-auto text-xs font-medium ${status.color}`}>
+                            {status.icon} {total > 0 ? total : ""}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              {selectedType && (
+                <p className="text-xs text-muted-foreground">
+                  Tabela: {selectedType.table}
+                </p>
+              )}
             </div>
           </div>
 
