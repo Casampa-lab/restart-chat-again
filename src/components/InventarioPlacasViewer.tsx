@@ -346,6 +346,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     
     if (nec) {
       setSelectedNecessidade(nec);
+      setSelectedPlaca(placa); // Importante: setar a placa para exibir no drawer
       setReconciliacaoOpen(true);
       console.log("✅ Drawer aberto com sucesso");
     } else {
@@ -1045,7 +1046,13 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
       {/* Drawer de Reconciliação */}
       <ReconciliacaoDrawer
         open={reconciliacaoOpen}
-        onOpenChange={setReconciliacaoOpen}
+        onOpenChange={(open) => {
+          setReconciliacaoOpen(open);
+          if (!open) {
+            // Limpar seleção quando fechar o drawer
+            setSelectedNecessidade(null);
+          }
+        }}
         necessidade={selectedNecessidade}
         cadastro={selectedPlaca}
         onReconciliar={handleReconciliar}
