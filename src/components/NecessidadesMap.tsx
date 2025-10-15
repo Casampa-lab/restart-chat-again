@@ -50,41 +50,17 @@ function MapBoundsUpdater({
   const map = useMap();
 
   useEffect(() => {
-    // SEMPRE executar fitBounds quando necessidades mudam
-    if (necessidades.length > 0) {
-      // Extrair todas coordenadas
-      const allCoordinates = necessidades
-        .map((n) => {
-          const lat = n.latitude_inicial || n.latitude || 0;
-          const lng = n.longitude_inicial || n.longitude || 0;
-          return [lat, lng] as [number, number];
-        });
+    // Mostrar todos os pontos sempre
+    setMaxMarkers(necessidades.length);
 
-      // Remover outliers geográficos extremos (>2500km do centroide)
-      const filteredCoordinates = removeGeographicOutliers(allCoordinates, 2500);
-      
-      // Usar apenas coordenadas "normais" para fitBounds
-      if (filteredCoordinates.length > 0) {
-        const bounds = L.latLngBounds(filteredCoordinates as LatLngExpression[]);
-        map.fitBounds(bounds, { 
-          padding: [50, 50],
-          maxZoom: 16
-        });
-      }
-    }
-
-    // Debounce do zoom handler para prevenir recálculos excessivos
+    // Debounce do zoom handler apenas para atualizar o estado do zoom
     let zoomTimeout: NodeJS.Timeout;
     const handleZoom = () => {
       clearTimeout(zoomTimeout);
       zoomTimeout = setTimeout(() => {
         const zoom = map.getZoom();
         setZoom(zoom);
-        
-        if (zoom > 15) setMaxMarkers(2000);
-        else if (zoom > 13) setMaxMarkers(1000);
-        else setMaxMarkers(500);
-      }, 300); // 300ms debounce
+      }, 300);
     };
     
     map.on('zoomend', handleZoom);
