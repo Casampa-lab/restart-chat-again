@@ -537,14 +537,13 @@ export function RecalcularMatches() {
       });
 
       // Invalidar cache para atualizar viewers automaticamente
-      await queryClient.invalidateQueries({ 
-        queryKey: ["necessidades-match-marcas"] 
-      });
-      await queryClient.invalidateQueries({ 
-        queryKey: [`inventario-${tipo.replace('necessidades_', '').replace(/_/g, '-')}`] 
-      });
-      await queryClient.invalidateQueries({ 
-        queryKey: ["necessidades", tipo] 
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0] as string;
+          return key?.includes('necessidades-match') || 
+                 key?.includes('inventario-') ||
+                 key === 'necessidades';
+        }
       });
 
     } catch (error: any) {

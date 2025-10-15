@@ -430,7 +430,7 @@ export function InventarioMarcasLongitudinaisViewer({
                         onClick={() => handleSort("km_inicial")}
                       >
                         <div className="flex items-center justify-center">
-                          km
+                          km inicial - km final
                           <SortIcon column="km_inicial" />
                         </div>
                       </TableHead>
@@ -488,7 +488,9 @@ export function InventarioMarcasLongitudinaisViewer({
                           </TableCell>
                           <TableCell>{marca.cor || "-"}</TableCell>
                           <TableCell className="text-center">
-                            {marca.km_inicial?.toFixed(2) || "-"}
+                            {marca.km_inicial && marca.km_final 
+                              ? `${marca.km_inicial.toFixed(2)} - ${marca.km_final.toFixed(2)}`
+                              : marca.km_inicial?.toFixed(2) || "-"}
                           </TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (
