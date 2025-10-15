@@ -13,13 +13,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import * as XLSX from "xlsx";
 
 const INVENTORY_TYPES = [
-  { value: "placas", label: "Placas de Sinalização Vertical", table: "ficha_placa" },
-  { value: "marcas_longitudinais", label: "Marcas Longitudinais", table: "ficha_marcas_longitudinais" },
   { value: "cilindros", label: "Cilindros Delimitadores", table: "ficha_cilindros" },
-  { value: "inscricoes", label: "Zebrados, Setas, Símbolos e Legendas", table: "ficha_inscricoes" },
-  { value: "tachas", label: "Tachas Refletivas", table: "ficha_tachas" },
-  { value: "porticos", label: "Pórticos e Braços Projetados", table: "ficha_porticos" },
   { value: "defensas", label: "Defensas", table: "defensas" },
+  { value: "marcas_longitudinais", label: "Marcas Longitudinais", table: "ficha_marcas_longitudinais" },
+  { value: "placas", label: "Placas de Sinalização Vertical", table: "ficha_placa" },
+  { value: "porticos", label: "Pórticos e Braços Projetados", table: "ficha_porticos" },
+  { value: "tachas", label: "Tachas Refletivas", table: "ficha_tachas" },
+  { value: "inscricoes", label: "Zebrados, Setas, Símbolos e Legendas", table: "ficha_inscricoes" },
 ];
 
 export function InventarioImporterManager() {
