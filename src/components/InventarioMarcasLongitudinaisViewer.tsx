@@ -453,16 +453,18 @@ export function InventarioMarcasLongitudinaisViewer({
                         <TableCell>{marca.espacamento_m?.toFixed(2) || "-"}</TableCell>
                         <TableCell className="text-center">
                           {necessidadesMap?.get(marca.id) ? (
-                            <Badge 
-                              variant="outline" 
-                              className="border-orange-400 text-orange-600 cursor-pointer hover:bg-orange-50 transition-colors"
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleOpenReconciliacao(marca);
                               }}
+                              className="border-orange-400 text-orange-600 bg-orange-50/50 hover:bg-orange-100 font-medium shadow-sm transition-all hover:shadow-md"
                             >
-                              ⚠️ Requer Revisão
-                            </Badge>
+                              <AlertCircle className="h-4 w-4 mr-1" />
+                              Requer Revisão
+                            </Button>
                           ) : (
                             <span className="text-xs text-muted-foreground">-</span>
                           )}
@@ -830,7 +832,14 @@ export function InventarioMarcasLongitudinaisViewer({
       {/* Drawer de Reconciliação */}
       <ReconciliacaoDrawer
         open={reconciliacaoOpen}
-        onOpenChange={setReconciliacaoOpen}
+        onOpenChange={(open) => {
+          setReconciliacaoOpen(open);
+          if (!open) {
+            // Limpar ambas as seleções quando fechar o drawer
+            setSelectedNecessidade(null);
+            setSelectedMarca(null);
+          }
+        }}
         necessidade={selectedNecessidade}
         cadastro={selectedMarca}
         onReconciliar={async () => {
