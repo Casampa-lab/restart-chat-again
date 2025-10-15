@@ -122,7 +122,7 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="supervisoras" className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="supervisoras">Supervisoras</TabsTrigger>
             <TabsTrigger value="usuarios">Usuários</TabsTrigger>
             <TabsTrigger value="empresas">Executoras</TabsTrigger>
@@ -130,6 +130,7 @@ const Admin = () => {
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
             <TabsTrigger value="inventario">Cadastro</TabsTrigger>
             <TabsTrigger value="necessidades">Necessidades</TabsTrigger>
+            <TabsTrigger value="auditoria">Auditoria GPS</TabsTrigger>
           </TabsList>
 
           <TabsContent value="supervisoras">
@@ -168,6 +169,20 @@ const Admin = () => {
               <DiagnosticoMatch />
               <NecessidadesAuditor />
               <DeleteNecessidades />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="auditoria">
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">
+                Clique no botão abaixo para acessar o painel completo de Auditoria de Sinalizações GPS
+              </p>
+              <Button 
+                size="lg"
+                onClick={() => navigate("/admin/auditoria-sinalizacoes")}
+              >
+                Abrir Painel de Auditoria GPS
+              </Button>
             </div>
           </TabsContent>
         </Tabs>

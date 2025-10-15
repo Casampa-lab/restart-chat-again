@@ -3,7 +3,8 @@ import L, { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MapPin, AlertCircle, Upload } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, AlertCircle, Upload, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from "react-leaflet";
@@ -51,25 +52,35 @@ function MapBoundsUpdater({ necessidades }: { necessidades: Necessidade[] }) {
   return null;
 }
 
-const createCustomIcon = (servico: string) => {
+const createCustomIcon = (servico: string, isSinalizado: boolean) => {
   const color = servico === "Implantar" ? "#22c55e" : servico === "Substituir" ? "#eab308" : servico === "Remover" ? "#ef4444" : "#3b82f6";
   const emoji = servico === "Implantar" ? "➕" : servico === "Substituir" ? "🔄" : servico === "Remover" ? "➖" : "✓";
+  
+  const borderStyle = isSinalizado ? `4px solid #dc2626` : `3px solid white`;
+  const pulseAnimation = isSinalizado ? `animation: pulse 2s infinite;` : ``;
   
   return L.divIcon({
     className: "custom-marker",
     html: `
+      <style>
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+          50% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+        }
+      </style>
       <div style="
         background-color: ${color};
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        border: 3px solid white;
+        border: ${borderStyle};
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 16px;
-      ">${emoji}</div>
+        ${pulseAnimation}
+      ">${emoji}${isSinalizado ? '⚠️' : ''}</div>
     `,
     iconSize: [32, 32] as [number, number],
     iconAnchor: [16, 16] as [number, number],
@@ -82,6 +93,8 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
   const [geojsonSnvData, setGeojsonSnvData] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadingSnv, setUploadingSnv] = useState(false);
+  const [sinalizacoes, setSinalizacoes] = useState<Map<string, any>>(new Map());
+  const [loadingSinalizacoes, setLoadingSinalizacoes] = useState(false);
 
   const necessidadesComCoordenadas = necessidades.filter(n => {
     const lat = n.latitude_inicial || n.latitude;
@@ -126,6 +139,33 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
     };
     loadGeojson();
   }, []);
+
+  useEffect(() => {
+    const carregarSinalizacoes = async () => {
+      setLoadingSinalizacoes(true);
+      try {
+        const { data, error } = await supabase
+          .from('auditoria_sinalizacoes')
+          .select('*')
+          .eq('tipo_elemento', tipo)
+          .eq('status', 'pendente');
+
+        if (error) throw error;
+
+        const map = new Map();
+        data?.forEach((s: any) => {
+          map.set(s.elemento_id, s);
+        });
+        setSinalizacoes(map);
+      } catch (error) {
+        console.error('Erro ao carregar sinalizações:', error);
+      } finally {
+        setLoadingSinalizacoes(false);
+      }
+    };
+
+    carregarSinalizacoes();
+  }, [tipo, necessidades]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -201,6 +241,67 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
     }
   };
 
+  const handleSinalizarErro = async (necessidade: Necessidade, tipoproblema: string, descricao?: string) => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        toast.error("Você precisa estar logado");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('auditoria_sinalizacoes')
+        .insert({
+          tipo_elemento: tipo,
+          elemento_id: necessidade.id,
+          origem: 'necessidade',
+          tipo_problema: tipoproblema,
+          descricao: descricao,
+          sinalizado_por: userData.user.id,
+        });
+
+      if (error) throw error;
+
+      const { data: novaSinalizacao } = await supabase
+        .from('auditoria_sinalizacoes')
+        .select('*')
+        .eq('elemento_id', necessidade.id)
+        .single();
+
+      if (novaSinalizacao) {
+        setSinalizacoes(prev => new Map(prev).set(necessidade.id, novaSinalizacao));
+      }
+
+      toast.success("Marcador sinalizado como possível erro!");
+    } catch (error: any) {
+      console.error('Erro ao sinalizar:', error);
+      toast.error("Erro ao sinalizar: " + error.message);
+    }
+  };
+
+  const handleRemoverSinalizacao = async (necessidadeId: string) => {
+    try {
+      const { error } = await supabase
+        .from('auditoria_sinalizacoes')
+        .delete()
+        .eq('elemento_id', necessidadeId)
+        .eq('tipo_elemento', tipo);
+
+      if (error) throw error;
+
+      setSinalizacoes(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(necessidadeId);
+        return newMap;
+      });
+
+      toast.success("Sinalização removida!");
+    } catch (error: any) {
+      console.error('Erro ao remover sinalização:', error);
+      toast.error("Erro ao remover: " + error.message);
+    }
+  };
+
   const defaultCenter: LatLngExpression = [-15.7801, -47.9292];
   const mapCenter = necessidadesComCoordenadas.length > 0 
     ? [
@@ -217,6 +318,12 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
           <span className="font-semibold">
             {necessidadesComCoordenadas.length} necessidades no mapa
           </span>
+          {sinalizacoes.size > 0 && (
+            <Badge variant="destructive" className="ml-2">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              {sinalizacoes.size} sinalizado{sinalizacoes.size > 1 ? 's' : ''}
+            </Badge>
+          )}
         </div>
         
         <div className="flex gap-4 items-center flex-wrap">
@@ -352,10 +459,10 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
                 <Marker
                   key={nec.id}
                   position={[lat, lng] as LatLngExpression}
-                  icon={createCustomIcon(nec.servico)}
+                  icon={createCustomIcon(nec.servico, sinalizacoes.has(nec.id))}
                 >
                   <Popup>
-                    <div className="font-sans">
+                    <div className="font-sans w-64">
                       <h3 className="font-semibold text-sm mb-2">
                         {nec.servico === "Implantar"
                           ? "➕"
@@ -366,7 +473,7 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
                           : "✓"}{" "}
                         {nec.servico}
                       </h3>
-                      <p className="text-xs space-y-1">
+                      <p className="text-xs space-y-1 mb-3">
                         {nec.codigo && (
                           <>
                             <strong>Placa:</strong> {nec.codigo}
@@ -396,6 +503,82 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
                           </span>
                         )}
                       </p>
+
+                      <div className="border-t pt-2 mt-2">
+                        {sinalizacoes.has(nec.id) ? (
+                          <div className="space-y-2">
+                            <div className="bg-red-50 border border-red-200 rounded p-2">
+                              <div className="flex items-start gap-1">
+                                <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                                <div className="text-xs">
+                                  <p className="font-semibold text-red-700">
+                                    Sinalizado como erro
+                                  </p>
+                                  <p className="text-red-600 mt-1">
+                                    {sinalizacoes.get(nec.id)?.tipo_problema?.replace('_', ' ')}
+                                  </p>
+                                  {sinalizacoes.get(nec.id)?.descricao && (
+                                    <p className="text-muted-foreground mt-1">
+                                      {sinalizacoes.get(nec.id).descricao}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full text-xs"
+                              onClick={() => handleRemoverSinalizacao(nec.id)}
+                            >
+                              Remover sinalização
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <p className="text-xs font-semibold mb-1">Sinalizar como erro:</p>
+                            <div className="grid grid-cols-2 gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs h-8"
+                                onClick={() => handleSinalizarErro(nec, 'fora_rodovia', 'Marcador aparenta estar fora da rodovia')}
+                              >
+                                🗺️ Fora rodovia
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs h-8"
+                                onClick={() => handleSinalizarErro(nec, 'coordenada_errada', 'Coordenada GPS aparenta estar incorreta')}
+                              >
+                                📍 GPS errado
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs h-8"
+                                onClick={() => handleSinalizarErro(nec, 'duplicata', 'Possível duplicata de registro')}
+                              >
+                                👥 Duplicata
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs h-8"
+                                onClick={() => {
+                                  const descricao = prompt("Descreva o problema:");
+                                  if (descricao) {
+                                    handleSinalizarErro(nec, 'outro', descricao);
+                                  }
+                                }}
+                              >
+                                ❓ Outro
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </Popup>
                 </Marker>

@@ -104,6 +104,57 @@ export type Database = {
           },
         ]
       }
+      auditoria_sinalizacoes: {
+        Row: {
+          created_at: string | null
+          descricao: string | null
+          elemento_id: string
+          id: string
+          observacao_resolucao: string | null
+          origem: string
+          resolvido_em: string | null
+          resolvido_por: string | null
+          sinalizado_em: string | null
+          sinalizado_por: string
+          status: string | null
+          tipo_elemento: string
+          tipo_problema: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          descricao?: string | null
+          elemento_id: string
+          id?: string
+          observacao_resolucao?: string | null
+          origem: string
+          resolvido_em?: string | null
+          resolvido_por?: string | null
+          sinalizado_em?: string | null
+          sinalizado_por: string
+          status?: string | null
+          tipo_elemento: string
+          tipo_problema: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          descricao?: string | null
+          elemento_id?: string
+          id?: string
+          observacao_resolucao?: string | null
+          origem?: string
+          resolvido_em?: string | null
+          resolvido_por?: string | null
+          sinalizado_em?: string | null
+          sinalizado_por?: string
+          status?: string | null
+          tipo_elemento?: string
+          tipo_problema?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       configuracoes: {
         Row: {
           chave: string

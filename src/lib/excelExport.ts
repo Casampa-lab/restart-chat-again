@@ -1,5 +1,7 @@
 import * as XLSX from 'xlsx';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 // Função auxiliar para formatar data
 const formatDate = (date: string | null) => {
@@ -873,5 +875,76 @@ export const exportDadosRodovias = async () => {
   } catch (error) {
     console.error('Erro ao exportar dados das rodovias:', error);
     throw error;
+  }
+};
+
+// Função auxiliar para gerar link do Google Maps
+const gerarLinkGoogleMaps = (lat: number, lng: number): string => {
+  return `https://www.google.com/maps?q=${lat},${lng}`;
+};
+
+// Função para aplicar estilo customizado
+const aplicarEstiloCustom = (ws: XLSX.WorkSheet, rowIndex: number, numCols: number, bgColor: string) => {
+  for (let col = 0; col < numCols; col++) {
+    const cellAddress = XLSX.utils.encode_cell({ r: rowIndex, c: col });
+    if (!ws[cellAddress]) continue;
+    ws[cellAddress].s = {
+      fill: { fgColor: { rgb: bgColor } }
+    };
+  }
+};
+
+// Exportar Auditoria de Sinalizações GPS
+export const exportAuditoriaSinalizacoes = async (filtros?: {
+  status?: string;
+  tipo_elemento?: string;
+  tipo_problema?: string;
+}) => {
+  try {
+    toast.info("Gerando relatório GPS...");
+
+    let query = supabase
+      .from('auditoria_sinalizacoes')
+      .select('*, sinalizado_por_profile:profiles!auditoria_sinalizacoes_sinalizado_por_fkey(nome)')
+      .order('sinalizado_em', { ascending: false });
+
+    if (filtros?.tipo_elemento) query = query.eq('tipo_elemento', filtros.tipo_elemento);
+
+    const { data: sinalizacoes, error } = await query;
+    if (error) throw error;
+
+    if (!sinalizacoes?.length) {
+      toast.warning("Nenhuma sinalização encontrada");
+      return;
+    }
+
+    const wb = XLSX.utils.book_new();
+
+    // Resumo
+    const resumo = [
+      ['RELATÓRIO DE AUDITORIA GPS'],
+      [`Data: ${format(new Date(), 'dd/MM/yyyy')}`],
+      [],
+      ['Total:', sinalizacoes.length]
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumo), 'Resumo');
+
+    // Dados
+    const dados = sinalizacoes.map(s => ({
+      'Data': formatDate(s.sinalizado_em),
+      'Tipo': s.tipo_elemento,
+      'Problema': s.tipo_problema,
+      'Descrição': s.descricao || '-',
+      'Sinalizado Por': s.sinalizado_por_profile?.nome || 'N/A',
+      'Status': s.status
+    }));
+    
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dados), 'Sinalizações');
+    XLSX.writeFile(wb, `Auditoria_GPS_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    
+    toast.success("Relatório exportado!");
+  } catch (error: any) {
+    console.error(error);
+    toast.error("Erro ao exportar");
   }
 };
