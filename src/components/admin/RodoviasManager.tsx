@@ -12,6 +12,7 @@ interface Rodovia {
   id: string;
   codigo: string;
   uf: string;
+  tolerancia_match_metros: number | null;
 }
 
 const RodoviasManager = () => {
@@ -68,6 +69,20 @@ const RodoviasManager = () => {
     if (!confirm("Tem certeza que deseja excluir esta rodovia?")) return;
 
     try {
+      // Verifica se há lotes vinculados
+      const { data: lotes, error: checkError } = await supabase
+        .from("lotes_rodovias")
+        .select("id")
+        .eq("rodovia_id", id)
+        .limit(1);
+
+      if (checkError) throw checkError;
+
+      if (lotes && lotes.length > 0) {
+        toast.error("Não é possível excluir: existem lotes vinculados a esta rodovia");
+        return;
+      }
+
       const { error } = await supabase.from("rodovias").delete().eq("id", id);
 
       if (error) throw error;
@@ -154,6 +169,7 @@ const RodoviasManager = () => {
               <TableRow>
                 <TableHead>Código</TableHead>
                 <TableHead>UF</TableHead>
+                <TableHead>Tolerância GPS (m)</TableHead>
                 <TableHead className="w-24">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -162,6 +178,7 @@ const RodoviasManager = () => {
                 <TableRow key={rodovia.id}>
                   <TableCell className="font-medium">{rodovia.codigo}</TableCell>
                   <TableCell>{rodovia.uf || "-"}</TableCell>
+                  <TableCell>{rodovia.tolerancia_match_metros || 50}</TableCell>
                   <TableCell>
                     <Button
                       variant="ghost"
@@ -175,7 +192,7 @@ const RodoviasManager = () => {
               ))}
               {rodovias.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center text-muted-foreground">
                     Nenhuma rodovia cadastrada
                   </TableCell>
                 </TableRow>
