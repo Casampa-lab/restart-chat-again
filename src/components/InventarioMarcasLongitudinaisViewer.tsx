@@ -269,19 +269,20 @@ export function InventarioMarcasLongitudinaisViewer({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Contador de Matches a Reconciliar */}
           {pendentesRevisao > 0 && (
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-500/20 to-orange-400/10 border-2 border-orange-400/40 rounded-lg shadow-sm">
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
               <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-500/20 border border-orange-400/40">
-                  <AlertCircle className="h-6 w-6 text-orange-500" />
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
+                  <AlertCircle className="h-6 w-6 text-warning" />
                 </div>
                 <div>
                   <div className="font-bold text-base flex items-center gap-2">
-                    <span className="text-2xl font-extrabold text-orange-600">{pendentesRevisao}</span>
-                    <span>{pendentesRevisao === 1 ? 'match parcial a revisar' : 'matches parciais a revisar'}</span>
+                    <span className="text-2xl font-extrabold text-warning">{pendentesRevisao}</span>
+                    <span>{pendentesRevisao === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
                   </div>
                   <div className="text-sm text-muted-foreground mt-0.5">
-                    📐 Sobreposição &lt;75% - Requer verificação manual
+                    🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
                   </div>
                 </div>
               </div>
@@ -298,6 +299,8 @@ export function InventarioMarcasLongitudinaisViewer({
               </div>
             </div>
           )}
+
+          {/* Campos de Pesquisa */}
           <div className="space-y-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
