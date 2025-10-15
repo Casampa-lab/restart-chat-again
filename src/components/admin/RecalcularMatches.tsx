@@ -133,6 +133,13 @@ export function RecalcularMatches() {
       corpo?: string;
       refletivo?: string;
       cor_refletivo?: string;
+      cor_corpo?: string;
+      tipo_refletivo?: string;
+      funcao?: string;
+      especificacao_obstaculo_fixo?: string;
+      nivel_contencao_en1317?: string;
+      nivel_contencao_nchrp350?: string;
+      geometria?: string;
     },
     cadastros: any[],
     tipo: string,
@@ -210,6 +217,71 @@ export function RecalcularMatches() {
         }
       }
       
+      // VALIDAÇÕES ESPECÍFICAS PARA CILINDROS
+      if (tipo === 'cilindros') {
+        // 1. Rejeitar cadastros sem local_implantacao definido
+        if (!cad.local_implantacao || 
+            cad.local_implantacao === "Não se Aplica" || 
+            cad.local_implantacao.trim() === "") {
+          continue;
+        }
+        
+        // 2. LOCAL_IMPLANTACAO deve ser idêntico
+        if (necessidade.local_implantacao && cad.local_implantacao && 
+            necessidade.local_implantacao !== cad.local_implantacao) {
+          continue;
+        }
+        
+        // 3. COR_CORPO deve ser idêntico
+        if (necessidade.cor_corpo && cad.cor_corpo && 
+            necessidade.cor_corpo !== cad.cor_corpo) {
+          continue;
+        }
+        
+        // 4. COR_REFLETIVO deve ser idêntico
+        if (necessidade.cor_refletivo && cad.cor_refletivo && 
+            necessidade.cor_refletivo !== cad.cor_refletivo) {
+          continue;
+        }
+      }
+      
+      // VALIDAÇÕES ESPECÍFICAS PARA DEFENSAS
+      if (tipo === 'defensas') {
+        // 1. Rejeitar cadastros sem função definida
+        if (!cad.funcao || cad.funcao === "Não se Aplica" || cad.funcao.trim() === "") {
+          continue;
+        }
+        
+        // 2. FUNCAO deve ser idêntica
+        if (necessidade.funcao && cad.funcao && necessidade.funcao !== cad.funcao) {
+          continue;
+        }
+        
+        // 3. ESPECIFICACAO_OBSTACULO_FIXO deve ser idêntica
+        if (necessidade.especificacao_obstaculo_fixo && cad.especificacao_obstaculo_fixo && 
+            necessidade.especificacao_obstaculo_fixo !== cad.especificacao_obstaculo_fixo) {
+          continue;
+        }
+        
+        // 4. NIVEL_CONTENCAO_EN1317 deve ser compatível
+        if (necessidade.nivel_contencao_en1317 && cad.nivel_contencao_en1317 && 
+            necessidade.nivel_contencao_en1317 !== cad.nivel_contencao_en1317) {
+          continue;
+        }
+        
+        // 5. NIVEL_CONTENCAO_NCHRP350 deve ser compatível
+        if (necessidade.nivel_contencao_nchrp350 && cad.nivel_contencao_nchrp350 && 
+            necessidade.nivel_contencao_nchrp350 !== cad.nivel_contencao_nchrp350) {
+          continue;
+        }
+        
+        // 6. GEOMETRIA deve ser idêntica
+        if (necessidade.geometria && cad.geometria && 
+            necessidade.geometria !== cad.geometria) {
+          continue;
+        }
+      }
+      
       const { overlap_km, porcentagem } = calcularSobreposicaoKm(
         necessidade.km_inicial,
         necessidade.km_final,
@@ -241,24 +313,150 @@ export function RecalcularMatches() {
   };
 
   const buscarMatchPontual = (
-    necessidade: { km: number; latitude?: number; longitude?: number; lado?: string },
+    necessidade: {
+      km?: number;
+      tipo?: string;
+      codigo?: string;
+      lado?: string;
+      suporte?: string;
+      substrato?: string;
+      sigla?: string;
+      tipo_inscricao?: string;
+      cor?: string;
+      area_m2?: number;
+      vao_horizontal_m?: number;
+      altura_livre_m?: number;
+      latitude?: number;
+      longitude?: number;
+    },
     cadastros: any[],
+    tipo: string,
     toleranciaKm: number = 0.05
   ): Array<{ cadastro_id: string; distancia_metros: number; diferenca_km: number }> => {
     const matches: Array<{ cadastro_id: string; distancia_metros: number; diferenca_km: number }> = [];
 
     for (const cadastro of cadastros) {
-      // 1. Validar lado (se aplicável)
-      if (necessidade.lado && cadastro.lado) {
-        const ladoNec = normalizarLado(necessidade.lado);
-        const ladoCad = normalizarLado(cadastro.lado);
-        if (ladoNec !== ladoCad && ladoNec !== 'ambos' && ladoCad !== 'ambos') {
+      // VALIDAÇÕES ESPECÍFICAS PARA PLACAS
+      if (tipo === 'placas') {
+        // Rejeitar cadastros com código "Não se Aplica"
+        if (!cadastro.codigo || cadastro.codigo === "Não se Aplica" || cadastro.codigo.trim() === "") {
           continue;
+        }
+        
+        // CÓDIGO deve ser idêntico
+        if (necessidade.codigo && cadastro.codigo && necessidade.codigo !== cadastro.codigo) {
+          continue;
+        }
+        
+        // TIPO deve ser idêntico
+        if (necessidade.tipo && cadastro.tipo && necessidade.tipo !== cadastro.tipo) {
+          continue;
+        }
+        
+        // LADO deve ser compatível
+        if (necessidade.lado && cadastro.lado) {
+          const ladoNecNorm = normalizarLado(necessidade.lado);
+          const ladoCadNorm = normalizarLado(cadastro.lado);
+          if (ladoNecNorm !== ladoCadNorm) {
+            continue;
+          }
+        }
+        
+        // SUPORTE deve ser idêntico
+        if (necessidade.suporte && cadastro.suporte && necessidade.suporte !== cadastro.suporte) {
+          continue;
+        }
+        
+        // SUBSTRATO deve ser idêntico
+        if (necessidade.substrato && cadastro.substrato && necessidade.substrato !== cadastro.substrato) {
+          continue;
+        }
+      }
+      
+      // VALIDAÇÕES ESPECÍFICAS PARA INSCRIÇÕES
+      if (tipo === 'inscricoes') {
+        // 1. Rejeitar cadastros sem sigla definida
+        if (!cadastro.sigla || cadastro.sigla.trim() === "") {
+          continue;
+        }
+        
+        // 2. SIGLA deve ser idêntica
+        if (necessidade.sigla && cadastro.sigla && necessidade.sigla !== cadastro.sigla) {
+          continue;
+        }
+        
+        // 3. TIPO_INSCRICAO deve ser idêntico
+        if (necessidade.tipo_inscricao && cadastro.tipo_inscricao && 
+            necessidade.tipo_inscricao !== cadastro.tipo_inscricao) {
+          continue;
+        }
+        
+        // 4. COR deve ser idêntica
+        if (necessidade.cor && cadastro.cor && necessidade.cor !== cadastro.cor) {
+          continue;
+        }
+        
+        // 5. AREA_M2 deve ter ±10% de tolerância
+        if (necessidade.area_m2 && cadastro.area_m2) {
+          const tolerancia = necessidade.area_m2 * 0.10;
+          if (Math.abs(necessidade.area_m2 - cadastro.area_m2) > tolerancia) {
+            continue;
+          }
+        }
+      }
+      
+      // VALIDAÇÕES ESPECÍFICAS PARA PÓRTICOS
+      if (tipo === 'porticos') {
+        // 1. Rejeitar cadastros com tipo "Não se Aplica"
+        if (!cadastro.tipo || cadastro.tipo === "Não se Aplica" || cadastro.tipo.trim() === "") {
+          continue;
+        }
+        
+        // 2. TIPO deve ser idêntico
+        if (necessidade.tipo && cadastro.tipo && necessidade.tipo !== cadastro.tipo) {
+          continue;
+        }
+        
+        // 3. LADO deve ser compatível
+        if (necessidade.lado && cadastro.lado) {
+          const ladoNecNorm = normalizarLado(necessidade.lado);
+          const ladoCadNorm = normalizarLado(cadastro.lado);
+          if (ladoNecNorm !== ladoCadNorm) {
+            continue;
+          }
+        }
+        
+        // 4. VAO_HORIZONTAL_M com ±10% de tolerância
+        if (necessidade.vao_horizontal_m && cadastro.vao_horizontal_m) {
+          const tolerancia = necessidade.vao_horizontal_m * 0.10;
+          if (Math.abs(necessidade.vao_horizontal_m - cadastro.vao_horizontal_m) > tolerancia) {
+            continue;
+          }
+        }
+        
+        // 5. ALTURA_LIVRE_M com ±10% de tolerância
+        if (necessidade.altura_livre_m && cadastro.altura_livre_m) {
+          const tolerancia = necessidade.altura_livre_m * 0.10;
+          if (Math.abs(necessidade.altura_livre_m - cadastro.altura_livre_m) > tolerancia) {
+            continue;
+          }
+        }
+      }
+      
+      // 1. Validar lado (se aplicável e não já validado acima)
+      if (!tipo || (tipo !== 'placas' && tipo !== 'porticos')) {
+        if (necessidade.lado && cadastro.lado) {
+          const ladoNec = normalizarLado(necessidade.lado);
+          const ladoCad = normalizarLado(cadastro.lado);
+          if (ladoNec !== ladoCad && ladoNec !== 'ambos' && ladoCad !== 'ambos') {
+            continue;
+          }
         }
       }
 
       // 2. Calcular diferença de km
-      const diferencaKm = Math.abs(cadastro.km - necessidade.km);
+      const km = necessidade.km || 0;
+      const diferencaKm = Math.abs(cadastro.km - km);
       if (diferencaKm > toleranciaKm) continue;
 
       // 3. Calcular distância GPS (se disponível)
@@ -404,7 +602,7 @@ export function RecalcularMatches() {
             'placas': 'pontual',
             'porticos': 'pontual',
             'inscricoes': 'pontual',
-            'cilindros': 'pontual',
+            'cilindros': 'linear',
             'tachas': 'linear'
           };
 
@@ -414,7 +612,7 @@ export function RecalcularMatches() {
             'defensas': false,
             'placas': false,
             'porticos': false,
-            'cilindros': false,
+            'cilindros': true,
             'tachas': true
           };
 
@@ -443,7 +641,14 @@ export function RecalcularMatches() {
                 local_implantacao: nec.local_implantacao,
                 corpo: nec.corpo,
                 refletivo: nec.refletivo,
-                cor_refletivo: nec.cor_refletivo
+                cor_refletivo: nec.cor_refletivo,
+                cor_corpo: nec.cor_corpo,
+                tipo_refletivo: nec.tipo_refletivo,
+                funcao: nec.funcao,
+                especificacao_obstaculo_fixo: nec.especificacao_obstaculo_fixo,
+                nivel_contencao_en1317: nec.nivel_contencao_en1317,
+                nivel_contencao_nchrp350: nec.nivel_contencao_nchrp350,
+                geometria: nec.geometria
               },
               cadastros,
               tipo,
@@ -477,9 +682,20 @@ export function RecalcularMatches() {
                 km: parseFloat(nec.km_inicial || nec.km),
                 latitude: nec.latitude_inicial || nec.latitude,
                 longitude: nec.longitude_inicial || nec.longitude,
-                lado: nec.lado
+                lado: nec.lado,
+                tipo: nec.tipo,
+                codigo: nec.codigo,
+                suporte: nec.suporte,
+                substrato: nec.substrato,
+                sigla: nec.sigla,
+                tipo_inscricao: nec.tipo_inscricao,
+                cor: nec.cor,
+                area_m2: nec.area_m2 ? parseFloat(nec.area_m2) : undefined,
+                vao_horizontal_m: nec.vao_horizontal_m ? parseFloat(nec.vao_horizontal_m) : undefined,
+                altura_livre_m: nec.altura_livre_m ? parseFloat(nec.altura_livre_m) : undefined
               },
               cadastros,
+              tipo,
               0.05
             );
 

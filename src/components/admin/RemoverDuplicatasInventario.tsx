@@ -45,7 +45,7 @@ const TIPOS_ELEMENTOS = [
     tabela_cadastro: 'ficha_cilindros',
     tabela_necessidade: 'necessidades_cilindros',
     coluna_referencia: 'cadastro_id',
-    campos_chave: ['snv', 'cor_corpo', 'cor_refletivo', 'tipo_refletivo', 'km_inicial', 'km_final', 'rodovia_id', 'lote_id'],
+    campos_chave: ['snv', 'local_implantacao', 'cor_corpo', 'cor_refletivo', 'tipo_refletivo', 'km_inicial', 'km_final', 'rodovia_id', 'lote_id'],
   },
   {
     value: 'inscricoes',
@@ -61,7 +61,7 @@ const TIPOS_ELEMENTOS = [
     tabela_cadastro: 'defensas',
     tabela_necessidade: 'necessidades_defensas',
     coluna_referencia: 'cadastro_id',
-    campos_chave: ['id_defensa', 'tipo_defensa', 'km_inicial', 'km_final', 'lado', 'rodovia_id', 'lote_id'],
+    campos_chave: ['id_defensa', 'tipo_defensa', 'lado', 'funcao', 'especificacao_obstaculo_fixo', 'nivel_contencao_en1317', 'nivel_contencao_nchrp350', 'geometria', 'km_inicial', 'km_final', 'rodovia_id', 'lote_id'],
   },
   {
     value: 'porticos',
@@ -69,7 +69,7 @@ const TIPOS_ELEMENTOS = [
     tabela_cadastro: 'ficha_porticos',
     tabela_necessidade: 'necessidades_porticos',
     coluna_referencia: 'cadastro_id',
-    campos_chave: ['snv', 'tipo', 'km', 'rodovia_id', 'lote_id'],
+    campos_chave: ['snv', 'tipo', 'lado', 'vao_horizontal_m', 'altura_livre_m', 'km', 'rodovia_id', 'lote_id'],
   },
   {
     value: 'placas',
