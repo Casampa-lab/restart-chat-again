@@ -19,14 +19,49 @@ export default function AuditoriaSinalizacoes() {
   const [loading, setLoading] = useState(true);
   const [tipoAtivo, setTipoAtivo] = useState("todas");
   const [exporting, setExporting] = useState(false);
+  const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
+  const [checkingPermissions, setCheckingPermissions] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      navigate("/auth");
-      return;
+    const checkPermissions = async () => {
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .in("role", ["admin", "coordenador"])
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (!data) {
+          toast.error("Acesso negado. Apenas administradores e coordenadores podem acessar esta área.");
+          navigate("/admin");
+          return;
+        }
+
+        setIsAdminOrCoordinator(true);
+        setCheckingPermissions(false);
+      } catch (error: any) {
+        console.error('Erro ao verificar permissões:', error);
+        toast.error("Erro ao verificar permissões: " + error.message);
+        navigate("/admin");
+      }
+    };
+
+    checkPermissions();
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (isAdminOrCoordinator && !checkingPermissions) {
+      carregarSinalizacoes();
     }
-    carregarSinalizacoes();
-  }, [user, tipoAtivo]);
+  }, [isAdminOrCoordinator, checkingPermissions, tipoAtivo]);
 
   const carregarSinalizacoes = async () => {
     setLoading(true);
@@ -120,6 +155,18 @@ export default function AuditoriaSinalizacoes() {
     resolvidas: sinalizacoes.filter(s => s.status === 'resolvido').length,
     ignoradas: sinalizacoes.filter(s => s.status === 'ignorado').length,
   };
+
+  if (checkingPermissions) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!isAdminOrCoordinator) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/5 to-secondary/5">
