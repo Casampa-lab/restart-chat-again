@@ -70,3 +70,33 @@ export function sortByProximity<T extends { latitude_inicial?: number | null; lo
     }))
     .sort((a, b) => a.distance - b.distance);
 }
+
+/**
+ * Remove outliers geográficos de um conjunto de coordenadas
+ * Retorna apenas coordenadas dentro de um raio razoável do centroide
+ * @param coordinates Array de [lat, lng]
+ * @param maxDistanceKm Distância máxima permitida do centroide (padrão: 2500km)
+ * @returns Coordenadas filtradas sem outliers
+ */
+export function removeGeographicOutliers(
+  coordinates: [number, number][],
+  maxDistanceKm: number = 2500
+): [number, number][] {
+  if (coordinates.length === 0) return [];
+  if (coordinates.length === 1) return coordinates;
+
+  // 1. Calcular centroide usando mediana (robusta contra outliers)
+  const lats = coordinates.map(c => c[0]).sort((a, b) => a - b);
+  const lngs = coordinates.map(c => c[1]).sort((a, b) => a - b);
+  
+  const medianLat = lats[Math.floor(lats.length / 2)];
+  const medianLng = lngs[Math.floor(lngs.length / 2)];
+
+  // 2. Filtrar pontos dentro do raio máximo do centroide
+  const maxDistanceMeters = maxDistanceKm * 1000;
+  
+  return coordinates.filter(([lat, lng]) => {
+    const distance = calculateDistance(medianLat, medianLng, lat, lng);
+    return distance <= maxDistanceMeters;
+  });
+}

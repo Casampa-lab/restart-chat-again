@@ -8,6 +8,7 @@ import { MapPin, AlertCircle, Upload, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from "react-leaflet";
+import { removeGeographicOutliers } from "@/lib/gpsUtils";
 
 interface Necessidade {
   id: string;
@@ -51,19 +52,25 @@ function MapBoundsUpdater({
   useEffect(() => {
     // SEMPRE executar fitBounds quando necessidades mudam
     if (necessidades.length > 0) {
-      // Usar TODAS as coordenadas para calcular bounds
-      const coordinates = necessidades
+      // Extrair todas coordenadas
+      const allCoordinates = necessidades
         .map((n) => {
           const lat = n.latitude_inicial || n.latitude || 0;
           const lng = n.longitude_inicial || n.longitude || 0;
-          return [lat, lng] as LatLngExpression;
+          return [lat, lng] as [number, number];
         });
 
-      const bounds = L.latLngBounds(coordinates as any);
-      map.fitBounds(bounds, { 
-        padding: [50, 50],
-        maxZoom: 16 // Limitar zoom máximo para não ficar muito próximo
-      });
+      // Remover outliers geográficos extremos (>2500km do centroide)
+      const filteredCoordinates = removeGeographicOutliers(allCoordinates, 2500);
+      
+      // Usar apenas coordenadas "normais" para fitBounds
+      if (filteredCoordinates.length > 0) {
+        const bounds = L.latLngBounds(filteredCoordinates as LatLngExpression[]);
+        map.fitBounds(bounds, { 
+          padding: [50, 50],
+          maxZoom: 16
+        });
+      }
     }
 
     // Debounce do zoom handler para prevenir recálculos excessivos
