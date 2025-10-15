@@ -43,7 +43,9 @@ export function ReconciliacaoDrawer({
     checkRole();
   }, []);
 
-  const handleSolicitarReconciliacao = async () => {
+  const handleSolicitarReconciliacao = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    e?.preventDefault();
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -94,7 +96,10 @@ export function ReconciliacaoDrawer({
     }
   };
 
-  const handleRejeitarReconciliacao = async () => {
+  const handleRejeitarReconciliacao = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    e?.preventDefault();
+    
     if (!observacao.trim()) {
       toast.error("Por favor, adicione uma observação explicando por que não é a mesma placa");
       return;
@@ -134,7 +139,11 @@ export function ReconciliacaoDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} dismissible={false} modal={true}>
-      <DrawerContent className="max-h-[90vh]">
+      <DrawerContent 
+        className="max-h-[90vh]"
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
         <DrawerHeader>
           <DrawerTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-warning" />
@@ -269,10 +278,13 @@ export function ReconciliacaoDrawer({
           </div>
         </div>
 
-        <DrawerFooter className="flex-col gap-3">
+        <DrawerFooter 
+          className="flex-col gap-3"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           {/* Ação Principal: Confirmar que é substituição */}
           <Button
-            onClick={handleSolicitarReconciliacao}
+            onClick={(e) => handleSolicitarReconciliacao(e)}
             disabled={loading}
             size="lg"
             className="w-full bg-green-600 hover:bg-green-700 text-white"
@@ -285,7 +297,7 @@ export function ReconciliacaoDrawer({
 
           {/* Ação Secundária: Não é a mesma */}
           <Button
-            onClick={handleRejeitarReconciliacao}
+            onClick={(e) => handleRejeitarReconciliacao(e)}
             disabled={loading}
             variant="outline"
             className="w-full"
