@@ -24,12 +24,18 @@ export default function AuditoriaSinalizacoes() {
 
   useEffect(() => {
     const checkPermissions = async () => {
+      console.log("🔍 [AuditoriaSinalizacoes] Verificando permissões...");
+      console.log("👤 [AuditoriaSinalizacoes] User:", user);
+      
       if (!user) {
+        console.log("❌ [AuditoriaSinalizacoes] Sem usuário, redirecionando para /auth");
         navigate("/auth");
         return;
       }
 
       try {
+        console.log("🔎 [AuditoriaSinalizacoes] Buscando roles para user_id:", user.id);
+        
         const { data, error } = await supabase
           .from("user_roles")
           .select("role")
@@ -37,18 +43,25 @@ export default function AuditoriaSinalizacoes() {
           .in("role", ["admin", "coordenador"])
           .maybeSingle();
 
-        if (error) throw error;
+        console.log("📊 [AuditoriaSinalizacoes] Resultado da query:", { data, error });
+
+        if (error) {
+          console.error("❌ [AuditoriaSinalizacoes] Erro na query:", error);
+          throw error;
+        }
 
         if (!data) {
+          console.log("⛔ [AuditoriaSinalizacoes] Sem permissões, redirecionando para /admin");
           toast.error("Acesso negado. Apenas administradores e coordenadores podem acessar esta área.");
           navigate("/admin");
           return;
         }
 
+        console.log("✅ [AuditoriaSinalizacoes] Permissões OK, liberando acesso");
         setIsAdminOrCoordinator(true);
         setCheckingPermissions(false);
       } catch (error: any) {
-        console.error('Erro ao verificar permissões:', error);
+        console.error('❌ [AuditoriaSinalizacoes] Erro ao verificar permissões:', error);
         toast.error("Erro ao verificar permissões: " + error.message);
         navigate("/admin");
       }
