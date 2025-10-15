@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
@@ -337,9 +338,19 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
 
   const handleOpenReconciliacao = (placa: FichaPlaca) => {
     const nec = necessidadesMap?.get(placa.id);
+    console.log("🔍 handleOpenReconciliacao chamado:", {
+      placaId: placa.id,
+      necessidadeEncontrada: !!nec,
+      necessidade: nec
+    });
+    
     if (nec) {
       setSelectedNecessidade(nec);
       setReconciliacaoOpen(true);
+      console.log("✅ Drawer aberto com sucesso");
+    } else {
+      console.error("❌ Necessidade não encontrada no mapa para placa:", placa.id);
+      toast.error("Erro: Necessidade não encontrada");
     }
   };
 
@@ -623,12 +634,17 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                   size="sm"
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    console.log("🔍 Abrindo reconciliação para:", {
+                                      placa: placa.id,
+                                      necessidade: necessidade.id,
+                                      codigo: placa.codigo
+                                    });
                                     handleOpenReconciliacao(placa);
                                   }}
-                                  className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground"
+                                  className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
                                 >
                                   <AlertCircle className="h-4 w-4 mr-1" />
-                                  Verificar
+                                  Verificar Match
                                 </Button>
                               )}
                             </div>
