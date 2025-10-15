@@ -439,7 +439,16 @@ export function InventarioMarcasLongitudinaisViewer({
                         <TableCell>{marca.espacamento_m?.toFixed(2) || "-"}</TableCell>
                         <TableCell className="text-center">
                           {necessidadesMap?.get(marca.id) ? (
-                            <Badge variant="outline" className="border-orange-400 text-orange-600">
+                            <Badge 
+                              variant="outline" 
+                              className="border-orange-400 text-orange-600 cursor-pointer hover:bg-orange-50 transition-colors"
+                              onClick={() => {
+                                const nec = necessidadesMap?.get(marca.id);
+                                if (nec) {
+                                  navigate(`/minhas-necessidades?tipo=marcas_longitudinais&highlight=${nec.id}`);
+                                }
+                              }}
+                            >
                               ⚠️ Requer Revisão
                             </Badge>
                           ) : (
