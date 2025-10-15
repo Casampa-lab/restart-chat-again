@@ -165,9 +165,12 @@ const MinhasNecessidades = () => {
             lote:lotes(numero)
           `);
         
-        // Filtrar por lote se houver sessão ativa
+        // Filtrar por lote e rodovia se houver sessão ativa
         if (activeSession?.lote_id) {
           query = query.eq("lote_id", activeSession.lote_id);
+        }
+        if (activeSession?.rodovia_id) {
+          query = query.eq("rodovia_id", activeSession.rodovia_id);
         }
         
         const { data, error } = await query
