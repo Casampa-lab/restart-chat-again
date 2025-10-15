@@ -905,7 +905,7 @@ export const exportAuditoriaSinalizacoes = async (filtros?: {
 
     let query = supabase
       .from('auditoria_sinalizacoes')
-      .select('*, sinalizado_por_profile:profiles!auditoria_sinalizacoes_sinalizado_por_fkey(nome)')
+      .select('*')
       .order('sinalizado_em', { ascending: false });
 
     if (filtros?.tipo_elemento) query = query.eq('tipo_elemento', filtros.tipo_elemento);
@@ -917,6 +917,15 @@ export const exportAuditoriaSinalizacoes = async (filtros?: {
       toast.warning("Nenhuma sinalização encontrada");
       return;
     }
+
+    // Buscar nomes dos usuários
+    const userIds = [...new Set(sinalizacoes.map(s => s.sinalizado_por))];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, nome')
+      .in('id', userIds);
+    
+    const profilesMap = new Map(profiles?.map(p => [p.id, p.nome]) || []);
 
     const wb = XLSX.utils.book_new();
 
@@ -935,7 +944,7 @@ export const exportAuditoriaSinalizacoes = async (filtros?: {
       'Tipo': s.tipo_elemento,
       'Problema': s.tipo_problema,
       'Descrição': s.descricao || '-',
-      'Sinalizado Por': s.sinalizado_por_profile?.nome || 'N/A',
+      'Sinalizado Por': profilesMap.get(s.sinalizado_por) || 'N/A',
       'Status': s.status
     }));
     
