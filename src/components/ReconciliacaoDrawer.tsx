@@ -43,9 +43,7 @@ export function ReconciliacaoDrawer({
     checkRole();
   }, []);
 
-  const handleSolicitarReconciliacao = async (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    e?.preventDefault();
+  const handleSolicitarReconciliacao = async () => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -96,10 +94,7 @@ export function ReconciliacaoDrawer({
     }
   };
 
-  const handleRejeitarReconciliacao = async (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    e?.preventDefault();
-    
+  const handleRejeitarReconciliacao = async () => {
     if (!observacao.trim()) {
       toast.error("Por favor, adicione uma observação explicando por que não é a mesma placa");
       return;
@@ -138,11 +133,34 @@ export function ReconciliacaoDrawer({
   if (!necessidade || !cadastro) return null;
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} dismissible={false} modal={true}>
+    <Drawer 
+      open={open} 
+      onOpenChange={(newOpen) => {
+        if (!newOpen && !loading) {
+          onOpenChange(false);
+        }
+      }}
+      dismissible={false} 
+      modal={true}
+      closeThreshold={0.9}
+    >
       <DrawerContent 
         className="max-h-[90vh]"
-        onPointerDown={(e) => e.stopPropagation()}
-        onPointerDownOutside={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => {
+          const originalEvent = e.detail?.originalEvent as MouseEvent | undefined;
+          if (originalEvent) {
+            const target = originalEvent.target as HTMLElement;
+            const isScrollbarClick = 
+              originalEvent.offsetX > target.clientWidth || 
+              originalEvent.offsetY > target.clientHeight;
+            
+            if (isScrollbarClick || loading) {
+              e.preventDefault();
+            }
+          } else if (loading) {
+            e.preventDefault();
+          }
+        }}
       >
         <DrawerHeader>
           <DrawerTitle className="flex items-center gap-2">
@@ -166,7 +184,6 @@ export function ReconciliacaoDrawer({
             {/* ESQUERDA: Inventário/Cadastro */}
             <div 
               className="border-2 border-green-500 rounded-lg p-4 space-y-3 max-h-[400px] overflow-y-auto"
-              onPointerDown={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-2">
                 <span className="text-2xl">📷</span>
@@ -209,7 +226,6 @@ export function ReconciliacaoDrawer({
             {/* DIREITA: Projeto/Necessidade */}
             <div 
               className="border-2 border-primary rounded-lg p-4 space-y-3 max-h-[400px] overflow-y-auto"
-              onPointerDown={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -278,13 +294,10 @@ export function ReconciliacaoDrawer({
           </div>
         </div>
 
-        <DrawerFooter 
-          className="flex-col gap-3"
-          onPointerDown={(e) => e.stopPropagation()}
-        >
+        <DrawerFooter className="flex-col gap-3">
           {/* Ação Principal: Confirmar que é substituição */}
           <Button
-            onClick={(e) => handleSolicitarReconciliacao(e)}
+            onClick={handleSolicitarReconciliacao}
             disabled={loading}
             size="lg"
             className="w-full bg-green-600 hover:bg-green-700 text-white"
@@ -297,7 +310,7 @@ export function ReconciliacaoDrawer({
 
           {/* Ação Secundária: Não é a mesma */}
           <Button
-            onClick={(e) => handleRejeitarReconciliacao(e)}
+            onClick={handleRejeitarReconciliacao}
             disabled={loading}
             variant="outline"
             className="w-full"
