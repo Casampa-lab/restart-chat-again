@@ -116,108 +116,143 @@ export default function DashboardNecessidades() {
       let totalComMatch = 0;
       let totalSemMatch = 0;
 
-      // Buscar dados de cada tipo filtrado por lote_id
+      // Buscar dados de cada tipo usando QUERIES AGREGADAS (resolve limite de 1000)
       for (const tipo of TIPOS_NECESSIDADES) {
-        console.log(`Buscando necessidades de ${tipo.label} para lote ${loteIdFiltro}`);
+        console.log(`📊 Agregando stats de ${tipo.label} para lote ${loteIdFiltro}`);
         
-        // Primeiro, contar quantos registros existem
-        const { count } = await supabase
-          .from(`necessidades_${tipo.value}` as any)
+        const tabela = `necessidades_${tipo.value}` as any;
+
+        // ===== 1. TOTAL GERAL =====
+        const { count: totalTipo } = await supabase
+          .from(tabela)
           .select("*", { count: "exact", head: true })
           .eq("lote_id", loteIdFiltro);
 
-        console.log(`${tipo.label}: ${count} registros encontrados no total`);
+        console.log(`  ✓ Total: ${totalTipo}`);
 
-        // Buscar com paginação adequada (até 10k registros)
-        const { data, error } = await supabase
-          .from(`necessidades_${tipo.value}` as any)
-          .select(`
-            id,
-            servico,
-            cadastro_id,
-            created_at,
-            rodovia:rodovias(codigo),
-            lote:lotes(numero)
-          `)
+        // ===== 2. CONTAGEM POR SERVIÇO (4 queries paralelas) =====
+        const [
+          { count: countImplantar },
+          { count: countSubstituir },
+          { count: countRemover },
+          { count: countManter }
+        ] = await Promise.all([
+          supabase.from(tabela).select("*", { count: "exact", head: true }).eq("lote_id", loteIdFiltro).eq("servico", "Implantar"),
+          supabase.from(tabela).select("*", { count: "exact", head: true }).eq("lote_id", loteIdFiltro).eq("servico", "Substituir"),
+          supabase.from(tabela).select("*", { count: "exact", head: true }).eq("lote_id", loteIdFiltro).eq("servico", "Remover"),
+          supabase.from(tabela).select("*", { count: "exact", head: true }).eq("lote_id", loteIdFiltro).eq("servico", "Manter"),
+        ]);
+
+        console.log(`  ✓ Por serviço: I=${countImplantar} S=${countSubstituir} R=${countRemover} M=${countManter}`);
+
+        // ===== 3. TAXA DE MATCH =====
+        const [
+          { count: comMatch },
+          { count: semMatch }
+        ] = await Promise.all([
+          supabase.from(tabela).select("*", { count: "exact", head: true }).eq("lote_id", loteIdFiltro).not("cadastro_id", "is", null),
+          supabase.from(tabela).select("*", { count: "exact", head: true }).eq("lote_id", loteIdFiltro).is("cadastro_id", null),
+        ]);
+
+        totalComMatch += comMatch || 0;
+        totalSemMatch += semMatch || 0;
+
+        console.log(`  ✓ Match: Com=${comMatch} Sem=${semMatch}`);
+
+        // ===== 4. STATS POR RODOVIA =====
+        // Buscar lista única de rodovias neste lote
+        const { data: rodoviasData } = await supabase
+          .from(tabela)
+          .select("rodovia_id")
           .eq("lote_id", loteIdFiltro)
-          .range(0, Math.min(count || 0, 10000) - 1);
+          .not("rodovia_id", "is", null);
 
-        if (error) {
-          console.error(`Erro ao carregar ${tipo.label}:`, error);
-          continue;
+        const rodoviasUnicas = [...new Set((rodoviasData || []).map((r: any) => r.rodovia_id))];
+
+        for (const rodoviaId of rodoviasUnicas) {
+          // Buscar código da rodovia
+          const { data: rodoviaInfo } = await supabase
+            .from("rodovias")
+            .select("codigo")
+            .eq("id", rodoviaId)
+            .maybeSingle();
+
+          if (!rodoviaInfo) continue;
+
+          // Contar por serviço para esta rodovia
+          const [
+            { count: totalRodovia },
+            { count: implantarRodovia },
+            { count: substituirRodovia },
+            { count: removerRodovia },
+            { count: manterRodovia }
+          ] = await Promise.all([
+            supabase.from(tabela).select("*", { count: "exact", head: true }).eq("lote_id", loteIdFiltro).eq("rodovia_id", rodoviaId),
+            supabase.from(tabela).select("*", { count: "exact", head: true }).eq("lote_id", loteIdFiltro).eq("rodovia_id", rodoviaId).eq("servico", "Implantar"),
+            supabase.from(tabela).select("*", { count: "exact", head: true }).eq("lote_id", loteIdFiltro).eq("rodovia_id", rodoviaId).eq("servico", "Substituir"),
+            supabase.from(tabela).select("*", { count: "exact", head: true }).eq("lote_id", loteIdFiltro).eq("rodovia_id", rodoviaId).eq("servico", "Remover"),
+            supabase.from(tabela).select("*", { count: "exact", head: true }).eq("lote_id", loteIdFiltro).eq("rodovia_id", rodoviaId).eq("servico", "Manter"),
+          ]);
+
+          const existing = allStats.porRodovia.find((r: any) => r.rodovia === rodoviaInfo.codigo);
+          if (existing) {
+            existing.total += totalRodovia || 0;
+            existing.Implantar += implantarRodovia || 0;
+            existing.Substituir += substituirRodovia || 0;
+            existing.Remover += removerRodovia || 0;
+            existing.Manter += manterRodovia || 0;
+          } else {
+            allStats.porRodovia.push({
+              rodovia: rodoviaInfo.codigo,
+              total: totalRodovia || 0,
+              Implantar: implantarRodovia || 0,
+              Substituir: substituirRodovia || 0,
+              Remover: removerRodovia || 0,
+              Manter: manterRodovia || 0,
+            });
+          }
         }
 
-        const necessidades = (data as any[]) || [];
-        console.log(`${tipo.label}: ${necessidades.length} necessidades carregadas`);
-
-
-        // Stats por tipo
+        // ===== 5. ADICIONAR AOS TOTAIS =====
         allStats.porTipo.push({
           tipo: tipo.label,
-          total: necessidades.length,
-          Implantar: necessidades.filter((n: any) => n.servico === "Implantar").length,
-          Substituir: necessidades.filter((n: any) => n.servico === "Substituir").length,
-          Remover: necessidades.filter((n: any) => n.servico === "Remover").length,
-          Manter: necessidades.filter((n: any) => n.servico === "Manter").length,
+          total: totalTipo || 0,
+          Implantar: countImplantar || 0,
+          Substituir: countSubstituir || 0,
+          Remover: countRemover || 0,
+          Manter: countManter || 0,
         });
 
-        // Stats por serviço
-        allStats.porServico.Implantar += necessidades.filter((n: any) => n.servico === "Implantar").length;
-        allStats.porServico.Substituir += necessidades.filter((n: any) => n.servico === "Substituir").length;
-        allStats.porServico.Remover += necessidades.filter((n: any) => n.servico === "Remover").length;
-        allStats.porServico.Manter += necessidades.filter((n: any) => n.servico === "Manter").length;
+        allStats.porServico.Implantar += countImplantar || 0;
+        allStats.porServico.Substituir += countSubstituir || 0;
+        allStats.porServico.Remover += countRemover || 0;
+        allStats.porServico.Manter += countManter || 0;
 
-        // Taxa de match
-        totalComMatch += necessidades.filter((n: any) => n.cadastro_id).length;
-        totalSemMatch += necessidades.filter((n: any) => !n.cadastro_id).length;
+        // ===== 6. TIMELINE (amostra para estimativa) =====
+        // Buscar amostra de 500 registros para estimar distribuição temporal
+        const { data: timelineData } = await supabase
+          .from(tabela)
+          .select("created_at")
+          .eq("lote_id", loteIdFiltro)
+          .order("created_at", { ascending: true })
+          .limit(500);
 
-        // Stats por rodovia
-        necessidades.forEach((n: any) => {
-          if (n.rodovia) {
-            const existing = allStats.porRodovia.find((r: any) => r.rodovia === n.rodovia.codigo);
-            if (existing) {
-              existing.total++;
-              existing[n.servico]++;
-            } else {
-              allStats.porRodovia.push({
-                rodovia: n.rodovia.codigo,
-                total: 1,
-                Implantar: n.servico === "Implantar" ? 1 : 0,
-                Substituir: n.servico === "Substituir" ? 1 : 0,
-                Remover: n.servico === "Remover" ? 1 : 0,
-                Manter: n.servico === "Manter" ? 1 : 0,
-              });
-            }
-          }
-        });
-
-        // Stats por lote
-        necessidades.forEach((n: any) => {
-          if (n.lote) {
-            const existing = allStats.porLote.find((l: any) => l.lote === n.lote.numero);
-            if (existing) {
-              existing.total++;
-            } else {
-              allStats.porLote.push({
-                lote: `Lote ${n.lote.numero}`,
-                total: 1,
-              });
-            }
-          }
-        });
-
-        // Timeline (agrupado por semana para mais granularidade)
-        necessidades.forEach((n: any) => {
-          const data = new Date(n.created_at);
-          const semana = `${data.getDate().toString().padStart(2, '0')}/${(data.getMonth() + 1).toString().padStart(2, '0')}`;
+        if (timelineData && timelineData.length > 0) {
+          // Agrupar por mês e estimar total baseado na proporção da amostra
+          const fatorMultiplicacao = (totalTipo || 0) / timelineData.length;
           
-          const existing = allStats.timeline.find((t: any) => t.semana === semana);
-          if (existing) {
-            existing.total++;
-          } else {
-            allStats.timeline.push({ semana, total: 1 });
-          }
-        });
+          timelineData.forEach((n: any) => {
+            const data = new Date(n.created_at);
+            const mes = `${(data.getMonth() + 1).toString().padStart(2, '0')}/${data.getFullYear()}`;
+            
+            const existing = allStats.timeline.find((t: any) => t.mes === mes);
+            if (existing) {
+              existing.total += fatorMultiplicacao;
+            } else {
+              allStats.timeline.push({ mes, total: fatorMultiplicacao });
+            }
+          });
+        }
       }
 
       // Calcular taxa de match
@@ -231,10 +266,12 @@ export default function DashboardNecessidades() {
       // Ordenar
       allStats.porRodovia.sort((a: any, b: any) => b.total - a.total);
       allStats.porLote.sort((a: any, b: any) => b.total - a.total);
+      
+      // Ordenar timeline por mês/ano
       allStats.timeline.sort((a: any, b: any) => {
-        const [diaA, mesA] = a.semana.split("/").map(Number);
-        const [diaB, mesB] = b.semana.split("/").map(Number);
-        return (mesA * 100 + diaA) - (mesB * 100 + diaB);
+        const [mesA, anoA] = a.mes.split("/").map(Number);
+        const [mesB, anoB] = b.mes.split("/").map(Number);
+        return (anoA * 100 + mesA) - (anoB * 100 + mesB);
       });
       
       setStats(allStats);
@@ -432,14 +469,16 @@ export default function DashboardNecessidades() {
                     <LineChart data={stats.timeline}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis 
-                        dataKey="semana" 
+                        dataKey="mes" 
                         angle={-45} 
                         textAnchor="end" 
                         height={80}
                         interval={0}
                       />
                       <YAxis />
-                      <Tooltip />
+                      <Tooltip 
+                        formatter={(value: number) => [Math.round(value).toLocaleString(), 'Necessidades']}
+                      />
                       <Legend />
                       <Line 
                         type="monotone" 
