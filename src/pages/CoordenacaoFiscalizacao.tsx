@@ -312,7 +312,7 @@ const CoordenacaoFiscalizacao = () => {
                         size="lg"
                         variant="default"
                         className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-orange-600 hover:bg-orange-700 text-white"
-                        onClick={() => navigate("/reconciliacoes-pendentes")}
+                        onClick={() => navigate("/reconciliacoes-pendentes", { state: { from: "/coordenacao-fiscalizacao" } })}
                       >
                         <GitCompareArrows className="mr-2 h-5 w-5" />
                         Acessar Reconciliação

@@ -399,7 +399,7 @@ const Index = () => {
                     variant="secondary" 
                     size="lg" 
                     className="font-semibold shadow-md hover:shadow-lg transition-shadow" 
-                    onClick={() => navigate("/reconciliacoes-pendentes")}
+                    onClick={() => navigate("/reconciliacoes-pendentes", { state: { from: "/" } })}
                   >
                     <GitCompareArrows className="mr-2 h-5 w-5" />
                     Reconciliação
