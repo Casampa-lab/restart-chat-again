@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, MapPin, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 interface ReconciliacaoDrawerProps {
   open: boolean;
@@ -133,44 +133,24 @@ export function ReconciliacaoDrawer({
   if (!necessidade || !cadastro) return null;
 
   return (
-    <Drawer 
+    <Dialog 
       open={open} 
       onOpenChange={(newOpen) => {
-        if (!newOpen && !loading) {
-          onOpenChange(false);
+        if (!loading) {
+          onOpenChange(newOpen);
         }
       }}
-      dismissible={false} 
-      modal={true}
-      closeThreshold={0.9}
     >
-      <DrawerContent 
-        className="max-h-[90vh]"
-        onPointerDownOutside={(e) => {
-          const originalEvent = e.detail?.originalEvent as MouseEvent | undefined;
-          if (originalEvent) {
-            const target = originalEvent.target as HTMLElement;
-            const isScrollbarClick = 
-              originalEvent.offsetX > target.clientWidth || 
-              originalEvent.offsetY > target.clientHeight;
-            
-            if (isScrollbarClick || loading) {
-              e.preventDefault();
-            }
-          } else if (loading) {
-            e.preventDefault();
-          }
-        }}
-      >
-        <DrawerHeader>
-          <DrawerTitle className="flex items-center gap-2">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-warning" />
             Reconciliação de Divergência
-          </DrawerTitle>
-          <DrawerDescription>
+          </DialogTitle>
+          <DialogDescription>
             Compare o inventário existente com a necessidade do projeto para confirmar a substituição
-          </DrawerDescription>
-        </DrawerHeader>
+          </DialogDescription>
+        </DialogHeader>
 
         <div className="px-4 overflow-y-auto max-h-[65vh] pb-safe scroll-smooth space-y-6">
           {/* Localização */}
@@ -294,7 +274,7 @@ export function ReconciliacaoDrawer({
           </div>
         </div>
 
-        <DrawerFooter className="flex-col gap-3">
+        <DialogFooter className="flex-col gap-3">
           {/* Ação Principal: Confirmar que é substituição */}
           <Button
             onClick={handleSolicitarReconciliacao}
@@ -317,8 +297,8 @@ export function ReconciliacaoDrawer({
           >
             ✗ Cancelar - Não é a mesma placa
           </Button>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
