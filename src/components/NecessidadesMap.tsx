@@ -498,7 +498,7 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
           {/* Botões VGeo */}
           <div className="flex gap-2 items-center">
             {/* Botão de download automático */}
-            {necessidades.length > 0 && necessidades[0].rodovia?.codigo && (
+            {necessidades.length > 0 && necessidades[0].rodovia?.codigo && !geojsonData && (
               <Button
                 size="sm"
                 variant="default"
@@ -509,26 +509,6 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                 Baixar {necessidades[0].rodovia.codigo}
               </Button>
             )}
-            
-            <div className="relative">
-              <input
-                type="file"
-                id="geojson-upload"
-                accept=".geojson,.json"
-                onChange={handleFileUpload}
-                className="hidden"
-                disabled={uploading}
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => document.getElementById("geojson-upload")?.click()}
-                disabled={uploading}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                {geojsonData ? "Trocar" : "Importar"} Manual
-              </Button>
-            </div>
             
             {geojsonData && (
               <Button
