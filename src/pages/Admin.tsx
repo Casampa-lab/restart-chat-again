@@ -19,6 +19,7 @@ import { NecessidadesImporter } from "@/components/admin/NecessidadesImporter";
 import { NecessidadesAuditor } from "@/components/admin/NecessidadesAuditor";
 import { DeleteNecessidades } from "@/components/admin/DeleteNecessidades";
 import { DiagnosticoMatch } from "@/components/admin/DiagnosticoMatch";
+import { RecalcularMatches } from "@/components/admin/RecalcularMatches";
 
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
@@ -161,6 +162,7 @@ const Admin = () => {
           <TabsContent value="necessidades">
             <div className="space-y-6">
               <NecessidadesImporter />
+              <RecalcularMatches />
               <DiagnosticoMatch />
               <NecessidadesAuditor />
               <DeleteNecessidades />
