@@ -167,12 +167,9 @@ export function ReconciliacaoDrawer({
                   <div className="text-xs text-muted-foreground">O que prevê a planilha</div>
                 </div>
               </div>
-
-              <Badge className="w-full justify-center text-base py-2 bg-primary">
-                {necessidade.solucao_planilha || necessidade.servico}
-              </Badge>
               
               <div className="space-y-2 text-sm">
+                <div><strong>Serviço:</strong> <Badge variant="outline" className="ml-1">{necessidade.solucao_planilha || necessidade.servico}</Badge></div>
                 <div><strong>Código:</strong> {cadastro.codigo || "N/A"}</div>
                 <div><strong>Tipo:</strong> {cadastro.tipo || "N/A"}</div>
                 <div><strong>km projeto:</strong> {necessidade.km?.toFixed(3) || "N/A"}</div>
