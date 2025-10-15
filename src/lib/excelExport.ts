@@ -894,6 +894,74 @@ const aplicarEstiloCustom = (ws: XLSX.WorkSheet, rowIndex: number, numCols: numb
   }
 };
 
+// Mapeamento de tabelas por tipo de elemento
+const TABELAS_POR_TIPO: Record<string, {
+  necessidades: string;
+  cadastro: string;
+  campos_chave: string[];
+}> = {
+  placas: {
+    necessidades: 'necessidades_placas',
+    cadastro: 'ficha_placa',
+    campos_chave: ['codigo', 'tipo', 'km', 'lado', 'latitude', 'longitude']
+  },
+  marcas_longitudinais: {
+    necessidades: 'necessidades_marcas_longitudinais',
+    cadastro: 'ficha_marcas_longitudinais',
+    campos_chave: ['codigo', 'tipo_demarcacao', 'cor', 'km_inicial', 'km_final', 'latitude_inicial', 'longitude_inicial']
+  },
+  tachas: {
+    necessidades: 'necessidades_tachas',
+    cadastro: 'ficha_tachas',
+    campos_chave: ['tipo_tacha', 'cor_tacha', 'km_inicial', 'km_final', 'latitude_inicial', 'longitude_inicial']
+  },
+  inscricoes: {
+    necessidades: 'necessidades_inscricoes',
+    cadastro: 'ficha_inscricoes',
+    campos_chave: ['tipo_inscricao', 'sigla', 'cor', 'km_inicial', 'km_final', 'latitude_inicial', 'longitude_inicial']
+  },
+  cilindros: {
+    necessidades: 'necessidades_cilindros',
+    cadastro: 'ficha_cilindros',
+    campos_chave: ['cor_corpo', 'cor_refletivo', 'km_inicial', 'km_final', 'latitude_inicial', 'longitude_inicial']
+  },
+  porticos: {
+    necessidades: 'necessidades_porticos',
+    cadastro: 'ficha_porticos',
+    campos_chave: ['tipo_portico', 'km', 'latitude', 'longitude']
+  },
+  defensas: {
+    necessidades: 'necessidades_defensas',
+    cadastro: 'defensas',
+    campos_chave: ['tipo_defensa', 'lado', 'km_inicial', 'km_final', 'latitude_inicial', 'longitude_inicial']
+  }
+};
+
+// Função auxiliar para buscar dados do elemento
+const buscarDadosElemento = async (
+  elemento_id: string,
+  tipo_elemento: string,
+  origem: string
+): Promise<any | null> => {
+  const config = TABELAS_POR_TIPO[tipo_elemento];
+  if (!config) return null;
+
+  const tabela = origem === 'necessidade' ? config.necessidades : config.cadastro;
+
+  try {
+    const { data, error } = await supabase
+      .from(tabela as any)
+      .select(config.campos_chave.join(', '))
+      .eq('id', elemento_id)
+      .single();
+
+    if (error || !data) return null;
+    return data;
+  } catch {
+    return null;
+  }
+};
+
 // Exportar Auditoria de Sinalizações GPS
 export const exportAuditoriaSinalizacoes = async (filtros?: {
   status?: string;
@@ -901,14 +969,16 @@ export const exportAuditoriaSinalizacoes = async (filtros?: {
   tipo_problema?: string;
 }) => {
   try {
-    toast.info("Gerando relatório GPS...");
+    toast.info("Gerando relatório GPS completo...");
 
     let query = supabase
       .from('auditoria_sinalizacoes')
       .select('*')
       .order('sinalizado_em', { ascending: false });
 
+    if (filtros?.status) query = query.eq('status', filtros.status);
     if (filtros?.tipo_elemento) query = query.eq('tipo_elemento', filtros.tipo_elemento);
+    if (filtros?.tipo_problema) query = query.eq('tipo_problema', filtros.tipo_problema);
 
     const { data: sinalizacoes, error } = await query;
     if (error) throw error;
@@ -927,33 +997,139 @@ export const exportAuditoriaSinalizacoes = async (filtros?: {
     
     const profilesMap = new Map(profiles?.map(p => [p.id, p.nome]) || []);
 
+    // Buscar dados completos de cada elemento
+    const sinalizacoesCompletas = await Promise.all(
+      sinalizacoes.map(async (s) => {
+        const dadosElemento = await buscarDadosElemento(
+          s.elemento_id,
+          s.tipo_elemento,
+          s.origem
+        );
+        return { ...s, dados_elemento: dadosElemento };
+      })
+    );
+
     const wb = XLSX.utils.book_new();
 
-    // Resumo
+    // === ABA 1: RESUMO ===
+    const porTipo: Record<string, number> = {};
+    const porProblema: Record<string, number> = {};
+    const porStatus: Record<string, number> = {};
+
+    sinalizacoes.forEach((s) => {
+      porTipo[s.tipo_elemento] = (porTipo[s.tipo_elemento] || 0) + 1;
+      porProblema[s.tipo_problema] = (porProblema[s.tipo_problema] || 0) + 1;
+      porStatus[s.status] = (porStatus[s.status] || 0) + 1;
+    });
+
     const resumo = [
       ['RELATÓRIO DE AUDITORIA GPS'],
-      [`Data: ${format(new Date(), 'dd/MM/yyyy')}`],
+      [`Data de Geração: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`],
       [],
-      ['Total:', sinalizacoes.length]
+      ['Total de Sinalizações:', sinalizacoes.length],
+      [],
+      ['Por Tipo de Elemento:'],
+      ...Object.entries(porTipo).map(([tipo, qtd]) => [tipo, qtd]),
+      [],
+      ['Por Tipo de Problema:'],
+      ...Object.entries(porProblema).map(([tipo, qtd]) => [tipo, qtd]),
+      [],
+      ['Por Status:'],
+      ...Object.entries(porStatus).map(([status, qtd]) => [status, qtd])
     ];
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumo), 'Resumo');
 
-    // Dados
-    const dados = sinalizacoes.map(s => ({
-      'Data': formatDate(s.sinalizado_em),
-      'Tipo': s.tipo_elemento,
-      'Problema': s.tipo_problema,
-      'Descrição': s.descricao || '-',
-      'Sinalizado Por': profilesMap.get(s.sinalizado_por) || 'N/A',
-      'Status': s.status
-    }));
-    
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dados), 'Sinalizações');
+    const wsResumo = XLSX.utils.aoa_to_sheet(resumo);
+    XLSX.utils.book_append_sheet(wb, wsResumo, 'Resumo');
+
+    // === ABA 2: SINALIZAÇÕES DETALHADAS ===
+    const dados = sinalizacoesCompletas.map((s) => {
+      const dados = s.dados_elemento;
+      
+      // Formatação de km (pontual vs linear)
+      let kmFormatado = 'N/A';
+      if (dados) {
+        if (dados.km !== undefined && dados.km !== null) {
+          // Pontual (placas, pórticos)
+          kmFormatado = formatNumber(dados.km);
+        } else if (dados.km_inicial !== undefined && dados.km_final !== undefined) {
+          // Linear (marcas, tachas, etc)
+          kmFormatado = `${formatNumber(dados.km_inicial)} - ${formatNumber(dados.km_final)}`;
+        }
+      }
+
+      // Coordenadas
+      let lat = 'N/A';
+      let lng = 'N/A';
+      if (dados) {
+        if (dados.latitude !== undefined && dados.latitude !== null) {
+          lat = dados.latitude.toString();
+          lng = dados.longitude?.toString() || 'N/A';
+        } else if (dados.latitude_inicial !== undefined && dados.latitude_inicial !== null) {
+          lat = dados.latitude_inicial.toString();
+          lng = dados.longitude_inicial?.toString() || 'N/A';
+        }
+      }
+
+      // Código/Tipo do elemento
+      let codigo = dados?.codigo || dados?.sigla || '-';
+      let tipoElemento = dados?.tipo || dados?.tipo_demarcacao || dados?.tipo_tacha || 
+                         dados?.tipo_inscricao || dados?.tipo_portico || dados?.tipo_defensa || '-';
+
+      // Lado
+      let lado = dados?.lado || '-';
+
+      return {
+        'Data': formatDate(s.sinalizado_em),
+        'Tipo Serviço': s.tipo_elemento,
+        'Tipo Problema': s.tipo_problema,
+        'Código': codigo,
+        'Tipo Elemento': tipoElemento,
+        'km': kmFormatado,
+        'Lado': lado,
+        'Latitude': lat,
+        'Longitude': lng,
+        'Descrição': s.descricao || '-',
+        'Sinalizado Por': profilesMap.get(s.sinalizado_por) || 'N/A',
+        'Status': s.status
+      };
+    });
+
+    const wsDados = XLSX.utils.json_to_sheet(dados);
+
+    // Estilização das linhas por status
+    const numCols = 12; // Total de colunas
+    dados.forEach((row, index) => {
+      const rowIndex = index + 1; // +1 porque linha 0 é cabeçalho
+      let bgColor = 'FFFFFF'; // Branco padrão
+
+      if (row.Status === 'pendente') {
+        bgColor = 'FFF9C4'; // Amarelo claro
+      } else if (row.Status === 'resolvido') {
+        bgColor = 'C8E6C9'; // Verde claro
+      } else if (row.Status === 'ignorado') {
+        bgColor = 'E0E0E0'; // Cinza claro
+      }
+
+      aplicarEstiloCustom(wsDados, rowIndex, numCols, bgColor);
+    });
+
+    // Cabeçalho em negrito e azul
+    for (let col = 0; col < numCols; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+      if (!wsDados[cellAddress]) continue;
+      wsDados[cellAddress].s = {
+        fill: { fgColor: { rgb: 'BBDEFB' } },
+        font: { bold: true }
+      };
+    }
+
+    XLSX.utils.book_append_sheet(wb, wsDados, 'Sinalizações');
+
     XLSX.writeFile(wb, `Auditoria_GPS_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     
-    toast.success("Relatório exportado!");
+    toast.success("Relatório completo exportado com sucesso!");
   } catch (error: any) {
-    console.error(error);
-    toast.error("Erro ao exportar");
+    console.error('Erro ao exportar auditoria GPS:', error);
+    toast.error("Erro ao exportar relatório");
   }
 };
