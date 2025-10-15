@@ -121,8 +121,6 @@ export function InventarioMarcasLongitudinaisViewer({
       
       if (error) throw error;
       
-      console.log("📊 Necessidades marcas carregadas:", data?.length || 0);
-      
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
         if (nec.distancia_match_metros <= toleranciaMetros) {
@@ -133,7 +131,6 @@ export function InventarioMarcasLongitudinaisViewer({
         }
       });
       
-      console.log("📍 Map de necessidades populado com:", map.size, "itens");
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
@@ -143,8 +140,6 @@ export function InventarioMarcasLongitudinaisViewer({
   const pendentesRevisao = Array.from(necessidadesMap?.values() || []).filter(
     nec => nec.divergencia && !nec.reconciliado
   ).length;
-
-  console.log("⚠️ Divergências pendentes de reconciliação:", pendentesRevisao);
 
   const { data: marcas, isLoading, refetch } = useQuery({
     queryKey: ["inventario-marcas-longitudinais", loteId, rodoviaId, searchTerm, searchLat, searchLng],
@@ -190,10 +185,11 @@ export function InventarioMarcasLongitudinaisViewer({
     },
   });
 
+  // Filtrar marcas com divergências se necessário
   const filteredMarcas = marcas?.filter(marca => {
     if (!showOnlyPendentes) return true;
     const nec = necessidadesMap?.get(marca.id);
-    return nec?.status_revisao === 'pendente_coordenador';
+    return nec?.divergencia && !nec?.reconciliado;
   }) || [];
 
   // Função para ordenar dados
