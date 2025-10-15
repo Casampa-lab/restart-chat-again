@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Download, ClipboardCheck, GitCompareArrows } from "lucide-react";
+import { ArrowLeft, Download, ClipboardCheck, GitCompareArrows, CheckSquare } from "lucide-react";
 import { BarChart3, FileSpreadsheet } from "lucide-react";
 import {
   exportFrentesLiberadas,
@@ -73,6 +73,34 @@ const CoordenacaoFiscalizacao = () => {
         totalDivergencias += (count || 0);
       }
       return totalDivergencias;
+    },
+    enabled: !!user && isAdminOrCoordinator,
+    refetchInterval: 30000,
+  });
+
+  // Contador de intervenções pendentes de aprovação
+  const { data: countIntervencoesPendentes = 0 } = useQuery({
+    queryKey: ["count-intervencoes-aprovacao"],
+    queryFn: async () => {
+      const tabelas = [
+        'ficha_marcas_longitudinais_intervencoes',
+        'ficha_cilindros_intervencoes',
+        'ficha_porticos_intervencoes',
+        'defensas_intervencoes',
+        'ficha_inscricoes_intervencoes',
+        'ficha_tachas_intervencoes',
+        'ficha_placa_intervencoes',
+      ];
+      
+      let totalPendentes = 0;
+      for (const tabela of tabelas) {
+        const { count } = await supabase
+          .from(tabela as any)
+          .select("*", { count: "exact", head: true })
+          .eq("pendente_aprovacao_coordenador", true);
+        totalPendentes += (count || 0);
+      }
+      return totalPendentes;
     },
     enabled: !!user && isAdminOrCoordinator,
     refetchInterval: 30000,
@@ -226,6 +254,39 @@ const CoordenacaoFiscalizacao = () => {
                     )}
                   </Button>
                 </div>
+
+                {/* Botão Revisão de Intervenções */}
+                <Card className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 shadow-lg">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckSquare className="h-6 w-6 text-yellow-600" />
+                          <h3 className="text-xl font-bold text-yellow-900">Revisão de Intervenções</h3>
+                        </div>
+                        <p className="text-sm text-yellow-700">
+                          Aprove intervenções registradas pelos técnicos e marque serviços fora do plano
+                        </p>
+                        {countIntervencoesPendentes > 0 && (
+                          <div className="mt-3 flex items-center gap-2">
+                            <Badge className="bg-yellow-500 text-white text-base px-3 py-1">
+                              {countIntervencoesPendentes} {countIntervencoesPendentes === 1 ? 'intervenção pendente' : 'intervenções pendentes'}
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        size="lg"
+                        variant="default"
+                        className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-yellow-600 hover:bg-yellow-700 text-white"
+                        onClick={() => navigate("/revisao-intervencoes")}
+                      >
+                        <CheckSquare className="mr-2 h-5 w-5" />
+                        Acessar Revisão
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Botão Reconciliação */}
                 <Card className="bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300 shadow-lg">

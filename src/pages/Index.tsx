@@ -289,6 +289,34 @@ const Index = () => {
     enabled: isAdminOrCoordinator,
   });
 
+  // Contador de intervenções pendentes de aprovação (para coordenadores)
+  const { data: countIntervencoesPendentes } = useQuery({
+    queryKey: ["count-intervencoes-pendentes"],
+    queryFn: async () => {
+      const tabelas = [
+        'ficha_marcas_longitudinais_intervencoes',
+        'ficha_cilindros_intervencoes',
+        'ficha_porticos_intervencoes',
+        'defensas_intervencoes',
+        'ficha_inscricoes_intervencoes',
+        'ficha_tachas_intervencoes',
+        'ficha_placa_intervencoes',
+      ];
+      
+      let totalPendentes = 0;
+      for (const tabela of tabelas) {
+        const { count } = await supabase
+          .from(tabela as any)
+          .select("*", { count: "exact", head: true })
+          .eq("pendente_aprovacao_coordenador", true);
+        totalPendentes += (count || 0);
+      }
+      return totalPendentes;
+    },
+    enabled: isAdminOrCoordinator,
+    refetchInterval: 30000,
+  });
+
 
   // Handler genérico para abrir diálogo de intervenção
   const handleAbrirIntervencao = (
@@ -383,6 +411,22 @@ const Index = () => {
                   )}
                 </div>
               )}
+              <div className="relative">
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  className="font-semibold shadow-md hover:shadow-lg transition-shadow" 
+                  onClick={() => navigate("/revisao-intervencoes")}
+                >
+                  <ClipboardList className="mr-2 h-5 w-5" />
+                  Revisão
+                </Button>
+                {isAdminOrCoordinator && countIntervencoesPendentes && countIntervencoesPendentes > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-yellow-500 text-black pointer-events-none">
+                    {countIntervencoesPendentes}
+                  </Badge>
+                )}
+              </div>
               <div className="relative">
                 <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/coordenacao-fiscalizacao")}>
                   <ClipboardList className="mr-2 h-5 w-5" />
