@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import L, { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import MarkerClusterGroup from "react-leaflet-cluster";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +34,15 @@ interface NecessidadesMapProps {
   tipo: string;
 }
 
-function MapBoundsUpdater({ necessidades }: { necessidades: Necessidade[] }) {
+function MapBoundsUpdater({ 
+  necessidades, 
+  setMaxMarkers, 
+  setZoom 
+}: { 
+  necessidades: Necessidade[];
+  setMaxMarkers: (n: number) => void;
+  setZoom: (n: number) => void;
+}) {
   const map = useMap();
 
   useEffect(() => {
@@ -47,7 +56,24 @@ function MapBoundsUpdater({ necessidades }: { necessidades: Necessidade[] }) {
       const bounds = L.latLngBounds(coordinates as any);
       map.fitBounds(bounds, { padding: [50, 50] });
     }
-  }, [necessidades, map]);
+
+    // Listener de zoom para ajustar número de markers
+    const handleZoom = () => {
+      const zoom = map.getZoom();
+      setZoom(zoom);
+      
+      if (zoom > 15) setMaxMarkers(2000);
+      else if (zoom > 13) setMaxMarkers(1000);
+      else setMaxMarkers(500);
+    };
+    
+    map.on('zoomend', handleZoom);
+    handleZoom();
+    
+    return () => { 
+      map.off('zoomend', handleZoom);
+    };
+  }, [necessidades, map, setMaxMarkers, setZoom]);
 
   return null;
 }
@@ -95,6 +121,8 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
   const [uploadingSnv, setUploadingSnv] = useState(false);
   const [sinalizacoes, setSinalizacoes] = useState<Map<string, any>>(new Map());
   const [loadingSinalizacoes, setLoadingSinalizacoes] = useState(false);
+  const [maxMarkersToShow, setMaxMarkersToShow] = useState(500);
+  const [currentZoom, setCurrentZoom] = useState(13);
 
   const necessidadesComCoordenadas = necessidades.filter(n => {
     const lat = n.latitude_inicial || n.latitude;
@@ -446,7 +474,25 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
               />
             )}
 
-            {necessidadesComCoordenadas.map((nec) => {
+            <MarkerClusterGroup
+              chunkedLoading
+              maxClusterRadius={50}
+              spiderfyOnMaxZoom={true}
+              showCoverageOnHover={false}
+              iconCreateFunction={(cluster) => {
+                const count = cluster.getChildCount();
+                let size = 'small';
+                if (count > 100) size = 'large';
+                else if (count > 10) size = 'medium';
+                
+                return L.divIcon({
+                  html: `<div class="cluster-marker"><span>${count}</span></div>`,
+                  className: `marker-cluster marker-cluster-${size}`,
+                  iconSize: [40, 40] as [number, number],
+                });
+              }}
+            >
+            {necessidadesComCoordenadas.slice(0, maxMarkersToShow).map((nec) => {
               const lat = nec.latitude_inicial || nec.latitude || 0;
               const lng = nec.longitude_inicial || nec.longitude || 0;
               const km = nec.km_inicial || nec.km || "N/A";
@@ -584,10 +630,26 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
                 </Marker>
               );
             })}
+            </MarkerClusterGroup>
 
-            <MapBoundsUpdater necessidades={necessidadesComCoordenadas} />
+            <MapBoundsUpdater 
+              necessidades={necessidadesComCoordenadas}
+              setMaxMarkers={setMaxMarkersToShow}
+              setZoom={setCurrentZoom}
+            />
           </MapContainer>
         </div>
+      )}
+
+      {/* Alerta de markers limitados */}
+      {necessidadesComCoordenadas.length > maxMarkersToShow && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Mostrando {maxMarkersToShow} de {necessidadesComCoordenadas.length} pontos. 
+            Dê zoom para carregar mais detalhes (até {currentZoom > 15 ? '2000' : currentZoom > 13 ? '1000' : '500'} no zoom atual).
+          </AlertDescription>
+        </Alert>
       )}
     </div>
   );

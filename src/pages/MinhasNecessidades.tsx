@@ -151,8 +151,12 @@ const MinhasNecessidades = () => {
       let from = 0;
       const batchSize = 1000;
       let hasMore = true;
+      const maxIterations = 50; // Máximo 50k registros para prevenir travamentos
+      let iteration = 0;
 
-      while (hasMore) {
+      while (hasMore && iteration < maxIterations) {
+        iteration++;
+        
         let query = supabase
           .from(tipoConfig.table as any)
           .select(`
@@ -176,12 +180,22 @@ const MinhasNecessidades = () => {
           allData = [...allData, ...data];
           from += batchSize;
           hasMore = data.length === batchSize;
+          
+          // Feedback visual de progresso
+          console.log(`Carregando... ${allData.length} registros`);
         } else {
           hasMore = false;
         }
       }
 
-      console.log("Necessidades carregadas:", allData.length, "registros");
+      if (iteration >= maxIterations) {
+        console.warn(`Limite de ${maxIterations * batchSize} registros atingido`);
+        toast.warning(`Carregados ${allData.length} registros (pode haver mais)`, {
+          duration: 5000
+        });
+      }
+
+      console.log("✅ Necessidades carregadas:", allData.length, "registros");
       console.log("Serviços encontrados:", [...new Set(allData.map((d: any) => d.servico))]);
       
       setNecessidades(allData);

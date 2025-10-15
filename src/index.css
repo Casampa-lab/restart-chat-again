@@ -123,3 +123,49 @@ All colors MUST be HSL.
     min-height: -webkit-fill-available;
   }
 }
+
+/* Custom Leaflet Cluster Styles */
+.marker-cluster {
+  background: hsl(var(--primary) / 0.6);
+  border-radius: 50%;
+  text-align: center;
+  color: hsl(var(--primary-foreground));
+  font-weight: bold;
+  border: 3px solid hsl(var(--primary));
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.marker-cluster-small {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 11px;
+}
+
+.marker-cluster-medium {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 13px;
+}
+
+.marker-cluster-large {
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  font-size: 15px;
+}
+
+.cluster-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.marker-cluster:hover {
+  background: hsl(var(--primary) / 0.8);
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
