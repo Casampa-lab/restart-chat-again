@@ -1046,13 +1046,14 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
       {/* Drawer de Reconciliação */}
       <ReconciliacaoDrawer
         open={reconciliacaoOpen}
-        onOpenChange={(open) => {
-          setReconciliacaoOpen(open);
-          if (!open) {
-            // Limpar seleção quando fechar o drawer
-            setSelectedNecessidade(null);
-          }
-        }}
+              onOpenChange={(open) => {
+                setReconciliacaoOpen(open);
+                if (!open) {
+                  // Limpar ambas as seleções quando fechar o drawer
+                  setSelectedNecessidade(null);
+                  setSelectedPlaca(null);
+                }
+              }}
         necessidade={selectedNecessidade}
         cadastro={selectedPlaca}
         onReconciliar={handleReconciliar}
