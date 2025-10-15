@@ -13,6 +13,7 @@ import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp,
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
+import { ReconciliacaoDrawer } from "./ReconciliacaoDrawer";
 import { toast } from "sonner";
 
 interface FichaMarcaLongitudinal {
@@ -62,6 +63,8 @@ export function InventarioMarcasLongitudinaisViewer({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
   const [showOnlyPendentes, setShowOnlyPendentes] = useState(false);
+  const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
+  const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
 
   // Buscar tolerância GPS da rodovia
   const { data: rodoviaConfig } = useQuery({
@@ -95,7 +98,18 @@ export function InventarioMarcasLongitudinaisViewer({
     return R * c;
   };
 
-  const { data: necessidadesMap } = useQuery({
+  const handleOpenReconciliacao = (marca: FichaMarcaLongitudinal) => {
+    const nec = necessidadesMap?.get(marca.id);
+    if (nec) {
+      setSelectedNecessidade(nec);
+      setSelectedMarca(marca);
+      setReconciliacaoOpen(true);
+    } else {
+      toast.error("Erro: Necessidade não encontrada");
+    }
+  };
+
+  const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
     queryKey: ["necessidades-match-marcas", loteId, rodoviaId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -120,7 +134,7 @@ export function InventarioMarcasLongitudinaisViewer({
 
   const pendentesRevisao = necessidadesMap?.size || 0;
 
-  const { data: marcas, isLoading } = useQuery({
+  const { data: marcas, isLoading, refetch } = useQuery({
     queryKey: ["inventario-marcas-longitudinais", loteId, rodoviaId, searchTerm, searchLat, searchLng],
     queryFn: async () => {
       let query = supabase
@@ -442,12 +456,7 @@ export function InventarioMarcasLongitudinaisViewer({
                             <Badge 
                               variant="outline" 
                               className="border-orange-400 text-orange-600 cursor-pointer hover:bg-orange-50 transition-colors"
-                              onClick={() => {
-                                const nec = necessidadesMap?.get(marca.id);
-                                if (nec) {
-                                  navigate(`/minhas-necessidades?tipo=marcas_longitudinais&highlight=${nec.id}`);
-                                }
-                              }}
+                              onClick={() => handleOpenReconciliacao(marca)}
                             >
                               ⚠️ Requer Revisão
                             </Badge>
@@ -813,6 +822,20 @@ export function InventarioMarcasLongitudinaisViewer({
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Drawer de Reconciliação */}
+      <ReconciliacaoDrawer
+        open={reconciliacaoOpen}
+        onOpenChange={setReconciliacaoOpen}
+        necessidade={selectedNecessidade}
+        cadastro={selectedMarca}
+        onReconciliar={async () => {
+          await new Promise(resolve => setTimeout(resolve, 300));
+          refetchNecessidades();
+          refetch();
+          setReconciliacaoOpen(false);
+        }}
+      />
     </>
   );
 }
