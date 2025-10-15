@@ -117,19 +117,23 @@ export function InventarioMarcasLongitudinaisViewer({
         .select("*")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .not("cadastro_id", "is", null)
-        .lte("distancia_match_metros", toleranciaMetros);
+        .not("cadastro_id", "is", null);
       
       if (error) throw error;
       
+      console.log("📊 Necessidades marcas carregadas:", data?.length || 0);
+      
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
-        map.set(nec.cadastro_id, {
-          ...nec,
-          servico: nec.servico_final || nec.servico, // Priorizar servico_final
-        });
+        if (nec.distancia_match_metros <= toleranciaMetros) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+          });
+        }
       });
       
+      console.log("📍 Map de necessidades populado com:", map.size, "itens");
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
@@ -138,6 +142,8 @@ export function InventarioMarcasLongitudinaisViewer({
   const pendentesRevisao = Array.from(necessidadesMap?.values() || []).filter(
     nec => nec.status_revisao === 'pendente_coordenador'
   ).length;
+
+  console.log("⚠️ Pendentes de revisão:", pendentesRevisao);
 
   const { data: marcas, isLoading, refetch } = useQuery({
     queryKey: ["inventario-marcas-longitudinais", loteId, rodoviaId, searchTerm, searchLat, searchLng],
