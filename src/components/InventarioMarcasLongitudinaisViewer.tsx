@@ -139,11 +139,12 @@ export function InventarioMarcasLongitudinaisViewer({
     enabled: !!loteId && !!rodoviaId,
   });
 
+  // Contar divergências pendentes
   const pendentesRevisao = Array.from(necessidadesMap?.values() || []).filter(
-    nec => nec.status_revisao === 'pendente_coordenador'
+    nec => nec.divergencia && !nec.reconciliado
   ).length;
 
-  console.log("⚠️ Pendentes de revisão:", pendentesRevisao);
+  console.log("⚠️ Divergências pendentes de reconciliação:", pendentesRevisao);
 
   const { data: marcas, isLoading, refetch } = useQuery({
     queryKey: ["inventario-marcas-longitudinais", loteId, rodoviaId, searchTerm, searchLat, searchLng],
