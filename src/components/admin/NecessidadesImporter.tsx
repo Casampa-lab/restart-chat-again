@@ -713,6 +713,7 @@ export function NecessidadesImporter() {
 
       console.log(`✅ VERSÃO OTIMIZADA: ${cadastros?.length || 0} cadastros carregados. Match será local (sem RPC).`);
       
+      // Log inicial (não precisa de buffer, é apenas 1 log antes do loop)
       setLogs(prev => [...prev, {
         tipo: "success",
         linha: 0,
@@ -750,6 +751,33 @@ export function NecessidadesImporter() {
       let matchesEncontrados = 0;
       let divergenciasPendentes = 0;
       let pendentesRevisao = 0; // Contador para matches parciais
+      
+      // 🚀 OTIMIZAÇÃO: Batch de logs e inserts
+      const logsBuffer: LogEntry[] = [];
+      const batchInsert: any[] = [];
+      const BATCH_SIZE = 100; // Inserir a cada 100 registros
+      const LOG_UPDATE_INTERVAL = 50; // Atualizar logs a cada 50 registros
+      
+      // Função auxiliar para fazer flush dos logs
+      const flushLogs = () => {
+        if (logsBuffer.length > 0) {
+          setLogs(prev => [...prev, ...logsBuffer]);
+          logsBuffer.length = 0; // Limpar buffer
+        }
+      };
+      
+      // Função auxiliar para fazer flush do batch de inserts
+      const flushBatch = async (tabelaNecessidade: string) => {
+        if (batchInsert.length > 0) {
+          const { error } = await supabase
+            .from(tabelaNecessidade as any)
+            .insert(batchInsert);
+          
+          if (error) throw error;
+          batchInsert.length = 0; // Limpar batch
+        }
+      };
+      
       setProgressInfo({ current: 0, total });
 
       for (let i = 0; i < dadosFiltrados.length; i++) {
@@ -757,11 +785,12 @@ export function NecessidadesImporter() {
         setProgressInfo({ current: i + 1, total });
         // Verificar se foi cancelado
         if (cancelImportRef.current) {
-          setLogs(prev => [...prev, {
+          logsBuffer.push({
             tipo: "warning",
             linha: 0,
             mensagem: "Importação cancelada pelo usuário"
-          }]);
+          });
+          flushLogs(); // Garantir que logs sejam salvos antes de cancelar
           toast({
             title: "Importação Cancelada",
             description: `Processadas ${i} de ${total} linhas antes do cancelamento`,
@@ -1016,22 +1045,31 @@ export function NecessidadesImporter() {
             }
           });
 
-          const { error } = await supabase
-            .from(tabelaNecessidade)
-            .insert(dadosInsercao);
+          // 🚀 OTIMIZAÇÃO: Adicionar ao batch ao invés de inserir individualmente
+          batchInsert.push(dadosInsercao);
 
-          if (error) throw error;
+          // Fazer flush do batch quando atingir o tamanho limite
+          if (batchInsert.length >= BATCH_SIZE) {
+            await flushBatch(tabelaNecessidade);
+          }
 
           // Log de sucesso com indicação de divergência
           const icon = servicoFinal === "Implantar" ? "🟢" : servicoFinal === "Substituir" ? "🟡" : servicoFinal === "Remover" ? "🔴" : "🔵";
           const matchInfo = match ? ` (${distancia?.toFixed(0)}m)` : "";
           const divIcon = divergencia ? " ⚠️" : "";
           
-          setLogs(prev => [...prev, {
+          // 🚀 OTIMIZAÇÃO: Adicionar ao buffer ao invés de setLogs direto
+          logsBuffer.push({
             tipo: divergencia ? "warning" : "success",
             linha: linhaExcel,
             mensagem: `${icon} ${servicoFinal}${matchInfo}${divIcon}${divergencia ? ` Projeto: ${solucaoPlanilhaNormalizada} vs Sistema: ${servicoInferido}` : ""}`
-          }]);
+          });
+          
+          // Fazer flush dos logs a cada 50 registros para mostrar progresso
+          if ((i + 1) % LOG_UPDATE_INTERVAL === 0) {
+            flushLogs();
+          }
+          
           sucessos++;
 
         } catch (error: any) {
@@ -1041,18 +1079,29 @@ export function NecessidadesImporter() {
           // Detectar erro de tipo numérico
           const erroNumerico = error.message?.includes('invalid input syntax for type numeric');
           
-          setLogs(prev => [...prev, {
+          // 🚀 OTIMIZAÇÃO: Adicionar ao buffer ao invés de setLogs direto
+          logsBuffer.push({
             tipo: "error",
             linha: linhaExcel,
             mensagem: erroNumerico 
               ? `Erro: Valor inválido em campo numérico. Verifique se há textos como "Não se aplica" em colunas numéricas. Detalhe: ${error.message}`
               : `Erro: ${error.message || "Erro desconhecido"}`,
-          }]);
+          });
+          
+          // Fazer flush dos logs a cada 50 registros
+          if ((i + 1) % LOG_UPDATE_INTERVAL === 0) {
+            flushLogs();
+          }
         }
 
         // Atualizar progresso
         setProgress(Math.round(((i + 1) / total) * 100));
       }
+
+      // 🚀 OTIMIZAÇÃO: Fazer flush final do batch e logs restantes
+      const tabelaNecessidade = `necessidades_${tipo}` as any;
+      await flushBatch(tabelaNecessidade);
+      flushLogs();
 
       // Resultado final com estatísticas detalhadas
       const isLinear = ["marcas_longitudinais", "tachas", "defensas"].includes(tipo);
