@@ -332,15 +332,13 @@ export function NecessidadesImporter() {
   ): { 
     servico: string; 
     match_usado?: any;
-    status_revisao: string;
     motivo_revisao?: string;
   } => {
     
     // SEM match = nova instalação
     if (!matches || matches.length === 0) {
       return { 
-        servico: "Implantar",
-        status_revisao: "ok"
+        servico: "Implantar"
       };
     }
     
@@ -358,8 +356,7 @@ export function NecessidadesImporter() {
     if (sinaisRemocao.some(Boolean)) {
       return { 
         servico: "Remover", 
-        match_usado: melhorMatch,
-        status_revisao: "ok"
+        match_usado: melhorMatch
       };
     }
     
@@ -368,7 +365,6 @@ export function NecessidadesImporter() {
       return {
         servico: "Substituir",
         match_usado: melhorMatch,
-        status_revisao: "pendente_coordenador",
         motivo_revisao: `Sobreposição parcial (${melhorMatch.overlap_porcentagem}%) - requer revisão manual`
       };
     }
@@ -376,8 +372,7 @@ export function NecessidadesImporter() {
     // Match exato/alto (≥75%) = Substituir automático
     return { 
       servico: "Substituir", 
-      match_usado: melhorMatch,
-      status_revisao: "ok"
+      match_usado: melhorMatch
     };
   };
 
@@ -812,7 +807,6 @@ export function NecessidadesImporter() {
           let distancia = null;
           let overlap_porcentagem = null;
           let tipo_match_resultado = null;
-          let status_revisao = "ok";
           let motivo_revisao = null;
 
           // ===== TIPO 1: ELEMENTOS LINEARES (Match por sobreposição de segmento KM) =====
@@ -842,15 +836,15 @@ export function NecessidadesImporter() {
               match = resultado.match_usado?.cadastro_id || null;
               overlap_porcentagem = resultado.match_usado?.overlap_porcentagem || null;
               tipo_match_resultado = resultado.match_usado?.tipo_match || null;
-              status_revisao = resultado.status_revisao;
               motivo_revisao = resultado.motivo_revisao || null;
               
-              // Contabilizar matches e pendências
+              // Contabilizar matches
               if (match) {
                 matchesEncontrados++;
               }
               
-              if (status_revisao === "pendente_coordenador") {
+              // Contabilizar pendências se houver motivo de revisão
+              if (motivo_revisao) {
                 pendentesRevisao++;
               }
               
@@ -995,7 +989,6 @@ export function NecessidadesImporter() {
             servico_final: servicoFinal,
             divergencia,
             reconciliado: false,
-            status_revisao: 'ok', // Sempre iniciar como 'ok' (aprovado) ao importar/recalcular
             ...dados,
             arquivo_origem: file.name,
             linha_planilha: linhaExcel,
@@ -1006,10 +999,6 @@ export function NecessidadesImporter() {
           if (["marcas_longitudinais", "tachas", "defensas"].includes(tipo)) {
             dadosInsercao.overlap_porcentagem = overlap_porcentagem;
             dadosInsercao.tipo_match = tipo_match_resultado;
-            // Sobrescrever status_revisao se houver necessidade de revisão manual
-            if (status_revisao) {
-              dadosInsercao.status_revisao = status_revisao;
-            }
             dadosInsercao.motivo_revisao = motivo_revisao;
           }
 
