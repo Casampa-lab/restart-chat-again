@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RefreshCw, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const TIPOS_ELEMENTOS = [
   { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabela_cadastro: "ficha_marcas_longitudinais", tabela_necessidade: "necessidades_marcas_longitudinais" },
@@ -29,6 +29,7 @@ export function RecalcularMatches() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [progressInfo, setProgressInfo] = useState<{ current: number; total: number } | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Buscar lotes
   const { data: lotes } = useQuery({
@@ -533,6 +534,17 @@ export function RecalcularMatches() {
       toast({
         title: "Recálculo Concluído",
         description: `${matchesEncontrados} matches encontrados, ${divergenciasDetectadas} divergências detectadas`,
+      });
+
+      // Invalidar cache para atualizar viewers automaticamente
+      await queryClient.invalidateQueries({ 
+        queryKey: ["necessidades-match-marcas"] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: [`inventario-${tipo.replace('necessidades_', '').replace(/_/g, '-')}`] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["necessidades", tipo] 
       });
 
     } catch (error: any) {
