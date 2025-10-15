@@ -417,7 +417,7 @@ export function NecessidadesImporter() {
       longitude_inicial: converterCoordenada(row["Longitude Inicial"] || row["Long Inicial"] || row["Longitude inicial"] || row["longitude_inicial"]),
       latitude_final: converterCoordenada(row["Latitude Final"] || row["Lat Final"] || row["Latitude final"] || row["latitude_final"]),
       longitude_final: converterCoordenada(row["Longitude Final"] || row["Long Final"] || row["Longitude final"] || row["longitude_final"]),
-      observacao: row["Observação"] || row["Observacao"] || row["observacao"],
+      observacao_usuario: row["Observação"] || row["Observacao"] || row["observacao"],
       snv: row["SNV"] || row["snv"],
       solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
     };
@@ -528,7 +528,7 @@ export function NecessidadesImporter() {
           lado: row["Lado"] || row["lado"],
           altura_livre_m: sanitizarNumerico(row["Altura Livre (m)"] || row["Altura Livre"] || row["altura_livre_m"]),
           vao_horizontal_m: sanitizarNumerico(row["Vão Horizontal"] || row["Vao Horizontal"] || row["vao_horizontal_m"]),
-          observacao: row["Observação"] || row["Observacao"] || row["observacao"],
+          observacao_usuario: row["Observação"] || row["Observacao"] || row["observacao"],
           snv: row["SNV"] || row["snv"],
           solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
           motivo: sanitizarTexto(motivoPortico),
