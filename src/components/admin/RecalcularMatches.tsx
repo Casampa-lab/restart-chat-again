@@ -349,26 +349,41 @@ export function RecalcularMatches() {
 
           const solucaoPlanilhaNormalizada = normalizarServico(nec.solucao_planilha);
           const servicoFinal = solucaoPlanilhaNormalizada || servico_inferido;
-          const divergencia = solucaoPlanilhaNormalizada && solucaoPlanilhaNormalizada !== servico_inferido;
+          
+          // IMPORTANTE: garantir que divergencia seja sempre boolean (true/false)
+          const divergencia = !!(solucaoPlanilhaNormalizada && solucaoPlanilhaNormalizada !== servico_inferido);
 
           if (divergencia) {
             divergenciasDetectadas++;
           }
 
+          // Preparar dados de atualização com valores explícitos
+          const updateData: any = {
+            servico_inferido,
+            servico_final: servicoFinal,
+            servico: servicoFinal,
+            divergencia: divergencia, // sempre boolean
+            reconciliado: false
+          };
+
+          // Adicionar campos opcionais apenas se tiverem valor
+          if (cadastro_id !== null) {
+            updateData.cadastro_id = cadastro_id;
+          }
+          if (distancia_match_metros !== null) {
+            updateData.distancia_match_metros = distancia_match_metros;
+          }
+          if (overlap_porcentagem !== null) {
+            updateData.overlap_porcentagem = overlap_porcentagem;
+          }
+          if (tipo_match !== null) {
+            updateData.tipo_match = tipo_match;
+          }
+
           // Atualizar necessidade
           const { error: updateError } = await supabase
             .from(tabela_necessidade as any)
-            .update({
-              cadastro_id,
-              distancia_match_metros,
-              overlap_porcentagem,
-              tipo_match,
-              servico_inferido,
-              servico_final: servicoFinal,
-              servico: servicoFinal,
-              divergencia,
-              reconciliado: false
-            })
+            .update(updateData)
             .eq("id", nec.id);
 
           if (updateError) throw updateError;
