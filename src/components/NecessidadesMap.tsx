@@ -31,6 +31,10 @@ interface Necessidade {
 interface NecessidadesMapProps {
   necessidades: Necessidade[];
   tipo: string;
+  rodoviaId?: string;
+  loteId?: string;
+  rodovia?: { codigo: string };
+  lote?: { numero: string };
 }
 
 function MapBoundsUpdater({ 
@@ -124,7 +128,7 @@ const createCustomIcon = (servico: string, isSinalizado: boolean) => {
   });
 };
 
-export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) => {
+export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia, lote }: NecessidadesMapProps) => {
   const [geojsonData, setGeojsonData] = useState<any>(null);
   const [geojsonSnvData, setGeojsonSnvData] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
@@ -134,10 +138,23 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
   const [maxMarkersToShow, setMaxMarkersToShow] = useState(500);
   const [currentZoom, setCurrentZoom] = useState(13);
 
-  const necessidadesComCoordenadas = necessidades.filter(n => {
+  // Filtrar necessidades por rodovia e lote
+  const necessidadesFiltradas = necessidades.filter(n => {
+    if (rodoviaId && n.rodovia_id !== rodoviaId) return false;
+    if (loteId && n.lote_id !== loteId) return false;
+    return true;
+  });
+
+  const necessidadesComCoordenadas = necessidadesFiltradas.filter(n => {
     const lat = n.latitude_inicial || n.latitude;
     const lng = n.longitude_inicial || n.longitude;
     return lat && lng && lat !== 0 && lng !== 0;
+  });
+
+  const necessidadesSemCoordenadas = necessidadesFiltradas.filter(n => {
+    const lat = n.latitude_inicial || n.latitude;
+    const lng = n.longitude_inicial || n.longitude;
+    return !lat || !lng || lat === 0 || lng === 0;
   });
 
   useEffect(() => {
@@ -350,6 +367,18 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
 
   return (
     <div className="space-y-4">
+      {/* Badge de Filtros Ativos */}
+      {(rodovia || lote) && (
+        <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+          <MapPin className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium">
+            {rodovia && `🛣️ ${rodovia.codigo}`}
+            {rodovia && lote && " | "}
+            {lote && `📦 Lote ${lote.numero}`}
+          </span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-2">
           <MapPin className="h-5 w-5" />
@@ -433,6 +462,21 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
               <>Camada VGeo carregada ✓</>
             ) : (
               <>Camada SNV carregada ✓</>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Alerta de necessidades sem GPS */}
+      {necessidadesSemCoordenadas.length > 0 && (
+        <Alert variant="destructive" className="border-amber-400 bg-amber-50">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-900">
+            <strong>{necessidadesSemCoordenadas.length}</strong> de <strong>{necessidadesFiltradas.length}</strong> {tipo} não possuem coordenadas GPS válidas e não podem ser exibidas no mapa.
+            {necessidadesSemCoordenadas.length > 10 && (
+              <span className="block mt-1 text-xs">
+                Verifique se a importação incluiu as colunas de latitude/longitude.
+              </span>
             )}
           </AlertDescription>
         </Alert>

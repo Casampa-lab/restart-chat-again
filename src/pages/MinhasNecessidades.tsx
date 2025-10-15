@@ -458,6 +458,10 @@ const MinhasNecessidades = () => {
                       <NecessidadesMap 
                         necessidades={necessidadesFiltradas} 
                         tipo={tipoAtivo}
+                        rodoviaId={activeSession?.rodovia_id}
+                        loteId={activeSession?.lote_id}
+                        rodovia={activeSession?.rodovia}
+                        lote={activeSession?.lote}
                       />
                     </Suspense>
                   ) : (
