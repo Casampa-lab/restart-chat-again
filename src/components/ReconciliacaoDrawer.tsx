@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, MapPin, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
 
 interface ReconciliacaoDrawerProps {
   open: boolean;
@@ -104,9 +104,12 @@ export function ReconciliacaoDrawer({
             <AlertCircle className="h-5 w-5 text-warning" />
             Reconciliação de Divergência
           </DrawerTitle>
+          <DrawerDescription>
+            Compare o inventário existente com a necessidade do projeto para confirmar a substituição
+          </DrawerDescription>
         </DrawerHeader>
 
-        <div className="px-4 overflow-y-auto max-h-[60vh] space-y-6">
+        <div className="px-4 overflow-y-auto max-h-[65vh] pb-safe scroll-smooth space-y-6">
           {/* Localização */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4" />
