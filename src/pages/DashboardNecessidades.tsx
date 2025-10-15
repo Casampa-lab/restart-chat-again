@@ -426,16 +426,16 @@ export default function DashboardNecessidades() {
                 <CardContent>
                   <ResponsiveContainer width="100%" height={400}>
                     <PieChart>
-                      <Pie
-                        data={dadosPizzaPorGrupo}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={false}
-                        outerRadius={120}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
+                <Pie
+                  data={dadosPizzaPorGrupo}
+                  cx="40%"
+                  cy="50%"
+                  labelLine={false}
+                  label={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
                         {dadosPizzaPorGrupo.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={CORES_GRUPOS[entry.name] || "#888888"} />
                         ))}
@@ -444,13 +444,18 @@ export default function DashboardNecessidades() {
                         contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px' }}
                         formatter={(value: number) => [`${value.toLocaleString()} necessidades`]}
                       />
-                      <Legend 
-                        layout="vertical" 
-                        align="right" 
-                        verticalAlign="middle"
-                        iconType="circle"
-                        formatter={(value, entry: any) => `${value}: ${entry.payload.value.toLocaleString()}`}
-                      />
+                <Legend 
+                  layout="vertical" 
+                  align="right" 
+                  verticalAlign="middle"
+                  iconType="circle"
+                  wrapperStyle={{ 
+                    fontSize: '12px',
+                    paddingLeft: '30px',
+                    lineHeight: '1.8'
+                  }}
+                  formatter={(value, entry: any) => `${value}: ${entry.payload.value.toLocaleString()}`}
+                />
                     </PieChart>
                   </ResponsiveContainer>
                 </CardContent>
