@@ -11,16 +11,23 @@ serve(async (req) => {
   }
 
   try {
-    const { codigo_rodovia } = await req.json();
+    const { codigo_rodovia, layer_type = 'vgeo' } = await req.json();
     
     if (!codigo_rodovia) {
       throw new Error('codigo_rodovia é obrigatório');
     }
 
-    console.log(`Baixando camada VGeo para rodovia: ${codigo_rodovia}`);
+    // Layer IDs no serviço ArcGIS REST do DNIT
+    const layerIds = {
+      'vgeo': 16,  // VGeo - Segmentos rodoviários
+      'snv': 14    // SNV - Sistema Nacional de Viação
+    };
 
-    // URL do serviço ArcGIS REST do VGeo (exemplo - ajustar se necessário)
-    const baseUrl = 'https://geo.ambientare.com.br/server/rest/services/0_DADOS_REFERENCIAIS/DADOS_REFERENCIAIS_INFRAESTRUTURA/MapServer/16/query';
+    const layerId = layerIds[layer_type as keyof typeof layerIds] || layerIds.vgeo;
+    
+    console.log(`Baixando camada ${layer_type.toUpperCase()} (Layer ${layerId}) para rodovia: ${codigo_rodovia}`);
+
+    const baseUrl = `https://geo.ambientare.com.br/server/rest/services/0_DADOS_REFERENCIAIS/DADOS_REFERENCIAIS_INFRAESTRUTURA/MapServer/${layerId}/query`;
     
     // Construir filtro WHERE para a rodovia
     const whereClause = codigo_rodovia.startsWith('UF_') 

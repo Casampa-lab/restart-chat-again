@@ -201,6 +201,53 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
     }
   };
 
+  // Função para baixar camada SNV automaticamente
+  const downloadSNVAutomatico = async (codigoRodovia: string) => {
+    if (!codigoRodovia) return;
+
+    try {
+      const cacheKey = `snv_${codigoRodovia}`;
+      const { data: cached } = await supabase
+        .from("configuracoes")
+        .select("valor, updated_at")
+        .eq("chave", cacheKey)
+        .maybeSingle();
+
+      if (cached?.valor && cached.updated_at && isRecentCache(cached.updated_at)) {
+        setGeojsonSnvData(JSON.parse(cached.valor));
+        toast.success(`Camada SNV ${codigoRodovia} carregada (cache)`);
+        return;
+      }
+
+      toast.loading(`Baixando camada SNV para ${codigoRodovia}...`, { id: 'snv-download' });
+      
+      const { data, error } = await supabase.functions.invoke('download-vgeo-layer', {
+        body: { codigo_rodovia: codigoRodovia, layer_type: 'snv' }
+      });
+
+      if (error) throw error;
+
+      if (!data?.success || !data?.geojson) {
+        throw new Error('Resposta inválida do servidor');
+      }
+
+      await supabase
+        .from("configuracoes")
+        .upsert({
+          chave: cacheKey,
+          valor: JSON.stringify(data.geojson),
+          updated_at: new Date().toISOString()
+        });
+
+      setGeojsonSnvData(data.geojson);
+      toast.success(`Camada SNV ${codigoRodovia} carregada (${data.features_count} trechos)`, { id: 'snv-download' });
+      
+    } catch (error) {
+      console.error("Erro ao baixar SNV:", error);
+      toast.error("Falha ao baixar camada SNV. Use upload manual.", { id: 'snv-download' });
+    }
+  };
+
   useEffect(() => {
     const loadGeojson = async () => {
       // Carregar GeoJSON VGeo (rodovia)
@@ -239,11 +286,12 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
     loadGeojson();
   }, []);
 
-  // Baixar camada VGeo automaticamente quando rodovia mudar
+  // Baixar camadas VGeo e SNV automaticamente quando rodovia mudar
   useEffect(() => {
     const rodoviaAtiva = necessidades.length > 0 ? necessidades[0].rodovia : null;
     if (rodoviaAtiva?.codigo) {
       downloadVGeoAutomatico(rodoviaAtiva.codigo);
+      downloadSNVAutomatico(rodoviaAtiva.codigo);
     }
   }, [necessidades]);
 
@@ -525,26 +573,18 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
 
           {/* Botões SNV */}
           <div className="flex gap-2 items-center">
-            <div className="relative">
-              <input
-                type="file"
-                id="geojson-snv-upload"
-                accept=".geojson,.json"
-                onChange={handleSnvFileUpload}
-                className="hidden"
-                disabled={uploadingSnv}
-              />
+            {necessidades.length > 0 && necessidades[0].rodovia?.codigo && !geojsonSnvData && (
               <Button
                 size="sm"
-                variant="outline"
-                onClick={() => document.getElementById("geojson-snv-upload")?.click()}
+                variant="default"
+                onClick={() => downloadSNVAutomatico(necessidades[0].rodovia.codigo)}
+                className="bg-green-600 hover:bg-green-700"
                 disabled={uploadingSnv}
-                className="border-green-500 text-green-700 hover:bg-green-50"
               >
-                <Upload className="h-4 w-4 mr-2" />
-                {geojsonSnvData ? "Trocar" : "Importar"} GeoJSON SNV
+                <Download className="h-4 w-4 mr-2" />
+                Baixar SNV {necessidades[0].rodovia.codigo}
               </Button>
-            </div>
+            )}
             
             {geojsonSnvData && (
               <Button
