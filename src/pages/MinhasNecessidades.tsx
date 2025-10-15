@@ -36,10 +36,10 @@ interface Necessidade {
 
 const TIPOS_NECESSIDADES = [
   { value: "marcas_longitudinais", label: "Marcas Longitudinais", table: "necessidades_marcas_longitudinais" },
-  { value: "tachas", label: "Tachas", table: "necessidades_tachas" },
-  { value: "marcas_transversais", label: "Zebrados", table: "necessidades_marcas_transversais" },
-  { value: "cilindros", label: "Cilindros", table: "necessidades_cilindros" },
-  { value: "placas", label: "Placas", table: "necessidades_placas" },
+  { value: "tachas", label: "Tachas Refletivas", table: "necessidades_tachas" },
+  { value: "marcas_transversais", label: "Zebrados (Marcas Transversais)", table: "necessidades_marcas_transversais" },
+  { value: "cilindros", label: "Cilindros Delimitadores", table: "necessidades_cilindros" },
+  { value: "placas", label: "Placas de Sinalização Vertical", table: "necessidades_placas" },
   { value: "porticos", label: "Pórticos", table: "necessidades_porticos" },
   { value: "defensas", label: "Defensas", table: "necessidades_defensas" },
 ];

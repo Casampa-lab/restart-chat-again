@@ -13,9 +13,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 
 const TIPOS_NECESSIDADES = [
-  { value: "placas", label: "Placas" },
+  { value: "placas", label: "Placas de Sinalização Vertical" },
   { value: "marcas_longitudinais", label: "Marcas Longitudinais" },
-  { value: "tachas", label: "Tachas" },
+  { value: "tachas", label: "Tachas Refletivas" },
   { value: "marcas_transversais", label: "Zebrados (Marcas Transversais)" },
   { value: "cilindros", label: "Cilindros Delimitadores" },
   { value: "porticos", label: "Pórticos" },

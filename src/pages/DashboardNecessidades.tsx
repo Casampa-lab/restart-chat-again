@@ -13,10 +13,10 @@ import logoOperaVia from "@/assets/logo-operavia.jpg";
 
 const TIPOS_NECESSIDADES = [
   { value: "marcas_longitudinais", label: "Marcas Longitudinais" },
-  { value: "tachas", label: "Tachas" },
-  { value: "marcas_transversais", label: "Zebrados" },
-  { value: "cilindros", label: "Cilindros" },
-  { value: "placas", label: "Placas" },
+  { value: "tachas", label: "Tachas Refletivas" },
+  { value: "marcas_transversais", label: "Zebrados (Marcas Transversais)" },
+  { value: "cilindros", label: "Cilindros Delimitadores" },
+  { value: "placas", label: "Placas de Sinalização Vertical" },
   { value: "porticos", label: "Pórticos" },
   { value: "defensas", label: "Defensas" },
 ];

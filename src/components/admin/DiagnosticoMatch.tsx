@@ -12,10 +12,10 @@ import { useQuery } from "@tanstack/react-query";
 
 const TIPOS_NECESSIDADES = [
   { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabela_nec: "necessidades_marcas_longitudinais", tabela_cad: "ficha_marcas_longitudinais" },
-  { value: "tachas", label: "Tachas", tabela_nec: "necessidades_tachas", tabela_cad: "ficha_tachas" },
+  { value: "tachas", label: "Tachas Refletivas", tabela_nec: "necessidades_tachas", tabela_cad: "ficha_tachas" },
   { value: "marcas_transversais", label: "Zebrados (Marcas Transversais)", tabela_nec: "necessidades_marcas_transversais", tabela_cad: "ficha_inscricoes" },
   { value: "cilindros", label: "Cilindros Delimitadores", tabela_nec: "necessidades_cilindros", tabela_cad: "ficha_cilindros" },
-  { value: "placas", label: "Placas", tabela_nec: "necessidades_placas", tabela_cad: "ficha_placa" },
+  { value: "placas", label: "Placas de Sinalização Vertical", tabela_nec: "necessidades_placas", tabela_cad: "ficha_placa" },
   { value: "porticos", label: "Pórticos", tabela_nec: "necessidades_porticos", tabela_cad: "ficha_porticos" },
   { value: "defensas", label: "Defensas", tabela_nec: "necessidades_defensas", tabela_cad: "defensas" },
 ];
