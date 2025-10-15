@@ -63,6 +63,23 @@ export function InventarioMarcasLongitudinaisViewer({
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
   const [showOnlyPendentes, setShowOnlyPendentes] = useState(false);
 
+  // Buscar tolerância GPS da rodovia
+  const { data: rodoviaConfig } = useQuery({
+    queryKey: ["rodovia-tolerancia", rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rodovias")
+        .select("tolerancia_match_metros")
+        .eq("id", rodoviaId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!rodoviaId,
+  });
+
+  const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
+
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
     const φ1 = (lat1 * Math.PI) / 180;
@@ -132,12 +149,12 @@ export function InventarioMarcasLongitudinaisViewer({
           filteredData = filteredData
             .map((marca) => ({
               ...marca,
-              distance: marca.latitude_inicial && marca.longitude_inicial
-                ? calculateDistance(lat, lng, marca.latitude_inicial, marca.longitude_inicial)
-                : Infinity,
-            }))
-            .filter((marca) => marca.distance <= 50)
-            .sort((a, b) => a.distance - b.distance);
+            distance: marca.latitude_inicial && marca.longitude_inicial
+              ? calculateDistance(lat, lng, marca.latitude_inicial, marca.longitude_inicial)
+              : Infinity,
+          }))
+          .filter((marca) => marca.distance <= toleranciaMetros)
+          .sort((a, b) => a.distance - b.distance);
         }
       } else {
         filteredData = filteredData.sort((a, b) => (a.km_inicial || 0) - (b.km_inicial || 0));
@@ -277,7 +294,7 @@ export function InventarioMarcasLongitudinaisViewer({
             
             <div className="border-t pt-3">
               <p className="text-sm font-medium mb-2 text-muted-foreground">
-                Buscar por Coordenadas GPS (raio de 50m)
+                Buscar por Coordenadas GPS (raio de {toleranciaMetros}m)
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <Input

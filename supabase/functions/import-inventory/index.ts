@@ -62,6 +62,17 @@ serve(async (req) => {
       throw new Error("Tipo de inventário inválido");
     }
 
+    // Buscar configuração da rodovia (tolerância GPS)
+    const { data: rodoviaConfig } = await supabase
+      .from("rodovias")
+      .select("tolerancia_match_metros")
+      .eq("id", rodoviaId)
+      .single();
+
+    const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
+    console.log(`Usando tolerância GPS de ${toleranciaMetros}m para matches`);
+
+
     // Processar Excel
     const arrayBuffer = await excelFile.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });

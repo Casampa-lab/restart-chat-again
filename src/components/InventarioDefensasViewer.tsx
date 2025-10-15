@@ -63,6 +63,23 @@ export const InventarioDefensasViewer = ({
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
   const [showOnlyPendentes, setShowOnlyPendentes] = useState(false);
 
+  // Buscar tolerância GPS da rodovia
+  const { data: rodoviaConfig } = useQuery({
+    queryKey: ["rodovia-tolerancia", rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rodovias")
+        .select("tolerancia_match_metros")
+        .eq("id", rodoviaId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!rodoviaId,
+  });
+
+  const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
+
   const { data: necessidadesMap } = useQuery({
     queryKey: ["necessidades-match-defensas", loteId, rodoviaId],
     queryFn: async () => {

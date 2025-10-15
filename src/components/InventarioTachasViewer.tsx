@@ -56,6 +56,23 @@ export function InventarioTachasViewer({
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
   const [showOnlyPendentes, setShowOnlyPendentes] = useState(false);
 
+  // Buscar tolerância GPS da rodovia
+  const { data: rodoviaConfig } = useQuery({
+    queryKey: ["rodovia-tolerancia", rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rodovias")
+        .select("tolerancia_match_metros")
+        .eq("id", rodoviaId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!rodoviaId,
+  });
+
+  const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
+
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
     const φ1 = (lat1 * Math.PI) / 180;
@@ -129,7 +146,7 @@ export function InventarioTachasViewer({
                 ? calculateDistance(lat, lng, tacha.latitude_inicial, tacha.longitude_inicial)
                 : Infinity,
             }))
-            .filter((tacha) => tacha.distance <= 50)
+            .filter((tacha) => tacha.distance <= toleranciaMetros)
             .sort((a, b) => a.distance - b.distance);
         }
       } else {
@@ -270,7 +287,7 @@ export function InventarioTachasViewer({
             
             <div className="border-t pt-3">
               <p className="text-sm font-medium mb-2 text-muted-foreground">
-                Buscar por Coordenadas GPS (raio de 50m)
+                Buscar por Coordenadas GPS (raio de {toleranciaMetros}m)
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <Input

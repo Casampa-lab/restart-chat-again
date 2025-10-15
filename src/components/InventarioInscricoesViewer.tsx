@@ -98,19 +98,21 @@ export function InventarioInscricoesViewer({
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
 
-  // Buscar informações da rodovia
+  // Buscar informações e tolerância da rodovia
   const { data: rodovia } = useQuery({
     queryKey: ["rodovia", rodoviaId],
     queryFn: async () => {
       const result = (await supabase
         .from("rodovias")
-        .select("codigo")
+        .select("codigo, tolerancia_match_metros")
         .eq("id", rodoviaId)
         .single()) as unknown as { data: any; error: any };
       if (result.error) throw result.error;
       return result.data;
     },
   });
+
+  const toleranciaMetros = rodovia?.tolerancia_match_metros || 50;
 
   // Query de necessidades relacionadas (retorna Map indexado por cadastro_id)
   const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
@@ -196,7 +198,7 @@ export function InventarioInscricoesViewer({
                 ? calculateDistance(lat, lng, inscricao.latitude_inicial, inscricao.longitude_inicial)
                 : Infinity,
             }))
-            .filter((inscricao) => inscricao.distance <= 50)
+            .filter((inscricao) => inscricao.distance <= toleranciaMetros)
             .sort((a, b) => a.distance - b.distance);
         }
       } else {
@@ -339,7 +341,7 @@ export function InventarioInscricoesViewer({
             
             <div className="border-t pt-3">
               <p className="text-sm font-medium mb-2 text-muted-foreground">
-                Buscar por Coordenadas GPS (raio de 50m)
+                Buscar por Coordenadas GPS (raio de {toleranciaMetros}m)
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <Input

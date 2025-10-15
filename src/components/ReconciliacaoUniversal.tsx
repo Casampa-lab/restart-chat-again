@@ -44,6 +44,24 @@ export function ReconciliacaoUniversal({ grupo }: ReconciliacaoUniversalProps) {
   const [decisao, setDecisao] = useState<"projeto" | "inferencia" | null>(null);
   const [grupoAtivo, setGrupoAtivo] = useState<GrupoElemento>(grupo);
 
+  // Buscar tolerância GPS da rodovia da necessidade selecionada
+  const { data: rodoviaConfig } = useQuery({
+    queryKey: ["rodovia-tolerancia", selectedNecessidade?.rodovia_id],
+    queryFn: async () => {
+      if (!selectedNecessidade?.rodovia_id) return null;
+      const { data, error } = await supabase
+        .from("rodovias")
+        .select("tolerancia_match_metros")
+        .eq("id", selectedNecessidade.rodovia_id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedNecessidade?.rodovia_id,
+  });
+
+  const toleranciaRodovia = rodoviaConfig?.tolerancia_match_metros || 50;
+
   // Buscar divergências não reconciliadas para o grupo ativo
   const { data: divergencias, isLoading } = useQuery({
     queryKey: ["divergencias", grupoAtivo],

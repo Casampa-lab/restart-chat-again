@@ -72,6 +72,23 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
 
+  // Buscar tolerância GPS da rodovia
+  const { data: rodoviaConfig } = useQuery({
+    queryKey: ["rodovia-tolerancia", rodoviaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rodovias")
+        .select("tolerancia_match_metros")
+        .eq("id", rodoviaId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!rodoviaId,
+  });
+
+  const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
+
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371e3; // Earth radius in meters
     const φ1 = (lat1 * Math.PI) / 180;
@@ -166,7 +183,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
               cilindro.latitude_inicial,
               cilindro.longitude_inicial
             );
-            return distance <= 50; // 50m radius
+            return distance <= toleranciaMetros;
           })
           .map((cilindro: Cilindro) => ({
             ...cilindro,
