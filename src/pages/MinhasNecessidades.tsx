@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, FileText, ExternalLink, Trash2, Filter, FileSpreadsheet, Map, BarChart3 } from "lucide-react";
+import { ArrowLeft, FileText, ExternalLink, Trash2, Filter, FileSpreadsheet, Map, BarChart3, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
@@ -29,6 +29,8 @@ interface Necessidade {
   arquivo_origem: string;
   linha_planilha: number;
   created_at: string;
+  divergencia: boolean | null;
+  reconciliado: boolean | null;
   rodovia?: { codigo: string; nome: string };
   lote?: { numero: string };
   [key: string]: any;
@@ -395,6 +397,32 @@ const MinhasNecessidades = () => {
                 </CardHeader>
 
                 <CardContent>
+                  {/* Alerta de Divergências Pendentes */}
+                  {necessidadesFiltradas.filter(n => n.divergencia && !n.reconciliado).length > 0 && (
+                    <div className="mb-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <AlertCircle className="h-5 w-5 text-amber-600" />
+                          <div>
+                            <p className="font-semibold text-amber-900">
+                              {necessidadesFiltradas.filter(n => n.divergencia && !n.reconciliado).length} divergências pendentes de reconciliação
+                            </p>
+                            <p className="text-sm text-amber-700">
+                              Existem diferenças entre a decisão do projeto e a análise automática do sistema
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="default"
+                          className="bg-amber-600 hover:bg-amber-700"
+                          onClick={() => navigate(`/reconciliacao-pendente?grupo=${tipoAtivo}`)}
+                        >
+                          Reconciliar Agora
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   {loading ? (
                     <div className="flex justify-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -463,8 +491,24 @@ const MinhasNecessidades = () => {
                                   <div className="space-y-1">
                                     {/* Match por GPS (placas e outros pontos únicos) */}
                                     {nec.distancia_match_metros !== null && nec.distancia_match_metros !== undefined && (
-                                      <Badge variant="outline" className="text-xs gap-1">
-                                        <ExternalLink className="h-3 w-3" />
+                                      <Badge 
+                                        variant="outline" 
+                                        className={`text-xs gap-1 ${
+                                          nec.divergencia && !nec.reconciliado 
+                                            ? 'border-amber-400 text-amber-700 bg-amber-50 cursor-pointer hover:bg-amber-100 transition-colors' 
+                                            : ''
+                                        }`}
+                                        onClick={() => {
+                                          if (nec.divergencia && !nec.reconciliado) {
+                                            navigate(`/reconciliacao-pendente?grupo=${tipoAtivo}&highlight=${nec.id}`);
+                                          }
+                                        }}
+                                      >
+                                        {nec.divergencia && !nec.reconciliado ? (
+                                          <AlertCircle className="h-3 w-3" />
+                                        ) : (
+                                          <ExternalLink className="h-3 w-3" />
+                                        )}
                                         {nec.distancia_match_metros.toFixed(0)}m
                                       </Badge>
                                     )}
@@ -478,9 +522,23 @@ const MinhasNecessidades = () => {
                                             nec.tipo_match === 'alto' ? 'secondary' : 
                                             'outline'
                                           }
-                                          className="text-xs"
+                                          className={`text-xs ${
+                                            nec.divergencia && !nec.reconciliado 
+                                              ? 'border-amber-400 text-amber-700 bg-amber-50 cursor-pointer hover:bg-amber-100 transition-colors' 
+                                              : ''
+                                          }`}
+                                          onClick={() => {
+                                            if (nec.divergencia && !nec.reconciliado) {
+                                              navigate(`/reconciliacao-pendente?grupo=${tipoAtivo}&highlight=${nec.id}`);
+                                            }
+                                          }}
                                         >
-                                          📏 {nec.overlap_porcentagem.toFixed(1)}% overlap
+                                          {nec.divergencia && !nec.reconciliado ? (
+                                            <AlertCircle className="h-3 w-3 inline mr-1" />
+                                          ) : (
+                                            '📏 '
+                                          )}
+                                          {nec.overlap_porcentagem.toFixed(1)}% overlap
                                         </Badge>
                                         {nec.tipo_match && (
                                           <span className="text-xs text-muted-foreground">
@@ -492,7 +550,11 @@ const MinhasNecessidades = () => {
                                     
                                     {/* Status de Revisão */}
                                     {nec.status_revisao === 'pendente_coordenador' && (
-                                      <Badge variant="destructive" className="text-xs">
+                                      <Badge 
+                                        variant="destructive" 
+                                        className="text-xs cursor-pointer hover:bg-destructive/90 transition-colors"
+                                        onClick={() => navigate(`/reconciliacao-pendente?grupo=${tipoAtivo}&highlight=${nec.id}`)}
+                                      >
                                         ⚠️ Requer Revisão
                                       </Badge>
                                     )}
