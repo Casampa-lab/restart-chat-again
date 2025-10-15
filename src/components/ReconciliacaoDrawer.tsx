@@ -223,14 +223,14 @@ export function ReconciliacaoDrawer({
               </div>
               
               <div className="space-y-2 text-sm">
-                <div><strong>Código:</strong> {cadastro.codigo || "N/A"}</div>
-                <div><strong>Tipo:</strong> {cadastro.tipo || "N/A"}</div>
+                <div><strong>Código:</strong> {necessidade.codigo || "N/A"}</div>
+                <div><strong>Tipo:</strong> {necessidade.tipo || "N/A"}</div>
                 <div><strong>km projeto:</strong> {necessidade.km?.toFixed(3) || "N/A"}</div>
-                <div><strong>Lado:</strong> {cadastro.lado || "N/A"}</div>
-                <div><strong>Suporte:</strong> {cadastro.suporte || "N/A"}</div>
-                <div><strong>Substrato:</strong> {cadastro.substrato || "N/A"}</div>
+                <div><strong>Lado:</strong> {necessidade.lado || "N/A"}</div>
+                <div><strong>Suporte:</strong> {necessidade.suporte || "N/A"}</div>
+                <div><strong>Substrato:</strong> {necessidade.substrato || "N/A"}</div>
                 <div className="text-xs text-muted-foreground">
-                  GPS projeto: {cadastro.latitude?.toFixed(6)}, {cadastro.longitude?.toFixed(6)}
+                  GPS projeto: {necessidade.latitude?.toFixed(6)}, {necessidade.longitude?.toFixed(6)}
                 </div>
               </div>
               
