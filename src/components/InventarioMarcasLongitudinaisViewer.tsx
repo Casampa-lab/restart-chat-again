@@ -110,7 +110,7 @@ export function InventarioMarcasLongitudinaisViewer({
   };
 
   const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
-    queryKey: ["necessidades-match-marcas", loteId, rodoviaId, toleranciaMetros],
+    queryKey: ["necessidades-match-marcas", loteId, rodoviaId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_marcas_longitudinais")
@@ -123,13 +123,14 @@ export function InventarioMarcasLongitudinaisViewer({
       
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
-        if (nec.distancia_match_metros <= toleranciaMetros) {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-          });
-        }
+        // Não filtrar por distância aqui - o recálculo já validou o match
+        map.set(nec.cadastro_id, {
+          ...nec,
+          servico: nec.servico_final || nec.servico,
+        });
       });
+      
+      console.log(`🔍 Necessidades carregadas: ${data?.length || 0}, no Map: ${map.size}`);
       
       return map;
     },
@@ -475,8 +476,13 @@ export function InventarioMarcasLongitudinaisViewer({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedMarcas.map((marca) => {
+                    {sortedMarcas.map((marca, idx) => {
                       const necessidade = necessidadesMap?.get(marca.id);
+                      
+                      // Debug: mostrar primeiras 3 marcas
+                      if (idx < 3) {
+                        console.log(`🔍 Marca ${idx}: ID=${marca.id}, SNV=${marca.snv}, necessidade=`, necessidade);
+                      }
                       
                       return (
                         <TableRow key={marca.id} className="hover:bg-muted/50">
