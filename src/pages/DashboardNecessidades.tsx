@@ -38,6 +38,55 @@ const CORES_GRUPOS: Record<string, string> = {
   "Defensas": "#ef4444",
 };
 
+const calcularDensidades = async (loteId: string, rodoviaId: string) => {
+  // Buscar info da rodovia
+  const { data: rodoviaData } = await supabase
+    .from("rodovias")
+    .select("codigo")
+    .eq("id", rodoviaId)
+    .maybeSingle();
+
+  if (!rodoviaData) return null;
+
+  const densidades = [];
+
+  for (const tipo of TIPOS_NECESSIDADES) {
+    const tabelaCadastro = tipo.value === "placas" 
+      ? "ficha_placa" 
+      : tipo.value === "marcas_transversais"
+        ? "ficha_inscricoes"
+        : `ficha_${tipo.value}`;
+
+    const { count: totalCadastro } = await supabase
+      .from(tabelaCadastro as any)
+      .select("*", { count: "exact", head: true })
+      .eq("lote_id", loteId)
+      .eq("rodovia_id", rodoviaId);
+
+    const { count: totalNecessidades } = await supabase
+      .from(`necessidades_${tipo.value}` as any)
+      .select("*", { count: "exact", head: true })
+      .eq("lote_id", loteId);
+
+    const proporcao = totalCadastro && totalCadastro > 0
+      ? (totalNecessidades || 0) / totalCadastro * 100
+      : 0;
+
+    densidades.push({
+      tipo: tipo.label,
+      totalCadastro: totalCadastro || 0,
+      totalNecessidades: totalNecessidades || 0,
+      proporcao: Math.round(proporcao),
+      status: proporcao < 130 ? "ok" : proporcao < 200 ? "moderado" : "alto"
+    });
+  }
+
+  return {
+    rodovia: rodoviaData.codigo,
+    densidades
+  };
+};
+
 export default function DashboardNecessidades() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -46,6 +95,7 @@ export default function DashboardNecessidades() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
   const [loteInfo, setLoteInfo] = useState<any>(null);
+  const [densidadeInfo, setDensidadeInfo] = useState<any>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -109,7 +159,6 @@ export default function DashboardNecessidades() {
         porRodovia: [],
         porLote: [],
         taxaMatch: 0,
-        timeline: [],
         totalGeral: 0,
       };
 
@@ -227,32 +276,6 @@ export default function DashboardNecessidades() {
         allStats.porServico.Substituir += countSubstituir || 0;
         allStats.porServico.Remover += countRemover || 0;
         allStats.porServico.Manter += countManter || 0;
-
-        // ===== 6. TIMELINE (amostra para estimativa) =====
-        // Buscar amostra de 500 registros para estimar distribuição temporal
-        const { data: timelineData } = await supabase
-          .from(tabela)
-          .select("created_at")
-          .eq("lote_id", loteIdFiltro)
-          .order("created_at", { ascending: true })
-          .limit(500);
-
-        if (timelineData && timelineData.length > 0) {
-          // Agrupar por mês e estimar total baseado na proporção da amostra
-          const fatorMultiplicacao = (totalTipo || 0) / timelineData.length;
-          
-          timelineData.forEach((n: any) => {
-            const data = new Date(n.created_at);
-            const mes = `${(data.getMonth() + 1).toString().padStart(2, '0')}/${data.getFullYear()}`;
-            
-            const existing = allStats.timeline.find((t: any) => t.mes === mes);
-            if (existing) {
-              existing.total += fatorMultiplicacao;
-            } else {
-              allStats.timeline.push({ mes, total: fatorMultiplicacao });
-            }
-          });
-        }
       }
 
       // Calcular taxa de match
@@ -266,13 +289,26 @@ export default function DashboardNecessidades() {
       // Ordenar
       allStats.porRodovia.sort((a: any, b: any) => b.total - a.total);
       allStats.porLote.sort((a: any, b: any) => b.total - a.total);
-      
-      // Ordenar timeline por mês/ano
-      allStats.timeline.sort((a: any, b: any) => {
-        const [mesA, anoA] = a.mes.split("/").map(Number);
-        const [mesB, anoB] = b.mes.split("/").map(Number);
-        return (anoA * 100 + mesA) - (anoB * 100 + mesB);
+
+      // Calcular densidades
+      const densidades = await calcularDensidades(loteIdFiltro, activeSession.rodovia_id);
+      setDensidadeInfo(densidades);
+
+      // Preparar dados de matching por tipo para o gráfico
+      const dadosMatchingPorTipo = allStats.porTipo.map((item: any) => {
+        const comMatch = item.total - (item.semMatch || 0);
+        const taxaMatch = item.total > 0 ? Math.round((comMatch / item.total) * 100) : 0;
+        
+        return {
+          tipo: item.tipo,
+          taxaMatch,
+          comMatch,
+          semMatch: item.semMatch || 0,
+          total: item.total
+        };
       });
+
+      allStats.dadosMatchingPorTipo = dadosMatchingPorTipo;
       
       setStats(allStats);
     } catch (error: any) {
@@ -284,7 +320,6 @@ export default function DashboardNecessidades() {
         porRodovia: [],
         porLote: [],
         taxaMatch: 0,
-        timeline: [],
         totalGeral: 0,
       });
     } finally {
@@ -410,7 +445,7 @@ export default function DashboardNecessidades() {
             <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
             <TabsTrigger value="por-tipo">Por Tipo</TabsTrigger>
             <TabsTrigger value="geografia">Geografia</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="qualidade">Qualidade</TabsTrigger>
           </TabsList>
 
           <TabsContent value="visao-geral" className="space-y-4">
@@ -464,38 +499,94 @@ export default function DashboardNecessidades() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Timeline de Importações
+                    <FileCheck className="h-5 w-5" />
+                    Qualidade do Projeto
                   </CardTitle>
-                  <CardDescription>Evolução das necessidades ao longo do tempo</CardDescription>
+                  <CardDescription>Taxa de Matching e Análise de Densidade</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={stats.timeline}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="mes" 
-                        angle={-45} 
-                        textAnchor="end" 
-                        height={80}
-                        interval={0}
-                      />
-                      <YAxis />
-                      <Tooltip 
-                        formatter={(value: number) => [Math.round(value).toLocaleString(), 'Necessidades']}
-                      />
-                      <Legend />
-                      <Line 
-                        type="monotone" 
-                        dataKey="total" 
-                        stroke="#8884d8" 
-                        strokeWidth={3} 
-                        name="Necessidades"
-                        dot={{ r: 5 }}
-                        activeDot={{ r: 8 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <div className="mb-6">
+                    <h3 className="text-sm font-semibold mb-3">📊 Taxa de Matching por Tipo</h3>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={stats.dadosMatchingPorTipo || []} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" domain={[0, 100]} />
+                        <YAxis dataKey="tipo" type="category" width={120} style={{ fontSize: '11px' }} />
+                        <Tooltip 
+                          formatter={(value: number) => [`${value}%`, 'Match']}
+                          contentStyle={{ fontSize: '12px' }}
+                        />
+                        <Bar dataKey="taxaMatch" radius={[0, 4, 4, 0]}>
+                          {(stats.dadosMatchingPorTipo || []).map((entry: any, index: number) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={entry.taxaMatch >= 70 ? "#22c55e" : entry.taxaMatch >= 40 ? "#eab308" : "#ef4444"} 
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {densidadeInfo && (
+                    <div>
+                      <h3 className="text-sm font-semibold mb-3">
+                        🎯 Densidade: Cadastro vs Necessidades
+                        <span className="text-xs font-normal text-muted-foreground ml-2">
+                          ({densidadeInfo.rodovia})
+                        </span>
+                      </h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs">
+                          <thead className="bg-muted/50">
+                            <tr className="border-b">
+                              <th className="text-left p-2 font-semibold">Tipo</th>
+                              <th className="text-right p-2 font-semibold">Cadastro</th>
+                              <th className="text-right p-2 font-semibold">Necessidades</th>
+                              <th className="text-right p-2 font-semibold">Proporção</th>
+                              <th className="text-center p-2 font-semibold">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {densidadeInfo.densidades.map((d: any, idx: number) => (
+                              <tr key={idx} className="border-b hover:bg-muted/30">
+                                <td className="p-2">{d.tipo}</td>
+                                <td className="text-right p-2">
+                                  <div className="font-semibold">{d.totalCadastro}</div>
+                                  <div className="text-[10px] text-muted-foreground">elementos</div>
+                                </td>
+                                <td className="text-right p-2">
+                                  <div className="font-semibold">{d.totalNecessidades}</div>
+                                  <div className="text-[10px] text-muted-foreground">necessidades</div>
+                                </td>
+                                <td className="text-right p-2 font-semibold">
+                                  {d.proporcao}%
+                                </td>
+                                <td className="text-center p-2">
+                                  {d.status === "ok" && <span title="Equilibrado">✅</span>}
+                                  {d.status === "moderado" && <span title="Moderado">⚠️</span>}
+                                  {d.status === "alto" && <span title="Projeto pesado">❌</span>}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      
+                      <div className="mt-3 p-3 bg-muted/30 rounded-lg text-xs">
+                        <p className="font-semibold mb-1.5">📖 Interpretação:</p>
+                        <ul className="space-y-0.5 text-muted-foreground">
+                          <li>✅ <strong>&lt; 130%</strong>: Projeto equilibrado (bom)</li>
+                          <li>⚠️ <strong>130-200%</strong>: Projeto moderado (atenção)</li>
+                          <li>❌ <strong>&gt; 200%</strong>: Projeto "pesou a mão" (excessivo)</li>
+                        </ul>
+                        <p className="mt-2 text-[11px]">
+                          <strong>Proporção</strong>: Quantas necessidades existem para cada elemento cadastrado. 
+                          Valores muito altos indicam que o projeto prevê muitas intervenções em relação ao inventário existente.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -574,7 +665,7 @@ export default function DashboardNecessidades() {
             </div>
           </TabsContent>
 
-          <TabsContent value="performance" className="space-y-4">
+          <TabsContent value="qualidade" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
