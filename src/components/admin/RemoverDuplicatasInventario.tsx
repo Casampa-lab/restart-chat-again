@@ -37,7 +37,7 @@ const TIPOS_ELEMENTOS = [
     tabela_cadastro: 'ficha_tachas',
     tabela_necessidade: 'necessidades_tachas',
     coluna_referencia: 'cadastro_id',
-    campos_chave: ['snv', 'tipo_tacha', 'km_inicial', 'km_final', 'lado', 'rodovia_id', 'lote_id'],
+    campos_chave: ['snv', 'corpo', 'refletivo', 'cor_refletivo', 'local_implantacao', 'km_inicial', 'km_final', 'rodovia_id', 'lote_id'],
   },
   {
     value: 'cilindros',

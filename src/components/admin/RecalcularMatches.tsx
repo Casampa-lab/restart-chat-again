@@ -129,6 +129,10 @@ export function RecalcularMatches() {
       cor?: string;
       tipo_demarcacao?: string;
       largura_cm?: number;
+      local_implantacao?: string;
+      corpo?: string;
+      refletivo?: string;
+      cor_refletivo?: string;
     },
     cadastros: any[],
     tipo: string,
@@ -170,6 +174,39 @@ export function RecalcularMatches() {
           if (diferencaLargura > 2) {
             continue;
           }
+        }
+      }
+      
+      // VALIDAÇÕES ESPECÍFICAS PARA TACHAS
+      if (tipo === 'tachas') {
+        // 1. NÃO permite match com cadastros vazios ("Não se Aplica" ou null)
+        if (!cad.local_implantacao || 
+            cad.local_implantacao === "Não se Aplica" || 
+            cad.local_implantacao.trim() === "") {
+          continue; // Sempre rejeita cadastros sem implantação definida
+        }
+        
+        // 2. LOCAL_IMPLANTACAO deve ser idêntico
+        if (necessidade.local_implantacao && cad.local_implantacao && 
+            necessidade.local_implantacao !== cad.local_implantacao) {
+          continue;
+        }
+        
+        // 3. CORPO deve ser compatível
+        if (necessidade.corpo && cad.corpo && necessidade.corpo !== cad.corpo) {
+          continue;
+        }
+        
+        // 4. REFLETIVO deve ser compatível
+        if (necessidade.refletivo && cad.refletivo && 
+            necessidade.refletivo !== cad.refletivo) {
+          continue;
+        }
+        
+        // 5. COR_REFLETIVO deve ser compatível
+        if (necessidade.cor_refletivo && cad.cor_refletivo && 
+            necessidade.cor_refletivo !== cad.cor_refletivo) {
+          continue;
         }
       }
       
@@ -368,7 +405,7 @@ export function RecalcularMatches() {
             'porticos': 'pontual',
             'inscricoes': 'pontual',
             'cilindros': 'pontual',
-            'tachas': 'pontual'
+            'tachas': 'linear'
           };
 
           const tipoRecorrenteMap: Record<string, boolean> = {
@@ -378,7 +415,7 @@ export function RecalcularMatches() {
             'placas': false,
             'porticos': false,
             'cilindros': false,
-            'tachas': false
+            'tachas': true
           };
 
           const tipoGeometria = tipoElementoMap[tipo] || 'linear';
@@ -402,7 +439,11 @@ export function RecalcularMatches() {
                 posicao: nec.posicao,
                 cor: nec.cor,
                 tipo_demarcacao: nec.tipo_demarcacao,
-                largura_cm: nec.largura_cm ? parseFloat(nec.largura_cm) : undefined
+                largura_cm: nec.largura_cm ? parseFloat(nec.largura_cm) : undefined,
+                local_implantacao: nec.local_implantacao,
+                corpo: nec.corpo,
+                refletivo: nec.refletivo,
+                cor_refletivo: nec.cor_refletivo
               },
               cadastros,
               tipo,
