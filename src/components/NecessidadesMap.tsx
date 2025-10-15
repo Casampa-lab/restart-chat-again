@@ -43,27 +43,37 @@ function MapBoundsUpdater({
   setZoom: (n: number) => void;
 }) {
   const map = useMap();
+  const [boundsSet, setBoundsSet] = useState(false);
 
   useEffect(() => {
-    if (necessidades.length > 0) {
-      const coordinates = necessidades.map((n) => {
-        const lat = n.latitude_inicial || n.latitude || 0;
-        const lng = n.longitude_inicial || n.longitude || 0;
-        return [lat, lng] as LatLngExpression;
-      });
+    // Executar fitBounds APENAS UMA VEZ na montagem inicial
+    if (necessidades.length > 0 && !boundsSet) {
+      // Usar apenas primeiros 100 markers para calcular bounds (performance)
+      const coordinates = necessidades
+        .slice(0, 100)
+        .map((n) => {
+          const lat = n.latitude_inicial || n.latitude || 0;
+          const lng = n.longitude_inicial || n.longitude || 0;
+          return [lat, lng] as LatLngExpression;
+        });
 
       const bounds = L.latLngBounds(coordinates as any);
       map.fitBounds(bounds, { padding: [50, 50] });
+      setBoundsSet(true);
     }
 
-    // Listener de zoom para ajustar número de markers
+    // Debounce do zoom handler para prevenir recálculos excessivos
+    let zoomTimeout: NodeJS.Timeout;
     const handleZoom = () => {
-      const zoom = map.getZoom();
-      setZoom(zoom);
-      
-      if (zoom > 15) setMaxMarkers(2000);
-      else if (zoom > 13) setMaxMarkers(1000);
-      else setMaxMarkers(500);
+      clearTimeout(zoomTimeout);
+      zoomTimeout = setTimeout(() => {
+        const zoom = map.getZoom();
+        setZoom(zoom);
+        
+        if (zoom > 15) setMaxMarkers(2000);
+        else if (zoom > 13) setMaxMarkers(1000);
+        else setMaxMarkers(500);
+      }, 300); // 300ms debounce
     };
     
     map.on('zoomend', handleZoom);
@@ -71,8 +81,9 @@ function MapBoundsUpdater({
     
     return () => { 
       map.off('zoomend', handleZoom);
+      clearTimeout(zoomTimeout);
     };
-  }, [necessidades, map, setMaxMarkers, setZoom]);
+  }, [necessidades, map, setMaxMarkers, setZoom, boundsSet]);
 
   return null;
 }
@@ -474,7 +485,7 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
             )}
 
             {/* Marcadores limitados para performance */}
-            {necessidadesComCoordenadas.slice(0, maxMarkersToShow).map((nec) => {
+            {necessidadesComCoordenadas.slice(0, maxMarkersToShow).map((nec, index) => {
               const lat = nec.latitude_inicial || nec.latitude || 0;
               const lng = nec.longitude_inicial || nec.longitude || 0;
               const km = nec.km_inicial || nec.km || "N/A";
@@ -483,9 +494,12 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
                 ? `Match: ${nec.distancia_match_metros.toFixed(0)}m`
                 : "";
 
+              // Usar index como fallback para key única (previne conflitos com IDs duplicados)
+              const uniqueKey = `${nec.id}-${index}`;
+              
               return (
                 <Marker
-                  key={nec.id}
+                  key={uniqueKey}
                   position={[lat, lng] as LatLngExpression}
                   icon={createCustomIcon(nec.servico, sinalizacoes.has(nec.id))}
                 >
@@ -614,7 +628,7 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
             })}
 
             <MapBoundsUpdater
-              necessidades={necessidadesComCoordenadas}
+              necessidades={necessidadesComCoordenadas.slice(0, maxMarkersToShow)}
               setMaxMarkers={setMaxMarkersToShow}
               setZoom={setCurrentZoom}
             />

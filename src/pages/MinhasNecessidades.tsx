@@ -181,8 +181,10 @@ const MinhasNecessidades = () => {
           from += batchSize;
           hasMore = data.length === batchSize;
           
-          // Feedback visual de progresso
-          console.log(`Carregando... ${allData.length} registros`);
+          // Feedback visual de progresso (apenas a cada 10 iterações em dev)
+          if (import.meta.env.DEV && iteration % 10 === 0) {
+            console.log(`Carregando... ${allData.length} registros`);
+          }
         } else {
           hasMore = false;
         }
@@ -195,8 +197,10 @@ const MinhasNecessidades = () => {
         });
       }
 
-      console.log("✅ Necessidades carregadas:", allData.length, "registros");
-      console.log("Serviços encontrados:", [...new Set(allData.map((d: any) => d.servico))]);
+      if (import.meta.env.DEV) {
+        console.log("✅ Necessidades carregadas:", allData.length, "registros");
+        console.log("Serviços encontrados:", [...new Set(allData.map((d: any) => d.servico))]);
+      }
       
       setNecessidades(allData);
     } catch (error: any) {
