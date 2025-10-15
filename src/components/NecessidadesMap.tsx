@@ -270,6 +270,26 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
     }
   };
 
+  // Tutorial toast na primeira visita (tipo VGeo)
+  useEffect(() => {
+    if (geojsonSnvData?.features?.length > 0) {
+      const tutorialVisto = localStorage.getItem('snv_tutorial_km_vgeo');
+      
+      if (!tutorialVisto) {
+        setTimeout(() => {
+          toast.info(
+            '💡 Dica: Clique em qualquer ponto da rodovia (linha amarela) para ver o KM exato!',
+            { 
+              duration: 8000,
+              position: 'bottom-center'
+            }
+          );
+          localStorage.setItem('snv_tutorial_km_vgeo', 'true');
+        }, 2000); // Aguarda 2s após carregar
+      }
+    }
+  }, [geojsonSnvData]);
+
   // Função para baixar camada SNV automaticamente (com fallback para SNV completo)
   const downloadSNVAutomatico = async (codigoRodovia: string) => {
     if (!codigoRodovia) return;
@@ -743,32 +763,50 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
       </div>
 
       {(geojsonData || geojsonSnvData) && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="flex items-center gap-2">
-            {geojsonData && geojsonSnvData ? (
-              <>
-                Camadas VGeo (azul) e SNV (verde) carregadas ✓
-                {geojsonSnvData.features?.length > 1000 && (
-                  <Badge variant="outline" className="ml-2">
-                    SNV: Brasil Completo
-                  </Badge>
-                )}
-              </>
-            ) : geojsonData ? (
-              <>Camada VGeo carregada ✓</>
-            ) : (
-              <>
-                Camada SNV carregada ✓
-                {geojsonSnvData.features?.length > 1000 && (
-                  <Badge variant="outline" className="ml-2">
-                    Brasil Completo
-                  </Badge>
-                )}
-              </>
+        <div className="space-y-2">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center gap-2 flex-wrap">
+              {geojsonData && geojsonSnvData ? (
+                <>
+                  Camadas VGeo (azul) e SNV (amarelo) carregadas ✓
+                  {geojsonSnvData.features?.length > 1000 && (
+                    <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-300">
+                      🛣️ SNV: Brasil Completo
+                    </Badge>
+                  )}
+                </>
+              ) : geojsonData ? (
+                <>Camada VGeo carregada ✓</>
+              ) : (
+                <>
+                  Camada SNV carregada ✓
+                  {geojsonSnvData?.features?.length > 0 && (
+                    <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-300">
+                      🛣️ {geojsonSnvData.features.length.toLocaleString()} trechos
+                    </Badge>
+                  )}
+                </>
+              )}
+            </AlertDescription>
+          </Alert>
+          
+          {/* Legenda de cores */}
+          <div className="flex items-center gap-4 text-xs text-muted-foreground px-2">
+            {geojsonData && (
+              <div className="flex items-center gap-1">
+                <div className="w-8 h-0.5 bg-blue-500" />
+                <span>VGeo</span>
+              </div>
             )}
-          </AlertDescription>
-        </Alert>
+            {geojsonSnvData && (
+              <div className="flex items-center gap-1">
+                <div className="w-8 h-1 bg-amber-400" />
+                <span>SNV (clique para ver KM)</span>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Alerta de necessidades sem GPS */}
@@ -825,15 +863,101 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                 key={JSON.stringify(geojsonSnvData)}
                 data={geojsonSnvData}
                 pathOptions={{
-                  color: "#22c55e",
-                  weight: 3,
-                  opacity: 0.7,
+                  color: "#fbbf24", // Amarelo para melhor contraste (tipo VGeo)
+                  weight: 5, // Linha mais grossa
+                  opacity: 0.9, // Bem visível
+                }}
+                eventHandlers={{
+                  mouseover: (e: any) => {
+                    // Highlight ao passar mouse
+                    e.target.setStyle({ 
+                      weight: 7, 
+                      color: "#f59e0b" // Laranja mais escuro
+                    });
+                  },
+                  mouseout: (e: any) => {
+                    // Volta ao normal
+                    e.target.setStyle({ 
+                      weight: 5, 
+                      color: "#fbbf24" 
+                    });
+                  }
                 }}
                 onEachFeature={(feature, layer) => {
-                  layer.on('click', (e) => {
-                    const coords = e.latlng;
-                    console.log('Clicou na rodovia:', coords);
-                    toast.info(`📍 Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`);
+                  const props = feature.properties || {};
+                  const rodovia = props.CD_RODOVIA || props.DS_RODOVIA || props.vl_br || 'Rodovia';
+                  const uf = props.SG_UF || props.uf || '';
+                  const kmInicial = parseFloat(props.KM_INICIAL || props.km_inicial || '0') || 0;
+                  const kmFinal = parseFloat(props.KM_FINAL || props.km_final || '0') || 0;
+                  
+                  // === TOOLTIP HOVER (rápido) ===
+                  layer.bindTooltip(
+                    `<div class="font-semibold text-base">${rodovia}${uf ? ` (${uf})` : ''}</div>
+                     ${kmInicial > 0 || kmFinal > 0 ? `<div class="text-sm text-gray-600">
+                       Trecho: KM ${kmInicial.toFixed(1)} → ${kmFinal.toFixed(1)}
+                     </div>` : ''}`,
+                    { 
+                      sticky: true, // Segue o mouse
+                      className: 'custom-snv-tooltip',
+                      direction: 'top'
+                    }
+                  );
+                  
+                  // === CLICK (detalhado tipo VGeo) ===
+                  layer.on('click', (e: any) => {
+                    const coords = (feature.geometry as any).coordinates;
+                    
+                    // Se tiver KM_INICIAL e KM_FINAL, calcular KM exato
+                    if (kmInicial > 0 || kmFinal > 0) {
+                      // Importar função de cálculo
+                      import('@/lib/gpsUtils').then(({ calcularKmNoSegmento }) => {
+                        const kmCalculado = calcularKmNoSegmento(
+                          e.latlng.lat,
+                          e.latlng.lng,
+                          coords,
+                          kmInicial,
+                          kmFinal
+                        );
+                        
+                        // Toast igual ao VGeo
+                        toast.info(
+                          `📍 ${rodovia}${uf ? ` (${uf})` : ''} - KM ${kmCalculado.toFixed(1)}`,
+                          { 
+                            duration: 5000,
+                            position: 'top-center'
+                          }
+                        );
+                        
+                        // Log detalhado para debug
+                        console.log('📍 Click SNV (tipo VGeo):', {
+                          rodovia,
+                          uf,
+                          trecho: `KM ${kmInicial.toFixed(1)} → ${kmFinal.toFixed(1)}`,
+                          kmClicado: kmCalculado.toFixed(1),
+                          coordenadas: {
+                            lat: e.latlng.lat.toFixed(6),
+                            lng: e.latlng.lng.toFixed(6)
+                          },
+                          atributos_completos: props
+                        });
+                      });
+                    } else {
+                      // Se não tiver KM, mostrar apenas coordenadas
+                      toast.info(
+                        `📍 ${rodovia}${uf ? ` (${uf})` : ''}\nLat: ${e.latlng.lat.toFixed(6)}, Lng: ${e.latlng.lng.toFixed(6)}`,
+                        { 
+                          duration: 5000,
+                          position: 'top-center'
+                        }
+                      );
+                      
+                      console.log('📍 Click SNV (sem KM):', {
+                        rodovia,
+                        uf,
+                        coordenadas: e.latlng,
+                        atributos_completos: props
+                      });
+                    }
                   });
                 }}
               />

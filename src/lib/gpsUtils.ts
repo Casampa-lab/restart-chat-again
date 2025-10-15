@@ -100,3 +100,80 @@ export function removeGeographicOutliers(
     return distance <= maxDistanceMeters;
   });
 }
+
+/**
+ * Calcula o KM aproximado no ponto clicado dentro de um segmento rodoviário
+ * Usa interpolação linear baseada na distância ao longo da geometria
+ * Tipo VGeo - Sistema de Click para Ver KM
+ */
+export function calcularKmNoSegmento(
+  clickLat: number,
+  clickLng: number,
+  segmentCoords: number[][], // [[lng, lat], [lng, lat], ...]
+  kmInicial: number,
+  kmFinal: number
+): number {
+  if (segmentCoords.length < 2) return kmInicial;
+  
+  // 1. Calcular distâncias acumuladas ao longo do segmento
+  let distanciaTotal = 0;
+  const distanciasAcumuladas = [0];
+  
+  for (let i = 1; i < segmentCoords.length; i++) {
+    const dist = calculateDistance(
+      segmentCoords[i-1][1], // lat anterior
+      segmentCoords[i-1][0], // lng anterior
+      segmentCoords[i][1],   // lat atual
+      segmentCoords[i][0]    // lng atual
+    );
+    distanciaTotal += dist;
+    distanciasAcumuladas.push(distanciaTotal);
+  }
+  
+  if (distanciaTotal === 0) return kmInicial;
+  
+  // 2. Encontrar o sub-segmento mais próximo do clique
+  let menorDistancia = Infinity;
+  let segmentoProximo = 0;
+  let proporcaoNoSegmento = 0;
+  
+  for (let i = 1; i < segmentCoords.length; i++) {
+    const p1Lat = segmentCoords[i-1][1];
+    const p1Lng = segmentCoords[i-1][0];
+    const p2Lat = segmentCoords[i][1];
+    const p2Lng = segmentCoords[i][0];
+    
+    // Calcular distância do click aos dois pontos do segmento
+    const distP1 = calculateDistance(clickLat, clickLng, p1Lat, p1Lng);
+    const distP2 = calculateDistance(clickLat, clickLng, p2Lat, p2Lng);
+    const distMenor = Math.min(distP1, distP2);
+    
+    if (distMenor < menorDistancia) {
+      menorDistancia = distMenor;
+      segmentoProximo = i;
+      
+      // Calcular proporção dentro desse sub-segmento
+      const distP1P2 = calculateDistance(p1Lat, p1Lng, p2Lat, p2Lng);
+      if (distP1P2 > 0) {
+        proporcaoNoSegmento = Math.min(1, Math.max(0, distP1 / distP1P2));
+      }
+    }
+  }
+  
+  // 3. Calcular distância acumulada até o ponto clicado
+  const p1Lat = segmentCoords[segmentoProximo-1][1];
+  const p1Lng = segmentCoords[segmentoProximo-1][0];
+  const p2Lat = segmentCoords[segmentoProximo][1];
+  const p2Lng = segmentCoords[segmentoProximo][0];
+  const distSegmento = calculateDistance(p1Lat, p1Lng, p2Lat, p2Lng);
+  
+  const distanciaAteClick = 
+    distanciasAcumuladas[segmentoProximo - 1] +
+    (proporcaoNoSegmento * distSegmento);
+  
+  // 4. Interpolar KM baseado na proporção da distância total
+  const proporcaoTotal = distanciaTotal > 0 ? distanciaAteClick / distanciaTotal : 0;
+  const kmCalculado = kmInicial + (proporcaoTotal * (kmFinal - kmInicial));
+  
+  return kmCalculado;
+}
