@@ -3824,10 +3824,13 @@ export type Database = {
           lote_id: string
           observacao: string | null
           observacao_coordenador: string | null
+          observacao_reconciliacao: string | null
           observacao_usuario: string | null
           reconciliado: boolean | null
           reconciliado_em: string | null
           reconciliado_por: string | null
+          rejeitado_em: string | null
+          rejeitado_por: string | null
           revisao_observacao: string | null
           revisao_solicitada: boolean | null
           revisao_solicitada_por: string | null
@@ -3875,10 +3878,13 @@ export type Database = {
           lote_id: string
           observacao?: string | null
           observacao_coordenador?: string | null
+          observacao_reconciliacao?: string | null
           observacao_usuario?: string | null
           reconciliado?: boolean | null
           reconciliado_em?: string | null
           reconciliado_por?: string | null
+          rejeitado_em?: string | null
+          rejeitado_por?: string | null
           revisao_observacao?: string | null
           revisao_solicitada?: boolean | null
           revisao_solicitada_por?: string | null
@@ -3926,10 +3932,13 @@ export type Database = {
           lote_id?: string
           observacao?: string | null
           observacao_coordenador?: string | null
+          observacao_reconciliacao?: string | null
           observacao_usuario?: string | null
           reconciliado?: boolean | null
           reconciliado_em?: string | null
           reconciliado_por?: string | null
+          rejeitado_em?: string | null
+          rejeitado_por?: string | null
           revisao_observacao?: string | null
           revisao_solicitada?: boolean | null
           revisao_solicitada_por?: string | null
