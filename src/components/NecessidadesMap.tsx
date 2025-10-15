@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import L, { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import MarkerClusterGroup from "react-leaflet-cluster";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -474,24 +473,7 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
               />
             )}
 
-            <MarkerClusterGroup
-              chunkedLoading
-              maxClusterRadius={50}
-              spiderfyOnMaxZoom={true}
-              showCoverageOnHover={false}
-              iconCreateFunction={(cluster) => {
-                const count = cluster.getChildCount();
-                let size = 'small';
-                if (count > 100) size = 'large';
-                else if (count > 10) size = 'medium';
-                
-                return L.divIcon({
-                  html: `<div class="cluster-marker"><span>${count}</span></div>`,
-                  className: `marker-cluster marker-cluster-${size}`,
-                  iconSize: [40, 40] as [number, number],
-                });
-              }}
-            >
+            {/* Marcadores limitados para performance */}
             {necessidadesComCoordenadas.slice(0, maxMarkersToShow).map((nec) => {
               const lat = nec.latitude_inicial || nec.latitude || 0;
               const lng = nec.longitude_inicial || nec.longitude || 0;
@@ -630,9 +612,8 @@ export const NecessidadesMap = ({ necessidades, tipo }: NecessidadesMapProps) =>
                 </Marker>
               );
             })}
-            </MarkerClusterGroup>
 
-            <MapBoundsUpdater 
+            <MapBoundsUpdater
               necessidades={necessidadesComCoordenadas}
               setMaxMarkers={setMaxMarkersToShow}
               setZoom={setCurrentZoom}
