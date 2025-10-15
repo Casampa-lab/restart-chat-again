@@ -123,11 +123,14 @@ export function InventarioMarcasLongitudinaisViewer({
       
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
-        // Não filtrar por distância aqui - o recálculo já validou o match
-        map.set(nec.cadastro_id, {
-          ...nec,
-          servico: nec.servico_final || nec.servico,
-        });
+        // Se já existe uma necessidade para este cadastro_id, mantém apenas a mais próxima
+        const existing = map.get(nec.cadastro_id);
+        if (!existing || (nec.distancia_match_metros || 0) < (existing.distancia_match_metros || 0)) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+          });
+        }
       });
       
       console.log(`🔍 Necessidades carregadas: ${data?.length || 0}, no Map: ${map.size}`);
@@ -476,13 +479,8 @@ export function InventarioMarcasLongitudinaisViewer({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedMarcas.map((marca, idx) => {
+                    {sortedMarcas.map((marca) => {
                       const necessidade = necessidadesMap?.get(marca.id);
-                      
-                      // Debug: mostrar primeiras 3 marcas
-                      if (idx < 3) {
-                        console.log(`🔍 Marca ${idx}: ID=${marca.id}, SNV=${marca.snv}, necessidade=`, necessidade);
-                      }
                       
                       return (
                         <TableRow key={marca.id} className="hover:bg-muted/50">
