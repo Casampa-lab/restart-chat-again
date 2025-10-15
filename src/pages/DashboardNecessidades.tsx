@@ -29,11 +29,11 @@ const COLORS = {
 };
 
 const CORES_GRUPOS: Record<string, string> = {
-  "Placas": "#3b82f6",
+  "Placas de Sinalização Vertical": "#3b82f6",
   "Marcas Longitudinais": "#10b981",
-  "Tachas": "#f59e0b",
-  "Zebrados": "#8b5cf6",
-  "Cilindros": "#ec4899",
+  "Tachas Refletivas": "#f59e0b",
+  "Zebrados (Marcas Transversais)": "#8b5cf6",
+  "Cilindros Delimitadores": "#ec4899",
   "Pórticos": "#06b6d4",
   "Defensas": "#ef4444",
 };
@@ -120,14 +120,27 @@ export default function DashboardNecessidades() {
       for (const tipo of TIPOS_NECESSIDADES) {
         console.log(`Buscando necessidades de ${tipo.label} para lote ${loteIdFiltro}`);
         
+        // Primeiro, contar quantos registros existem
+        const { count } = await supabase
+          .from(`necessidades_${tipo.value}` as any)
+          .select("*", { count: "exact", head: true })
+          .eq("lote_id", loteIdFiltro);
+
+        console.log(`${tipo.label}: ${count} registros encontrados no total`);
+
+        // Buscar com paginação adequada (até 10k registros)
         const { data, error } = await supabase
           .from(`necessidades_${tipo.value}` as any)
           .select(`
-            *,
+            id,
+            servico,
+            cadastro_id,
+            created_at,
             rodovia:rodovias(codigo),
             lote:lotes(numero)
           `)
-          .eq("lote_id", loteIdFiltro);
+          .eq("lote_id", loteIdFiltro)
+          .range(0, Math.min(count || 0, 10000) - 1);
 
         if (error) {
           console.error(`Erro ao carregar ${tipo.label}:`, error);
@@ -135,7 +148,7 @@ export default function DashboardNecessidades() {
         }
 
         const necessidades = (data as any[]) || [];
-        console.log(`${tipo.label}: ${necessidades.length} necessidades encontradas`);
+        console.log(`${tipo.label}: ${necessidades.length} necessidades carregadas`);
 
 
         // Stats por tipo
@@ -193,14 +206,16 @@ export default function DashboardNecessidades() {
           }
         });
 
-        // Timeline (agrupado por mês)
+        // Timeline (agrupado por semana para mais granularidade)
         necessidades.forEach((n: any) => {
-          const mes = new Date(n.created_at).toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
-          const existing = allStats.timeline.find((t: any) => t.mes === mes);
+          const data = new Date(n.created_at);
+          const semana = `${data.getDate().toString().padStart(2, '0')}/${(data.getMonth() + 1).toString().padStart(2, '0')}`;
+          
+          const existing = allStats.timeline.find((t: any) => t.semana === semana);
           if (existing) {
             existing.total++;
           } else {
-            allStats.timeline.push({ mes, total: 1 });
+            allStats.timeline.push({ semana, total: 1 });
           }
         });
       }
@@ -217,9 +232,9 @@ export default function DashboardNecessidades() {
       allStats.porRodovia.sort((a: any, b: any) => b.total - a.total);
       allStats.porLote.sort((a: any, b: any) => b.total - a.total);
       allStats.timeline.sort((a: any, b: any) => {
-        const [mesA, anoA] = a.mes.split(" ");
-        const [mesB, anoB] = b.mes.split(" ");
-        return new Date(`${mesA} 1, ${anoA}`).getTime() - new Date(`${mesB} 1, ${anoB}`).getTime();
+        const [diaA, mesA] = a.semana.split("/").map(Number);
+        const [diaB, mesB] = b.semana.split("/").map(Number);
+        return (mesA * 100 + diaA) - (mesB * 100 + diaB);
       });
       
       setStats(allStats);
@@ -372,15 +387,15 @@ export default function DashboardNecessidades() {
                   <CardDescription>Quantidade de necessidades por tipo de elemento</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={400}>
                     <PieChart>
                       <Pie
                         data={dadosPizzaPorGrupo}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={(entry) => `${entry.name}: ${entry.value}`}
-                        outerRadius={100}
+                        label={false}
+                        outerRadius={120}
                         fill="#8884d8"
                         dataKey="value"
                       >
@@ -388,8 +403,17 @@ export default function DashboardNecessidades() {
                           <Cell key={`cell-${index}`} fill={CORES_GRUPOS[entry.name] || "#888888"} />
                         ))}
                       </Pie>
-                      <Tooltip />
-                      <Legend />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px' }}
+                        formatter={(value: number) => [`${value.toLocaleString()} necessidades`]}
+                      />
+                      <Legend 
+                        layout="vertical" 
+                        align="right" 
+                        verticalAlign="middle"
+                        iconType="circle"
+                        formatter={(value, entry: any) => `${value}: ${entry.payload.value.toLocaleString()}`}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -404,14 +428,28 @@ export default function DashboardNecessidades() {
                   <CardDescription>Evolução das necessidades ao longo do tempo</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={400}>
                     <LineChart data={stats.timeline}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="mes" />
+                      <XAxis 
+                        dataKey="semana" 
+                        angle={-45} 
+                        textAnchor="end" 
+                        height={80}
+                        interval={0}
+                      />
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Line type="monotone" dataKey="total" stroke="#8884d8" strokeWidth={2} name="Necessidades" />
+                      <Line 
+                        type="monotone" 
+                        dataKey="total" 
+                        stroke="#8884d8" 
+                        strokeWidth={3} 
+                        name="Necessidades"
+                        dot={{ r: 5 }}
+                        activeDot={{ r: 8 }}
+                      />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -457,7 +495,7 @@ export default function DashboardNecessidades() {
                   <CardDescription>Top rodovias com mais necessidades</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={stats.porRodovia.slice(0, 10)} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" />
@@ -478,7 +516,7 @@ export default function DashboardNecessidades() {
                   <CardDescription>Distribuição por lote de concessão</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={stats.porLote.slice(0, 10)}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="lote" />
