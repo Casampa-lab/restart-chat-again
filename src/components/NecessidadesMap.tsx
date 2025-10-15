@@ -162,11 +162,17 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
         .eq("chave", cacheKey)
         .maybeSingle();
 
-      // 2. Se cache válido (< 7 dias), usar
+      // 2. Se cache válido (< 7 dias) E não vazio, usar
       if (cached?.valor && cached.updated_at && isRecentCache(cached.updated_at)) {
-        setGeojsonData(JSON.parse(cached.valor));
-        toast.success(`Camada ${codigoRodovia} carregada (cache)`);
-        return;
+        const parsedCache = JSON.parse(cached.valor);
+        if (parsedCache.features && parsedCache.features.length > 0) {
+          console.log(`✓ VGeo cache: ${parsedCache.features.length} features`);
+          setGeojsonData(parsedCache);
+          toast.success(`Camada ${codigoRodovia} carregada (${parsedCache.features.length} trechos, cache)`);
+          return;
+        } else {
+          console.warn("Cache VGeo vazio, baixando novamente...");
+        }
       }
 
       // 3. Se não, baixar via Edge Function
@@ -182,7 +188,20 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
         throw new Error('Resposta inválida do servidor');
       }
 
-      // 4. Salvar em cache
+      // Validar que tem dados antes de salvar
+      if (!data.geojson.features || data.geojson.features.length === 0) {
+        console.warn("Nenhum dado VGeo encontrado para", codigoRodovia);
+        toast.error(`Nenhum dado VGeo encontrado para ${codigoRodovia}`, { id: 'vgeo-download' });
+        return;
+      }
+
+      // Log de debug com informações das features
+      console.log(`✓ VGeo baixado: ${data.features_count} features`);
+      if (data.layer_info) {
+        console.log(`Layer usado: ${data.layer_info.layerId}, Campo: ${data.layer_info.field}`);
+      }
+
+      // 4. Salvar em cache apenas se tiver dados
       await supabase
         .from("configuracoes")
         .upsert({
@@ -213,10 +232,17 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
         .eq("chave", cacheKey)
         .maybeSingle();
 
+      // Se cache válido (< 7 dias) E não vazio, usar
       if (cached?.valor && cached.updated_at && isRecentCache(cached.updated_at)) {
-        setGeojsonSnvData(JSON.parse(cached.valor));
-        toast.success(`Camada SNV ${codigoRodovia} carregada (cache)`);
-        return;
+        const parsedCache = JSON.parse(cached.valor);
+        if (parsedCache.features && parsedCache.features.length > 0) {
+          console.log(`✓ SNV cache: ${parsedCache.features.length} features`);
+          setGeojsonSnvData(parsedCache);
+          toast.success(`Camada SNV ${codigoRodovia} carregada (${parsedCache.features.length} trechos, cache)`);
+          return;
+        } else {
+          console.warn("Cache SNV vazio, baixando novamente...");
+        }
       }
 
       toast.loading(`Baixando camada SNV para ${codigoRodovia}...`, { id: 'snv-download' });
@@ -231,6 +257,20 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
         throw new Error('Resposta inválida do servidor');
       }
 
+      // Validar que tem dados antes de salvar
+      if (!data.geojson.features || data.geojson.features.length === 0) {
+        console.warn("Nenhum dado SNV encontrado para", codigoRodovia);
+        toast.error(`Nenhum dado SNV encontrado para ${codigoRodovia}`, { id: 'snv-download' });
+        return;
+      }
+
+      // Log de debug com informações das features
+      console.log(`✓ SNV baixado: ${data.features_count} features`);
+      if (data.layer_info) {
+        console.log(`Layer usado: ${data.layer_info.layerId}, Campo: ${data.layer_info.field}`);
+      }
+
+      // Salvar em cache apenas se tiver dados
       await supabase
         .from("configuracoes")
         .upsert({
@@ -598,6 +638,51 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
               </Button>
             )}
           </div>
+
+          {/* Botão Limpar Cache */}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              try {
+                const { data: caches } = await supabase
+                  .from("configuracoes")
+                  .select("chave, valor")
+                  .or("chave.like.vgeo_%,chave.like.snv_%");
+
+                const cachesVazios = caches?.filter(c => {
+                  try {
+                    const parsed = JSON.parse(c.valor);
+                    return !parsed.features || parsed.features.length === 0;
+                  } catch {
+                    return true;
+                  }
+                }) || [];
+
+                if (cachesVazios.length === 0) {
+                  toast.info("Nenhum cache vazio encontrado");
+                  return;
+                }
+
+                const { error } = await supabase
+                  .from("configuracoes")
+                  .delete()
+                  .in("chave", cachesVazios.map(c => c.chave));
+
+                if (error) throw error;
+
+                toast.success(`${cachesVazios.length} cache(s) vazio(s) removido(s)`);
+                setGeojsonData(null);
+                setGeojsonSnvData(null);
+              } catch (error: any) {
+                console.error("Erro ao limpar cache:", error);
+                toast.error("Erro ao limpar cache: " + error.message);
+              }
+            }}
+            className="border-amber-500 text-amber-700 hover:bg-amber-50"
+          >
+            🗑️ Limpar Cache Vazio
+          </Button>
         </div>
       </div>
 
@@ -658,9 +743,9 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                 key={JSON.stringify(geojsonData)}
                 data={geojsonData}
                 pathOptions={{
-                  color: "#1e40af",
-                  weight: 4,
-                  opacity: 0.7,
+                  color: "#2563eb",
+                  weight: 6,
+                  opacity: 0.9,
                 }}
               />
             )}
@@ -670,9 +755,9 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                 key={JSON.stringify(geojsonSnvData)}
                 data={geojsonSnvData}
                 pathOptions={{
-                  color: "#16a34a",
-                  weight: 3,
-                  opacity: 0.6,
+                  color: "#22c55e",
+                  weight: 5,
+                  opacity: 0.9,
                 }}
               />
             )}
