@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter } from "lucide-react";
+import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -263,6 +263,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     enabled: !!loteId && !!rodoviaId,
   });
 
+  // Contar TODAS as necessidades com match processados (não apenas divergências)
+  const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
+
   // Contar divergências pendentes
   const divergenciasPendentes = Array.from(necessidadesMap?.values() || []).filter(
     nec => nec.divergencia && !nec.reconciliado
@@ -414,35 +417,67 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Contador de Matches a Reconciliar */}
-          {divergenciasPendentes > 0 && (
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
-                  <AlertCircle className="h-6 w-6 text-warning" />
+          {/* Banner de Status de Reconciliação */}
+          {totalMatchesProcessados > 0 && (
+            divergenciasPendentes === 0 ? (
+              // Banner VERDE - Tudo OK
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-success/20 to-success/10 border-2 border-success/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-success/20 border border-success/40">
+                    <CheckCircle className="h-6 w-6 text-success" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-success">{totalMatchesProcessados}</span>
+                      <span>{totalMatchesProcessados === 1 ? 'item verificado' : 'itens verificados'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      ✅ Inventário OK - Projeto e Sistema em conformidade
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-bold text-base flex items-center gap-2">
-                    <span className="text-2xl font-extrabold text-warning">{divergenciasPendentes}</span>
-                    <span>{divergenciasPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-0.5">
-                    🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={showOnlyDivergencias}
+                    onCheckedChange={setShowOnlyDivergencias}
+                    id="filtro-divergencias"
+                  />
+                  <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
+                    <Filter className="h-4 w-4 inline mr-1" />
+                    Apenas divergências
+                  </Label>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={showOnlyDivergencias}
-                  onCheckedChange={setShowOnlyDivergencias}
-                  id="filtro-divergencias"
-                />
-                <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
-                  <Filter className="h-4 w-4 inline mr-1" />
-                  Apenas divergências
-                </Label>
+            ) : (
+              // Banner AMARELO - Com divergências
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
+                    <AlertCircle className="h-6 w-6 text-warning" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-warning">{divergenciasPendentes}</span>
+                      <span>{divergenciasPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={showOnlyDivergencias}
+                    onCheckedChange={setShowOnlyDivergencias}
+                    id="filtro-divergencias"
+                  />
+                  <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
+                    <Filter className="h-4 w-4 inline mr-1" />
+                    Apenas divergências
+                  </Label>
+                </div>
               </div>
-            </div>
+            )
           )}
 
           {/* Campos de Pesquisa */}
