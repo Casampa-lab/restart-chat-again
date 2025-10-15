@@ -22,6 +22,10 @@ const INVENTORY_TYPES = [
   { value: "inscricoes", label: "Zebrados, Setas, Símbolos e Legendas", table: "ficha_inscricoes" },
 ];
 
+// Constantes de otimização para batching
+const LOG_UPDATE_INTERVAL = 100; // Atualizar UI a cada 100 registros
+const BATCH_SIZE = 100; // Inserir 100 registros por vez no banco
+
 export function InventarioImporterManager() {
   const [inventoryType, setInventoryType] = useState<string>("");
   const [excelFile, setExcelFile] = useState<File | null>(null);
@@ -378,7 +382,7 @@ export function InventarioImporterManager() {
             });
           }
 
-          if ((i + 1) % 50 === 0 || i === photoArray.length - 1) {
+          if ((i + 1) % LOG_UPDATE_INTERVAL === 0 || i === photoArray.length - 1) {
             setProgress(`Upload: ${i + 1}/${photoArray.length} fotos`);
           }
         }
@@ -1013,11 +1017,10 @@ export function InventarioImporterManager() {
 
       // 4. Inserir em lotes
       setProgress("Inserindo dados no banco...");
-      const batchSize = 50;
       let imported = 0;
 
-      for (let i = 0; i < recordsToInsert.length; i += batchSize) {
-        const batch = recordsToInsert.slice(i, i + batchSize);
+      for (let i = 0; i < recordsToInsert.length; i += BATCH_SIZE) {
+        const batch = recordsToInsert.slice(i, i + BATCH_SIZE);
         const { error: insertError } = await supabase
           .from(tableName as any)
           .insert(batch as any);
@@ -1028,7 +1031,11 @@ export function InventarioImporterManager() {
         }
 
         imported += batch.length;
-        setProgress(`Importando: ${imported}/${recordsToInsert.length} registros`);
+        
+        // Atualizar progress apenas a cada LOG_UPDATE_INTERVAL registros
+        if (imported % LOG_UPDATE_INTERVAL === 0 || imported === recordsToInsert.length) {
+          setProgress(`Importando: ${imported}/${recordsToInsert.length} registros`);
+        }
       }
 
       setProgress("");
