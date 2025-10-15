@@ -35,6 +35,8 @@ import MeusElementosPendentes from "./pages/MeusElementosPendentes";
 import RelatorioMedicao from "./pages/RelatorioMedicao";
 import ReconciliacaoPendente from "./pages/ReconciliacaoPendente";
 import ModoCampo from "./pages/ModoCampo";
+import InventarioDinamicoComAlerta from "./pages/InventarioDinamicoComAlerta";
+import RegistrarIntervencaoCampo from "./pages/RegistrarIntervencaoCampo";
 
 const queryClient = new QueryClient();
 
@@ -75,7 +77,9 @@ const App = () => (
           <Route path="/meus-elementos-pendentes" element={<MeusElementosPendentes />} />
           <Route path="/relatorio-medicao" element={<RelatorioMedicao />} />
           <Route path="/reconciliacoes-pendentes" element={<ReconciliacaoPendente />} />
-          <Route path="/modo-campo" element={<ModoCampo />} />
+        <Route path="/modo-campo" element={<ModoCampo />} />
+        <Route path="/modo-campo/inventario-dinamico" element={<InventarioDinamicoComAlerta />} />
+        <Route path="/modo-campo/registrar-intervencao" element={<RegistrarIntervencaoCampo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
