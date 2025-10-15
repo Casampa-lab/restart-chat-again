@@ -80,6 +80,47 @@ export function NecessidadesImporter() {
     return null;
   };
 
+  /**
+   * Sanitiza valores numéricos, convertendo textos como "Não se aplica" para NULL
+   */
+  const sanitizarNumerico = (valor: any): number | null => {
+    // Se já é null/undefined, retorna null
+    if (valor === null || valor === undefined) return null;
+    
+    // Se já é número, retorna
+    if (typeof valor === "number") return isNaN(valor) ? null : valor;
+    
+    // Se é string, verificar se é valor descartável
+    if (typeof valor === "string") {
+      const valorLimpo = valor.trim().toLowerCase();
+      
+      // Lista de valores que devem ser convertidos para NULL
+      const valoresInvalidos = [
+        "não se aplica",
+        "nao se aplica",
+        "n/a",
+        "na",
+        "-",
+        "",
+        "null",
+        "indefinido",
+        "sem informação",
+        "sem informacao"
+      ];
+      
+      if (valoresInvalidos.includes(valorLimpo)) {
+        return null;
+      }
+      
+      // Tentar converter para número
+      const valorNumerico = valorLimpo.replace(",", ".");
+      const numero = parseFloat(valorNumerico);
+      return isNaN(numero) ? null : numero;
+    }
+    
+    return null;
+  };
+
   const identificarServico = (row: any, match: any): string => {
     // SEM match = nova instalação
     if (!match) {
@@ -354,29 +395,35 @@ export function NecessidadesImporter() {
         return {
           ...baseMap,
           codigo: row["Código"] || row["codigo"],
-          posicao: row["Posição"] || row["Posicao"] || row["posicao"] || row["Código"] || row["codigo"], // Posição vem da coluna Posição (ou do Código se não existir)
+          posicao: row["Posição"] || row["Posicao"] || row["posicao"] || row["Código"] || row["codigo"],
           tipo_demarcacao: row["Código"] || row["codigo"],
-          largura_cm: (row["Largura da Faixa (m)"] || row["largura_cm"]) ? 
-            parseFloat(String(row["Largura da Faixa (m)"] || row["largura_cm"]).replace(',', '.')) * 100 : null,
+          largura_cm: (() => {
+            const valor = sanitizarNumerico(row["Largura da Faixa (m)"] || row["largura_cm"]);
+            return valor !== null ? valor * 100 : null;
+          })(),
           material: row["Material"] || row["material"],
-          espessura_cm: (row["Espessura (mm)"] || row["espessura_cm"]) ?
-            parseFloat(String(row["Espessura (mm)"] || row["espessura_cm"]).replace(',', '.')) / 10 : null,
-          extensao_metros: (row["Extensão (km)"] || row["extensao_metros"]) ?
-            parseFloat(String(row["Extensão (km)"] || row["extensao_metros"]).replace(',', '.')) * 1000 : null,
-          traco_m: row["Traço (m)"] && row["Traço (m)"] !== "-" ? parseFloat(String(row["Traço (m)"]).replace(',', '.')) : null,
-          espacamento_m: row["Espaçamento (m)"] && row["Espaçamento (m)"] !== "-" ? parseFloat(String(row["Espaçamento (m)"]).replace(',', '.')) : null,
-          area_m2: row["Área (m²)"] ? parseFloat(String(row["Área (m²)"]).replace(',', '.')) : null,
+          espessura_cm: (() => {
+            const valor = sanitizarNumerico(row["Espessura (mm)"] || row["espessura_cm"]);
+            return valor !== null ? valor / 10 : null;
+          })(),
+          extensao_metros: (() => {
+            const valor = sanitizarNumerico(row["Extensão (km)"] || row["extensao_metros"]);
+            return valor !== null ? valor * 1000 : null;
+          })(),
+          traco_m: sanitizarNumerico(row["Traço (m)"] || row["traco_m"]),
+          espacamento_m: sanitizarNumerico(row["Espaçamento (m)"] || row["espacamento_m"]),
+          area_m2: sanitizarNumerico(row["Área (m²)"] || row["area_m2"]),
         };
 
       case "tachas":
         return {
           ...baseMap,
-          quantidade: parseInt(row["Quantidade"] || row["quantidade"]) || null,
+          quantidade: sanitizarNumerico(row["Quantidade"] || row["quantidade"]),
           corpo: row["Corpo"] || row["corpo"],
           refletivo: row["Refletivo"] || row["refletivo"],
           cor_refletivo: row["Cor do refletivo"] || row["Cor Refletivo"] || row["cor_refletivo"],
-          espacamento_m: row["Espaçamento"] || row["espacamento_m"] ? parseFloat(String(row["Espaçamento"] || row["espacamento_m"]).replace(',', '.')) : null,
-          extensao_km: row["Extensão (km)"] || row["extensao_km"] ? parseFloat(String(row["Extensão (km)"] || row["extensao_km"]).replace(',', '.')) : null,
+          espacamento_m: sanitizarNumerico(row["Espaçamento"] || row["espacamento_m"]),
+          extensao_km: sanitizarNumerico(row["Extensão (km)"] || row["extensao_km"]),
           local_implantacao: row["Local de implantação"] || row["Local Implantação"] || row["local_implantacao"],
           descricao: row["Descrição"] || row["descricao"],
         };
@@ -403,10 +450,10 @@ export function NecessidadesImporter() {
           cor_corpo: row["Cor (Corpo)"] || row["Cor Corpo"] || row["cor_corpo"],
           cor_refletivo: row["Cor (Refletivo)"] || row["Cor Refletivo"] || row["cor_refletivo"],
           tipo_refletivo: row["Tipo Refletivo"] || row["tipo_refletivo"],
-          extensao_km: row["Extensão (km)"] || row["extensao_km"] ? parseFloat(String(row["Extensão (km)"] || row["extensao_km"]).replace(',', '.')) : null,
+          extensao_km: sanitizarNumerico(row["Extensão (km)"] || row["extensao_km"]),
           local_implantacao: row["Local de Implantação"] || row["Local Implantação"] || row["local_implantacao"],
-          espacamento_m: row["Espaçamento"] || row["espacamento_m"] ? parseFloat(String(row["Espaçamento"] || row["espacamento_m"]).replace(',', '.')) : null,
-          quantidade: parseInt(row["Quantidade"] || row["quantidade"]) || null,
+          espacamento_m: sanitizarNumerico(row["Espaçamento"] || row["espacamento_m"]),
+          quantidade: sanitizarNumerico(row["Quantidade"] || row["quantidade"]),
           motivo,
         };
 
@@ -415,14 +462,14 @@ export function NecessidadesImporter() {
           ...baseMap,
           sigla: row["Sigla"] || row["sigla"],
           descricao: row["Descrição"] || row["Descricao"] || row["descricao"],
-          tipo_inscricao: row["Sigla"] || row["sigla"], // tipo_inscricao usa a sigla
+          tipo_inscricao: row["Sigla"] || row["sigla"],
           cor: row["Cor"] || row["cor"],
-          km: row["Km"] || row["KM"] || row["km"] ? parseFloat(String(row["Km"] || row["KM"] || row["km"]).replace(',', '.')) : null,
+          km: sanitizarNumerico(row["Km"] || row["KM"] || row["km"]),
           latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
           longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
           material_utilizado: row["Material"] || row["material"],
-          espessura_mm: row["Espessura (mm)"] || row["Espessura"] || row["espessura_mm"] ? parseFloat(String(row["Espessura (mm)"] || row["Espessura"] || row["espessura_mm"]).replace(',', '.')) : null,
-          area_m2: row["Área (m²)"] || row["Área"] || row["area_m2"] ? parseFloat(String(row["Área (m²)"] || row["Área"] || row["area_m2"]).replace(',', '.')) : null,
+          espessura_mm: sanitizarNumerico(row["Espessura (mm)"] || row["Espessura"] || row["espessura_mm"]),
+          area_m2: sanitizarNumerico(row["Área (m²)"] || row["Área"] || row["area_m2"]),
         };
 
       case "porticos":
@@ -441,13 +488,13 @@ export function NecessidadesImporter() {
         }
         
         return {
-          km: row["Km"] || row["KM"] || row["km"] ? parseFloat(String(row["Km"] || row["KM"] || row["km"]).replace(',', '.')) : null,
+          km: sanitizarNumerico(row["Km"] || row["KM"] || row["km"]),
           latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
           longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
           tipo: row["Tipo"] || row["tipo"],
           lado: row["Lado"] || row["lado"],
-          altura_livre_m: row["Altura Livre (m)"] || row["Altura Livre"] || row["altura_livre_m"] ? parseFloat(String(row["Altura Livre (m)"] || row["Altura Livre"] || row["altura_livre_m"]).replace(',', '.')) : null,
-          vao_horizontal_m: row["Vão Horizontal"] || row["Vao Horizontal"] || row["vao_horizontal_m"] ? parseFloat(String(row["Vão Horizontal"] || row["Vao Horizontal"] || row["vao_horizontal_m"]).replace(',', '.')) : null,
+          altura_livre_m: sanitizarNumerico(row["Altura Livre (m)"] || row["Altura Livre"] || row["altura_livre_m"]),
+          vao_horizontal_m: sanitizarNumerico(row["Vão Horizontal"] || row["Vao Horizontal"] || row["vao_horizontal_m"]),
           observacao: row["Observação"] || row["Observacao"] || row["observacao"],
           snv: row["SNV"] || row["snv"],
           solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
@@ -473,19 +520,21 @@ export function NecessidadesImporter() {
           ...baseMap,
           tramo: row["Tramo"] || row["tramo"],
           lado: row["Lado"] || row["lado"],
-          quantidade_laminas: parseInt(row["Quantidade lâminas"] || row["Quantidade laminas"] || row["quantidade_laminas"]) || null,
-          comprimento_total_tramo_m: row["Comprimento Total do Tramo (m)"] || row["Comprimento Total"] || row["comprimento_total_tramo_m"] ? 
-            parseFloat(String(row["Comprimento Total do Tramo (m)"] || row["Comprimento Total"] || row["comprimento_total_tramo_m"]).replace(',', '.')) : null,
+          quantidade_laminas: sanitizarNumerico(row["Quantidade lâminas"] || row["Quantidade laminas"] || row["quantidade_laminas"]),
+          comprimento_total_tramo_m: sanitizarNumerico(row["Comprimento Total do Tramo (m)"] || row["Comprimento Total"] || row["comprimento_total_tramo_m"]),
           funcao: row["Função"] || row["Funcao"] || row["funcao"],
           especificacao_obstaculo_fixo: row["Especificação do obstáculo fixo"] || row["Especificacao obstaculo fixo"] || row["especificacao_obstaculo_fixo"],
           id_defensa: row["ID"] || row["id"],
-          distancia_pista_obstaculo_m: row["Distância da pista ao obstáculo (m)"] || row["Distancia pista obstaculo"] || row["distancia_pista_obstaculo_m"] ? 
-            parseFloat(String(row["Distância da pista ao obstáculo (m)"] || row["Distancia pista obstaculo"] || row["distancia_pista_obstaculo_m"]).replace(',', '.')) : null,
+          distancia_pista_obstaculo_m: sanitizarNumerico(row["Distância da pista ao obstáculo (m)"] || row["Distancia pista obstaculo"] || row["distancia_pista_obstaculo_m"]),
           risco: row["Risco"] || row["risco"],
-          velocidade_kmh: parseInt(row["Velocidade (km/h)"] || row["Velocidade"] || row["velocidade_kmh"]) || null,
-          vmd_veic_dia: parseInt(row["VMD (veíc./dia)"] || row["VMD"] || row["vmd_veic_dia"]) || null,
-          percentual_veiculos_pesados: row["% veículos pesados"] || row["Percentual veiculos pesados"] || row["percentual_veiculos_pesados"] ? 
-            parseFloat(String(row["% veículos pesados"] || row["Percentual veiculos pesados"] || row["percentual_veiculos_pesados"]).replace(',', '.').replace('%', '')) : null,
+          velocidade_kmh: sanitizarNumerico(row["Velocidade (km/h)"] || row["Velocidade"] || row["velocidade_kmh"]),
+          vmd_veic_dia: sanitizarNumerico(row["VMD (veíc./dia)"] || row["VMD"] || row["vmd_veic_dia"]),
+          percentual_veiculos_pesados: (() => {
+            const valor = row["% veículos pesados"] || row["Percentual veiculos pesados"] || row["percentual_veiculos_pesados"];
+            if (!valor) return null;
+            const valorLimpo = String(valor).replace(',', '.').replace('%', '').trim();
+            return sanitizarNumerico(valorLimpo);
+          })(),
           geometria: row["Geometria"] || row["geometria"],
           classificacao_nivel_contencao: row["Classificação do nível de contenção"] || row["Classificacao nivel contencao"] || row["classificacao_nivel_contencao"],
           nivel_contencao_en1317: row["Nível de contenção EN 1317-2"] || row["Nivel contencao EN1317"] || row["nivel_contencao_en1317"],
@@ -497,10 +546,8 @@ export function NecessidadesImporter() {
           adequacao_funcionalidade_laminas_inadequadas: row["Adequação à funcionalidade - Lâminas inadequadas"] || row["Adequacao laminas inadequadas"] || row["adequacao_funcionalidade_laminas_inadequadas"],
           adequacao_funcionalidade_terminais: row["Adequação à funcionalidade - Terminais"] || row["Adequacao funcionalidade terminais"] || row["adequacao_funcionalidade_terminais"],
           adequacao_funcionalidade_terminais_inadequados: row["Adequação à funcionalidade - Terminais inadequados"] || row["Adequacao terminais inadequados"] || row["adequacao_funcionalidade_terminais_inadequados"],
-          distancia_face_defensa_obstaculo_m: row["Distância da face da defensa ao obstáculo(m)"] || row["Distancia face defensa obstaculo"] || row["distancia_face_defensa_obstaculo_m"] ? 
-            parseFloat(String(row["Distância da face da defensa ao obstáculo(m)"] || row["Distancia face defensa obstaculo"] || row["distancia_face_defensa_obstaculo_m"]).replace(',', '.')) : null,
-          distancia_bordo_pista_face_defensa_m: row["Distância da linha de bordo da pista à face da defensa (m)"] || row["Distancia bordo pista face defensa"] || row["distancia_bordo_pista_face_defensa_m"] ? 
-            parseFloat(String(row["Distância da linha de bordo da pista à face da defensa (m)"] || row["Distancia bordo pista face defensa"] || row["distancia_bordo_pista_face_defensa_m"]).replace(',', '.')) : null,
+          distancia_face_defensa_obstaculo_m: sanitizarNumerico(row["Distância da face da defensa ao obstáculo(m)"] || row["Distancia face defensa obstaculo"] || row["distancia_face_defensa_obstaculo_m"]),
+          distancia_bordo_pista_face_defensa_m: sanitizarNumerico(row["Distância da linha de bordo da pista à face da defensa (m)"] || row["Distancia bordo pista face defensa"] || row["distancia_bordo_pista_face_defensa_m"]),
           motivo: motivoDefensa,
         };
 
@@ -900,6 +947,38 @@ export function NecessidadesImporter() {
             dadosInsercao.motivo_revisao = motivo_revisao;
           }
 
+          // Validar e sanitizar campos numéricos antes de inserir
+          const camposNumericos = [
+            'km', 'km_inicial', 'km_final',
+            'latitude', 'longitude', 'latitude_inicial', 'longitude_inicial',
+            'latitude_final', 'longitude_final',
+            'largura_cm', 'espessura_cm', 'extensao_metros', 'area_m2',
+            'quantidade', 'espacamento_m', 'extensao_km',
+            'altura_livre_m', 'vao_horizontal_m',
+            'quantidade_laminas', 'comprimento_total_tramo_m',
+            'distancia_pista_obstaculo_m', 'velocidade_kmh', 'vmd_veic_dia',
+            'percentual_veiculos_pesados', 'distancia_face_defensa_obstaculo_m',
+            'distancia_bordo_pista_face_defensa_m', 'traco_m', 'espessura_mm'
+          ];
+
+          // Sanitizar todos os campos numéricos
+          let conversoes = 0;
+          camposNumericos.forEach(campo => {
+            if (dadosInsercao.hasOwnProperty(campo)) {
+              const valorOriginal = dadosInsercao[campo];
+              dadosInsercao[campo] = sanitizarNumerico(valorOriginal);
+              
+              // Contar conversões (apenas quando o valor mudou e não era null)
+              if (valorOriginal !== dadosInsercao[campo] && valorOriginal !== null && valorOriginal !== undefined) {
+                conversoes++;
+                // Log apenas a cada 50 linhas para não sobrecarregar
+                if (i % 50 === 0) {
+                  console.log(`🔧 Linha ${linhaExcel}: Campo '${campo}' convertido de '${valorOriginal}' para NULL`);
+                }
+              }
+            }
+          });
+
           const { error } = await supabase
             .from(tabelaNecessidade)
             .insert(dadosInsercao);
@@ -919,12 +998,19 @@ export function NecessidadesImporter() {
           sucessos++;
 
         } catch (error: any) {
+          falhas++;
+          console.error(`❌ Erro linha ${linhaExcel}:`, error);
+          
+          // Detectar erro de tipo numérico
+          const erroNumerico = error.message?.includes('invalid input syntax for type numeric');
+          
           setLogs(prev => [...prev, {
             tipo: "error",
             linha: linhaExcel,
-            mensagem: `Erro: ${error.message}`
+            mensagem: erroNumerico 
+              ? `Erro: Valor inválido em campo numérico. Verifique se há textos como "Não se aplica" em colunas numéricas. Detalhe: ${error.message}`
+              : `Erro: ${error.message || "Erro desconhecido"}`,
           }]);
-          falhas++;
         }
 
         // Atualizar progresso
@@ -940,8 +1026,17 @@ export function NecessidadesImporter() {
           ? `🔗 ${matchesEncontrados} matches por sobreposição` 
           : `🔗 ${matchesEncontrados} matches GPS encontrados`,
         pendentesRevisao > 0 ? `🟡 ${pendentesRevisao} matches parciais pendentes de revisão` : null,
-        divergenciasPendentes > 0 ? `⚠️ ${divergenciasPendentes} divergências a reconciliar` : null
+        divergenciasPendentes > 0 ? `⚠️ ${divergenciasPendentes} divergências a reconciliar` : null,
+        `🔧 Valores "Não se aplica" convertidos para NULL automaticamente`
       ].filter(Boolean).join(' • ');
+
+      console.log(`📊 RESUMO DA IMPORTAÇÃO:`);
+      console.log(`   ✅ Sucessos: ${sucessos}`);
+      console.log(`   ❌ Falhas: ${falhas}`);
+      console.log(`   🔗 Matches encontrados: ${matchesEncontrados}`);
+      console.log(`   ⚠️ Divergências detectadas: ${divergenciasPendentes}`);
+      console.log(`   🔍 Pendentes de revisão: ${pendentesRevisao}`);
+      console.log(`   🔧 Valores "Não se aplica" convertidos para NULL automaticamente`);
 
       setLogs(prev => [...prev, {
         tipo: divergenciasPendentes > 0 ? "warning" : "success",
