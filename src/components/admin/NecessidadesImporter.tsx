@@ -933,6 +933,7 @@ export function NecessidadesImporter() {
             servico_final: servicoFinal,
             divergencia,
             reconciliado: false,
+            status_revisao: 'ok', // Sempre iniciar como 'ok' (aprovado) ao importar/recalcular
             ...dados,
             arquivo_origem: file.name,
             linha_planilha: linhaExcel,
@@ -943,7 +944,10 @@ export function NecessidadesImporter() {
           if (["marcas_longitudinais", "tachas", "defensas"].includes(tipo)) {
             dadosInsercao.overlap_porcentagem = overlap_porcentagem;
             dadosInsercao.tipo_match = tipo_match_resultado;
-            dadosInsercao.status_revisao = status_revisao;
+            // Sobrescrever status_revisao se houver necessidade de revisão manual
+            if (status_revisao) {
+              dadosInsercao.status_revisao = status_revisao;
+            }
             dadosInsercao.motivo_revisao = motivo_revisao;
           }
 

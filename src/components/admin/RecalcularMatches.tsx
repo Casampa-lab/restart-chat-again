@@ -483,7 +483,8 @@ export function RecalcularMatches() {
             servico_final: servicoFinal,
             servico: servicoFinal,
             divergencia,
-            reconciliado: false
+            reconciliado: false,
+            status_revisao: 'ok'
           };
 
           if (cadastro_id !== null) updateData.cadastro_id = cadastro_id;
