@@ -21,6 +21,18 @@ const intervencaoSchema = z.object({
   tipo_pelicula_fundo_novo: z.string().optional(),
   retro_fundo: z.string().optional(),
   retro_orla_legenda: z.string().optional(),
+  fora_plano_manutencao: z.boolean().default(false),
+  justificativa_fora_plano: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+}).refine(data => {
+  if (data.fora_plano_manutencao && !data.justificativa_fora_plano?.trim()) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Justificativa obrigatória quando fora do plano de manutenção",
+  path: ["justificativa_fora_plano"]
 });
 
 interface IntervencaoInventarioFormProps {

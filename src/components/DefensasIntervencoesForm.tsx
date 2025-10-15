@@ -53,6 +53,14 @@ const NIVEIS_RISCO = [
   "Muito Alto"
 ];
 
+const MOTIVOS = [
+  "Substituição",
+  "Recuperação",
+  "Remoção",
+  "Manutenção",
+  "Implantação"
+];
+
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
@@ -68,6 +76,14 @@ const formSchema = z.object({
   longitude: z.string().optional(),
   fora_plano_manutencao: z.boolean().default(false),
   justificativa_fora_plano: z.string().optional(),
+}).refine(data => {
+  if (data.fora_plano_manutencao && !data.justificativa_fora_plano?.trim()) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Justificativa obrigatória quando fora do plano de manutenção",
+  path: ["justificativa_fora_plano"]
 });
 
 const DefensasIntervencoesForm = ({ 
@@ -179,6 +195,8 @@ const DefensasIntervencoesForm = ({
           necessita_intervencao: data.necessita_intervencao,
           observacao: data.observacao || null,
           foto_url: data.foto_url || null,
+          latitude: data.latitude ? parseFloat(data.latitude) : null,
+          longitude: data.longitude ? parseFloat(data.longitude) : null,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
         });
@@ -218,9 +236,20 @@ const DefensasIntervencoesForm = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Motivo da Intervenção *</FormLabel>
-              <FormControl>
-                <Input placeholder="Descreva o motivo" {...field} />
-              </FormControl>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o motivo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {MOTIVOS.map((motivo) => (
+                    <SelectItem key={motivo} value={motivo}>
+                      {motivo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

@@ -377,6 +377,8 @@ export type Database = {
           foto_url: string | null
           id: string
           justificativa_fora_plano: string | null
+          latitude: number | null
+          longitude: number | null
           motivo: string
           necessita_intervencao: boolean | null
           nivel_risco: string | null
@@ -399,6 +401,8 @@ export type Database = {
           foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
+          latitude?: number | null
+          longitude?: number | null
           motivo: string
           necessita_intervencao?: boolean | null
           nivel_risco?: string | null
@@ -421,6 +425,8 @@ export type Database = {
           foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
+          latitude?: number | null
+          longitude?: number | null
           motivo?: string
           necessita_intervencao?: boolean | null
           nivel_risco?: string | null
@@ -714,6 +720,8 @@ export type Database = {
           foto_url: string | null
           id: string
           justificativa_fora_plano: string | null
+          latitude: number | null
+          longitude: number | null
           motivo: string
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
@@ -733,6 +741,8 @@ export type Database = {
           foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
+          latitude?: number | null
+          longitude?: number | null
           motivo: string
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
@@ -752,6 +762,8 @@ export type Database = {
           foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
+          latitude?: number | null
+          longitude?: number | null
           motivo?: string
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
@@ -917,6 +929,8 @@ export type Database = {
           foto_url: string | null
           id: string
           justificativa_fora_plano: string | null
+          latitude: number | null
+          longitude: number | null
           material_utilizado: string | null
           motivo: string
           observacao: string | null
@@ -941,6 +955,8 @@ export type Database = {
           foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
+          latitude?: number | null
+          longitude?: number | null
           material_utilizado?: string | null
           motivo: string
           observacao?: string | null
@@ -965,6 +981,8 @@ export type Database = {
           foto_url?: string | null
           id?: string
           justificativa_fora_plano?: string | null
+          latitude?: number | null
+          longitude?: number | null
           material_utilizado?: string | null
           motivo?: string
           observacao?: string | null
@@ -1143,6 +1161,8 @@ export type Database = {
           id: string
           justificativa_fora_plano: string | null
           largura_cm: number | null
+          latitude: number | null
+          longitude: number | null
           material: string | null
           motivo: string
           observacao: string | null
@@ -1165,6 +1185,8 @@ export type Database = {
           id?: string
           justificativa_fora_plano?: string | null
           largura_cm?: number | null
+          latitude?: number | null
+          longitude?: number | null
           material?: string | null
           motivo: string
           observacao?: string | null
@@ -1187,6 +1209,8 @@ export type Database = {
           id?: string
           justificativa_fora_plano?: string | null
           largura_cm?: number | null
+          latitude?: number | null
+          longitude?: number | null
           material?: string | null
           motivo?: string
           observacao?: string | null
@@ -1469,6 +1493,8 @@ export type Database = {
           fora_plano_manutencao: boolean | null
           id: string
           justificativa_fora_plano: string | null
+          latitude: number | null
+          longitude: number | null
           motivo: string
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
@@ -1489,6 +1515,8 @@ export type Database = {
           fora_plano_manutencao?: boolean | null
           id?: string
           justificativa_fora_plano?: string | null
+          latitude?: number | null
+          longitude?: number | null
           motivo: string
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
@@ -1509,6 +1537,8 @@ export type Database = {
           fora_plano_manutencao?: boolean | null
           id?: string
           justificativa_fora_plano?: string | null
+          latitude?: number | null
+          longitude?: number | null
           motivo?: string
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
@@ -1666,6 +1696,8 @@ export type Database = {
           fora_plano_manutencao: boolean | null
           id: string
           justificativa_fora_plano: string | null
+          latitude: number | null
+          longitude: number | null
           motivo: string
           observacao: string | null
           observacao_coordenador: string | null
@@ -1684,6 +1716,8 @@ export type Database = {
           fora_plano_manutencao?: boolean | null
           id?: string
           justificativa_fora_plano?: string | null
+          latitude?: number | null
+          longitude?: number | null
           motivo: string
           observacao?: string | null
           observacao_coordenador?: string | null
@@ -1702,6 +1736,8 @@ export type Database = {
           fora_plano_manutencao?: boolean | null
           id?: string
           justificativa_fora_plano?: string | null
+          latitude?: number | null
+          longitude?: number | null
           motivo?: string
           observacao?: string | null
           observacao_coordenador?: string | null
@@ -1866,6 +1902,8 @@ export type Database = {
           id: string
           justificativa_fora_plano: string | null
           lado: string | null
+          latitude: number | null
+          longitude: number | null
           material: string | null
           motivo: string
           observacao: string | null
@@ -1888,6 +1926,8 @@ export type Database = {
           id?: string
           justificativa_fora_plano?: string | null
           lado?: string | null
+          latitude?: number | null
+          longitude?: number | null
           material?: string | null
           motivo: string
           observacao?: string | null
@@ -1910,6 +1950,8 @@ export type Database = {
           id?: string
           justificativa_fora_plano?: string | null
           lado?: string | null
+          latitude?: number | null
+          longitude?: number | null
           material?: string | null
           motivo?: string
           observacao?: string | null
