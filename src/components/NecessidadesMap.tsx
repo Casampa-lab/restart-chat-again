@@ -113,9 +113,7 @@ const createCustomIcon = (servico: string, isSinalizado: boolean) => {
 };
 
 export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia, lote }: NecessidadesMapProps) => {
-  const [geojsonData, setGeojsonData] = useState<any>(null);
   const [geojsonSnvData, setGeojsonSnvData] = useState<any>(null);
-  const [uploading, setUploading] = useState(false);
   const [uploadingSnv, setUploadingSnv] = useState(false);
   const [sinalizacoes, setSinalizacoes] = useState<Map<string, any>>(new Map());
   const [loadingSinalizacoes, setLoadingSinalizacoes] = useState(false);
@@ -149,76 +147,6 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
     return diffDays < 7;
   };
 
-  // Função para baixar camada VGeo automaticamente
-  const downloadVGeoAutomatico = async (codigoRodovia: string) => {
-    if (!codigoRodovia) return;
-
-    try {
-      // 1. Verificar se já existe em cache
-      const cacheKey = `vgeo_${codigoRodovia}`;
-      const { data: cached } = await supabase
-        .from("configuracoes")
-        .select("valor, updated_at")
-        .eq("chave", cacheKey)
-        .maybeSingle();
-
-      // 2. Se cache válido (< 7 dias) E não vazio, usar
-      if (cached?.valor && cached.updated_at && isRecentCache(cached.updated_at)) {
-        const parsedCache = JSON.parse(cached.valor);
-        if (parsedCache.features && parsedCache.features.length > 0) {
-          console.log(`✓ VGeo cache: ${parsedCache.features.length} features`);
-          setGeojsonData(parsedCache);
-          toast.success(`Camada ${codigoRodovia} carregada (${parsedCache.features.length} trechos, cache)`);
-          return;
-        } else {
-          console.warn("Cache VGeo vazio, baixando novamente...");
-        }
-      }
-
-      // 3. Se não, baixar via Edge Function
-      toast.loading(`Baixando camada VGeo para ${codigoRodovia}...`, { id: 'vgeo-download' });
-      
-      const { data, error } = await supabase.functions.invoke('download-vgeo-layer', {
-        body: { codigo_rodovia: codigoRodovia }
-      });
-
-      if (error) throw error;
-
-      if (!data?.success || !data?.geojson) {
-        throw new Error('Resposta inválida do servidor');
-      }
-
-      // Validar que tem dados antes de salvar
-      if (!data.geojson.features || data.geojson.features.length === 0) {
-        console.warn("Nenhum dado VGeo encontrado para", codigoRodovia);
-        toast.error(`Nenhum dado VGeo encontrado para ${codigoRodovia}`, { id: 'vgeo-download' });
-        return;
-      }
-
-      // Log de debug com informações das features
-      console.log(`✓ VGeo baixado: ${data.features_count} features`);
-      if (data.layer_info) {
-        console.log(`Layer usado: ${data.layer_info.layerId}, Campo: ${data.layer_info.field}`);
-      }
-
-      // 4. Salvar em cache apenas se tiver dados
-      await supabase
-        .from("configuracoes")
-        .upsert({
-          chave: cacheKey,
-          valor: JSON.stringify(data.geojson),
-          updated_at: new Date().toISOString()
-        });
-
-      // 5. Renderizar
-      setGeojsonData(data.geojson);
-      toast.success(`Camada ${codigoRodovia} carregada (${data.features_count} trechos)`, { id: 'vgeo-download' });
-      
-    } catch (error) {
-      console.error("Erro ao baixar VGeo:", error);
-      toast.error("Falha ao baixar camada VGeo. Use upload manual.", { id: 'vgeo-download' });
-    }
-  };
 
   // Função para carregar SNV completo do Brasil (fallback)
   const carregarSNVCompleto = async () => {
@@ -366,22 +294,7 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
 
   useEffect(() => {
     const loadGeojson = async () => {
-      // Carregar GeoJSON VGeo (rodovia)
-      const { data: dataVgeo } = await supabase
-        .from("configuracoes")
-        .select("valor")
-        .eq("chave", "mapa_geojson_rodovias")
-        .maybeSingle();
-      
-      if (dataVgeo?.valor) {
-        try {
-          setGeojsonData(JSON.parse(dataVgeo.valor));
-        } catch (error) {
-          console.error("Erro ao carregar GeoJSON VGeo:", error);
-        }
-      }
-
-      // Carregar GeoJSON SNV
+      // Carregar apenas SNV
       const { data: dataSnv } = await supabase
         .from("configuracoes")
         .select("valor")
@@ -391,22 +304,19 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
       if (dataSnv?.valor) {
         try {
           setGeojsonSnvData(JSON.parse(dataSnv.valor));
-          toast.success("Camadas VGeo e SNV carregadas");
+          toast.success("Camada SNV carregada");
         } catch (error) {
           console.error("Erro ao carregar GeoJSON SNV:", error);
         }
-      } else if (dataVgeo?.valor) {
-        toast.success("Camada VGeo carregada");
       }
     };
     loadGeojson();
   }, []);
 
-  // Baixar camadas VGeo e SNV automaticamente quando rodovia mudar
+  // Baixar camada SNV automaticamente quando rodovia mudar
   useEffect(() => {
     const rodoviaAtiva = necessidades.length > 0 ? necessidades[0].rodovia : null;
     if (rodoviaAtiva?.codigo) {
-      downloadVGeoAutomatico(rodoviaAtiva.codigo);
       downloadSNVAutomatico(rodoviaAtiva.codigo);
     }
   }, [necessidades]);
@@ -438,42 +348,6 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
     carregarSinalizacoes();
   }, [tipo, necessidades]);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.name.endsWith(".geojson") && !file.name.endsWith(".json")) {
-      toast.error("Por favor, selecione um arquivo GeoJSON (.geojson ou .json)");
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      
-      if (!data.type || (data.type !== "FeatureCollection" && data.type !== "Feature")) {
-        throw new Error("Arquivo não é um GeoJSON válido");
-      }
-
-      const { error } = await supabase
-        .from("configuracoes")
-        .upsert({
-          chave: "mapa_geojson_rodovias",
-          valor: text,
-        });
-
-      if (error) throw error;
-
-      setGeojsonData(data);
-      toast.success("Camada VGeo importada com sucesso!");
-    } catch (error: any) {
-      console.error("Erro ao importar GeoJSON:", error);
-      toast.error("Erro ao importar arquivo: " + error.message);
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handleSnvFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -512,22 +386,6 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
     }
   };
 
-  const handleRemoveGeojson = async () => {
-    try {
-      const { error } = await supabase
-        .from("configuracoes")
-        .delete()
-        .eq("chave", "mapa_geojson_rodovias");
-
-      if (error) throw error;
-
-      setGeojsonData(null);
-      toast.success("Camada VGeo removida!");
-    } catch (error: any) {
-      console.error("Erro ao remover GeoJSON:", error);
-      toast.error("Erro ao remover camada: " + error.message);
-    }
-  };
 
   const handleRemoveSnvGeojson = async () => {
     try {
@@ -659,33 +517,6 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
             </span>
           </div>
 
-          {/* Botões VGeo */}
-          <div className="flex gap-2 items-center">
-            {/* Botão de download automático */}
-            {necessidades.length > 0 && necessidades[0].rodovia?.codigo && !geojsonData && (
-              <Button
-                size="sm"
-                variant="default"
-                onClick={() => downloadVGeoAutomatico(necessidades[0].rodovia.codigo)}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Baixar {necessidades[0].rodovia.codigo}
-              </Button>
-            )}
-            
-            {geojsonData && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleRemoveGeojson}
-                className="border-red-500 text-red-700 hover:bg-red-50"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Remover VGeo
-              </Button>
-            )}
-          </div>
 
           {/* Botões SNV */}
           <div className="flex gap-2 items-center">
@@ -748,7 +579,6 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                 if (error) throw error;
 
                 toast.success(`${cachesVazios.length} cache(s) vazio(s) removido(s)`);
-                setGeojsonData(null);
                 setGeojsonSnvData(null);
               } catch (error: any) {
                 console.error("Erro ao limpar cache:", error);
@@ -762,49 +592,26 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
         </div>
       </div>
 
-      {(geojsonData || geojsonSnvData) && (
+      {geojsonSnvData && (
         <div className="space-y-2">
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="flex items-center gap-2 flex-wrap">
-              {geojsonData && geojsonSnvData ? (
-                <>
-                  Camadas VGeo (azul) e SNV (amarelo) carregadas ✓
-                  {geojsonSnvData.features?.length > 1000 && (
-                    <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-300">
-                      🛣️ SNV: Brasil Completo
-                    </Badge>
-                  )}
-                </>
-              ) : geojsonData ? (
-                <>Camada VGeo carregada ✓</>
-              ) : (
-                <>
-                  Camada SNV carregada ✓
-                  {geojsonSnvData?.features?.length > 0 && (
-                    <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-300">
-                      🛣️ {geojsonSnvData.features.length.toLocaleString()} trechos
-                    </Badge>
-                  )}
-                </>
+              Camada SNV carregada ✓
+              {geojsonSnvData?.features?.length > 0 && (
+                <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-300">
+                  🛣️ {geojsonSnvData.features.length.toLocaleString()} trechos
+                </Badge>
               )}
             </AlertDescription>
           </Alert>
           
           {/* Legenda de cores */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground px-2">
-            {geojsonData && (
-              <div className="flex items-center gap-1">
-                <div className="w-8 h-0.5 bg-blue-500" />
-                <span>VGeo</span>
-              </div>
-            )}
-            {geojsonSnvData && (
-              <div className="flex items-center gap-1">
-                <div className="w-8 h-1 bg-amber-400" />
-                <span>SNV (clique para ver KM)</span>
-              </div>
-            )}
+            <div className="flex items-center gap-1">
+              <div className="w-8 h-1 bg-amber-400" />
+              <span>SNV (clique para ver KM)</span>
+            </div>
           </div>
         </div>
       )}
@@ -845,18 +652,6 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-
-            {geojsonData && (
-              <GeoJSON
-                key={JSON.stringify(geojsonData)}
-                data={geojsonData}
-                pathOptions={{
-                  color: "#2563eb",
-                  weight: 6,
-                  opacity: 0.9,
-                }}
-              />
-            )}
 
             {geojsonSnvData && (
               <GeoJSON
