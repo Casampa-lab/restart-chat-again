@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import { removeGeographicOutliers } from "@/lib/gpsUtils";
+import { removeGeographicOutliers, calcularKmNoSegmento } from "@/lib/gpsUtils";
 
 interface Necessidade {
   id: string;
@@ -692,6 +692,8 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                   weight: 5, // Linha mais grossa
                   opacity: 0.9, // Bem visível
                 }}
+                pane="overlayPane"
+                interactive={true}
                 eventHandlers={{
                   mouseover: (e: any) => {
                     // Highlight ao passar mouse
@@ -715,6 +717,16 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                   const kmInicial = parseFloat(props.KM_INICIAL || props.km_inicial || '0') || 0;
                   const kmFinal = parseFloat(props.KM_FINAL || props.km_final || '0') || 0;
                   
+                  // 🛣️ DEBUG: Log dos atributos da feature
+                  console.log('🛣️ Feature SNV carregada:', {
+                    rodovia,
+                    uf,
+                    kmInicial,
+                    kmFinal,
+                    temKM: kmInicial > 0 || kmFinal > 0,
+                    todosAtributos: props
+                  });
+                  
                   // === TOOLTIP HOVER (rápido) ===
                   layer.bindTooltip(
                     `<div class="font-semibold text-base">${rodovia}${uf ? ` (${uf})` : ''}</div>
@@ -734,44 +746,41 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                     
                     // Se tiver KM_INICIAL e KM_FINAL, calcular KM exato
                     if (kmInicial > 0 || kmFinal > 0) {
-                      // Importar função de cálculo
-                      import('@/lib/gpsUtils').then(({ calcularKmNoSegmento }) => {
-                        const kmCalculado = calcularKmNoSegmento(
-                          e.latlng.lat,
-                          e.latlng.lng,
-                          coords,
-                          kmInicial,
-                          kmFinal
-                        );
-                        
-                        // Toast igual ao VGeo
-                        toast.info(
-                          `📍 ${rodovia}${uf ? ` (${uf})` : ''} - KM ${kmCalculado.toFixed(1)}`,
-                          { 
-                            duration: 5000,
-                            position: 'top-center'
-                          }
-                        );
-                        
-                        // Log detalhado para debug
-                        console.log('📍 Click SNV (tipo VGeo):', {
-                          rodovia,
-                          uf,
-                          trecho: `KM ${kmInicial.toFixed(1)} → ${kmFinal.toFixed(1)}`,
-                          kmClicado: kmCalculado.toFixed(1),
-                          coordenadas: {
-                            lat: e.latlng.lat.toFixed(6),
-                            lng: e.latlng.lng.toFixed(6)
-                          },
-                          atributos_completos: props
-                        });
-                      });
-                    } else {
-                      // Se não tiver KM, mostrar apenas coordenadas
+                      const kmCalculado = calcularKmNoSegmento(
+                        e.latlng.lat,
+                        e.latlng.lng,
+                        coords,
+                        kmInicial,
+                        kmFinal
+                      );
+                      
+                      // Toast igual ao VGeo
                       toast.info(
-                        `📍 ${rodovia}${uf ? ` (${uf})` : ''}\nLat: ${e.latlng.lat.toFixed(6)}, Lng: ${e.latlng.lng.toFixed(6)}`,
+                        `📍 ${rodovia}${uf ? ` (${uf})` : ''} - KM ${kmCalculado.toFixed(1)}`,
                         { 
                           duration: 5000,
+                          position: 'top-center'
+                        }
+                      );
+                      
+                      // Log detalhado para debug
+                      console.log('📍 Click SNV:', {
+                        rodovia,
+                        uf,
+                        trecho: `KM ${kmInicial.toFixed(1)} → ${kmFinal.toFixed(1)}`,
+                        kmClicado: kmCalculado.toFixed(1),
+                        coordenadas: {
+                          lat: e.latlng.lat.toFixed(6),
+                          lng: e.latlng.lng.toFixed(6)
+                        },
+                        atributos_completos: props
+                      });
+                    } else {
+                      // Se não tiver KM, mostrar mensagem informativa
+                      toast.warning(
+                        `⚠️ ${rodovia}${uf ? ` (${uf})` : ''}\nEste trecho não possui dados de KM.\nCoordenadas: ${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`,
+                        { 
+                          duration: 6000,
                           position: 'top-center'
                         }
                       );
