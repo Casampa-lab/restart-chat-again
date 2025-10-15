@@ -360,7 +360,6 @@ export function InventarioMarcasLongitudinaisViewer({
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
-                      {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("snv")}
@@ -371,10 +370,10 @@ export function InventarioMarcasLongitudinaisViewer({
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("tipo_demarcacao")}
                       >
-                        <div className="flex items-center">
+                        <div className="whitespace-normal leading-tight flex items-center justify-center">
                           Código
                           <SortIcon column="tipo_demarcacao" />
                         </div>
@@ -389,60 +388,49 @@ export function InventarioMarcasLongitudinaisViewer({
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("km_inicial")}
+                      >
+                        <div className="flex items-center justify-center">
+                          km
+                          <SortIcon column="km_inicial" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("servico")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Projeto
+                          <SortIcon column="servico" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("status_revisao")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Status
+                          <SortIcon column="status_revisao" />
+                        </div>
+                      </TableHead>
+                      {searchLat && searchLng && <TableHead>Distância</TableHead>}
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("material")}
                       >
-                        <div className="flex items-center">
+                        <div className="whitespace-normal leading-tight flex items-center justify-center">
                           Material
                           <SortIcon column="material" />
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("km_inicial")}
-                      >
-                        <div className="flex items-center">
-                          km Inicial
-                          <SortIcon column="km_inicial" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("km_final")}
-                      >
-                        <div className="flex items-center">
-                          km Final
-                          <SortIcon column="km_final" />
-                        </div>
-                      </TableHead>
-                      <TableHead>Traço (m)</TableHead>
-                      <TableHead>Espaçamento (m)</TableHead>
-                      <TableHead className="cursor-pointer select-none hover:bg-muted/50 text-center">
-                        <div className="flex items-center justify-center">
-                          Projeto
-                        </div>
-                      </TableHead>
-                      <TableHead className="cursor-pointer select-none hover:bg-muted/50 text-center">
-                        <div className="flex items-center justify-center">
-                          Status
-                        </div>
-                      </TableHead>
-                      <TableHead
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("extensao_metros")}
                       >
-                        <div className="flex items-center">
+                        <div className="whitespace-normal leading-tight flex items-center justify-center">
                           Extensão (km)
                           <SortIcon column="extensao_metros" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("data_vistoria")}
-                      >
-                        <div className="flex items-center">
-                          Data Vistoria
-                          <SortIcon column="data_vistoria" />
                         </div>
                       </TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -454,85 +442,85 @@ export function InventarioMarcasLongitudinaisViewer({
                       
                       return (
                         <TableRow key={marca.id} className="hover:bg-muted/50">
-                        {searchLat && searchLng && (
+                          <TableCell className="font-medium">{marca.snv || "-"}</TableCell>
                           <TableCell>
-                            <Badge variant="secondary">
-                              {(marca as any).distance?.toFixed(1)}m
+                            <Badge variant="outline">
+                              {marca.tipo_demarcacao || "-"}
                             </Badge>
                           </TableCell>
-                        )}
-                        <TableCell className="font-mono text-sm">{marca.snv || "-"}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{marca.tipo_demarcacao || "-"}</Badge>
-                        </TableCell>
-                        <TableCell>{marca.cor || "-"}</TableCell>
-                        <TableCell>{marca.material || "-"}</TableCell>
-                        <TableCell>{marca.km_inicial?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>{marca.km_final?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>{marca.traco_m?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>{marca.espacamento_m?.toFixed(2) || "-"}</TableCell>
-                        
-                        {/* Coluna Projeto */}
-                        <TableCell className="text-center">
-                          {necessidade ? (
-                            <Badge 
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {necessidade.servico_final || necessidade.servico || "N/A"}
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-muted-foreground text-xs">
-                              Sem previsão
-                            </Badge>
+                          <TableCell>{marca.cor || "-"}</TableCell>
+                          <TableCell className="text-center">
+                            {marca.km_inicial?.toFixed(2) || "-"}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {necessidade ? (
+                              <Badge 
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {necessidade.servico_final || necessidade.servico || "N/A"}
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground text-xs">
+                                Sem previsão
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {necessidade?.status_revisao === 'pendente_coordenador' ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenReconciliacao(marca);
+                                }}
+                                className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
+                              >
+                                <AlertCircle className="h-4 w-4 mr-1" />
+                                Verificar Match
+                              </Button>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          {searchLat && searchLng && (
+                            <TableCell>
+                              <Badge variant="secondary">
+                                {(marca as any).distance?.toFixed(1)}m
+                              </Badge>
+                            </TableCell>
                           )}
-                        </TableCell>
-                        
-                        {/* Coluna Status */}
-                        <TableCell className="text-center">
-                          {necessidade?.status_revisao === 'pendente_coordenador' ? (
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="text-xs">
+                              {marca.material || "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="text-xs">
+                              {marca.extensao_metros ? (marca.extensao_metros / 1000).toFixed(2) : "-"} km
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
                             <Button
-                              variant="outline"
+                              variant="ghost"
                               size="sm"
-                              onClick={(e) => {
+                              onClick={async (e) => {
                                 e.stopPropagation();
-                                handleOpenReconciliacao(marca);
+                                setSelectedMarca(marca);
+                                const { data } = await supabase
+                                  .from("ficha_marcas_longitudinais_intervencoes")
+                                  .select("*")
+                                  .eq("ficha_marcas_longitudinais_id", marca.id)
+                                  .order("data_intervencao", { ascending: false });
+                                setIntervencoes(data || []);
                               }}
-                              className="border-orange-400 text-orange-600 bg-orange-50/50 hover:bg-orange-100 font-medium shadow-sm transition-all hover:shadow-md"
                             >
-                              <AlertCircle className="h-4 w-4 mr-1" />
-                              Requer Revisão
+                              <Eye className="h-4 w-4" />
                             </Button>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell>{marca.extensao_metros ? (marca.extensao_metros / 1000).toFixed(2) : "-"}</TableCell>
-                        <TableCell>
-                          {marca.data_vistoria
-                            ? new Date(marca.data_vistoria).toLocaleDateString("pt-BR")
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              setSelectedMarca(marca);
-                              const { data } = await supabase
-                                .from("ficha_marcas_longitudinais_intervencoes")
-                                .select("*")
-                                .eq("ficha_marcas_longitudinais_id", marca.id)
-                                .order("data_intervencao", { ascending: false });
-                              setIntervencoes(data || []);
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
+                          </TableCell>
+                        </TableRow>
+                      );
                     })}
                   </TableBody>
                 </Table>
