@@ -324,7 +324,7 @@ export function NecessidadesImporter() {
         latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
         longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
         codigo: row["Código da Placa"] || row["Código da placa"] || row["Codigo da Placa"] || row["Codigo da placa"] || row["Código"] || row["Codigo"] || row["codigo"],
-        tipo: row["Tipo da Placa"] || row["Tipo de Placa"] || row["Tipo da placa"] || row["Tipo de placa"] || row["Tipo Placa"] || row["Tipo"] || row["tipo"],
+        tipo: row["Tipo de Placa"] || row["Tipo de placa"] || row["Tipo da Placa"] || row["Tipo da placa"] || row["Tipo Placa"] || row["Tipo"] || row["tipo"],
         lado: row["Lado"] || row["lado"],
         dimensoes_mm: row["Dimensões (mm)"] || row["dimensoes_mm"],
         substrato: row["Tipo de Substrato"] || row["Substrato"] || row["substrato"],
