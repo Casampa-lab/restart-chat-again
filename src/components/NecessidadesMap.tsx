@@ -148,8 +148,8 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
   };
 
 
-  // Função para carregar SNV completo do Brasil (fallback)
-  const carregarSNVCompleto = async () => {
+  // Função para carregar SNV completo do Brasil (fallback) e filtrar pela rodovia ativa
+  const carregarSNVCompleto = async (codigoRodovia?: string) => {
     try {
       // Verificar cache primeiro
       const cacheKey = 'snv_brasil_completo';
@@ -159,38 +159,68 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
         .eq("chave", cacheKey)
         .maybeSingle();
 
+      let geojsonCompleto: any;
+
       // Se cache válido (< 7 dias), usar
       if (cached?.valor && cached.updated_at && isRecentCache(cached.updated_at)) {
-        const parsedCache = JSON.parse(cached.valor);
-        console.log(`✓ SNV Brasil completo (cache): ${parsedCache.features?.length || 0} features`);
-        setGeojsonSnvData(parsedCache);
-        toast.success("SNV Brasil completo carregado (cache)");
-        return;
+        geojsonCompleto = JSON.parse(cached.valor);
+        console.log(`✓ SNV Brasil completo (cache): ${geojsonCompleto.features?.length || 0} features`);
+      } else {
+        // Se não, buscar do arquivo público
+        toast.loading("Carregando SNV Brasil completo...", { id: 'snv-completo' });
+        const response = await fetch('/geojson/snv-brasil-completo.geojson');
+        
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        geojsonCompleto = await response.json();
+        
+        // Salvar em cache
+        await supabase
+          .from("configuracoes")
+          .upsert({
+            chave: cacheKey,
+            valor: JSON.stringify(geojsonCompleto),
+            updated_at: new Date().toISOString()
+          });
+
+        console.log(`✓ SNV Brasil completo carregado: ${geojsonCompleto.features?.length || 0} features`);
       }
 
-      // Se não, buscar do arquivo público
-      toast.loading("Carregando SNV Brasil completo...", { id: 'snv-completo' });
-      const response = await fetch('/geojson/snv-brasil-completo.geojson');
-      
-      if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
-      }
-
-      const geojsonCompleto = await response.json();
-      
-      // Salvar em cache
-      await supabase
-        .from("configuracoes")
-        .upsert({
-          chave: cacheKey,
-          valor: JSON.stringify(geojsonCompleto),
-          updated_at: new Date().toISOString()
+      // FILTRAR pela rodovia se código foi fornecido
+      if (codigoRodovia && geojsonCompleto.features) {
+        const codigoLimpo = codigoRodovia.replace(/^BR-?/i, ''); // Remove "BR-" ou "BR"
+        
+        const featuresRodovia = geojsonCompleto.features.filter((f: any) => {
+          const props = f.properties || {};
+          // Tentar diferentes campos de rodovia
+          const brValue = props.vl_br || props.CD_RODOVIA || props.DS_RODOVIA || props.br || '';
+          const brLimpo = String(brValue).replace(/^BR-?/i, '');
+          
+          return brLimpo === codigoLimpo;
         });
 
+        if (featuresRodovia.length > 0) {
+          const geojsonFiltrado = {
+            type: "FeatureCollection",
+            features: featuresRodovia
+          };
+          
+          setGeojsonSnvData(geojsonFiltrado);
+          toast.success(`SNV ${codigoRodovia} carregado (${featuresRodovia.length} trechos)`, { id: 'snv-completo' });
+          console.log(`✓ SNV filtrado para ${codigoRodovia}: ${featuresRodovia.length} features`);
+          return;
+        } else {
+          console.warn(`Nenhum trecho encontrado para ${codigoRodovia} no SNV completo`);
+          toast.info(`SNV: não encontrado trecho específico da ${codigoRodovia}`, { id: 'snv-completo' });
+        }
+      }
+
+      // Se não filtrou ou não encontrou, mostrar tudo
       setGeojsonSnvData(geojsonCompleto);
       const featureCount = geojsonCompleto.features?.length || 0;
       toast.success(`SNV Brasil completo carregado (${featureCount} trechos)`, { id: 'snv-completo' });
-      console.log(`✓ SNV Brasil completo carregado: ${featureCount} features`);
       
     } catch (error) {
       console.error("Erro ao carregar SNV completo:", error);
@@ -259,9 +289,9 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
       if (!data.geojson.features || data.geojson.features.length === 0) {
         console.warn("Nenhum dado SNV encontrado para", codigoRodovia);
         toast.dismiss('snv-download');
-        // Fallback para SNV completo
-        console.log("Tentando carregar SNV Brasil completo como fallback...");
-        await carregarSNVCompleto();
+        // Fallback para SNV completo FILTRADO pela rodovia
+        console.log(`Tentando carregar SNV Brasil completo filtrado para ${codigoRodovia}...`);
+        await carregarSNVCompleto(codigoRodovia);
         return;
       }
 
@@ -286,9 +316,9 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
     } catch (error) {
       console.error("Erro ao baixar SNV:", error);
       toast.dismiss('snv-download');
-      // Fallback para SNV completo
-      console.log("Erro no download SNV específico, tentando SNV completo...");
-      await carregarSNVCompleto();
+      // Fallback para SNV completo FILTRADO pela rodovia
+      console.log(`Erro no download SNV específico, tentando SNV completo filtrado para ${codigoRodovia}...`);
+      await carregarSNVCompleto(codigoRodovia);
     }
   };
 
