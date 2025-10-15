@@ -133,6 +133,7 @@ const MinhasNecessidades = () => {
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [busca, setBusca] = useState("");
   const [visualizacao, setVisualizacao] = useState<"tabela" | "mapa">("tabela");
+  const [verTodasRodovias, setVerTodasRodovias] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -165,11 +166,13 @@ const MinhasNecessidades = () => {
             lote:lotes(numero)
           `);
         
-        // Filtrar por lote e rodovia se houver sessão ativa
+        // Filtrar por lote se houver sessão ativa
         if (activeSession?.lote_id) {
           query = query.eq("lote_id", activeSession.lote_id);
         }
-        if (activeSession?.rodovia_id) {
+        
+        // Filtrar por rodovia APENAS se modo "Ver Todas" estiver desativado
+        if (activeSession?.rodovia_id && !verTodasRodovias) {
           query = query.eq("rodovia_id", activeSession.rodovia_id);
         }
         
@@ -219,7 +222,7 @@ const MinhasNecessidades = () => {
       setNecessidades([]);
       loadNecessidades(tipoAtivo);
     }
-  }, [user, activeSession?.lote_id, tipoAtivo]);
+  }, [user, activeSession?.lote_id, tipoAtivo, verTodasRodovias]);
 
   // Scroll automático + highlight quando houver highlight na URL
   useEffect(() => {
@@ -351,13 +354,33 @@ const MinhasNecessidades = () => {
                         <FileText className="h-5 w-5" />
                         {tipo.label}
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="flex items-center gap-2">
                         Total: {necessidadesFiltradas.length} necessidades
+                        {activeSession && (
+                          <Badge variant="outline" className={verTodasRodovias ? "border-blue-500 text-blue-700 bg-blue-50" : ""}>
+                            {verTodasRodovias ? (
+                              <>🌍 Lote {activeSession.lote?.numero} - Todas Rodovias</>
+                            ) : (
+                              <>{activeSession.rodovia?.codigo} - Lote {activeSession.lote?.numero}</>
+                            )}
+                          </Badge>
+                        )}
                       </CardDescription>
                     </div>
 
                     {/* Filtros e Visualização */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* Botão Ver Todas Rodovias */}
+                      <Button
+                        size="sm"
+                        variant={verTodasRodovias ? "default" : "outline"}
+                        onClick={() => setVerTodasRodovias(!verTodasRodovias)}
+                        className={verTodasRodovias ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}
+                      >
+                        <Map className="h-4 w-4 mr-2" />
+                        {verTodasRodovias ? "🌍 Todas Rodovias" : "Ver Todas Rodovias"}
+                      </Button>
+                      
                       <div className="flex border rounded-lg overflow-hidden">
                         <Button
                           variant={visualizacao === "tabela" ? "default" : "ghost"}
