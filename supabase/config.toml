@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-nc-notification]
 verify_jwt = false
+
+[functions.download-vgeo-layer]
+verify_jwt = false

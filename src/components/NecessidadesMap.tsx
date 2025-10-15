@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, AlertCircle, Upload, AlertTriangle, X } from "lucide-react";
+import { MapPin, AlertCircle, Upload, AlertTriangle, X, Download } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from "react-leaflet";
@@ -141,6 +141,66 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
     return !lat || !lng || lat === 0 || lng === 0;
   });
 
+  // Função para verificar se cache é recente (menos de 7 dias)
+  const isRecentCache = (updatedAt: string) => {
+    const cacheDate = new Date(updatedAt);
+    const now = new Date();
+    const diffDays = (now.getTime() - cacheDate.getTime()) / (1000 * 60 * 60 * 24);
+    return diffDays < 7;
+  };
+
+  // Função para baixar camada VGeo automaticamente
+  const downloadVGeoAutomatico = async (codigoRodovia: string) => {
+    if (!codigoRodovia) return;
+
+    try {
+      // 1. Verificar se já existe em cache
+      const cacheKey = `vgeo_${codigoRodovia}`;
+      const { data: cached } = await supabase
+        .from("configuracoes")
+        .select("valor, updated_at")
+        .eq("chave", cacheKey)
+        .maybeSingle();
+
+      // 2. Se cache válido (< 7 dias), usar
+      if (cached?.valor && cached.updated_at && isRecentCache(cached.updated_at)) {
+        setGeojsonData(JSON.parse(cached.valor));
+        toast.success(`Camada ${codigoRodovia} carregada (cache)`);
+        return;
+      }
+
+      // 3. Se não, baixar via Edge Function
+      toast.loading(`Baixando camada VGeo para ${codigoRodovia}...`, { id: 'vgeo-download' });
+      
+      const { data, error } = await supabase.functions.invoke('download-vgeo-layer', {
+        body: { codigo_rodovia: codigoRodovia }
+      });
+
+      if (error) throw error;
+
+      if (!data?.success || !data?.geojson) {
+        throw new Error('Resposta inválida do servidor');
+      }
+
+      // 4. Salvar em cache
+      await supabase
+        .from("configuracoes")
+        .upsert({
+          chave: cacheKey,
+          valor: JSON.stringify(data.geojson),
+          updated_at: new Date().toISOString()
+        });
+
+      // 5. Renderizar
+      setGeojsonData(data.geojson);
+      toast.success(`Camada ${codigoRodovia} carregada (${data.features_count} trechos)`, { id: 'vgeo-download' });
+      
+    } catch (error) {
+      console.error("Erro ao baixar VGeo:", error);
+      toast.error("Falha ao baixar camada VGeo. Use upload manual.", { id: 'vgeo-download' });
+    }
+  };
+
   useEffect(() => {
     const loadGeojson = async () => {
       // Carregar GeoJSON VGeo (rodovia)
@@ -178,6 +238,14 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
     };
     loadGeojson();
   }, []);
+
+  // Baixar camada VGeo automaticamente quando rodovia mudar
+  useEffect(() => {
+    const rodoviaAtiva = necessidades.length > 0 ? necessidades[0].rodovia : null;
+    if (rodoviaAtiva?.codigo) {
+      downloadVGeoAutomatico(rodoviaAtiva.codigo);
+    }
+  }, [necessidades]);
 
   useEffect(() => {
     const carregarSinalizacoes = async () => {
@@ -429,6 +497,19 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
 
           {/* Botões VGeo */}
           <div className="flex gap-2 items-center">
+            {/* Botão de download automático */}
+            {necessidades.length > 0 && necessidades[0].rodovia?.codigo && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => downloadVGeoAutomatico(necessidades[0].rodovia.codigo)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Baixar {necessidades[0].rodovia.codigo}
+              </Button>
+            )}
+            
             <div className="relative">
               <input
                 type="file"
@@ -445,7 +526,7 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                 disabled={uploading}
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {geojsonData ? "Trocar" : "Importar"} GeoJSON VGeo
+                {geojsonData ? "Trocar" : "Importar"} Manual
               </Button>
             </div>
             
