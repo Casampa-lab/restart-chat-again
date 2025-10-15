@@ -541,13 +541,48 @@ export function NecessidadesImporter() {
         throw new Error("Planilha vazia ou sem dados");
       }
 
-      // Pegar os cabeçalhos da linha 2 (índice 1)
-      const headers = jsonData[1] as any[];
+      // Detectar automaticamente onde estão os headers
+      const primeiraLinha = jsonData[0] as any[];
+      const segundaLinha = jsonData[1] as any[];
+
+      // Colunas comuns em planilhas de necessidades
+      const colunasEsperadas = [
+        "Tipo de Placa", "Código da Placa", "Tipo da Placa", "Código",
+        "Km", "KM", "Latitude", "Longitude", "BR", "SNV", "Lado",
+        "Tipo de Demarcação", "Cor", "Material", "Largura", "Km Inicial", "Km Final"
+      ];
+
+      // Verificar qual linha tem mais colunas conhecidas
+      const matchPrimeiraLinha = primeiraLinha.filter((col: any) =>
+        colunasEsperadas.some(esp => 
+          String(col || "").toLowerCase().includes(esp.toLowerCase())
+        )
+      ).length;
+
+      const matchSegundaLinha = segundaLinha.filter((col: any) =>
+        colunasEsperadas.some(esp => 
+          String(col || "").toLowerCase().includes(esp.toLowerCase())
+        )
+      ).length;
+
+      // Escolher a linha com mais matches como header
+      const linhaHeader = matchPrimeiraLinha > matchSegundaLinha ? 0 : 1;
+      const linhaInicioDados = linhaHeader + 1;
+
+      console.log(`🔍 Headers detectados na linha ${linhaHeader + 1} (índice ${linhaHeader})`);
+      console.log(`🔍 Matches - Linha 1: ${matchPrimeiraLinha}, Linha 2: ${matchSegundaLinha}`);
+
+      const headers = jsonData[linhaHeader] as any[];
       
-      // Converter os dados (a partir da linha 3) em objetos usando os cabeçalhos da linha 2
-      const dadosComHeader = jsonData.slice(2).map((row: any) => {
+      // Normalizar headers (remover espaços extras)
+      const headersNormalizados = headers.map((h: any) => 
+        String(h || "").trim()
+      );
+      
+      // Converter os dados usando headers detectados
+      const dadosComHeader = jsonData.slice(linhaInicioDados).map((row: any) => {
         const obj: any = {};
-        headers.forEach((header, index) => {
+        headersNormalizados.forEach((header, index) => {
           obj[header] = row[index];
         });
         return obj;
