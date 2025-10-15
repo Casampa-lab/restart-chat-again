@@ -428,12 +428,24 @@ export function InventarioTachasViewer({
                           </TableCell>
                         )}
                         <TableCell className="font-mono text-sm">{tacha.snv || "-"}</TableCell>
-                        <TableCell>{tacha.corpo || "-"}</TableCell>
-                        <TableCell>{tacha.refletivo || "-"}</TableCell>
-                        <TableCell>{tacha.cor_refletivo || "-"}</TableCell>
+                        <TableCell>
+                          {tacha.corpo || <span className="text-muted-foreground italic text-xs">Não especificado</span>}
+                        </TableCell>
+                        <TableCell>
+                          {tacha.refletivo || <span className="text-muted-foreground italic text-xs">Não especificado</span>}
+                        </TableCell>
+                        <TableCell>
+                          {tacha.cor_refletivo || <span className="text-muted-foreground italic text-xs">Não especificado</span>}
+                        </TableCell>
                         <TableCell>{tacha.km_inicial.toFixed(2)}</TableCell>
                         <TableCell>{tacha.extensao_km?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>{tacha.local_implantacao || "-"}</TableCell>
+                        <TableCell>
+                          {tacha.local_implantacao && tacha.local_implantacao !== "Não se Aplica" ? (
+                            tacha.local_implantacao
+                          ) : (
+                            <span className="text-muted-foreground italic text-xs">Não especificado no cadastro</span>
+                          )}
+                        </TableCell>
                         <TableCell>{tacha.espacamento_m || "-"}</TableCell>
                         <TableCell>{tacha.quantidade}</TableCell>
                         <TableCell className="text-center">

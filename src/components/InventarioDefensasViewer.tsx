@@ -503,7 +503,13 @@ export const InventarioDefensasViewer = ({
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Função:</span>
-                      <p className="text-sm">{(selectedDefensa as any).funcao || "-"}</p>
+                      <p className="text-sm">
+                        {(selectedDefensa as any).funcao && (selectedDefensa as any).funcao !== "Não se Aplica" ? (
+                          (selectedDefensa as any).funcao
+                        ) : (
+                          <span className="text-muted-foreground italic">Não especificado no cadastro</span>
+                        )}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -597,11 +603,23 @@ export const InventarioDefensasViewer = ({
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Nível Contenção EN1317:</span>
-                      <p className="text-sm">{(selectedDefensa as any).nivel_contencao_en1317 || "-"}</p>
+                      <p className="text-sm">
+                        {(selectedDefensa as any).nivel_contencao_en1317 && (selectedDefensa as any).nivel_contencao_en1317 !== "Não se Aplica" ? (
+                          (selectedDefensa as any).nivel_contencao_en1317
+                        ) : (
+                          <span className="text-muted-foreground italic">Não especificado no cadastro</span>
+                        )}
+                      </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Nível Contenção NCHRP350:</span>
-                      <p className="text-sm">{(selectedDefensa as any).nivel_contencao_nchrp350 || "-"}</p>
+                      <p className="text-sm">
+                        {(selectedDefensa as any).nivel_contencao_nchrp350 && (selectedDefensa as any).nivel_contencao_nchrp350 !== "Não se Aplica" ? (
+                          (selectedDefensa as any).nivel_contencao_nchrp350
+                        ) : (
+                          <span className="text-muted-foreground italic">Não especificado no cadastro</span>
+                        )}
+                      </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Classificação Contenção:</span>
@@ -628,7 +646,13 @@ export const InventarioDefensasViewer = ({
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Geometria:</span>
-                      <p className="text-sm">{(selectedDefensa as any).geometria || "-"}</p>
+                      <p className="text-sm">
+                        {(selectedDefensa as any).geometria && (selectedDefensa as any).geometria !== "Não se Aplica" ? (
+                          (selectedDefensa as any).geometria
+                        ) : (
+                          <span className="text-muted-foreground italic">Não especificado no cadastro</span>
+                        )}
+                      </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Espaço de Trabalho:</span>
