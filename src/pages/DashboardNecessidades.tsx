@@ -470,6 +470,7 @@ export default function DashboardNecessidades() {
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
+                  stroke="none"
                 >
                         {dadosPizzaPorGrupo.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={CORES_GRUPOS[entry.name] || "#888888"} />
@@ -500,89 +501,110 @@ export default function DashboardNecessidades() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileCheck className="h-5 w-5" />
-                    Qualidade do Projeto
+                    Intensidade do Projeto
                   </CardTitle>
-                  <CardDescription>Taxa de Matching e Análise de Densidade</CardDescription>
+                  <CardDescription>Comparação entre inventário original e volume de necessidades previstas</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="mb-6">
-                    <h3 className="text-sm font-semibold mb-3">📊 Taxa de Matching por Tipo</h3>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <BarChart data={stats.dadosMatchingPorTipo || []} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" domain={[0, 100]} />
-                        <YAxis dataKey="tipo" type="category" width={120} style={{ fontSize: '11px' }} />
-                        <Tooltip 
-                          formatter={(value: number) => [`${value}%`, 'Match']}
-                          contentStyle={{ fontSize: '12px' }}
-                        />
-                        <Bar dataKey="taxaMatch" radius={[0, 4, 4, 0]}>
-                          {(stats.dadosMatchingPorTipo || []).map((entry: any, index: number) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={entry.taxaMatch >= 70 ? "#22c55e" : entry.taxaMatch >= 40 ? "#eab308" : "#ef4444"} 
-                            />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-
                   {densidadeInfo && (
                     <div>
-                      <h3 className="text-sm font-semibold mb-3">
-                        🎯 Densidade: Cadastro vs Necessidades
-                        <span className="text-xs font-normal text-muted-foreground ml-2">
-                          ({densidadeInfo.rodovia})
-                        </span>
+                      <h3 className="text-sm font-semibold mb-4">
+                        🎯 Intensidade do Projeto: Cadastro Original vs Necessidades Previstas
                       </h3>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs">
-                          <thead className="bg-muted/50">
-                            <tr className="border-b">
-                              <th className="text-left p-2 font-semibold">Tipo</th>
-                              <th className="text-right p-2 font-semibold">Cadastro</th>
-                              <th className="text-right p-2 font-semibold">Necessidades</th>
-                              <th className="text-right p-2 font-semibold">Proporção</th>
-                              <th className="text-center p-2 font-semibold">Status</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {densidadeInfo.densidades.map((d: any, idx: number) => (
-                              <tr key={idx} className="border-b hover:bg-muted/30">
-                                <td className="p-2">{d.tipo}</td>
-                                <td className="text-right p-2">
-                                  <div className="font-semibold">{d.totalCadastro}</div>
-                                  <div className="text-[10px] text-muted-foreground">elementos</div>
-                                </td>
-                                <td className="text-right p-2">
-                                  <div className="font-semibold">{d.totalNecessidades}</div>
-                                  <div className="text-[10px] text-muted-foreground">necessidades</div>
-                                </td>
-                                <td className="text-right p-2 font-semibold">
-                                  {d.proporcao}%
-                                </td>
-                                <td className="text-center p-2">
-                                  {d.status === "ok" && <span title="Equilibrado">✅</span>}
-                                  {d.status === "moderado" && <span title="Moderado">⚠️</span>}
-                                  {d.status === "alto" && <span title="Projeto pesado">❌</span>}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                      
+                      <div className="space-y-4">
+                        {densidadeInfo.densidades.map((d: any, idx: number) => (
+                          <div key={idx} className="space-y-2">
+                            {/* Cabeçalho do tipo */}
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium">{d.tipo}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">
+                                  Proporção: <strong>{d.proporcao}%</strong>
+                                </span>
+                                {d.status === "ok" && <span title="Equilibrado">✅</span>}
+                                {d.status === "moderado" && <span title="Moderado">⚠️</span>}
+                                {d.status === "alto" && <span title="Projeto pesado">❌</span>}
+                              </div>
+                            </div>
+                            
+                            {/* Barras de comparação */}
+                            <div className="grid grid-cols-2 gap-4">
+                              {/* Coluna: Cadastro Original */}
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1 flex justify-between">
+                                  <span>📋 Cadastro Original</span>
+                                  <span className="font-semibold">{d.totalCadastro}</span>
+                                </div>
+                                <div className="w-full bg-muted rounded-full h-6 flex items-center px-2">
+                                  <div 
+                                    className="bg-blue-500 h-4 rounded-full transition-all"
+                                    style={{ 
+                                      width: `${Math.min(100, (d.totalCadastro / Math.max(d.totalCadastro, d.totalNecessidades)) * 100)}%` 
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                              
+                              {/* Coluna: Necessidades do Projeto */}
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1 flex justify-between">
+                                  <span>🔧 Necessidades Previstas</span>
+                                  <span className="font-semibold">{d.totalNecessidades}</span>
+                                </div>
+                                <div className="w-full bg-muted rounded-full h-6 flex items-center px-2">
+                                  <div 
+                                    className={`h-4 rounded-full transition-all ${
+                                      d.status === "ok" ? "bg-green-500" : 
+                                      d.status === "moderado" ? "bg-yellow-500" : 
+                                      "bg-red-500"
+                                    }`}
+                                    style={{ 
+                                      width: `${Math.min(100, (d.totalNecessidades / Math.max(d.totalCadastro, d.totalNecessidades)) * 100)}%` 
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                       
-                      <div className="mt-3 p-3 bg-muted/30 rounded-lg text-xs">
-                        <p className="font-semibold mb-1.5">📖 Interpretação:</p>
-                        <ul className="space-y-0.5 text-muted-foreground">
-                          <li>✅ <strong>&lt; 130%</strong>: Projeto equilibrado (bom)</li>
-                          <li>⚠️ <strong>130-200%</strong>: Projeto moderado (atenção)</li>
-                          <li>❌ <strong>&gt; 200%</strong>: Projeto "pesou a mão" (excessivo)</li>
-                        </ul>
-                        <p className="mt-2 text-[11px]">
-                          <strong>Proporção</strong>: Quantas necessidades existem para cada elemento cadastrado. 
-                          Valores muito altos indicam que o projeto prevê muitas intervenções em relação ao inventário existente.
+                      {/* Legenda de interpretação */}
+                      <div className="mt-6 p-4 bg-muted/30 rounded-lg text-sm">
+                        <p className="font-semibold mb-2">📖 Como interpretar:</p>
+                        <div className="grid grid-cols-3 gap-4 text-xs">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span>✅</span>
+                              <strong>Equilibrado (&lt;130%)</strong>
+                            </div>
+                            <p className="text-muted-foreground">
+                              Projeto proporcional ao inventário existente
+                            </p>
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span>⚠️</span>
+                              <strong>Moderado (130-200%)</strong>
+                            </div>
+                            <p className="text-muted-foreground">
+                              Projeto prevê intervenções significativas
+                            </p>
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span>❌</span>
+                              <strong>Intenso (&gt;200%)</strong>
+                            </div>
+                            <p className="text-muted-foreground">
+                              Projeto muito mais denso que inventário original
+                            </p>
+                          </div>
+                        </div>
+                        <p className="mt-3 text-xs text-muted-foreground italic">
+                          <strong>Proporção</strong>: Quantas necessidades o projeto prevê para cada elemento que existia no cadastro original. 
+                          Valores altos indicam que o projeto é mais "pesado" que o inventário base.
                         </p>
                       </div>
                     </div>
