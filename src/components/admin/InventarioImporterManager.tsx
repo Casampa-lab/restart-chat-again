@@ -11,6 +11,7 @@ import { Upload, FileSpreadsheet, Image, Loader2, AlertCircle } from "lucide-rea
 import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import * as XLSX from "xlsx";
+import { useInventoryStatus, getStatusIndicator } from "@/hooks/useInventoryStatus";
 
 const INVENTORY_TYPES = [
   { value: "cilindros", label: "Cilindros Delimitadores", table: "ficha_cilindros" },
@@ -62,6 +63,9 @@ export function InventarioImporterManager() {
       return data;
     },
   });
+
+  // Hook para status de importação
+  const { data: inventoryStatus } = useInventoryStatus(selectedLote, selectedRodovia);
 
   const handleExcelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -1087,11 +1091,24 @@ export function InventarioImporterManager() {
                 <SelectValue placeholder="Selecione o tipo de cadastro" />
               </SelectTrigger>
               <SelectContent>
-                {INVENTORY_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
+                {INVENTORY_TYPES.map((type) => {
+                  const statusData = inventoryStatus?.find(s => s.tipo === type.value);
+                  const total = statusData?.total || 0;
+                  const status = getStatusIndicator(total);
+                  
+                  return (
+                    <SelectItem key={type.value} value={type.value}>
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <span>{type.label}</span>
+                        {selectedLote && selectedRodovia && (
+                          <span className={`ml-auto text-xs font-medium ${status.color}`}>
+                            {status.icon} {total > 0 ? total : ""}
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
             {selectedType && (
