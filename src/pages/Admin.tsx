@@ -19,7 +19,6 @@ import { NecessidadesImporter } from "@/components/admin/NecessidadesImporter";
 import { NecessidadesAuditor } from "@/components/admin/NecessidadesAuditor";
 import { DeleteNecessidades } from "@/components/admin/DeleteNecessidades";
 import { DiagnosticoMatch } from "@/components/admin/DiagnosticoMatch";
-import { NecessidadesReconciliacao } from "@/components/admin/NecessidadesReconciliacao";
 
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
@@ -163,7 +162,6 @@ const Admin = () => {
             <div className="space-y-6">
               <NecessidadesImporter />
               <DiagnosticoMatch />
-              <NecessidadesReconciliacao />
               <NecessidadesAuditor />
               <DeleteNecessidades />
             </div>
