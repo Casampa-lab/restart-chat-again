@@ -113,7 +113,8 @@ export function ReconciliacaoDrawer({
           servico: 'Implantar',
           observacao_reconciliacao: observacao,
           rejeitado_por: user.id,
-          rejeitado_em: new Date().toISOString()
+          rejeitado_em: new Date().toISOString(),
+          reconciliado: true
         })
         .eq("id", necessidade.id);
 
