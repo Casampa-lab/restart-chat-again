@@ -13,7 +13,7 @@ import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp,
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
-import { ReconciliacaoDrawer } from "./ReconciliacaoDrawer";
+import { ReconciliacaoDrawerUniversal } from "./ReconciliacaoDrawerUniversal";
 import { toast } from "sonner";
 
 interface FichaMarcaLongitudinal {
@@ -830,7 +830,7 @@ export function InventarioMarcasLongitudinaisViewer({
       </Dialog>
 
       {/* Drawer de Reconciliação */}
-      <ReconciliacaoDrawer
+      <ReconciliacaoDrawerUniversal
         open={reconciliacaoOpen}
         onOpenChange={(open) => {
           setReconciliacaoOpen(open);
@@ -842,6 +842,7 @@ export function InventarioMarcasLongitudinaisViewer({
         }}
         necessidade={selectedNecessidade}
         cadastro={selectedMarca}
+        tipoElemento="marcas_longitudinais"
         onReconciliar={async () => {
           await new Promise(resolve => setTimeout(resolve, 300));
           refetchNecessidades();
