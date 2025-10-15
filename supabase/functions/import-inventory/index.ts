@@ -264,11 +264,19 @@ serve(async (req) => {
         "br": "",
       },
       ficha_inscricoes: {
-        "área_(m²)": "area_m2",
+        "sigla": "sigla",
+        "descrição": "tipo_inscricao",
         "tipo": "tipo_inscricao",
+        "área_(m²)": "area_m2",
+        "area_(m²)": "area_m2",
+        "espessura_(mm)": "espessura_mm",
+        "outros_materiais": "espessura_mm",
+        "material": "material_utilizado",
         "data_vistoria": "data_vistoria",
         "data": "data_vistoria",
         "br": "",
+        "snv": "snv",
+        "cor": "cor",
       },
       ficha_placa: {
         "dimensões_(mm)": "dimensoes_mm",
@@ -330,13 +338,17 @@ serve(async (req) => {
         "extensao_metros", "foto_url", "km_final", "km_inicial",
         "largura_cm", "latitude_final", "latitude_inicial",
         "longitude_final", "longitude_inicial", "material",
-        "observacao", "tipo_demarcacao", "snv", "traco_m", "espacamento_m", "area_m2"
+        "observacao", "tipo_demarcacao", "snv", "traco_m", "espacamento_m", "area_m2",
+        "origem", "modificado_por_intervencao", "ultima_intervencao_id",
+        "data_ultima_modificacao"
       ],
       ficha_inscricoes: [
-        "area_m2", "cor", "data_vistoria", "dimensoes",
-        "foto_url", "km_final", "km_inicial", "latitude_final", "latitude_inicial",
-        "longitude_final", "longitude_inicial", "material_utilizado",
-        "observacao", "tipo_inscricao"
+        "sigla", "tipo_inscricao", "cor", "area_m2", "espessura_mm",
+        "dimensoes", "material_utilizado", "data_vistoria",
+        "km_inicial", "km_final", "latitude_inicial", "longitude_inicial",
+        "latitude_final", "longitude_final", "observacao", "foto_url",
+        "snv", "origem", "modificado_por_intervencao", "ultima_intervencao_id",
+        "data_ultima_modificacao"
       ],
       ficha_placa: [
         "altura_m", "area_m2", "br", "codigo", "contrato", "data_implantacao",
@@ -349,7 +361,9 @@ serve(async (req) => {
         "tipo_pelicula_fundo", "cor_pelicula_fundo",
         "tipo_pelicula_legenda_orla", "cor_pelicula_legenda_orla",
         "posicao", "si_sinal_impresso", "tipo_secao_suporte", 
-        "secao_suporte_mm", "link_fotografia", "foto_url"
+        "secao_suporte_mm", "link_fotografia", "foto_url",
+        "origem", "modificado_por_intervencao", "ultima_intervencao_id",
+        "data_ultima_modificacao"
       ],
       intervencoes_cilindros: [
         "cor_corpo", "cor_refletivo", "data_intervencao", "espacamento_m",
@@ -361,12 +375,16 @@ serve(async (req) => {
         "corpo", "cor_refletivo", "data_vistoria", "espacamento_m",
         "extensao_km", "foto_url", "km_final", "km_inicial", "latitude_final",
         "latitude_inicial", "local_implantacao", "longitude_final", "longitude_inicial",
-        "quantidade", "refletivo", "snv"
+        "quantidade", "refletivo", "snv",
+        "origem", "modificado_por_intervencao", "ultima_intervencao_id",
+        "data_ultima_modificacao"
       ],
       ficha_porticos: [
         "altura_livre_m", "data_vistoria", "foto_url",
         "km", "lado", "latitude", "longitude", "snv", "tipo",
-        "vao_horizontal_m"
+        "vao_horizontal_m",
+        "origem", "modificado_por_intervencao", "ultima_intervencao_id",
+        "data_ultima_modificacao"
       ],
       defensas: [
         "data_vistoria", "extensao_metros", "km_final",
@@ -384,7 +402,9 @@ serve(async (req) => {
         "distancia_face_defensa_obstaculo_m",
         "distancia_bordo_pista_face_defensa_m", "link_fotografia",
         "quantidade_laminas", "comprimento_total_tramo_m",
-        "latitude_inicial", "longitude_inicial", "latitude_final", "longitude_final"
+        "latitude_inicial", "longitude_inicial", "latitude_final", "longitude_final",
+        "origem", "modificado_por_intervencao", "ultima_intervencao_id",
+        "data_ultima_modificacao"
       ],
     };
 
@@ -407,6 +427,11 @@ serve(async (req) => {
         lote_id: loteId,
         rodovia_id: rodoviaId,
         [dateField]: "2023-01-01", // Data padrão: 01/01/2023
+        // Campos de controle do Inventário Dinâmico
+        origem: "cadastro_inicial",
+        modificado_por_intervencao: false,
+        ultima_intervencao_id: null,
+        data_ultima_modificacao: null,
       };
       
       // Adicionar campos obrigatórios com valores padrão específicos por tabela
