@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Rodovia {
   id: string;
@@ -104,6 +106,19 @@ const RodoviasManager = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <Alert className="mb-4">
+            <Info className="h-4 w-4" />
+            <AlertTitle>⚠️ Importante: Quando a Tolerância GPS é Aplicada</AlertTitle>
+            <AlertDescription className="text-sm space-y-2">
+              <p>
+                <strong>A tolerância de match GPS é aplicada APENAS durante a importação de necessidades.</strong>
+              </p>
+              <p>
+                Alterar este valor aqui NÃO afetará necessidades já importadas. Para reimportar com nova tolerância, 
+                você precisará excluir as necessidades antigas e importá-las novamente.
+              </p>
+            </AlertDescription>
+          </Alert>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -130,9 +145,9 @@ const RodoviasManager = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="tolerancia_match_rodovia">
-                  Tolerância Match GPS (m)
+                  Tolerância Match GPS (m) - Novas Importações
                   <span className="text-xs text-muted-foreground ml-2">
-                    (Fallback se lote não especificar)
+                    (Usado ao importar necessidades. Fallback se lote não especificar)
                   </span>
                 </Label>
                 <Input
@@ -160,7 +175,8 @@ const RodoviasManager = () => {
         <CardHeader>
           <CardTitle>Rodovias Cadastradas</CardTitle>
           <CardDescription>
-            KMs específicos são configurados ao vincular rodovia ao lote
+            KMs específicos são configurados ao vincular rodovia ao lote. 
+            Tolerância GPS é aplicada apenas em novas importações de necessidades.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -169,7 +185,24 @@ const RodoviasManager = () => {
               <TableRow>
                 <TableHead>Código</TableHead>
                 <TableHead>UF</TableHead>
-                <TableHead>Tolerância GPS (m)</TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-1">
+                    Tolerância GPS (m)
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p className="text-xs">
+                            Valor usado durante a importação de necessidades. 
+                            Alterar não afeta dados já importados.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </TableHead>
                 <TableHead className="w-24">Ações</TableHead>
               </TableRow>
             </TableHeader>
