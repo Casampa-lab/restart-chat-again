@@ -16,6 +16,8 @@ export interface ReconciliacaoConfig {
   camposComparacao: string[];
   iconeProjeto: string;
   iconeCadastro: string;
+  tipoGeometria: 'linear' | 'pontual';
+  recorrente: boolean;
 }
 
 export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = {
@@ -26,6 +28,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     camposComparacao: ['codigo', 'tipo', 'lado', 'suporte', 'substrato', 'km'],
     iconeProjeto: '🚏',
     iconeCadastro: '📷',
+    tipoGeometria: 'pontual',
+    recorrente: false,
   },
   defensas: {
     tabelaNecessidades: 'necessidades_defensas',
@@ -34,6 +38,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     camposComparacao: ['tipo_defensa', 'extensao_metros', 'lado', 'km_inicial', 'km_final'],
     iconeProjeto: '🛣️',
     iconeCadastro: '📷',
+    tipoGeometria: 'linear',
+    recorrente: false,
   },
   porticos: {
     tabelaNecessidades: 'necessidades_porticos',
@@ -42,6 +48,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     camposComparacao: ['tipo', 'vao_horizontal_m', 'altura_livre_m', 'km'],
     iconeProjeto: '🌉',
     iconeCadastro: '📷',
+    tipoGeometria: 'pontual',
+    recorrente: false,
   },
   marcas_longitudinais: {
     tabelaNecessidades: 'necessidades_marcas_longitudinais',
@@ -50,6 +58,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     camposComparacao: ['tipo_demarcacao', 'cor', 'largura_cm', 'km_inicial', 'km_final'],
     iconeProjeto: '➖',
     iconeCadastro: '📷',
+    tipoGeometria: 'linear',
+    recorrente: true,
   },
   inscricoes: {
     tabelaNecessidades: 'necessidades_marcas_transversais',
@@ -58,6 +68,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     camposComparacao: ['sigla', 'tipo_inscricao', 'cor', 'area_m2', 'km_inicial'],
     iconeProjeto: '➡️',
     iconeCadastro: '📷',
+    tipoGeometria: 'pontual',
+    recorrente: true,
   },
   cilindros: {
     tabelaNecessidades: 'necessidades_cilindros',
@@ -66,6 +78,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     camposComparacao: ['cor_corpo', 'cor_refletivo', 'quantidade', 'km_inicial'],
     iconeProjeto: '🔴',
     iconeCadastro: '📷',
+    tipoGeometria: 'pontual',
+    recorrente: false,
   },
   tachas: {
     tabelaNecessidades: 'necessidades_tachas',
@@ -74,6 +88,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     camposComparacao: ['tipo_tacha', 'cor', 'lado', 'quantidade', 'km_inicial'],
     iconeProjeto: '💎',
     iconeCadastro: '📷',
+    tipoGeometria: 'pontual',
+    recorrente: false,
   },
 };
 
@@ -113,6 +129,23 @@ export function getTabelaNecessidades(tipo: GrupoElemento): string {
 
 export function getTabelaCadastro(tipo: GrupoElemento): string {
   return RECONCILIACAO_CONFIG[tipo].tabelaCadastro;
+}
+
+export function isRecorrente(tipo: GrupoElemento): boolean {
+  return RECONCILIACAO_CONFIG[tipo].recorrente;
+}
+
+export function getTipoGeometria(tipo: GrupoElemento): 'linear' | 'pontual' {
+  return RECONCILIACAO_CONFIG[tipo].tipoGeometria;
+}
+
+export function getComportamentoServico(tipo: GrupoElemento): string {
+  const config = RECONCILIACAO_CONFIG[tipo];
+  const geometria = config.tipoGeometria === 'linear' ? 'por extensão' : 'pontual';
+  const recorrencia = config.recorrente 
+    ? 'substituição automática por desgaste natural'
+    : 'avaliação manual de danos específicos';
+  return `Matching ${geometria}, ${recorrencia}`;
 }
 
 export function formatarCampo(campo: string, valor: any): string {

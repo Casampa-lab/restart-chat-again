@@ -170,6 +170,49 @@ export function RecalcularMatches() {
     return matches.sort((a, b) => b.overlap_porcentagem - a.overlap_porcentagem);
   };
 
+  const buscarMatchPontual = (
+    necessidade: { km: number; latitude?: number; longitude?: number; lado?: string },
+    cadastros: any[],
+    toleranciaKm: number = 0.05
+  ): Array<{ cadastro_id: string; distancia_metros: number; diferenca_km: number }> => {
+    const matches: Array<{ cadastro_id: string; distancia_metros: number; diferenca_km: number }> = [];
+
+    for (const cadastro of cadastros) {
+      // 1. Validar lado (se aplicável)
+      if (necessidade.lado && cadastro.lado) {
+        const ladoNec = normalizarLado(necessidade.lado);
+        const ladoCad = normalizarLado(cadastro.lado);
+        if (ladoNec !== ladoCad && ladoNec !== 'ambos' && ladoCad !== 'ambos') {
+          continue;
+        }
+      }
+
+      // 2. Calcular diferença de km
+      const diferencaKm = Math.abs(cadastro.km - necessidade.km);
+      if (diferencaKm > toleranciaKm) continue;
+
+      // 3. Calcular distância GPS (se disponível)
+      let distanciaMetros = null;
+      if (necessidade.latitude && necessidade.longitude && 
+          cadastro.latitude && cadastro.longitude) {
+        distanciaMetros = calcularDistanciaHaversine(
+          necessidade.latitude,
+          necessidade.longitude,
+          cadastro.latitude,
+          cadastro.longitude
+        );
+      }
+
+      matches.push({
+        cadastro_id: cadastro.id,
+        distancia_metros: distanciaMetros || diferencaKm * 1000,
+        diferenca_km: diferencaKm,
+      });
+    }
+
+    return matches.sort((a, b) => a.distancia_metros - b.distancia_metros);
+  };
+
   const calcularDistanciaHaversine = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371000; // Raio da Terra em metros
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -284,52 +327,100 @@ export function RecalcularMatches() {
         setProgress(((i + 1) / total) * 100);
 
         try {
-          // Buscar match por sobreposição
-          const matches = buscarMatchSegmento(
-            {
-              km_inicial: parseFloat(nec.km_inicial),
-              km_final: parseFloat(nec.km_final),
-              lado: nec.lado
-            },
-            cadastros,
-            tipo,
-            50 // threshold 50%
-          );
+          // Determinar tipo de geometria baseado no tipo de elemento
+          const tipoElementoMap: Record<string, 'linear' | 'pontual'> = {
+            'marcas_longitudinais': 'linear',
+            'defensas': 'linear',
+            'placas': 'pontual',
+            'porticos': 'pontual',
+            'inscricoes': 'pontual',
+            'cilindros': 'pontual',
+            'tachas': 'pontual'
+          };
 
+          const tipoRecorrenteMap: Record<string, boolean> = {
+            'marcas_longitudinais': true,
+            'inscricoes': true,
+            'defensas': false,
+            'placas': false,
+            'porticos': false,
+            'cilindros': false,
+            'tachas': false
+          };
+
+          const tipoGeometria = tipoElementoMap[tipo] || 'linear';
+          const isRecorrente = tipoRecorrenteMap[tipo] || false;
+
+          let matches: any[] = [];
           let cadastro_id = null;
           let distancia_match_metros = null;
           let overlap_porcentagem = null;
           let tipo_match = null;
           let servico_inferido = "Implantar";
 
-          if (matches.length > 0) {
-            const melhorMatch = matches[0];
-            cadastro_id = melhorMatch.cadastro_id;
-            overlap_porcentagem = melhorMatch.overlap_porcentagem;
-            tipo_match = melhorMatch.tipo_match;
-            matchesEncontrados++;
+          // MATCHING DIFERENCIADO POR GEOMETRIA
+          if (tipoGeometria === 'linear') {
+            // ELEMENTOS LINEARES
+            matches = buscarMatchSegmento(
+              {
+                km_inicial: parseFloat(nec.km_inicial),
+                km_final: parseFloat(nec.km_final),
+                lado: nec.lado
+              },
+              cadastros,
+              tipo,
+              50
+            );
 
-            // Calcular distância GPS se houver coordenadas
-            const cadastro = cadastros.find((c: any) => c.id === cadastro_id);
-            if (cadastro && nec.latitude_inicial && nec.longitude_inicial && 
-                cadastro.latitude_inicial && cadastro.longitude_inicial) {
-              distancia_match_metros = Math.round(
-                calcularDistanciaHaversine(
-                  parseFloat(nec.latitude_inicial),
-                  parseFloat(nec.longitude_inicial),
-                  parseFloat(cadastro.latitude_inicial),
-                  parseFloat(cadastro.longitude_inicial)
-                )
-              );
+            if (matches.length > 0) {
+              const melhorMatch = matches[0];
+              cadastro_id = melhorMatch.cadastro_id;
+              overlap_porcentagem = melhorMatch.overlap_porcentagem;
+              tipo_match = melhorMatch.tipo_match;
+              matchesEncontrados++;
+
+              const cadastro = cadastros.find((c: any) => c.id === cadastro_id);
+              if (cadastro && nec.latitude_inicial && nec.longitude_inicial && 
+                  cadastro.latitude_inicial && cadastro.longitude_inicial) {
+                distancia_match_metros = Math.round(
+                  calcularDistanciaHaversine(
+                    parseFloat(nec.latitude_inicial),
+                    parseFloat(nec.longitude_inicial),
+                    parseFloat(cadastro.latitude_inicial),
+                    parseFloat(cadastro.longitude_inicial)
+                  )
+                );
+              }
             }
+          } else if (tipoGeometria === 'pontual') {
+            // ELEMENTOS PONTUAIS
+            matches = buscarMatchPontual(
+              {
+                km: parseFloat(nec.km_inicial || nec.km),
+                latitude: nec.latitude_inicial || nec.latitude,
+                longitude: nec.longitude_inicial || nec.longitude,
+                lado: nec.lado
+              },
+              cadastros,
+              0.05
+            );
 
-            // Inferir serviço
+            if (matches.length > 0) {
+              const melhorMatch = matches[0];
+              cadastro_id = melhorMatch.cadastro_id;
+              distancia_match_metros = melhorMatch.distancia_metros;
+              tipo_match = 'pontual';
+              matchesEncontrados++;
+            }
+          }
+
+          // INFERIR SERVIÇO
+          if (cadastro_id) {
             const sinaisRemocao = [
               nec.quantidade === 0 || nec.quantidade === "0",
               nec.extensao_metros === 0 || nec.extensao_metros === "0",
               nec.solucao_planilha?.toLowerCase().includes("remov"),
             ];
-
             servico_inferido = sinaisRemocao.some(Boolean) ? "Remover" : "Substituir";
           } else {
             elementosNovos++;
@@ -348,37 +439,56 @@ export function RecalcularMatches() {
           };
 
           const solucaoPlanilhaNormalizada = normalizarServico(nec.solucao_planilha);
-          const servicoFinal = solucaoPlanilhaNormalizada || servico_inferido;
-          
-          // IMPORTANTE: garantir que divergencia seja sempre boolean (true/false)
-          const divergencia = !!(solucaoPlanilhaNormalizada && solucaoPlanilhaNormalizada !== servico_inferido);
+
+          // LÓGICA DE RECORRÊNCIA
+          let servicoFinal: string;
+          let divergencia: boolean;
+
+          if (isRecorrente) {
+            // ELEMENTOS RECORRENTES (Marcas, Inscrições)
+            if (cadastro_id) {
+              servicoFinal = "Substituir";
+              divergencia = false;
+            } else {
+              servicoFinal = "Implantar";
+              divergencia = false;
+            }
+            if (solucaoPlanilhaNormalizada) {
+              servicoFinal = solucaoPlanilhaNormalizada;
+              divergencia = (solucaoPlanilhaNormalizada !== servico_inferido);
+            }
+          } else {
+            // ELEMENTOS NÃO-RECORRENTES (Placas, Defensas, etc)
+            if (cadastro_id) {
+              servicoFinal = servico_inferido;
+              divergencia = true;
+            } else {
+              servicoFinal = "Implantar";
+              divergencia = false;
+            }
+            if (solucaoPlanilhaNormalizada) {
+              servicoFinal = solucaoPlanilhaNormalizada;
+              divergencia = (solucaoPlanilhaNormalizada !== servico_inferido);
+            }
+          }
 
           if (divergencia) {
             divergenciasDetectadas++;
           }
 
-          // Preparar dados de atualização com valores explícitos
+          // Preparar dados de atualização
           const updateData: any = {
             servico_inferido,
             servico_final: servicoFinal,
             servico: servicoFinal,
-            divergencia: divergencia, // sempre boolean
+            divergencia,
             reconciliado: false
           };
 
-          // Adicionar campos opcionais apenas se tiverem valor
-          if (cadastro_id !== null) {
-            updateData.cadastro_id = cadastro_id;
-          }
-          if (distancia_match_metros !== null) {
-            updateData.distancia_match_metros = distancia_match_metros;
-          }
-          if (overlap_porcentagem !== null) {
-            updateData.overlap_porcentagem = overlap_porcentagem;
-          }
-          if (tipo_match !== null) {
-            updateData.tipo_match = tipo_match;
-          }
+          if (cadastro_id !== null) updateData.cadastro_id = cadastro_id;
+          if (distancia_match_metros !== null) updateData.distancia_match_metros = distancia_match_metros;
+          if (overlap_porcentagem !== null) updateData.overlap_porcentagem = overlap_porcentagem;
+          if (tipo_match !== null) updateData.tipo_match = tipo_match;
 
           // Atualizar necessidade
           const { error: updateError } = await supabase
@@ -390,11 +500,14 @@ export function RecalcularMatches() {
 
           // Log a cada 10 processados
           if ((i + 1) % 10 === 0) {
-            const icon = cadastro_id ? "✅" : "🆕";
+            const tipoIcon = tipoGeometria === 'linear' ? '📏' : '📍';
+            const matchIcon = cadastro_id ? "✅" : "🆕";
             const divIcon = divergencia ? " ⚠️" : "";
+            const recorrenteIcon = isRecorrente ? " 🔄" : "";
+            
             setLogs(prev => [...prev, {
               tipo: divergencia ? "warning" : "success",
-              mensagem: `${icon} [${i + 1}/${total}] km ${nec.km_inicial}-${nec.km_final}: ${servicoFinal}${divIcon}${cadastro_id ? ` (${overlap_porcentagem}%)` : ""}`
+              mensagem: `${tipoIcon}${matchIcon} [${i + 1}/${total}] ${tipoConfig.label}: ${servicoFinal}${divIcon}${recorrenteIcon}`
             }]);
           }
 
@@ -402,7 +515,7 @@ export function RecalcularMatches() {
           erros++;
           setLogs(prev => [...prev, {
             tipo: "error",
-            mensagem: `❌ Erro ao processar km ${nec.km_inicial}: ${error.message}`
+            mensagem: `❌ Erro ao processar item ${nec.id}: ${error.message}`
           }]);
         }
       }
