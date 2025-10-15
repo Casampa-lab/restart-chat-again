@@ -826,8 +826,15 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                 data={geojsonSnvData}
                 pathOptions={{
                   color: "#22c55e",
-                  weight: geojsonSnvData.features?.length > 1000 ? 2 : 5,
-                  opacity: geojsonSnvData.features?.length > 1000 ? 0.3 : 0.9,
+                  weight: 3,
+                  opacity: 0.7,
+                }}
+                onEachFeature={(feature, layer) => {
+                  layer.on('click', (e) => {
+                    const coords = e.latlng;
+                    console.log('Clicou na rodovia:', coords);
+                    toast.info(`📍 Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`);
+                  });
                 }}
               />
             )}
