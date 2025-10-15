@@ -456,7 +456,10 @@ export function InventarioMarcasLongitudinaisViewer({
                             <Badge 
                               variant="outline" 
                               className="border-orange-400 text-orange-600 cursor-pointer hover:bg-orange-50 transition-colors"
-                              onClick={() => handleOpenReconciliacao(marca)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenReconciliacao(marca);
+                              }}
                             >
                               ⚠️ Requer Revisão
                             </Badge>
@@ -474,7 +477,8 @@ export function InventarioMarcasLongitudinaisViewer({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={async () => {
+                            onClick={async (e) => {
+                              e.stopPropagation();
                               setSelectedMarca(marca);
                               const { data } = await supabase
                                 .from("ficha_marcas_longitudinais_intervencoes")
