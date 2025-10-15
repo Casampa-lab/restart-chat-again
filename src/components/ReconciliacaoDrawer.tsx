@@ -173,12 +173,33 @@ export function ReconciliacaoDrawer({
               </Badge>
               
               <div className="space-y-2 text-sm">
-                <div><strong>Código:</strong> {necessidade.codigo || "N/A"}</div>
-                <div><strong>Tipo:</strong> {necessidade.tipo || "N/A"}</div>
                 <div><strong>km projeto:</strong> {necessidade.km?.toFixed(3) || "N/A"}</div>
-                <div><strong>Lado:</strong> {necessidade.lado || "N/A"}</div>
                 
-                {/* Info do Match */}
+                {/* Divergência entre Planilha e Sistema */}
+                {necessidade.solucao_planilha !== necessidade.servico_inferido && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded p-2 space-y-1">
+                    <div className="text-xs font-semibold text-yellow-800">⚠️ Divergência detectada:</div>
+                    <div className="text-xs">
+                      <strong>Planilha:</strong> {necessidade.solucao_planilha}
+                    </div>
+                    <div className="text-xs">
+                      <strong>Sistema inferiu:</strong> {necessidade.servico_inferido}
+                    </div>
+                    <div className="text-xs text-yellow-700 mt-1">
+                      Sistema encontrou placa cadastrada a {necessidade.distancia_match_metros}m do local previsto
+                    </div>
+                  </div>
+                )}
+                
+                {/* Nota sobre dados da planilha */}
+                <div className="bg-blue-50 border border-blue-200 rounded p-2">
+                  <div className="text-xs text-blue-700">
+                    <strong>📋 Nota:</strong> A planilha do projeto contém apenas a localização (km) e o serviço previsto. 
+                    Os detalhes da placa (código, tipo, etc.) estão no inventário existente ao lado.
+                  </div>
+                </div>
+                
+                {/* Info do Match GPS */}
                 <div className="pt-2 border-t">
                   <Badge variant="outline" className="text-xs">
                     📍 Match GPS: {necessidade.distancia_match_metros?.toFixed(1) || "0"}m
