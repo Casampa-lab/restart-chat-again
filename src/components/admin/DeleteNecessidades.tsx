@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2, AlertTriangle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 const TABELAS_NECESSIDADES = [
@@ -179,6 +180,27 @@ export function DeleteNecessidades() {
             </Select>
           </div>
         </div>
+
+        {/* Mensagem quando lote selecionado não tem necessidades */}
+        {selectedLote && rodovias !== undefined && rodovias.length === 0 && (
+          <Alert variant="default" className="border-amber-500/50 bg-amber-500/10">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="text-amber-900 dark:text-amber-100">
+              Nenhuma necessidade encontrada neste lote
+            </AlertTitle>
+            <AlertDescription className="text-amber-800 dark:text-amber-200">
+              O <strong>Lote {lotes?.find(l => l.id === selectedLote)?.numero}</strong> ainda não possui 
+              necessidades importadas no sistema.
+              <br />
+              <br />
+              Para usar esta funcionalidade:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Importe necessidades para este lote primeiro</li>
+                <li>Ou selecione um lote diferente que já tenha dados</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Button
           onClick={handleDelete}
