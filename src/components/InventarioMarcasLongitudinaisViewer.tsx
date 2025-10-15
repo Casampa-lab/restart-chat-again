@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
@@ -123,7 +123,6 @@ export function InventarioMarcasLongitudinaisViewer({
       
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
-        // Se já existe uma necessidade para este cadastro_id, mantém apenas a mais próxima
         const existing = map.get(nec.cadastro_id);
         if (!existing || (nec.distancia_match_metros || 0) < (existing.distancia_match_metros || 0)) {
           map.set(nec.cadastro_id, {
@@ -133,11 +132,11 @@ export function InventarioMarcasLongitudinaisViewer({
         }
       });
       
-      console.log(`🔍 Necessidades carregadas: ${data?.length || 0}, no Map: ${map.size}`);
-      
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   // Contar divergências pendentes
@@ -298,16 +297,29 @@ export function InventarioMarcasLongitudinaisViewer({
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={showOnlyPendentes}
-                    onCheckedChange={setShowOnlyPendentes}
-                    id="filtro-pendentes-marcas"
-                  />
-                  <Label htmlFor="filtro-pendentes-marcas" className="cursor-pointer text-sm font-medium">
-                    <Filter className="h-4 w-4 inline mr-1" />
-                    Apenas pendentes
-                  </Label>
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      refetchNecessidades();
+                      toast("Atualizando dados...", { description: "Buscando informações mais recentes" });
+                    }}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Atualizar
+                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={showOnlyPendentes}
+                      onCheckedChange={setShowOnlyPendentes}
+                      id="filtro-pendentes-marcas"
+                    />
+                    <Label htmlFor="filtro-pendentes-marcas" className="cursor-pointer text-sm font-medium">
+                      <Filter className="h-4 w-4 inline mr-1" />
+                      Apenas pendentes
+                    </Label>
+                  </div>
                 </div>
               </div>
             ) : (
