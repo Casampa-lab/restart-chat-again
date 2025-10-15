@@ -718,7 +718,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
       </Dialog>
 
       {/* Dialog de Detalhes */}
-      <Dialog open={!!selectedPlaca} onOpenChange={() => setSelectedPlaca(null)}>
+      <Dialog open={!!selectedPlaca && !reconciliacaoOpen} onOpenChange={() => setSelectedPlaca(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
