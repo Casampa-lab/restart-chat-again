@@ -8,6 +8,7 @@ import { MapPin, AlertCircle, Upload, AlertTriangle, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
 import { removeGeographicOutliers } from "@/lib/gpsUtils";
 
 interface Necessidade {
@@ -575,8 +576,14 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
               />
             )}
 
-            {/* Marcadores limitados para performance */}
-            {necessidadesComCoordenadas.slice(0, maxMarkersToShow).map((nec, index) => {
+            {/* Marcadores com clustering */}
+            <MarkerClusterGroup
+              chunkedLoading
+              maxClusterRadius={80}
+              spiderfyOnMaxZoom={true}
+              showCoverageOnHover={false}
+            >
+              {necessidadesComCoordenadas.map((nec, index) => {
               const lat = nec.latitude_inicial || nec.latitude || 0;
               const lng = nec.longitude_inicial || nec.longitude || 0;
               const km = nec.km_inicial || nec.km || "N/A";
@@ -717,9 +724,10 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                 </Marker>
               );
             })}
+            </MarkerClusterGroup>
 
             <MapBoundsUpdater
-              necessidades={necessidadesComCoordenadas.slice(0, maxMarkersToShow)}
+              necessidades={necessidadesComCoordenadas}
               setMaxMarkers={setMaxMarkersToShow}
               setZoom={setCurrentZoom}
             />
@@ -727,16 +735,6 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
         </div>
       )}
 
-      {/* Alerta de markers limitados */}
-      {necessidadesComCoordenadas.length > maxMarkersToShow && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Mostrando {maxMarkersToShow} de {necessidadesComCoordenadas.length} pontos. 
-            Dê zoom para carregar mais detalhes (até {currentZoom > 15 ? '2000' : currentZoom > 13 ? '1000' : '500'} no zoom atual).
-          </AlertDescription>
-        </Alert>
-      )}
     </div>
   );
 };
