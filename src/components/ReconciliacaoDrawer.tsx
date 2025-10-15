@@ -160,16 +160,21 @@ export function ReconciliacaoDrawer({
 
             {/* DIREITA: Projeto/Necessidade */}
             <div className="border-2 border-primary rounded-lg p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🎨</span>
-                <div>
-                  <div className="font-semibold text-primary">Projeto (Necessidade)</div>
-                  <div className="text-xs text-muted-foreground">O que prevê a planilha</div>
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🎨</span>
+                  <div>
+                    <div className="font-semibold text-primary">Projeto (Necessidade)</div>
+                    <div className="text-xs text-muted-foreground">O que prevê a planilha</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-muted-foreground mb-1">Serviço:</div>
+                  <Badge variant="default" className="bg-primary">{necessidade.solucao_planilha || necessidade.servico}</Badge>
                 </div>
               </div>
               
               <div className="space-y-2 text-sm">
-                <div><strong>Serviço:</strong> <Badge variant="outline" className="ml-1">{necessidade.solucao_planilha || necessidade.servico}</Badge></div>
                 <div><strong>Código:</strong> {cadastro.codigo || "N/A"}</div>
                 <div><strong>Tipo:</strong> {cadastro.tipo || "N/A"}</div>
                 <div><strong>km projeto:</strong> {necessidade.km?.toFixed(3) || "N/A"}</div>
