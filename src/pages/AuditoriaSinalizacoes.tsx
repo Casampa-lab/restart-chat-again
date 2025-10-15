@@ -14,7 +14,7 @@ import { exportAuditoriaSinalizacoes } from "@/lib/excelExport";
 
 export default function AuditoriaSinalizacoes() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [sinalizacoes, setSinalizacoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tipoAtivo, setTipoAtivo] = useState("todas");
@@ -26,6 +26,13 @@ export default function AuditoriaSinalizacoes() {
     const checkPermissions = async () => {
       console.log("🔍 [AuditoriaSinalizacoes] Verificando permissões...");
       console.log("👤 [AuditoriaSinalizacoes] User:", user);
+      console.log("⏳ [AuditoriaSinalizacoes] Auth Loading:", authLoading);
+      
+      // Aguardar o hook de autenticação terminar de carregar
+      if (authLoading) {
+        console.log("⏳ [AuditoriaSinalizacoes] Aguardando autenticação carregar...");
+        return;
+      }
       
       if (!user) {
         console.log("❌ [AuditoriaSinalizacoes] Sem usuário, redirecionando para /auth");
@@ -68,7 +75,7 @@ export default function AuditoriaSinalizacoes() {
     };
 
     checkPermissions();
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     if (isAdminOrCoordinator && !checkingPermissions) {
@@ -169,10 +176,15 @@ export default function AuditoriaSinalizacoes() {
     ignoradas: sinalizacoes.filter(s => s.status === 'ignorado').length,
   };
 
-  if (checkingPermissions) {
+  if (authLoading || checkingPermissions) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">
+            {authLoading ? "Carregando autenticação..." : "Verificando permissões..."}
+          </p>
+        </div>
       </div>
     );
   }
