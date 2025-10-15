@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, Info } from "lucide-react";
+import { Plus, Trash2, Info, Pencil, Settings } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -25,6 +26,14 @@ const RodoviasManager = () => {
     uf: "",
     tolerancia_match_metros: "50",
   });
+  const [editingRodovia, setEditingRodovia] = useState<Rodovia | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    codigo: "",
+    uf: "",
+    tolerancia_match_metros: "50",
+  });
+  const [bulkTolerance, setBulkTolerance] = useState("25");
+  const [bulkUpdateLoading, setBulkUpdateLoading] = useState(false);
 
   useEffect(() => {
     loadRodovias();
@@ -64,6 +73,54 @@ const RodoviasManager = () => {
       toast.error("Erro ao cadastrar rodovia: " + error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!editingRodovia) return;
+
+    try {
+      const { error } = await supabase
+        .from("rodovias")
+        .update({
+          codigo: editFormData.codigo,
+          uf: editFormData.uf || null,
+          tolerancia_match_metros: parseInt(editFormData.tolerancia_match_metros),
+        })
+        .eq("id", editingRodovia.id);
+
+      if (error) throw error;
+
+      toast.success("Rodovia atualizada com sucesso!");
+      setEditingRodovia(null);
+      loadRodovias();
+    } catch (error: any) {
+      toast.error("Erro ao atualizar rodovia: " + error.message);
+    }
+  };
+
+  const handleBulkUpdate = async () => {
+    if (!bulkTolerance) return;
+
+    const confirmMsg = `Tem certeza que deseja alterar a tolerância GPS de TODAS as ${rodovias.length} rodovias para ${bulkTolerance}m?\n\nIsso só afetará novas importações de necessidades.`;
+
+    if (!confirm(confirmMsg)) return;
+
+    setBulkUpdateLoading(true);
+    try {
+      const { error } = await supabase
+        .from("rodovias")
+        .update({ tolerancia_match_metros: parseInt(bulkTolerance) })
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+
+      if (error) throw error;
+
+      toast.success(`✅ Tolerância atualizada para ${bulkTolerance}m em ${rodovias.length} rodovias!`);
+      loadRodovias();
+    } catch (error: any) {
+      toast.error("Erro na atualização em massa: " + error.message);
+    } finally {
+      setBulkUpdateLoading(false);
     }
   };
 
@@ -180,6 +237,46 @@ const RodoviasManager = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <Alert className="mb-4 border-amber-500/50 bg-amber-500/10">
+            <Settings className="h-4 w-4" />
+            <AlertTitle>⚡ Atualização Rápida em Massa</AlertTitle>
+            <AlertDescription className="space-y-3">
+              <p className="text-sm">
+                Altere a tolerância GPS de <strong>todas as rodovias</strong> de uma vez 
+                (útil para corrigir matches excessivos).
+              </p>
+              <div className="flex gap-3 items-end">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="bulk-tolerance">Nova Tolerância (metros)</Label>
+                  <Input
+                    id="bulk-tolerance"
+                    type="number"
+                    min="10"
+                    max="500"
+                    step="5"
+                    value={bulkTolerance}
+                    onChange={(e) => setBulkTolerance(e.target.value)}
+                    className="max-w-xs"
+                    placeholder="25"
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={handleBulkUpdate}
+                  disabled={!bulkTolerance || bulkUpdateLoading}
+                  className="border-amber-600 text-amber-600 hover:bg-amber-600 hover:text-white"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Aplicar em Todas ({rodovias.length} rodovias)
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                ⚠️ Lembre-se: isso só afeta <strong>novas importações</strong>. Necessidades 
+                já importadas mantêm a tolerância original.
+              </p>
+            </AlertDescription>
+          </Alert>
+          
           <Table>
             <TableHeader>
               <TableRow>
@@ -213,13 +310,29 @@ const RodoviasManager = () => {
                   <TableCell>{rodovia.uf || "-"}</TableCell>
                   <TableCell>{rodovia.tolerancia_match_metros || 50}</TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(rodovia.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditingRodovia(rodovia);
+                          setEditFormData({
+                            codigo: rodovia.codigo,
+                            uf: rodovia.uf || "",
+                            tolerancia_match_metros: String(rodovia.tolerancia_match_metros || 50),
+                          });
+                        }}
+                      >
+                        <Pencil className="h-4 w-4 text-primary" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(rodovia.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -234,6 +347,54 @@ const RodoviasManager = () => {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editingRodovia} onOpenChange={(open) => !open && setEditingRodovia(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Rodovia</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-codigo">Código da Rodovia *</Label>
+              <Input
+                id="edit-codigo"
+                placeholder="BR-101"
+                value={editFormData.codigo}
+                onChange={(e) => setEditFormData({ ...editFormData, codigo: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-uf">UF (opcional)</Label>
+              <Input
+                id="edit-uf"
+                placeholder="SC"
+                maxLength={2}
+                value={editFormData.uf}
+                onChange={(e) => setEditFormData({ ...editFormData, uf: e.target.value.toUpperCase() })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-tolerancia">Tolerância GPS (metros)</Label>
+              <Input
+                id="edit-tolerancia"
+                type="number"
+                min="10"
+                max="500"
+                value={editFormData.tolerancia_match_metros}
+                onChange={(e) => setEditFormData({ ...editFormData, tolerancia_match_metros: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingRodovia(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleUpdate} disabled={!editFormData.codigo}>
+              Salvar Alterações
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
