@@ -47,14 +47,12 @@ function MapBoundsUpdater({
   setZoom: (n: number) => void;
 }) {
   const map = useMap();
-  const [boundsSet, setBoundsSet] = useState(false);
 
   useEffect(() => {
-    // Executar fitBounds APENAS UMA VEZ na montagem inicial
-    if (necessidades.length > 0 && !boundsSet) {
-      // Usar apenas primeiros 100 markers para calcular bounds (performance)
+    // SEMPRE executar fitBounds quando necessidades mudam
+    if (necessidades.length > 0) {
+      // Usar TODAS as coordenadas para calcular bounds
       const coordinates = necessidades
-        .slice(0, 100)
         .map((n) => {
           const lat = n.latitude_inicial || n.latitude || 0;
           const lng = n.longitude_inicial || n.longitude || 0;
@@ -62,8 +60,10 @@ function MapBoundsUpdater({
         });
 
       const bounds = L.latLngBounds(coordinates as any);
-      map.fitBounds(bounds, { padding: [50, 50] });
-      setBoundsSet(true);
+      map.fitBounds(bounds, { 
+        padding: [50, 50],
+        maxZoom: 16 // Limitar zoom máximo para não ficar muito próximo
+      });
     }
 
     // Debounce do zoom handler para prevenir recálculos excessivos
@@ -87,7 +87,7 @@ function MapBoundsUpdater({
       map.off('zoomend', handleZoom);
       clearTimeout(zoomTimeout);
     };
-  }, [necessidades, map, setMaxMarkers, setZoom, boundsSet]);
+  }, [necessidades, map, setMaxMarkers, setZoom]);
 
   return null;
 }
