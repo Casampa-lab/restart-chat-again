@@ -192,6 +192,9 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
       if (codigoRodovia && geojsonCompleto.features) {
         const codigoLimpo = codigoRodovia.replace(/^BR-?/i, ''); // Remove "BR-" ou "BR"
         
+        console.log(`🔍 Filtrando SNV: brLimpo="${codigoLimpo}", codigoRodovia="${codigoRodovia}"`);
+        console.log(`📦 Features antes filtro: ${geojsonCompleto.features?.length}`);
+        
         const featuresRodovia = geojsonCompleto.features.filter((f: any) => {
           const props = f.properties || {};
           // Tentar diferentes campos de rodovia
@@ -201,7 +204,10 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
           return brLimpo === codigoLimpo;
         });
 
+        console.log(`📦 Features após filtro: ${featuresRodovia.length}`);
+
         if (featuresRodovia.length > 0) {
+          console.log(`✅ Rodovia ${codigoRodovia} encontrada no SNV completo`);
           const geojsonFiltrado = {
             type: "FeatureCollection",
             features: featuresRodovia
@@ -346,8 +352,23 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
   // Baixar camada SNV automaticamente quando rodovia mudar
   useEffect(() => {
     const rodoviaAtiva = necessidades.length > 0 ? necessidades[0].rodovia : null;
-    if (rodoviaAtiva?.codigo) {
-      downloadSNVAutomatico(rodoviaAtiva.codigo);
+    const codigoAtual = rodoviaAtiva?.codigo || '';
+    
+    // Limpar estado anterior ANTES de carregar novo
+    if (codigoAtual && geojsonSnvData) {
+      const codigoCarregado = geojsonSnvData.features?.[0]?.properties?.vl_br || 
+                              geojsonSnvData.features?.[0]?.properties?.CD_RODOVIA || '';
+      const codigoCarregadoLimpo = String(codigoCarregado).replace(/^BR-?/i, '');
+      const codigoAtualLimpo = codigoAtual.replace(/^BR-?/i, '');
+      
+      if (codigoCarregadoLimpo && codigoCarregadoLimpo !== codigoAtualLimpo) {
+        console.log(`🔄 Mudança de rodovia detectada: BR-${codigoCarregadoLimpo} → BR-${codigoAtualLimpo}`);
+        setGeojsonSnvData(null); // Limpar dados antigos
+      }
+    }
+    
+    if (codigoAtual) {
+      downloadSNVAutomatico(codigoAtual);
     }
   }, [necessidades]);
 
@@ -576,48 +597,41 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
             )}
           </div>
 
-          {/* Botão Limpar Cache */}
+          {/* Botão Limpar TODOS os Caches SNV */}
           <Button
             size="sm"
             variant="outline"
             onClick={async () => {
               try {
-                const { data: caches } = await supabase
+                // Buscar TODOS os caches SNV (snv_*, não apenas vazios)
+                const { data: cachesSNV } = await supabase
                   .from("configuracoes")
-                  .select("chave, valor")
-                  .or("chave.like.vgeo_%,chave.like.snv_%");
+                  .select("chave")
+                  .like("chave", "snv_%");
 
-                const cachesVazios = caches?.filter(c => {
-                  try {
-                    const parsed = JSON.parse(c.valor);
-                    return !parsed.features || parsed.features.length === 0;
-                  } catch {
-                    return true;
-                  }
-                }) || [];
-
-                if (cachesVazios.length === 0) {
-                  toast.info("Nenhum cache vazio encontrado");
+                if (!cachesSNV || cachesSNV.length === 0) {
+                  toast.info("Nenhum cache SNV encontrado");
                   return;
                 }
 
                 const { error } = await supabase
                   .from("configuracoes")
                   .delete()
-                  .in("chave", cachesVazios.map(c => c.chave));
+                  .in("chave", cachesSNV.map(c => c.chave));
 
                 if (error) throw error;
 
-                toast.success(`${cachesVazios.length} cache(s) vazio(s) removido(s)`);
+                // Limpar estado local
                 setGeojsonSnvData(null);
+                toast.success(`${cachesSNV.length} cache(s) SNV removido(s). Recarregue a página.`);
               } catch (error: any) {
-                console.error("Erro ao limpar cache:", error);
-                toast.error("Erro ao limpar cache: " + error.message);
+                console.error("Erro ao limpar cache SNV:", error);
+                toast.error("Erro: " + error.message);
               }
             }}
-            className="border-amber-500 text-amber-700 hover:bg-amber-50"
+            className="border-red-500 text-red-700 hover:bg-red-50"
           >
-            🗑️ Limpar Cache Vazio
+            🗑️ Limpar TODOS os Caches SNV
           </Button>
         </div>
       </div>
@@ -629,9 +643,16 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
             <AlertDescription className="flex items-center gap-2 flex-wrap">
               Camada SNV carregada ✓
               {geojsonSnvData?.features?.length > 0 && (
-                <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-300">
-                  🛣️ {geojsonSnvData.features.length.toLocaleString()} trechos
-                </Badge>
+                <>
+                  <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-300">
+                    🛣️ {geojsonSnvData.features.length.toLocaleString()} trechos
+                  </Badge>
+                  {rodovia?.codigo && (
+                    <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
+                      BR-{rodovia.codigo}
+                    </Badge>
+                  )}
+                </>
               )}
             </AlertDescription>
           </Alert>
