@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -37,18 +37,28 @@ export function DeleteNecessidades() {
     },
   });
 
-  // Buscar rodovias
+  // Buscar rodovias do lote selecionado
   const { data: rodovias } = useQuery({
-    queryKey: ["rodovias"],
+    queryKey: ["rodovias", selectedLote],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("rodovias")
-        .select("id, codigo")
-        .order("codigo");
+      if (!selectedLote) {
+        return [];
+      }
+
+      const { data, error } = await supabase.rpc('get_rodovias_by_lote', {
+        p_lote_id: selectedLote
+      });
+
       if (error) throw error;
       return data;
     },
+    enabled: !!selectedLote,
   });
+
+  // Resetar rodovia quando lote mudar
+  useEffect(() => {
+    setSelectedRodovia("");
+  }, [selectedLote]);
 
   const handleDelete = async () => {
     if (!selectedLote || !selectedRodovia || !selectedTabela) {
@@ -139,9 +149,9 @@ export function DeleteNecessidades() {
 
           <div className="space-y-2">
             <Label htmlFor="rodovia">Rodovia *</Label>
-            <Select value={selectedRodovia} onValueChange={setSelectedRodovia}>
+            <Select value={selectedRodovia} onValueChange={setSelectedRodovia} disabled={!selectedLote}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione a rodovia" />
+                <SelectValue placeholder={!selectedLote ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
               </SelectTrigger>
               <SelectContent>
                 {rodovias?.map((rodovia) => (

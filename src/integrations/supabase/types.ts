@@ -4935,6 +4935,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_rodovias_by_lote: {
+        Args: { p_lote_id: string }
+        Returns: {
+          codigo: string
+          id: string
+        }[]
+      }
       get_user_supervisora_id: {
         Args: { _user_id: string }
         Returns: string
