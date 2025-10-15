@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Download, ClipboardCheck } from "lucide-react";
+import { ArrowLeft, Download, ClipboardCheck, GitCompareArrows } from "lucide-react";
 import { BarChart3, FileSpreadsheet } from "lucide-react";
 import {
   exportFrentesLiberadas,
@@ -54,6 +54,30 @@ const CoordenacaoFiscalizacao = () => {
     enabled: !!user,
     refetchInterval: 30000,
   });
+
+  // Contador de divergências pendentes de reconciliação
+  const { data: countDivergencias = 0 } = useQuery({
+    queryKey: ["count-divergencias-coordenacao"],
+    queryFn: async () => {
+      const grupos = ['necessidades_placas', 'necessidades_defensas', 'necessidades_porticos', 
+                      'necessidades_marcas_longitudinais', 'necessidades_marcas_transversais', 
+                      'necessidades_cilindros', 'necessidades_tachas'];
+      
+      let totalDivergencias = 0;
+      for (const tabela of grupos) {
+        const { count } = await supabase
+          .from(tabela as any)
+          .select("*", { count: "exact", head: true })
+          .eq("divergencia", true)
+          .eq("reconciliado", false);
+        totalDivergencias += (count || 0);
+      }
+      return totalDivergencias;
+    },
+    enabled: !!user && isAdminOrCoordinator,
+    refetchInterval: 30000,
+  });
+
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -184,16 +208,57 @@ const CoordenacaoFiscalizacao = () => {
           </CardHeader>
           <CardContent className="pt-6">
             {isAdminOrCoordinator && (
-              <div className="mb-6 flex justify-center">
-                <Button
-                  size="lg"
-                  variant="default"
-                  className="font-semibold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all bg-accent text-accent-foreground hover:bg-accent/90"
-                  onClick={() => navigate("/elementos-pendentes")}
-                >
-                  <FileSpreadsheet className="mr-2 h-6 w-6" />
-                  Elementos Pendentes de Aprovação
-                </Button>
+              <div className="mb-6 space-y-4">
+                {/* Botão Elementos Pendentes */}
+                <div className="flex justify-center">
+                  <Button
+                    size="lg"
+                    variant="default"
+                    className="relative font-semibold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all bg-accent text-accent-foreground hover:bg-accent/90"
+                    onClick={() => navigate("/elementos-pendentes")}
+                  >
+                    <FileSpreadsheet className="mr-2 h-6 w-6" />
+                    Elementos Pendentes de Aprovação
+                    {contadorPendentes > 0 && (
+                      <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white">
+                        {contadorPendentes}
+                      </Badge>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Botão Reconciliação */}
+                <Card className="bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300 shadow-lg">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <GitCompareArrows className="h-6 w-6 text-orange-600" />
+                          <h3 className="text-xl font-bold text-orange-900">Sistema de Reconciliação</h3>
+                        </div>
+                        <p className="text-sm text-orange-700">
+                          Resolva divergências entre o projeto e a análise automática GPS para todos os grupos de elementos
+                        </p>
+                        {countDivergencias > 0 && (
+                          <div className="mt-3 flex items-center gap-2">
+                            <Badge className="bg-orange-500 text-white text-base px-3 py-1">
+                              {countDivergencias} {countDivergencias === 1 ? 'divergência pendente' : 'divergências pendentes'}
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        size="lg"
+                        variant="default"
+                        className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-orange-600 hover:bg-orange-700 text-white"
+                        onClick={() => navigate("/reconciliacoes-pendentes")}
+                      >
+                        <GitCompareArrows className="mr-2 h-5 w-5" />
+                        Acessar Reconciliação
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
             <Tabs defaultValue="frentes" className="w-full">

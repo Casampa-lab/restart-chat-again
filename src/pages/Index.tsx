@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy, X, FileText } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy, X, FileText, GitCompareArrows } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
@@ -267,6 +267,29 @@ const Index = () => {
     enabled: isAdminOrCoordinator,
   });
 
+  // Contador de divergências pendentes de reconciliação (para coordenadores)
+  const { data: countDivergencias } = useQuery({
+    queryKey: ["count-divergencias-pendentes"],
+    queryFn: async () => {
+      const grupos = ['necessidades_placas', 'necessidades_defensas', 'necessidades_porticos', 
+                      'necessidades_marcas_longitudinais', 'necessidades_marcas_transversais', 
+                      'necessidades_cilindros', 'necessidades_tachas'];
+      
+      let totalDivergencias = 0;
+      for (const tabela of grupos) {
+        const { count } = await supabase
+          .from(tabela as any)
+          .select("*", { count: "exact", head: true })
+          .eq("divergencia", true)
+          .eq("reconciliado", false);
+        totalDivergencias += (count || 0);
+      }
+      return totalDivergencias;
+    },
+    enabled: isAdminOrCoordinator,
+  });
+
+
   // Handler genérico para abrir diálogo de intervenção
   const handleAbrirIntervencao = (
     elemento: any, 
@@ -342,6 +365,24 @@ const Index = () => {
                 <Boxes className="mr-2 h-5 w-5" />
                 Módulos
               </Button>
+              {isAdminOrCoordinator && (
+                <div className="relative">
+                  <Button 
+                    variant="secondary" 
+                    size="lg" 
+                    className="font-semibold shadow-md hover:shadow-lg transition-shadow" 
+                    onClick={() => navigate("/reconciliacoes-pendentes")}
+                  >
+                    <GitCompareArrows className="mr-2 h-5 w-5" />
+                    Reconciliação
+                  </Button>
+                  {countDivergencias && countDivergencias > 0 && (
+                    <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-orange-500 text-white pointer-events-none">
+                      {countDivergencias}
+                    </Badge>
+                  )}
+                </div>
+              )}
               <div className="relative">
                 <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/coordenacao-fiscalizacao")}>
                   <ClipboardList className="mr-2 h-5 w-5" />

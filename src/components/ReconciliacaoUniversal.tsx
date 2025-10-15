@@ -397,6 +397,116 @@ export function ReconciliacaoUniversal({ grupo }: ReconciliacaoUniversalProps) {
                         </div>
                       ))}
                     </div>
+
+                    {/* Fotos do Cadastro (para placas, pórticos e defensas) */}
+                    {(grupoAtivo === 'placas' || grupoAtivo === 'porticos' || grupoAtivo === 'defensas') && (
+                      <div className="mt-4 pt-4 border-t space-y-2">
+                        <div className="text-xs font-semibold text-muted-foreground uppercase">Fotos do Local</div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {/* Placas - múltiplas fotos */}
+                          {grupoAtivo === 'placas' && (
+                            <>
+                              {cadastroDetalhes.foto_frontal_url && (
+                                <div>
+                                  <div className="text-[10px] text-muted-foreground mb-1">Frontal</div>
+                                  <img 
+                                    src={cadastroDetalhes.foto_frontal_url} 
+                                    alt="Foto Frontal" 
+                                    className="w-full h-24 object-cover rounded border cursor-pointer hover:opacity-80"
+                                    onClick={() => window.open(cadastroDetalhes.foto_frontal_url, '_blank')}
+                                  />
+                                </div>
+                              )}
+                              {cadastroDetalhes.foto_lateral_url && (
+                                <div>
+                                  <div className="text-[10px] text-muted-foreground mb-1">Lateral</div>
+                                  <img 
+                                    src={cadastroDetalhes.foto_lateral_url} 
+                                    alt="Foto Lateral" 
+                                    className="w-full h-24 object-cover rounded border cursor-pointer hover:opacity-80"
+                                    onClick={() => window.open(cadastroDetalhes.foto_lateral_url, '_blank')}
+                                  />
+                                </div>
+                              )}
+                              {cadastroDetalhes.foto_posterior_url && (
+                                <div>
+                                  <div className="text-[10px] text-muted-foreground mb-1">Posterior</div>
+                                  <img 
+                                    src={cadastroDetalhes.foto_posterior_url} 
+                                    alt="Foto Posterior" 
+                                    className="w-full h-24 object-cover rounded border cursor-pointer hover:opacity-80"
+                                    onClick={() => window.open(cadastroDetalhes.foto_posterior_url, '_blank')}
+                                  />
+                                </div>
+                              )}
+                              {cadastroDetalhes.foto_base_url && (
+                                <div>
+                                  <div className="text-[10px] text-muted-foreground mb-1">Base</div>
+                                  <img 
+                                    src={cadastroDetalhes.foto_base_url} 
+                                    alt="Foto Base" 
+                                    className="w-full h-24 object-cover rounded border cursor-pointer hover:opacity-80"
+                                    onClick={() => window.open(cadastroDetalhes.foto_base_url, '_blank')}
+                                  />
+                                </div>
+                              )}
+                              {cadastroDetalhes.foto_url && !cadastroDetalhes.foto_frontal_url && (
+                                <div className="col-span-2">
+                                  <img 
+                                    src={cadastroDetalhes.foto_url} 
+                                    alt="Foto Placa" 
+                                    className="w-full h-32 object-cover rounded border cursor-pointer hover:opacity-80"
+                                    onClick={() => window.open(cadastroDetalhes.foto_url, '_blank')}
+                                  />
+                                </div>
+                              )}
+                            </>
+                          )}
+
+                          {/* Pórticos - foto única */}
+                          {grupoAtivo === 'porticos' && cadastroDetalhes.foto_url && (
+                            <div className="col-span-2">
+                              <img 
+                                src={cadastroDetalhes.foto_url} 
+                                alt="Foto Pórtico" 
+                                className="w-full h-32 object-cover rounded border cursor-pointer hover:opacity-80"
+                                onClick={() => window.open(cadastroDetalhes.foto_url, '_blank')}
+                              />
+                            </div>
+                          )}
+
+                          {/* Defensas - link_fotografia */}
+                          {grupoAtivo === 'defensas' && cadastroDetalhes.link_fotografia && (
+                            <div className="col-span-2">
+                              <img 
+                                src={cadastroDetalhes.link_fotografia} 
+                                alt="Foto Defensa" 
+                                className="w-full h-32 object-cover rounded border cursor-pointer hover:opacity-80"
+                                onClick={() => window.open(cadastroDetalhes.link_fotografia, '_blank')}
+                              />
+                            </div>
+                          )}
+
+                          {/* Mensagem caso não haja fotos */}
+                          {grupoAtivo === 'placas' && !cadastroDetalhes.foto_frontal_url && !cadastroDetalhes.foto_lateral_url && 
+                           !cadastroDetalhes.foto_posterior_url && !cadastroDetalhes.foto_base_url && !cadastroDetalhes.foto_url && (
+                            <div className="col-span-2 text-xs text-muted-foreground italic">
+                              Sem fotos cadastradas
+                            </div>
+                          )}
+                          {grupoAtivo === 'porticos' && !cadastroDetalhes.foto_url && (
+                            <div className="col-span-2 text-xs text-muted-foreground italic">
+                              Sem fotos cadastradas
+                            </div>
+                          )}
+                          {grupoAtivo === 'defensas' && !cadastroDetalhes.link_fotografia && (
+                            <div className="col-span-2 text-xs text-muted-foreground italic">
+                              Sem fotos cadastradas
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
