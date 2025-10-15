@@ -220,7 +220,57 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
     }
   };
 
-  // Função para baixar camada SNV automaticamente
+  // Função para carregar SNV completo do Brasil (fallback)
+  const carregarSNVCompleto = async () => {
+    try {
+      // Verificar cache primeiro
+      const cacheKey = 'snv_brasil_completo';
+      const { data: cached } = await supabase
+        .from("configuracoes")
+        .select("valor, updated_at")
+        .eq("chave", cacheKey)
+        .maybeSingle();
+
+      // Se cache válido (< 7 dias), usar
+      if (cached?.valor && cached.updated_at && isRecentCache(cached.updated_at)) {
+        const parsedCache = JSON.parse(cached.valor);
+        console.log(`✓ SNV Brasil completo (cache): ${parsedCache.features?.length || 0} features`);
+        setGeojsonSnvData(parsedCache);
+        toast.success("SNV Brasil completo carregado (cache)");
+        return;
+      }
+
+      // Se não, buscar do arquivo público
+      toast.loading("Carregando SNV Brasil completo...", { id: 'snv-completo' });
+      const response = await fetch('/geojson/snv-brasil-completo.geojson');
+      
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+
+      const geojsonCompleto = await response.json();
+      
+      // Salvar em cache
+      await supabase
+        .from("configuracoes")
+        .upsert({
+          chave: cacheKey,
+          valor: JSON.stringify(geojsonCompleto),
+          updated_at: new Date().toISOString()
+        });
+
+      setGeojsonSnvData(geojsonCompleto);
+      const featureCount = geojsonCompleto.features?.length || 0;
+      toast.success(`SNV Brasil completo carregado (${featureCount} trechos)`, { id: 'snv-completo' });
+      console.log(`✓ SNV Brasil completo carregado: ${featureCount} features`);
+      
+    } catch (error) {
+      console.error("Erro ao carregar SNV completo:", error);
+      toast.error("Falha ao carregar SNV completo", { id: 'snv-completo' });
+    }
+  };
+
+  // Função para baixar camada SNV automaticamente (com fallback para SNV completo)
   const downloadSNVAutomatico = async (codigoRodovia: string) => {
     if (!codigoRodovia) return;
 
@@ -260,7 +310,10 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
       // Validar que tem dados antes de salvar
       if (!data.geojson.features || data.geojson.features.length === 0) {
         console.warn("Nenhum dado SNV encontrado para", codigoRodovia);
-        toast.error(`Nenhum dado SNV encontrado para ${codigoRodovia}`, { id: 'snv-download' });
+        toast.dismiss('snv-download');
+        // Fallback para SNV completo
+        console.log("Tentando carregar SNV Brasil completo como fallback...");
+        await carregarSNVCompleto();
         return;
       }
 
@@ -284,7 +337,10 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
       
     } catch (error) {
       console.error("Erro ao baixar SNV:", error);
-      toast.error("Falha ao baixar camada SNV. Use upload manual.", { id: 'snv-download' });
+      toast.dismiss('snv-download');
+      // Fallback para SNV completo
+      console.log("Erro no download SNV específico, tentando SNV completo...");
+      await carregarSNVCompleto();
     }
   };
 
@@ -689,13 +745,27 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
       {(geojsonData || geojsonSnvData) && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+          <AlertDescription className="flex items-center gap-2">
             {geojsonData && geojsonSnvData ? (
-              <>Camadas VGeo (azul) e SNV (verde) carregadas ✓</>
+              <>
+                Camadas VGeo (azul) e SNV (verde) carregadas ✓
+                {geojsonSnvData.features?.length > 1000 && (
+                  <Badge variant="outline" className="ml-2">
+                    SNV: Brasil Completo
+                  </Badge>
+                )}
+              </>
             ) : geojsonData ? (
               <>Camada VGeo carregada ✓</>
             ) : (
-              <>Camada SNV carregada ✓</>
+              <>
+                Camada SNV carregada ✓
+                {geojsonSnvData.features?.length > 1000 && (
+                  <Badge variant="outline" className="ml-2">
+                    Brasil Completo
+                  </Badge>
+                )}
+              </>
             )}
           </AlertDescription>
         </Alert>
@@ -756,8 +826,8 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                 data={geojsonSnvData}
                 pathOptions={{
                   color: "#22c55e",
-                  weight: 5,
-                  opacity: 0.9,
+                  weight: geojsonSnvData.features?.length > 1000 ? 2 : 5,
+                  opacity: geojsonSnvData.features?.length > 1000 ? 0.3 : 0.9,
                 }}
               />
             )}
