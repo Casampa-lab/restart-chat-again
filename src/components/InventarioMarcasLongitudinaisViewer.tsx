@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
@@ -140,6 +140,9 @@ export function InventarioMarcasLongitudinaisViewer({
   const pendentesRevisao = Array.from(necessidadesMap?.values() || []).filter(
     nec => nec.divergencia && !nec.reconciliado
   ).length;
+
+  // Contar TODAS as necessidades com match (não apenas divergências)
+  const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
   const { data: marcas, isLoading, refetch } = useQuery({
     queryKey: ["inventario-marcas-longitudinais", loteId, rodoviaId, searchTerm, searchLat, searchLng],
@@ -273,34 +276,66 @@ export function InventarioMarcasLongitudinaisViewer({
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Contador de Matches a Reconciliar */}
-          {pendentesRevisao > 0 && (
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
-                  <AlertCircle className="h-6 w-6 text-warning" />
+          {totalMatchesProcessados > 0 && (
+            pendentesRevisao === 0 ? (
+              // Estado OK - Sem divergências
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500/20 border border-green-500/40">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-green-600">{totalMatchesProcessados}</span>
+                      <span>{totalMatchesProcessados === 1 ? 'item verificado' : 'itens verificados'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      ✅ Inventário OK - Projeto e Sistema em conformidade
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-bold text-base flex items-center gap-2">
-                    <span className="text-2xl font-extrabold text-warning">{pendentesRevisao}</span>
-                    <span>{pendentesRevisao === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-0.5">
-                    🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={showOnlyPendentes}
+                    onCheckedChange={setShowOnlyPendentes}
+                    id="filtro-pendentes-marcas"
+                  />
+                  <Label htmlFor="filtro-pendentes-marcas" className="cursor-pointer text-sm font-medium">
+                    <Filter className="h-4 w-4 inline mr-1" />
+                    Apenas pendentes
+                  </Label>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={showOnlyPendentes}
-                  onCheckedChange={setShowOnlyPendentes}
-                  id="filtro-pendentes-marcas"
-                />
-                <Label htmlFor="filtro-pendentes-marcas" className="cursor-pointer text-sm font-medium">
-                  <Filter className="h-4 w-4 inline mr-1" />
-                  Apenas pendentes
-                </Label>
+            ) : (
+              // Estado com Divergências
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
+                    <AlertCircle className="h-6 w-6 text-warning" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-warning">{pendentesRevisao}</span>
+                      <span>{pendentesRevisao === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={showOnlyPendentes}
+                    onCheckedChange={setShowOnlyPendentes}
+                    id="filtro-pendentes-marcas"
+                  />
+                  <Label htmlFor="filtro-pendentes-marcas" className="cursor-pointer text-sm font-medium">
+                    <Filter className="h-4 w-4 inline mr-1" />
+                    Apenas pendentes
+                  </Label>
+                </div>
               </div>
-            </div>
+            )
           )}
 
           {/* Campos de Pesquisa */}
