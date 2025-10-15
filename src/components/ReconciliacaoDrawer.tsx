@@ -94,6 +94,42 @@ export function ReconciliacaoDrawer({
     }
   };
 
+  const handleRejeitarReconciliacao = async () => {
+    if (!observacao.trim()) {
+      toast.error("Por favor, adicione uma observação explicando por que não é a mesma placa");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { error } = await supabase
+        .from("necessidades_placas")
+        .update({
+          status_reconciliacao: 'rejeitado',
+          servico_final: 'Implantar',
+          servico: 'Implantar',
+          observacao_reconciliacao: observacao,
+          rejeitado_por: user.id,
+          rejeitado_em: new Date().toISOString()
+        })
+        .eq("id", necessidade.id);
+
+      if (error) throw error;
+      
+      toast.success("✓ Reconciliação rejeitada. Item marcado para implantação.");
+      onReconciliar();
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Erro ao rejeitar reconciliação:", error);
+      toast.error("Erro ao processar rejeição");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!necessidade || !cadastro) return null;
 
   return (
@@ -119,7 +155,7 @@ export function ReconciliacaoDrawer({
           {/* Comparação: Inventário (Esquerda) vs Projeto (Direita) */}
           <div className="grid grid-cols-2 gap-4">
             {/* ESQUERDA: Inventário/Cadastro */}
-            <div className="border-2 border-green-500 rounded-lg p-4 space-y-3">
+            <div className="border-2 border-green-500 rounded-lg p-4 space-y-3 max-h-[400px] overflow-y-auto">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">📷</span>
                 <div>
@@ -159,7 +195,7 @@ export function ReconciliacaoDrawer({
             </div>
 
             {/* DIREITA: Projeto/Necessidade */}
-            <div className="border-2 border-primary rounded-lg p-4 space-y-3">
+            <div className="border-2 border-primary rounded-lg p-4 space-y-3 max-h-[400px] overflow-y-auto">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🎨</span>
@@ -214,7 +250,7 @@ export function ReconciliacaoDrawer({
           {/* Campo de observação */}
           <div className="space-y-2">
             <label className="text-sm font-medium">
-              Observação (opcional)
+              Observação {!isCoordenador && <span className="text-muted-foreground text-xs">(obrigatória para rejeitar)</span>}
             </label>
             <Textarea
               value={observacao}
@@ -243,7 +279,7 @@ export function ReconciliacaoDrawer({
 
           {/* Ação Secundária: Não é a mesma */}
           <Button
-            onClick={() => onOpenChange(false)}
+            onClick={handleRejeitarReconciliacao}
             disabled={loading}
             variant="outline"
             className="w-full"
