@@ -86,7 +86,7 @@ export function InventarioImporterManager() {
     }
     
     if (!inventoryType) {
-      toast.error("Selecione o tipo de inventário");
+      toast.error("Selecione o tipo de cadastro");
       return;
     }
 
@@ -1057,27 +1057,27 @@ export function InventarioImporterManager() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          Importação Genérica de Inventários
+          Importação Genérica de Cadastros (Inventários)
         </CardTitle>
         <CardDescription>
-          Importe dados de inventário a partir de planilhas Excel com ou sem fotos
+          Importe dados de cadastro a partir de planilhas Excel com ou sem fotos
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Este sistema permite importar qualquer tipo de inventário. Selecione o tipo, faça upload do Excel e, 
+            Este sistema permite importar qualquer tipo de cadastro. Selecione o tipo, faça upload do Excel e, 
             se houver fotos, marque a opção correspondente, informe a letra da coluna do Excel que contém os nomes das fotos (ex: A, B, AA, AB, AC) e selecione as fotos.
           </AlertDescription>
         </Alert>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="inventory-type">Tipo de Inventário *</Label>
+            <Label htmlFor="inventory-type">Tipo de Cadastro *</Label>
             <Select value={inventoryType} onValueChange={setInventoryType}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo de inventário" />
+                <SelectValue placeholder="Selecione o tipo de cadastro" />
               </SelectTrigger>
               <SelectContent>
                 {INVENTORY_TYPES.map((type) => (
@@ -1214,7 +1214,7 @@ export function InventarioImporterManager() {
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 Para iniciar a importação, você precisa:
-                {!inventoryType && <div className="ml-4">✗ Selecionar o tipo de inventário</div>}
+                {!inventoryType && <div className="ml-4">✗ Selecionar o tipo de cadastro</div>}
                 {!selectedLote && <div className="ml-4">✗ Selecionar o lote</div>}
                 {!selectedRodovia && <div className="ml-4">✗ Selecionar a rodovia</div>}
                 {!excelFile && <div className="ml-4">✗ Selecionar o arquivo Excel</div>}
@@ -1237,7 +1237,7 @@ export function InventarioImporterManager() {
               ) : (
                 <>
                   <Upload className="mr-2 h-4 w-4" />
-                  Importar Inventário
+                  Importar Cadastro
                 </>
               )}
             </Button>
