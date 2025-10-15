@@ -121,6 +121,39 @@ export function NecessidadesImporter() {
     return null;
   };
 
+  /**
+   * Sanitiza valores TEXT, convertendo valores descartáveis para NULL,
+   * MAS MANTENDO "-" como valor válido (usado em campos como "motivo")
+   */
+  const sanitizarTexto = (valor: any): string | null => {
+    // Se já é null/undefined, retorna null
+    if (valor === null || valor === undefined) return null;
+    
+    // Converter para string se não for
+    const valorStr = String(valor).trim();
+    
+    // Lista de valores que devem ser convertidos para NULL
+    // NOTA: "-" NÃO está nesta lista, pois é um valor válido para campos como "motivo"
+    const valoresInvalidos = [
+      "",
+      "não se aplica",
+      "nao se aplica",
+      "n/a",
+      "na",
+      "null",
+      "indefinido",
+      "sem informação",
+      "sem informacao"
+    ];
+    
+    if (valoresInvalidos.includes(valorStr.toLowerCase())) {
+      return null;
+    }
+    
+    // Retornar o valor como string
+    return valorStr;
+  };
+
   const identificarServico = (row: any, match: any): string => {
     // SEM match = nova instalação
     if (!match) {
@@ -454,7 +487,7 @@ export function NecessidadesImporter() {
           local_implantacao: row["Local de Implantação"] || row["Local Implantação"] || row["local_implantacao"],
           espacamento_m: sanitizarNumerico(row["Espaçamento"] || row["espacamento_m"]),
           quantidade: sanitizarNumerico(row["Quantidade"] || row["quantidade"]),
-          motivo,
+          motivo: sanitizarTexto(motivo),
         };
 
       case "marcas_transversais":
@@ -498,7 +531,7 @@ export function NecessidadesImporter() {
           observacao: row["Observação"] || row["Observacao"] || row["observacao"],
           snv: row["SNV"] || row["snv"],
           solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
-          motivo: motivoPortico,
+          motivo: sanitizarTexto(motivoPortico),
         };
 
       case "defensas":
@@ -548,7 +581,7 @@ export function NecessidadesImporter() {
           adequacao_funcionalidade_terminais_inadequados: row["Adequação à funcionalidade - Terminais inadequados"] || row["Adequacao terminais inadequados"] || row["adequacao_funcionalidade_terminais_inadequados"],
           distancia_face_defensa_obstaculo_m: sanitizarNumerico(row["Distância da face da defensa ao obstáculo(m)"] || row["Distancia face defensa obstaculo"] || row["distancia_face_defensa_obstaculo_m"]),
           distancia_bordo_pista_face_defensa_m: sanitizarNumerico(row["Distância da linha de bordo da pista à face da defensa (m)"] || row["Distancia bordo pista face defensa"] || row["distancia_bordo_pista_face_defensa_m"]),
-          motivo: motivoDefensa,
+          motivo: sanitizarTexto(motivoDefensa),
         };
 
       default:
