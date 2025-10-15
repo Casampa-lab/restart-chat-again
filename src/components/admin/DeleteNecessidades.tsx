@@ -9,13 +9,13 @@ import { Trash2, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 const TABELAS_NECESSIDADES = [
-  { value: "necessidades_placas", label: "Placas de Sinalização Vertical" },
-  { value: "necessidades_marcas_longitudinais", label: "Marcas Longitudinais" },
   { value: "necessidades_cilindros", label: "Cilindros Delimitadores" },
-  { value: "necessidades_marcas_transversais", label: "Zebrados (Marcas Transversais)" },
-  { value: "necessidades_tachas", label: "Tachas Refletivas" },
-  { value: "necessidades_porticos", label: "Pórticos" },
   { value: "necessidades_defensas", label: "Defensas" },
+  { value: "necessidades_marcas_longitudinais", label: "Marcas Longitudinais" },
+  { value: "necessidades_porticos", label: "Pórticos" },
+  { value: "necessidades_placas", label: "Placas de Sinalização Vertical" },
+  { value: "necessidades_tachas", label: "Tachas Refletivas" },
+  { value: "necessidades_marcas_transversais", label: "Zebrados (Marcas Transversais)" },
 ];
 
 export function DeleteNecessidades() {

@@ -13,13 +13,13 @@ import { useQuery } from "@tanstack/react-query";
 import * as XLSX from "xlsx";
 
 const TIPOS_NECESSIDADES = [
+  { value: "cilindros", label: "Cilindros Delimitadores" },
+  { value: "defensas", label: "Defensas" },
   { value: "marcas_longitudinais", label: "Marcas Longitudinais" },
+  { value: "porticos", label: "Pórticos" },
+  { value: "placas", label: "Placas de Sinalização Vertical" },
   { value: "tachas", label: "Tachas Refletivas" },
   { value: "marcas_transversais", label: "Zebrados (Marcas Transversais)" },
-  { value: "cilindros", label: "Cilindros Delimitadores" },
-  { value: "placas", label: "Placas de Sinalização Vertical" },
-  { value: "porticos", label: "Pórticos" },
-  { value: "defensas", label: "Defensas" },
 ];
 
 interface LogEntry {
