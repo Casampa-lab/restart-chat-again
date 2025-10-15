@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, AlertCircle, Upload, AlertTriangle } from "lucide-react";
+import { MapPin, AlertCircle, Upload, AlertTriangle, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from "react-leaflet";
@@ -303,6 +303,40 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
     }
   };
 
+  const handleRemoveGeojson = async () => {
+    try {
+      const { error } = await supabase
+        .from("configuracoes")
+        .delete()
+        .eq("chave", "mapa_geojson_rodovias");
+
+      if (error) throw error;
+
+      setGeojsonData(null);
+      toast.success("Camada VGeo removida!");
+    } catch (error: any) {
+      console.error("Erro ao remover GeoJSON:", error);
+      toast.error("Erro ao remover camada: " + error.message);
+    }
+  };
+
+  const handleRemoveSnvGeojson = async () => {
+    try {
+      const { error } = await supabase
+        .from("configuracoes")
+        .delete()
+        .eq("chave", "mapa_geojson_snv");
+
+      if (error) throw error;
+
+      setGeojsonSnvData(null);
+      toast.success("Camada SNV removida!");
+    } catch (error: any) {
+      console.error("Erro ao remover GeoJSON SNV:", error);
+      toast.error("Erro ao remover camada: " + error.message);
+    }
+  };
+
   const handleSinalizarErro = async (necessidade: Necessidade, tipoproblema: string, descricao?: string) => {
     try {
       const { data: userData } = await supabase.auth.getUser();
@@ -416,45 +450,75 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
             </span>
           </div>
 
-          <div className="relative">
-            <input
-              type="file"
-              id="geojson-upload"
-              accept=".geojson,.json"
-              onChange={handleFileUpload}
-              className="hidden"
-              disabled={uploading}
-            />
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => document.getElementById("geojson-upload")?.click()}
-              disabled={uploading}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              {geojsonData ? "Trocar" : "Importar"} GeoJSON VGeo
-            </Button>
+          {/* Botões VGeo */}
+          <div className="flex gap-2 items-center">
+            <div className="relative">
+              <input
+                type="file"
+                id="geojson-upload"
+                accept=".geojson,.json"
+                onChange={handleFileUpload}
+                className="hidden"
+                disabled={uploading}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => document.getElementById("geojson-upload")?.click()}
+                disabled={uploading}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {geojsonData ? "Trocar" : "Importar"} GeoJSON VGeo
+              </Button>
+            </div>
+            
+            {geojsonData && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRemoveGeojson}
+                className="border-red-500 text-red-700 hover:bg-red-50"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Remover VGeo
+              </Button>
+            )}
           </div>
 
-          <div className="relative">
-            <input
-              type="file"
-              id="geojson-snv-upload"
-              accept=".geojson,.json"
-              onChange={handleSnvFileUpload}
-              className="hidden"
-              disabled={uploadingSnv}
-            />
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => document.getElementById("geojson-snv-upload")?.click()}
-              disabled={uploadingSnv}
-              className="border-green-500 text-green-700 hover:bg-green-50"
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              {geojsonSnvData ? "Trocar" : "Importar"} GeoJSON SNV
-            </Button>
+          {/* Botões SNV */}
+          <div className="flex gap-2 items-center">
+            <div className="relative">
+              <input
+                type="file"
+                id="geojson-snv-upload"
+                accept=".geojson,.json"
+                onChange={handleSnvFileUpload}
+                className="hidden"
+                disabled={uploadingSnv}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => document.getElementById("geojson-snv-upload")?.click()}
+                disabled={uploadingSnv}
+                className="border-green-500 text-green-700 hover:bg-green-50"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {geojsonSnvData ? "Trocar" : "Importar"} GeoJSON SNV
+              </Button>
+            </div>
+            
+            {geojsonSnvData && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRemoveSnvGeojson}
+                className="border-red-500 text-red-700 hover:bg-red-50"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Remover SNV
+              </Button>
+            )}
           </div>
         </div>
       </div>
