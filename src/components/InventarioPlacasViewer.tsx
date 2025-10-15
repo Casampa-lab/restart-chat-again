@@ -355,7 +355,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     }
   };
 
-  const handleReconciliar = () => {
+  const handleReconciliar = async () => {
+    // Aguardar commit do Supabase antes de buscar dados atualizados
+    await new Promise(resolve => setTimeout(resolve, 300));
     refetchNecessidades();
     refetch();
   };
