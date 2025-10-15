@@ -29,7 +29,7 @@ const TIPOS_ELEMENTOS = [
     tabela_cadastro: 'ficha_marcas_longitudinais',
     tabela_necessidade: 'necessidades_marcas_longitudinais',
     coluna_referencia: 'cadastro_id',
-    campos_chave: ['snv', 'tipo_demarcacao', 'km_inicial', 'km_final', 'rodovia_id', 'lote_id'],
+    campos_chave: ['snv', 'tipo_demarcacao', 'posicao', 'cor', 'largura_cm', 'km_inicial', 'km_final', 'rodovia_id', 'lote_id'],
   },
   {
     value: 'tachas',
@@ -45,7 +45,7 @@ const TIPOS_ELEMENTOS = [
     tabela_cadastro: 'ficha_cilindros',
     tabela_necessidade: 'necessidades_cilindros',
     coluna_referencia: 'cadastro_id',
-    campos_chave: ['snv', 'cor_corpo', 'km_inicial', 'km_final', 'rodovia_id', 'lote_id'],
+    campos_chave: ['snv', 'cor_corpo', 'cor_refletivo', 'tipo_refletivo', 'km_inicial', 'km_final', 'rodovia_id', 'lote_id'],
   },
   {
     value: 'inscricoes',
