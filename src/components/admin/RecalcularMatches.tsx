@@ -124,7 +124,11 @@ export function RecalcularMatches() {
     necessidade: { 
       km_inicial: number; 
       km_final: number; 
-      lado?: string 
+      lado?: string;
+      posicao?: string;
+      cor?: string;
+      tipo_demarcacao?: string;
+      largura_cm?: number;
     },
     cadastros: any[],
     tipo: string,
@@ -140,6 +144,34 @@ export function RecalcularMatches() {
     for (const cad of cadastros) {
       const ladoValido = validarLadoPorTipo(tipo, necessidade.lado || "", cad.lado || "");
       if (!ladoValido) continue;
+      
+      // VALIDAÇÕES ESPECÍFICAS PARA MARCAS LONGITUDINAIS
+      if (tipo === 'marcas_longitudinais') {
+        // 1. POSIÇÃO deve ser idêntica (BD, BE, E, CE, CD são elementos DIFERENTES)
+        if (necessidade.posicao && cad.posicao && necessidade.posicao !== cad.posicao) {
+          continue;
+        }
+        
+        // 2. COR deve ser idêntica (Branco ≠ Amarelo)
+        if (necessidade.cor && cad.cor && necessidade.cor !== cad.cor) {
+          continue;
+        }
+        
+        // 3. TIPO DE DEMARCAÇÃO deve ser compatível (LBO ≠ LFO-3 ≠ LMS-2)
+        if (necessidade.tipo_demarcacao && cad.tipo_demarcacao) {
+          if (necessidade.tipo_demarcacao !== cad.tipo_demarcacao) {
+            continue;
+          }
+        }
+        
+        // 4. LARGURA deve ser compatível (tolerância de ±2cm)
+        if (necessidade.largura_cm && cad.largura_cm) {
+          const diferencaLargura = Math.abs(necessidade.largura_cm - cad.largura_cm);
+          if (diferencaLargura > 2) {
+            continue;
+          }
+        }
+      }
       
       const { overlap_km, porcentagem } = calcularSobreposicaoKm(
         necessidade.km_inicial,
@@ -366,7 +398,11 @@ export function RecalcularMatches() {
               {
                 km_inicial: parseFloat(nec.km_inicial),
                 km_final: parseFloat(nec.km_final),
-                lado: nec.lado
+                lado: nec.lado,
+                posicao: nec.posicao,
+                cor: nec.cor,
+                tipo_demarcacao: nec.tipo_demarcacao,
+                largura_cm: nec.largura_cm ? parseFloat(nec.largura_cm) : undefined
               },
               cadastros,
               tipo,
