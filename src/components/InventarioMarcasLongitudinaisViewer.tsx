@@ -110,21 +110,24 @@ export function InventarioMarcasLongitudinaisViewer({
   };
 
   const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
-    queryKey: ["necessidades-match-marcas", loteId, rodoviaId],
+    queryKey: ["necessidades-match-marcas", loteId, rodoviaId, toleranciaMetros],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_marcas_longitudinais")
         .select("*")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .eq("status_revisao", "pendente_coordenador")
-        .not("cadastro_id", "is", null);
+        .not("cadastro_id", "is", null)
+        .lte("distancia_match_metros", toleranciaMetros);
       
       if (error) throw error;
       
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
-        map.set(nec.cadastro_id, nec);
+        map.set(nec.cadastro_id, {
+          ...nec,
+          servico: nec.servico_final || nec.servico, // Priorizar servico_final
+        });
       });
       
       return map;
@@ -132,7 +135,9 @@ export function InventarioMarcasLongitudinaisViewer({
     enabled: !!loteId && !!rodoviaId,
   });
 
-  const pendentesRevisao = necessidadesMap?.size || 0;
+  const pendentesRevisao = Array.from(necessidadesMap?.values() || []).filter(
+    nec => nec.status_revisao === 'pendente_coordenador'
+  ).length;
 
   const { data: marcas, isLoading, refetch } = useQuery({
     queryKey: ["inventario-marcas-longitudinais", loteId, rodoviaId, searchTerm, searchLat, searchLng],
@@ -409,7 +414,16 @@ export function InventarioMarcasLongitudinaisViewer({
                       </TableHead>
                       <TableHead>Traço (m)</TableHead>
                       <TableHead>Espaçamento (m)</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead className="cursor-pointer select-none hover:bg-muted/50 text-center">
+                        <div className="flex items-center justify-center">
+                          Projeto
+                        </div>
+                      </TableHead>
+                      <TableHead className="cursor-pointer select-none hover:bg-muted/50 text-center">
+                        <div className="flex items-center justify-center">
+                          Status
+                        </div>
+                      </TableHead>
                       <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("extensao_metros")}
@@ -432,8 +446,11 @@ export function InventarioMarcasLongitudinaisViewer({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedMarcas.map((marca) => (
-                      <TableRow key={marca.id} className="hover:bg-muted/50">
+                    {sortedMarcas.map((marca) => {
+                      const necessidade = necessidadesMap?.get(marca.id);
+                      
+                      return (
+                        <TableRow key={marca.id} className="hover:bg-muted/50">
                         {searchLat && searchLng && (
                           <TableCell>
                             <Badge variant="secondary">
@@ -451,8 +468,26 @@ export function InventarioMarcasLongitudinaisViewer({
                         <TableCell>{marca.km_final?.toFixed(2) || "-"}</TableCell>
                         <TableCell>{marca.traco_m?.toFixed(2) || "-"}</TableCell>
                         <TableCell>{marca.espacamento_m?.toFixed(2) || "-"}</TableCell>
+                        
+                        {/* Coluna Projeto */}
                         <TableCell className="text-center">
-                          {necessidadesMap?.get(marca.id) ? (
+                          {necessidade ? (
+                            <Badge 
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {necessidade.servico_final || necessidade.servico || "N/A"}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-muted-foreground text-xs">
+                              Sem previsão
+                            </Badge>
+                          )}
+                        </TableCell>
+                        
+                        {/* Coluna Status */}
+                        <TableCell className="text-center">
+                          {necessidade?.status_revisao === 'pendente_coordenador' ? (
                             <Button
                               variant="outline"
                               size="sm"
@@ -494,7 +529,8 @@ export function InventarioMarcasLongitudinaisViewer({
                           </Button>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    );
+                    })}
                   </TableBody>
                 </Table>
               </div>
