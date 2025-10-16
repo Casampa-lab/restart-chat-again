@@ -198,9 +198,7 @@ const CoordenacaoFiscalizacao = () => {
                           <FileSpreadsheet className="h-6 w-6 text-red-600" />
                           <h3 className="text-xl font-bold text-red-900">Elementos Não Cadastrados em Projeto</h3>
                         </div>
-                        <p className="text-sm text-red-700">
-                          Aprove ou rejeite elementos identificados em campo que não constam no cadastro inicial do projeto
-                        </p>
+                        <p className="text-sm text-red-700">Aprove ou rejeite elementos identificados em campo que não constam no projeto</p>
                         {contadorElementosPendentes > 0 && <div className="mt-3 flex items-center gap-2">
                             <Badge className="bg-red-500 text-white text-base px-3 py-1">
                               {contadorElementosPendentes} {contadorElementosPendentes === 1 ? 'elemento pendente' : 'elementos pendentes'}
