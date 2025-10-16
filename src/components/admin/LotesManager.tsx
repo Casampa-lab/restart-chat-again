@@ -583,7 +583,7 @@ const LotesManager = () => {
           </DialogHeader>
           <form onSubmit={handleUpdate} className="space-y-6">
             {/* Dados básicos do lote */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-numero">Número do Lote *</Label>
                 <Input id="edit-numero" value={formData.numero} onChange={e => setFormData({
@@ -598,6 +598,28 @@ const LotesManager = () => {
                 ...formData,
                 contrato: e.target.value
               })} placeholder="Ex: 123/2024" />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-empresa">Empresa Executora *</Label>
+                <Select 
+                  value={formData.empresa_id} 
+                  onValueChange={value => setFormData({
+                    ...formData,
+                    empresa_id: value
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a empresa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {empresas.map(empresa => (
+                      <SelectItem key={empresa.id} value={empresa.id}>
+                        {empresa.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
