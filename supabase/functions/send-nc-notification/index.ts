@@ -209,6 +209,10 @@ const handler = async (req: Request): Promise<Response> => {
     // Limpar base64 - remover prefixo data:application/pdf;base64, se existir
     const cleanBase64 = pdf_base64.replace(/^data:application\/pdf;base64,/, '');
 
+    // Validação do base64
+    console.log('Tamanho do PDF base64:', cleanBase64.length);
+    console.log('Primeiros 50 caracteres:', cleanBase64.substring(0, 50));
+
     // Enviar email via Resend
     const emailPayload: any = {
       from: emailFrom,
@@ -219,6 +223,8 @@ const handler = async (req: Request): Promise<Response> => {
         {
           filename: `NC_${ncData.numero_nc}.pdf`,
           content: cleanBase64,
+          type: 'application/pdf',
+          encoding: 'base64'
         }
       ]
     };
