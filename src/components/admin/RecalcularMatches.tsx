@@ -862,10 +862,10 @@ export function RecalcularMatches() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <RefreshCw className="h-5 w-5" />
-          Recalcular Matches (Inventário ↔ Necessidades)
+          Recalcular Matches (Inventário ↔ Projeto)
         </CardTitle>
         <CardDescription>
-          Recalcula os vínculos entre cadastro e necessidades para elementos lineares, atualizando divergências e matches
+          Recalcula os vínculos entre cadastro e projeto para elementos lineares, atualizando divergências e matches
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

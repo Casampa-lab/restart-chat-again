@@ -295,7 +295,7 @@ export function DiagnosticoMatch() {
           Diagnóstico de Match de Coordenadas
         </CardTitle>
         <CardDescription>
-          Verificar distâncias entre necessidades e cadastro (Marcas Longitudinais: apenas eixo | Outros: substituição)
+          Verificar distâncias entre projeto e cadastro (Marcas Longitudinais: apenas eixo | Outros: substituição)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

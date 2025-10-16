@@ -124,10 +124,10 @@ export function DeleteNecessidades() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-destructive">
           <Trash2 className="h-5 w-5" />
-          Deletar Necessidades por Lote e Rodovia
+          Deletar Dados do Projeto por Lote e Rodovia
         </CardTitle>
         <CardDescription>
-          Selecione o lote, rodovia e tipo de necessidade para deletar todos os registros correspondentes
+          Selecione o lote, rodovia e tipo de serviço do projeto para deletar todos os registros correspondentes
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

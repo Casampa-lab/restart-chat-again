@@ -135,7 +135,7 @@ const Admin = () => {
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
             <TabsTrigger value="inventario">Cadastro</TabsTrigger>
-            <TabsTrigger value="necessidades">Necessidades</TabsTrigger>
+            <TabsTrigger value="necessidades">Projeto</TabsTrigger>
             {isAdmin && <TabsTrigger value="auditoria">Auditoria GPS</TabsTrigger>}
           </TabsList>
 

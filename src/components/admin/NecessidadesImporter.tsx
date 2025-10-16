@@ -1151,9 +1151,9 @@ export function NecessidadesImporter() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Importar Necessidades</CardTitle>
+        <CardTitle>Importar Projeto</CardTitle>
         <CardDescription>
-          Importar planilhas de necessidades com match automático ao cadastro
+          Importar planilhas do projeto com match automático ao cadastro
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -342,9 +342,9 @@ export function NecessidadesAuditor() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Auditar Necessidades</CardTitle>
+        <CardTitle>Auditar Projeto</CardTitle>
         <CardDescription>
-          Verificar se necessidades de substituição possuem match com cadastro
+          Verificar se serviços do projeto de substituição possuem match com cadastro
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
