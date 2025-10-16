@@ -98,7 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { data: supervisoraData, error: supervisoraError } = await supabase
       .from('supervisoras')
-      .select('nome_empresa, email_envio')
+      .select('nome_empresa, email_envio, logo_url')
       .eq('id', supervisora_id)
       .single();
 

@@ -257,16 +257,17 @@ const NCsCoordenador = () => {
         .eq("id", user.id)
         .single();
 
-      let supervisoraData = { nome_empresa: "Supervisora", contrato: "N/A" };
+      let supervisoraData = { nome_empresa: "Supervisora", contrato: "N/A", logo_url: undefined as string | undefined };
       if (profile?.supervisora_id) {
         const { data: supervisora } = await supabase
           .from("supervisoras")
-          .select("nome_empresa")
+          .select("nome_empresa, logo_url")
           .eq("id", profile.supervisora_id)
           .single();
         
         if (supervisora) {
           supervisoraData.nome_empresa = supervisora.nome_empresa;
+          supervisoraData.logo_url = supervisora.logo_url || undefined;
         }
       }
 

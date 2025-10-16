@@ -1,12 +1,13 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { urlToBase64 } from './pdfHelpers';
 
 interface FotoData {
   foto_url: string;
-  latitude: number | null;
-  longitude: number | null;
-  sentido: string;
-  descricao: string;
+  latitude?: number;
+  longitude?: number;
+  sentido?: string;
+  descricao?: string;
   ordem: number;
 }
 
@@ -15,11 +16,11 @@ interface NCData {
   data_ocorrencia: string;
   tipo_nc: string;
   problema_identificado: string;
-  descricao_problema: string;
-  observacao: string;
-  km_inicial: number | null;
-  km_final: number | null;
-  km_referencia: number | null;
+  descricao_problema?: string;
+  observacao?: string;
+  km_inicial?: number;
+  km_final?: number;
+  km_referencia?: number;
   rodovia: {
     codigo: string;
     uf: string;
@@ -27,10 +28,10 @@ interface NCData {
   lote: {
     numero: string;
     contrato: string;
-    responsavel_executora: string;
-    email_executora: string;
-    nome_fiscal_execucao: string;
-    email_fiscal_execucao: string;
+    responsavel_executora?: string;
+    email_executora?: string;
+    nome_fiscal_execucao?: string;
+    email_fiscal_execucao?: string;
   };
   empresa: {
     nome: string;
@@ -38,11 +39,12 @@ interface NCData {
   supervisora: {
     nome_empresa: string;
     contrato: string;
+    logo_url?: string;
   };
   fotos: FotoData[];
-  natureza: string;
-  grau: string;
-  tipo_obra: string;
+  natureza?: string;
+  grau?: string;
+  tipo_obra?: string;
   comentarios_supervisora?: string;
   comentarios_executora?: string;
 }
@@ -50,190 +52,175 @@ interface NCData {
 export async function generateNCPDF(ncData: NCData): Promise<Blob> {
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 15;
-  let yPos = 20;
+  const margin = 12;
+  let yPos = 15;
 
-  // Header - DNIT e Supervisora
-  doc.setFontSize(10);
-  doc.text('DNIT', margin, yPos);
-  doc.text('Logotipo Supervisora', pageWidth - margin - 40, yPos);
-  
-  yPos += 8;
-  doc.setFontSize(8);
-  doc.text('Departamento Nacional de Infraestrutura de Transportes', margin, yPos);
-  
-  yPos += 10;
-  
-  // Título
-  doc.setFontSize(16);
+  // ==================== HEADER COM LOGOS ====================
+  // Logo DNIT (esquerda)
+  try {
+    const logoDNIT = '/logo-dnit.jpg';
+    const dnitBase64 = await urlToBase64(logoDNIT);
+    doc.addImage(dnitBase64, 'JPEG', margin, yPos, 35, 12);
+  } catch (error) {
+    console.error('Erro ao carregar logo DNIT:', error);
+    doc.setFontSize(8);
+    doc.text('DNIT', margin, yPos + 6);
+  }
+
+  // Logo Supervisora (direita)
+  if (ncData.supervisora.logo_url) {
+    try {
+      const logoSupBase64 = await urlToBase64(ncData.supervisora.logo_url);
+      doc.addImage(logoSupBase64, 'PNG', pageWidth - margin - 35, yPos, 35, 12);
+    } catch (error) {
+      console.error('Erro ao carregar logo supervisora:', error);
+      doc.setFontSize(8);
+      doc.text(ncData.supervisora.nome_empresa.substring(0, 15), pageWidth - margin - 35, yPos + 6);
+    }
+  }
+
+  yPos += 18;
+
+  // ==================== TÍTULO ====================
+  doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('REGISTRO DE NÃO CONFORMIDADE', pageWidth / 2, yPos, { align: 'center' });
-  
-  yPos += 8;
-  doc.setFontSize(14);
+  yPos += 6;
+  doc.setFontSize(12);
   doc.text(`Nº ${ncData.numero_nc}`, pageWidth / 2, yPos, { align: 'center' });
-  
-  yPos += 10;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
+  yPos += 8;
 
-  // Identificação
+  // ==================== IDENTIFICAÇÃO (COMPACTA) ====================
+  doc.setFont('helvetica', 'normal');
   const identificacaoData = [
-    ['Data:', new Date(ncData.data_ocorrencia).toLocaleDateString('pt-BR')],
-    ['Rodovia:', ncData.rodovia.codigo, 'Km:', 
-     ncData.km_inicial && ncData.km_final 
-       ? `${ncData.km_inicial} ao ${ncData.km_final}` 
-       : ncData.km_referencia?.toString() || 'N/A',
-     'Lote:', ncData.lote.numero],
-    ['Supervisora:', ncData.supervisora.nome_empresa, 'Contrato:', ncData.supervisora.contrato],
-    ['Construtora:', ncData.empresa.nome, 'Contrato:', ncData.lote.contrato],
-    ['Tipo de Obra:', ncData.tipo_obra],
+    ['Data', new Date(ncData.data_ocorrencia).toLocaleDateString('pt-BR'), 
+     'Rodovia', `${ncData.rodovia.codigo}/${ncData.rodovia.uf}`,
+     'Lote', ncData.lote.numero],
+    ['Km', ncData.km_inicial && ncData.km_final 
+        ? `${ncData.km_inicial} ao ${ncData.km_final}` 
+        : ncData.km_referencia?.toString() || 'N/A',
+     'Supervisora', ncData.supervisora.nome_empresa.substring(0, 25)],
+    ['Construtora', ncData.empresa.nome.substring(0, 40)],
   ];
 
   autoTable(doc, {
     startY: yPos,
     body: identificacaoData,
     theme: 'grid',
-    styles: { fontSize: 9, cellPadding: 2 },
+    styles: { fontSize: 7, cellPadding: 1.5 },
     columnStyles: {
-      0: { fontStyle: 'bold', cellWidth: 30 },
+      0: { fontStyle: 'bold', cellWidth: 20 },
+      2: { fontStyle: 'bold', cellWidth: 22 },
+      4: { fontStyle: 'bold', cellWidth: 12 },
     },
   });
 
   yPos = (doc as any).lastAutoTable.finalY + 5;
 
-  // Natureza e Grau
-  doc.setFontSize(9);
+  // ==================== NATUREZA/GRAU/TIPO ====================
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
   doc.text('Natureza:', margin, yPos);
   doc.setFont('helvetica', 'normal');
-  doc.text(ncData.natureza, margin + 20, yPos);
+  doc.text(ncData.natureza || 'N/A', margin + 18, yPos);
   
   doc.setFont('helvetica', 'bold');
-  doc.text('Grau:', margin + 80, yPos);
+  doc.text('Grau:', margin + 60, yPos);
   doc.setFont('helvetica', 'normal');
-  doc.text(ncData.grau, margin + 95, yPos);
+  doc.text(ncData.grau || 'N/A', margin + 72, yPos);
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text('Tipo:', margin + 110, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(ncData.tipo_obra || 'N/A', margin + 122, yPos);
   
   yPos += 8;
 
-  // Descrição da Ocorrência
+  // ==================== DESCRIÇÃO (RESUMIDA) ====================
   doc.setFont('helvetica', 'bold');
-  doc.text('Descrição da Ocorrência', margin, yPos);
-  yPos += 5;
-  doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  
-  doc.text(`Problema identificado: ${ncData.problema_identificado}`, margin, yPos);
-  yPos += 5;
-  
-  if (ncData.descricao_problema) {
-    const descLines = doc.splitTextToSize(ncData.descricao_problema, pageWidth - 2 * margin);
-    doc.text(descLines, margin, yPos);
-    yPos += descLines.length * 4;
-  }
-  
-  yPos += 8;
-
-  // Comentários
-  if (ncData.comentarios_supervisora) {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.text('Comentários da Supervisora:', margin, yPos);
-    yPos += 5;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    const comentSuperLines = doc.splitTextToSize(ncData.comentarios_supervisora, pageWidth - 2 * margin);
-    doc.text(comentSuperLines, margin, yPos);
-    yPos += comentSuperLines.length * 4 + 5;
-  }
-
-  if (ncData.comentarios_executora) {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.text('Comentários da Executora:', margin, yPos);
-    yPos += 5;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    const comentExecLines = doc.splitTextToSize(ncData.comentarios_executora, pageWidth - 2 * margin);
-    doc.text(comentExecLines, margin, yPos);
-    yPos += comentExecLines.length * 4 + 5;
-  }
-
-  // Nova página para fotos se necessário
-  if (yPos > pageHeight - 100) {
-    doc.addPage();
-    yPos = 20;
-  }
-
-  // Documentação Fotográfica
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.text('Documentação Fotográfica', margin, yPos);
-  yPos += 8;
-
-  // Fotos (2 por linha)
-  const fotoWidth = (pageWidth - 3 * margin) / 2;
-  const fotoHeight = 60;
-  let fotoCol = 0;
-  let fotoStartY = yPos;
-
-  for (let i = 0; i < 4; i++) {
-    const foto = ncData.fotos[i];
-    const xPos = margin + (fotoCol * (fotoWidth + margin));
-    
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.text(`Foto ${i + 1} - Não conformidade`, xPos, fotoStartY);
-    
-    if (foto && foto.foto_url) {
-      // Tentar adicionar a imagem
-      try {
-        doc.addImage(foto.foto_url, 'JPEG', xPos, fotoStartY + 3, fotoWidth, fotoHeight);
-      } catch (error) {
-        // Se falhar, apenas desenhar um retângulo
-        doc.rect(xPos, fotoStartY + 3, fotoWidth, fotoHeight);
-        doc.setFontSize(8);
-        doc.text('[Imagem não disponível]', xPos + fotoWidth/2, fotoStartY + fotoHeight/2, { align: 'center' });
-      }
-      
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      const infoY = fotoStartY + fotoHeight + 6;
-      doc.text(`Sentido: ${foto.sentido || 'N/A'}`, xPos, infoY);
-      doc.text(`Lat: ${foto.latitude?.toFixed(6) || 'N/A'}`, xPos, infoY + 3);
-      doc.text(`Long: ${foto.longitude?.toFixed(6) || 'N/A'}`, xPos, infoY + 6);
-      if (foto.descricao) {
-        const descLines = doc.splitTextToSize(`Descrição: ${foto.descricao}`, fotoWidth);
-        doc.text(descLines, xPos, infoY + 9);
-      }
-    } else {
-      // Placeholder para foto vazia
-      doc.rect(xPos, fotoStartY + 3, fotoWidth, fotoHeight);
-      doc.setFontSize(8);
-      doc.text('[Sem foto]', xPos + fotoWidth/2, fotoStartY + fotoHeight/2, { align: 'center' });
-    }
-    
-    fotoCol++;
-    if (fotoCol >= 2) {
-      fotoCol = 0;
-      fotoStartY += fotoHeight + 25;
-      
-      // Adicionar nova página se necessário
-      if (fotoStartY > pageHeight - 100 && i < 3) {
-        doc.addPage();
-        fotoStartY = 20;
-      }
-    }
-  }
-
-  // Footer
-  yPos = pageHeight - 20;
-  doc.setFontSize(7);
+  doc.text('Descrição:', margin, yPos);
+  yPos += 4;
   doc.setFont('helvetica', 'normal');
-  doc.text(`EMPRESA: ${ncData.empresa.nome}`, margin, yPos);
-  doc.text(`CONTRATO: ${ncData.lote.contrato}`, margin, yPos + 4);
-  doc.text(`UF: ${ncData.rodovia.uf}`, pageWidth - margin - 20, yPos);
+  doc.setFontSize(7);
+  
+  const descResumida = (ncData.descricao_problema || ncData.problema_identificado).substring(0, 200);
+  const descLines = doc.splitTextToSize(descResumida, pageWidth - 2 * margin);
+  doc.text(descLines.slice(0, 3), margin, yPos);
+  yPos += 12;
+
+  // ==================== GRID 2x2 DE FOTOS ====================
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('Documentação Fotográfica', margin, yPos);
+  yPos += 5;
+
+  const fotoWidth = (pageWidth - 3 * margin) / 2;
+  const fotoHeight = 50;
+  const fotoSpacing = 5;
+
+  const fotosOrdenadas = [...ncData.fotos].sort((a, b) => a.ordem - b.ordem);
+
+  for (let row = 0; row < 2; row++) {
+    for (let col = 0; col < 2; col++) {
+      const fotoIndex = row * 2 + col;
+      if (fotoIndex >= fotosOrdenadas.length) break;
+      
+      const foto = fotosOrdenadas[fotoIndex];
+      
+      const xPos = margin + col * (fotoWidth + margin);
+      const yFoto = yPos + row * (fotoHeight + fotoSpacing + 10);
+
+      // Título da foto
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Foto ${fotoIndex + 1}`, xPos, yFoto);
+
+      if (foto?.foto_url) {
+        try {
+          const fotoBase64 = await urlToBase64(foto.foto_url);
+          doc.addImage(fotoBase64, 'JPEG', xPos, yFoto + 2, fotoWidth, fotoHeight);
+        } catch (error) {
+          console.error(`Erro ao carregar foto ${fotoIndex + 1}:`, error);
+          doc.rect(xPos, yFoto + 2, fotoWidth, fotoHeight);
+          doc.setFontSize(6);
+          doc.text('[Erro ao carregar]', xPos + fotoWidth/2, yFoto + fotoHeight/2 + 2, { align: 'center' });
+        }
+
+        // Coordenadas GPS (compactas)
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6);
+        const gpsY = yFoto + fotoHeight + 4;
+        const gpsText = `${foto.sentido || 'N/A'} | ${foto.latitude?.toFixed(5) || 'N/A'}, ${foto.longitude?.toFixed(5) || 'N/A'}`;
+        doc.text(gpsText, xPos, gpsY);
+      } else {
+        doc.rect(xPos, yFoto + 2, fotoWidth, fotoHeight);
+        doc.setFontSize(6);
+        doc.text('[Sem foto]', xPos + fotoWidth/2, yFoto + fotoHeight/2 + 2, { align: 'center' });
+      }
+    }
+  }
+
+  yPos += 2 * (fotoHeight + fotoSpacing + 10) + 5;
+
+  // ==================== COMENTÁRIOS (SE COUBER) ====================
+  if (yPos < 260 && ncData.comentarios_supervisora) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.text('Comentários:', margin, yPos);
+    yPos += 3;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6);
+    const comentLines = doc.splitTextToSize(ncData.comentarios_supervisora, pageWidth - 2 * margin);
+    doc.text(comentLines.slice(0, 2), margin, yPos);
+  }
+
+  // ==================== FOOTER ====================
+  const footerY = 285;
+  doc.setFontSize(6);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${ncData.empresa.nome} | Contrato: ${ncData.lote.contrato}`, margin, footerY);
+  doc.text(`UF: ${ncData.rodovia.uf}`, pageWidth - margin - 15, footerY);
 
   return doc.output('blob');
 }
