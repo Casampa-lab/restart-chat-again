@@ -348,26 +348,9 @@ export function NecessidadesAuditor() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Seleção de tipo */}
-        <div className="space-y-2">
-          <Label>Tipo de Cadastro</Label>
-          <Select value={tipo} onValueChange={setTipo} disabled={isLoading}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              {TIPOS_NECESSIDADES.map(t => (
-                <SelectItem key={t.value} value={t.value}>
-                  {t.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* Seleção de Lote */}
         <div className="space-y-2">
-          <Label>Lote</Label>
+          <Label>Lote *</Label>
           <Select value={loteId} onValueChange={(value) => {
             setLoteId(value);
             setRodoviaId("");
@@ -378,7 +361,7 @@ export function NecessidadesAuditor() {
             <SelectContent>
               {lotes?.map(lote => (
                 <SelectItem key={lote.id} value={lote.id}>
-                  {lote.numero}
+                  Lote {lote.numero}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -387,15 +370,32 @@ export function NecessidadesAuditor() {
 
         {/* Seleção de Rodovia */}
         <div className="space-y-2">
-          <Label>Rodovia</Label>
+          <Label>Rodovia *</Label>
           <Select value={rodoviaId} onValueChange={setRodoviaId} disabled={isLoading || !loteId}>
             <SelectTrigger>
-              <SelectValue placeholder="Selecione a rodovia" />
+              <SelectValue placeholder={!loteId ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
             </SelectTrigger>
             <SelectContent>
               {rodovias?.map((rodovia: any) => (
                 <SelectItem key={rodovia.id} value={rodovia.id}>
                   {rodovia.codigo}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Seleção de tipo */}
+        <div className="space-y-2">
+          <Label>Tipo de Elemento *</Label>
+          <Select value={tipo} onValueChange={setTipo} disabled={isLoading}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              {TIPOS_NECESSIDADES.map(t => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
                 </SelectItem>
               ))}
             </SelectContent>
