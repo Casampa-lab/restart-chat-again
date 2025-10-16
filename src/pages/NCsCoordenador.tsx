@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeft, Bell } from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { generateNCPDF } from "@/lib/pdfGenerator";
 import {
@@ -423,7 +423,7 @@ const NCsCoordenador = () => {
                               disabled={!!nc.data_notificacao}
                               title={nc.data_notificacao ? "NC já foi notificada" : "Notificar Executora"}
                             >
-                              <Bell className="h-4 w-4" />
+                              <Send className="h-4 w-4" />
                             </Button>
                           </TableCell>
                         </TableRow>
