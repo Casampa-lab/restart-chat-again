@@ -1159,7 +1159,7 @@ export function NecessidadesImporter() {
       <CardContent className="space-y-4">
         {/* Seleção de tipo */}
         <div className="space-y-2">
-          <Label>Tipo de Necessidade</Label>
+          <Label>Tipo de Cadastro</Label>
           <Select value={tipo} onValueChange={setTipo} disabled={isImporting}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione o tipo" />

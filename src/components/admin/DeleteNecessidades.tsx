@@ -165,7 +165,7 @@ export function DeleteNecessidades() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tabela">Tipo de Necessidade *</Label>
+            <Label htmlFor="tabela">Tipo de Cadastro *</Label>
             <Select value={selectedTabela} onValueChange={setSelectedTabela}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o tipo" />
