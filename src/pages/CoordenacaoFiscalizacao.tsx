@@ -34,7 +34,7 @@ const CoordenacaoFiscalizacao = () => {
       }).eq("status", "pendente_aprovacao");
       return count || 0;
     },
-    enabled: !!user && isAdminOrCoordinator,
+    enabled: !!user,
     refetchInterval: 30000
   });
 
@@ -57,7 +57,7 @@ const CoordenacaoFiscalizacao = () => {
       }
       return totalDivergencias;
     },
-    enabled: !!user && isAdminOrCoordinator,
+    enabled: !!user,
     refetchInterval: 30000
   });
 
@@ -80,7 +80,7 @@ const CoordenacaoFiscalizacao = () => {
       }
       return totalPendentes;
     },
-    enabled: !!user && isAdminOrCoordinator,
+    enabled: !!user,
     refetchInterval: 30000
   });
   useEffect(() => {
