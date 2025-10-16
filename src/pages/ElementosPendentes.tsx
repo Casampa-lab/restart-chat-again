@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ArrowLeft, CheckCircle, XCircle, Eye, Loader2, RefreshCw } from "lucide-react";
 import { aprovarElemento, rejeitarElemento } from "@/lib/elementosPendentesActions";
+import { ElementoDataDisplay } from "@/components/ElementoDataDisplay";
 
 export default function ElementosPendentes() {
   const navigate = useNavigate();
@@ -371,10 +372,11 @@ export default function ElementosPendentes() {
               )}
 
               <div>
-                <Label>Dados do Elemento</Label>
-                <pre className="text-xs bg-muted p-3 rounded mt-1 overflow-x-auto">
-                  {JSON.stringify(selectedElemento.dados_elemento, null, 2)}
-                </pre>
+                <Label className="text-base font-semibold">Dados do Elemento</Label>
+                <ElementoDataDisplay 
+                  dados_elemento={selectedElemento.dados_elemento}
+                  tipo_elemento={selectedElemento.tipo_elemento}
+                />
               </div>
             </div>
           )}
