@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy, X, FileText, GitCompareArrows } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy, X, FileText } from "lucide-react";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeForm from "@/components/NaoConformidadeForm";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
@@ -393,51 +393,18 @@ const Index = () => {
                 <Boxes className="mr-2 h-5 w-5" />
                 Módulos
               </Button>
-              {isAdminOrCoordinator && (
-                <div className="relative">
-                  <Button 
-                    variant="secondary" 
-                    size="lg" 
-                    className="font-semibold shadow-md hover:shadow-lg transition-shadow" 
-                    onClick={() => navigate("/reconciliacoes-pendentes", { state: { from: "/" } })}
-                  >
-                    <GitCompareArrows className="mr-2 h-5 w-5" />
-                    Reconciliação
+              {isAdminOrCoordinator && <div className="relative">
+                  <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/coordenacao-fiscalizacao")}>
+                    <ClipboardList className="mr-2 h-5 w-5" />
+                    Gestão
                   </Button>
-                  {countDivergencias && countDivergencias > 0 && (
-                    <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-orange-500 text-white pointer-events-none">
-                      {countDivergencias}
+                  {isAdminOrCoordinator && ((countPendentes || 0) + (countDivergencias || 0) + (countIntervencoesPendentes || 0)) > 0 && (
+                    <Badge className="absolute -top-2 -right-2 h-7 min-w-[1.75rem] px-1.5 rounded-full flex items-center justify-center bg-red-500 text-white pointer-events-none font-bold">
+                      {(countPendentes || 0) + (countDivergencias || 0) + (countIntervencoesPendentes || 0)}
                     </Badge>
                   )}
                 </div>
-              )}
-              <div className="relative">
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  className="font-semibold shadow-md hover:shadow-lg transition-shadow" 
-                  onClick={() => navigate("/revisao-intervencoes")}
-                >
-                  <ClipboardList className="mr-2 h-5 w-5" />
-                  Revisão
-                </Button>
-                {isAdminOrCoordinator && countIntervencoesPendentes && countIntervencoesPendentes > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-yellow-500 text-black pointer-events-none">
-                    {countIntervencoesPendentes}
-                  </Badge>
-                )}
-              </div>
-              <div className="relative">
-                <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/coordenacao-fiscalizacao")}>
-                  <ClipboardList className="mr-2 h-5 w-5" />
-                  Gestão
-                </Button>
-                {isAdminOrCoordinator && countPendentes && countPendentes > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white pointer-events-none">
-                    {countPendentes}
-                  </Badge>
-                )}
-              </div>
+              }
               {isAdminOrCoordinator && <Button variant="default" size="lg" className="font-semibold bg-accent text-accent-foreground shadow-md hover:shadow-lg transition-shadow hover:bg-accent/90" onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-5 w-5" />
                   Admin
