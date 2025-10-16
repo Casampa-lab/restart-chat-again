@@ -539,12 +539,12 @@ const LotesManager = () => {
             <TableBody>
               {lotes.map(lote => <TableRow key={lote.id}>
                   <TableCell className="font-medium">{lote.numero}</TableCell>
-                  <TableCell>{lote.empresas.nome}</TableCell>
+                  <TableCell>{lote.empresas?.nome || "-"}</TableCell>
                   <TableCell>{lote.contrato || "-"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {lote.lotes_rodovias.map((lr, idx) => <Badge key={idx} variant="secondary" className="text-xs">
-                          {lr.rodovias.codigo}
+                          {lr.rodovias?.codigo || "-"}
                           {(lr.km_inicial || lr.km_final) && <span className="ml-1 opacity-70">
                               ({lr.km_inicial?.toFixed(0)}-{lr.km_final?.toFixed(0)})
                             </span>}
