@@ -219,6 +219,10 @@ export async function rejeitarElemento(elementoId: string, observacao: string) {
     // Gerar número de NC
     const { data: ncNumber } = await supabase.rpc('generate_nc_number');
     
+    if (!ncNumber) {
+      throw new Error('Erro ao gerar número da NC');
+    }
+    
     const dadosElemento = elemento.dados_elemento as any;
     
     const getTipoLabel = (tipo: string): string => {
@@ -254,25 +258,49 @@ export async function rejeitarElemento(elementoId: string, observacao: string) {
       observacao: `Rejeitado em ${new Date().toLocaleDateString('pt-BR')} - Coordenador`
     };
 
-    const { error: ncError } = await supabase
+    const { data: ncCreated, error: ncError } = await supabase
       .from('nao_conformidades')
-      .insert(ncData as any);
+      .insert(ncData as any)
+      .select()
+      .single();
 
-    if (ncError) throw ncError;
+    if (ncError || !ncCreated) {
+      console.error('Erro ao criar NC:', ncError);
+      throw new Error('Erro ao criar NC: ' + (ncError?.message || 'NC não retornada'));
+    }
 
-    // 4. Enviar email notificando a NC
+    // 4. Criar notificação in-app para o técnico
+    const { error: notifError } = await supabase
+      .from('notificacoes')
+      .insert({
+        user_id: elemento.user_id,
+        tipo: 'elemento_rejeitado',
+        titulo: '❌ Elemento Rejeitado',
+        mensagem: `Seu elemento ${getTipoLabel(elemento.tipo_elemento)} foi rejeitado. Uma NC foi criada automaticamente: ${ncNumber}. Motivo: ${observacao}`,
+        elemento_pendente_id: elementoId,
+        nc_id: ncCreated.id
+      });
+
+    if (notifError) {
+      console.error('Erro ao criar notificação in-app:', notifError);
+    }
+
+    // 5. Tentar enviar notificação por email (não bloqueia se falhar)
     try {
-      await supabase.functions.invoke('send-nc-notification', {
+      const { error: emailError } = await supabase.functions.invoke('send-nc-notification', {
         body: {
-          ncId: ncNumber,
-          tipo: tipoNC,
-          problema: 'Item Implantado Fora do Projeto',
-          descricao: `Elemento rejeitado: ${observacao}`
+          nc_id: ncCreated.id, // ✅ Agora passa o UUID correto
+          pdf_base64: ''
         }
       });
+      
+      if (emailError) {
+        console.error('Erro ao enviar email de notificação:', emailError);
+      } else {
+        console.log('✅ Email de notificação enviado com sucesso');
+      }
     } catch (emailError) {
-      console.error('Erro ao enviar email de NC:', emailError);
-      // Não falha a operação se o email não for enviado
+      console.error('Erro ao invocar função de email:', emailError);
     }
 
     toast.success('Elemento rejeitado e NC criada automaticamente');

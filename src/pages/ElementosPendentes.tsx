@@ -128,6 +128,11 @@ export default function ElementosPendentes() {
       setSelectedElemento(null);
       setObservacao("");
       refetch();
+      
+      // Toast informando que email foi enviado
+      toast.success('✉️ Elemento rejeitado e notificações enviadas', {
+        description: 'O técnico foi notificado no sistema e por email (executora, fiscal e coordenadores em cópia)'
+      });
     }
   };
 

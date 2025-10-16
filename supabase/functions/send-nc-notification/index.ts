@@ -112,32 +112,35 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('supervisora_id', supervisora_id)
       .not('email', 'is', null);
 
-    // Montar lista de destinatários
+    // Montar lista de destinatários conforme solicitado
     const destinatarios: string[] = [];
     const copias: string[] = [];
     
-    // Email principal: responsável da executora (se existir)
+    // 1. Email da Executora (principal)
     if (ncData.lotes?.email_executora) {
       destinatarios.push(ncData.lotes.email_executora);
     }
     
-    // Fiscal da execução
+    // 2. Fiscal de Execução (cópia)
     if (ncData.lotes?.email_fiscal_execucao) {
       copias.push(ncData.lotes.email_fiscal_execucao);
     }
 
-    // Coordenadores da supervisora
+    // 3. cassia.sampaio@me.com (cópia fixa)
+    copias.push('cassia.sampaio@me.com');
+
+    // 4. Coordenadores da supervisora (cópias)
     if (coordEmails && coordEmails.length > 0) {
       coordEmails.forEach(coord => {
-        if (coord.email) {
-          // Se não temos destinatário principal, primeiro coordenador vai como principal
-          if (destinatarios.length === 0) {
-            destinatarios.push(coord.email);
-          } else if (!copias.includes(coord.email)) {
-            copias.push(coord.email);
-          }
+        if (coord.email && !copias.includes(coord.email) && !destinatarios.includes(coord.email)) {
+          copias.push(coord.email);
         }
       });
+    }
+
+    // Se não tem executora, primeiro coordenador vira principal
+    if (destinatarios.length === 0 && copias.length > 0) {
+      destinatarios.push(copias.shift()!);
     }
 
     if (destinatarios.length === 0) {

@@ -4432,6 +4432,57 @@ export type Database = {
           },
         ]
       }
+      notificacoes: {
+        Row: {
+          created_at: string | null
+          elemento_pendente_id: string | null
+          id: string
+          lida: boolean | null
+          mensagem: string
+          nc_id: string | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          elemento_pendente_id?: string | null
+          id?: string
+          lida?: boolean | null
+          mensagem: string
+          nc_id?: string | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          elemento_pendente_id?: string | null
+          id?: string
+          lida?: boolean | null
+          mensagem?: string
+          nc_id?: string | null
+          tipo?: string
+          titulo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_elemento_pendente_id_fkey"
+            columns: ["elemento_pendente_id"]
+            isOneToOne: false
+            referencedRelation: "elementos_pendentes_aprovacao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_nc_id_fkey"
+            columns: ["nc_id"]
+            isOneToOne: false
+            referencedRelation: "nao_conformidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planos: {
         Row: {
           ativo: boolean | null
