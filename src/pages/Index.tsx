@@ -400,10 +400,38 @@ const Index = () => {
                     <ClipboardList className="mr-2 h-5 w-5" />
                     Gestão
                   </Button>
-                  {isAdminOrCoordinator && ((countPendentes || 0) + (countDivergencias || 0) + (countIntervencoesPendentes || 0)) > 0 && (
-                    <Badge className="absolute -top-2 -right-2 h-7 min-w-[1.75rem] px-1.5 rounded-full flex items-center justify-center bg-red-500 text-white pointer-events-none font-bold">
-                      {(countPendentes || 0) + (countDivergencias || 0) + (countIntervencoesPendentes || 0)}
-                    </Badge>
+                  {isAdminOrCoordinator && (
+                    <div className="absolute -top-2 -right-2 flex gap-1 pointer-events-none">
+                      {/* Badge Elementos Pendentes - VERMELHO */}
+                      {(countPendentes || 0) > 0 && (
+                        <Badge 
+                          className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-red-500 text-white font-bold text-xs"
+                          title="Elementos Pendentes"
+                        >
+                          {countPendentes}
+                        </Badge>
+                      )}
+                      
+                      {/* Badge Divergências - LARANJA */}
+                      {(countDivergencias || 0) > 0 && (
+                        <Badge 
+                          className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-orange-500 text-white font-bold text-xs"
+                          title="Divergências"
+                        >
+                          {countDivergencias}
+                        </Badge>
+                      )}
+                      
+                      {/* Badge Intervenções Pendentes - AZUL */}
+                      {(countIntervencoesPendentes || 0) > 0 && (
+                        <Badge 
+                          className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-blue-500 text-white font-bold text-xs"
+                          title="Intervenções Pendentes"
+                        >
+                          {countIntervencoesPendentes}
+                        </Badge>
+                      )}
+                    </div>
                   )}
                 </div>
               }
