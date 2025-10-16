@@ -360,9 +360,9 @@ export default function DashboardNecessidades() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-primary-foreground">Dashboard de Necessidades</h1>
-                <p className="text-sm text-primary-foreground/80">
-                  {loteInfo ? `Lote ${loteInfo.numero} - ${loteInfo.rodovia?.codigo || 'N/A'}` : 'Carregando...'}
-                </p>
+              <p className="text-sm text-primary-foreground/80">
+                {loteInfo ? `Lote ${loteInfo.numero}` : 'Carregando...'}
+              </p>
               </div>
             </div>
             <Button 
