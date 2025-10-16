@@ -29,6 +29,7 @@ interface NaoConformidade {
   situacao: string;
   empresa: string;
   enviado_coordenador: boolean;
+  data_notificacao: string | null;
   rodovias: {
     codigo: string;
   };
@@ -63,6 +64,7 @@ const MinhasNCs = () => {
           situacao,
           empresa,
           enviado_coordenador,
+          data_notificacao,
           rodovias(codigo),
           lotes(numero)
         `)
@@ -112,138 +114,30 @@ const MinhasNCs = () => {
     }
   };
 
-  const handleNotificar = async (ncId: string) => {
-    toast.info("Gerando PDF e enviando notificação...");
-    
+  const handleEnviarParaCoordenador = async (ncId: string) => {
     try {
-      // Buscar todos os dados necessários para o PDF
-      const { data: ncCompleta, error: ncCompletaError } = await supabase
+      const { error } = await supabase
         .from("nao_conformidades")
-        .select(`
-          *,
-          rodovias(codigo, uf),
-          lotes(
-            numero,
-            contrato,
-            responsavel_executora,
-            email_executora,
-            nome_fiscal_execucao,
-            email_fiscal_execucao
-          )
-        `)
-        .eq("id", ncId)
-        .single();
+        .update({ enviado_coordenador: true })
+        .eq("id", ncId);
 
-      if (ncCompletaError || !ncCompleta) {
-        throw new Error("Erro ao buscar dados da NC");
-      }
+      if (error) throw error;
 
-      // Buscar fotos
-      const { data: fotos, error: fotosError } = await supabase
-        .from("nao_conformidades_fotos")
-        .select("*")
-        .eq("nc_id", ncId)
-        .order("ordem");
-
-      if (fotosError) {
-        console.error("Erro ao buscar fotos:", fotosError);
-      }
-
-      // Buscar dados da supervisora
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("supervisora_id")
-        .eq("id", user.id)
-        .single();
-
-      let supervisoraData = { nome_empresa: "Supervisora", contrato: "N/A" };
-      if (profile?.supervisora_id) {
-        const { data: supervisora } = await supabase
-          .from("supervisoras")
-          .select("nome_empresa")
-          .eq("id", profile.supervisora_id)
-          .single();
-        
-        if (supervisora) {
-          supervisoraData.nome_empresa = supervisora.nome_empresa;
-        }
-      }
-
-      // Preparar dados para o PDF
-      const pdfData = {
-        numero_nc: ncCompleta.numero_nc,
-        data_ocorrencia: ncCompleta.data_ocorrencia,
-        tipo_nc: ncCompleta.tipo_nc,
-        problema_identificado: ncCompleta.problema_identificado,
-        descricao_problema: ncCompleta.descricao_problema || "",
-        observacao: ncCompleta.observacao || "",
-        km_inicial: ncCompleta.km_inicial,
-        km_final: ncCompleta.km_final,
-        km_referencia: ncCompleta.km_referencia,
-        rodovia: {
-          codigo: (ncCompleta as any).rodovias?.codigo || "N/A",
-          uf: (ncCompleta as any).rodovias?.uf || "N/A",
-        },
-        lote: {
-          numero: (ncCompleta as any).lotes?.numero || "N/A",
-          contrato: (ncCompleta as any).lotes?.contrato || "N/A",
-          responsavel_executora: (ncCompleta as any).lotes?.responsavel_executora || "N/A",
-          email_executora: (ncCompleta as any).lotes?.email_executora || "",
-          nome_fiscal_execucao: (ncCompleta as any).lotes?.nome_fiscal_execucao || "N/A",
-          email_fiscal_execucao: (ncCompleta as any).lotes?.email_fiscal_execucao || "",
-        },
-        empresa: {
-          nome: ncCompleta.empresa,
-        },
-        supervisora: supervisoraData,
-        fotos: fotos || [],
-        natureza: ncCompleta.natureza || ncCompleta.tipo_nc,
-        grau: ncCompleta.grau || "Média",
-        tipo_obra: ncCompleta.tipo_obra || "Manutenção",
-        comentarios_supervisora: ncCompleta.comentarios_supervisora || "",
-        comentarios_executora: ncCompleta.comentarios_executora || "",
-      };
-
-      // Gerar PDF
-      const pdfBlob = await generateNCPDF(pdfData);
-      
-      // Converter PDF para base64
-      const pdfBase64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64 = (reader.result as string).split(',')[1];
-          resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(pdfBlob);
-      });
-
-      // Enviar email com PDF via edge function
-      toast.info("Enviando email...");
-      const { data: emailResult, error: emailError } = await supabase.functions.invoke(
-        "send-nc-notification",
-        {
-          body: {
-            nc_id: ncId,
-            pdf_base64: pdfBase64,
-          },
-        }
-      );
-
-      if (emailError) throw emailError;
-
-      toast.success("Notificação enviada com sucesso! A NC foi marcada como enviada.");
-      
-      // Recarregar lista de NCs
+      toast.success("NC enviada para revisão do coordenador!");
       loadNCs();
-
     } catch (error: any) {
-      console.error("Erro ao enviar notificação:", error);
-      toast.error("Erro ao enviar notificação: " + error.message);
+      toast.error("Erro ao enviar NC: " + error.message);
     }
+  };
+
+  const getStatusBadge = (nc: NaoConformidade) => {
+    if (!nc.enviado_coordenador) {
+      return <Badge variant="outline" className="bg-gray-100">Rascunho</Badge>;
+    }
+    if (!nc.data_notificacao) {
+      return <Badge variant="outline" className="bg-yellow-100">Em Revisão</Badge>;
+    }
+    return <Badge variant="outline" className="bg-green-100">Notificada</Badge>;
   };
 
   const filteredNCs = showEnviadas 
@@ -321,25 +215,17 @@ const MinhasNCs = () => {
                             {nc.situacao}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          {nc.enviado_coordenador ? (
-                            <Badge variant="outline" className="bg-green-50">
-                              Enviada
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="bg-yellow-50">
-                              Não enviada
-                            </Badge>
-                          )}
+                         <TableCell>
+                          {getStatusBadge(nc)}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleNotificar(nc.id)}
+                              onClick={() => handleEnviarParaCoordenador(nc.id)}
                               disabled={nc.enviado_coordenador}
-                              title={nc.enviado_coordenador ? "NC já foi enviada" : "Enviar NC por Email"}
+                              title={nc.enviado_coordenador ? "NC já foi enviada ao coordenador" : "Enviar para Coordenador"}
                             >
                               <Bell className="h-4 w-4" />
                             </Button>

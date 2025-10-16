@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { generateNCPDF } from "@/lib/pdfGenerator";
 import {
   Select,
   SelectContent,
@@ -27,6 +28,7 @@ interface NaoConformidade {
   km_referencia: number;
   user_id: string;
   fiscalNome?: string;
+  data_notificacao: string | null;
   rodovias: {
     codigo: string;
     nome: string;
@@ -123,6 +125,7 @@ const NCsCoordenador = () => {
           empresa,
           km_referencia,
           user_id,
+          data_notificacao,
           rodovias(codigo),
           lotes(numero)
         `)
@@ -169,6 +172,144 @@ const NCsCoordenador = () => {
       case "Atendida": return "bg-green-500";
       case "Não Atendida": return "bg-red-500";
       default: return "bg-gray-500";
+    }
+  };
+
+  const handleNotificarExecutora = async (ncId: string) => {
+    toast.info("Gerando PDF e enviando notificação...");
+    
+    try {
+      // Buscar todos os dados necessários para o PDF
+      const { data: ncCompleta, error: ncCompletaError } = await supabase
+        .from("nao_conformidades")
+        .select(`
+          *,
+          rodovias(codigo, uf),
+          lotes(
+            numero,
+            contrato,
+            responsavel_executora,
+            email_executora,
+            nome_fiscal_execucao,
+            email_fiscal_execucao
+          )
+        `)
+        .eq("id", ncId)
+        .single();
+
+      if (ncCompletaError || !ncCompleta) {
+        throw new Error("Erro ao buscar dados da NC");
+      }
+
+      // Verificar se já foi notificada
+      if (ncCompleta.data_notificacao) {
+        toast.warning("Esta NC já foi notificada anteriormente");
+        return;
+      }
+
+      // Buscar fotos
+      const { data: fotos, error: fotosError } = await supabase
+        .from("nao_conformidades_fotos")
+        .select("*")
+        .eq("nc_id", ncId)
+        .order("ordem");
+
+      if (fotosError) {
+        console.error("Erro ao buscar fotos:", fotosError);
+      }
+
+      // Buscar dados da supervisora
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("supervisora_id")
+        .eq("id", user.id)
+        .single();
+
+      let supervisoraData = { nome_empresa: "Supervisora", contrato: "N/A" };
+      if (profile?.supervisora_id) {
+        const { data: supervisora } = await supabase
+          .from("supervisoras")
+          .select("nome_empresa")
+          .eq("id", profile.supervisora_id)
+          .single();
+        
+        if (supervisora) {
+          supervisoraData.nome_empresa = supervisora.nome_empresa;
+        }
+      }
+
+      // Preparar dados para o PDF
+      const pdfData = {
+        numero_nc: ncCompleta.numero_nc,
+        data_ocorrencia: ncCompleta.data_ocorrencia,
+        tipo_nc: ncCompleta.tipo_nc,
+        problema_identificado: ncCompleta.problema_identificado,
+        descricao_problema: ncCompleta.descricao_problema || "",
+        observacao: ncCompleta.observacao || "",
+        km_inicial: ncCompleta.km_inicial,
+        km_final: ncCompleta.km_final,
+        km_referencia: ncCompleta.km_referencia,
+        rodovia: {
+          codigo: (ncCompleta as any).rodovias?.codigo || "N/A",
+          uf: (ncCompleta as any).rodovias?.uf || "N/A",
+        },
+        lote: {
+          numero: (ncCompleta as any).lotes?.numero || "N/A",
+          contrato: (ncCompleta as any).lotes?.contrato || "N/A",
+          responsavel_executora: (ncCompleta as any).lotes?.responsavel_executora || "N/A",
+          email_executora: (ncCompleta as any).lotes?.email_executora || "",
+          nome_fiscal_execucao: (ncCompleta as any).lotes?.nome_fiscal_execucao || "N/A",
+          email_fiscal_execucao: (ncCompleta as any).lotes?.email_fiscal_execucao || "",
+        },
+        empresa: {
+          nome: ncCompleta.empresa,
+        },
+        supervisora: supervisoraData,
+        fotos: fotos || [],
+        natureza: ncCompleta.natureza || ncCompleta.tipo_nc,
+        grau: ncCompleta.grau || "Média",
+        tipo_obra: ncCompleta.tipo_obra || "Manutenção",
+        comentarios_supervisora: ncCompleta.comentarios_supervisora || "",
+        comentarios_executora: ncCompleta.comentarios_executora || "",
+      };
+
+      // Gerar PDF
+      const pdfBlob = await generateNCPDF(pdfData);
+      
+      // Converter PDF para base64
+      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(pdfBlob);
+      });
+
+      // Enviar email com PDF via edge function
+      toast.info("Enviando email...");
+      const { data: emailResult, error: emailError } = await supabase.functions.invoke(
+        "send-nc-notification",
+        {
+          body: {
+            nc_id: ncId,
+            pdf_base64: pdfBase64,
+          },
+        }
+      );
+
+      if (emailError) throw emailError;
+
+      toast.success("Email enviado com sucesso para a executora!");
+      loadNCs();
+
+    } catch (error: any) {
+      console.error("Erro ao enviar notificação:", error);
+      toast.error("Erro ao enviar notificação: " + error.message);
     }
   };
 
@@ -242,6 +383,8 @@ const NCsCoordenador = () => {
                         <TableHead>Tipo</TableHead>
                         <TableHead>Problema</TableHead>
                         <TableHead>Situação</TableHead>
+                        <TableHead>Data Notificação</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -265,6 +408,23 @@ const NCsCoordenador = () => {
                             <Badge className={getSituacaoColor(nc.situacao)}>
                               {nc.situacao}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {nc.data_notificacao 
+                              ? new Date(nc.data_notificacao).toLocaleDateString('pt-BR')
+                              : <span className="text-muted-foreground">Não enviada</span>
+                            }
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleNotificarExecutora(nc.id)}
+                              disabled={!!nc.data_notificacao}
+                              title={nc.data_notificacao ? "NC já foi notificada" : "Notificar Executora"}
+                            >
+                              <Bell className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}

@@ -54,6 +54,18 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Erro ao buscar NC: ${ncError?.message}`);
     }
 
+    // Verificar se NC já foi notificada anteriormente
+    if (ncData.data_notificacao) {
+      console.log("NC já foi notificada anteriormente em:", ncData.data_notificacao);
+      return new Response(
+        JSON.stringify({ error: "NC já foi notificada anteriormente" }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
     // Buscar supervisora_id - primeiro tenta do perfil do usuário, senão busca da empresa do lote
     let supervisora_id: string | null = null;
     
