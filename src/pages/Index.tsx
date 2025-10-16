@@ -408,9 +408,11 @@ const Index = () => {
                         {(countPendentes || 0) > 0 && (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-red-500 text-white font-bold text-xs cursor-help">
-                                {countPendentes}
-                              </Badge>
+                              <span className="cursor-help">
+                                <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-red-500 text-white font-bold text-xs">
+                                  {countPendentes}
+                                </Badge>
+                              </span>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>Elementos Pendentes de Aprovação</p>
@@ -422,9 +424,11 @@ const Index = () => {
                         {(countDivergencias || 0) > 0 && (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-orange-500 text-white font-bold text-xs cursor-help">
-                                {countDivergencias}
-                              </Badge>
+                              <span className="cursor-help">
+                                <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-orange-500 text-white font-bold text-xs">
+                                  {countDivergencias}
+                                </Badge>
+                              </span>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>Divergências na Reconciliação</p>
@@ -436,9 +440,11 @@ const Index = () => {
                         {(countIntervencoesPendentes || 0) > 0 && (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-blue-500 text-white font-bold text-xs cursor-help">
-                                {countIntervencoesPendentes}
-                              </Badge>
+                              <span className="cursor-help">
+                                <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-blue-500 text-white font-bold text-xs">
+                                  {countIntervencoesPendentes}
+                                </Badge>
+                              </span>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>Intervenções Aguardando Revisão</p>
