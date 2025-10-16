@@ -350,7 +350,7 @@ export function NecessidadesAuditor() {
       <CardContent className="space-y-4">
         {/* Seleção de tipo */}
         <div className="space-y-2">
-          <Label>Tipo de Cadastro</Label>
+          <Label>Tipo de Necessidade</Label>
           <Select value={tipo} onValueChange={setTipo} disabled={isLoading}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione o tipo" />
