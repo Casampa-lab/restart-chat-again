@@ -176,9 +176,11 @@ const NCsCoordenador = () => {
   };
 
   const handleNotificarExecutora = async (ncId: string) => {
+    console.log('🚀 Iniciando notificação para NC:', ncId);
     toast.info("Gerando PDF e enviando notificação...");
     
     try {
+      console.log('📊 Buscando dados da NC...');
       // Buscar todos os dados necessários para o PDF
       const { data: ncCompleta, error: ncCompletaError } = await supabase
         .from("nao_conformidades")
@@ -197,16 +199,42 @@ const NCsCoordenador = () => {
         .eq("id", ncId)
         .single();
 
+      console.log('✅ Dados da NC:', ncCompleta);
+      console.log('❌ Erro ao buscar NC:', ncCompletaError);
+
       if (ncCompletaError || !ncCompleta) {
-        throw new Error("Erro ao buscar dados da NC");
+        throw new Error("Erro ao buscar dados da NC: " + ncCompletaError?.message);
+      }
+
+      // ✅ VALIDAÇÃO CRÍTICA 1: Verificar lote_id
+      if (!ncCompleta.lote_id) {
+        console.error('❌ NC sem lote_id:', ncCompleta);
+        toast.error("Esta NC não possui um lote associado. Entre em contato com o suporte.");
+        return;
+      }
+
+      // ✅ VALIDAÇÃO CRÍTICA 2: Verificar dados do lote
+      if (!(ncCompleta as any).lotes) {
+        console.error('❌ Dados do lote não encontrados:', ncCompleta);
+        toast.error("Não foi possível carregar dados do lote. Verifique se o lote está cadastrado corretamente.");
+        return;
+      }
+
+      // ✅ VALIDAÇÃO CRÍTICA 3: Verificar email da executora
+      if (!(ncCompleta as any).lotes?.email_executora) {
+        console.error('❌ Email da executora não configurado:', (ncCompleta as any).lotes);
+        toast.error("O lote não possui email da executora configurado. Configure no cadastro de lotes.");
+        return;
       }
 
       // Verificar se já foi notificada
       if (ncCompleta.data_notificacao) {
+        console.log('⚠️ NC já notificada em:', ncCompleta.data_notificacao);
         toast.warning("Esta NC já foi notificada anteriormente");
         return;
       }
 
+      console.log('📸 Buscando fotos...');
       // Buscar fotos
       const { data: fotos, error: fotosError } = await supabase
         .from("nao_conformidades_fotos")
@@ -214,8 +242,9 @@ const NCsCoordenador = () => {
         .eq("nc_id", ncId)
         .order("ordem");
 
+      console.log('✅ Fotos encontradas:', fotos?.length || 0);
       if (fotosError) {
-        console.error("Erro ao buscar fotos:", fotosError);
+        console.error("❌ Erro ao buscar fotos:", fotosError);
       }
 
       // Buscar dados da supervisora
@@ -276,8 +305,10 @@ const NCsCoordenador = () => {
         comentarios_executora: ncCompleta.comentarios_executora || "",
       };
 
+      console.log('📄 Gerando PDF...');
       // Gerar PDF
       const pdfBlob = await generateNCPDF(pdfData);
+      console.log('✅ PDF gerado:', pdfBlob.size, 'bytes');
       
       // Converter PDF para base64
       const pdfBase64 = await new Promise<string>((resolve, reject) => {
@@ -290,6 +321,7 @@ const NCsCoordenador = () => {
         reader.readAsDataURL(pdfBlob);
       });
 
+      console.log('📧 Enviando email via edge function...');
       // Enviar email com PDF via edge function
       toast.info("Enviando email...");
       const { data: emailResult, error: emailError } = await supabase.functions.invoke(
@@ -302,13 +334,16 @@ const NCsCoordenador = () => {
         }
       );
 
+      console.log('✅ Resultado do email:', emailResult);
+      console.log('❌ Erro no email:', emailError);
+
       if (emailError) throw emailError;
 
       toast.success("Email enviado com sucesso para a executora!");
       loadNCs();
 
     } catch (error: any) {
-      console.error("Erro ao enviar notificação:", error);
+      console.error("❌ Erro completo:", error);
       toast.error("Erro ao enviar notificação: " + error.message);
     }
   };
@@ -417,13 +452,18 @@ const NCsCoordenador = () => {
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
-                              variant="ghost"
+                              variant={nc.data_notificacao ? "ghost" : "outline"}
                               size="sm"
-                              onClick={() => handleNotificarExecutora(nc.id)}
+                              onClick={() => {
+                                console.log('🖱️ Botão clicado para NC:', nc.id);
+                                console.log('📋 Dados da NC:', nc);
+                                handleNotificarExecutora(nc.id);
+                              }}
                               disabled={!!nc.data_notificacao}
-                              title={nc.data_notificacao ? "NC já foi notificada" : "Notificar Executora"}
+                              className="gap-2"
                             >
                               <Send className="h-4 w-4" />
+                              {nc.data_notificacao ? "Enviada" : "Notificar"}
                             </Button>
                           </TableCell>
                         </TableRow>
