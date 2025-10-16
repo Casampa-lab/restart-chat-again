@@ -285,25 +285,11 @@ export async function rejeitarElemento(elementoId: string, observacao: string) {
       console.error('Erro ao criar notificação in-app:', notifError);
     }
 
-    // 5. Tentar enviar notificação por email (não bloqueia se falhar)
-    try {
-      const { error: emailError } = await supabase.functions.invoke('send-nc-notification', {
-        body: {
-          nc_id: ncCreated.id, // ✅ Agora passa o UUID correto
-          pdf_base64: ''
-        }
-      });
-      
-      if (emailError) {
-        console.error('Erro ao enviar email de notificação:', emailError);
-      } else {
-        console.log('✅ Email de notificação enviado com sucesso');
-      }
-    } catch (emailError) {
-      console.error('Erro ao invocar função de email:', emailError);
-    }
+    // 5. A NC foi criada como rascunho - não envia email ainda
+    // O coordenador poderá revisar e enviar depois via NCsCoordenador.tsx
+    console.log('NC criada automaticamente:', ncCreated.numero_nc);
 
-    toast.success('Elemento rejeitado e NC criada automaticamente');
+    toast.success('Elemento rejeitado. NC criada e aguardando revisão do coordenador.');
     
     // Invalidar cache para atualizar automaticamente
     queryClient.invalidateQueries({ queryKey: ['elementos-pendentes'] });

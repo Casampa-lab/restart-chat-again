@@ -130,9 +130,9 @@ export default function ElementosPendentes() {
       setObservacao("");
       refetch();
       
-      // Toast informando que email foi enviado
-      toast.success('✉️ Elemento rejeitado e notificações enviadas', {
-        description: 'O técnico foi notificado no sistema e por email (executora, fiscal e coordenadores em cópia)'
+      // Toast informando que NC foi criada como rascunho
+      toast.success('Elemento rejeitado e NC criada', {
+        description: 'Uma NC foi criada automaticamente. Revise em "NCs Coordenador" antes de notificar a executora.'
       });
     }
   };
