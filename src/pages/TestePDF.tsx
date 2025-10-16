@@ -8,7 +8,7 @@ const TestePDF = () => {
   const handleGeneratePDF = async () => {
     try {
       const dadosExemplo = {
-        numero_nc: "NC-2025-001",
+        numero_nc: "NC00001",
         data_ocorrencia: "2025-01-15",
         tipo_nc: "Sinalização Horizontal",
         problema_identificado: "Falta de pintura na faixa central",
@@ -79,13 +79,14 @@ const TestePDF = () => {
       };
 
       toast.info("Gerando PDF...");
-      const pdfBlob = await generateNCPDF(dadosExemplo);
+      const blob = await generateNCPDF(dadosExemplo);
       
       // Criar link para download
-      const url = URL.createObjectURL(pdfBlob);
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `NC-Exemplo-${dadosExemplo.numero_nc}.pdf`;
+      // numero_nc já vem com prefixo "NC", não duplicar
+      link.download = `${dadosExemplo.numero_nc}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -111,7 +112,7 @@ const TestePDF = () => {
           <div className="bg-muted p-4 rounded-lg space-y-2">
             <h3 className="font-semibold">Dados do exemplo:</h3>
             <ul className="text-sm space-y-1">
-              <li>• Número: NC-2025-001</li>
+              <li>• Número: NC00001</li>
               <li>• Rodovia: BR-101/SC</li>
               <li>• Trecho: km 250 ao km 252</li>
               <li>• Tipo: Sinalização Horizontal</li>

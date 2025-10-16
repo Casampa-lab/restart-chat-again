@@ -87,6 +87,7 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
   doc.text('REGISTRO DE NÃO CONFORMIDADE', pageWidth / 2, yPos, { align: 'center' });
   yPos += 6;
   doc.setFontSize(12);
+  // Número já vem com prefixo "NC", não duplicar
   doc.text(`Nº ${ncData.numero_nc}`, pageWidth / 2, yPos, { align: 'center' });
   yPos += 8;
 
@@ -178,13 +179,20 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
 
       if (foto?.foto_url) {
         try {
+          console.log(`🔄 [Foto ${fotoIndex + 1}] Iniciando carregamento:`, foto.foto_url);
+          const startTime = Date.now();
+          
           const fotoBase64 = await urlToBase64(foto.foto_url);
+          
+          console.log(`✅ [Foto ${fotoIndex + 1}] Carregada em ${Date.now() - startTime}ms`);
           doc.addImage(fotoBase64, 'JPEG', xPos, yFoto + 2, fotoWidth, fotoHeight);
         } catch (error) {
-          console.error(`Erro ao carregar foto ${fotoIndex + 1}:`, error);
+          console.error(`❌ [Foto ${fotoIndex + 1}] Erro ao carregar:`, error);
           doc.rect(xPos, yFoto + 2, fotoWidth, fotoHeight);
           doc.setFontSize(6);
-          doc.text('[Erro ao carregar]', xPos + fotoWidth/2, yFoto + fotoHeight/2 + 2, { align: 'center' });
+          doc.setTextColor(255, 0, 0);
+          doc.text('[Erro ao carregar imagem]', xPos + fotoWidth/2, yFoto + fotoHeight/2 + 2, { align: 'center' });
+          doc.setTextColor(0, 0, 0);
         }
 
         // Coordenadas GPS (compactas)
@@ -219,8 +227,9 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
   const footerY = 285;
   doc.setFontSize(6);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${ncData.empresa.nome} | Contrato: ${ncData.lote.contrato}`, margin, footerY);
-  doc.text(`UF: ${ncData.rodovia.uf}`, pageWidth - margin - 15, footerY);
+  doc.text(`${ncData.empresa.nome} | Contrato: ${ncData.lote.contrato || 'N/A'}`, margin, footerY);
+  doc.text(`UF: ${ncData.rodovia.uf}`, pageWidth - margin - 60, footerY);
+  doc.text('Email: contato@operavia.com.br', pageWidth - margin - 60, footerY + 4);
 
   return doc.output('blob');
 }

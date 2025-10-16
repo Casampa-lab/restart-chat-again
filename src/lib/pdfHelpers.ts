@@ -6,20 +6,40 @@
  * Converte URL remota (Supabase Storage) para base64 data URL
  */
 export async function urlToBase64(url: string): Promise<string> {
+  console.log('🔄 Iniciando conversão de imagem:', url);
+  
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    // Adicionar timeout de 10 segundos
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    
+    console.log('📥 Status HTTP:', response.status, response.statusText);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
     
     const blob = await response.blob();
+    console.log('📦 Blob recebido:', blob.size, 'bytes | Tipo:', blob.type);
     
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        console.log('✅ Base64 gerado com sucesso:', result.substring(0, 50) + '...');
+        resolve(result);
+      };
+      reader.onerror = (error) => {
+        console.error('❌ Erro no FileReader:', error);
+        reject(error);
+      };
       reader.readAsDataURL(blob);
     });
   } catch (error) {
-    console.error('Erro ao converter URL para base64:', error);
+    console.error('❌ Erro completo ao converter URL para base64:', error);
     throw error;
   }
 }

@@ -221,7 +221,8 @@ const handler = async (req: Request): Promise<Response> => {
       html: emailHtml,
       attachments: [
         {
-          filename: `NC_${ncData.numero_nc}.pdf`,
+          // numero_nc já vem com prefixo "NC", não duplicar
+          filename: `${ncData.numero_nc}.pdf`,
           content: cleanBase64,
           type: 'application/pdf',
           encoding: 'base64'

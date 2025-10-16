@@ -308,8 +308,8 @@ const NCsCoordenador = () => {
 
       console.log('📄 Gerando PDF...');
       // Gerar PDF
-      const pdfBlob = await generateNCPDF(pdfData);
-      console.log('✅ PDF gerado:', pdfBlob.size, 'bytes');
+      const blob = await generateNCPDF(pdfData);
+      console.log('✅ PDF gerado:', blob.size, 'bytes');
       
       // Converter PDF para base64
       const pdfBase64 = await new Promise<string>((resolve, reject) => {
@@ -319,7 +319,7 @@ const NCsCoordenador = () => {
           resolve(base64);
         };
         reader.onerror = reject;
-        reader.readAsDataURL(pdfBlob);
+        reader.readAsDataURL(blob);
       });
 
       console.log('📧 Enviando email via edge function...');
