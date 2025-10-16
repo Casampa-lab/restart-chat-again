@@ -252,11 +252,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Email enviado com sucesso:', emailData.id);
 
-    // Atualizar data de notificação e status de envio na NC
+    // Atualizar apenas status de envio na NC, preservando data_notificacao original
     await supabase
       .from('nao_conformidades')
       .update({ 
-        data_notificacao: new Date().toISOString(),
         enviado_coordenador: true
       })
       .eq('id', nc_id);

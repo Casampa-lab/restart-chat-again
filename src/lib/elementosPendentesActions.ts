@@ -251,11 +251,12 @@ export async function rejeitarElemento(elementoId: string, observacao: string) {
                            `Motivo da rejeição: ${observacao}`,
       situacao: 'Não Atendida',
       empresa: 'A definir',
-      data_ocorrencia: new Date().toISOString().split('T')[0],
+      data_ocorrencia: dadosElemento?.data_intervencao || new Date().toISOString().split('T')[0],
       km_referencia: dadosElemento?.km || dadosElemento?.km_inicial || null,
       latitude: dadosElemento?.latitude || dadosElemento?.latitude_inicial || null,
       longitude: dadosElemento?.longitude || dadosElemento?.longitude_inicial || null,
-      observacao: `Rejeitado em ${new Date().toLocaleDateString('pt-BR')} - Coordenador`
+      observacao: `Rejeitado em ${new Date().toLocaleDateString('pt-BR')} - Coordenador`,
+      enviado_coordenador: true
     };
 
     const { data: ncCreated, error: ncError } = await supabase
