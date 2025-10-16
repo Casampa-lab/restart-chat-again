@@ -272,7 +272,7 @@ export function RemoverDuplicatasInventario() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Trash2 className="h-5 w-5" />
-          Remover Duplicatas do Inventário
+          Remover Duplicatas do Cadastro
         </CardTitle>
         <CardDescription>
           Detecta e remove registros duplicados do cadastro inicial, mantendo o registro com necessidades associadas
