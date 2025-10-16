@@ -1123,9 +1123,9 @@ export function InventarioImporterManager() {
               </Select>
             </div>
 
-            {/* Coluna 3: Tipo de Cadastro */}
+            {/* Coluna 3: Tipo de Elemento */}
             <div className="space-y-2">
-              <Label htmlFor="inventory-type">Tipo de Cadastro *</Label>
+              <Label htmlFor="inventory-type">Tipo de Elemento *</Label>
               <Select 
                 value={inventoryType} 
                 onValueChange={setInventoryType}
