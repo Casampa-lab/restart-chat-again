@@ -43,7 +43,7 @@ interface Lote {
   numero: string;
   empresas: {
     nome: string;
-  };
+  } | null;
 }
 
 const NCsCoordenador = () => {
@@ -355,7 +355,7 @@ const NCsCoordenador = () => {
                     <SelectItem value="all">Todos os Lotes</SelectItem>
                     {lotes.map((lote) => (
                       <SelectItem key={lote.id} value={lote.id}>
-                        Lote {lote.numero} - {lote.empresas.nome}
+                        Lote {lote.numero} - {lote.empresas?.nome || "Sem empresa"}
                       </SelectItem>
                     ))}
                   </SelectContent>
