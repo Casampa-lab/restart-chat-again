@@ -194,6 +194,9 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
+    // Limpar base64 - remover prefixo data:application/pdf;base64, se existir
+    const cleanBase64 = pdf_base64.replace(/^data:application\/pdf;base64,/, '');
+
     // Enviar email via Resend
     const emailPayload: any = {
       from: emailFrom,
@@ -203,7 +206,7 @@ const handler = async (req: Request): Promise<Response> => {
       attachments: [
         {
           filename: `NC_${ncData.numero_nc}.pdf`,
-          content: pdf_base64,
+          content: cleanBase64,
         }
       ]
     };
@@ -231,10 +234,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Email enviado com sucesso:', emailData.id);
 
-    // Atualizar data de notificação na NC
+    // Atualizar data de notificação e status de envio na NC
     await supabase
       .from('nao_conformidades')
-      .update({ data_notificacao: new Date().toISOString() })
+      .update({ 
+        data_notificacao: new Date().toISOString(),
+        enviado_coordenador: true
+      })
       .eq('id', nc_id);
 
     return new Response(JSON.stringify({ 

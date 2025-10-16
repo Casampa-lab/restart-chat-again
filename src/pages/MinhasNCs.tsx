@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeft, Send, Edit, Trash2, Bell } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import NCEditDialog from "@/components/NCEditDialog";
 import { generateNCPDF } from "@/lib/pdfGenerator";
@@ -41,7 +41,6 @@ const MinhasNCs = () => {
   const navigate = useNavigate();
   const [ncs, setNcs] = useState<NaoConformidade[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedNCs, setSelectedNCs] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ncToDelete, setNcToDelete] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -84,38 +83,6 @@ const MinhasNCs = () => {
     loadNCs();
   }, []);
 
-  const handleToggleSelect = (id: string) => {
-    const newSelection = new Set(selectedNCs);
-    if (newSelection.has(id)) {
-      newSelection.delete(id);
-    } else {
-      newSelection.add(id);
-    }
-    setSelectedNCs(newSelection);
-  };
-
-  const handleEnviarSelecionadas = async () => {
-    if (selectedNCs.size === 0) {
-      toast.error("Selecione pelo menos uma NC para enviar");
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("nao_conformidades")
-        .update({ enviado_coordenador: true })
-        .in("id", Array.from(selectedNCs));
-
-      if (error) throw error;
-
-      toast.success(`${selectedNCs.size} NC(s) enviada(s) ao coordenador com sucesso!`);
-      setSelectedNCs(new Set());
-      loadNCs();
-    } catch (error: any) {
-      toast.error("Erro ao enviar NCs: " + error.message);
-    }
-  };
-
   const handleDelete = async () => {
     if (!ncToDelete) return;
 
@@ -146,7 +113,7 @@ const MinhasNCs = () => {
   };
 
   const handleNotificar = async (ncId: string) => {
-    toast.info("Gerando PDF...");
+    toast.info("Gerando PDF e enviando notificação...");
     
     try {
       // Buscar todos os dados necessários para o PDF
@@ -243,21 +210,39 @@ const MinhasNCs = () => {
       // Gerar PDF
       const pdfBlob = await generateNCPDF(pdfData);
       
-      // Criar link para download
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `NC-${pdfData.numero_nc}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Converter PDF para base64
+      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(pdfBlob);
+      });
 
-      toast.success("PDF gerado com sucesso!");
+      // Enviar email com PDF via edge function
+      toast.info("Enviando email...");
+      const { data: emailResult, error: emailError } = await supabase.functions.invoke(
+        "send-nc-notification",
+        {
+          body: {
+            nc_id: ncId,
+            pdf_base64: pdfBase64,
+          },
+        }
+      );
+
+      if (emailError) throw emailError;
+
+      toast.success("Notificação enviada com sucesso! A NC foi marcada como enviada.");
+      
+      // Recarregar lista de NCs
+      loadNCs();
 
     } catch (error: any) {
-      console.error("Erro ao gerar PDF:", error);
-      toast.error("Erro ao gerar PDF: " + error.message);
+      console.error("Erro ao enviar notificação:", error);
+      toast.error("Erro ao enviar notificação: " + error.message);
     }
   };
 
@@ -287,13 +272,6 @@ const MinhasNCs = () => {
                 className="h-4 w-4 cursor-pointer"
               />
             </div>
-            
-            {selectedNCs.size > 0 && (
-              <Button onClick={handleEnviarSelecionadas}>
-                <Send className="mr-2 h-4 w-4" />
-                Enviar {selectedNCs.size} ao Coordenador
-              </Button>
-            )}
           </div>
         </div>
 
@@ -318,7 +296,6 @@ const MinhasNCs = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-12">Selecionar</TableHead>
                       <TableHead>Número NC</TableHead>
                       <TableHead>Data</TableHead>
                       <TableHead>Rodovia</TableHead>
@@ -333,15 +310,6 @@ const MinhasNCs = () => {
                   <TableBody>
                     {filteredNCs.map((nc) => (
                       <TableRow key={nc.id}>
-                        <TableCell>
-                          <input
-                            type="checkbox"
-                            checked={selectedNCs.has(nc.id)}
-                            onChange={() => handleToggleSelect(nc.id)}
-                            disabled={nc.enviado_coordenador}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                        </TableCell>
                         <TableCell className="font-medium">{nc.numero_nc}</TableCell>
                         <TableCell>{new Date(nc.data_ocorrencia).toLocaleDateString('pt-BR')}</TableCell>
                         <TableCell>{nc.rodovias.codigo}</TableCell>
@@ -371,7 +339,7 @@ const MinhasNCs = () => {
                               size="sm"
                               onClick={() => handleNotificar(nc.id)}
                               disabled={nc.enviado_coordenador}
-                              title={nc.enviado_coordenador ? "NC já foi enviada" : "Gerar PDF"}
+                              title={nc.enviado_coordenador ? "NC já foi enviada" : "Enviar NC por Email"}
                             >
                               <Bell className="h-4 w-4" />
                             </Button>
