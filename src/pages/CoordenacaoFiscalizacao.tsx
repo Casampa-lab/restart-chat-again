@@ -189,18 +189,33 @@ const CoordenacaoFiscalizacao = () => {
           </CardHeader>
           <CardContent className="pt-6">
             {isAdminOrCoordinator && <div className="mb-6 space-y-4">
-                {/* Botão Elementos Pendentes */}
-                <div className="flex justify-center">
-                  <Button size="lg" variant="default" className="relative font-semibold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => navigate("/elementos-pendentes")}>
-                    <FileSpreadsheet className="mr-2 h-6 w-6" />
-                    Elementos Pendentes de Aprovação
-                    {contadorElementosPendentes > 0 && <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white">
-                        {contadorElementosPendentes}
-                      </Badge>}
-                  </Button>
-                </div>
+                {/* Card Elementos Pendentes */}
+                <Card className="bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-300 shadow-lg">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileSpreadsheet className="h-6 w-6 text-red-600" />
+                          <h3 className="text-xl font-bold text-red-900">Elementos Não Cadastrados em Projeto</h3>
+                        </div>
+                        <p className="text-sm text-red-700">
+                          Aprove ou rejeite elementos identificados em campo que não constam no cadastro inicial do projeto
+                        </p>
+                        {contadorElementosPendentes > 0 && <div className="mt-3 flex items-center gap-2">
+                            <Badge className="bg-red-500 text-white text-base px-3 py-1">
+                              {contadorElementosPendentes} {contadorElementosPendentes === 1 ? 'elemento pendente' : 'elementos pendentes'}
+                            </Badge>
+                          </div>}
+                      </div>
+                      <Button size="lg" variant="default" className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-red-600 hover:bg-red-700 text-white" onClick={() => navigate("/elementos-pendentes")}>
+                        <FileSpreadsheet className="mr-2 h-5 w-5" />
+                        Acessar Aprovação
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                {/* Botão Aprovar Intervenções no Inventário */}
+                {/* Card Aprovar Intervenções no Inventário */}
                 <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 shadow-lg">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between gap-4">
@@ -282,27 +297,6 @@ const CoordenacaoFiscalizacao = () => {
               </TabsList>
 
               <TabsContent value="frentes" className="mt-6">
-                {/* Card 1: Elementos Não Cadastrados */}
-                <Card className="mb-4 border-2 border-orange-500/30 shadow-md">
-                  <CardHeader className="bg-gradient-to-r from-orange-500/10 to-orange-600/10">
-                    <CardTitle className="flex items-center justify-between text-xl">
-                      <span>Elementos Não Cadastrados em Projeto</span>
-                      {contadorElementosPendentes > 0 && <Badge className="bg-orange-500 text-white text-base px-3 py-1">
-                          {contadorElementosPendentes} pendente{contadorElementosPendentes > 1 ? "s" : ""}
-                        </Badge>}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-4">
-                    <Button variant="outline" size="lg" className="w-full justify-start font-semibold border-2 hover:bg-orange-500/10 hover:border-orange-500" onClick={() => navigate("/elementos-pendentes")}>
-                      <FileSpreadsheet className="w-5 h-5 mr-3" />
-                      Aprovar/Rejeitar Elementos
-                      {contadorElementosPendentes > 0 && <Badge className="ml-auto bg-orange-500 text-white">
-                          {contadorElementosPendentes}
-                        </Badge>}
-                    </Button>
-                  </CardContent>
-                </Card>
-
                 <div className="text-center py-8 space-y-4">
                   <div className="space-y-2">
                     <h3 className="text-lg font-semibold">Planilha 2.2 - Frente Liberada</h3>
