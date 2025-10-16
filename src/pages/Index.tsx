@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy, X, FileText } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import SessionSelector from "@/components/SessionSelector";
@@ -401,37 +402,51 @@ const Index = () => {
                     Gestão
                   </Button>
                   {isAdminOrCoordinator && (
-                    <div className="absolute -top-2 -right-2 flex gap-1 pointer-events-none">
-                      {/* Badge Elementos Pendentes - VERMELHO */}
-                      {(countPendentes || 0) > 0 && (
-                        <Badge 
-                          className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-red-500 text-white font-bold text-xs"
-                          title="Elementos Pendentes"
-                        >
-                          {countPendentes}
-                        </Badge>
-                      )}
-                      
-                      {/* Badge Divergências - LARANJA */}
-                      {(countDivergencias || 0) > 0 && (
-                        <Badge 
-                          className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-orange-500 text-white font-bold text-xs"
-                          title="Divergências"
-                        >
-                          {countDivergencias}
-                        </Badge>
-                      )}
-                      
-                      {/* Badge Intervenções Pendentes - AZUL */}
-                      {(countIntervencoesPendentes || 0) > 0 && (
-                        <Badge 
-                          className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-blue-500 text-white font-bold text-xs"
-                          title="Intervenções Pendentes"
-                        >
-                          {countIntervencoesPendentes}
-                        </Badge>
-                      )}
-                    </div>
+                    <TooltipProvider>
+                      <div className="absolute -top-2 -right-2 flex gap-1">
+                        {/* Badge Elementos Pendentes - VERMELHO */}
+                        {(countPendentes || 0) > 0 && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-red-500 text-white font-bold text-xs cursor-help">
+                                {countPendentes}
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Elementos Pendentes de Aprovação</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                        
+                        {/* Badge Divergências - LARANJA */}
+                        {(countDivergencias || 0) > 0 && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-orange-500 text-white font-bold text-xs cursor-help">
+                                {countDivergencias}
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Divergências na Reconciliação</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                        
+                        {/* Badge Intervenções Pendentes - AZUL */}
+                        {(countIntervencoesPendentes || 0) > 0 && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-blue-500 text-white font-bold text-xs cursor-help">
+                                {countIntervencoesPendentes}
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Intervenções Aguardando Revisão</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </TooltipProvider>
                   )}
                 </div>
               }
