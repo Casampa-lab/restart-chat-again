@@ -132,7 +132,11 @@ export default function ElementosPendentes() {
       
       // Toast informando que NC foi criada como rascunho
       toast.success('Elemento rejeitado e NC criada', {
-        description: 'Uma NC foi criada automaticamente. Revise em "NCs Coordenador" antes de notificar a executora.'
+        description: 'Uma NC foi criada automaticamente. Revise em "NCs Coordenador" antes de notificar a executora.',
+        action: {
+          label: "Ir para NCs",
+          onClick: () => navigate('/coordenacao-fiscalizacao')
+        }
       });
     }
   };
