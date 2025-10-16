@@ -19,27 +19,6 @@ const CoordenacaoFiscalizacao = () => {
     loading: authLoading
   } = useAuth();
   const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
-  const {
-    data: contadorPendentes = 0
-  } = useQuery({
-    queryKey: ["contador-pendentes"],
-    queryFn: async () => {
-      const tipos: ("ficha_placa_intervencoes" | "ficha_porticos_intervencoes")[] = ["ficha_placa_intervencoes", "ficha_porticos_intervencoes"];
-      let total = 0;
-      for (const tabela of tipos) {
-        const {
-          count
-        } = await supabase.from(tabela).select("*", {
-          count: "exact",
-          head: true
-        }).eq("pendente_aprovacao_coordenador", true);
-        total += count || 0;
-      }
-      return total;
-    },
-    enabled: !!user,
-    refetchInterval: 30000
-  });
 
   // Contador de elementos não cadastrados pendentes de aprovação
   const {
@@ -215,33 +194,33 @@ const CoordenacaoFiscalizacao = () => {
                   <Button size="lg" variant="default" className="relative font-semibold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => navigate("/elementos-pendentes")}>
                     <FileSpreadsheet className="mr-2 h-6 w-6" />
                     Elementos Pendentes de Aprovação
-                    {contadorPendentes > 0 && <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white">
-                        {contadorPendentes}
+                    {contadorElementosPendentes > 0 && <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white">
+                        {contadorElementosPendentes}
                       </Badge>}
                   </Button>
                 </div>
 
-                {/* Botão Revisão de Intervenções */}
-                <Card className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 shadow-lg">
+                {/* Botão Aprovar Intervenções no Inventário */}
+                <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 shadow-lg">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <CheckSquare className="h-6 w-6 text-yellow-600" />
-                          <h3 className="text-xl font-bold text-yellow-900">Revisão de Intervenções</h3>
+                          <CheckSquare className="h-6 w-6 text-blue-600" />
+                          <h3 className="text-xl font-bold text-blue-900">Aprovar Intervenções no Inventário</h3>
                         </div>
-                        <p className="text-sm text-yellow-700">
-                          Aprove intervenções registradas pelos técnicos e marque serviços fora do plano
+                        <p className="text-sm text-blue-700">
+                          Aprove intervenções registradas pelos técnicos e marque serviços fora do plano (7 tipos de elementos)
                         </p>
                         {countIntervencoesPendentes > 0 && <div className="mt-3 flex items-center gap-2">
-                            <Badge className="bg-yellow-500 text-white text-base px-3 py-1">
+                            <Badge className="bg-blue-500 text-white text-base px-3 py-1">
                               {countIntervencoesPendentes} {countIntervencoesPendentes === 1 ? 'intervenção pendente' : 'intervenções pendentes'}
                             </Badge>
                           </div>}
                       </div>
-                      <Button size="lg" variant="default" className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-yellow-600 hover:bg-yellow-700 text-white" onClick={() => navigate("/revisao-intervencoes")}>
+                      <Button size="lg" variant="default" className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-blue-600 hover:bg-blue-700 text-white" onClick={() => navigate("/revisao-intervencoes")}>
                         <CheckSquare className="mr-2 h-5 w-5" />
-                        Acessar Revisão
+                        Acessar Aprovação
                       </Button>
                     </div>
                   </CardContent>
@@ -324,26 +303,6 @@ const CoordenacaoFiscalizacao = () => {
                   </CardContent>
                 </Card>
 
-                {/* Card 2: Intervenções */}
-                <Card className="mb-4 border-2 border-primary/30 shadow-md">
-                  <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
-                    <CardTitle className="flex items-center justify-between text-xl">
-                      <span>Intervenções realizadas previstas no Cadastro</span>
-                      {contadorPendentes > 0 && <Badge className="bg-yellow-500 text-yellow-900 text-base px-3 py-1">
-                          {contadorPendentes} pendente{contadorPendentes > 1 ? "s" : ""}
-                        </Badge>}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-4">
-                    <Button variant="outline" size="lg" className="w-full justify-start font-semibold border-2 hover:bg-primary/10 hover:border-primary" onClick={() => navigate("/intervencoes-pendentes")}>
-                      <ClipboardCheck className="w-5 h-5 mr-3" />
-                      Aprovar/Rejeitar Intervenções
-                      {contadorPendentes > 0 && <Badge className="ml-auto bg-yellow-500 text-yellow-900">
-                          {contadorPendentes}
-                        </Badge>}
-                    </Button>
-                  </CardContent>
-                </Card>
                 <div className="text-center py-8 space-y-4">
                   <div className="space-y-2">
                     <h3 className="text-lg font-semibold">Planilha 2.2 - Frente Liberada</h3>
