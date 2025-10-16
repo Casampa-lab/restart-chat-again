@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -869,26 +870,13 @@ export function RecalcularMatches() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Tipo de Elemento</label>
-            <Select value={tipo} onValueChange={setTipo} disabled={isProcessing}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {TIPOS_ELEMENTOS.map(t => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Lote</label>
-            <Select value={loteId} onValueChange={setLoteId} disabled={isProcessing}>
+            <Label>Lote *</Label>
+            <Select value={loteId} onValueChange={(value) => {
+              setLoteId(value);
+              setRodoviaId(""); // Limpar rodovia ao mudar lote
+            }} disabled={isProcessing}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o lote" />
               </SelectTrigger>
@@ -903,15 +891,31 @@ export function RecalcularMatches() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Rodovia</label>
+            <Label>Rodovia *</Label>
             <Select value={rodoviaId} onValueChange={setRodoviaId} disabled={isProcessing || !loteId}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione a rodovia" />
+                <SelectValue placeholder={!loteId ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
               </SelectTrigger>
               <SelectContent>
                 {rodovias?.map((rodovia: any) => (
                   <SelectItem key={rodovia.id} value={rodovia.id}>
                     {rodovia.codigo}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tipo de Elemento *</Label>
+            <Select value={tipo} onValueChange={setTipo} disabled={isProcessing}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                {TIPOS_ELEMENTOS.map(t => (
+                  <SelectItem key={t.value} value={t.value}>
+                    {t.label}
                   </SelectItem>
                 ))}
               </SelectContent>
