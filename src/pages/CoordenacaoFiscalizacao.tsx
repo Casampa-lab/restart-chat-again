@@ -7,144 +7,118 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Download, ClipboardCheck, GitCompareArrows, CheckSquare } from "lucide-react";
 import { BarChart3, FileSpreadsheet } from "lucide-react";
-import {
-  exportFrentesLiberadas,
-  exportNaoConformidades,
-  exportRetrorrefletividadeEstaticaHorizontal,
-  exportRetrorrefletividadeEstaticaVertical,
-  exportRetrorrefletividadeDinamica,
-  exportDefensas,
-  exportIntervencoesSH,
-  exportIntervencoesInscricoes,
-  exportIntervencoesSV,
-  exportIntervencoesTacha,
-  exportFichasVerificacao,
-  exportFichasPlaca,
-  exportRegistroNC
-} from "@/lib/excelExport";
+import { exportFrentesLiberadas, exportNaoConformidades, exportRetrorrefletividadeEstaticaHorizontal, exportRetrorrefletividadeEstaticaVertical, exportRetrorrefletividadeDinamica, exportDefensas, exportIntervencoesSH, exportIntervencoesInscricoes, exportIntervencoesSV, exportIntervencoesTacha, exportFichasVerificacao, exportFichasPlaca, exportRegistroNC } from "@/lib/excelExport";
 import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
-
-
 const CoordenacaoFiscalizacao = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const {
+    user,
+    loading: authLoading
+  } = useAuth();
   const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
-
-  const { data: contadorPendentes = 0 } = useQuery({
+  const {
+    data: contadorPendentes = 0
+  } = useQuery({
     queryKey: ["contador-pendentes"],
     queryFn: async () => {
-      const tipos: ("ficha_placa_intervencoes" | "ficha_porticos_intervencoes")[] = [
-        "ficha_placa_intervencoes",
-        "ficha_porticos_intervencoes",
-      ];
-
+      const tipos: ("ficha_placa_intervencoes" | "ficha_porticos_intervencoes")[] = ["ficha_placa_intervencoes", "ficha_porticos_intervencoes"];
       let total = 0;
       for (const tabela of tipos) {
-        const { count } = await supabase
-          .from(tabela)
-          .select("*", { count: "exact", head: true })
-          .eq("pendente_aprovacao_coordenador", true);
+        const {
+          count
+        } = await supabase.from(tabela).select("*", {
+          count: "exact",
+          head: true
+        }).eq("pendente_aprovacao_coordenador", true);
         total += count || 0;
       }
       return total;
     },
     enabled: !!user,
-    refetchInterval: 30000,
+    refetchInterval: 30000
   });
 
   // Contador de elementos não cadastrados pendentes de aprovação
-  const { data: contadorElementosPendentes = 0 } = useQuery({
+  const {
+    data: contadorElementosPendentes = 0
+  } = useQuery({
     queryKey: ["contador-elementos-pendentes"],
     queryFn: async () => {
-      const { count } = await supabase
-        .from("elementos_pendentes_aprovacao")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "pendente_aprovacao");
-      
+      const {
+        count
+      } = await supabase.from("elementos_pendentes_aprovacao").select("*", {
+        count: "exact",
+        head: true
+      }).eq("status", "pendente_aprovacao");
       return count || 0;
     },
     enabled: !!user && isAdminOrCoordinator,
-    refetchInterval: 30000,
+    refetchInterval: 30000
   });
 
   // Contador de divergências pendentes de reconciliação
-  const { data: countDivergencias = 0 } = useQuery({
+  const {
+    data: countDivergencias = 0
+  } = useQuery({
     queryKey: ["count-divergencias-coordenacao"],
     queryFn: async () => {
-      const grupos = ['necessidades_placas', 'necessidades_defensas', 'necessidades_porticos', 
-                      'necessidades_marcas_longitudinais', 'necessidades_marcas_transversais', 
-                      'necessidades_cilindros', 'necessidades_tachas'];
-      
+      const grupos = ['necessidades_placas', 'necessidades_defensas', 'necessidades_porticos', 'necessidades_marcas_longitudinais', 'necessidades_marcas_transversais', 'necessidades_cilindros', 'necessidades_tachas'];
       let totalDivergencias = 0;
       for (const tabela of grupos) {
-        const { count } = await supabase
-          .from(tabela as any)
-          .select("*", { count: "exact", head: true })
-          .eq("divergencia", true)
-          .eq("reconciliado", false);
-        totalDivergencias += (count || 0);
+        const {
+          count
+        } = await supabase.from(tabela as any).select("*", {
+          count: "exact",
+          head: true
+        }).eq("divergencia", true).eq("reconciliado", false);
+        totalDivergencias += count || 0;
       }
       return totalDivergencias;
     },
     enabled: !!user && isAdminOrCoordinator,
-    refetchInterval: 30000,
+    refetchInterval: 30000
   });
 
   // Contador de intervenções pendentes de aprovação
-  const { data: countIntervencoesPendentes = 0 } = useQuery({
+  const {
+    data: countIntervencoesPendentes = 0
+  } = useQuery({
     queryKey: ["count-intervencoes-aprovacao"],
     queryFn: async () => {
-      const tabelas = [
-        'ficha_marcas_longitudinais_intervencoes',
-        'ficha_cilindros_intervencoes',
-        'ficha_porticos_intervencoes',
-        'defensas_intervencoes',
-        'ficha_inscricoes_intervencoes',
-        'ficha_tachas_intervencoes',
-        'ficha_placa_intervencoes',
-      ];
-      
+      const tabelas = ['ficha_marcas_longitudinais_intervencoes', 'ficha_cilindros_intervencoes', 'ficha_porticos_intervencoes', 'defensas_intervencoes', 'ficha_inscricoes_intervencoes', 'ficha_tachas_intervencoes', 'ficha_placa_intervencoes'];
       let totalPendentes = 0;
       for (const tabela of tabelas) {
-        const { count } = await supabase
-          .from(tabela as any)
-          .select("*", { count: "exact", head: true })
-          .eq("pendente_aprovacao_coordenador", true);
-        totalPendentes += (count || 0);
+        const {
+          count
+        } = await supabase.from(tabela as any).select("*", {
+          count: "exact",
+          head: true
+        }).eq("pendente_aprovacao_coordenador", true);
+        totalPendentes += count || 0;
       }
       return totalPendentes;
     },
     enabled: !!user && isAdminOrCoordinator,
-    refetchInterval: 30000,
+    refetchInterval: 30000
   });
-
-
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
-
   useEffect(() => {
     const checkAdminOrCoordinator = async () => {
       if (!user) return;
-
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .in("role", ["admin", "coordenador"])
-        .maybeSingle();
-
+      const {
+        data
+      } = await supabase.from("user_roles").select("role").eq("user_id", user.id).in("role", ["admin", "coordenador"]).maybeSingle();
       setIsAdminOrCoordinator(!!data);
     };
-
     checkAdminOrCoordinator();
   }, [user]);
-
   const handleDownload = async (type: string) => {
     try {
       switch (type) {
@@ -206,34 +180,19 @@ const CoordenacaoFiscalizacao = () => {
       toast.error('Erro ao baixar planilha. Tente novamente.');
     }
   };
-
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+  return <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10">
       <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="bg-white/95 rounded-lg px-4 py-2 shadow-md">
-              <img 
-                src={logoOperaVia} 
-                alt="OperaVia" 
-                className="h-20 object-contain cursor-pointer hover:scale-105 transition-transform" 
-                onClick={() => navigate("/")}
-              />
+              <img src={logoOperaVia} alt="OperaVia" className="h-20 object-contain cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate("/")} />
             </div>
-            <Button 
-              variant="default" 
-              size="lg"
-              onClick={() => navigate("/")}
-              className="font-semibold shadow-md hover:shadow-lg transition-shadow bg-accent text-accent-foreground hover:bg-accent/90"
-            >
+            <Button variant="default" size="lg" onClick={() => navigate("/")} className="font-semibold shadow-md hover:shadow-lg transition-shadow bg-accent text-accent-foreground hover:bg-accent/90">
               <ArrowLeft className="mr-2 h-5 w-5" />
               Voltar
             </Button>
@@ -250,23 +209,15 @@ const CoordenacaoFiscalizacao = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            {isAdminOrCoordinator && (
-              <div className="mb-6 space-y-4">
+            {isAdminOrCoordinator && <div className="mb-6 space-y-4">
                 {/* Botão Elementos Pendentes */}
                 <div className="flex justify-center">
-                  <Button
-                    size="lg"
-                    variant="default"
-                    className="relative font-semibold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all bg-accent text-accent-foreground hover:bg-accent/90"
-                    onClick={() => navigate("/elementos-pendentes")}
-                  >
+                  <Button size="lg" variant="default" className="relative font-semibold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => navigate("/elementos-pendentes")}>
                     <FileSpreadsheet className="mr-2 h-6 w-6" />
                     Elementos Pendentes de Aprovação
-                    {contadorPendentes > 0 && (
-                      <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white">
+                    {contadorPendentes > 0 && <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white">
                         {contadorPendentes}
-                      </Badge>
-                    )}
+                      </Badge>}
                   </Button>
                 </div>
 
@@ -282,20 +233,13 @@ const CoordenacaoFiscalizacao = () => {
                         <p className="text-sm text-yellow-700">
                           Aprove intervenções registradas pelos técnicos e marque serviços fora do plano
                         </p>
-                        {countIntervencoesPendentes > 0 && (
-                          <div className="mt-3 flex items-center gap-2">
+                        {countIntervencoesPendentes > 0 && <div className="mt-3 flex items-center gap-2">
                             <Badge className="bg-yellow-500 text-white text-base px-3 py-1">
                               {countIntervencoesPendentes} {countIntervencoesPendentes === 1 ? 'intervenção pendente' : 'intervenções pendentes'}
                             </Badge>
-                          </div>
-                        )}
+                          </div>}
                       </div>
-                      <Button
-                        size="lg"
-                        variant="default"
-                        className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-yellow-600 hover:bg-yellow-700 text-white"
-                        onClick={() => navigate("/revisao-intervencoes")}
-                      >
+                      <Button size="lg" variant="default" className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-yellow-600 hover:bg-yellow-700 text-white" onClick={() => navigate("/revisao-intervencoes")}>
                         <CheckSquare className="mr-2 h-5 w-5" />
                         Acessar Revisão
                       </Button>
@@ -315,28 +259,24 @@ const CoordenacaoFiscalizacao = () => {
                         <p className="text-sm text-orange-700">
                           Resolva divergências entre o projeto e a análise automática GPS para todos os grupos de elementos
                         </p>
-                        {countDivergencias > 0 && (
-                          <div className="mt-3 flex items-center gap-2">
+                        {countDivergencias > 0 && <div className="mt-3 flex items-center gap-2">
                             <Badge className="bg-orange-500 text-white text-base px-3 py-1">
                               {countDivergencias} {countDivergencias === 1 ? 'divergência pendente' : 'divergências pendentes'}
                             </Badge>
-                          </div>
-                        )}
+                          </div>}
                       </div>
-                      <Button
-                        size="lg"
-                        variant="default"
-                        className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-orange-600 hover:bg-orange-700 text-white"
-                        onClick={() => navigate("/reconciliacoes-pendentes", { state: { from: "/coordenacao-fiscalizacao" } })}
-                      >
+                      <Button size="lg" variant="default" className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-orange-600 hover:bg-orange-700 text-white" onClick={() => navigate("/reconciliacoes-pendentes", {
+                    state: {
+                      from: "/coordenacao-fiscalizacao"
+                    }
+                  })}>
                         <GitCompareArrows className="mr-2 h-5 w-5" />
                         Acessar Reconciliação
                       </Button>
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-            )}
+              </div>}
             <Tabs defaultValue="frentes" className="w-full">
               <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 gap-2 h-auto bg-muted p-2">
                 <TabsTrigger value="frentes" className="whitespace-normal py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold text-sm">
@@ -367,28 +307,19 @@ const CoordenacaoFiscalizacao = () => {
                 <Card className="mb-4 border-2 border-orange-500/30 shadow-md">
                   <CardHeader className="bg-gradient-to-r from-orange-500/10 to-orange-600/10">
                     <CardTitle className="flex items-center justify-between text-xl">
-                      <span>Elementos Não Cadastrados</span>
-                      {contadorElementosPendentes > 0 && (
-                        <Badge className="bg-orange-500 text-white text-base px-3 py-1">
+                      <span>Elementos Não Cadastrados em Projeto</span>
+                      {contadorElementosPendentes > 0 && <Badge className="bg-orange-500 text-white text-base px-3 py-1">
                           {contadorElementosPendentes} pendente{contadorElementosPendentes > 1 ? "s" : ""}
-                        </Badge>
-                      )}
+                        </Badge>}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full justify-start font-semibold border-2 hover:bg-orange-500/10 hover:border-orange-500"
-                      onClick={() => navigate("/elementos-pendentes")}
-                    >
+                    <Button variant="outline" size="lg" className="w-full justify-start font-semibold border-2 hover:bg-orange-500/10 hover:border-orange-500" onClick={() => navigate("/elementos-pendentes")}>
                       <FileSpreadsheet className="w-5 h-5 mr-3" />
                       Aprovar/Rejeitar Elementos
-                      {contadorElementosPendentes > 0 && (
-                        <Badge className="ml-auto bg-orange-500 text-white">
+                      {contadorElementosPendentes > 0 && <Badge className="ml-auto bg-orange-500 text-white">
                           {contadorElementosPendentes}
-                        </Badge>
-                      )}
+                        </Badge>}
                     </Button>
                   </CardContent>
                 </Card>
@@ -397,28 +328,19 @@ const CoordenacaoFiscalizacao = () => {
                 <Card className="mb-4 border-2 border-primary/30 shadow-md">
                   <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
                     <CardTitle className="flex items-center justify-between text-xl">
-                      <span>Intervenções em Cadastro</span>
-                      {contadorPendentes > 0 && (
-                        <Badge className="bg-yellow-500 text-yellow-900 text-base px-3 py-1">
+                      <span>Intervenções realizadas previstas no Cadastro</span>
+                      {contadorPendentes > 0 && <Badge className="bg-yellow-500 text-yellow-900 text-base px-3 py-1">
                           {contadorPendentes} pendente{contadorPendentes > 1 ? "s" : ""}
-                        </Badge>
-                      )}
+                        </Badge>}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full justify-start font-semibold border-2 hover:bg-primary/10 hover:border-primary"
-                      onClick={() => navigate("/intervencoes-pendentes")}
-                    >
+                    <Button variant="outline" size="lg" className="w-full justify-start font-semibold border-2 hover:bg-primary/10 hover:border-primary" onClick={() => navigate("/intervencoes-pendentes")}>
                       <ClipboardCheck className="w-5 h-5 mr-3" />
                       Aprovar/Rejeitar Intervenções
-                      {contadorPendentes > 0 && (
-                        <Badge className="ml-auto bg-yellow-500 text-yellow-900">
+                      {contadorPendentes > 0 && <Badge className="ml-auto bg-yellow-500 text-yellow-900">
                           {contadorPendentes}
-                        </Badge>
-                      )}
+                        </Badge>}
                     </Button>
                   </CardContent>
                 </Card>
@@ -426,20 +348,10 @@ const CoordenacaoFiscalizacao = () => {
                   <div className="space-y-2">
                     <h3 className="text-lg font-semibold">Planilha 2.2 - Frente Liberada</h3>
                     <div className="flex gap-4 justify-center">
-                      <Button 
-                        size="lg"
-                        variant="default"
-                        className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                        onClick={() => navigate("/minhas-frentes-liberadas")}
-                      >
+                      <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-frentes-liberadas")}>
                         Visualizar Registros
                       </Button>
-                      <Button 
-                        size="lg"
-                        variant="secondary"
-                        className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                        onClick={() => handleDownload('frentes')}
-                      >
+                      <Button size="lg" variant="secondary" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => handleDownload('frentes')}>
                         <Download className="mr-2 h-5 w-5" />
                         Baixar Planilha
                       </Button>
@@ -453,20 +365,10 @@ const CoordenacaoFiscalizacao = () => {
 
               <TabsContent value="ncs-lote" className="mt-6">
                 <div className="text-center py-8 space-y-4">
-                  <Button 
-                    size="lg"
-                    variant="default"
-                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                    onClick={() => navigate("/ncs-coordenador")}
-                  >
+                  <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/ncs-coordenador")}>
                     Acessar NCs por Lote
                   </Button>
-                  <Button 
-                    size="lg"
-                    variant="secondary"
-                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow ml-4"
-                    onClick={() => handleDownload('ncs')}
-                  >
+                  <Button size="lg" variant="secondary" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow ml-4" onClick={() => handleDownload('ncs')}>
                     <Download className="mr-2 h-5 w-5" />
                     Baixar Planilha
                   </Button>
@@ -479,33 +381,18 @@ const CoordenacaoFiscalizacao = () => {
               <TabsContent value="retrorrefletividades" className="mt-6">
                 <div className="text-center py-8 space-y-4">
                   <div className="space-x-4">
-                    <Button 
-                      size="lg"
-                      variant="default"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => navigate("/minhas-retrorrefletividades")}
-                    >
+                    <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-retrorrefletividades")}>
                       Estática
                     </Button>
-                    <Button 
-                      size="lg"
-                      variant="default"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => navigate("/minhas-retrorrefletividades-dinamicas")}
-                    >
+                    <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-retrorrefletividades-dinamicas")}>
                       Dinâmica
                     </Button>
                   </div>
-                  <Button 
-                    size="lg"
-                    variant="secondary"
-                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                    onClick={async () => {
-                      await handleDownload('retro-estatica-horizontal');
-                      await handleDownload('retro-estatica-vertical');
-                      await handleDownload('retro-dinamica');
-                    }}
-                  >
+                  <Button size="lg" variant="secondary" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={async () => {
+                  await handleDownload('retro-estatica-horizontal');
+                  await handleDownload('retro-estatica-vertical');
+                  await handleDownload('retro-dinamica');
+                }}>
                     <Download className="mr-2 h-5 w-5" />
                     Baixar Planilhas
                   </Button>
@@ -517,20 +404,10 @@ const CoordenacaoFiscalizacao = () => {
 
               <TabsContent value="defensas" className="mt-6">
                 <div className="text-center py-8 space-y-4">
-                  <Button 
-                    size="lg"
-                    variant="default"
-                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                    onClick={() => navigate("/minhas-defensas")}
-                  >
+                  <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-defensas")}>
                     Visualizar Defensas
                   </Button>
-                  <Button 
-                    size="lg"
-                    variant="secondary"
-                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow ml-4"
-                    onClick={() => handleDownload('defensas')}
-                  >
+                  <Button size="lg" variant="secondary" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow ml-4" onClick={() => handleDownload('defensas')}>
                     <Download className="mr-2 h-5 w-5" />
                     Baixar Planilha
                   </Button>
@@ -543,50 +420,25 @@ const CoordenacaoFiscalizacao = () => {
               <TabsContent value="intervencoes" className="mt-6">
                 <div className="text-center py-8 space-y-4">
                   <div className="space-x-4 mb-4">
-                    <Button 
-                      size="lg"
-                      variant="default"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => navigate("/minhas-intervencoes-sh")}
-                    >
+                    <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-intervencoes-sh")}>
                       SH
                     </Button>
-                    <Button 
-                      size="lg"
-                      variant="default"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => navigate("/minhas-intervencoes-inscricoes")}
-                    >
+                    <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-intervencoes-inscricoes")}>
                       Inscrições
                     </Button>
-                    <Button 
-                      size="lg"
-                      variant="default"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => navigate("/minhas-intervencoes-sv")}
-                    >
+                    <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-intervencoes-sv")}>
                       SV
                     </Button>
-                    <Button 
-                      size="lg"
-                      variant="default"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => navigate("/minhas-intervencoes-tacha")}
-                    >
+                    <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-intervencoes-tacha")}>
                       Tachas
                     </Button>
                   </div>
-                  <Button 
-                    size="lg"
-                    variant="secondary"
-                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                    onClick={async () => {
-                      await handleDownload('int-sh');
-                      await handleDownload('int-inscricoes');
-                      await handleDownload('int-sv');
-                      await handleDownload('int-tacha');
-                    }}
-                  >
+                  <Button size="lg" variant="secondary" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={async () => {
+                  await handleDownload('int-sh');
+                  await handleDownload('int-inscricoes');
+                  await handleDownload('int-sv');
+                  await handleDownload('int-tacha');
+                }}>
                     <Download className="mr-2 h-5 w-5" />
                     Baixar Planilhas
                   </Button>
@@ -599,41 +451,21 @@ const CoordenacaoFiscalizacao = () => {
               <TabsContent value="fichas" className="mt-6">
                 <div className="text-center py-8 space-y-4">
                   <div className="space-x-4 mb-4">
-                    <Button 
-                      size="lg"
-                      variant="default"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => navigate("/minhas-fichas-verificacao")}
-                    >
+                    <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-fichas-verificacao")}>
                       Verificação
                     </Button>
-                    <Button 
-                      size="lg"
-                      variant="default"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => navigate("/minhas-fichas-placa")}
-                    >
+                    <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-fichas-placa")}>
                       Placa
                     </Button>
-                    <Button 
-                      size="lg"
-                      variant="default"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => navigate("/meus-registros-nc")}
-                    >
+                    <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/meus-registros-nc")}>
                       Registro NC
                     </Button>
                   </div>
-                  <Button 
-                    size="lg"
-                    variant="secondary"
-                    className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                    onClick={async () => {
-                      await handleDownload('fichas-verificacao');
-                      await handleDownload('fichas-placa');
-                      await handleDownload('registro-nc');
-                    }}
-                  >
+                  <Button size="lg" variant="secondary" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={async () => {
+                  await handleDownload('fichas-verificacao');
+                  await handleDownload('fichas-placa');
+                  await handleDownload('registro-nc');
+                }}>
                     <Download className="mr-2 h-5 w-5" />
                     Baixar Planilhas
                   </Button>
@@ -650,21 +482,11 @@ const CoordenacaoFiscalizacao = () => {
                     Ferramentas de análise e geração de relatórios do programa
                   </p>
                   <div className="flex gap-4 justify-center">
-                    <Button 
-                      size="lg"
-                      variant="default"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => navigate("/dashboard-necessidades")}
-                    >
+                    <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/dashboard-necessidades")}>
                       <BarChart3 className="mr-2 h-5 w-5" />
                       Dashboard
                     </Button>
-                    <Button 
-                      size="lg"
-                      variant="secondary"
-                      className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow"
-                      onClick={() => navigate("/minhas-necessidades-relatorios")}
-                    >
+                    <Button size="lg" variant="secondary" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-necessidades-relatorios")}>
                       <FileSpreadsheet className="mr-2 h-5 w-5" />
                       Relatórios
                     </Button>
@@ -685,8 +507,6 @@ const CoordenacaoFiscalizacao = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default CoordenacaoFiscalizacao;
