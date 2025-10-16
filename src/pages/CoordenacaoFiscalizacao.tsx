@@ -55,6 +55,21 @@ const CoordenacaoFiscalizacao = () => {
     refetchInterval: 30000,
   });
 
+  // Contador de elementos não cadastrados pendentes de aprovação
+  const { data: contadorElementosPendentes = 0 } = useQuery({
+    queryKey: ["contador-elementos-pendentes"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("elementos_pendentes_aprovacao")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pendente_aprovacao");
+      
+      return count || 0;
+    },
+    enabled: !!user && isAdminOrCoordinator,
+    refetchInterval: 30000,
+  });
+
   // Contador de divergências pendentes de reconciliação
   const { data: countDivergencias = 0 } = useQuery({
     queryKey: ["count-divergencias-coordenacao"],
@@ -348,10 +363,41 @@ const CoordenacaoFiscalizacao = () => {
               </TabsList>
 
               <TabsContent value="frentes" className="mt-6">
+                {/* Card 1: Elementos Não Cadastrados */}
+                <Card className="mb-4 border-2 border-orange-500/30 shadow-md">
+                  <CardHeader className="bg-gradient-to-r from-orange-500/10 to-orange-600/10">
+                    <CardTitle className="flex items-center justify-between text-xl">
+                      <span>Elementos Não Cadastrados</span>
+                      {contadorElementosPendentes > 0 && (
+                        <Badge className="bg-orange-500 text-white text-base px-3 py-1">
+                          {contadorElementosPendentes} pendente{contadorElementosPendentes > 1 ? "s" : ""}
+                        </Badge>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full justify-start font-semibold border-2 hover:bg-orange-500/10 hover:border-orange-500"
+                      onClick={() => navigate("/elementos-pendentes")}
+                    >
+                      <FileSpreadsheet className="w-5 h-5 mr-3" />
+                      Aprovar/Rejeitar Elementos
+                      {contadorElementosPendentes > 0 && (
+                        <Badge className="ml-auto bg-orange-500 text-white">
+                          {contadorElementosPendentes}
+                        </Badge>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Card 2: Intervenções */}
                 <Card className="mb-4 border-2 border-primary/30 shadow-md">
                   <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
                     <CardTitle className="flex items-center justify-between text-xl">
-                      <span>Aprovações e Gestão</span>
+                      <span>Intervenções em Cadastro</span>
                       {contadorPendentes > 0 && (
                         <Badge className="bg-yellow-500 text-yellow-900 text-base px-3 py-1">
                           {contadorPendentes} pendente{contadorPendentes > 1 ? "s" : ""}
@@ -367,7 +413,7 @@ const CoordenacaoFiscalizacao = () => {
                       onClick={() => navigate("/intervencoes-pendentes")}
                     >
                       <ClipboardCheck className="w-5 h-5 mr-3" />
-                      Intervenções Pendentes de Aprovação
+                      Aprovar/Rejeitar Intervenções
                       {contadorPendentes > 0 && (
                         <Badge className="ml-auto bg-yellow-500 text-yellow-900">
                           {contadorPendentes}

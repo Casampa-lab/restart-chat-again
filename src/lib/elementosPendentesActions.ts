@@ -173,6 +173,7 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
     
     // Invalidar cache para atualizar automaticamente
     queryClient.invalidateQueries({ queryKey: ['elementos-pendentes'] });
+    queryClient.invalidateQueries({ queryKey: ['contador-elementos-pendentes'] });
     
     return { success: true };
   } catch (error: any) {
@@ -278,6 +279,7 @@ export async function rejeitarElemento(elementoId: string, observacao: string) {
     
     // Invalidar cache para atualizar automaticamente
     queryClient.invalidateQueries({ queryKey: ['elementos-pendentes'] });
+    queryClient.invalidateQueries({ queryKey: ['contador-elementos-pendentes'] });
     
     return { success: true };
   } catch (error: any) {
