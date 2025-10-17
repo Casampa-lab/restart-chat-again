@@ -236,6 +236,7 @@ const LotesManager = () => {
         error: loteError
       } = await supabase.from("lotes").update({
         numero: formData.numero,
+        empresa_id: formData.empresa_id,
         contrato: formData.contrato || null,
         responsavel_executora: formData.responsavel_executora || null,
         email_executora: formData.email_executora || null,
