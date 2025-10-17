@@ -385,7 +385,7 @@ const RodoviasManager = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Rodovia</TableHead>
-                <TableHead className="w-24">Ações</TableHead>
+                <TableHead className="w-16">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
