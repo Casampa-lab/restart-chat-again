@@ -20,7 +20,6 @@ interface Lote {
 interface Rodovia {
   id: string;
   codigo: string;
-  nome: string;
 }
 
 interface SessionSelectorProps {

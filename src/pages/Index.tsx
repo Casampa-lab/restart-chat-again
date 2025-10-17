@@ -537,7 +537,7 @@ const Index = () => {
                   <MapPin className="h-5 w-5" />
                   <span className="font-bold">Rodovia:</span>
                   <span className="font-semibold">
-                    {activeSession.rodovia?.codigo}
+                    {activeSession.rodovia?.codigo || "Carregando..."}
                   </span>
                 </div>
               </CardContent>

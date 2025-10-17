@@ -47,6 +47,10 @@ export const useWorkSession = (userId: string | undefined) => {
         .maybeSingle();
 
       if (error) throw error;
+      
+      console.log("📍 Sessão ativa carregada:", data);
+      console.log("📍 Rodovia da sessão:", data?.rodovia);
+      
       setActiveSession(data);
     } catch (error: any) {
       console.error("Erro ao carregar sessão:", error);
