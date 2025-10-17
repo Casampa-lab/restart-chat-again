@@ -457,16 +457,16 @@ export default function ElementosPendentes() {
               </Select>
             </div>
             
-            <div>
-              <Label htmlFor="obs-rejeicao">Motivo da Rejeição *</Label>
-              <Textarea
-                id="obs-rejeicao"
-                value={observacao}
-                onChange={(e) => setObservacao(e.target.value)}
-                placeholder="Explique o motivo da rejeição..."
-                rows={3}
-                required
-              />
+              <div>
+                <Label htmlFor="obs-rejeicao">Problema *</Label>
+                <Textarea
+                  id="obs-rejeicao"
+                  value={observacao}
+                  onChange={(e) => setObservacao(e.target.value)}
+                  placeholder="Explique o motivo da rejeição..."
+                  rows={3}
+                  required
+                />
             </div>
           </div>
           <DialogFooter>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { generateNCPDF } from "@/lib/pdfGenerator";
 import {
@@ -428,6 +428,7 @@ const NCsCoordenador = () => {
                         <TableHead>km</TableHead>
                         <TableHead>Tipo</TableHead>
                         <TableHead>Grau</TableHead>
+                        <TableHead>Visualizar</TableHead>
                         <TableHead>Problema</TableHead>
                         <TableHead>Situação</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
@@ -446,6 +447,18 @@ const NCsCoordenador = () => {
                           <TableCell>{nc.tipo_nc}</TableCell>
                           <TableCell>
                             <Badge variant="outline">{(nc as any).grau || "N/A"}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                // TODO: Implementar visualização de detalhes da NC
+                                toast.info("Funcionalidade de visualização em desenvolvimento");
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                           <TableCell className="max-w-xs truncate">
                             {(nc as any).comentarios_supervisora || nc.problema_identificado}
