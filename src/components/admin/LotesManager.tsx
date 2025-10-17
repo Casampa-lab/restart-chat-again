@@ -57,6 +57,10 @@ interface LoteComRodovias extends Lote {
     km_inicial: number | null;
     km_final: number | null;
     extensao_km?: number;
+    latitude_inicial?: number;
+    longitude_inicial?: number;
+    latitude_final?: number;
+    longitude_final?: number;
   }>;
 }
 interface Supervisora {
@@ -110,7 +114,11 @@ const LotesManager = () => {
               snv_final,
               km_inicial,
               km_final,
-              extensao_km
+              extensao_km,
+              latitude_inicial,
+              longitude_inicial,
+              latitude_final,
+              longitude_final
             )
           `).order("numero"), 
         supabase.from("empresas").select("id, nome").order("nome"), 
@@ -705,14 +713,15 @@ const LotesManager = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Número</TableHead>
-                <TableHead>Supervisora</TableHead>
-                <TableHead>Empresa</TableHead>
-                <TableHead>Unidade/Localidade</TableHead>
-                <TableHead>Contrato</TableHead>
-                <TableHead>Rodovias</TableHead>
-                <TableHead>Extensão Total</TableHead>
-                <TableHead className="w-24">Ações</TableHead>
+            <TableHead>Número</TableHead>
+            <TableHead>Supervisora</TableHead>
+            <TableHead>Empresa</TableHead>
+            <TableHead>Unidade/Localidade</TableHead>
+            <TableHead>Contrato</TableHead>
+            <TableHead className="min-w-[300px]">Rodovias</TableHead>
+            <TableHead>Coordenadas</TableHead>
+            <TableHead>Extensão Total</TableHead>
+            <TableHead className="w-24">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -733,25 +742,64 @@ const LotesManager = () => {
                   </TableCell>
                   <TableCell>{lote.contrato || "-"}</TableCell>
                   <TableCell>
-                    <div className="flex flex-col gap-1">
+                    <div className="space-y-3">
                       {lote.lotes_rodovias.map((lr, idx) => (
-                        <div key={idx} className="text-xs">
-                          <Badge variant="secondary" className="text-xs">
-                            {lr.rodovias?.codigo || "-"}
-                          </Badge>
+                        <div key={idx} className="border-l-2 border-primary/30 pl-3 py-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="secondary" className="font-semibold">
+                              {lr.rodovias?.codigo || "-"}
+                            </Badge>
+                          </div>
+                          
                           {lr.snv_inicial && lr.snv_final && (
-                            <span className="ml-2 text-muted-foreground">
-                              SNV: {lr.snv_inicial}→{lr.snv_final}
-                            </span>
+                            <div className="text-xs text-muted-foreground">
+                              📍 SNV: <span className="font-mono">{lr.snv_inicial}</span> → 
+                              <span className="font-mono">{lr.snv_final}</span>
+                            </div>
                           )}
+                          
                           {(lr.km_inicial || lr.km_final) && (
-                            <span className="ml-2 text-muted-foreground">
-                              KM: {lr.km_inicial?.toFixed(0)}-{lr.km_final?.toFixed(0)}
-                            </span>
+                            <div className="text-xs text-muted-foreground">
+                              📏 KM: <span className="font-mono">{lr.km_inicial?.toFixed(3)}</span> - 
+                              <span className="font-mono">{lr.km_final?.toFixed(3)}</span>
+                              {lr.extensao_km && (
+                                <span className="ml-2 font-semibold text-foreground">
+                                  ({lr.extensao_km.toFixed(2)} km)
+                                </span>
+                              )}
+                            </div>
                           )}
-                          {lr.extensao_km && (
-                            <span className="ml-2 font-medium">
-                              • {lr.extensao_km.toFixed(2)} km
+                        </div>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-2">
+                      {lote.lotes_rodovias.map((lr, idx) => (
+                        <div key={idx} className="text-xs space-y-1 border rounded p-2 bg-muted/30">
+                          {(lr.latitude_inicial || lr.longitude_inicial) && (
+                            <div className="font-mono text-muted-foreground">
+                              <span className="text-green-600 font-semibold">📍 Início:</span>
+                              <br />
+                              <span className="ml-2">
+                                {lr.latitude_inicial?.toFixed(6)}, {lr.longitude_inicial?.toFixed(6)}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {(lr.latitude_final || lr.longitude_final) && (
+                            <div className="font-mono text-muted-foreground">
+                              <span className="text-red-600 font-semibold">🏁 Fim:</span>
+                              <br />
+                              <span className="ml-2">
+                                {lr.latitude_final?.toFixed(6)}, {lr.longitude_final?.toFixed(6)}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {!lr.latitude_inicial && !lr.longitude_inicial && (
+                            <span className="text-muted-foreground italic">
+                              Sem coordenadas
                             </span>
                           )}
                         </div>
@@ -773,7 +821,7 @@ const LotesManager = () => {
                   </TableCell>
                 </TableRow>)}
               {lotes.length === 0 && <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center text-muted-foreground">
                     Nenhum lote cadastrado
                   </TableCell>
                 </TableRow>}
