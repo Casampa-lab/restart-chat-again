@@ -13,47 +13,22 @@ interface Empresa {
   id: string;
   nome: string;
   cnpj: string;
-  supervisora_id: string;
-  supervisoras?: {
-    nome_empresa: string;
-  };
-}
-
-interface Supervisora {
-  id: string;
-  nome_empresa: string;
 }
 
 const EmpresasManager = () => {
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
-  const [supervisoras, setSupervisoras] = useState<Supervisora[]>([]);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ nome: "", cnpj: "", supervisora_id: "" });
+  const [formData, setFormData] = useState({ nome: "", cnpj: "" });
 
   useEffect(() => {
-    loadSupervisoras();
     loadEmpresas();
   }, []);
-
-  const loadSupervisoras = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("supervisoras")
-        .select("id, nome_empresa")
-        .order("nome_empresa");
-
-      if (error) throw error;
-      setSupervisoras(data || []);
-    } catch (error: any) {
-      toast.error("Erro ao carregar supervisoras: " + error.message);
-    }
-  };
 
   const loadEmpresas = async () => {
     try {
       const { data, error } = await supabase
         .from("empresas")
-        .select("*, supervisoras(nome_empresa)")
+        .select("*")
         .order("nome");
 
       if (error) throw error;
@@ -65,25 +40,18 @@ const EmpresasManager = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.supervisora_id) {
-      toast.error("Selecione uma supervisora");
-      return;
-    }
-    
     setLoading(true);
 
     try {
       const { error } = await supabase.from("empresas").insert({
         nome: formData.nome,
         cnpj: formData.cnpj,
-        supervisora_id: formData.supervisora_id,
       });
 
       if (error) throw error;
 
       toast.success("Empresa cadastrada com sucesso!");
-      setFormData({ nome: "", cnpj: "", supervisora_id: "" });
+      setFormData({ nome: "", cnpj: "" });
       loadEmpresas();
     } catch (error: any) {
       toast.error("Erro ao cadastrar empresa: " + error.message);
@@ -116,27 +84,9 @@ const EmpresasManager = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="supervisora">Supervisora *</Label>
-                <Select
-                  value={formData.supervisora_id}
-                  onValueChange={(value) => setFormData({ ...formData, supervisora_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a supervisora" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {supervisoras.map((sup) => (
-                      <SelectItem key={sup.id} value={sup.id}>
-                        {sup.nome_empresa}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome da Empresa</Label>
+                <Label htmlFor="nome">Nome da Empresa *</Label>
                 <Input
                   id="nome"
                   value={formData.nome}
@@ -146,7 +96,7 @@ const EmpresasManager = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cnpj">CNPJ</Label>
+                <Label htmlFor="cnpj">CNPJ *</Label>
                 <Input
                   id="cnpj"
                   value={formData.cnpj}
@@ -174,7 +124,6 @@ const EmpresasManager = () => {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>CNPJ</TableHead>
-                <TableHead>Supervisora</TableHead>
                 <TableHead className="w-24">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -183,7 +132,6 @@ const EmpresasManager = () => {
                 <TableRow key={empresa.id}>
                   <TableCell className="font-medium">{empresa.nome}</TableCell>
                   <TableCell>{empresa.cnpj}</TableCell>
-                  <TableCell>{empresa.supervisoras?.nome_empresa || "—"}</TableCell>
                   <TableCell>
                     <Button
                       variant="ghost"
@@ -197,7 +145,7 @@ const EmpresasManager = () => {
               ))}
               {empresas.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  <TableCell colSpan={3} className="text-center text-muted-foreground">
                     Nenhuma empresa cadastrada
                   </TableCell>
                 </TableRow>

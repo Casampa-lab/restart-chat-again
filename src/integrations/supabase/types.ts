@@ -606,31 +606,20 @@ export type Database = {
           created_at: string | null
           id: string
           nome: string
-          supervisora_id: string | null
         }
         Insert: {
           cnpj: string
           created_at?: string | null
           id?: string
           nome: string
-          supervisora_id?: string | null
         }
         Update: {
           cnpj?: string
           created_at?: string | null
           id?: string
           nome?: string
-          supervisora_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "empresas_supervisora_id_fkey"
-            columns: ["supervisora_id"]
-            isOneToOne: false
-            referencedRelation: "supervisoras"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       ficha_cilindros: {
         Row: {
@@ -2906,6 +2895,7 @@ export type Database = {
           nome_fiscal_execucao: string | null
           numero: string
           responsavel_executora: string | null
+          supervisora_id: string
           tolerancia_match_metros: number | null
           unidade_administrativa: string | null
         }
@@ -2920,6 +2910,7 @@ export type Database = {
           nome_fiscal_execucao?: string | null
           numero: string
           responsavel_executora?: string | null
+          supervisora_id: string
           tolerancia_match_metros?: number | null
           unidade_administrativa?: string | null
         }
@@ -2934,6 +2925,7 @@ export type Database = {
           nome_fiscal_execucao?: string | null
           numero?: string
           responsavel_executora?: string | null
+          supervisora_id?: string
           tolerancia_match_metros?: number | null
           unidade_administrativa?: string | null
         }
@@ -2943,6 +2935,13 @@ export type Database = {
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lotes_supervisora_id_fkey"
+            columns: ["supervisora_id"]
+            isOneToOne: false
+            referencedRelation: "supervisoras"
             referencedColumns: ["id"]
           },
         ]

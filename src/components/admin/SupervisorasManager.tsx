@@ -162,18 +162,18 @@ export const SupervisorasManager = () => {
 
   const handleDelete = async (id: string, nome: string) => {
     try {
-      // Verificar se há empresas vinculadas
-      const { data: empresas, error: checkError } = await supabase
-        .from("empresas")
-        .select("id, nome")
+      // Verificar se há lotes vinculados
+      const { data: lotes, error: checkError } = await supabase
+        .from("lotes")
+        .select("id, numero")
         .eq("supervisora_id", id);
 
       if (checkError) throw checkError;
 
-      if (empresas && empresas.length > 0) {
-        const empresasNomes = empresas.map(e => e.nome).join(", ");
+      if (lotes && lotes.length > 0) {
+        const lotesNumeros = lotes.map(l => l.numero).join(", ");
         toast.error(
-          `Não é possível excluir "${nome}" pois existem ${empresas.length} empresa(s) vinculada(s): ${empresasNomes}. Desvincule ou exclua as empresas primeiro.`,
+          `Não é possível excluir "${nome}" pois existem ${lotes.length} lote(s) vinculado(s): ${lotesNumeros}. Desvincule ou exclua os lotes primeiro.`,
           { duration: 6000 }
         );
         return;

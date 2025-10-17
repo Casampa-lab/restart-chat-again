@@ -36,6 +36,7 @@ interface Lote {
   numero: string;
   contrato: string;
   empresa_id?: string;
+  supervisora_id?: string;
   unidade_administrativa?: string;
   responsavel_executora?: string;
   email_executora?: string;
@@ -58,9 +59,15 @@ interface LoteComRodovias extends Lote {
     extensao_km?: number;
   }>;
 }
+interface Supervisora {
+  id: string;
+  nome_empresa: string;
+}
+
 const LotesManager = () => {
   const [lotes, setLotes] = useState<LoteComRodovias[]>([]);
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [supervisoras, setSupervisoras] = useState<Supervisora[]>([]);
   const [rodovias, setRodovias] = useState<Rodovia[]>([]);
   const [rodoviasVinculadas, setRodoviasVinculadas] = useState<RodoviaComKm[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,6 +75,7 @@ const LotesManager = () => {
   const [formData, setFormData] = useState({
     numero: "",
     empresa_id: "",
+    supervisora_id: "",
     contrato: "",
     unidade_administrativa: "",
     responsavel_executora: "",
@@ -92,7 +100,8 @@ const LotesManager = () => {
   }, []);
   const loadData = async () => {
     try {
-      const [lotesRes, empresasRes, rodoviasRes] = await Promise.all([supabase.from("lotes").select(`
+      const [lotesRes, empresasRes, rodoviasRes, superVisorasRes] = await Promise.all([
+        supabase.from("lotes").select(`
             *,
             empresas(nome),
             lotes_rodovias(
@@ -103,13 +112,19 @@ const LotesManager = () => {
               km_final,
               extensao_km
             )
-          `).order("numero"), supabase.from("empresas").select("id, nome").order("nome"), supabase.from("rodovias").select("id, codigo").order("codigo")]);
+          `).order("numero"), 
+        supabase.from("empresas").select("id, nome").order("nome"), 
+        supabase.from("rodovias").select("id, codigo").order("codigo"),
+        supabase.from("supervisoras").select("id, nome_empresa").order("nome_empresa")
+      ]);
       if (lotesRes.error) throw lotesRes.error;
       if (empresasRes.error) throw empresasRes.error;
       if (rodoviasRes.error) throw rodoviasRes.error;
+      if (superVisorasRes.error) throw superVisorasRes.error;
       setLotes(lotesRes.data || []);
       setEmpresas(empresasRes.data || []);
       setRodovias(rodoviasRes.data || []);
+      setSupervisoras(superVisorasRes.data || []);
     } catch (error: any) {
       toast.error("Erro ao carregar dados: " + error.message);
     }
@@ -175,6 +190,7 @@ const LotesManager = () => {
       } = await supabase.from("lotes").insert({
         numero: formData.numero,
         empresa_id: formData.empresa_id,
+        supervisora_id: formData.supervisora_id,
         contrato: formData.contrato || null,
         unidade_administrativa: formData.unidade_administrativa || null,
         responsavel_executora: formData.responsavel_executora || null,
@@ -207,6 +223,7 @@ const LotesManager = () => {
       setFormData({
         numero: "",
         empresa_id: "",
+        supervisora_id: "",
         contrato: "",
         unidade_administrativa: "",
         responsavel_executora: "",
@@ -227,6 +244,7 @@ const LotesManager = () => {
     setFormData({
       numero: lote.numero,
       empresa_id: lote.empresa_id || "",
+      supervisora_id: lote.supervisora_id || "",
       contrato: lote.contrato || "",
       unidade_administrativa: lote.unidade_administrativa || "",
       responsavel_executora: lote.responsavel_executora || "",
@@ -279,6 +297,7 @@ const LotesManager = () => {
       } = await supabase.from("lotes").update({
         numero: formData.numero,
         empresa_id: formData.empresa_id,
+        supervisora_id: formData.supervisora_id,
         contrato: formData.contrato || null,
         unidade_administrativa: formData.unidade_administrativa || null,
         responsavel_executora: formData.responsavel_executora || null,
@@ -318,6 +337,7 @@ const LotesManager = () => {
       setFormData({
         numero: "",
         empresa_id: "",
+        supervisora_id: "",
         contrato: "",
         unidade_administrativa: "",
         responsavel_executora: "",
@@ -457,13 +477,32 @@ const LotesManager = () => {
               </CardContent>
             </Card>
 
-            {/* Card 2: Empresa Executora */}
+            {/* Card 2: Supervisora e Empresa Executora */}
             <Card>
               <CardHeader>
-                <CardTitle>Empresa Executora</CardTitle>
-                <CardDescription>Dados da empresa responsável pela execução</CardDescription>
+                <CardTitle>Supervisora e Empresa Executora</CardTitle>
+                <CardDescription>Dados da supervisora e empresa responsável pela execução</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="supervisora_id">Supervisora *</Label>
+                  <Select
+                    value={formData.supervisora_id}
+                    onValueChange={(value) => setFormData({ ...formData, supervisora_id: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a supervisora" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {supervisoras.map((sup) => (
+                        <SelectItem key={sup.id} value={sup.id}>
+                          {sup.nome_empresa}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div>
                   <Label htmlFor="empresa_id">Empresa Executora *</Label>
                   <Select
@@ -667,6 +706,7 @@ const LotesManager = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Número</TableHead>
+                <TableHead>Supervisora</TableHead>
                 <TableHead>Empresa</TableHead>
                 <TableHead>Unidade/Localidade</TableHead>
                 <TableHead>Contrato</TableHead>
@@ -678,6 +718,9 @@ const LotesManager = () => {
             <TableBody>
               {lotes.map(lote => <TableRow key={lote.id}>
                   <TableCell className="font-medium">{lote.numero}</TableCell>
+                  <TableCell>
+                    {supervisoras.find(s => s.id === lote.supervisora_id)?.nome_empresa || "-"}
+                  </TableCell>
                   <TableCell>
                     {empresas.find(e => e.id === lote.empresa_id)?.nome || "-"}
                   </TableCell>
@@ -730,7 +773,7 @@ const LotesManager = () => {
                   </TableCell>
                 </TableRow>)}
               {lotes.length === 0 && <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground">
                     Nenhum lote cadastrado
                   </TableCell>
                 </TableRow>}
@@ -816,12 +859,32 @@ const LotesManager = () => {
               </CardContent>
             </Card>
 
-            {/* Card 2: Empresa Executora */}
+            {/* Card 2: Supervisora e Empresa Executora */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Empresa Executora</CardTitle>
+                <CardTitle className="text-lg">Supervisora e Empresa Executora</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Supervisora */}
+                <div className="space-y-2">
+                  <Label htmlFor="edit-supervisora">Supervisora *</Label>
+                  <Select
+                    value={formData.supervisora_id}
+                    onValueChange={(value) => setFormData({ ...formData, supervisora_id: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a supervisora" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {supervisoras.map((sup) => (
+                        <SelectItem key={sup.id} value={sup.id}>
+                          {sup.nome_empresa}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 {/* Empresa (linha inteira) */}
                 <div className="space-y-2">
                   <Label htmlFor="edit-empresa">Empresa Executora *</Label>
