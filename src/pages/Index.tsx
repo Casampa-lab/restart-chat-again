@@ -271,8 +271,10 @@ const Index = () => {
 
   // Contador de divergências pendentes de reconciliação (para coordenadores)
   const { data: countDivergencias } = useQuery({
-    queryKey: ["count-divergencias-pendentes"],
+    queryKey: ["count-divergencias-pendentes", activeSession?.lote_id, activeSession?.rodovia_id],
     queryFn: async () => {
+      if (!activeSession) return 0;
+      
       const grupos = ['necessidades_placas', 'necessidades_defensas', 'necessidades_porticos', 
                       'necessidades_marcas_longitudinais', 'necessidades_marcas_transversais', 
                       'necessidades_cilindros', 'necessidades_tachas'];
@@ -282,13 +284,16 @@ const Index = () => {
         const { count } = await supabase
           .from(tabela as any)
           .select("*", { count: "exact", head: true })
+          .eq("lote_id", activeSession.lote_id)
+          .eq("rodovia_id", activeSession.rodovia_id)
+          .not("cadastro_id", "is", null)
           .eq("divergencia", true)
           .eq("reconciliado", false);
         totalDivergencias += (count || 0);
       }
       return totalDivergencias;
     },
-    enabled: isAdminOrCoordinator,
+    enabled: isAdminOrCoordinator && !!activeSession,
   });
 
   // Contador de intervenções pendentes de aprovação (para coordenadores)
