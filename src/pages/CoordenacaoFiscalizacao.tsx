@@ -62,7 +62,7 @@ const CoordenacaoFiscalizacao = () => {
           head: true
         })
         .eq("divergencia", true)
-        .eq("reconciliado", false)
+        .eq("status_reconciliacao", "pendente_aprovacao")
         .eq("lote_id", activeSession.lote_id)
         .eq("rodovia_id", activeSession.rodovia_id);
         totalDivergencias += count || 0;

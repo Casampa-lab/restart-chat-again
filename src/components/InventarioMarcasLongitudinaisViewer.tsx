@@ -117,7 +117,9 @@ export function InventarioMarcasLongitudinaisViewer({
         .select("*")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .not("cadastro_id", "is", null);
+        .not("cadastro_id", "is", null)
+        .eq("status_reconciliacao", "pendente_aprovacao")
+        .lte("distancia_match_metros", toleranciaMetros);
       
       if (error) throw error;
       

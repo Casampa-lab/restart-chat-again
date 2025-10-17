@@ -1081,7 +1081,7 @@ export function NecessidadesImporter() {
             servico_final: servicoFinal,
             divergencia,
             reconciliado: false,
-            status_reconciliacao: 'aprovado', // Sempre iniciar como 'aprovado' ao importar
+            status_reconciliacao: status_reconciliacao || 'pendente_aprovacao',
             ...dados,
             arquivo_origem: file.name,
             linha_planilha: linhaExcel,

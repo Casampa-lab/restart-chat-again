@@ -165,7 +165,8 @@ export function InventarioInscricoesViewer({
         .select("id, servico, servico_final, cadastro_id, distancia_match_metros, km_inicial, divergencia, reconciliado, status_reconciliacao, solucao_planilha, servico_inferido, solucao_confirmada, latitude_inicial, longitude_inicial")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .not("cadastro_id", "is", null);
+        .not("cadastro_id", "is", null)
+        .eq("status_reconciliacao", "pendente_aprovacao");
       
       if (error) throw error;
       

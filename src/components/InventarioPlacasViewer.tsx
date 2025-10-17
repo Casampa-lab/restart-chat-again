@@ -244,6 +244,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null)
+        .eq("status_reconciliacao", "pendente_aprovacao")
         .lte("distancia_match_metros", toleranciaRodovia);
       
       if (error) throw error;

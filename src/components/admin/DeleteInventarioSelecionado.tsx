@@ -159,6 +159,43 @@ export function DeleteInventarioSelecionado() {
         throw deleteError;
       }
 
+      // Limpar matches órfãos nas necessidades relacionadas
+      const tipoNecessidadeMap: Record<string, string> = {
+        'ficha_placa': 'placas',
+        'defensas': 'defensas',
+        'ficha_porticos': 'porticos',
+        'ficha_marcas_longitudinais': 'marcas_longitudinais',
+        'ficha_inscricoes': 'inscricoes',
+        'ficha_cilindros': 'cilindros',
+        'ficha_tachas': 'tachas'
+      };
+
+      const tipoNecessidade = tipoNecessidadeMap[selectedTabela];
+
+      if (tipoNecessidade) {
+        toast.info("Limpando matches relacionados às necessidades...");
+        const tabelaNecessidade = `necessidades_${tipoNecessidade}`;
+        
+        const { error: cleanupError } = await supabase
+          .from(tabelaNecessidade as any)
+          .update({
+            cadastro_id: null,
+            distancia_match_metros: null,
+            tipo_match: null,
+            status_reconciliacao: "pendente_aprovacao",
+            reconciliado: false,
+            overlap_porcentagem: null
+          })
+          .eq('lote_id', selectedLote)
+          .eq('rodovia_id', selectedRodovia)
+          .not('cadastro_id', 'is', null);
+        
+        if (cleanupError) {
+          console.error('Erro ao limpar matches:', cleanupError);
+          toast.warning("Inventário deletado, mas houve erro ao limpar matches relacionados");
+        }
+      }
+
       // 4. Deletar as fotos do storage
       if (fotosParaDeletar.length > 0) {
         toast.info(`Deletando ${fotosParaDeletar.length} fotos do storage...`);

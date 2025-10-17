@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getConfig, type GrupoElemento } from "@/lib/reconciliacaoConfig";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -275,20 +276,18 @@ const Index = () => {
     queryFn: async () => {
       if (!activeSession) return 0;
       
-      const grupos = ['necessidades_placas', 'necessidades_defensas', 'necessidades_porticos', 
-                      'necessidades_marcas_longitudinais', 'necessidades_marcas_transversais', 
-                      'necessidades_cilindros', 'necessidades_tachas'];
+      const gruposElementos: GrupoElemento[] = ['placas', 'defensas', 'porticos', 'marcas_longitudinais', 'inscricoes', 'cilindros', 'tachas'];
       
       let totalDivergencias = 0;
-      for (const tabela of grupos) {
+      for (const grupo of gruposElementos) {
+        const config = getConfig(grupo);
         const { count } = await supabase
-          .from(tabela as any)
+          .from(config.tabelaNecessidades as any)
           .select("*", { count: "exact", head: true })
           .eq("lote_id", activeSession.lote_id)
           .eq("rodovia_id", activeSession.rodovia_id)
-          .not("cadastro_id", "is", null)
           .eq("divergencia", true)
-          .eq("reconciliado", false);
+          .eq("status_reconciliacao", "pendente_aprovacao");
         totalDivergencias += (count || 0);
       }
       return totalDivergencias;

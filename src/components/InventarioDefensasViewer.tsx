@@ -135,7 +135,8 @@ export const InventarioDefensasViewer = ({
         .select("*")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .not("cadastro_id", "is", null);
+        .not("cadastro_id", "is", null)
+        .eq("status_reconciliacao", "pendente_aprovacao");
       
       if (error) throw error;
       
