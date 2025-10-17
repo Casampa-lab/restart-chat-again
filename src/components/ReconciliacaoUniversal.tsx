@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { WorkSession } from "@/hooks/useWorkSession";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,9 +32,10 @@ interface Divergencia {
 
 interface ReconciliacaoUniversalProps {
   grupo: GrupoElemento;
+  activeSession: WorkSession;
 }
 
-export function ReconciliacaoUniversal({ grupo }: ReconciliacaoUniversalProps) {
+export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUniversalProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const config = getConfig(grupo);
@@ -64,7 +66,7 @@ export function ReconciliacaoUniversal({ grupo }: ReconciliacaoUniversalProps) {
 
   // Buscar divergências não reconciliadas para o grupo ativo
   const { data: divergencias, isLoading } = useQuery({
-    queryKey: ["divergencias", grupoAtivo],
+    queryKey: ["divergencias", grupoAtivo, activeSession.lote_id, activeSession.rodovia_id],
     queryFn: async () => {
       const configAtual = getConfig(grupoAtivo);
       const { data, error } = await supabase
@@ -72,12 +74,14 @@ export function ReconciliacaoUniversal({ grupo }: ReconciliacaoUniversalProps) {
         .select("*")
         .eq("divergencia", true)
         .eq("reconciliado", false)
+        .eq("lote_id", activeSession.lote_id)
+        .eq("rodovia_id", activeSession.rodovia_id)
         .order("km", { ascending: true });
 
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: !!user,
+    enabled: !!user && !!activeSession,
   });
 
   // Buscar detalhes do cadastro quando seleciona necessidade
@@ -95,7 +99,7 @@ export function ReconciliacaoUniversal({ grupo }: ReconciliacaoUniversalProps) {
 
   // Estatísticas agregadas de todos os grupos
   const { data: estatisticasGerais } = useQuery({
-    queryKey: ["estatisticas-gerais"],
+    queryKey: ["estatisticas-gerais", activeSession.lote_id, activeSession.rodovia_id],
     queryFn: async () => {
       const grupos: GrupoElemento[] = ['placas', 'defensas', 'porticos', 'marcas_longitudinais', 'inscricoes', 'cilindros', 'tachas'];
       
@@ -105,7 +109,9 @@ export function ReconciliacaoUniversal({ grupo }: ReconciliacaoUniversalProps) {
           const { data } = await supabase
             .from(cfg.tabelaNecessidades as any)
             .select("divergencia, reconciliado")
-            .eq("divergencia", true);
+            .eq("divergencia", true)
+            .eq("lote_id", activeSession.lote_id)
+            .eq("rodovia_id", activeSession.rodovia_id);
 
           const total = data?.length || 0;
           const reconciliadas = data?.filter((d: any) => d.reconciliado).length || 0;
@@ -125,7 +131,7 @@ export function ReconciliacaoUniversal({ grupo }: ReconciliacaoUniversalProps) {
 
       return { totais, porGrupo: resultados };
     },
-    enabled: !!user,
+    enabled: !!user && !!activeSession,
   });
 
   // Mutation para reconciliar
@@ -155,8 +161,8 @@ export function ReconciliacaoUniversal({ grupo }: ReconciliacaoUniversalProps) {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["divergencias", grupoAtivo] });
-      queryClient.invalidateQueries({ queryKey: ["estatisticas-gerais"] });
+      queryClient.invalidateQueries({ queryKey: ["divergencias", grupoAtivo, activeSession.lote_id, activeSession.rodovia_id] });
+      queryClient.invalidateQueries({ queryKey: ["estatisticas-gerais", activeSession.lote_id, activeSession.rodovia_id] });
       toast({
         title: "Reconciliação concluída",
         description: "A decisão foi registrada com sucesso.",

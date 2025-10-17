@@ -3,10 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useWorkSession } from "@/hooks/useWorkSession";
 
 export default function ReconciliacaoPendente() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  const { activeSession } = useWorkSession(user?.id);
   
   const handleVoltar = () => {
     const from = location.state?.from;
@@ -58,7 +62,15 @@ export default function ReconciliacaoPendente() {
         </CardContent>
       </Card>
 
-      <ReconciliacaoUniversal grupo="placas" />
+      {activeSession ? (
+        <ReconciliacaoUniversal grupo="placas" activeSession={activeSession} />
+      ) : (
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
+            <p>Inicie uma sessão de trabalho para visualizar as reconciliações.</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
