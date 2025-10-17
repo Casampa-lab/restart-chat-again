@@ -2906,6 +2906,7 @@ export type Database = {
           numero: string
           responsavel_executora: string | null
           tolerancia_match_metros: number | null
+          unidade_administrativa: string | null
         }
         Insert: {
           contrato?: string | null
@@ -2918,6 +2919,7 @@ export type Database = {
           numero: string
           responsavel_executora?: string | null
           tolerancia_match_metros?: number | null
+          unidade_administrativa?: string | null
         }
         Update: {
           contrato?: string | null
@@ -2930,6 +2932,7 @@ export type Database = {
           numero?: string
           responsavel_executora?: string | null
           tolerancia_match_metros?: number | null
+          unidade_administrativa?: string | null
         }
         Relationships: [
           {

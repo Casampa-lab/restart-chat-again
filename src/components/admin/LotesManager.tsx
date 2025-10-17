@@ -32,6 +32,7 @@ interface Lote {
   id: string;
   numero: string;
   contrato: string;
+  unidade_administrativa?: string;
   responsavel_executora?: string;
   email_executora?: string;
   nome_fiscal_execucao?: string;
@@ -60,6 +61,7 @@ const LotesManager = () => {
     numero: "",
     empresa_id: "",
     contrato: "",
+    unidade_administrativa: "",
     responsavel_executora: "",
     email_executora: "",
     nome_fiscal_execucao: "",
@@ -149,6 +151,7 @@ const LotesManager = () => {
         numero: formData.numero,
         empresa_id: formData.empresa_id,
         contrato: formData.contrato || null,
+        unidade_administrativa: formData.unidade_administrativa || null,
         responsavel_executora: formData.responsavel_executora || null,
         email_executora: formData.email_executora || null,
         nome_fiscal_execucao: formData.nome_fiscal_execucao || null,
@@ -176,6 +179,7 @@ const LotesManager = () => {
         numero: "",
         empresa_id: "",
         contrato: "",
+        unidade_administrativa: "",
         responsavel_executora: "",
         email_executora: "",
         nome_fiscal_execucao: "",
@@ -195,6 +199,7 @@ const LotesManager = () => {
       numero: lote.numero,
       empresa_id: lote.empresa_id || "",
       contrato: lote.contrato || "",
+      unidade_administrativa: lote.unidade_administrativa || "",
       responsavel_executora: lote.responsavel_executora || "",
       email_executora: lote.email_executora || "",
       nome_fiscal_execucao: lote.nome_fiscal_execucao || "",
@@ -238,6 +243,7 @@ const LotesManager = () => {
         numero: formData.numero,
         empresa_id: formData.empresa_id,
         contrato: formData.contrato || null,
+        unidade_administrativa: formData.unidade_administrativa || null,
         responsavel_executora: formData.responsavel_executora || null,
         email_executora: formData.email_executora || null,
         nome_fiscal_execucao: formData.nome_fiscal_execucao || null,
@@ -272,6 +278,7 @@ const LotesManager = () => {
         numero: "",
         empresa_id: "",
         contrato: "",
+        unidade_administrativa: "",
         responsavel_executora: "",
         email_executora: "",
         nome_fiscal_execucao: "",
@@ -532,6 +539,7 @@ const LotesManager = () => {
               <TableRow>
                 <TableHead>Número</TableHead>
                 <TableHead>Empresa</TableHead>
+                <TableHead>Unidade/Localidade</TableHead>
                 <TableHead>Contrato</TableHead>
                 <TableHead>Rodovias</TableHead>
                 <TableHead className="w-24">Ações</TableHead>
@@ -541,6 +549,13 @@ const LotesManager = () => {
               {lotes.map(lote => <TableRow key={lote.id}>
                   <TableCell className="font-medium">{lote.numero}</TableCell>
                   <TableCell>{lote.empresas?.nome || "-"}</TableCell>
+                  <TableCell>
+                    {lote.unidade_administrativa ? (
+                      <Badge variant="outline">{lote.unidade_administrativa}</Badge>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
                   <TableCell>{lote.contrato || "-"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
@@ -564,7 +579,7 @@ const LotesManager = () => {
                   </TableCell>
                 </TableRow>)}
               {lotes.length === 0 && <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     Nenhum lote cadastrado
                   </TableCell>
                 </TableRow>}
@@ -583,81 +598,125 @@ const LotesManager = () => {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleUpdate} className="space-y-6">
-            {/* Dados básicos do lote */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-numero">Número do Lote *</Label>
-                <Input id="edit-numero" value={formData.numero} onChange={e => setFormData({
-                ...formData,
-                numero: e.target.value
-              })} placeholder="Ex: 01" required />
-              </div>
+            {/* Card 1: Informações Administrativas */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Informações Administrativas</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Grid 3 colunas: Número | Unidade/Localidade | Contrato */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-numero">Número do Lote *</Label>
+                    <Input
+                      id="edit-numero"
+                      value={formData.numero}
+                      onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
+                      placeholder="Ex: 01"
+                      required
+                    />
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-contrato">Número do Contrato</Label>
-                <Input id="edit-contrato" value={formData.contrato} onChange={e => setFormData({
-                ...formData,
-                contrato: e.target.value
-              })} placeholder="Ex: 123/2024" />
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-unidade_administrativa">Unidade/Localidade *</Label>
+                    <Input
+                      id="edit-unidade_administrativa"
+                      value={formData.unidade_administrativa}
+                      onChange={(e) => setFormData({ ...formData, unidade_administrativa: e.target.value })}
+                      placeholder="Ex: UL Caxambu, SR Belo Horizonte"
+                      required
+                    />
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-empresa">Empresa Executora *</Label>
-                <Select 
-                  value={formData.empresa_id} 
-                  onValueChange={value => setFormData({
-                    ...formData,
-                    empresa_id: value
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a empresa" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {empresas.map(empresa => (
-                      <SelectItem key={empresa.id} value={empresa.id}>
-                        {empresa.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-contrato">Número do Contrato</Label>
+                    <Input
+                      id="edit-contrato"
+                      value={formData.contrato}
+                      onChange={(e) => setFormData({ ...formData, contrato: e.target.value })}
+                      placeholder="Ex: 123/2024"
+                    />
+                  </div>
+                </div>
 
-            {/* Informações de Contatos */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-responsavel_executora">Responsável da Executora</Label>
-                <Input id="edit-responsavel_executora" value={formData.responsavel_executora} onChange={e => setFormData({
-                ...formData,
-                responsavel_executora: e.target.value
-              })} placeholder="Nome do responsável" />
-              </div>
+                {/* Grid 2 colunas: Fiscal | Email Fiscal */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-nome_fiscal_execucao">Nome do Fiscal de Execução (UL)</Label>
+                    <Input
+                      id="edit-nome_fiscal_execucao"
+                      value={formData.nome_fiscal_execucao}
+                      onChange={(e) => setFormData({ ...formData, nome_fiscal_execucao: e.target.value })}
+                      placeholder="Nome do fiscal responsável"
+                    />
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-email_executora">E-mail da Executora</Label>
-                <Input id="edit-email_executora" type="email" value={formData.email_executora} onChange={e => setFormData({
-                ...formData,
-                email_executora: e.target.value
-              })} placeholder="email@executora.com" />
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-email_fiscal_execucao">E-mail do Fiscal de Execução</Label>
+                    <Input
+                      id="edit-email_fiscal_execucao"
+                      type="email"
+                      value={formData.email_fiscal_execucao}
+                      onChange={(e) => setFormData({ ...formData, email_fiscal_execucao: e.target.value })}
+                      placeholder="fiscal@dnit.gov.br"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-nome_fiscal_execucao">Nome do Fiscal de Execução (UL)</Label>
-                <Input id="edit-nome_fiscal_execucao" value={formData.nome_fiscal_execucao} onChange={e => setFormData({
-                ...formData,
-                nome_fiscal_execucao: e.target.value
-              })} placeholder="Nome do fiscal" />
-              </div>
+            {/* Card 2: Empresa Executora */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Empresa Executora</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Empresa (linha inteira) */}
+                <div className="space-y-2">
+                  <Label htmlFor="edit-empresa">Empresa Executora *</Label>
+                  <Select
+                    value={formData.empresa_id}
+                    onValueChange={(value) => setFormData({ ...formData, empresa_id: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a empresa executora" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {empresas.map((empresa) => (
+                        <SelectItem key={empresa.id} value={empresa.id}>
+                          {empresa.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-email_fiscal_execucao">E-mail do Fiscal de Execução</Label>
-                <Input id="edit-email_fiscal_execucao" type="email" value={formData.email_fiscal_execucao} onChange={e => setFormData({
-                ...formData,
-                email_fiscal_execucao: e.target.value
-              })} placeholder="email@fiscal.com" />
-              </div>
-            </div>
+                {/* Grid 2 colunas: Responsável | Email */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-responsavel_executora">Nome do Responsável da Executora</Label>
+                    <Input
+                      id="edit-responsavel_executora"
+                      value={formData.responsavel_executora}
+                      onChange={(e) => setFormData({ ...formData, responsavel_executora: e.target.value })}
+                      placeholder="Nome do responsável técnico"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-email_executora">E-mail do Responsável</Label>
+                    <Input
+                      id="edit-email_executora"
+                      type="email"
+                      value={formData.email_executora}
+                      onChange={(e) => setFormData({ ...formData, email_executora: e.target.value })}
+                      placeholder="responsavel@empresa.com"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Adicionar rodovias */}
             <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
