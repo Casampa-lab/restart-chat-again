@@ -57,14 +57,19 @@ const CoordenacaoFiscalizacao = () => {
         const config = getConfig(grupo);
         const {
           count
-        } = await supabase.from(config.tabelaNecessidades as any).select("*", {
-          count: "exact",
-          head: true
-        })
-        .eq("divergencia", true)
-        .eq("status_reconciliacao", "pendente_aprovacao")
-        .eq("lote_id", activeSession.lote_id)
-        .eq("rodovia_id", activeSession.rodovia_id);
+        } = await supabase
+          .from(config.tabelaNecessidades as any)
+          .select(`
+            id,
+            reconciliacao:reconciliacoes!inner(status)
+          `, {
+            count: "exact",
+            head: true
+          })
+          .eq("divergencia", true)
+          .eq("reconciliacao.status", "pendente_aprovacao")
+          .eq("lote_id", activeSession.lote_id)
+          .eq("rodovia_id", activeSession.rodovia_id);
         totalDivergencias += count || 0;
       }
       return totalDivergencias;

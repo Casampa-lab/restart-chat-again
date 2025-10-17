@@ -283,11 +283,14 @@ const Index = () => {
         const config = getConfig(grupo);
         const { count } = await supabase
           .from(config.tabelaNecessidades as any)
-          .select("*", { count: "exact", head: true })
+          .select(`
+            id,
+            reconciliacao:reconciliacoes!inner(status)
+          `, { count: "exact", head: true })
           .eq("lote_id", activeSession.lote_id)
           .eq("rodovia_id", activeSession.rodovia_id)
           .eq("divergencia", true)
-          .eq("status_reconciliacao", "pendente_aprovacao");
+          .eq("reconciliacao.status", "pendente_aprovacao");
         totalDivergencias += (count || 0);
       }
       return totalDivergencias;
