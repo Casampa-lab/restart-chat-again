@@ -213,13 +213,23 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
     }
   };
 
-  const handleRefreshContadores = () => {
-    queryClient.invalidateQueries({ 
+  const handleRefreshContadores = async () => {
+    // Invalidar TODAS as queries relacionadas a contagens
+    await queryClient.invalidateQueries({ 
       queryKey: ["estatisticas-gerais", activeSession.lote_id, activeSession.rodovia_id] 
     });
-    queryClient.invalidateQueries({
+    await queryClient.invalidateQueries({
       queryKey: ["divergencias"]
     });
+    await queryClient.invalidateQueries({
+      queryKey: ["count-divergencias-coordenacao", activeSession.lote_id, activeSession.rodovia_id]
+    });
+    
+    // Refetch imediato para garantir dados atualizados
+    await queryClient.refetchQueries({ 
+      queryKey: ["estatisticas-gerais", activeSession.lote_id, activeSession.rodovia_id] 
+    });
+    
     toast({ title: "✅ Contadores atualizados" });
   };
 

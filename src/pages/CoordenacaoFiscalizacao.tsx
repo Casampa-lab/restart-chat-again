@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkSession } from "@/hooks/useWorkSession";
 import { supabase } from "@/integrations/supabase/client";
+import { getConfig, type GrupoElemento } from "@/lib/reconciliacaoConfig";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,12 +49,15 @@ const CoordenacaoFiscalizacao = () => {
     queryFn: async () => {
       if (!activeSession) return 0;
       
-      const grupos = ['necessidades_placas', 'necessidades_defensas', 'necessidades_porticos', 'necessidades_marcas_longitudinais', 'necessidades_marcas_transversais', 'necessidades_cilindros', 'necessidades_tachas'];
+      // Usar grupos lógicos padronizados (mesma lógica de ReconciliacaoUniversal)
+      const gruposElementos: GrupoElemento[] = ['placas', 'defensas', 'porticos', 'marcas_longitudinais', 'inscricoes', 'cilindros', 'tachas'];
       let totalDivergencias = 0;
-      for (const tabela of grupos) {
+      
+      for (const grupo of gruposElementos) {
+        const config = getConfig(grupo);
         const {
           count
-        } = await supabase.from(tabela as any).select("*", {
+        } = await supabase.from(config.tabelaNecessidades as any).select("*", {
           count: "exact",
           head: true
         })
@@ -66,7 +70,9 @@ const CoordenacaoFiscalizacao = () => {
       return totalDivergencias;
     },
     enabled: !!user && !!activeSession,
-    refetchInterval: 30000
+    refetchInterval: 30000,
+    staleTime: 0,
+    gcTime: 0
   });
 
   // Contador de intervenções pendentes de aprovação
