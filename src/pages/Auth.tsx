@@ -26,13 +26,25 @@ const Auth = () => {
   }, []);
   useEffect(() => {
     const checkSession = async () => {
-      const {
-        data: {
-          session
+      const startTime = Date.now();
+      console.log('[Auth] Verificando sessão existente...');
+      
+      try {
+        const {
+          data: {
+            session
+          }
+        } = await supabase.auth.getSession();
+        
+        console.log(`[Auth] Sessão verificada em ${Date.now() - startTime}ms`, { hasSession: !!session });
+        
+        if (session) {
+          navigate("/");
         }
-      } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/");
+      } catch (error) {
+        console.error('[Auth] Erro ao verificar sessão:', error);
+        // Limpar tokens corrompidos
+        localStorage.removeItem('sb-cfdnrbyeuqtrjzzjyuon-auth-token');
       }
     };
     checkSession();
@@ -43,22 +55,14 @@ const Auth = () => {
         subscription
       }
     } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[Auth] Estado de autenticação mudou:', event);
+      
       if (event === 'SIGNED_IN' && session) {
         navigate("/");
       }
       // SIGNED_OUT não precisa fazer nada - usuário já está em /auth
     });
 
-    // Inicializar admin na primeira vez
-    const initAdmin = async () => {
-      try {
-        await supabase.functions.invoke('init-admin');
-      } catch (error) {
-        // Silenciar erro - admin pode já existir
-        console.log('Admin initialization:', error);
-      }
-    };
-    initAdmin();
     return () => {
       subscription.unsubscribe();
     };
@@ -66,22 +70,42 @@ const Auth = () => {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
+    const startTime = Date.now();
+    console.log(`[Auth] Iniciando ${isLogin ? 'login' : 'cadastro'}...`);
+    
+    // Timeout de 10 segundos
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout: Operação demorou mais de 10 segundos')), 10000)
+    );
+    
     try {
       if (isLogin) {
-        const {
-          error
-        } = await supabase.auth.signInWithPassword({
+        console.log('[Auth] Tentando login...');
+        const loginPromise = supabase.auth.signInWithPassword({
           email,
           password
         });
-        if (error) throw error;
+        
+        const { error } = await Promise.race([loginPromise, timeoutPromise]) as any;
+        
+        if (error) {
+          console.error('[Auth] Erro no login:', error);
+          // Limpar tokens corrompidos em caso de erro
+          if (error.message?.includes('Invalid') || error.message?.includes('refresh_token')) {
+            console.log('[Auth] Limpando tokens corrompidos...');
+            localStorage.removeItem('sb-cfdnrbyeuqtrjzzjyuon-auth-token');
+          }
+          throw error;
+        }
+        
+        console.log(`[Auth] Login bem-sucedido em ${Date.now() - startTime}ms`);
         localStorage.setItem("lastEmail", email);
         toast.success("Login realizado com sucesso!");
         navigate("/");
       } else {
-        const {
-          error
-        } = await supabase.auth.signUp({
+        console.log('[Auth] Tentando cadastro...');
+        const signupPromise = supabase.auth.signUp({
           email,
           password,
           options: {
@@ -92,13 +116,27 @@ const Auth = () => {
             }
           }
         });
-        if (error) throw error;
+        
+        const { error } = await Promise.race([signupPromise, timeoutPromise]) as any;
+        
+        if (error) {
+          console.error('[Auth] Erro no cadastro:', error);
+          throw error;
+        }
+        
+        console.log(`[Auth] Cadastro bem-sucedido em ${Date.now() - startTime}ms`);
         localStorage.setItem("lastEmail", email);
         toast.success("Conta criada! Faça login para continuar.");
         setIsLogin(true);
       }
     } catch (error: any) {
-      toast.error(error.message || "Erro ao autenticar");
+      console.error(`[Auth] Erro após ${Date.now() - startTime}ms:`, error);
+      
+      if (error.message?.includes('Timeout')) {
+        toast.error("A operação está demorando muito. Tente novamente.");
+      } else {
+        toast.error(error.message || "Erro ao autenticar");
+      }
     } finally {
       setLoading(false);
     }
