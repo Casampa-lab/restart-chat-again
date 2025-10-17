@@ -1114,8 +1114,8 @@ export function NecessidadesImporter() {
             mensagem: `${icon} ${servicoFinal}${matchInfo}${divIcon}${divergencia ? ` Projeto: ${solucaoPlanilhaNormalizada} vs Sistema: ${servicoInferido}` : ""}`
           });
           
-          // Flush imediato na primeira linha para garantir visibilidade
-          if (i === 0) {
+          // Flush imediato nas primeiras 10 linhas para garantir visibilidade inicial
+          if (i < 10) {
             setLogs(prev => [...prev, ...logsBuffer]);
             logsBuffer.length = 0;
           } else if ((i + 1) % LOG_UPDATE_INTERVAL === 0) {
@@ -1195,8 +1195,8 @@ export function NecessidadesImporter() {
             mensagem: mensagemDetalhada
           });
           
-          // Flush imediato na primeira linha para garantir visibilidade
-          if (i === 0) {
+          // Flush imediato nas primeiras 10 linhas para garantir visibilidade inicial
+          if (i < 10) {
             setLogs(prev => [...prev, ...logsBuffer]);
             logsBuffer.length = 0;
           } else if ((i + 1) % LOG_UPDATE_INTERVAL === 0) {
