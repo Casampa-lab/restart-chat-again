@@ -232,13 +232,13 @@ export default function ElementosPendentes() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="cilindros">Cilindros</SelectItem>
+                  <SelectItem value="defensas">Defensas</SelectItem>
+                  <SelectItem value="inscricoes">Inscrições</SelectItem>
                   <SelectItem value="marcas_longitudinais">Marcas Longitudinais</SelectItem>
                   <SelectItem value="placas">Placas</SelectItem>
-                  <SelectItem value="tachas">Tachas</SelectItem>
-                  <SelectItem value="inscricoes">Inscrições</SelectItem>
-                  <SelectItem value="cilindros">Cilindros</SelectItem>
                   <SelectItem value="porticos">Pórticos</SelectItem>
-                  <SelectItem value="defensas">Defensas</SelectItem>
+                  <SelectItem value="tachas">Tachas</SelectItem>
                 </SelectContent>
               </Select>
             </div>

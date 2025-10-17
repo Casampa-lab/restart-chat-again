@@ -22,13 +22,13 @@ import { IntervencoesPorticosForm } from '@/components/IntervencoesPorticosForm'
 import { IntervencoesInscricoesForm } from '@/components/IntervencoesInscricoesForm';
 
 const TIPOS_ELEMENTOS = [
-  { value: 'placas', label: '🚦 Placa', component: IntervencoesSVForm },
-  { value: 'marcas_longitudinais', label: '➖ Marca SH', component: IntervencoesSHForm },
-  { value: 'tachas', label: '⚪ Tacha', component: IntervencoesTachaForm },
-  { value: 'defensas', label: '🛡️ Defensa', component: DefensasIntervencoesForm },
   { value: 'cilindros', label: '🔵 Cilindro', component: IntervencoesCilindrosForm },
-  { value: 'porticos', label: '🌉 Pórtico', component: IntervencoesPorticosForm },
+  { value: 'defensas', label: '🛡️ Defensa', component: DefensasIntervencoesForm },
   { value: 'inscricoes', label: '📝 Inscrição', component: IntervencoesInscricoesForm },
+  { value: 'marcas_longitudinais', label: '➖ Marca SH', component: IntervencoesSHForm },
+  { value: 'placas', label: '🚦 Placa', component: IntervencoesSVForm },
+  { value: 'porticos', label: '🌉 Pórtico', component: IntervencoesPorticosForm },
+  { value: 'tachas', label: '⚪ Tacha', component: IntervencoesTachaForm },
 ];
 
 export default function RegistrarIntervencaoCampo() {
