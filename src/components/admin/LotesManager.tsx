@@ -315,210 +315,255 @@ const LotesManager = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Dados básicos do lote */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="numero">Número do Lote *</Label>
-                <Input id="numero" value={formData.numero} onChange={e => setFormData({
-                ...formData,
-                numero: e.target.value
-              })} placeholder="Ex: 01" required />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="empresa">Empresa *</Label>
-                <Select value={formData.empresa_id} onValueChange={value => setFormData({
-                ...formData,
-                empresa_id: value
-              })} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a empresa" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {empresas.map(empresa => <SelectItem key={empresa.id} value={empresa.id}>
-                        {empresa.nome}
-                      </SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contrato">Número do Contrato</Label>
-                <Input id="contrato" value={formData.contrato} onChange={e => setFormData({
-                ...formData,
-                contrato: e.target.value
-              })} placeholder="Ex: 123/2024" />
-              </div>
-            </div>
-
-            {/* Informações de Contatos */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="responsavel_executora">Nome do Responsável da Executora</Label>
-                <Input id="responsavel_executora" value={formData.responsavel_executora} onChange={e => setFormData({
-                ...formData,
-                responsavel_executora: e.target.value
-              })} placeholder="Nome do responsável" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email_executora">E-mail da Executora</Label>
-                <Input id="email_executora" type="email" value={formData.email_executora} onChange={e => setFormData({
-                ...formData,
-                email_executora: e.target.value
-              })} placeholder="email@executora.com" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="nome_fiscal_execucao">Nome do Fiscal de Execução (UL)</Label>
-                <Input id="nome_fiscal_execucao" value={formData.nome_fiscal_execucao} onChange={e => setFormData({
-                ...formData,
-                nome_fiscal_execucao: e.target.value
-              })} placeholder="Nome do fiscal" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email_fiscal_execucao">E-mail do Fiscal de Execução</Label>
-                <Input id="email_fiscal_execucao" type="email" value={formData.email_fiscal_execucao} onChange={e => setFormData({
-                ...formData,
-                email_fiscal_execucao: e.target.value
-              })} placeholder="email@fiscal.com" />
-              </div>
-            </div>
-
-            {/* Adicionar rodovias */}
-            <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
-              <Label className="text-base font-semibold flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Rodovias do Lote
-              </Label>
-
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="rodovia">Rodovia</Label>
-                    <Select value={novaRodovia.rodovia_id} onValueChange={value => setNovaRodovia({
-                    ...novaRodovia,
-                    rodovia_id: value
-                  })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {rodovias.filter(r => !rodoviasVinculadas.find(rv => rv.rodovia_id === r.id)).map(rodovia => <SelectItem key={rodovia.id} value={rodovia.id}>
-                              {rodovia.codigo}
-                            </SelectItem>)}
-                      </SelectContent>
-                    </Select>
+            {/* Card 1: Informações Administrativas */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Informações Administrativas</CardTitle>
+                <CardDescription>Dados da Unidade Local e Fiscalização</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="numero">Número do Lote *</Label>
+                    <Input
+                      id="numero"
+                      value={formData.numero}
+                      onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
+                      placeholder="Ex: 01"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="unidade_administrativa">Unidade/Localidade *</Label>
+                    <Input
+                      id="unidade_administrativa"
+                      placeholder="Ex: UL-BA, DNIT/CE, etc."
+                      value={formData.unidade_administrativa}
+                      onChange={(e) => setFormData({ ...formData, unidade_administrativa: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contrato">Número do Contrato</Label>
+                    <Input
+                      id="contrato"
+                      value={formData.contrato}
+                      onChange={(e) => setFormData({ ...formData, contrato: e.target.value })}
+                      placeholder="Ex: 123/2024"
+                    />
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* KM Inicial e Coordenadas */}
-                  <div className="space-y-3 p-3 border rounded-lg bg-background/50">
-                    <Label className="text-sm font-semibold">KM Inicial</Label>
-                    <div className="space-y-2">
-                      <Input type="number" step="0.001" value={novaRodovia.km_inicial} onChange={e => setNovaRodovia({
-                      ...novaRodovia,
-                      km_inicial: e.target.value
-                    })} placeholder="0.000" />
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input type="number" step="0.000001" value={novaRodovia.latitude_inicial} onChange={e => setNovaRodovia({
-                        ...novaRodovia,
-                        latitude_inicial: e.target.value
-                      })} placeholder="Latitude" />
-                        <Input type="number" step="0.000001" value={novaRodovia.longitude_inicial} onChange={e => setNovaRodovia({
-                        ...novaRodovia,
-                        longitude_inicial: e.target.value
-                      })} placeholder="Longitude" />
-                      </div>
-                      <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => {
-                      if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(position => {
-                          setNovaRodovia({
-                            ...novaRodovia,
-                            latitude_inicial: position.coords.latitude.toString(),
-                            longitude_inicial: position.coords.longitude.toString()
-                          });
-                          toast.success("Localização capturada!");
-                        }, error => {
-                          toast.error("Erro ao capturar localização: " + error.message);
-                        });
-                      } else {
-                        toast.error("Geolocalização não suportada");
-                      }
-                    }}>
-                        <Navigation className="mr-2 h-3 w-3" />
-                        Capturar GPS
-                      </Button>
-                    </div>
+                  <div>
+                    <Label htmlFor="nome_fiscal_execucao">Nome do Fiscal de Execução (UL)</Label>
+                    <Input
+                      id="nome_fiscal_execucao"
+                      value={formData.nome_fiscal_execucao}
+                      onChange={(e) => setFormData({ ...formData, nome_fiscal_execucao: e.target.value })}
+                      placeholder="Nome do fiscal"
+                    />
                   </div>
-
-                  {/* KM Final e Coordenadas */}
-                  <div className="space-y-3 p-3 border rounded-lg bg-background/50">
-                    <Label className="text-sm font-semibold">KM Final</Label>
-                    <div className="space-y-2">
-                      <Input type="number" step="0.001" value={novaRodovia.km_final} onChange={e => setNovaRodovia({
-                      ...novaRodovia,
-                      km_final: e.target.value
-                    })} placeholder="200.000" />
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input type="number" step="0.000001" value={novaRodovia.latitude_final} onChange={e => setNovaRodovia({
-                        ...novaRodovia,
-                        latitude_final: e.target.value
-                      })} placeholder="Latitude" />
-                        <Input type="number" step="0.000001" value={novaRodovia.longitude_final} onChange={e => setNovaRodovia({
-                        ...novaRodovia,
-                        longitude_final: e.target.value
-                      })} placeholder="Longitude" />
-                      </div>
-                      <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => {
-                      if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(position => {
-                          setNovaRodovia({
-                            ...novaRodovia,
-                            latitude_final: position.coords.latitude.toString(),
-                            longitude_final: position.coords.longitude.toString()
-                          });
-                          toast.success("Localização capturada!");
-                        }, error => {
-                          toast.error("Erro ao capturar localização: " + error.message);
-                        });
-                      } else {
-                        toast.error("Geolocalização não suportada");
-                      }
-                    }}>
-                        <Navigation className="mr-2 h-3 w-3" />
-                        Capturar GPS
-                      </Button>
-                    </div>
+                  <div>
+                    <Label htmlFor="email_fiscal_execucao">E-mail do Fiscal de Execução</Label>
+                    <Input
+                      id="email_fiscal_execucao"
+                      type="email"
+                      value={formData.email_fiscal_execucao}
+                      onChange={(e) => setFormData({ ...formData, email_fiscal_execucao: e.target.value })}
+                      placeholder="email@fiscal.com"
+                    />
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                <Button type="button" onClick={adicionarRodovia} variant="outline" className="w-full">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Adicionar Rodovia ao Lote
-                </Button>
-              </div>
-
-              {/* Lista de rodovias adicionadas */}
-              {rodoviasVinculadas.length > 0 && <div className="space-y-2">
-                  <Label className="text-sm">Rodovias Adicionadas:</Label>
-                  <div className="space-y-2">
-                    {rodoviasVinculadas.map(rodovia => <div key={rodovia.rodovia_id} className="flex items-center justify-between p-3 bg-background rounded border">
-                        <div className="flex items-center gap-4">
-                          <Badge variant="outline">{rodovia.codigo}</Badge>
-                          <span className="text-sm text-muted-foreground">
-                            km {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}
-                          </span>
-                        </div>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => removerRodovia(rodovia.rodovia_id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>)}
+            {/* Card 2: Empresa Executora */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Empresa Executora</CardTitle>
+                <CardDescription>Dados da empresa responsável pela execução</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="empresa_id">Empresa Executora *</Label>
+                  <Select
+                    value={formData.empresa_id}
+                    onValueChange={(value) => setFormData({ ...formData, empresa_id: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a empresa" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {empresas.map((empresa) => (
+                        <SelectItem key={empresa.id} value={empresa.id}>
+                          {empresa.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="responsavel_executora">Nome do Responsável da Executora</Label>
+                    <Input
+                      id="responsavel_executora"
+                      value={formData.responsavel_executora}
+                      onChange={(e) => setFormData({ ...formData, responsavel_executora: e.target.value })}
+                      placeholder="Nome do responsável"
+                    />
                   </div>
-                </div>}
-            </div>
+                  <div>
+                    <Label htmlFor="email_executora">E-mail do Responsável</Label>
+                    <Input
+                      id="email_executora"
+                      type="email"
+                      value={formData.email_executora}
+                      onChange={(e) => setFormData({ ...formData, email_executora: e.target.value })}
+                      placeholder="email@executora.com"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card 3: Rodovias */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Rodovias do Lote
+                </CardTitle>
+                <CardDescription>Adicione as rodovias e seus trechos (km inicial e final)</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="rodovia">Rodovia</Label>
+                      <Select value={novaRodovia.rodovia_id} onValueChange={value => setNovaRodovia({
+                      ...novaRodovia,
+                      rodovia_id: value
+                    })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {rodovias.filter(r => !rodoviasVinculadas.find(rv => rv.rodovia_id === r.id)).map(rodovia => <SelectItem key={rodovia.id} value={rodovia.id}>
+                                {rodovia.codigo}
+                              </SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* KM Inicial e Coordenadas */}
+                    <div className="space-y-3 p-3 border rounded-lg bg-background/50">
+                      <Label className="text-sm font-semibold">KM Inicial</Label>
+                      <div className="space-y-2">
+                        <Input type="number" step="0.001" value={novaRodovia.km_inicial} onChange={e => setNovaRodovia({
+                        ...novaRodovia,
+                        km_inicial: e.target.value
+                      })} placeholder="0.000" />
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input type="number" step="0.000001" value={novaRodovia.latitude_inicial} onChange={e => setNovaRodovia({
+                          ...novaRodovia,
+                          latitude_inicial: e.target.value
+                        })} placeholder="Latitude" />
+                          <Input type="number" step="0.000001" value={novaRodovia.longitude_inicial} onChange={e => setNovaRodovia({
+                          ...novaRodovia,
+                          longitude_inicial: e.target.value
+                        })} placeholder="Longitude" />
+                        </div>
+                        <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => {
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition(position => {
+                            setNovaRodovia({
+                              ...novaRodovia,
+                              latitude_inicial: position.coords.latitude.toString(),
+                              longitude_inicial: position.coords.longitude.toString()
+                            });
+                            toast.success("Localização capturada!");
+                          }, error => {
+                            toast.error("Erro ao capturar localização: " + error.message);
+                          });
+                        } else {
+                          toast.error("Geolocalização não suportada");
+                        }
+                      }}>
+                          <Navigation className="mr-2 h-3 w-3" />
+                          Capturar GPS
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* KM Final e Coordenadas */}
+                    <div className="space-y-3 p-3 border rounded-lg bg-background/50">
+                      <Label className="text-sm font-semibold">KM Final</Label>
+                      <div className="space-y-2">
+                        <Input type="number" step="0.001" value={novaRodovia.km_final} onChange={e => setNovaRodovia({
+                        ...novaRodovia,
+                        km_final: e.target.value
+                      })} placeholder="200.000" />
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input type="number" step="0.000001" value={novaRodovia.latitude_final} onChange={e => setNovaRodovia({
+                          ...novaRodovia,
+                          latitude_final: e.target.value
+                        })} placeholder="Latitude" />
+                          <Input type="number" step="0.000001" value={novaRodovia.longitude_final} onChange={e => setNovaRodovia({
+                          ...novaRodovia,
+                          longitude_final: e.target.value
+                        })} placeholder="Longitude" />
+                        </div>
+                        <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => {
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition(position => {
+                            setNovaRodovia({
+                              ...novaRodovia,
+                              latitude_final: position.coords.latitude.toString(),
+                              longitude_final: position.coords.longitude.toString()
+                            });
+                            toast.success("Localização capturada!");
+                          }, error => {
+                            toast.error("Erro ao capturar localização: " + error.message);
+                          });
+                        } else {
+                          toast.error("Geolocalização não suportada");
+                        }
+                      }}>
+                          <Navigation className="mr-2 h-3 w-3" />
+                          Capturar GPS
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button type="button" onClick={adicionarRodovia} variant="outline" className="w-full">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Adicionar Rodovia ao Lote
+                  </Button>
+                </div>
+
+                {/* Lista de rodovias adicionadas */}
+                {rodoviasVinculadas.length > 0 && <div className="space-y-2">
+                    <Label className="text-sm">Rodovias Adicionadas:</Label>
+                    <div className="space-y-2">
+                      {rodoviasVinculadas.map(rodovia => <div key={rodovia.rodovia_id} className="flex items-center justify-between p-3 bg-background rounded border">
+                          <div className="flex items-center gap-4">
+                            <Badge variant="outline">{rodovia.codigo}</Badge>
+                            <span className="text-sm text-muted-foreground">
+                              km {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}
+                            </span>
+                          </div>
+                          <Button type="button" variant="ghost" size="sm" onClick={() => removerRodovia(rodovia.rodovia_id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>)}
+                    </div>
+                  </div>}
+              </CardContent>
+            </Card>
 
             <Button type="submit" disabled={loading} size="lg">
               <Plus className="mr-2 h-5 w-5" />
