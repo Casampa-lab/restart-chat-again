@@ -414,8 +414,8 @@ const RodoviasManager = () => {
         <CardHeader>
           <CardTitle>Rodovias Cadastradas</CardTitle>
           <CardDescription>
-            KMs específicos são configurados ao vincular rodovia ao lote. 
-            Tolerâncias GPS são aplicadas apenas em novas importações de necessidades.
+            kms específicos são configurados ao vincular rodovia ao lote. 
+            Novas distâncias de tolerâncias GPS são aplicadas apenas em novas importações de projeto na aba Projetos.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -430,18 +430,18 @@ const RodoviasManager = () => {
               {rodovias.map((rodovia) => (
                 <TableRow key={rodovia.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-4 flex-wrap">
                       <span className="font-medium whitespace-nowrap">
-                        {rodovia.codigo} ({rodovia.uf || "N/A"})
+                        {rodovia.codigo}/{rodovia.uf || "N/A"}
                       </span>
                       <span className="text-muted-foreground">•</span>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-2">
                         {TOLERANCIA_CONFIG.map((config) => {
                           const valor = rodovia[config.key as keyof Rodovia] || config.default;
                           return (
                             <div 
                               key={config.key} 
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted text-xs"
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-muted text-xs"
                             >
                               <span>{config.icon}</span>
                               <span>{valor}m</span>
