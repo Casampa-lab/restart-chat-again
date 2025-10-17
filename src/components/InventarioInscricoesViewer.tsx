@@ -12,11 +12,53 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 import { toast } from "sonner";
+
+// Component to show reconciliation status badge
+function StatusReconciliacaoBadge({ status }: { status: string | null }) {
+  if (!status) return null;
+
+  const config = {
+    pendente_aprovacao: {
+      color: "bg-yellow-100 text-yellow-800 border-yellow-300",
+      icon: "🟡",
+      label: "Aguardando Coordenação"
+    },
+    aprovado: {
+      color: "bg-green-100 text-green-800 border-green-300",
+      icon: "🟢",
+      label: "Substituição Aprovada"
+    },
+    rejeitado: {
+      color: "bg-red-100 text-red-800 border-red-300",
+      icon: "🔴",
+      label: "Mantido como Implantação"
+    }
+  };
+
+  const item = config[status as keyof typeof config];
+  if (!item) return null;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge className={`${item.color} text-xs border`}>
+            {item.icon}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-xs">{item.label}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 interface FichaInscricao {
   id: string;
@@ -120,7 +162,7 @@ export function InventarioInscricoesViewer({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_marcas_transversais")
-        .select("*")
+        .select("id, servico, servico_final, cadastro_id, distancia_match_metros, km_inicial, divergencia, reconciliado, status_reconciliacao, solucao_planilha, servico_inferido, solucao_confirmada, latitude_inicial, longitude_inicial")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null);
@@ -130,13 +172,20 @@ export function InventarioInscricoesViewer({
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
         const divergencia = nec.solucao_planilha && nec.servico_inferido && nec.solucao_planilha !== nec.servico_inferido;
-        map.set(nec.cadastro_id, { ...nec, divergencia });
+        map.set(nec.cadastro_id, { 
+          ...nec, 
+          divergencia,
+          servico: nec.servico_final || nec.servico, // Priorizar servico_final
+        });
       });
       
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
   });
+
+  // Contar TODAS as necessidades com match processados (não apenas divergências)
+  const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
   const divergenciasPendentes = Array.from(necessidadesMap?.values() || []).filter(
     (nec: any) => nec.divergencia && !nec.solucao_confirmada
@@ -295,8 +344,39 @@ export function InventarioInscricoesViewer({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Contador de Matches a Reconciliar */}
-          {divergenciasPendentes > 0 && (
+        {/* Banner de Status de Reconciliação */}
+        {totalMatchesProcessados > 0 && (
+          divergenciasPendentes === 0 ? (
+            // Banner VERDE - Tudo OK
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500/20 border border-green-500/40">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <div className="font-bold text-base flex items-center gap-2">
+                    <span className="text-2xl font-extrabold text-green-600">{totalMatchesProcessados}</span>
+                    <span>{totalMatchesProcessados === 1 ? 'item verificado' : 'itens verificados'}</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-0.5">
+                    ✅ Inventário OK - Projeto e Sistema em conformidade
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showOnlyDivergencias}
+                  onCheckedChange={setShowOnlyDivergencias}
+                  id="filtro-divergencias-inscricoes"
+                />
+                <Label htmlFor="filtro-divergencias-inscricoes" className="cursor-pointer text-sm font-medium">
+                  <Filter className="h-4 w-4 inline mr-1" />
+                  Apenas divergências
+                </Label>
+              </div>
+            </div>
+          ) : (
+            // Banner AMARELO - Com divergências
             <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
               <div className="flex items-center gap-4">
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
@@ -324,7 +404,8 @@ export function InventarioInscricoesViewer({
                 </Label>
               </div>
             </div>
-          )}
+          )
+        )}
 
           <div className="space-y-3">
             <div className="flex gap-2">
@@ -425,6 +506,7 @@ export function InventarioInscricoesViewer({
                         </div>
                       </TableHead>
                       <TableHead className="text-center">Projeto</TableHead>
+                      <TableHead className="text-center">Status</TableHead>
                       <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -452,34 +534,59 @@ export function InventarioInscricoesViewer({
                           <TableCell>{inscricao.area_m2?.toFixed(2) || "-"}</TableCell>
                           <TableCell className="text-center">
                             {(() => {
-                              const nec = necessidadesMap?.get(inscricao.id);
-                              if (!nec) return "-";
-                              
-                              return (
-                                <div
-                                  className="cursor-pointer"
-                                  onClick={() => {
-                                    setSelectedNecessidade(nec);
-                                    setSelectedCadastroForReconciliacao(inscricao);
-                                    setReconciliacaoOpen(true);
+                              const necessidade = necessidadesMap?.get(inscricao.id);
+                              return necessidade ? (
+                                <NecessidadeBadge 
+                                  necessidade={{
+                                    id: necessidade.id,
+                                    servico: necessidade.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
+                                    distancia_match_metros: necessidade.distancia_match_metros || 0,
+                                    km: necessidade.km_inicial,
+                                    divergencia: necessidade.divergencia,
+                                    reconciliado: necessidade.solucao_confirmada,
+                                    solucao_planilha: necessidade.solucao_planilha,
+                                    servico_inferido: necessidade.servico_inferido,
                                   }}
-                                >
-                                  <NecessidadeBadge 
-                                    necessidade={{
-                                      id: nec.id,
-                                      servico: nec.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
-                                      distancia_match_metros: nec.distancia_match_metros || 0,
-                                      km: nec.km_inicial,
-                                      divergencia: nec.divergencia,
-                                      reconciliado: nec.solucao_confirmada,
-                                      solucao_planilha: nec.solucao_planilha,
-                                      servico_inferido: nec.servico_inferido,
-                                    }}
-                                    tipo="marcas_transversais" 
-                                  />
-                                </div>
+                                  tipo="marcas_transversais" 
+                                />
+                              ) : (
+                                <Badge variant="outline" className="text-muted-foreground text-xs">
+                                  Sem previsão
+                                </Badge>
                               );
                             })()}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex items-center gap-2 justify-center">
+                              {(() => {
+                                const necessidade = necessidadesMap?.get(inscricao.id);
+                                if (!necessidade) return null;
+                                
+                                return (
+                                  <>
+                                    <StatusReconciliacaoBadge 
+                                      status={necessidade.status_reconciliacao} 
+                                    />
+                                    {necessidade?.divergencia && !necessidade.solucao_confirmada && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setSelectedNecessidade(necessidade);
+                                          setSelectedCadastroForReconciliacao(inscricao);
+                                          setReconciliacaoOpen(true);
+                                        }}
+                                        className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
+                                      >
+                                        <AlertCircle className="h-4 w-4 mr-1" />
+                                        Verificar Match
+                                      </Button>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </div>
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
