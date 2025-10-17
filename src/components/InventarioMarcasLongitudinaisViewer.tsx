@@ -311,8 +311,8 @@ export function InventarioMarcasLongitudinaisViewer({
                 onClick={() => setShowRegistrarNaoCadastrado(true)}
                 className="gap-2"
               >
-                <Plus className="h-4 w-4" />
-                Item Não Cadastrado
+              <Plus className="h-4 w-4" />
+              + Item Novo
               </Button>
             </div>
           </div>

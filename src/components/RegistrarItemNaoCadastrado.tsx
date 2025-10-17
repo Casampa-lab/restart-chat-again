@@ -223,7 +223,7 @@ export function RegistrarItemNaoCadastrado({
     <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
-          <CardTitle>Registrar Item Não Cadastrado</CardTitle>
+          <CardTitle>Registrar Item Novo</CardTitle>
           <CardDescription>
             Tipo: {getTipoLabel()}
           </CardDescription>
