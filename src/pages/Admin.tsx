@@ -262,7 +262,6 @@ const Admin = () => {
               {/* Componentes com props compartilhadas */}
               <InventarioImporterManager loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
               <DeleteInventarioSelecionado loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
-              <RemoverDuplicatasInventario loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
               <LimparReconciliacoesOrfas />
             </div>
           </TabsContent>
@@ -363,6 +362,7 @@ const Admin = () => {
             <TabsContent value="sistema">
               <div className="space-y-6">
                 <LimparReconciliacoesInconsistentes />
+                <RemoverDuplicatasInventario />
                 <ResetDatabaseButton />
               </div>
             </TabsContent>
