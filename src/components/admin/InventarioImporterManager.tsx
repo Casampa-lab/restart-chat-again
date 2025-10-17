@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, FileSpreadsheet, Image, Loader2, AlertCircle } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import * as XLSX from "xlsx";
 import { useInventoryStatus, getStatusIndicator } from "@/hooks/useInventoryStatus";
@@ -28,6 +28,7 @@ const LOG_UPDATE_INTERVAL = 100; // Atualizar UI a cada 100 registros
 const BATCH_SIZE = 100; // Inserir 100 registros por vez no banco
 
 export function InventarioImporterManager() {
+  const queryClient = useQueryClient();
   const [inventoryType, setInventoryType] = useState<string>("");
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [photos, setPhotos] = useState<FileList | null>(null);
@@ -1089,6 +1090,11 @@ export function InventarioImporterManager() {
 
       setProgress("");
       toast.success(`Importação concluída! ${imported} registros importados${hasPhotos ? ` com ${photoArray.length} fotos` : ''}.`);
+
+      // Invalidar cache para atualizar o semáforo imediatamente
+      await queryClient.invalidateQueries({ 
+        queryKey: ["inventory-status", selectedLote, selectedRodovia] 
+      });
 
       // Limpar formulário
       setExcelFile(null);
