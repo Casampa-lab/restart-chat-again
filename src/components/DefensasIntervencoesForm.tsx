@@ -64,6 +64,9 @@ const MOTIVOS = [
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
+  km_inicial: z.string().min(1, "KM inicial é obrigatório"),
+  km_final: z.string().min(1, "KM final é obrigatório"),
+  lado: z.string().min(1, "Lado é obrigatório"),
   tipo_defensa: z.string().optional(),
   extensao_metros: z.string().optional(),
   tipo_avaria: z.string().optional(),
@@ -101,6 +104,9 @@ const DefensasIntervencoesForm = ({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       motivo: "",
+      km_inicial: "",
+      km_final: "",
+      lado: "",
       tipo_defensa: "",
       extensao_metros: "",
       tipo_avaria: "",
@@ -244,6 +250,57 @@ const DefensasIntervencoesForm = ({
                       {motivo}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="km_inicial"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>KM Inicial *</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.001" placeholder="0.000" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="km_final"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>KM Final *</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.001" placeholder="0.000" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="lado"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Lado *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o lado" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Direito">Direito</SelectItem>
+                  <SelectItem value="Esquerdo">Esquerdo</SelectItem>
+                  <SelectItem value="Central">Central</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

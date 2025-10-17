@@ -53,6 +53,8 @@ const TIPOS_DEMARCACAO = [
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
+  km_inicial: z.string().min(1, "KM inicial é obrigatório"),
+  km_final: z.string().min(1, "KM final é obrigatório"),
   tipo_demarcacao: z.string().optional(),
   cor: z.string().optional(),
   largura_cm: z.string().optional(),
@@ -80,6 +82,8 @@ const IntervencoesSHForm = ({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       motivo: "",
+      km_inicial: "",
+      km_final: "",
       tipo_demarcacao: "",
       cor: "",
       largura_cm: "",
@@ -230,6 +234,34 @@ const IntervencoesSHForm = ({
                         <SelectItem value="Manutenção">Manutenção</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="km_inicial"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>KM Inicial *</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.001" placeholder="0.000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="km_final"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>KM Final *</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.001" placeholder="0.000" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

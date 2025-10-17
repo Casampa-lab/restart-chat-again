@@ -13,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy, X, FileText } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import SessionSelector from "@/components/SessionSelector";
-import NaoConformidadeForm from "@/components/NaoConformidadeForm";
+import NaoConformidadeSimples from "@/components/NaoConformidadeSimples";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
 import RetrorrefletividadeEstaticaForm from "@/components/RetrorrefletividadeEstaticaForm";
 import RetrorrefletividadeDinamicaForm from "@/components/RetrorrefletividadeDinamicaForm";
@@ -591,7 +591,7 @@ const Index = () => {
                           Ver meus registros
                         </Button>
                       </div>
-                      <NaoConformidadeForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
+                      <NaoConformidadeSimples loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
                     </div>
                   </CardContent>
                 </Card>

@@ -15,6 +15,7 @@ import { Loader2, MapPin } from "lucide-react";
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
+  km: z.string().min(1, "KM é obrigatório"),
   tipo: z.string().optional(),
   altura_livre_m: z.string().optional(),
   vao_horizontal_m: z.string().optional(),
@@ -79,6 +80,7 @@ export function IntervencoesPorticosForm({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       motivo: "",
+      km: "",
       tipo: "",
       altura_livre_m: "",
       vao_horizontal_m: "",
@@ -210,6 +212,20 @@ export function IntervencoesPorticosForm({
                         <SelectItem value="Recuperação">Recuperação</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="km"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>KM *</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.001" placeholder="0.000" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
