@@ -410,7 +410,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                 className="gap-2"
               >
               <Plus className="h-4 w-4" />
-              + Item Novo
+              Item Novo
               </Button>
             </div>
           </div>
