@@ -63,7 +63,7 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
   try {
     const logoDNIT = '/logo-dnit.jpg';
     const dnitBase64 = await urlToBase64(logoDNIT);
-    doc.addImage(dnitBase64, 'JPEG', margin, yPos, 35, 12);
+    doc.addImage(dnitBase64, 'JPEG', margin, yPos, 30, 10);
   } catch (error) {
     console.error('Erro ao carregar logo DNIT:', error);
     doc.setFontSize(8);
