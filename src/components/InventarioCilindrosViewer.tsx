@@ -238,6 +238,15 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
   // Contar TODAS as necessidades com match (não apenas divergências)
   const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
+  // Debug: Log dos contadores
+  console.log('🔍 [CILINDROS] Debug Banner:', {
+    loteId,
+    rodoviaId,
+    necessidadesMapSize: necessidadesMap?.size,
+    totalMatchesProcessados,
+    matchesPendentes
+  });
+
   // Buscar cilindros do inventário
   const { data: cilindros, isLoading } = useQuery({
     queryKey: ["cilindros", loteId, rodoviaId, searchTerm, searchLat, searchLon],

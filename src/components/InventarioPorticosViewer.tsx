@@ -214,6 +214,15 @@ export function InventarioPorticosViewer({
     nec => nec.reconciliado !== true
   ).length;
 
+  // Debug: Log dos contadores
+  console.log('🔍 [PÓRTICOS] Debug Banner:', {
+    loteId,
+    rodoviaId,
+    necessidadesMapSize: necessidadesMap?.size,
+    totalMatchesProcessados,
+    matchesPendentes
+  });
+
   // Filtrar pórticos com matches pendentes se necessário
   const filteredPorticos = porticos?.filter(portico => {
     if (!showOnlyDivergencias) return true;

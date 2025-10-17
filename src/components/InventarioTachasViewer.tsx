@@ -220,6 +220,16 @@ export function InventarioTachasViewer({
   // Contar TODAS as necessidades com match (não apenas divergências)
   const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
+  // Debug: Log dos contadores
+  console.log('🔍 [TACHAS] Debug Banner:', {
+    loteId,
+    rodoviaId,
+    necessidadesMapSize: necessidadesMap?.size,
+    totalMatchesProcessados,
+    matchesPendentes,
+    necesssidadesArray: Array.from(necessidadesMap?.values() || [])
+  });
+
   const { data: tachas, isLoading } = useQuery({
     queryKey: ["inventario-tachas", loteId, rodoviaId, searchTerm, searchLat, searchLng],
     queryFn: async () => {

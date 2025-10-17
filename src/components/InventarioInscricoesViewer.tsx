@@ -191,6 +191,15 @@ export function InventarioInscricoesViewer({
     (nec: any) => !nec.solucao_confirmada
   ).length;
 
+  // Debug: Log dos contadores  
+  console.log('🔍 [INSCRIÇÕES] Debug Banner:', {
+    loteId,
+    rodoviaId,
+    necessidadesMapSize: necessidadesMap?.size,
+    totalMatchesProcessados,
+    matchesPendentes
+  });
+
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
     const φ1 = (lat1 * Math.PI) / 180;
