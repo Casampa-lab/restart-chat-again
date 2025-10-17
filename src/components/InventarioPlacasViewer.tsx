@@ -266,16 +266,16 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   // Contar TODAS as necessidades com match processados (não apenas divergências)
   const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
-  // Contar divergências pendentes
-  const divergenciasPendentes = Array.from(necessidadesMap?.values() || []).filter(
-    nec => nec.divergencia && !nec.reconciliado
+  // Contar matches pendentes de reconciliação
+  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter(
+    nec => !nec.reconciliado
   ).length;
 
-  // Filtrar placas com divergências se necessário
+  // Filtrar placas com matches pendentes se necessário
   const filteredPlacas = placas?.filter(placa => {
     if (!showOnlyDivergencias) return true;
     const nec = necessidadesMap?.get(placa.id);
-    return nec?.divergencia && !nec?.reconciliado;
+    return nec && !nec.reconciliado;
   }) || [];
 
   // Função para ordenar dados
@@ -419,7 +419,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
         <CardContent className="space-y-4">
           {/* Banner de Status de Reconciliação */}
           {totalMatchesProcessados > 0 && (
-            divergenciasPendentes === 0 ? (
+            matchesPendentes === 0 ? (
               // Banner VERDE - Tudo OK
               <div className="flex items-center justify-between p-4 bg-gradient-to-r from-success/20 to-success/10 border-2 border-success/40 rounded-lg shadow-sm">
                 <div className="flex items-center gap-4">
@@ -457,8 +457,8 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   </div>
                   <div>
                     <div className="font-bold text-base flex items-center gap-2">
-                      <span className="text-2xl font-extrabold text-warning">{divergenciasPendentes}</span>
-                      <span>{divergenciasPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
+                      <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
+                      <span>{matchesPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
                     </div>
                     <div className="text-sm text-muted-foreground mt-0.5">
                       🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária

@@ -187,8 +187,8 @@ export function InventarioInscricoesViewer({
   // Contar TODAS as necessidades com match processados (não apenas divergências)
   const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
-  const divergenciasPendentes = Array.from(necessidadesMap?.values() || []).filter(
-    (nec: any) => nec.divergencia && !nec.solucao_confirmada
+  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter(
+    (nec: any) => !nec.solucao_confirmada
   ).length;
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -261,7 +261,7 @@ export function InventarioInscricoesViewer({
   const filteredInscricoes = inscricoes?.filter(inscricao => {
     if (!showOnlyDivergencias) return true;
     const nec = necessidadesMap?.get(inscricao.id);
-    return nec?.divergencia;
+    return nec && !nec.solucao_confirmada;
   }) || [];
 
   // Função para ordenar dados
@@ -346,7 +346,7 @@ export function InventarioInscricoesViewer({
         <CardContent className="space-y-4">
         {/* Banner de Status de Reconciliação */}
         {totalMatchesProcessados > 0 && (
-          divergenciasPendentes === 0 ? (
+          matchesPendentes === 0 ? (
             // Banner VERDE - Tudo OK
             <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
               <div className="flex items-center gap-4">
@@ -383,10 +383,10 @@ export function InventarioInscricoesViewer({
                   <AlertCircle className="h-6 w-6 text-warning" />
                 </div>
                 <div>
-                  <div className="font-bold text-base flex items-center gap-2">
-                    <span className="text-2xl font-extrabold text-warning">{divergenciasPendentes}</span>
-                    <span>{divergenciasPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
-                  </div>
+                <div className="font-bold text-base flex items-center gap-2">
+                  <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
+                  <span>{matchesPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
+                </div>
                   <div className="text-sm text-muted-foreground mt-0.5">
                     🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
                   </div>

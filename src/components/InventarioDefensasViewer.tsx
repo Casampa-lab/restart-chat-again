@@ -204,9 +204,9 @@ export const InventarioDefensasViewer = ({
     gcTime: 0,
   });
 
-  // Contar divergências pendentes
-  const pendentesRevisao = Array.from(necessidadesMap?.values() || []).filter(
-    nec => nec.divergencia && !nec.reconciliado
+  // Contar matches pendentes de reconciliação
+  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter(
+    nec => !nec.reconciliado
   ).length;
 
   // Contar TODAS as necessidades com match (não apenas divergências)
@@ -281,7 +281,7 @@ export const InventarioDefensasViewer = ({
   const filteredDefensas = filteredByGps?.filter(defensa => {
     if (!showOnlyPendentes) return true;
     const nec = necessidadesMap?.get(defensa.id);
-    return nec?.divergencia && !nec?.reconciliado;
+    return nec && !nec.reconciliado;
   }) || [];
 
   const handleReconciliar = async () => {
@@ -365,7 +365,7 @@ export const InventarioDefensasViewer = ({
       </div>
 
       {totalMatchesProcessados > 0 && (
-        pendentesRevisao === 0 ? (
+        matchesPendentes === 0 ? (
           // Estado OK - Sem divergências
           <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
             <div className="flex items-center gap-4">
@@ -416,8 +416,8 @@ export const InventarioDefensasViewer = ({
               </div>
               <div>
                 <div className="font-bold text-base flex items-center gap-2">
-                  <span className="text-2xl font-extrabold text-warning">{pendentesRevisao}</span>
-                  <span>{pendentesRevisao === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
+                  <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
+                  <span>{matchesPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
                 </div>
                 <div className="text-sm text-muted-foreground mt-0.5">
                   🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
