@@ -24,7 +24,7 @@ const TIPOS_NECESSIDADES = [
 
 interface LogEntry {
   tipo: "success" | "warning" | "error";
-  linha: number;
+  linha: number | null;
   mensagem: string;
 }
 
@@ -37,6 +37,7 @@ export function NecessidadesImporter() {
   const [loteId, setLoteId] = useState<string>("");
   const [rodoviaId, setRodoviaId] = useState<string>("");
   const [progressInfo, setProgressInfo] = useState<{ current: number; total: number } | null>(null);
+  const [filtroLog, setFiltroLog] = useState<"todos" | "success" | "warning" | "error">("todos");
   const { toast } = useToast();
   const cancelImportRef = useRef(false);
 
@@ -815,9 +816,13 @@ export function NecessidadesImporter() {
         const row: any = dadosFiltrados[i];
         const linhaExcel = i + 3; // +3 pois Excel começa em 1, tem header, e pulamos a linha de cabeçalho duplicada
 
+        // Declarar variáveis fora do try para acessá-las no catch
+        let dados: any = null;
+        let dadosInsercao: any = null;
+
         try {
           // Mapear colunas
-          const dados = mapearColunas(row, tipo);
+          dados = mapearColunas(row, tipo);
 
           // ========== BIFURCAÇÃO: MATCH POR GPS (PLACAS) vs MATCH POR SOBREPOSIÇÃO (LINEARES) ==========
           
@@ -998,7 +1003,7 @@ export function NecessidadesImporter() {
             | "necessidades_defensas";
 
           // Preparar dados para inserção
-          const dadosInsercao: any = {
+          dadosInsercao = {
             user_id: user.id,
             lote_id: loteId,
             rodovia_id: rodoviaId,
@@ -1024,6 +1029,37 @@ export function NecessidadesImporter() {
               dadosInsercao.status_reconciliacao = status_reconciliacao;
             }
             dadosInsercao.motivo_revisao = motivo_revisao;
+          }
+
+          // 🔍 VALIDAÇÃO PREVENTIVA ANTES DA INSERÇÃO
+          const errosValidacao: string[] = [];
+          
+          // Validar serviço
+          if (!dadosInsercao.servico || !['Implantar', 'Substituir', 'Remover', 'Manter'].includes(dadosInsercao.servico)) {
+            errosValidacao.push(`Serviço inválido: "${dadosInsercao.servico}"`);
+          }
+          
+          // Validar extensão (tachas, marcas, defensas)
+          if (['tachas', 'marcas_longitudinais', 'defensas'].includes(tipo)) {
+            const campoExtensao = tipo === 'defensas' ? 'extensao_metros' : 'extensao_km';
+            if (dadosInsercao[campoExtensao] === 0) {
+              errosValidacao.push(`${campoExtensao} = 0`);
+            }
+          }
+          
+          // Validar quantidade (tachas, cilindros)
+          if (['tachas', 'cilindros'].includes(tipo) && dadosInsercao.quantidade === 0) {
+            errosValidacao.push(`Quantidade = 0`);
+          }
+          
+          // Se houver erros de validação, logar warning
+          if (errosValidacao.length > 0) {
+            console.warn(`⚠️ Linha ${linhaExcel} com problemas potenciais:`, errosValidacao);
+            logsBuffer.push({
+              tipo: "warning",
+              linha: linhaExcel,
+              mensagem: `⚠️ ATENÇÃO: ${errosValidacao.join(', ')} - Tentando inserir mesmo assim...`
+            });
           }
 
           // Validar e sanitizar campos numéricos antes de inserir
@@ -1087,18 +1123,73 @@ export function NecessidadesImporter() {
 
         } catch (error: any) {
           falhas++;
-          console.error(`❌ Erro linha ${linhaExcel}:`, error);
           
-          // Detectar erro de tipo numérico
+          // 🔍 LOG DETALHADO DA LINHA QUE FALHOU
+          const dadosDebug: any = {
+            linha_excel: linhaExcel,
+            codigo_erro: error.code,
+            mensagem_erro: error.message,
+            detalhes: error.details,
+            hint: error.hint
+          };
+          
+          // Adicionar dados se disponíveis (foram definidos antes do erro)
+          if (dados) {
+            dadosDebug.km_inicial = dados.km_inicial;
+            dadosDebug.km_final = dados.km_final;
+            dadosDebug.extensao_km = dados.extensao_km;
+            dadosDebug.extensao_metros = dados.extensao_metros;
+            dadosDebug.quantidade = dados.quantidade;
+          }
+          
+          if (dadosInsercao) {
+            dadosDebug.servico = dadosInsercao.servico;
+            dadosDebug.servico_final = dadosInsercao.servico_final;
+          }
+          
+          console.error(`❌ ERRO LINHA ${linhaExcel}:`, dadosDebug);
+          
+          // Detectar tipo de erro
           const erroNumerico = error.message?.includes('invalid input syntax for type numeric');
+          const erroConstraint = error.message?.includes('violates check constraint');
+          const erroNotNull = error.message?.includes('null value in column');
+          
+          // Construir mensagem detalhada
+          let mensagemDetalhada = '';
+          
+          if (erroNumerico) {
+            mensagemDetalhada = `❌ FALHA: Valor inválido em campo numérico. Verifique se há textos em colunas numéricas. `;
+          } else if (erroConstraint) {
+            mensagemDetalhada = `❌ FALHA: Violação de constraint (ex: serviço deve ser Implantar/Substituir/Remover/Manter). `;
+          } else if (erroNotNull) {
+            mensagemDetalhada = `❌ FALHA: Campo obrigatório vazio. `;
+          } else {
+            mensagemDetalhada = `❌ FALHA: `;
+          }
+          
+          // Adicionar informações de contexto se disponíveis
+          const contexto = [];
+          if (dados) {
+            if (dados.km_inicial !== undefined) contexto.push(`KM ${dados.km_inicial}-${dados.km_final}`);
+            if (dados.extensao_km !== undefined) contexto.push(`Ext: ${dados.extensao_km}km`);
+            if (dados.extensao_metros !== undefined) contexto.push(`Ext: ${dados.extensao_metros}m`);
+            if (dados.quantidade !== undefined) contexto.push(`Qtd: ${dados.quantidade}`);
+          }
+          
+          if (dadosInsercao && dadosInsercao.servico_final) {
+            contexto.push(`Serv: ${dadosInsercao.servico_final}`);
+          }
+          
+          if (contexto.length > 0) {
+            mensagemDetalhada += contexto.join(' | ') + ' | ';
+          }
+          mensagemDetalhada += `Erro: ${error.message}`;
           
           // 🚀 OTIMIZAÇÃO: Adicionar ao buffer ao invés de setLogs direto
           logsBuffer.push({
             tipo: "error",
             linha: linhaExcel,
-            mensagem: erroNumerico 
-              ? `Erro: Valor inválido em campo numérico. Verifique se há textos como "Não se aplica" em colunas numéricas. Detalhe: ${error.message}`
-              : `Erro: ${error.message || "Erro desconhecido"}`,
+            mensagem: mensagemDetalhada
           });
           
           // Fazer flush dos logs a cada 50 registros
@@ -1116,31 +1207,44 @@ export function NecessidadesImporter() {
       await flushBatch(tabelaNecessidade);
       flushLogs();
 
-      // Resultado final com estatísticas detalhadas
+      // 📊 RESUMO FINAL DETALHADO
       const isLinear = ["marcas_longitudinais", "tachas", "defensas"].includes(tipo);
+      
+      console.log(`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 RESUMO DA IMPORTAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📂 Total processado: ${total} linhas
+   ✅ Sucessos: ${sucessos}
+   ❌ Falhas: ${falhas}
+   🔗 Matches encontrados: ${matchesEncontrados}
+   ${isLinear ? `🟡 Matches parciais: ${pendentesRevisao}` : ''}
+   ⚠️ Divergências detectadas: ${divergenciasPendentes}
+   🔧 Valores convertidos para NULL automaticamente
+${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Verifique os logs acima para detalhes` : ''}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      `);
+      
       const mensagemResultado = [
-        `✅ ${sucessos} registros importados`,
+        `📂 ${total} linhas lidas`,
+        `✅ ${sucessos} importadas`,
         `❌ ${falhas} falhas`,
         isLinear 
           ? `🔗 ${matchesEncontrados} matches por sobreposição` 
-          : `🔗 ${matchesEncontrados} matches GPS encontrados`,
-        pendentesRevisao > 0 ? `🟡 ${pendentesRevisao} matches parciais pendentes de revisão` : null,
-        divergenciasPendentes > 0 ? `⚠️ ${divergenciasPendentes} divergências a reconciliar` : null,
-        `🔧 Valores "Não se aplica" convertidos para NULL automaticamente`
+          : `🔗 ${matchesEncontrados} matches GPS`,
+        pendentesRevisao > 0 ? `🟡 ${pendentesRevisao} pendentes revisão` : null,
+        divergenciasPendentes > 0 ? `⚠️ ${divergenciasPendentes} divergências` : null
       ].filter(Boolean).join(' • ');
 
-      console.log(`📊 RESUMO DA IMPORTAÇÃO:`);
-      console.log(`   ✅ Sucessos: ${sucessos}`);
-      console.log(`   ❌ Falhas: ${falhas}`);
-      console.log(`   🔗 Matches encontrados: ${matchesEncontrados}`);
-      console.log(`   ⚠️ Divergências detectadas: ${divergenciasPendentes}`);
-      console.log(`   🔍 Pendentes de revisão: ${pendentesRevisao}`);
-      console.log(`   🔧 Valores "Não se aplica" convertidos para NULL automaticamente`);
-
       setLogs(prev => [...prev, {
-        tipo: divergenciasPendentes > 0 ? "warning" : "success",
+        tipo: falhas > 0 ? "error" : divergenciasPendentes > 0 ? "warning" : "success",
         linha: null,
-        mensagem: `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📊 RESUMO DA IMPORTAÇÃO\n${mensagemResultado}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+        mensagem: `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 RESUMO DA IMPORTAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${mensagemResultado}
+${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Veja logs de erro acima para identificar o problema` : ''}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
       }]);
 
       toast({
@@ -1308,23 +1412,44 @@ export function NecessidadesImporter() {
 
         {/* Logs */}
         {logs.length > 0 && (
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            <Label>Log de Importação</Label>
-            <div className="space-y-1">
-              {logs.map((log, idx) => (
-                <Alert
-                  key={idx}
-                  variant={log.tipo === "error" ? "destructive" : "default"}
-                  className="py-2"
-                >
-                  {log.tipo === "success" && <CheckCircle2 className="h-4 w-4" />}
-                  {log.tipo === "warning" && <AlertCircle className="h-4 w-4" />}
-                  {log.tipo === "error" && <XCircle className="h-4 w-4" />}
-                  <AlertDescription className="text-xs">
-                    Linha {log.linha}: {log.mensagem}
-                  </AlertDescription>
-                </Alert>
-              ))}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Log de Importação</Label>
+              <Select value={filtroLog} onValueChange={(v: any) => setFiltroLog(v)}>
+                <SelectTrigger className="w-32 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="success">Sucessos</SelectItem>
+                  <SelectItem value="warning">Avisos</SelectItem>
+                  <SelectItem value="error">Erros</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1 max-h-96 overflow-y-auto">
+              {logs
+                .filter(log => filtroLog === "todos" || log.tipo === filtroLog)
+                .map((log, idx) => (
+                  <Alert
+                    key={idx}
+                    variant={log.tipo === "error" ? "destructive" : "default"}
+                    className={`py-2 ${
+                      log.tipo === "error" 
+                        ? "bg-destructive/10 border-destructive" 
+                        : log.tipo === "warning" 
+                        ? "bg-yellow-500/10 border-yellow-500/50" 
+                        : ""
+                    }`}
+                  >
+                    {log.tipo === "success" && <CheckCircle2 className="h-4 w-4" />}
+                    {log.tipo === "warning" && <AlertCircle className="h-4 w-4 text-yellow-600" />}
+                    {log.tipo === "error" && <XCircle className="h-4 w-4" />}
+                    <AlertDescription className="text-xs whitespace-pre-line">
+                      {log.linha !== null ? `Linha ${log.linha}: ` : ''}{log.mensagem}
+                    </AlertDescription>
+                  </Alert>
+                ))}
             </div>
           </div>
         )}
