@@ -193,7 +193,7 @@ const LotesManager = () => {
     setEditingLote(lote.id);
     setFormData({
       numero: lote.numero,
-      empresa_id: lote.empresa_id || lote.id,
+      empresa_id: lote.empresa_id || "",
       contrato: lote.contrato || "",
       responsavel_executora: lote.responsavel_executora || "",
       email_executora: lote.email_executora || "",
