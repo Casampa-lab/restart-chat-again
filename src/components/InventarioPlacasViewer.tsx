@@ -234,29 +234,44 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     },
   });
 
-  // Query de necessidades relacionadas
+  // Query de necessidades relacionadas com reconciliacao
   const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
     queryKey: ["necessidades-match-placas", loteId, rodoviaId, toleranciaRodovia],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_placas")
-        .select("id, servico, servico_final, cadastro_id, distancia_match_metros, codigo, tipo, km, divergencia, reconciliado, status_reconciliacao, solucao_planilha, servico_inferido, revisao_solicitada, localizado_em_campo, lado, suporte, substrato, latitude, longitude")
+        .select(`
+          id, servico, servico_final, cadastro_id, codigo, tipo, km, divergencia, 
+          solucao_planilha, servico_inferido, revisao_solicitada, localizado_em_campo, 
+          lado, suporte, substrato, latitude, longitude,
+          reconciliacao:reconciliacoes(
+            id,
+            status,
+            distancia_match_metros,
+            overlap_porcentagem,
+            tipo_match
+          )
+        `)
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .not("cadastro_id", "is", null)
-        .eq("status_reconciliacao", "pendente_aprovacao")
-        .lte("distancia_match_metros", toleranciaRodovia);
+        .not("cadastro_id", "is", null);
       
       if (error) throw error;
       
       // Indexar por cadastro_id para busca O(1)
-      // Usar servico_final como fonte da verdade para o badge
       const map = new Map<string, any>();
-      data?.forEach(nec => {
-        map.set(nec.cadastro_id, {
-          ...nec,
-          servico: nec.servico_final || nec.servico, // Priorizar servico_final
-        });
+      data?.forEach((nec: any) => {
+        const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
+        
+        // Filtrar apenas pendentes e dentro da tolerância
+        if (reconciliacao?.status === 'pendente_aprovacao' && 
+            reconciliacao?.distancia_match_metros <= toleranciaRodovia) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+            distancia_match_metros: reconciliacao.distancia_match_metros,
+          });
+        }
       });
       
       return map;

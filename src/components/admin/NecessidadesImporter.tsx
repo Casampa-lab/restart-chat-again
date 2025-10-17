@@ -1070,7 +1070,7 @@ export function NecessidadesImporter() {
             | "necessidades_porticos"
             | "necessidades_defensas";
 
-          // Preparar dados para inserção
+          // Preparar dados para inserção (apenas cadastro_id, sem dados de reconciliação)
           dadosInsercao = {
             user_id: user.id,
             lote_id: loteId,
@@ -1080,24 +1080,10 @@ export function NecessidadesImporter() {
             servico_inferido: servicoInferido,
             servico_final: servicoFinal,
             divergencia,
-            reconciliado: false,
-            status_reconciliacao: status_reconciliacao || 'pendente_aprovacao',
             ...dados,
             arquivo_origem: file.name,
             linha_planilha: linhaExcel,
-            distancia_match_metros: distancia,
           };
-
-          // Adicionar campos específicos de match por sobreposição (só para lineares)
-          if (["marcas_longitudinais", "tachas", "defensas"].includes(tipo)) {
-            dadosInsercao.overlap_porcentagem = overlap_porcentagem;
-            dadosInsercao.tipo_match = tipo_match_resultado;
-            // Sobrescrever status_reconciliacao se houver necessidade de revisão manual
-            if (status_reconciliacao) {
-              dadosInsercao.status_reconciliacao = status_reconciliacao;
-            }
-            dadosInsercao.motivo_revisao = motivo_revisao;
-          }
 
           // 🔍 VALIDAÇÃO PREVENTIVA ANTES DA INSERÇÃO
           const errosValidacao: string[] = [];

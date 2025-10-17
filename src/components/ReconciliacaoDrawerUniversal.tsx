@@ -55,37 +55,55 @@ export function ReconciliacaoDrawerUniversal({
       if (!user) throw new Error("Usuário não autenticado");
 
       if (isCoordenador) {
-        // Coordenador aprova diretamente
-        const { error } = await supabase
-          .from(config.tabelaNecessidades as any)
+        // Coordenador aprova diretamente - atualiza reconciliacao e necessidade
+        const { error: reconciliacaoError } = await supabase
+          .from('reconciliacoes')
           .update({
-            status_reconciliacao: 'aprovado',
+            status: 'aprovado',
+            reconciliado: true,
             aprovado_por: user.id,
             aprovado_em: new Date().toISOString(),
             observacao_coordenador: observacao,
+          })
+          .eq("necessidade_id", necessidade.id)
+          .eq("tipo_elemento", tipoElemento);
+
+        if (reconciliacaoError) throw reconciliacaoError;
+
+        const { error: necessidadeError } = await supabase
+          .from(config.tabelaNecessidades as any)
+          .update({
             servico_final: "Substituir",
             servico: "Substituir",
-            reconciliado: true,
             localizado_em_campo: true,
           })
           .eq("id", necessidade.id);
 
-        if (error) throw error;
+        if (necessidadeError) throw necessidadeError;
         toast.success("✓ Substituição aprovada com sucesso!");
       } else {
-        // Técnico envia para aprovação
-        const { error } = await supabase
-          .from(config.tabelaNecessidades as any)
+        // Técnico envia para aprovação - apenas atualiza reconciliacao
+        const { error: reconciliacaoError } = await supabase
+          .from('reconciliacoes')
           .update({
-            status_reconciliacao: 'pendente_aprovacao',
+            status: 'pendente_aprovacao',
             solicitado_por: user.id,
             solicitado_em: new Date().toISOString(),
             observacao_usuario: observacao,
+          })
+          .eq("necessidade_id", necessidade.id)
+          .eq("tipo_elemento", tipoElemento);
+
+        if (reconciliacaoError) throw reconciliacaoError;
+
+        const { error: necessidadeError } = await supabase
+          .from(config.tabelaNecessidades as any)
+          .update({
             localizado_em_campo: true,
           })
           .eq("id", necessidade.id);
 
-        if (error) throw error;
+        if (necessidadeError) throw necessidadeError;
         toast.success("✓ Reconciliação enviada ao coordenador!");
       }
 

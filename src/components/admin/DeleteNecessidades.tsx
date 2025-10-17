@@ -92,6 +92,23 @@ export function DeleteNecessidades() {
 
       if (countError) throw countError;
 
+      // Deletar reconciliações associadas primeiro
+      toast.info("Limpando reconciliações associadas...");
+      const { data: necessidadesParaDeletar } = await supabase
+        .from(selectedTabela as any)
+        .select('id')
+        .eq('lote_id', selectedLote)
+        .eq('rodovia_id', selectedRodovia);
+
+      if (necessidadesParaDeletar && necessidadesParaDeletar.length > 0) {
+        const necessidadeIds = necessidadesParaDeletar.map((n: any) => n.id);
+        
+        await supabase
+          .from('reconciliacoes')
+          .delete()
+          .in('necessidade_id', necessidadeIds);
+      }
+
       // Deletar os registros do banco
       toast.info(`Deletando ${totalCount || 0} registros de necessidades...`);
       const { error: deleteError, count } = await supabase

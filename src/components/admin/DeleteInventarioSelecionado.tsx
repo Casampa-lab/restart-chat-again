@@ -159,8 +159,8 @@ export function DeleteInventarioSelecionado() {
         throw deleteError;
       }
 
-      // Limpar matches órfãos nas necessidades relacionadas
-      const tipoNecessidadeMap: Record<string, string> = {
+      // Limpar reconciliações relacionadas
+      const tipoElementoMap: Record<string, string> = {
         'ficha_placa': 'placas',
         'defensas': 'defensas',
         'ficha_porticos': 'porticos',
@@ -170,29 +170,44 @@ export function DeleteInventarioSelecionado() {
         'ficha_tachas': 'tachas'
       };
 
-      const tipoNecessidade = tipoNecessidadeMap[selectedTabela];
+      const tipoElemento = tipoElementoMap[selectedTabela];
 
-      if (tipoNecessidade) {
-        toast.info("Limpando matches relacionados às necessidades...");
-        const tabelaNecessidade = `necessidades_${tipoNecessidade}`;
+      if (tipoElemento) {
+        toast.info("Limpando reconciliações relacionadas...");
+        const tabelaNecessidade = `necessidades_${tipoElemento}`;
         
-        const { error: cleanupError } = await supabase
+        // Buscar necessidades afetadas
+        const { data: necessidadesAfetadas } = await supabase
           .from(tabelaNecessidade as any)
-          .update({
-            cadastro_id: null,
-            distancia_match_metros: null,
-            tipo_match: null,
-            status_reconciliacao: "pendente_aprovacao",
-            reconciliado: false,
-            overlap_porcentagem: null
-          })
+          .select('id')
           .eq('lote_id', selectedLote)
           .eq('rodovia_id', selectedRodovia)
           .not('cadastro_id', 'is', null);
         
-        if (cleanupError) {
-          console.error('Erro ao limpar matches:', cleanupError);
-          toast.warning("Inventário deletado, mas houve erro ao limpar matches relacionados");
+        if (necessidadesAfetadas && necessidadesAfetadas.length > 0) {
+          const necessidadeIds = necessidadesAfetadas.map((n: any) => n.id);
+          
+          // Deletar reconciliações
+          const { error: reconciliacaoError } = await supabase
+            .from('reconciliacoes')
+            .delete()
+            .in('necessidade_id', necessidadeIds)
+            .eq('tipo_elemento', tipoElemento as any);
+          
+          if (reconciliacaoError) {
+            console.error('Erro ao deletar reconciliações:', reconciliacaoError);
+          }
+          
+          // Resetar cadastro_id nas necessidades
+          const { error: cleanupError } = await supabase
+            .from(tabelaNecessidade as any)
+            .update({ cadastro_id: null })
+            .in('id', necessidadeIds);
+          
+          if (cleanupError) {
+            console.error('Erro ao limpar cadastro_id:', cleanupError);
+            toast.warning("Inventário deletado, mas houve erro ao limpar matches relacionados");
+          }
         }
       }
 

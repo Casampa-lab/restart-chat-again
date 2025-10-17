@@ -132,29 +132,18 @@ export const InventarioDefensasViewer = ({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_defensas")
-        .select("*")
+        .select(`*, reconciliacao:reconciliacoes(id, status, distancia_match_metros)`)
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .not("cadastro_id", "is", null)
-        .eq("status_reconciliacao", "pendente_aprovacao");
+        .not("cadastro_id", "is", null);
       
       if (error) throw error;
       
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
-        const existing = map.get(nec.cadastro_id);
-        
-        // Calcular divergência
-        const divergencia = nec.solucao_planilha && nec.servico_inferido && nec.solucao_planilha !== nec.servico_inferido;
-        
-        // Se não existe, adiciona
-        if (!existing) {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-            divergencia,
-          });
-          return;
+        const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
+        if (reconciliacao?.status === 'pendente_aprovacao' && reconciliacao?.distancia_match_metros <= toleranciaMetros) {
+          map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
         }
         
         // Prioridade 1: Status de revisão (preferir "ok" sobre "pendente_coordenador")

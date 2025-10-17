@@ -3185,8 +3185,6 @@ export type Database = {
       }
       necessidades_cilindros: {
         Row: {
-          aprovado_em: string | null
-          aprovado_por: string | null
           arquivo_origem: string | null
           cadastro_id: string | null
           cor_corpo: string | null
@@ -3194,7 +3192,6 @@ export type Database = {
           created_at: string | null
           data_importacao: string | null
           data_reconciliacao: string | null
-          distancia_match_metros: number | null
           divergencia: boolean | null
           espacamento_m: number | null
           extensao_km: number | null
@@ -3212,10 +3209,8 @@ export type Database = {
           lote_id: string
           motivo: string | null
           observacao: string | null
-          observacao_coordenador: string | null
           observacao_usuario: string | null
           quantidade: number | null
-          reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
           servico: string
@@ -3225,14 +3220,11 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
-          status_reconciliacao: string | null
           tipo_refletivo: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
           cor_corpo?: string | null
@@ -3240,7 +3232,6 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
@@ -3258,10 +3249,8 @@ export type Database = {
           lote_id: string
           motivo?: string | null
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
           quantidade?: number | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
           servico: string
@@ -3271,14 +3260,11 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
           cor_corpo?: string | null
@@ -3286,7 +3272,6 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
@@ -3304,10 +3289,8 @@ export type Database = {
           lote_id?: string
           motivo?: string | null
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
           quantidade?: number | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
           servico?: string
@@ -3317,7 +3300,6 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
           user_id?: string
@@ -3352,8 +3334,6 @@ export type Database = {
           adequacao_funcionalidade_laminas_inadequadas: string | null
           adequacao_funcionalidade_terminais: string | null
           adequacao_funcionalidade_terminais_inadequados: string | null
-          aprovado_em: string | null
-          aprovado_por: string | null
           arquivo_origem: string | null
           br: string | null
           cadastro_id: string | null
@@ -3364,7 +3344,6 @@ export type Database = {
           data_reconciliacao: string | null
           distancia_bordo_pista_face_defensa_m: number | null
           distancia_face_defensa_obstaculo_m: number | null
-          distancia_match_metros: number | null
           distancia_pista_obstaculo_m: number | null
           divergencia: boolean | null
           espaco_trabalho: string | null
@@ -3387,17 +3366,13 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           motivo: string | null
-          motivo_revisao: string | null
           nivel_contencao_en1317: string | null
           nivel_contencao_nchrp350: string | null
           nivel_risco: string | null
           observacao: string | null
-          observacao_coordenador: string | null
           observacao_usuario: string | null
-          overlap_porcentagem: number | null
           percentual_veiculos_pesados: number | null
           quantidade_laminas: number | null
-          reconciliado: boolean | null
           reconciliado_por: string | null
           risco: string | null
           rodovia_id: string
@@ -3408,13 +3383,11 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
-          status_reconciliacao: string | null
           status_revisao: string | null
           terminal_entrada: string | null
           terminal_saida: string | null
           tipo_avaria: string | null
           tipo_defensa: string | null
-          tipo_match: string | null
           tramo: string | null
           updated_at: string | null
           user_id: string
@@ -3426,8 +3399,6 @@ export type Database = {
           adequacao_funcionalidade_laminas_inadequadas?: string | null
           adequacao_funcionalidade_terminais?: string | null
           adequacao_funcionalidade_terminais_inadequados?: string | null
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           arquivo_origem?: string | null
           br?: string | null
           cadastro_id?: string | null
@@ -3438,7 +3409,6 @@ export type Database = {
           data_reconciliacao?: string | null
           distancia_bordo_pista_face_defensa_m?: number | null
           distancia_face_defensa_obstaculo_m?: number | null
-          distancia_match_metros?: number | null
           distancia_pista_obstaculo_m?: number | null
           divergencia?: boolean | null
           espaco_trabalho?: string | null
@@ -3461,17 +3431,13 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           motivo?: string | null
-          motivo_revisao?: string | null
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
           nivel_risco?: string | null
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
-          overlap_porcentagem?: number | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           risco?: string | null
           rodovia_id: string
@@ -3482,13 +3448,11 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           status_revisao?: string | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
-          tipo_match?: string | null
           tramo?: string | null
           updated_at?: string | null
           user_id: string
@@ -3500,8 +3464,6 @@ export type Database = {
           adequacao_funcionalidade_laminas_inadequadas?: string | null
           adequacao_funcionalidade_terminais?: string | null
           adequacao_funcionalidade_terminais_inadequados?: string | null
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           arquivo_origem?: string | null
           br?: string | null
           cadastro_id?: string | null
@@ -3512,7 +3474,6 @@ export type Database = {
           data_reconciliacao?: string | null
           distancia_bordo_pista_face_defensa_m?: number | null
           distancia_face_defensa_obstaculo_m?: number | null
-          distancia_match_metros?: number | null
           distancia_pista_obstaculo_m?: number | null
           divergencia?: boolean | null
           espaco_trabalho?: string | null
@@ -3535,17 +3496,13 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           motivo?: string | null
-          motivo_revisao?: string | null
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
           nivel_risco?: string | null
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
-          overlap_porcentagem?: number | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           risco?: string | null
           rodovia_id?: string
@@ -3556,13 +3513,11 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           status_revisao?: string | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
-          tipo_match?: string | null
           tramo?: string | null
           updated_at?: string | null
           user_id?: string
@@ -3595,8 +3550,6 @@ export type Database = {
       }
       necessidades_marcas_longitudinais: {
         Row: {
-          aprovado_em: string | null
-          aprovado_por: string | null
           area_m2: number | null
           arquivo_origem: string | null
           cadastro_id: string | null
@@ -3605,7 +3558,6 @@ export type Database = {
           created_at: string | null
           data_importacao: string | null
           data_reconciliacao: string | null
-          distancia_match_metros: number | null
           divergencia: boolean | null
           espacamento_m: number | null
           espessura_cm: number | null
@@ -3624,13 +3576,9 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           material: string | null
-          motivo_revisao: string | null
           observacao: string | null
-          observacao_coordenador: string | null
           observacao_usuario: string | null
-          overlap_porcentagem: number | null
           posicao: string | null
-          reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
           servico: string
@@ -3640,17 +3588,13 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
-          status_reconciliacao: string | null
           status_revisao: string | null
           tipo_demarcacao: string | null
-          tipo_match: string | null
           traco_m: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           area_m2?: number | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
@@ -3659,7 +3603,6 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           espessura_cm?: number | null
@@ -3678,13 +3621,9 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           material?: string | null
-          motivo_revisao?: string | null
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
-          overlap_porcentagem?: number | null
           posicao?: string | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
           servico: string
@@ -3694,17 +3633,13 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           status_revisao?: string | null
           tipo_demarcacao?: string | null
-          tipo_match?: string | null
           traco_m?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           area_m2?: number | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
@@ -3713,7 +3648,6 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           espessura_cm?: number | null
@@ -3732,13 +3666,9 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           material?: string | null
-          motivo_revisao?: string | null
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
-          overlap_porcentagem?: number | null
           posicao?: string | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
           servico?: string
@@ -3748,10 +3678,8 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           status_revisao?: string | null
           tipo_demarcacao?: string | null
-          tipo_match?: string | null
           traco_m?: number | null
           updated_at?: string | null
           user_id?: string
@@ -3782,8 +3710,6 @@ export type Database = {
       }
       necessidades_marcas_transversais: {
         Row: {
-          aprovado_em: string | null
-          aprovado_por: string | null
           area_m2: number | null
           arquivo_origem: string | null
           cadastro_id: string | null
@@ -3793,7 +3719,6 @@ export type Database = {
           data_reconciliacao: string | null
           descricao: string | null
           dimensoes: string | null
-          distancia_match_metros: number | null
           divergencia: boolean | null
           espessura_mm: number | null
           estado_conservacao: string | null
@@ -3813,9 +3738,7 @@ export type Database = {
           lote_id: string
           material_utilizado: string | null
           observacao: string | null
-          observacao_coordenador: string | null
           observacao_usuario: string | null
-          reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
           servico: string
@@ -3826,14 +3749,11 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
-          status_reconciliacao: string | null
           tipo_inscricao: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           area_m2?: number | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
@@ -3843,7 +3763,6 @@ export type Database = {
           data_reconciliacao?: string | null
           descricao?: string | null
           dimensoes?: string | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espessura_mm?: number | null
           estado_conservacao?: string | null
@@ -3863,9 +3782,7 @@ export type Database = {
           lote_id: string
           material_utilizado?: string | null
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
           servico: string
@@ -3876,14 +3793,11 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           tipo_inscricao?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           area_m2?: number | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
@@ -3893,7 +3807,6 @@ export type Database = {
           data_reconciliacao?: string | null
           descricao?: string | null
           dimensoes?: string | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espessura_mm?: number | null
           estado_conservacao?: string | null
@@ -3913,9 +3826,7 @@ export type Database = {
           lote_id?: string
           material_utilizado?: string | null
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
           servico?: string
@@ -3926,7 +3837,6 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           tipo_inscricao?: string | null
           updated_at?: string | null
           user_id?: string
@@ -3958,8 +3868,6 @@ export type Database = {
       necessidades_placas: {
         Row: {
           altura_m: number | null
-          aprovado_em: string | null
-          aprovado_por: string | null
           area_m2: number | null
           arquivo_origem: string | null
           br: string | null
@@ -3970,7 +3878,6 @@ export type Database = {
           data_reconciliacao: string | null
           dimensoes_mm: string | null
           distancia_m: number | null
-          distancia_match_metros: number | null
           divergencia: boolean | null
           id: string
           justificativa_reconciliacao: string | null
@@ -3982,10 +3889,8 @@ export type Database = {
           longitude: number | null
           lote_id: string
           observacao: string | null
-          observacao_coordenador: string | null
           observacao_reconciliacao: string | null
           observacao_usuario: string | null
-          reconciliado: boolean | null
           reconciliado_em: string | null
           reconciliado_por: string | null
           rejeitado_em: string | null
@@ -4001,7 +3906,6 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
-          status_reconciliacao: string | null
           substrato: string | null
           suporte: string | null
           tipo: string | null
@@ -4012,8 +3916,6 @@ export type Database = {
         }
         Insert: {
           altura_m?: number | null
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           area_m2?: number | null
           arquivo_origem?: string | null
           br?: string | null
@@ -4024,7 +3926,6 @@ export type Database = {
           data_reconciliacao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
@@ -4036,10 +3937,8 @@ export type Database = {
           longitude?: number | null
           lote_id: string
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_reconciliacao?: string | null
           observacao_usuario?: string | null
-          reconciliado?: boolean | null
           reconciliado_em?: string | null
           reconciliado_por?: string | null
           rejeitado_em?: string | null
@@ -4055,7 +3954,6 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           substrato?: string | null
           suporte?: string | null
           tipo?: string | null
@@ -4066,8 +3964,6 @@ export type Database = {
         }
         Update: {
           altura_m?: number | null
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           area_m2?: number | null
           arquivo_origem?: string | null
           br?: string | null
@@ -4078,7 +3974,6 @@ export type Database = {
           data_reconciliacao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
@@ -4090,10 +3985,8 @@ export type Database = {
           longitude?: number | null
           lote_id?: string
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_reconciliacao?: string | null
           observacao_usuario?: string | null
-          reconciliado?: boolean | null
           reconciliado_em?: string | null
           reconciliado_por?: string | null
           rejeitado_em?: string | null
@@ -4109,7 +4002,6 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           substrato?: string | null
           suporte?: string | null
           tipo?: string | null
@@ -4145,14 +4037,11 @@ export type Database = {
       necessidades_porticos: {
         Row: {
           altura_livre_m: number | null
-          aprovado_em: string | null
-          aprovado_por: string | null
           arquivo_origem: string | null
           cadastro_id: string | null
           created_at: string | null
           data_importacao: string | null
           data_reconciliacao: string | null
-          distancia_match_metros: number | null
           divergencia: boolean | null
           id: string
           justificativa_reconciliacao: string | null
@@ -4164,9 +4053,7 @@ export type Database = {
           longitude: number | null
           lote_id: string
           motivo: string | null
-          observacao_coordenador: string | null
           observacao_usuario: string | null
-          reconciliado: boolean | null
           reconciliado_por: string | null
           revisao_solicitada: boolean | null
           rodovia_id: string
@@ -4177,7 +4064,6 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
-          status_reconciliacao: string | null
           tipo: string | null
           updated_at: string | null
           user_id: string
@@ -4185,14 +4071,11 @@ export type Database = {
         }
         Insert: {
           altura_livre_m?: number | null
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
@@ -4204,9 +4087,7 @@ export type Database = {
           longitude?: number | null
           lote_id: string
           motivo?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           revisao_solicitada?: boolean | null
           rodovia_id: string
@@ -4217,7 +4098,6 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           tipo?: string | null
           updated_at?: string | null
           user_id: string
@@ -4225,14 +4105,11 @@ export type Database = {
         }
         Update: {
           altura_livre_m?: number | null
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
@@ -4244,9 +4121,7 @@ export type Database = {
           longitude?: number | null
           lote_id?: string
           motivo?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           revisao_solicitada?: boolean | null
           rodovia_id?: string
@@ -4257,7 +4132,6 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           tipo?: string | null
           updated_at?: string | null
           user_id?: string
@@ -4289,8 +4163,6 @@ export type Database = {
       }
       necessidades_tachas: {
         Row: {
-          aprovado_em: string | null
-          aprovado_por: string | null
           arquivo_origem: string | null
           cadastro_id: string | null
           cor_refletivo: string | null
@@ -4299,7 +4171,6 @@ export type Database = {
           data_importacao: string | null
           data_reconciliacao: string | null
           descricao: string | null
-          distancia_match_metros: number | null
           divergencia: boolean | null
           espacamento_m: number | null
           extensao_km: number | null
@@ -4315,13 +4186,9 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
-          motivo_revisao: string | null
           observacao: string | null
-          observacao_coordenador: string | null
           observacao_usuario: string | null
-          overlap_porcentagem: number | null
           quantidade: number | null
-          reconciliado: boolean | null
           reconciliado_por: string | null
           refletivo: string | null
           rodovia_id: string
@@ -4332,15 +4199,11 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
-          status_reconciliacao: string | null
           status_revisao: string | null
-          tipo_match: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
           cor_refletivo?: string | null
@@ -4349,7 +4212,6 @@ export type Database = {
           data_importacao?: string | null
           data_reconciliacao?: string | null
           descricao?: string | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
@@ -4365,13 +4227,9 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
-          motivo_revisao?: string | null
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
-          overlap_porcentagem?: number | null
           quantidade?: number | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           refletivo?: string | null
           rodovia_id: string
@@ -4382,15 +4240,11 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           status_revisao?: string | null
-          tipo_match?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
-          aprovado_em?: string | null
-          aprovado_por?: string | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
           cor_refletivo?: string | null
@@ -4399,7 +4253,6 @@ export type Database = {
           data_importacao?: string | null
           data_reconciliacao?: string | null
           descricao?: string | null
-          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
@@ -4415,13 +4268,9 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
-          motivo_revisao?: string | null
           observacao?: string | null
-          observacao_coordenador?: string | null
           observacao_usuario?: string | null
-          overlap_porcentagem?: number | null
           quantidade?: number | null
-          reconciliado?: boolean | null
           reconciliado_por?: string | null
           refletivo?: string | null
           rodovia_id?: string
@@ -4432,9 +4281,7 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
-          status_reconciliacao?: string | null
           status_revisao?: string | null
-          tipo_match?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -4599,6 +4446,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reconciliacoes: {
+        Row: {
+          aprovado_em: string | null
+          aprovado_por: string | null
+          cadastro_id: string | null
+          created_at: string | null
+          distancia_match_metros: number | null
+          id: string
+          motivo_rejeicao: string | null
+          motivo_revisao: string | null
+          necessidade_id: string
+          observacao_coordenador: string | null
+          observacao_usuario: string | null
+          overlap_porcentagem: number | null
+          reconciliado: boolean | null
+          rejeitado_em: string | null
+          rejeitado_por: string | null
+          solicitado_em: string | null
+          solicitado_por: string | null
+          status: Database["public"]["Enums"]["status_reconciliacao_enum"]
+          tipo_elemento: Database["public"]["Enums"]["tipo_elemento_reconciliacao"]
+          tipo_match: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          cadastro_id?: string | null
+          created_at?: string | null
+          distancia_match_metros?: number | null
+          id?: string
+          motivo_rejeicao?: string | null
+          motivo_revisao?: string | null
+          necessidade_id: string
+          observacao_coordenador?: string | null
+          observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
+          reconciliado?: boolean | null
+          rejeitado_em?: string | null
+          rejeitado_por?: string | null
+          solicitado_em?: string | null
+          solicitado_por?: string | null
+          status?: Database["public"]["Enums"]["status_reconciliacao_enum"]
+          tipo_elemento: Database["public"]["Enums"]["tipo_elemento_reconciliacao"]
+          tipo_match?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          cadastro_id?: string | null
+          created_at?: string | null
+          distancia_match_metros?: number | null
+          id?: string
+          motivo_rejeicao?: string | null
+          motivo_revisao?: string | null
+          necessidade_id?: string
+          observacao_coordenador?: string | null
+          observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
+          reconciliado?: boolean | null
+          rejeitado_em?: string | null
+          rejeitado_por?: string | null
+          solicitado_em?: string | null
+          solicitado_por?: string | null
+          status?: Database["public"]["Enums"]["status_reconciliacao_enum"]
+          tipo_elemento?: Database["public"]["Enums"]["tipo_elemento_reconciliacao"]
+          tipo_match?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       registro_nc: {
         Row: {
@@ -5158,6 +5077,15 @@ export type Database = {
         Args: { _lote_id: string; _user_id: string }
         Returns: boolean
       }
+      find_orphaned_reconciliacoes: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cadastro_id: string
+          id: string
+          necessidade_id: string
+          tipo_elemento: Database["public"]["Enums"]["tipo_elemento_reconciliacao"]
+        }[]
+      }
       generate_codigo_convite: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -5205,7 +5133,16 @@ export type Database = {
     Enums: {
       app_role: "admin" | "coordenador" | "tecnico"
       plan_tier: "basico" | "profissional" | "enterprise"
+      status_reconciliacao_enum: "pendente_aprovacao" | "aprovado" | "rejeitado"
       subscription_status: "ativa" | "suspensa" | "cancelada" | "trial"
+      tipo_elemento_reconciliacao:
+        | "placas"
+        | "defensas"
+        | "porticos"
+        | "marcas_longitudinais"
+        | "inscricoes"
+        | "cilindros"
+        | "tachas"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5335,7 +5272,21 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "coordenador", "tecnico"],
       plan_tier: ["basico", "profissional", "enterprise"],
+      status_reconciliacao_enum: [
+        "pendente_aprovacao",
+        "aprovado",
+        "rejeitado",
+      ],
       subscription_status: ["ativa", "suspensa", "cancelada", "trial"],
+      tipo_elemento_reconciliacao: [
+        "placas",
+        "defensas",
+        "porticos",
+        "marcas_longitudinais",
+        "inscricoes",
+        "cilindros",
+        "tachas",
+      ],
     },
   },
 } as const

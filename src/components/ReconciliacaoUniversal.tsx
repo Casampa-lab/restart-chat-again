@@ -75,9 +75,24 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
       
       const { data, error } = await supabase
         .from(configAtual.tabelaNecessidades as any)
-        .select("*")
+        .select(`
+          *,
+          reconciliacao:reconciliacoes!inner(
+            id,
+            status,
+            distancia_match_metros,
+            overlap_porcentagem,
+            tipo_match,
+            solicitado_por,
+            solicitado_em,
+            aprovado_por,
+            aprovado_em,
+            observacao_coordenador,
+            motivo_rejeicao
+          )
+        `)
         .eq("divergencia", true)
-        .eq("reconciliado", false)
+        .eq("reconciliacao.status", "pendente_aprovacao")
         .eq("lote_id", activeSession.lote_id)
         .eq("rodovia_id", activeSession.rodovia_id)
         .order(colunaOrdenacao, { ascending: true });

@@ -22,6 +22,7 @@ import { DeleteNecessidades } from "@/components/admin/DeleteNecessidades";
 import { DiagnosticoMatch } from "@/components/admin/DiagnosticoMatch";
 import { RecalcularMatches } from "@/components/admin/RecalcularMatches";
 import { LimparReconciliacoesInconsistentes } from "@/components/admin/LimparReconciliacoesInconsistentes";
+import { LimparReconciliacoesOrfas } from "@/components/admin/LimparReconciliacoesOrfas";
 import { ResetDatabaseButton } from "@/components/admin/ResetDatabaseButton";
 
 import logoOperaVia from "@/assets/logo-operavia.jpg";
@@ -167,8 +168,9 @@ const Admin = () => {
               <InventarioImporterManager />
               <DeleteInventarioSelecionado />
               <RemoverDuplicatasInventario />
-              <LimparFotosOrfas />
-            </div>
+          <LimparFotosOrfas />
+          <LimparReconciliacoesOrfas />
+        </div>
           </TabsContent>
 
           <TabsContent value="necessidades">

@@ -162,22 +162,18 @@ export function InventarioInscricoesViewer({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_marcas_transversais")
-        .select("id, servico, servico_final, cadastro_id, distancia_match_metros, km_inicial, divergencia, reconciliado, status_reconciliacao, solucao_planilha, servico_inferido, solucao_confirmada, latitude_inicial, longitude_inicial")
+        .select(`id, servico, servico_final, cadastro_id, km_inicial, divergencia, solucao_planilha, servico_inferido, solucao_confirmada, latitude_inicial, longitude_inicial, reconciliacao:reconciliacoes(id, status, distancia_match_metros)`)
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .not("cadastro_id", "is", null)
-        .eq("status_reconciliacao", "pendente_aprovacao");
+        .not("cadastro_id", "is", null);
       
       if (error) throw error;
       
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
-        const divergencia = nec.solucao_planilha && nec.servico_inferido && nec.solucao_planilha !== nec.servico_inferido;
-        map.set(nec.cadastro_id, { 
-          ...nec, 
-          divergencia,
-          servico: nec.servico_final || nec.servico, // Priorizar servico_final
-        });
+        const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
+        if (reconciliacao?.status === 'pendente_aprovacao' && reconciliacao?.distancia_match_metros <= toleranciaMetros) {
+          map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
       });
       
       return map;

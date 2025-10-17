@@ -38,13 +38,15 @@ export function NecessidadesReconciliacao() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_placas")
-        .select("id, km, codigo, tipo, solucao_planilha, servico_inferido, servico_final, distancia_match_metros, cadastro_id, divergencia, reconciliado")
+        .select(`id, km, codigo, tipo, solucao_planilha, servico_inferido, servico_final, cadastro_id, divergencia, reconciliacao:reconciliacoes(id, status, distancia_match_metros)`)
         .eq("divergencia", true)
-        .eq("reconciliado", false)
         .order("km", { ascending: true });
 
       if (error) throw error;
-      return data as Divergencia[];
+      return (data || []).filter((d: any) => {
+        const rec = Array.isArray(d.reconciliacao) ? d.reconciliacao[0] : d.reconciliacao;
+        return rec?.status === 'pendente_aprovacao';
+      }) as Divergencia[];
     },
     enabled: !!user,
   });
