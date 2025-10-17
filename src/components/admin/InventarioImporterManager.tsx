@@ -1101,12 +1101,13 @@ export function InventarioImporterManager() {
           total_registros: imported,
           usuario_id: user.id,
         }, {
-          onConflict: 'lote_id,rodovia_id,tipo_inventario'
+          onConflict: 'lote_id,rodovia_id,tipo_inventario',
+          ignoreDuplicates: false // Força o UPDATE quando houver conflito
         });
 
       if (logError) {
         console.error('Erro ao registrar log de importação:', logError);
-        // Não bloquear o fluxo por erro no log
+        toast.warning('Importação concluída, mas log pode não ter sido salvo completamente');
       }
 
       // Invalidar cache para atualizar o semáforo imediatamente
