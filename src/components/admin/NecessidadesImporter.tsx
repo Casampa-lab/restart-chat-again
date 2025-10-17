@@ -660,16 +660,18 @@ export function NecessidadesImporter() {
         String(h || "").trim()
       );
       
-      // Converter os dados usando headers detectados
-      const dadosComHeader = jsonData.slice(linhaInicioDados).map((row: any) => {
+      // Converter os dados usando headers detectados E MANTER O NÚMERO DA LINHA ORIGINAL
+      const dadosComHeader = jsonData.slice(linhaInicioDados).map((row: any, index: number) => {
         const obj: any = {};
-        headersNormalizados.forEach((header, index) => {
-          obj[header] = row[index];
+        headersNormalizados.forEach((header, colIndex) => {
+          obj[header] = row[colIndex];
         });
+        // Guardar o número da linha ORIGINAL no Excel (header + 1 para linha do Excel + index das linhas de dados)
+        obj.__linha_excel_original = linhaInicioDados + index + 1; // +1 porque Excel começa em 1
         return obj;
       });
 
-      // Filtrar linhas vazias (que não têm KM)
+      // Filtrar linhas vazias (que não têm KM) MAS MANTENDO O NÚMERO DA LINHA ORIGINAL
       const dadosFiltrados = dadosComHeader.filter((row: any) => {
         const kmValue = (tipo === "placas" || tipo === "marcas_transversais" || tipo === "porticos")
           ? (row["Km"] || row["KM"] || row["km"])
@@ -814,7 +816,8 @@ export function NecessidadesImporter() {
         }
 
         const row: any = dadosFiltrados[i];
-        const linhaExcel = i + 3; // +3 pois Excel começa em 1, tem header, e pulamos a linha de cabeçalho duplicada
+        // Usar o número da linha ORIGINAL que foi guardado durante o mapeamento
+        const linhaExcel = row.__linha_excel_original || (i + 3);
 
         // Declarar variáveis fora do try para acessá-las no catch
         let dados: any = null;
