@@ -103,11 +103,11 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
     ['Km', ncData.km_inicial && ncData.km_final 
         ? `${ncData.km_inicial.toFixed(3)} ao ${ncData.km_final.toFixed(3)}` 
         : (ncData.km_referencia ? `km ${ncData.km_referencia.toFixed(3)}` : 'N/A'),
-     'SNV', ncData.snv || 'N/A'],
+     'SNV', ncData.snv || 'N/A', '', ''],
     ['Supervisora', ncData.supervisora.nome_empresa.substring(0, 40),
-     'Contrato', ncData.supervisora.contrato || 'N/A'],
+     'Contrato Supervisora', ncData.supervisora.contrato || 'N/A', '', ''],
     ['Construtora', ncData.empresa.nome.substring(0, 40),
-     'Contrato', ncData.empresa.contrato_executora || 'N/A'],
+     'Contrato Executora', ncData.empresa.contrato_executora || 'N/A', '', ''],
   ];
 
   autoTable(doc, {

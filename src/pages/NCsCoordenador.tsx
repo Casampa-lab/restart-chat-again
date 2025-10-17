@@ -297,6 +297,12 @@ const NCsCoordenador = () => {
       }
 
       // Preparar dados para o PDF
+      console.log('📋 Dados para PDF:', {
+        contratoSupervisora: supervisoraData.contrato,
+        contratoExecutora: contratoExecutora,
+        loteContrato: (ncCompleta as any).lotes?.contrato
+      });
+      
       const pdfData = {
         numero_nc: ncCompleta.numero_nc,
         data_ocorrencia: ncCompleta.data_ocorrencia,
