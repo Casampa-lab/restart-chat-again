@@ -392,10 +392,20 @@ export function NecessidadesImporter() {
   };
 
   const mapearColunas = (row: any, tipo: string) => {
+    // Helper para buscar primeira coluna com valor válido (aceita 0)
+    const getFirstValid = (...keys: string[]) => {
+      for (const key of keys) {
+        const val = row[key];
+        // Aceitar 0, mas não aceitar null, undefined ou string vazia
+        if (val !== undefined && val !== null && val !== "") return val;
+      }
+      return null;
+    };
+
     // Para placas, não usar campos do baseMap (não tem inicial/final)
     if (tipo === "placas") {
       return {
-        km: row["Km"] || row["KM"] || row["km"],
+        km: getFirstValid("Km", "KM", "km"),
         latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
         longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
         codigo: row["Código da Placa"] || row["Código da placa"] || row["Codigo da Placa"] || row["Codigo da placa"] || row["Código"] || row["Codigo"] || row["codigo"],
@@ -412,8 +422,8 @@ export function NecessidadesImporter() {
 
     // Mapeamento básico para outros tipos (com inicial/final)
     const baseMap: any = {
-      km_inicial: row["Km Inicial"] || row["KM Inicial"] || row["km inicial"] || row["km_inicial"],
-      km_final: row["Km Final"] || row["KM Final"] || row["km final"] || row["km_final"],
+      km_inicial: getFirstValid("Km Inicial", "KM Inicial", "km inicial", "km_inicial"),
+      km_final: getFirstValid("Km Final", "KM Final", "km final", "km_final"),
       latitude_inicial: converterCoordenada(row["Latitude Inicial"] || row["Lat Inicial"] || row["Latitude inicial"] || row["latitude_inicial"]),
       longitude_inicial: converterCoordenada(row["Longitude Inicial"] || row["Long Inicial"] || row["Longitude inicial"] || row["longitude_inicial"]),
       latitude_final: converterCoordenada(row["Latitude Final"] || row["Lat Final"] || row["Latitude final"] || row["latitude_final"]),
@@ -498,7 +508,7 @@ export function NecessidadesImporter() {
           descricao: row["Descrição"] || row["Descricao"] || row["descricao"],
           tipo_inscricao: row["Sigla"] || row["sigla"],
           cor: row["Cor"] || row["cor"],
-          km: sanitizarNumerico(row["Km"] || row["KM"] || row["km"]),
+          km: sanitizarNumerico(getFirstValid("Km", "KM", "km")),
           latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
           longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
           material_utilizado: row["Material"] || row["material"],
@@ -522,7 +532,7 @@ export function NecessidadesImporter() {
         }
         
         return {
-          km: sanitizarNumerico(row["Km"] || row["KM"] || row["km"]),
+          km: sanitizarNumerico(getFirstValid("Km", "KM", "km")),
           latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
           longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
           tipo: row["Tipo"] || row["tipo"],

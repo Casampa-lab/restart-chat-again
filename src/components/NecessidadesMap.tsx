@@ -735,8 +735,13 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                   const props = feature.properties || {};
                   const rodovia = props.CD_RODOVIA || props.DS_RODOVIA || props.vl_br || 'Rodovia';
                   const uf = props.SG_UF || props.uf || '';
-                  const kmInicial = parseFloat(props.KM_INICIAL || props.km_inicial || '0') || 0;
-                  const kmFinal = parseFloat(props.KM_FINAL || props.km_final || '0') || 0;
+                  const kmInicial = parseFloat(props.KM_INICIAL || props.km_inicial || '0');
+                  const kmFinal = parseFloat(props.KM_FINAL || props.km_final || '0');
+                  
+                  // Verificar se os valores de KM existem (aceita 0 como válido)
+                  const hasKmInicial = props.KM_INICIAL !== undefined || props.km_inicial !== undefined;
+                  const hasKmFinal = props.KM_FINAL !== undefined || props.km_final !== undefined;
+                  const temKM = hasKmInicial || hasKmFinal;
                   
                   // 🛣️ DEBUG: Log dos atributos da feature
                   console.log('🛣️ Feature SNV carregada:', {
@@ -744,14 +749,14 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                     uf,
                     kmInicial,
                     kmFinal,
-                    temKM: kmInicial > 0 || kmFinal > 0,
+                    temKM,
                     todosAtributos: props
                   });
                   
                   // === TOOLTIP HOVER (rápido) ===
                   layer.bindTooltip(
                     `<div class="font-semibold text-base">${rodovia}${uf ? ` (${uf})` : ''}</div>
-                     ${kmInicial > 0 || kmFinal > 0 ? `<div class="text-sm text-gray-600">
+                     ${temKM ? `<div class="text-sm text-gray-600">
                        Trecho: KM ${kmInicial.toFixed(1)} → ${kmFinal.toFixed(1)}
                      </div>` : ''}`,
                     { 
@@ -766,7 +771,7 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
                     const coords = (feature.geometry as any).coordinates;
                     
                     // Se tiver KM_INICIAL e KM_FINAL, calcular KM exato
-                    if (kmInicial > 0 || kmFinal > 0) {
+                    if (temKM) {
                       const kmCalculado = calcularKmNoSegmento(
                         e.latlng.lat,
                         e.latlng.lng,
