@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, MapPin, Pencil, Navigation } from "lucide-react";
+import { Plus, Trash2, MapPin, Pencil } from "lucide-react";
 interface Empresa {
   id: string;
   nome: string;
@@ -587,25 +587,6 @@ const LotesManager = () => {
                           longitude_inicial: e.target.value
                         })} placeholder="Longitude" />
                         </div>
-                        <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => {
-                        if (navigator.geolocation) {
-                          navigator.geolocation.getCurrentPosition(position => {
-                            setNovaRodovia({
-                              ...novaRodovia,
-                              latitude_inicial: position.coords.latitude.toString(),
-                              longitude_inicial: position.coords.longitude.toString()
-                            });
-                            toast.success("Localização capturada!");
-                          }, error => {
-                            toast.error("Erro ao capturar localização: " + error.message);
-                          });
-                        } else {
-                          toast.error("Geolocalização não suportada");
-                        }
-                      }}>
-                          <Navigation className="mr-2 h-3 w-3" />
-                          Capturar GPS
-                        </Button>
                       </div>
                     </div>
 
@@ -627,25 +608,6 @@ const LotesManager = () => {
                           longitude_final: e.target.value
                         })} placeholder="Longitude" />
                         </div>
-                        <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => {
-                        if (navigator.geolocation) {
-                          navigator.geolocation.getCurrentPosition(position => {
-                            setNovaRodovia({
-                              ...novaRodovia,
-                              latitude_final: position.coords.latitude.toString(),
-                              longitude_final: position.coords.longitude.toString()
-                            });
-                            toast.success("Localização capturada!");
-                          }, error => {
-                            toast.error("Erro ao capturar localização: " + error.message);
-                          });
-                        } else {
-                          toast.error("Geolocalização não suportada");
-                        }
-                      }}>
-                          <Navigation className="mr-2 h-3 w-3" />
-                          Capturar GPS
-                        </Button>
                       </div>
                     </div>
                   </div>
@@ -982,25 +944,6 @@ const LotesManager = () => {
                         longitude_inicial: e.target.value
                       })} placeholder="Longitude" />
                       </div>
-                      <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => {
-                      if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(position => {
-                          setNovaRodovia({
-                            ...novaRodovia,
-                            latitude_inicial: position.coords.latitude.toString(),
-                            longitude_inicial: position.coords.longitude.toString()
-                          });
-                          toast.success("Localização capturada!");
-                        }, error => {
-                          toast.error("Erro ao capturar localização: " + error.message);
-                        });
-                      } else {
-                        toast.error("Geolocalização não suportada");
-                      }
-                    }}>
-                        <Navigation className="mr-2 h-3 w-3" />
-                        Capturar GPS
-                      </Button>
                     </div>
                   </div>
 
@@ -1022,25 +965,6 @@ const LotesManager = () => {
                         longitude_final: e.target.value
                       })} placeholder="Longitude" />
                       </div>
-                      <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => {
-                      if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(position => {
-                          setNovaRodovia({
-                            ...novaRodovia,
-                            latitude_final: position.coords.latitude.toString(),
-                            longitude_final: position.coords.longitude.toString()
-                          });
-                          toast.success("Localização capturada!");
-                        }, error => {
-                          toast.error("Erro ao capturar localização: " + error.message);
-                        });
-                      } else {
-                        toast.error("Geolocalização não suportada");
-                      }
-                    }}>
-                        <Navigation className="mr-2 h-3 w-3" />
-                        Capturar GPS
-                      </Button>
                     </div>
                   </div>
                 </div>
