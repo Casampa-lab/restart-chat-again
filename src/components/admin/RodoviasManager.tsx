@@ -25,6 +25,16 @@ interface Rodovia {
   tolerancia_inscricoes_metros: number | null;
 }
 
+const TOLERANCIA_CONFIG = [
+  { key: 'tolerancia_placas_metros', icon: '🚏', label: 'Placas', default: 50 },
+  { key: 'tolerancia_porticos_metros', icon: '🌉', label: 'Pórticos', default: 200 },
+  { key: 'tolerancia_defensas_metros', icon: '🛣️', label: 'Defensas', default: 20 },
+  { key: 'tolerancia_marcas_metros', icon: '➖', label: 'Marcas Long.', default: 20 },
+  { key: 'tolerancia_cilindros_metros', icon: '🔴', label: 'Cilindros', default: 25 },
+  { key: 'tolerancia_tachas_metros', icon: '💎', label: 'Tachas', default: 25 },
+  { key: 'tolerancia_inscricoes_metros', icon: '➡️', label: 'Inscrições', default: 30 },
+];
+
 const RodoviasManager = () => {
   const [rodovias, setRodovias] = useState<Rodovia[]>([]);
   const [loading, setLoading] = useState(false);
@@ -456,6 +466,7 @@ const RodoviasManager = () => {
               <TableRow>
                 <TableHead>Código</TableHead>
                 <TableHead>UF</TableHead>
+                <TableHead className="w-[320px]">Tolerâncias GPS (m)</TableHead>
                 <TableHead className="w-24">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -464,6 +475,31 @@ const RodoviasManager = () => {
                 <TableRow key={rodovia.id}>
                   <TableCell className="font-medium">{rodovia.codigo}</TableCell>
                   <TableCell>{rodovia.uf || "-"}</TableCell>
+                  
+                  <TableCell>
+                    <TooltipProvider>
+                      <div className="flex flex-wrap gap-2">
+                        {TOLERANCIA_CONFIG.map((config) => {
+                          const valor = rodovia[config.key as keyof Rodovia] || config.default;
+                          return (
+                            <Tooltip key={config.key}>
+                              <TooltipTrigger asChild>
+                                <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-muted hover:bg-muted/80 transition-colors cursor-help">
+                                  <span className="text-sm">{config.icon}</span>
+                                  <span className="text-xs font-medium">{valor}m</span>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">
+                                <p className="text-xs font-medium">{config.label}</p>
+                                <p className="text-xs text-muted-foreground">Tolerância: {valor} metros</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })}
+                      </div>
+                    </TooltipProvider>
+                  </TableCell>
+                  
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
@@ -500,7 +536,7 @@ const RodoviasManager = () => {
               ))}
               {rodovias.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center text-muted-foreground">
                     Nenhuma rodovia cadastrada
                   </TableCell>
                 </TableRow>
