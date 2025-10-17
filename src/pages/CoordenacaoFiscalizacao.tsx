@@ -7,8 +7,9 @@ import { getConfig, type GrupoElemento } from "@/lib/reconciliacaoConfig";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Download, ClipboardCheck, GitCompareArrows, CheckSquare } from "lucide-react";
+import { ArrowLeft, Download, ClipboardCheck, GitCompareArrows, CheckSquare, Eye, FileText } from "lucide-react";
 import { BarChart3, FileSpreadsheet } from "lucide-react";
+import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
 import { exportFrentesLiberadas, exportNaoConformidades, exportRetrorrefletividadeEstaticaHorizontal, exportRetrorrefletividadeEstaticaVertical, exportRetrorrefletividadeDinamica, exportDefensas, exportIntervencoesSH, exportIntervencoesInscricoes, exportIntervencoesSV, exportIntervencoesTacha, exportFichasVerificacao, exportFichasPlaca, exportRegistroNC } from "@/lib/excelExport";
 import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
@@ -314,22 +315,60 @@ const CoordenacaoFiscalizacao = () => {
               </TabsList>
 
               <TabsContent value="frentes" className="mt-6">
-                <div className="text-center py-8 space-y-4">
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Planilha 2.2 - Frente Liberada</h3>
-                    <div className="flex gap-4 justify-center">
-                      <Button size="lg" variant="default" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/minhas-frentes-liberadas")}>
-                        Visualizar Registros
-                      </Button>
-                      <Button size="lg" variant="secondary" className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" onClick={() => handleDownload('frentes')}>
-                        <Download className="mr-2 h-5 w-5" />
-                        Baixar Planilha
-                      </Button>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Visualize e baixe as frentes liberadas registradas
-                    </p>
-                  </div>
+                <div className="space-y-6">
+                  {/* Seção de Registro */}
+                  <Card className="border-2 border-primary/20">
+                    <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        Registrar Nova Frente Liberada
+                      </CardTitle>
+                      <CardDescription>
+                        Planilha 2.2 - Registre as frentes de trabalho liberadas para execução dos serviços
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <FrenteLiberadaForm 
+                        loteId={activeSession?.lote_id || ''} 
+                        rodoviaId={activeSession?.rodovia_id || ''} 
+                      />
+                    </CardContent>
+                  </Card>
+
+                  {/* Seção de Visualização/Exportação */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Eye className="h-5 w-5" />
+                        Visualizar e Exportar Frentes
+                      </CardTitle>
+                      <CardDescription>
+                        Acesse os registros existentes ou baixe a planilha consolidada
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-4 justify-center">
+                        <Button 
+                          size="lg" 
+                          variant="default" 
+                          className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" 
+                          onClick={() => navigate("/minhas-frentes-liberadas")}
+                        >
+                          <Eye className="mr-2 h-5 w-5" />
+                          Visualizar Registros
+                        </Button>
+                        <Button 
+                          size="lg" 
+                          variant="secondary" 
+                          className="font-semibold text-lg px-8 shadow-md hover:shadow-lg transition-shadow" 
+                          onClick={() => handleDownload('frentes')}
+                        >
+                          <Download className="mr-2 h-5 w-5" />
+                          Baixar Planilha
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </TabsContent>
 

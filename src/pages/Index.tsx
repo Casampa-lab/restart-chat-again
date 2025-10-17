@@ -15,7 +15,7 @@ import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye
 import { NotificationBell } from "@/components/NotificationBell";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeSimples from "@/components/NaoConformidadeSimples";
-import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
+
 import RetrorrefletividadeEstaticaForm from "@/components/RetrorrefletividadeEstaticaForm";
 import RetrorrefletividadeDinamicaForm from "@/components/RetrorrefletividadeDinamicaForm";
 import DefensasForm from "@/components/DefensasForm";
@@ -569,12 +569,9 @@ const Index = () => {
             </Card>
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 h-auto bg-muted p-2 gap-1">
+              <TabsList className="grid w-full grid-cols-3 h-auto bg-muted p-2 gap-1">
                 <TabsTrigger value="prontuario" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Inventário Dinâmico</span>
-                </TabsTrigger>
-                <TabsTrigger value="frentes" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Frente de Serviço</span>
                 </TabsTrigger>
                 <TabsTrigger value="controle-qualidade" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Controle de Qualidade</span>
@@ -583,25 +580,6 @@ const Index = () => {
                   <span className="text-xs">Não Conformidade</span>
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="frentes" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Frente de Serviço Liberada</CardTitle>
-                    <CardDescription>Registre as frentes de trabalho liberadas para execução dos serviços</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-end">
-                        <Button variant="secondary" onClick={() => navigate("/minhas-frentes-liberadas")} className="shadow-md hover:shadow-lg transition-shadow">
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver meus registros
-                        </Button>
-                      </div>
-                      <FrenteLiberadaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
               <TabsContent value="ncs" className="mt-6">
                 <Card>
                   <CardHeader>
