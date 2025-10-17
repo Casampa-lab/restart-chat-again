@@ -7,9 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, Info, Pencil, Settings } from "lucide-react";
+import { Plus, Trash2, Info, Settings } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface Rodovia {
   id: string;
@@ -39,19 +39,6 @@ const RodoviasManager = () => {
   const [rodovias, setRodovias] = useState<Rodovia[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    codigo: "",
-    uf: "",
-    tolerancia_match_metros: "50",
-    tolerancia_placas_metros: "50",
-    tolerancia_porticos_metros: "200",
-    tolerancia_defensas_metros: "20",
-    tolerancia_marcas_metros: "20",
-    tolerancia_cilindros_metros: "25",
-    tolerancia_tachas_metros: "25",
-    tolerancia_inscricoes_metros: "30",
-  });
-  const [editingRodovia, setEditingRodovia] = useState<Rodovia | null>(null);
-  const [editFormData, setEditFormData] = useState({
     codigo: "",
     uf: "",
     tolerancia_match_metros: "50",
@@ -125,35 +112,6 @@ const RodoviasManager = () => {
     }
   };
 
-  const handleUpdate = async () => {
-    if (!editingRodovia) return;
-
-    try {
-      const { error } = await supabase
-        .from("rodovias")
-        .update({
-          codigo: editFormData.codigo,
-          uf: editFormData.uf || null,
-          tolerancia_match_metros: parseInt(editFormData.tolerancia_match_metros) || 50,
-          tolerancia_placas_metros: parseInt(editFormData.tolerancia_placas_metros) || 50,
-          tolerancia_porticos_metros: parseInt(editFormData.tolerancia_porticos_metros) || 200,
-          tolerancia_defensas_metros: parseInt(editFormData.tolerancia_defensas_metros) || 20,
-          tolerancia_marcas_metros: parseInt(editFormData.tolerancia_marcas_metros) || 20,
-          tolerancia_cilindros_metros: parseInt(editFormData.tolerancia_cilindros_metros) || 25,
-          tolerancia_tachas_metros: parseInt(editFormData.tolerancia_tachas_metros) || 25,
-          tolerancia_inscricoes_metros: parseInt(editFormData.tolerancia_inscricoes_metros) || 30,
-        })
-        .eq("id", editingRodovia.id);
-
-      if (error) throw error;
-
-      toast.success("Rodovia atualizada com sucesso!");
-      setEditingRodovia(null);
-      loadRodovias();
-    } catch (error: any) {
-      toast.error("Erro ao atualizar rodovia: " + error.message);
-    }
-  };
 
   const handleBulkUpdate = async () => {
     if (!bulkTolerance) return;
@@ -464,79 +422,50 @@ const RodoviasManager = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Código</TableHead>
-                <TableHead>UF</TableHead>
-                <TableHead className="w-[320px]">Tolerâncias GPS (m)</TableHead>
+                <TableHead>Rodovia</TableHead>
                 <TableHead className="w-24">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rodovias.map((rodovia) => (
                 <TableRow key={rodovia.id}>
-                  <TableCell className="font-medium">{rodovia.codigo}</TableCell>
-                  <TableCell>{rodovia.uf || "-"}</TableCell>
-                  
                   <TableCell>
-                    <TooltipProvider>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium whitespace-nowrap">
+                        {rodovia.codigo} ({rodovia.uf || "N/A"})
+                      </span>
+                      <span className="text-muted-foreground">•</span>
+                      <div className="flex flex-wrap gap-1.5">
                         {TOLERANCIA_CONFIG.map((config) => {
                           const valor = rodovia[config.key as keyof Rodovia] || config.default;
                           return (
-                            <Tooltip key={config.key}>
-                              <TooltipTrigger asChild>
-                                <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-muted hover:bg-muted/80 transition-colors cursor-help">
-                                  <span className="text-sm">{config.icon}</span>
-                                  <span className="text-xs font-medium">{valor}m</span>
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="top">
-                                <p className="text-xs font-medium">{config.label}</p>
-                                <p className="text-xs text-muted-foreground">Tolerância: {valor} metros</p>
-                              </TooltipContent>
-                            </Tooltip>
+                            <div 
+                              key={config.key} 
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted text-xs"
+                            >
+                              <span>{config.icon}</span>
+                              <span>{valor}m</span>
+                            </div>
                           );
                         })}
                       </div>
-                    </TooltipProvider>
+                    </div>
                   </TableCell>
                   
                   <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditingRodovia(rodovia);
-                          setEditFormData({
-                            codigo: rodovia.codigo,
-                            uf: rodovia.uf || "",
-                            tolerancia_match_metros: String(rodovia.tolerancia_match_metros || 50),
-                            tolerancia_placas_metros: String(rodovia.tolerancia_placas_metros || 50),
-                            tolerancia_porticos_metros: String(rodovia.tolerancia_porticos_metros || 200),
-                            tolerancia_defensas_metros: String(rodovia.tolerancia_defensas_metros || 20),
-                            tolerancia_marcas_metros: String(rodovia.tolerancia_marcas_metros || 20),
-                            tolerancia_cilindros_metros: String(rodovia.tolerancia_cilindros_metros || 25),
-                            tolerancia_tachas_metros: String(rodovia.tolerancia_tachas_metros || 25),
-                            tolerancia_inscricoes_metros: String(rodovia.tolerancia_inscricoes_metros || 30),
-                          });
-                        }}
-                      >
-                        <Pencil className="h-4 w-4 text-primary" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(rodovia.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(rodovia.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
               {rodovias.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  <TableCell colSpan={2} className="text-center text-muted-foreground">
                     Nenhuma rodovia cadastrada
                   </TableCell>
                 </TableRow>
@@ -546,133 +475,6 @@ const RodoviasManager = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={!!editingRodovia} onOpenChange={(open) => !open && setEditingRodovia(null)}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Editar Rodovia</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-codigo">Código da Rodovia *</Label>
-                <Input
-                  id="edit-codigo"
-                  placeholder="BR-101"
-                  value={editFormData.codigo}
-                  onChange={(e) => setEditFormData({ ...editFormData, codigo: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-uf">UF (opcional)</Label>
-                <Input
-                  id="edit-uf"
-                  placeholder="SC"
-                  maxLength={2}
-                  value={editFormData.uf}
-                  onChange={(e) => setEditFormData({ ...editFormData, uf: e.target.value.toUpperCase() })}
-                />
-              </div>
-            </div>
-
-            <div className="border-t pt-4 space-y-4">
-              <h4 className="font-medium text-sm">Tolerâncias GPS por Tipo de Elemento</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-placas">🚏 Placas (m)</Label>
-                  <Input
-                    id="edit-placas"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={editFormData.tolerancia_placas_metros}
-                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_placas_metros: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-porticos">🌉 Pórticos (m)</Label>
-                  <Input
-                    id="edit-porticos"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={editFormData.tolerancia_porticos_metros}
-                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_porticos_metros: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-defensas">🛣️ Defensas (m)</Label>
-                  <Input
-                    id="edit-defensas"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={editFormData.tolerancia_defensas_metros}
-                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_defensas_metros: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-marcas">➖ Marcas Long. (m)</Label>
-                  <Input
-                    id="edit-marcas"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={editFormData.tolerancia_marcas_metros}
-                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_marcas_metros: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-inscricoes">➡️ Inscrições (m)</Label>
-                  <Input
-                    id="edit-inscricoes"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={editFormData.tolerancia_inscricoes_metros}
-                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_inscricoes_metros: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-cilindros">🔴 Cilindros (m)</Label>
-                  <Input
-                    id="edit-cilindros"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={editFormData.tolerancia_cilindros_metros}
-                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_cilindros_metros: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-tachas">💎 Tachas (m)</Label>
-                  <Input
-                    id="edit-tachas"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={editFormData.tolerancia_tachas_metros}
-                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_tachas_metros: e.target.value })}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingRodovia(null)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleUpdate} disabled={!editFormData.codigo}>
-              Salvar Alterações
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
