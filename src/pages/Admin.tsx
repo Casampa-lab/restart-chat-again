@@ -21,6 +21,7 @@ import { NecessidadesAuditor } from "@/components/admin/NecessidadesAuditor";
 import { DeleteNecessidades } from "@/components/admin/DeleteNecessidades";
 import { DiagnosticoMatch } from "@/components/admin/DiagnosticoMatch";
 import { RecalcularMatches } from "@/components/admin/RecalcularMatches";
+import { LimparReconciliacoesInconsistentes } from "@/components/admin/LimparReconciliacoesInconsistentes";
 import { ResetDatabaseButton } from "@/components/admin/ResetDatabaseButton";
 
 import logoOperaVia from "@/assets/logo-operavia.jpg";
@@ -199,6 +200,7 @@ const Admin = () => {
           {isAdmin && (
             <TabsContent value="sistema">
               <div className="space-y-6">
+                <LimparReconciliacoesInconsistentes />
                 <ResetDatabaseButton />
               </div>
             </TabsContent>
