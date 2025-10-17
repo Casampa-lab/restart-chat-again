@@ -196,22 +196,18 @@ export const UsuariosManager = () => {
 
       if (profileError) throw profileError;
 
-      // Atualizar role apenas se mudou
-      const currentUserRole = editingProfile.user_roles?.[0]?.role;
-      if (currentUserRole !== selectedRole) {
-        // Remover role existente
-        await supabase
-          .from("user_roles")
-          .delete()
-          .eq("user_id", editingProfile.id);
+      // Remover role existente
+      await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", editingProfile.id);
 
-        // Inserir novo role
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .insert([{ user_id: editingProfile.id, role: selectedRole as any }]);
+      // Inserir novo role
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .insert([{ user_id: editingProfile.id, role: selectedRole as any }]);
 
-        if (roleError) throw roleError;
-      }
+      if (roleError) throw roleError;
 
       toast.success("Usuário atualizado com sucesso!");
       handleCloseDialog();
