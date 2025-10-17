@@ -345,7 +345,46 @@ const LotesManager = () => {
       toast.error("Erro ao excluir: " + error.message);
     }
   };
+
+  const handleImportLotesData = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('import-lotes-data');
+      
+      if (error) throw error;
+      
+      if (data.success) {
+        toast.success('Importação concluída com sucesso!');
+        console.log('Resultados:', data.results);
+        loadData();
+      } else {
+        toast.error('Erro na importação: ' + data.error);
+      }
+    } catch (error: any) {
+      toast.error('Erro ao importar dados: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Importar Dados da Planilha</CardTitle>
+          <CardDescription>
+            Importa dados dos Lotes 04 a 10 com suas rodovias e coordenadas
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            onClick={handleImportLotesData}
+            disabled={loading}
+            className="w-full"
+          >
+            {loading ? 'Importando...' : 'Importar Dados da Planilha'}
+          </Button>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>Cadastrar Novo Lote</CardTitle>
