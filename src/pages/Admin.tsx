@@ -21,6 +21,7 @@ import { NecessidadesAuditor } from "@/components/admin/NecessidadesAuditor";
 import { DeleteNecessidades } from "@/components/admin/DeleteNecessidades";
 import { DiagnosticoMatch } from "@/components/admin/DiagnosticoMatch";
 import { RecalcularMatches } from "@/components/admin/RecalcularMatches";
+import { ResetDatabaseButton } from "@/components/admin/ResetDatabaseButton";
 
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 
@@ -128,7 +129,7 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="supervisoras" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-8' : 'grid-cols-7'}`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-7'}`}>
             <TabsTrigger value="supervisoras">Supervisoras</TabsTrigger>
             <TabsTrigger value="usuarios">Usuários</TabsTrigger>
             <TabsTrigger value="empresas">Executoras</TabsTrigger>
@@ -137,6 +138,7 @@ const Admin = () => {
             <TabsTrigger value="inventario">Cadastro</TabsTrigger>
             <TabsTrigger value="necessidades">Projeto</TabsTrigger>
             {isAdmin && <TabsTrigger value="auditoria">Auditoria GPS</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="sistema" className="text-destructive">Sistema</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="supervisoras">
@@ -190,6 +192,14 @@ const Admin = () => {
                 >
                   Abrir Painel de Auditoria GPS
                 </Button>
+              </div>
+            </TabsContent>
+          )}
+
+          {isAdmin && (
+            <TabsContent value="sistema">
+              <div className="space-y-6">
+                <ResetDatabaseButton />
               </div>
             </TabsContent>
           )}
