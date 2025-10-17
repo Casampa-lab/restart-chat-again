@@ -128,20 +128,31 @@ export function ReconciliacaoDrawerUniversal({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      const { error } = await supabase
-        .from(config.tabelaNecessidades as any)
+      // Atualizar reconciliacao para rejeitado
+      const { error: reconciliacaoError } = await supabase
+        .from('reconciliacoes')
         .update({
-          status_reconciliacao: 'rejeitado',
-          servico_final: 'Implantar',
-          servico: 'Implantar',
-          observacao_reconciliacao: observacao,
+          status: 'rejeitado',
+          reconciliado: true,
           rejeitado_por: user.id,
           rejeitado_em: new Date().toISOString(),
-          reconciliado: true
+          motivo_rejeicao: observacao,
+        })
+        .eq("necessidade_id", necessidade.id)
+        .eq("tipo_elemento", tipoElemento);
+
+      if (reconciliacaoError) throw reconciliacaoError;
+
+      // Atualizar necessidade para Implantar
+      const { error: necessidadeError } = await supabase
+        .from(config.tabelaNecessidades as any)
+        .update({
+          servico_final: 'Implantar',
+          servico: 'Implantar',
         })
         .eq("id", necessidade.id);
 
-      if (error) throw error;
+      if (necessidadeError) throw necessidadeError;
       
       toast.success("✓ Reconciliação rejeitada. Item marcado para implantação.");
       onReconciliar();

@@ -836,15 +836,63 @@ export function NecessidadesImporter() {
         }
       };
       
-      // Função auxiliar para fazer flush do batch de inserts
+      // Array para guardar dados de match paralelos ao batch
+      const matchDataBatch: Array<{
+        distancia_match_metros: number | null;
+        overlap_porcentagem: number | null;
+        tipo_match: string | null;
+        status: 'aprovado' | 'pendente_aprovacao' | 'rejeitado';
+        motivo_revisao: string | null;
+        cadastro_id: string | null;
+      }> = [];
+
+      // Função auxiliar para fazer flush do batch de inserts e criar reconciliações
       const flushBatch = async (tabelaNecessidade: string) => {
         if (batchInsert.length > 0) {
-          const { error } = await supabase
+          // Inserir necessidades e retornar os IDs
+          const { data: necessidadesInseridas, error } = await supabase
             .from(tabelaNecessidade as any)
-            .insert(batchInsert);
+            .insert(batchInsert)
+            .select('id, cadastro_id');
           
           if (error) throw error;
+          
+          // Criar reconciliações para necessidades com match
+          if (necessidadesInseridas && necessidadesInseridas.length > 0) {
+            const reconciliacoesParaInserir = [];
+            
+            for (let index = 0; index < necessidadesInseridas.length; index++) {
+              const nec = necessidadesInseridas[index] as any;
+              const matchData = matchDataBatch[index];
+              
+              if (nec.cadastro_id && matchData) {
+                reconciliacoesParaInserir.push({
+                  tipo_elemento: tipo === 'marcas_transversais' ? 'inscricoes' : tipo,
+                  necessidade_id: nec.id,
+                  cadastro_id: nec.cadastro_id,
+                  distancia_match_metros: matchData.distancia_match_metros,
+                  overlap_porcentagem: matchData.overlap_porcentagem,
+                  tipo_match: matchData.tipo_match,
+                  status: matchData.status,
+                  reconciliado: matchData.status === 'aprovado',
+                  motivo_revisao: matchData.motivo_revisao,
+                });
+              }
+            }
+            
+            if (reconciliacoesParaInserir.length > 0) {
+              const { error: reconciliacaoError } = await supabase
+                .from('reconciliacoes')
+                .insert(reconciliacoesParaInserir);
+              
+              if (reconciliacaoError) {
+                console.error('Erro ao criar reconciliações:', reconciliacaoError);
+              }
+            }
+          }
+          
           batchInsert.length = 0; // Limpar batch
+          matchDataBatch.length = 0; // Limpar dados de match
         }
       };
       
@@ -1150,6 +1198,16 @@ export function NecessidadesImporter() {
 
           // 🚀 OTIMIZAÇÃO: Adicionar ao batch ao invés de inserir individualmente
           batchInsert.push(dadosInsercao);
+          
+          // Guardar dados de match paralelos
+          matchDataBatch.push({
+            distancia_match_metros: distancia,
+            overlap_porcentagem,
+            tipo_match: tipo_match_resultado,
+            status: (status_reconciliacao || 'aprovado') as 'aprovado' | 'pendente_aprovacao' | 'rejeitado',
+            motivo_revisao,
+            cadastro_id: match,
+          });
 
           // Fazer flush do batch quando atingir o tamanho limite
           if (batchInsert.length >= BATCH_SIZE) {
