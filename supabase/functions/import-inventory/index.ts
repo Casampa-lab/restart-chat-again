@@ -538,8 +538,21 @@ serve(async (req) => {
                 }
               }
               
+              // Log específico para valores de KM = 0
+              if ((normalizedKey.includes('km') || normalizedKey === 'km_inicial' || normalizedKey === 'km_final') 
+                  && (cleanedValue === 0 || cleanedValue === '0')) {
+                console.log(`[KM ZERO DEBUG] Campo: "${normalizedKey}", Valor: ${cleanedValue}, Tipo: ${typeof cleanedValue}`);
+              }
+              
               // Conversões especiais usando a chave original
-              if (normalizedKey === "largura_cm" && originalKey.toLowerCase().includes("(m)")) {
+              // PRIORIDADE: Garantir que km=0 sempre seja mapeado PRIMEIRO
+              if (normalizedKey === 'km' || normalizedKey === 'km_inicial' || normalizedKey === 'km_final') {
+                const kmValue = Number(cleanedValue);
+                if (!isNaN(kmValue)) {
+                  record[normalizedKey] = kmValue;
+                  console.log(`[KM MAPPING] ${normalizedKey} = ${kmValue}`);
+                }
+              } else if (normalizedKey === "largura_cm" && originalKey.toLowerCase().includes("(m)")) {
                 // Converter de metros para centímetros
                 record[normalizedKey] = Number(cleanedValue) * 100;
               } else if (normalizedKey === "extensao_metros" && originalKey.toLowerCase().includes("(km)")) {

@@ -278,6 +278,12 @@ export function InventarioImporterManager() {
         });
       });
 
+      // Log de debug para filtro de linhas
+      console.log(`=== FILTRO DE LINHAS (${inventoryType}) ===`);
+      console.log(`Linhas totais no Excel: ${jsonData.length}`);
+      console.log(`Linhas após filtro: ${dataRows.length}`);
+      console.log(`Primeiras 3 linhas filtradas:`, dataRows.slice(0, 3));
+
       // Validar se há dados após filtro
       if (dataRows.length === 0) {
         toast.error("Planilha vazia: nenhum registro válido encontrado");
