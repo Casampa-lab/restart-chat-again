@@ -25,6 +25,9 @@ const TIPOS_ELEMENTOS = [
 // Tipos que possuem a coluna status_revisao
 const TIPOS_COM_STATUS_REVISAO = ['defensas', 'marcas_longitudinais', 'tachas'];
 
+// Tipos que possuem colunas de match para geometria linear
+const TIPOS_COM_MATCH_LINEAR = ['marcas_longitudinais', 'marcas_transversais'];
+
 interface LogEntry {
   tipo: "success" | "warning" | "error" | "info";
   mensagem: string;
@@ -870,8 +873,12 @@ export function RecalcularMatches() {
 
           if (cadastro_id !== null) updateData.cadastro_id = cadastro_id;
           if (distancia_match_metros !== null) updateData.distancia_match_metros = distancia_match_metros;
-          if (overlap_porcentagem !== null) updateData.overlap_porcentagem = overlap_porcentagem;
-          if (tipo_match !== null) updateData.tipo_match = tipo_match;
+          
+          // Adicionar colunas de match linear apenas para tipos que as possuem
+          if (TIPOS_COM_MATCH_LINEAR.includes(tipo)) {
+            if (overlap_porcentagem !== null) updateData.overlap_porcentagem = overlap_porcentagem;
+            if (tipo_match !== null) updateData.tipo_match = tipo_match;
+          }
 
           // Atualizar necessidade
           const { error: updateError } = await supabase
