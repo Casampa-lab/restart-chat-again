@@ -158,18 +158,45 @@ export function InventarioImporterManager() {
         throw new Error("Nenhum registro encontrado na planilha");
       }
 
-      // Definir onde estão os headers e onde começam os dados para cada tipo
-      const sheetConfig: Record<string, { headerRow: number; dataStartRow: number }> = {
-        "placas": { headerRow: 1, dataStartRow: 2 },              // Headers na linha 2 (índice 1), dados na linha 3 (índice 2)
-        "marcas_longitudinais": { headerRow: 1, dataStartRow: 2 }, // Headers na linha 2 (índice 1), dados na linha 3 (índice 2)
-        "cilindros": { headerRow: 1, dataStartRow: 2 },
-        "inscricoes": { headerRow: 1, dataStartRow: 2 },
-        "tachas": { headerRow: 1, dataStartRow: 2 },
-        "porticos": { headerRow: 1, dataStartRow: 2 },
-        "defensas": { headerRow: 1, dataStartRow: 2 },
+      // Detecção automática da estrutura da planilha
+      // Verifica se a primeira linha contém headers típicos ou é uma linha de título
+      const detectSheetStructure = (): { headerRow: number; dataStartRow: number } => {
+        const firstRow = jsonData[0] as any[];
+        
+        // Headers típicos por tipo de inventário (case insensitive)
+        const typicalHeaders: Record<string, string[]> = {
+          "placas": ["br", "snv", "km", "código da placa", "codigo da placa", "lado", "tipo", "latitude", "longitude"],
+          "marcas_longitudinais": ["br", "snv", "km", "tipo de demarcação", "cor", "largura", "extensão"],
+          "cilindros": ["br", "snv", "km", "cor", "quantidade", "tipo"],
+          "inscricoes": ["br", "snv", "km", "sigla", "tipo", "cor", "dimensões"],
+          "tachas": ["br", "snv", "km", "tipo", "cor", "quantidade"],
+          "porticos": ["br", "snv", "km", "tipo", "vão", "altura"],
+          "defensas": ["br", "snv", "km", "tipo", "extensão", "lado"],
+        };
+        
+        const expectedHeaders = typicalHeaders[inventoryType] || ["br", "snv", "km"];
+        
+        // Verificar se a primeira linha contém pelo menos 2 headers típicos
+        const firstRowHeaders = firstRow.map(cell => 
+          String(cell || '').trim().toLowerCase()
+        );
+        
+        const matchCount = expectedHeaders.filter(header => 
+          firstRowHeaders.some(cell => cell.includes(header) || header.includes(cell))
+        ).length;
+        
+        // Se encontrou pelo menos 2 headers típicos, assume que é linha de header
+        if (matchCount >= 2) {
+          console.log(`✅ Headers detectados na linha 1 (${matchCount} campos identificados)`);
+          return { headerRow: 0, dataStartRow: 1 };
+        }
+        
+        // Caso contrário, assume estrutura tradicional com linha de título
+        console.log(`📋 Linha de título detectada. Headers na linha 2`);
+        return { headerRow: 1, dataStartRow: 2 };
       };
       
-      const config = sheetConfig[inventoryType] || { headerRow: 0, dataStartRow: 1 };
+      const config = detectSheetStructure();
       const headers = jsonData[config.headerRow] as any[];
       let dataRows = jsonData.slice(config.dataStartRow);
 
