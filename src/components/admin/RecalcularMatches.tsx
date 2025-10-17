@@ -13,9 +13,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const TIPOS_ELEMENTOS = [
-  { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabela_cadastro: "ficha_marcas_longitudinais", tabela_necessidade: "necessidades_marcas_longitudinais" },
-  { value: "tachas", label: "Tachas Refletivas", tabela_cadastro: "ficha_tachas", tabela_necessidade: "necessidades_tachas" },
+  { value: "placas", label: "Placas", tabela_cadastro: "ficha_placa", tabela_necessidade: "necessidades_placas" },
+  { value: "porticos", label: "Pórticos", tabela_cadastro: "ficha_porticos", tabela_necessidade: "necessidades_porticos" },
   { value: "defensas", label: "Defensas", tabela_cadastro: "defensas", tabela_necessidade: "necessidades_defensas" },
+  { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabela_cadastro: "ficha_marcas_longitudinais", tabela_necessidade: "necessidades_marcas_longitudinais" },
+  { value: "cilindros", label: "Cilindros", tabela_cadastro: "ficha_cilindros", tabela_necessidade: "necessidades_cilindros" },
+  { value: "tachas", label: "Tachas Refletivas", tabela_cadastro: "ficha_tachas", tabela_necessidade: "necessidades_tachas" },
+  { value: "marcas_transversais", label: "Inscrições/Marcas Transversais", tabela_cadastro: "ficha_inscricoes", tabela_necessidade: "necessidades_marcas_transversais" },
 ];
 
 interface LogEntry {
@@ -31,16 +35,16 @@ export function RecalcularMatches() {
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [progressInfo, setProgressInfo] = useState<{ current: number; total: number } | null>(null);
-  const [toleranciaCustomizada, setToleranciaCustomizada] = useState<number | null>(null);
-  const [toleranciaPadrao, setToleranciaPadrao] = useState<number | null>(null);
+  const [toleranciasPadrao, setToleranciasPadrao] = useState<Record<string, number>>({});
+  const [toleranciasCustomizadas, setToleranciasCustomizadas] = useState<Record<string, number>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Buscar tolerância padrão quando tipo ou rodovia mudar
+  // Buscar todas as tolerâncias padrão ao selecionar rodovia
   useEffect(() => {
-    const buscarToleranciaPadrao = async () => {
-      if (!tipo || !rodoviaId) {
-        setToleranciaPadrao(null);
+    const buscarToleranciasPadrao = async () => {
+      if (!rodoviaId) {
+        setToleranciasPadrao({});
         return;
       }
 
@@ -59,32 +63,26 @@ export function RecalcularMatches() {
         .eq('id', rodoviaId)
         .single();
 
-      const toleranciaMap: Record<string, string> = {
-        'placas': 'tolerancia_placas_metros',
-        'porticos': 'tolerancia_porticos_metros',
-        'defensas': 'tolerancia_defensas_metros',
-        'marcas_longitudinais': 'tolerancia_marcas_metros',
-        'cilindros': 'tolerancia_cilindros_metros',
-        'tachas': 'tolerancia_tachas_metros',
-        'marcas_transversais': 'tolerancia_inscricoes_metros'
-      };
-
-      const colunaEspecifica = toleranciaMap[tipo];
-      const tolerancia = 
-        rodoviaData?.[colunaEspecifica as keyof typeof rodoviaData] as number || 
-        rodoviaData?.tolerancia_match_metros || 
-        50;
-
-      setToleranciaPadrao(tolerancia);
+      if (rodoviaData) {
+        setToleranciasPadrao({
+          placas: rodoviaData.tolerancia_placas_metros || rodoviaData.tolerancia_match_metros || 50,
+          porticos: rodoviaData.tolerancia_porticos_metros || rodoviaData.tolerancia_match_metros || 200,
+          defensas: rodoviaData.tolerancia_defensas_metros || rodoviaData.tolerancia_match_metros || 20,
+          marcas_longitudinais: rodoviaData.tolerancia_marcas_metros || rodoviaData.tolerancia_match_metros || 20,
+          cilindros: rodoviaData.tolerancia_cilindros_metros || rodoviaData.tolerancia_match_metros || 30,
+          tachas: rodoviaData.tolerancia_tachas_metros || rodoviaData.tolerancia_match_metros || 20,
+          marcas_transversais: rodoviaData.tolerancia_inscricoes_metros || rodoviaData.tolerancia_match_metros || 30,
+        });
+      }
     };
 
-    buscarToleranciaPadrao();
-  }, [tipo, rodoviaId]);
+    buscarToleranciasPadrao();
+  }, [rodoviaId]);
 
-  // Resetar customização ao trocar tipo ou rodovia
+  // Resetar customizações ao trocar rodovia
   useEffect(() => {
-    setToleranciaCustomizada(null);
-  }, [tipo, rodoviaId]);
+    setToleranciasCustomizadas({});
+  }, [rodoviaId]);
 
   // Buscar lotes
   const { data: lotes } = useQuery({
@@ -656,11 +654,11 @@ export function RecalcularMatches() {
         50;
 
       // USAR A CUSTOMIZADA SE EXISTIR, SENÃO USA O PADRÃO
-      const toleranciaFinal = toleranciaCustomizada ?? toleranciaPadraoRodovia;
+      const toleranciaFinal = toleranciasCustomizadas[tipo] ?? toleranciasPadrao[tipo] ?? 50;
 
       setLogs(prev => [...prev, {
         tipo: "info",
-        mensagem: `📍 Tolerância GPS: ${toleranciaFinal}m ${toleranciaCustomizada ? '(customizada)' : '(padrão)'} para ${tipoConfig.label}`
+        mensagem: `📍 Tolerância GPS: ${toleranciaFinal}m ${toleranciasCustomizadas[tipo] ? '(customizada)' : '(padrão)'} para ${tipoConfig.label}`
       }]);
 
       // 4. Processar cada necessidade
@@ -923,9 +921,9 @@ export function RecalcularMatches() {
         }
       });
 
-      // Limpar tolerância customizada após alguns segundos
+      // Limpar tolerâncias customizadas após alguns segundos
       setTimeout(() => {
-        setToleranciaCustomizada(null);
+        setToleranciasCustomizadas({});
       }, 2000);
 
     } catch (error: any) {
@@ -1010,74 +1008,90 @@ export function RecalcularMatches() {
           </div>
         </div>
 
-        {/* Campo de Tolerância GPS Customizada */}
-        {tipo && rodoviaId && toleranciaPadrao !== null && (
+        {/* Tabela de Tolerâncias GPS */}
+        {rodoviaId && Object.keys(toleranciasPadrao).length > 0 && (
           <div className="bg-muted/50 p-4 rounded-lg border space-y-3">
-            <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-primary" />
-              <Label className="text-sm font-medium">
-                Tolerância GPS para este Match
-              </Label>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-primary" />
+                <Label className="text-sm font-medium">
+                  Tolerâncias GPS para este Match
+                </Label>
+              </div>
+              {Object.keys(toleranciasCustomizadas).length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setToleranciasCustomizadas({})}
+                  disabled={isProcessing}
+                >
+                  Resetar Todas
+                </Button>
+              )}
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">
-                  Padrão configurado na rodovia
-                </Label>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-base">
-                    {toleranciaPadrao}m
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    ({TIPOS_ELEMENTOS.find(t => t.value === tipo)?.label})
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tolerancia-custom" className="text-xs">
-                  Customizar para esta execução (opcional)
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="tolerancia-custom"
-                    type="number"
-                    min={10}
-                    max={500}
-                    placeholder={`Padrão: ${toleranciaPadrao}m`}
-                    value={toleranciaCustomizada ?? ""}
-                    onChange={(e) => {
-                      const val = e.target.value ? parseInt(e.target.value) : null;
-                      setToleranciaCustomizada(val);
-                    }}
-                    disabled={isProcessing}
-                    className="w-32"
-                  />
-                  <span className="flex items-center text-sm text-muted-foreground">metros</span>
-                  {toleranciaCustomizada && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setToleranciaCustomizada(null)}
+            <div className="grid gap-2">
+              {TIPOS_ELEMENTOS.map((elemento) => (
+                <div key={elemento.value} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center p-3 bg-background rounded border">
+                  <div className="font-medium text-sm">
+                    {elemento.label}
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Padrão:</span>
+                    <Badge variant="outline">
+                      {toleranciasPadrao[elemento.value]}m
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={10}
+                      max={500}
+                      placeholder={`${toleranciasPadrao[elemento.value]}m`}
+                      value={toleranciasCustomizadas[elemento.value] ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value ? parseInt(e.target.value) : undefined;
+                        setToleranciasCustomizadas(prev => {
+                          if (val === undefined) {
+                            const { [elemento.value]: _, ...rest } = prev;
+                            return rest;
+                          }
+                          return { ...prev, [elemento.value]: val };
+                        });
+                      }}
                       disabled={isProcessing}
-                    >
-                      Resetar
-                    </Button>
-                  )}
+                      className="w-24"
+                    />
+                    <span className="text-xs text-muted-foreground">metros</span>
+                    {toleranciasCustomizadas[elemento.value] && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setToleranciasCustomizadas(prev => {
+                            const { [elemento.value]: _, ...rest } = prev;
+                            return rest;
+                          });
+                        }}
+                        disabled={isProcessing}
+                        className="h-8"
+                      >
+                        ✕
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                {toleranciaCustomizada && toleranciaCustomizada < 15 && (
-                  <p className="text-xs text-yellow-600">
-                    ⚠️ Tolerância muito baixa pode reduzir matches válidos
-                  </p>
-                )}
-                {toleranciaCustomizada && toleranciaCustomizada > 150 && tipo !== 'porticos' && (
-                  <p className="text-xs text-yellow-600">
-                    ⚠️ Tolerância alta pode gerar matches imprecisos
-                  </p>
-                )}
-              </div>
+              ))}
             </div>
+            
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-xs">
+                💡 Valores customizados aplicam-se apenas a esta execução. Para alterar permanentemente, edite a rodovia.
+              </AlertDescription>
+            </Alert>
           </div>
         )}
 
