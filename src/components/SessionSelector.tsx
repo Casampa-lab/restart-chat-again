@@ -71,7 +71,7 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
         .eq("lote_id", loteId);
 
       if (error) throw error;
-      const rodoviasList = data?.map((lr: any) => lr.rodovias) || [];
+      const rodoviasList = data?.map((lr: any) => lr.rodovias).filter((r): r is Rodovia => r !== null && r !== undefined) || [];
       setRodovias(rodoviasList);
     } catch (error: any) {
       toast.error("Erro ao carregar rodovias: " + error.message);
