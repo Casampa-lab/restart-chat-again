@@ -762,11 +762,6 @@ const LotesManager = () => {
                             <div className="text-xs text-muted-foreground">
                               📏 KM: <span className="font-mono">{lr.km_inicial?.toFixed(3)}</span> - 
                               <span className="font-mono">{lr.km_final?.toFixed(3)}</span>
-                              {lr.extensao_km && (
-                                <span className="ml-2 font-semibold text-foreground">
-                                  ({lr.extensao_km.toFixed(2)} km)
-                                </span>
-                              )}
                             </div>
                           )}
                         </div>
@@ -774,9 +769,9 @@ const LotesManager = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="space-y-2">
-                      {lote.lotes_rodovias.map((lr, idx) => (
-                        <div key={idx} className="text-xs space-y-1 border rounded p-2 bg-muted/30">
+            <div className="space-y-2">
+              {lote.lotes_rodovias.map((lr, idx) => (
+                <div key={idx} className="text-xs space-y-1 border rounded p-2 bg-muted/30 min-w-[220px]">
                           {(lr.latitude_inicial || lr.longitude_inicial) && (
                             <div className="font-mono text-muted-foreground">
                               <span className="text-green-600 font-semibold">📍 Início:</span>
@@ -806,9 +801,14 @@ const LotesManager = () => {
                       ))}
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">
-                    {lote.extensao_total_km ? `${lote.extensao_total_km.toFixed(2)} km` : "—"}
-                  </TableCell>
+          <TableCell className="font-medium">
+            {lote.extensao_total_km ? (
+              <div className="text-center">
+                <div className="text-lg font-bold">{lote.extensao_total_km.toFixed(2)}</div>
+                <div className="text-xs text-muted-foreground">(km)</div>
+              </div>
+            ) : "—"}
+          </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button variant="ghost" size="sm" onClick={() => handleEdit(lote)}>
