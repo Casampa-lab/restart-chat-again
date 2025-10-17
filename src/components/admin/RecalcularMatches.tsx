@@ -13,13 +13,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const TIPOS_ELEMENTOS = [
+  { value: "cilindros", label: "Cilindros", tabela_cadastro: "ficha_cilindros", tabela_necessidade: "necessidades_cilindros" },
+  { value: "defensas", label: "Defensas", tabela_cadastro: "defensas", tabela_necessidade: "necessidades_defensas" },
+  { value: "marcas_transversais", label: "Inscrições/Marcas Transversais", tabela_cadastro: "ficha_inscricoes", tabela_necessidade: "necessidades_marcas_transversais" },
+  { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabela_cadastro: "ficha_marcas_longitudinais", tabela_necessidade: "necessidades_marcas_longitudinais" },
   { value: "placas", label: "Placas", tabela_cadastro: "ficha_placa", tabela_necessidade: "necessidades_placas" },
   { value: "porticos", label: "Pórticos", tabela_cadastro: "ficha_porticos", tabela_necessidade: "necessidades_porticos" },
-  { value: "defensas", label: "Defensas", tabela_cadastro: "defensas", tabela_necessidade: "necessidades_defensas" },
-  { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabela_cadastro: "ficha_marcas_longitudinais", tabela_necessidade: "necessidades_marcas_longitudinais" },
-  { value: "cilindros", label: "Cilindros", tabela_cadastro: "ficha_cilindros", tabela_necessidade: "necessidades_cilindros" },
   { value: "tachas", label: "Tachas Refletivas", tabela_cadastro: "ficha_tachas", tabela_necessidade: "necessidades_tachas" },
-  { value: "marcas_transversais", label: "Inscrições/Marcas Transversais", tabela_cadastro: "ficha_inscricoes", tabela_necessidade: "necessidades_marcas_transversais" },
 ];
 
 // Tipos que possuem a coluna status_revisao
