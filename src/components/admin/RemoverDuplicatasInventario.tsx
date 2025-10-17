@@ -254,7 +254,10 @@ export function RemoverDuplicatasInventario({ loteId: propLoteId, rodoviaId: pro
           Remover Duplicatas do Cadastro
         </CardTitle>
         <CardDescription>
-          Detecta e remove registros duplicados do cadastro inicial, mantendo o registro com necessidades associadas
+          Detecta e remove registros duplicados do cadastro inicial, mantendo o registro com necessidades associadas.
+          <strong className="text-primary block mt-1">
+            ℹ️ Nota: Novas importações já previnem duplicatas automaticamente. Use esta ferramenta apenas para limpar dados históricos.
+          </strong>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

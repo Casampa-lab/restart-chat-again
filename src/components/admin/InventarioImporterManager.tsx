@@ -41,6 +41,10 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
   const [hasPhotos, setHasPhotos] = useState(false);
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState<string>("");
+  
+  // Rastreamento de fotos para limpeza automática
+  const [fotosUploadadas, setFotosUploadadas] = useState<string[]>([]);
+  const [fotosVinculadas, setFotosVinculadas] = useState<Set<string>>(new Set());
 
   // Hook para status de importação
   const { data: inventoryStatus } = useInventoryStatus(propLoteId, propRodoviaId);
@@ -98,6 +102,10 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
 
     setImporting(true);
     setProgress("Iniciando importação...");
+    
+    // Reset rastreamento de fotos
+    setFotosUploadadas([]);
+    setFotosVinculadas(new Set());
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -301,6 +309,7 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
       // 2. Upload das fotos e criar mapeamento
       const photoUrls: Record<string, string> = {};
       const photoArray = photos ? Array.from(photos) : [];
+      const fotosUploadadasLocal: string[] = [];
 
       const bucketMap: Record<string, string> = {
         "placas": "placa-photos",
@@ -386,6 +395,8 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
             .upload(photoPath, photo);
 
           if (!photoError) {
+            // Rastrear foto uploadada
+            fotosUploadadasLocal.push(photoPath);
             const { data: urlData } = supabase.storage
               .from(bucketName)
               .getPublicUrl(photoPath);
@@ -436,6 +447,9 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
         console.log("Primeiras 5 chaves:", Object.keys(photoUrls).slice(0, 5));
         console.log("Coluna de fotos configurada:", photoColumnName);
       }
+
+      // Rastrear fotos vinculadas durante o mapeamento
+      const fotosVinculadasLocal = new Set<string>();
 
       const recordsToInsert = normalizedData.map((row: any, index: number) => {
         const record: Record<string, any> = {
@@ -512,6 +526,12 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
             }
             
             if (matchedUrl) {
+              // Rastrear foto vinculada
+              const pathMatch = matchedUrl.match(/\/([^/]+\/[^/]+)$/);
+              if (pathMatch) {
+                fotosVinculadasLocal.add(pathMatch[1]);
+              }
+              
               // Para placas, preencher tanto foto_url quanto foto_frontal_url
               if (inventoryType === "placas") {
                 record.foto_url = matchedUrl;
@@ -1048,12 +1068,76 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
         return record;
       });
 
+      // 3.5. Validação de duplicatas antes da inserção
+      setProgress("Verificando duplicatas...");
+      
+      const chavesUnicasPorTipo: Record<string, string[]> = {
+        placas: ['km', 'codigo', 'lado', 'rodovia_id'],
+        marcas_longitudinais: ['km_inicial', 'km_final', 'tipo_demarcacao', 'rodovia_id'],
+        cilindros: ['km_inicial', 'cor_corpo', 'rodovia_id'],
+        tachas: ['km_inicial', 'tipo_tacha', 'lado', 'rodovia_id'],
+        inscricoes: ['km_inicial', 'sigla', 'tipo_inscricao', 'rodovia_id'],
+        porticos: ['km', 'tipo', 'rodovia_id'],
+        defensas: ['km_inicial', 'tramo', 'lado', 'rodovia_id'],
+      };
+
+      const chavesUnicas = chavesUnicasPorTipo[inventoryType] || [];
+      
+      // Buscar todos os registros existentes de uma vez (otimizado para grandes volumes)
+      const { data: existentes } = await supabase
+        .from(tableName as any)
+        .select(chavesUnicas.join(',') + ',id')
+        .eq('rodovia_id', propRodoviaId);
+
+      // Criar Set de chaves existentes para lookup O(1)
+      const existentesSet = new Set(
+        (existentes || []).map(e => 
+          chavesUnicas.map(campo => String(e[campo] ?? '')).join('|')
+        )
+      );
+
+      // Filtrar apenas registros novos
+      const registrosOriginais = recordsToInsert.length;
+      const registrosNovos = recordsToInsert.filter(record => {
+        const chave = chavesUnicas.map(campo => String(record[campo] ?? '')).join('|');
+        return !existentesSet.has(chave);
+      });
+
+      const duplicatasEncontradas = registrosOriginais - registrosNovos.length;
+
+      if (duplicatasEncontradas > 0) {
+        const continuar = confirm(
+          `⚠️ DUPLICATAS DETECTADAS\n\n` +
+          `${duplicatasEncontradas} de ${registrosOriginais} registros já existem no banco.\n\n` +
+          `Deseja importar apenas os ${registrosNovos.length} registros novos?\n\n` +
+          `Clique OK para continuar apenas com registros novos.\n` +
+          `Clique Cancelar para abortar a importação.`
+        );
+        
+        if (!continuar) {
+          toast.info("Importação cancelada pelo usuário");
+          setImporting(false);
+          return;
+        }
+        
+        toast.warning(`${duplicatasEncontradas} duplicatas ignoradas. Importando ${registrosNovos.length} registros novos.`);
+      }
+
+      // Usar apenas registros novos
+      const finalRecords = registrosNovos;
+
+      if (finalRecords.length === 0) {
+        toast.warning("Nenhum registro novo para importar (todos já existem)");
+        setImporting(false);
+        return;
+      }
+
       // 4. Inserir em lotes
       setProgress("Inserindo dados no banco...");
       let imported = 0;
 
-      for (let i = 0; i < recordsToInsert.length; i += BATCH_SIZE) {
-        const batch = recordsToInsert.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < finalRecords.length; i += BATCH_SIZE) {
+        const batch = finalRecords.slice(i, i + BATCH_SIZE);
         const { error: insertError } = await supabase
           .from(tableName as any)
           .insert(batch as any);
@@ -1066,13 +1150,39 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
         imported += batch.length;
         
         // Atualizar progress apenas a cada LOG_UPDATE_INTERVAL registros
-        if (imported % LOG_UPDATE_INTERVAL === 0 || imported === recordsToInsert.length) {
-          setProgress(`Importando: ${imported}/${recordsToInsert.length} registros`);
+        if (imported % LOG_UPDATE_INTERVAL === 0 || imported === finalRecords.length) {
+          setProgress(`Importando: ${imported}/${finalRecords.length} registros`);
+        }
+      }
+
+      // 5. Limpeza automática de fotos órfãs
+      let fotosOrfasRemovidas = 0;
+      if (hasPhotos && fotosUploadadasLocal.length > 0) {
+        const fotosOrfas = fotosUploadadasLocal.filter(path => !fotosVinculadasLocal.has(path));
+        
+        if (fotosOrfas.length > 0) {
+          setProgress(`Limpando ${fotosOrfas.length} fotos não vinculadas...`);
+          
+          // Deletar em lotes de 100
+          for (let i = 0; i < fotosOrfas.length; i += 100) {
+            const lote = fotosOrfas.slice(i, i + 100);
+            await supabase.storage.from(bucketName).remove(lote);
+          }
+          
+          fotosOrfasRemovidas = fotosOrfas.length;
+          console.log(`🧹 Limpeza automática: ${fotosOrfasRemovidas} fotos órfãs removidas`);
         }
       }
 
       setProgress("");
-      toast.success(`Importação concluída! ${imported} registros importados${hasPhotos ? ` com ${photoArray.length} fotos` : ''}.`);
+      
+      // Mensagem final com estatísticas
+      const mensagemFinal = `Importação concluída! ${imported} registros importados` +
+        (hasPhotos && fotosVinculadasLocal.size > 0 ? `, ${fotosVinculadasLocal.size} fotos vinculadas` : '') +
+        (fotosOrfasRemovidas > 0 ? `, ${fotosOrfasRemovidas} fotos órfãs removidas automaticamente` : '') +
+        '.';
+      
+      toast.success(mensagemFinal);
 
       // Registrar no log de importações (upsert para atualizar se já existir)
       const { error: logError } = await supabase

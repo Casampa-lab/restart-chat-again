@@ -20,7 +20,6 @@ import { UsuariosManager } from "@/components/admin/UsuariosManager";
 import { InventarioImporterManager } from "@/components/admin/InventarioImporterManager";
 import { DeleteInventarioSelecionado } from "@/components/admin/DeleteInventarioSelecionado";
 import { RemoverDuplicatasInventario } from "@/components/admin/RemoverDuplicatasInventario";
-import { LimparFotosOrfas } from "@/components/admin/LimparFotosOrfas";
 import { NecessidadesImporter } from "@/components/admin/NecessidadesImporter";
 import { DeleteNecessidades } from "@/components/admin/DeleteNecessidades";
 import { RecalcularMatches } from "@/components/admin/RecalcularMatches";
@@ -264,9 +263,6 @@ const Admin = () => {
               <InventarioImporterManager loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
               <DeleteInventarioSelecionado loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
               <RemoverDuplicatasInventario loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
-              
-              {/* Componentes sem alteração */}
-              <LimparFotosOrfas />
               <LimparReconciliacoesOrfas />
             </div>
           </TabsContent>
