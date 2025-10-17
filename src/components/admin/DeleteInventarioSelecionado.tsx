@@ -18,51 +18,29 @@ const TABELAS_INVENTARIO = [
   { value: "defensas", label: "Defensas" },
 ];
 
-export function DeleteInventarioSelecionado() {
+interface DeleteInventarioSelecionadoProps {
+  loteId?: string;
+  rodoviaId?: string;
+}
+
+export function DeleteInventarioSelecionado({ loteId: propLoteId, rodoviaId: propRodoviaId }: DeleteInventarioSelecionadoProps = {}) {
   const queryClient = useQueryClient();
-  const [selectedLote, setSelectedLote] = useState<string>("");
-  const [selectedRodovia, setSelectedRodovia] = useState<string>("");
   const [selectedTabela, setSelectedTabela] = useState<string>("");
   const [deleting, setDeleting] = useState(false);
 
-  // Buscar lotes
-  const { data: lotes } = useQuery({
-    queryKey: ["lotes"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("lotes")
-        .select("id, numero")
-        .order("numero");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Buscar rodovias
-  const { data: rodovias } = useQuery({
-    queryKey: ["rodovias"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("rodovias")
-        .select("id, codigo")
-        .order("codigo");
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const handleDelete = async () => {
-    if (!selectedLote || !selectedRodovia || !selectedTabela) {
-      toast.error("Selecione o lote, rodovia e tipo de serviço");
+    if (!propLoteId || !propRodoviaId || !selectedTabela) {
+      toast.error("Selecione o lote, rodovia e tipo de serviço no topo da página");
       return;
     }
 
-    const loteNome = lotes?.find(l => l.id === selectedLote)?.numero;
-    const rodoviaNome = rodovias?.find(r => r.id === selectedRodovia)?.codigo;
+    // Buscar nomes do banco para confirmação
+    const { data: loteData } = await supabase.from("lotes").select("numero").eq("id", propLoteId).single();
+    const { data: rodoviaData } = await supabase.from("rodovias").select("codigo").eq("id", propRodoviaId).single();
     const tabelaNome = TABELAS_INVENTARIO.find(t => t.value === selectedTabela)?.label;
 
     if (!confirm(
-      `Tem certeza que deseja apagar TODOS os registros de ${tabelaNome} da ${rodoviaNome} do Lote ${loteNome}?\n\n` +
+      `Tem certeza que deseja apagar TODOS os registros de ${tabelaNome} da ${rodoviaData?.codigo} do Lote ${loteData?.numero}?\n\n` +
       `Esta ação não pode ser desfeita e incluirá as fotos associadas!`
     )) {
       return;
@@ -104,8 +82,8 @@ export function DeleteInventarioSelecionado() {
       const { data: registros, error: fetchError } = await supabase
         .from(selectedTabela as any)
         .select(selectColumns)
-        .eq('lote_id', selectedLote)
-        .eq('rodovia_id', selectedRodovia) as any;
+        .eq('lote_id', propLoteId)
+        .eq('rodovia_id', propRodoviaId) as any;
 
       if (fetchError) throw fetchError;
 
@@ -151,8 +129,8 @@ export function DeleteInventarioSelecionado() {
       const { error: deleteError, count } = await supabase
         .from(selectedTabela as any)
         .delete({ count: 'exact' })
-        .eq('lote_id', selectedLote)
-        .eq('rodovia_id', selectedRodovia);
+        .eq('lote_id', propLoteId)
+        .eq('rodovia_id', propRodoviaId);
 
       if (deleteError) {
         console.error('Erro ao deletar registros:', deleteError);
@@ -180,8 +158,8 @@ export function DeleteInventarioSelecionado() {
         const { data: necessidadesAfetadas } = await supabase
           .from(tabelaNecessidade as any)
           .select('id')
-          .eq('lote_id', selectedLote)
-          .eq('rodovia_id', selectedRodovia)
+          .eq('lote_id', propLoteId)
+          .eq('rodovia_id', propRodoviaId)
           .not('cadastro_id', 'is', null);
         
         if (necessidadesAfetadas && necessidadesAfetadas.length > 0) {
@@ -230,7 +208,7 @@ export function DeleteInventarioSelecionado() {
       
       // Invalidar cache para atualizar o semáforo
       await queryClient.invalidateQueries({ 
-        queryKey: ["inventory-status", selectedLote, selectedRodovia] 
+        queryKey: ["inventory-status", propLoteId, propRodoviaId] 
       });
 
       // Deletar o log de importação para este tipo
@@ -249,14 +227,12 @@ export function DeleteInventarioSelecionado() {
         await supabase
           .from('importacoes_log')
           .delete()
-          .eq('lote_id', selectedLote)
-          .eq('rodovia_id', selectedRodovia)
+          .eq('lote_id', propLoteId)
+          .eq('rodovia_id', propRodoviaId)
           .eq('tipo_inventario', tipoInventario);
       }
       
       // Limpar seleção
-      setSelectedLote("");
-      setSelectedRodovia("");
       setSelectedTabela("");
     } catch (error: any) {
       console.error('Erro:', error);
@@ -278,59 +254,25 @@ export function DeleteInventarioSelecionado() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="lote">Lote *</Label>
-            <Select value={selectedLote} onValueChange={setSelectedLote}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o lote" />
-              </SelectTrigger>
-              <SelectContent>
-                {lotes?.map((lote) => (
-                  <SelectItem key={lote.id} value={lote.id}>
-                    Lote {lote.numero}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="rodovia">Rodovia *</Label>
-            <Select value={selectedRodovia} onValueChange={setSelectedRodovia}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione a rodovia" />
-              </SelectTrigger>
-              <SelectContent>
-                {rodovias?.map((rodovia) => (
-                  <SelectItem key={rodovia.id} value={rodovia.id}>
-                    {rodovia.codigo}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="tabela">Tipo de Serviço *</Label>
-            <Select value={selectedTabela} onValueChange={setSelectedTabela}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {TABELAS_INVENTARIO.map((tabela) => (
-                  <SelectItem key={tabela.value} value={tabela.value}>
-                    {tabela.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="tabela">Tipo de Serviço *</Label>
+          <Select value={selectedTabela} onValueChange={setSelectedTabela}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              {TABELAS_INVENTARIO.map((tabela) => (
+                <SelectItem key={tabela.value} value={tabela.value}>
+                  {tabela.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Button
           onClick={handleDelete}
-          disabled={!selectedLote || !selectedRodovia || !selectedTabela || deleting}
+          disabled={!propLoteId || !propRodoviaId || !selectedTabela || deleting}
           variant="destructive"
           size="lg"
           className="w-full"

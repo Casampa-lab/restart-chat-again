@@ -193,12 +193,82 @@ const Admin = () => {
 
           <TabsContent value="inventario">
             <div className="space-y-6">
-              <InventarioImporterManager />
-              <DeleteInventarioSelecionado />
-              <RemoverDuplicatasInventario />
-          <LimparFotosOrfas />
-          <LimparReconciliacoesOrfas />
-        </div>
+              {/* Card de Seleção de Contexto */}
+              <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Contexto de Trabalho
+                  </CardTitle>
+                  <CardDescription>
+                    Selecione o lote e rodovia para facilitar a gestão do cadastro
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Dropdown Lote */}
+                    <div>
+                      <Label htmlFor="cadastro-lote">Lote</Label>
+                      <Select value={selectedLoteId} onValueChange={(value) => {
+                        setSelectedLoteId(value);
+                        setSelectedRodoviaId(""); // Reset rodovia ao trocar lote
+                      }}>
+                        <SelectTrigger id="cadastro-lote">
+                          <SelectValue placeholder="Selecione o lote" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {lotes?.map((lote) => (
+                            <SelectItem key={lote.id} value={lote.id}>
+                              Lote {lote.numero}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Dropdown Rodovia */}
+                    <div>
+                      <Label htmlFor="cadastro-rodovia">Rodovia</Label>
+                      <Select 
+                        value={selectedRodoviaId} 
+                        onValueChange={setSelectedRodoviaId}
+                        disabled={!selectedLoteId}
+                      >
+                        <SelectTrigger id="cadastro-rodovia">
+                          <SelectValue placeholder={selectedLoteId ? "Selecione a rodovia" : "Primeiro selecione o lote"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {rodovias?.map((rodovia: any) => (
+                            <SelectItem key={rodovia.id} value={rodovia.id}>
+                              {rodovia.codigo}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  {/* Indicador visual */}
+                  {selectedLoteId && selectedRodoviaId && (
+                    <Alert className="mt-4 bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <AlertDescription className="text-green-800 dark:text-green-200">
+                        <strong>Contexto ativo:</strong> Lote {lotes?.find(l => l.id === selectedLoteId)?.numero} - {rodovias?.find((r: any) => r.id === selectedRodoviaId)?.codigo}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Componentes com props compartilhadas */}
+              <InventarioImporterManager loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
+              <DeleteInventarioSelecionado loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
+              <RemoverDuplicatasInventario loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
+              
+              {/* Componentes sem alteração */}
+              <LimparFotosOrfas />
+              <LimparReconciliacoesOrfas />
+            </div>
           </TabsContent>
 
           <TabsContent value="necessidades">

@@ -81,40 +81,19 @@ const TIPOS_ELEMENTOS = [
   },
 ];
 
-export function RemoverDuplicatasInventario() {
+interface RemoverDuplicatasInventarioProps {
+  loteId?: string;
+  rodoviaId?: string;
+}
+
+export function RemoverDuplicatasInventario({ loteId: propLoteId, rodoviaId: propRodoviaId }: RemoverDuplicatasInventarioProps = {}) {
   const [tipo, setTipo] = useState<string>("");
-  const [loteId, setLoteId] = useState<string>("");
-  const [rodoviaId, setRodoviaId] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [stats, setStats] = useState<Stats>({ gruposEncontrados: 0, registrosRemovidos: 0, necessidadesReassociadas: 0 });
 
   const queryClient = useQueryClient();
-
-  // Buscar lotes
-  const { data: lotes } = useQuery({
-    queryKey: ['lotes-admin'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lotes')
-        .select('id, numero')
-        .order('numero');
-      if (error) throw error;
-      return data as Array<{ id: string; numero: string }>;
-    },
-  });
-
-  // Buscar rodovias do lote selecionado
-  const { data: rodovias } = useQuery({
-    queryKey: ['rodovias-by-lote', loteId],
-    enabled: !!loteId,
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_rodovias_by_lote', { p_lote_id: loteId });
-      if (error) throw error;
-      return data as Array<{ id: string; codigo: string }>;
-    },
-  });
 
   const addLog = (type: LogEntry['type'], message: string) => {
     setLogs(prev => [...prev, { type, message }]);
@@ -125,8 +104,8 @@ export function RemoverDuplicatasInventario() {
   };
 
   const handleRemoverDuplicatas = async () => {
-    if (!tipo || !loteId || !rodoviaId) {
-      toast.error("Selecione tipo, lote e rodovia");
+    if (!tipo || !propLoteId || !propRodoviaId) {
+      toast.error("Selecione tipo, lote e rodovia no topo da página");
       return;
     }
 
@@ -145,8 +124,8 @@ export function RemoverDuplicatasInventario() {
       const { data: registros, error: errorRegistros } = await supabase
         .from(config.tabela_cadastro as any)
         .select('*')
-        .eq('lote_id', loteId)
-        .eq('rodovia_id', rodoviaId);
+        .eq('lote_id', propLoteId)
+        .eq('rodovia_id', propRodoviaId);
 
       if (errorRegistros) throw errorRegistros;
       if (!registros || registros.length === 0) {
@@ -279,59 +258,25 @@ export function RemoverDuplicatasInventario() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Tipo de Elemento</label>
-            <Select value={tipo} onValueChange={setTipo} disabled={isProcessing}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {TIPOS_ELEMENTOS.map(t => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Lote</label>
-            <Select value={loteId} onValueChange={setLoteId} disabled={isProcessing}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o lote" />
-              </SelectTrigger>
-              <SelectContent>
-                {lotes?.map(lote => (
-                  <SelectItem key={lote.id} value={lote.id}>
-                    {lote.numero}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Rodovia</label>
-            <Select value={rodoviaId} onValueChange={setRodoviaId} disabled={isProcessing || !loteId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione a rodovia" />
-              </SelectTrigger>
-              <SelectContent>
-                {rodovias?.map((rodovia: any) => (
-                  <SelectItem key={rodovia.id} value={rodovia.id}>
-                    {rodovia.codigo}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Tipo de Elemento</label>
+          <Select value={tipo} onValueChange={setTipo} disabled={isProcessing}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              {TIPOS_ELEMENTOS.map(t => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Button
           onClick={handleRemoverDuplicatas}
-          disabled={!tipo || !loteId || !rodoviaId || isProcessing}
+          disabled={!tipo || !propLoteId || !propRodoviaId || isProcessing}
           className="w-full"
           size="lg"
         >

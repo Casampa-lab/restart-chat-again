@@ -27,46 +27,23 @@ const INVENTORY_TYPES = [
 const LOG_UPDATE_INTERVAL = 100; // Atualizar UI a cada 100 registros
 const BATCH_SIZE = 100; // Inserir 100 registros por vez no banco
 
-export function InventarioImporterManager() {
+interface InventarioImporterManagerProps {
+  loteId?: string;
+  rodoviaId?: string;
+}
+
+export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propRodoviaId }: InventarioImporterManagerProps = {}) {
   const queryClient = useQueryClient();
   const [inventoryType, setInventoryType] = useState<string>("");
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [photos, setPhotos] = useState<FileList | null>(null);
-  const [selectedLote, setSelectedLote] = useState<string>("");
-  const [selectedRodovia, setSelectedRodovia] = useState<string>("");
   const [photoColumnName, setPhotoColumnName] = useState<string>("");
   const [hasPhotos, setHasPhotos] = useState(false);
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState<string>("");
 
-  // Buscar lotes
-  const { data: lotes } = useQuery({
-    queryKey: ["lotes"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("lotes")
-        .select("id, numero")
-        .order("numero");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Buscar rodovias
-  const { data: rodovias } = useQuery({
-    queryKey: ["rodovias"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("rodovias")
-        .select("id, codigo")
-        .order("codigo");
-      if (error) throw error;
-      return data;
-    },
-  });
-
   // Hook para status de importação
-  const { data: inventoryStatus } = useInventoryStatus(selectedLote, selectedRodovia);
+  const { data: inventoryStatus } = useInventoryStatus(propLoteId, propRodoviaId);
 
   const handleExcelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -104,8 +81,8 @@ export function InventarioImporterManager() {
       return;
     }
 
-    if (!selectedLote || !selectedRodovia) {
-      toast.error("Selecione o lote e a rodovia");
+    if (!propLoteId || !propRodoviaId) {
+      toast.error("Selecione o lote e a rodovia no topo da página");
       return;
     }
 
@@ -463,8 +440,8 @@ export function InventarioImporterManager() {
       const recordsToInsert = normalizedData.map((row: any, index: number) => {
         const record: Record<string, any> = {
           user_id: user.id,
-          lote_id: selectedLote,
-          rodovia_id: selectedRodovia,
+          lote_id: propLoteId,
+          rodovia_id: propRodoviaId,
         };
 
       // Função para converter letra de coluna para índice
@@ -1101,8 +1078,8 @@ export function InventarioImporterManager() {
       const { error: logError } = await supabase
         .from('importacoes_log')
         .upsert({
-          lote_id: selectedLote,
-          rodovia_id: selectedRodovia,
+          lote_id: propLoteId,
+          rodovia_id: propRodoviaId,
           tipo_inventario: inventoryType,
           total_registros: imported,
           usuario_id: user.id,
@@ -1118,7 +1095,7 @@ export function InventarioImporterManager() {
 
       // Invalidar cache para atualizar o semáforo imediatamente
       await queryClient.invalidateQueries({ 
-        queryKey: ["inventory-status", selectedLote, selectedRodovia] 
+        queryKey: ["inventory-status", propLoteId, propRodoviaId] 
       });
 
       // Limpar formulário
@@ -1160,62 +1137,23 @@ export function InventarioImporterManager() {
         </Alert>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Coluna 1: Lote */}
-            <div className="space-y-2">
-              <Label htmlFor="lote">Lote *</Label>
-              <Select value={selectedLote} onValueChange={setSelectedLote}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o lote" />
-                </SelectTrigger>
-                <SelectContent>
-                  {lotes?.map((lote) => (
-                    <SelectItem key={lote.id} value={lote.id}>
-                      Lote {lote.numero}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Coluna 2: Rodovia */}
-            <div className="space-y-2">
-              <Label htmlFor="rodovia">Rodovia *</Label>
-              <Select 
-                value={selectedRodovia} 
-                onValueChange={setSelectedRodovia}
-                disabled={!selectedLote}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={!selectedLote ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {rodovias?.map((rodovia) => (
-                    <SelectItem key={rodovia.id} value={rodovia.id}>
-                      {rodovia.codigo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Coluna 3: Tipo de Elemento */}
-            <div className="space-y-2">
-              <Label htmlFor="inventory-type">Tipo de Elemento *</Label>
-              <Select 
-                value={inventoryType} 
-                onValueChange={setInventoryType}
-                disabled={!selectedLote || !selectedRodovia}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={!selectedLote || !selectedRodovia ? "Selecione lote e rodovia primeiro" : "Selecione o tipo"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {INVENTORY_TYPES.map((type) => {
-                    const statusData = inventoryStatus?.find(s => s.tipo === type.value);
-                    const total = statusData?.total || 0;
-                    const importado = statusData?.importado || false;
-                    const status = getStatusIndicator(total, importado);
+          {/* Tipo de Elemento */}
+          <div className="space-y-2">
+            <Label htmlFor="inventory-type">Tipo de Elemento *</Label>
+            <Select 
+              value={inventoryType} 
+              onValueChange={setInventoryType}
+              disabled={!propLoteId || !propRodoviaId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={!propLoteId || !propRodoviaId ? "Selecione lote e rodovia no topo primeiro" : "Selecione o tipo"} />
+              </SelectTrigger>
+              <SelectContent>
+                {INVENTORY_TYPES.map((type) => {
+                  const statusData = inventoryStatus?.find(s => s.tipo === type.value);
+                  const total = statusData?.total || 0;
+                  const importado = statusData?.importado || false;
+                  const status = getStatusIndicator(total, importado);
                     
                     return (
                       <SelectItem key={type.value} value={type.value}>
@@ -1236,7 +1174,6 @@ export function InventarioImporterManager() {
                 </p>
               )}
             </div>
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="excel-file">Arquivo Excel *</Label>
@@ -1319,14 +1256,14 @@ export function InventarioImporterManager() {
           )}
 
           {/* Indicador do que está faltando */}
-          {!importing && (!inventoryType || !excelFile || !selectedLote || !selectedRodovia) && (
+          {!importing && (!inventoryType || !excelFile || !propLoteId || !propRodoviaId) && (
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 Para iniciar a importação, você precisa:
                 {!inventoryType && <div className="ml-4">✗ Selecionar o tipo de cadastro</div>}
-                {!selectedLote && <div className="ml-4">✗ Selecionar o lote</div>}
-                {!selectedRodovia && <div className="ml-4">✗ Selecionar a rodovia</div>}
+                {!propLoteId && <div className="ml-4">✗ Selecionar o lote no topo da página</div>}
+                {!propRodoviaId && <div className="ml-4">✗ Selecionar a rodovia no topo da página</div>}
                 {!excelFile && <div className="ml-4">✗ Selecionar o arquivo Excel</div>}
               </AlertDescription>
             </Alert>
@@ -1335,7 +1272,7 @@ export function InventarioImporterManager() {
           <div className="flex gap-2">
             <Button 
               onClick={handleImport} 
-              disabled={importing || !inventoryType || !excelFile || !selectedLote || !selectedRodovia}
+              disabled={importing || !inventoryType || !excelFile || !propLoteId || !propRodoviaId}
               className="flex-1"
               size="lg"
             >
