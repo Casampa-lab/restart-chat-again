@@ -294,7 +294,6 @@ export async function rejeitarElemento(elementoId: string, observacao: string, g
         longitude: dadosElemento?.longitude || dadosElemento?.longitude_inicial || null,
       }),
       
-      fotos_urls: elemento.fotos_urls || [],
       observacao: `Rejeitado em ${new Date().toLocaleDateString('pt-BR')} - Coordenador`,
       enviado_coordenador: true,
       notificada: false
@@ -309,6 +308,27 @@ export async function rejeitarElemento(elementoId: string, observacao: string, g
     if (ncError || !ncCreated) {
       console.error('Erro ao criar NC:', ncError);
       throw new Error('Erro ao criar NC: ' + (ncError?.message || 'NC não retornada'));
+    }
+
+    // 3.1. Inserir fotos na tabela nao_conformidades_fotos
+    if (elemento.fotos_urls && elemento.fotos_urls.length > 0) {
+      const fotosData = elemento.fotos_urls.map((url: string, index: number) => ({
+        nc_id: ncCreated.id,
+        foto_url: url,
+        ordem: index + 1,
+        descricao: `Foto ${index + 1}`,
+        latitude: dadosElemento?.latitude || dadosElemento?.latitude_inicial || null,
+        longitude: dadosElemento?.longitude || dadosElemento?.longitude_inicial || null
+      }));
+
+      const { error: fotosError } = await supabase
+        .from('nao_conformidades_fotos')
+        .insert(fotosData);
+
+      if (fotosError) {
+        console.error('Erro ao inserir fotos da NC:', fotosError);
+        // Não interrompe o processo, apenas loga o erro
+      }
     }
 
     // 4. Criar notificação in-app para o técnico
