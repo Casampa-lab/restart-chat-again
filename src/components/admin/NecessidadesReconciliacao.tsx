@@ -38,14 +38,36 @@ export function NecessidadesReconciliacao() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_placas")
-        .select(`id, km, codigo, tipo, solucao_planilha, servico_inferido, servico_final, cadastro_id, divergencia, reconciliacao:reconciliacoes(id, status, distancia_match_metros)`)
+        .select(`
+          id, 
+          km, 
+          codigo, 
+          tipo, 
+          solucao_planilha, 
+          servico_inferido, 
+          servico_final, 
+          cadastro_id, 
+          divergencia, 
+          reconciliacao:reconciliacoes!inner(
+            id, 
+            status, 
+            distancia_match_metros,
+            reconciliado
+          )
+        `)
         .eq("divergencia", true)
+        .eq("reconciliacao.status", "pendente_aprovacao")
         .order("km", { ascending: true });
 
       if (error) throw error;
-      return (data || []).filter((d: any) => {
+      
+      return (data || []).map((d: any) => {
         const rec = Array.isArray(d.reconciliacao) ? d.reconciliacao[0] : d.reconciliacao;
-        return rec?.status === 'pendente_aprovacao';
+        return {
+          ...d,
+          distancia_match_metros: rec?.distancia_match_metros,
+          reconciliado: rec?.reconciliado || false
+        };
       }) as Divergencia[];
     },
     enabled: !!user,
@@ -57,13 +79,19 @@ export function NecessidadesReconciliacao() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_placas")
-        .select("divergencia, reconciliado")
+        .select(`
+          divergencia,
+          reconciliacao:reconciliacoes(reconciliado)
+        `)
         .eq("divergencia", true);
 
       if (error) throw error;
 
       const total = data.length;
-      const reconciliadas = data.filter(d => d.reconciliado).length;
+      const reconciliadas = data.filter((d: any) => {
+        const rec = Array.isArray(d.reconciliacao) ? d.reconciliacao[0] : d.reconciliacao;
+        return rec?.reconciliado;
+      }).length;
       const pendentes = total - reconciliadas;
 
       return { total, reconciliadas, pendentes };

@@ -174,6 +174,7 @@ export function InventarioInscricoesViewer({
         const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
         if (reconciliacao?.status === 'pendente_aprovacao' && reconciliacao?.distancia_match_metros <= toleranciaMetros) {
           map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
+        }
       });
       
       return map;

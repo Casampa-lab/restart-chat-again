@@ -165,62 +165,27 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_cilindros")
-        .select("*")
+        .select(`
+          *,
+          reconciliacao:reconciliacoes(
+            id,
+            status,
+            distancia_match_metros,
+            overlap_porcentagem,
+            tipo_match
+          )
+        `)
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .not("cadastro_id", "is", null)
-        .eq("status_reconciliacao", "pendente_aprovacao");
+        .not("cadastro_id", "is", null);
       
       if (error) throw error;
       
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
-        const existing = map.get(nec.cadastro_id);
-        
-        // Se não existe, adiciona
-        if (!existing) {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-          });
-          return;
-        }
-        
-        // Prioridade 1: Status de revisão (preferir "ok" sobre "pendente_coordenador")
-        const existingStatusOk = existing.status_revisao === 'ok';
-        const necStatusOk = nec.status_revisao === 'ok';
-        
-        if (necStatusOk && !existingStatusOk) {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-          });
-          return;
-        }
-        
-        if (!necStatusOk && existingStatusOk) {
-          return;
-        }
-        
-        // Prioridade 2: Tipo de match (preferir "exato" sobre "parcial")
-        if (nec.tipo_match === 'exato' && existing.tipo_match !== 'exato') {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-          });
-          return;
-        }
-        
-        if (existing.tipo_match === 'exato' && nec.tipo_match !== 'exato') {
-          return;
-        }
-        
-        // Prioridade 3: Menor distância (critério original)
-        if ((nec.distancia_match_metros || 0) < (existing.distancia_match_metros || 0)) {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-          });
+        const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
+        if (reconciliacao?.status === 'pendente_aprovacao') {
+          map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
         }
       });
       
@@ -233,7 +198,10 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
 
   // Contar matches pendentes de reconciliação
   const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter(
-    nec => !nec.reconciliado
+    nec => {
+      const rec = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
+      return rec?.status === 'pendente_aprovacao';
+    }
   ).length;
 
   // Contar TODAS as necessidades com match (não apenas divergências)

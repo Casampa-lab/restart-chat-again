@@ -145,46 +145,6 @@ export const InventarioDefensasViewer = ({
         if (reconciliacao?.status === 'pendente_aprovacao' && reconciliacao?.distancia_match_metros <= toleranciaMetros) {
           map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
         }
-        
-        // Prioridade 1: Status de revisão (preferir "ok" sobre "pendente_coordenador")
-        const existingStatusOk = existing.status_revisao === 'ok';
-        const necStatusOk = nec.status_revisao === 'ok';
-        
-        if (necStatusOk && !existingStatusOk) {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-            divergencia,
-          });
-          return;
-        }
-        
-        if (!necStatusOk && existingStatusOk) {
-          return;
-        }
-        
-        // Prioridade 2: Tipo de match (preferir "exato" sobre "parcial")
-        if (nec.tipo_match === 'exato' && existing.tipo_match !== 'exato') {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-            divergencia,
-          });
-          return;
-        }
-        
-        if (existing.tipo_match === 'exato' && nec.tipo_match !== 'exato') {
-          return;
-        }
-        
-        // Prioridade 3: Menor distância (critério original)
-        if ((nec.distancia_match_metros || 0) < (existing.distancia_match_metros || 0)) {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-            divergencia,
-          });
-        }
       });
       
       return map;
