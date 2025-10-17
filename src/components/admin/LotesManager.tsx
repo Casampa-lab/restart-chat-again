@@ -21,8 +21,11 @@ interface Rodovia {
 interface RodoviaComKm {
   rodovia_id: string;
   codigo: string;
+  snv_inicial?: string;
+  snv_final?: string;
   km_inicial: string;
   km_final: string;
+  extensao_km?: string;
   latitude_inicial: string;
   longitude_inicial: string;
   latitude_final: string;
@@ -37,6 +40,7 @@ interface Lote {
   email_executora?: string;
   nome_fiscal_execucao?: string;
   email_fiscal_execucao?: string;
+  extensao_total_km?: number;
   empresas: {
     nome: string;
   };
@@ -46,8 +50,11 @@ interface LoteComRodovias extends Lote {
     rodovias: {
       codigo: string;
     };
+    snv_inicial?: string;
+    snv_final?: string;
     km_inicial: number | null;
     km_final: number | null;
+    extensao_km?: number;
   }>;
 }
 const LotesManager = () => {
@@ -69,8 +76,11 @@ const LotesManager = () => {
   });
   const [novaRodovia, setNovaRodovia] = useState({
     rodovia_id: "",
+    snv_inicial: "",
+    snv_final: "",
     km_inicial: "",
     km_final: "",
+    extensao_km: "",
     latitude_inicial: "",
     longitude_inicial: "",
     latitude_final: "",
@@ -86,8 +96,11 @@ const LotesManager = () => {
             empresas(nome),
             lotes_rodovias(
               rodovias(codigo),
+              snv_inicial,
+              snv_final,
               km_inicial,
-              km_final
+              km_final,
+              extensao_km
             )
           `).order("numero"), supabase.from("empresas").select("id, nome").order("nome"), supabase.from("rodovias").select("id, codigo").order("codigo")]);
       if (lotesRes.error) throw lotesRes.error;
@@ -115,8 +128,11 @@ const LotesManager = () => {
     setRodoviasVinculadas([...rodoviasVinculadas, {
       rodovia_id: novaRodovia.rodovia_id,
       codigo: rodovia.codigo,
+      snv_inicial: novaRodovia.snv_inicial,
+      snv_final: novaRodovia.snv_final,
       km_inicial: novaRodovia.km_inicial,
       km_final: novaRodovia.km_final,
+      extensao_km: novaRodovia.extensao_km,
       latitude_inicial: novaRodovia.latitude_inicial,
       longitude_inicial: novaRodovia.longitude_inicial,
       latitude_final: novaRodovia.latitude_final,
@@ -124,8 +140,11 @@ const LotesManager = () => {
     }]);
     setNovaRodovia({
       rodovia_id: "",
+      snv_inicial: "",
+      snv_final: "",
       km_inicial: "",
       km_final: "",
+      extensao_km: "",
       latitude_inicial: "",
       longitude_inicial: "",
       latitude_final: "",
@@ -143,6 +162,11 @@ const LotesManager = () => {
     }
     setLoading(true);
     try {
+      // Calcular extensão total
+      const extensao_total_km = rodoviasVinculadas.reduce((total, rodovia) => {
+        return total + (rodovia.extensao_km ? parseFloat(rodovia.extensao_km) : 0);
+      }, 0);
+
       // Inserir lote
       const {
         data: lote,
@@ -155,7 +179,8 @@ const LotesManager = () => {
         responsavel_executora: formData.responsavel_executora || null,
         email_executora: formData.email_executora || null,
         nome_fiscal_execucao: formData.nome_fiscal_execucao || null,
-        email_fiscal_execucao: formData.email_fiscal_execucao || null
+        email_fiscal_execucao: formData.email_fiscal_execucao || null,
+        extensao_total_km
       }).select().single();
       if (loteError) throw loteError;
 
@@ -163,8 +188,11 @@ const LotesManager = () => {
       const lotesRodovias = rodoviasVinculadas.map(rodovia => ({
         lote_id: lote.id,
         rodovia_id: rodovia.rodovia_id,
+        snv_inicial: rodovia.snv_inicial || null,
+        snv_final: rodovia.snv_final || null,
         km_inicial: rodovia.km_inicial ? parseFloat(rodovia.km_inicial) : null,
         km_final: rodovia.km_final ? parseFloat(rodovia.km_final) : null,
+        extensao_km: rodovia.extensao_km ? parseFloat(rodovia.extensao_km) : null,
         latitude_inicial: rodovia.latitude_inicial ? parseFloat(rodovia.latitude_inicial) : null,
         longitude_inicial: rodovia.longitude_inicial ? parseFloat(rodovia.longitude_inicial) : null,
         latitude_final: rodovia.latitude_final ? parseFloat(rodovia.latitude_final) : null,
@@ -210,7 +238,7 @@ const LotesManager = () => {
     const {
       data: lotesRodoviasData,
       error
-    } = await supabase.from("lotes_rodovias").select("rodovia_id, km_inicial, km_final, latitude_inicial, longitude_inicial, latitude_final, longitude_final, rodovias(id, codigo)").eq("lote_id", lote.id);
+    } = await supabase.from("lotes_rodovias").select("rodovia_id, snv_inicial, snv_final, km_inicial, km_final, extensao_km, latitude_inicial, longitude_inicial, latitude_final, longitude_final, rodovias(id, codigo)").eq("lote_id", lote.id);
     if (error) {
       toast.error("Erro ao carregar rodovias: " + error.message);
       return;
@@ -218,8 +246,11 @@ const LotesManager = () => {
     const rodoviasFormatted = lotesRodoviasData.map((lr: any) => ({
       rodovia_id: lr.rodovia_id,
       codigo: lr.rodovias.codigo,
+      snv_inicial: lr.snv_inicial || "",
+      snv_final: lr.snv_final || "",
       km_inicial: lr.km_inicial?.toString() || "",
       km_final: lr.km_final?.toString() || "",
+      extensao_km: lr.extensao_km?.toString() || "",
       latitude_inicial: lr.latitude_inicial?.toString() || "",
       longitude_inicial: lr.longitude_inicial?.toString() || "",
       latitude_final: lr.latitude_final?.toString() || "",
@@ -236,6 +267,11 @@ const LotesManager = () => {
     }
     setLoading(true);
     try {
+      // Calcular extensão total
+      const extensao_total_km = rodoviasVinculadas.reduce((total, rodovia) => {
+        return total + (rodovia.extensao_km ? parseFloat(rodovia.extensao_km) : 0);
+      }, 0);
+
       // Atualizar lote
       const {
         error: loteError
@@ -247,7 +283,8 @@ const LotesManager = () => {
         responsavel_executora: formData.responsavel_executora || null,
         email_executora: formData.email_executora || null,
         nome_fiscal_execucao: formData.nome_fiscal_execucao || null,
-        email_fiscal_execucao: formData.email_fiscal_execucao || null
+        email_fiscal_execucao: formData.email_fiscal_execucao || null,
+        extensao_total_km
       }).eq("id", editingLote);
       if (loteError) throw loteError;
 
@@ -261,8 +298,11 @@ const LotesManager = () => {
       const lotesRodovias = rodoviasVinculadas.map(rodovia => ({
         lote_id: editingLote,
         rodovia_id: rodovia.rodovia_id,
+        snv_inicial: rodovia.snv_inicial || null,
+        snv_final: rodovia.snv_final || null,
         km_inicial: rodovia.km_inicial ? parseFloat(rodovia.km_inicial) : null,
         km_final: rodovia.km_final ? parseFloat(rodovia.km_final) : null,
+        extensao_km: rodovia.extensao_km ? parseFloat(rodovia.extensao_km) : null,
         latitude_inicial: rodovia.latitude_inicial ? parseFloat(rodovia.latitude_inicial) : null,
         longitude_inicial: rodovia.longitude_inicial ? parseFloat(rodovia.longitude_inicial) : null,
         latitude_final: rodovia.latitude_final ? parseFloat(rodovia.latitude_final) : null,
@@ -454,12 +494,44 @@ const LotesManager = () => {
                               </SelectItem>)}
                         </SelectContent>
                       </Select>
-                    </div>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* KM Inicial e Coordenadas */}
-                    <div className="space-y-3 p-3 border rounded-lg bg-background/50">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="snv_inicial">SNV Inicial</Label>
+                    <Input
+                      id="snv_inicial"
+                      value={novaRodovia.snv_inicial}
+                      onChange={e => setNovaRodovia({ ...novaRodovia, snv_inicial: e.target.value })}
+                      placeholder="Ex: 0010A"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="snv_final">SNV Final</Label>
+                    <Input
+                      id="snv_final"
+                      value={novaRodovia.snv_final}
+                      onChange={e => setNovaRodovia({ ...novaRodovia, snv_final: e.target.value })}
+                      placeholder="Ex: 0015B"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="extensao_km">Extensão (km)</Label>
+                    <Input
+                      id="extensao_km"
+                      type="number"
+                      step="0.001"
+                      value={novaRodovia.extensao_km}
+                      onChange={e => setNovaRodovia({ ...novaRodovia, extensao_km: e.target.value })}
+                      placeholder="0.000"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* KM Inicial e Coordenadas */}
+                  <div className="space-y-3 p-3 border rounded-lg bg-background/50">
                       <Label className="text-sm font-semibold">KM Inicial</Label>
                       <div className="space-y-2">
                         <Input type="number" step="0.001" value={novaRodovia.km_inicial} onChange={e => setNovaRodovia({
@@ -550,11 +622,21 @@ const LotesManager = () => {
                     <Label className="text-sm">Rodovias Adicionadas:</Label>
                     <div className="space-y-2">
                       {rodoviasVinculadas.map(rodovia => <div key={rodovia.rodovia_id} className="flex items-center justify-between p-3 bg-background rounded border">
-                          <div className="flex items-center gap-4">
-                            <Badge variant="outline">{rodovia.codigo}</Badge>
-                            <span className="text-sm text-muted-foreground">
-                              km {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}
-                            </span>
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">{rodovia.codigo}</Badge>
+                              {rodovia.snv_inicial && rodovia.snv_final && (
+                                <span className="text-xs text-muted-foreground">
+                                  SNV: {rodovia.snv_inicial} → {rodovia.snv_final}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              <span>KM: {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}</span>
+                              {rodovia.extensao_km && (
+                                <span className="font-medium">• Ext: {rodovia.extensao_km} km</span>
+                              )}
+                            </div>
                           </div>
                           <Button type="button" variant="ghost" size="sm" onClick={() => removerRodovia(rodovia.rodovia_id)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
@@ -587,6 +669,7 @@ const LotesManager = () => {
                 <TableHead>Unidade/Localidade</TableHead>
                 <TableHead>Contrato</TableHead>
                 <TableHead>Rodovias</TableHead>
+                <TableHead>Extensão Total</TableHead>
                 <TableHead className="w-24">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -603,14 +686,33 @@ const LotesManager = () => {
                   </TableCell>
                   <TableCell>{lote.contrato || "-"}</TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {lote.lotes_rodovias.map((lr, idx) => <Badge key={idx} variant="secondary" className="text-xs">
-                          {lr.rodovias?.codigo || "-"}
-                          {(lr.km_inicial || lr.km_final) && <span className="ml-1 opacity-70">
-                              ({lr.km_inicial?.toFixed(0)}-{lr.km_final?.toFixed(0)})
-                            </span>}
-                        </Badge>)}
+                    <div className="flex flex-col gap-1">
+                      {lote.lotes_rodovias.map((lr, idx) => (
+                        <div key={idx} className="text-xs">
+                          <Badge variant="secondary" className="text-xs">
+                            {lr.rodovias?.codigo || "-"}
+                          </Badge>
+                          {lr.snv_inicial && lr.snv_final && (
+                            <span className="ml-2 text-muted-foreground">
+                              SNV: {lr.snv_inicial}→{lr.snv_final}
+                            </span>
+                          )}
+                          {(lr.km_inicial || lr.km_final) && (
+                            <span className="ml-2 text-muted-foreground">
+                              KM: {lr.km_inicial?.toFixed(0)}-{lr.km_final?.toFixed(0)}
+                            </span>
+                          )}
+                          {lr.extensao_km && (
+                            <span className="ml-2 font-medium">
+                              • {lr.extensao_km.toFixed(2)} km
+                            </span>
+                          )}
+                        </div>
+                      ))}
                     </div>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {lote.extensao_total_km ? `${lote.extensao_total_km.toFixed(2)} km` : "—"}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
@@ -624,7 +726,7 @@ const LotesManager = () => {
                   </TableCell>
                 </TableRow>)}
               {lotes.length === 0 && <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
                     Nenhum lote cadastrado
                   </TableCell>
                 </TableRow>}
@@ -790,6 +892,38 @@ const LotesManager = () => {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="edit-snv_inicial">SNV Inicial</Label>
+                    <Input
+                      id="edit-snv_inicial"
+                      value={novaRodovia.snv_inicial}
+                      onChange={e => setNovaRodovia({ ...novaRodovia, snv_inicial: e.target.value })}
+                      placeholder="Ex: 0010A"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-snv_final">SNV Final</Label>
+                    <Input
+                      id="edit-snv_final"
+                      value={novaRodovia.snv_final}
+                      onChange={e => setNovaRodovia({ ...novaRodovia, snv_final: e.target.value })}
+                      placeholder="Ex: 0015B"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-extensao_km">Extensão (km)</Label>
+                    <Input
+                      id="edit-extensao_km"
+                      type="number"
+                      step="0.001"
+                      value={novaRodovia.extensao_km}
+                      onChange={e => setNovaRodovia({ ...novaRodovia, extensao_km: e.target.value })}
+                      placeholder="0.000"
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* KM Inicial e Coordenadas */}
                   <div className="space-y-3 p-3 border rounded-lg bg-background/50">
@@ -883,11 +1017,21 @@ const LotesManager = () => {
                   <Label className="text-sm">Rodovias Adicionadas:</Label>
                   <div className="space-y-2">
                     {rodoviasVinculadas.map(rodovia => <div key={rodovia.rodovia_id} className="flex items-center justify-between p-3 bg-background rounded border">
-                        <div className="flex items-center gap-4">
-                          <Badge variant="outline">{rodovia.codigo}</Badge>
-                          <span className="text-sm text-muted-foreground">
-                            km {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}
-                          </span>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{rodovia.codigo}</Badge>
+                            {rodovia.snv_inicial && rodovia.snv_final && (
+                              <span className="text-xs text-muted-foreground">
+                                SNV: {rodovia.snv_inicial} → {rodovia.snv_final}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span>KM: {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}</span>
+                            {rodovia.extensao_km && (
+                              <span className="font-medium">• Ext: {rodovia.extensao_km} km</span>
+                            )}
+                          </div>
                         </div>
                         <Button type="button" variant="ghost" size="sm" onClick={() => removerRodovia(rodovia.rodovia_id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />

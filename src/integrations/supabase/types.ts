@@ -2901,6 +2901,7 @@ export type Database = {
           email_executora: string | null
           email_fiscal_execucao: string | null
           empresa_id: string
+          extensao_total_km: number | null
           id: string
           nome_fiscal_execucao: string | null
           numero: string
@@ -2914,6 +2915,7 @@ export type Database = {
           email_executora?: string | null
           email_fiscal_execucao?: string | null
           empresa_id: string
+          extensao_total_km?: number | null
           id?: string
           nome_fiscal_execucao?: string | null
           numero: string
@@ -2927,6 +2929,7 @@ export type Database = {
           email_executora?: string | null
           email_fiscal_execucao?: string | null
           empresa_id?: string
+          extensao_total_km?: number | null
           id?: string
           nome_fiscal_execucao?: string | null
           numero?: string
@@ -2946,6 +2949,7 @@ export type Database = {
       }
       lotes_rodovias: {
         Row: {
+          extensao_km: number | null
           id: string
           km_final: number | null
           km_inicial: number | null
@@ -2955,8 +2959,11 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           rodovia_id: string
+          snv_final: string | null
+          snv_inicial: string | null
         }
         Insert: {
+          extensao_km?: number | null
           id?: string
           km_final?: number | null
           km_inicial?: number | null
@@ -2966,8 +2973,11 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           rodovia_id: string
+          snv_final?: string | null
+          snv_inicial?: string | null
         }
         Update: {
+          extensao_km?: number | null
           id?: string
           km_final?: number | null
           km_inicial?: number | null
@@ -2977,6 +2987,8 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           rodovia_id?: string
+          snv_final?: string | null
+          snv_inicial?: string | null
         }
         Relationships: [
           {
