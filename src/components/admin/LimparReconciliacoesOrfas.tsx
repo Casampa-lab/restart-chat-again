@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, AlertTriangle } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -72,10 +72,10 @@ export function LimparReconciliacoesOrfas() {
   };
 
   return (
-    <Card className="border-amber-500">
+    <Card className="border-destructive">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-amber-700">
-          <AlertTriangle className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-destructive">
+          <Trash2 className="h-5 w-5" />
           Limpar Reconciliações Órfãs
         </CardTitle>
         <CardDescription>
@@ -106,7 +106,7 @@ export function LimparReconciliacoesOrfas() {
           <div className={`p-3 rounded border ${
             contador === 0 
               ? 'bg-green-50 border-green-200 text-green-800' 
-              : 'bg-amber-50 border-amber-200 text-amber-800'
+              : 'bg-red-50 border-red-200 text-red-800'
           }`}>
             {contador === 0 
               ? "✓ Nenhuma reconciliação órfã encontrada" 
