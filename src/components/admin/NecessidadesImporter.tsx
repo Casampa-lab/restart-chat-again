@@ -1114,8 +1114,8 @@ export function NecessidadesImporter() {
             mensagem: `${icon} ${servicoFinal}${matchInfo}${divIcon}${divergencia ? ` Projeto: ${solucaoPlanilhaNormalizada} vs Sistema: ${servicoInferido}` : ""}`
           });
           
-          // Fazer flush dos logs a cada 50 registros para mostrar progresso
-          if ((i + 1) % LOG_UPDATE_INTERVAL === 0) {
+          // Fazer flush dos logs na primeira linha e a cada 50 registros
+          if (i === 0 || (i + 1) % LOG_UPDATE_INTERVAL === 0) {
             flushLogs();
           }
           
@@ -1192,8 +1192,8 @@ export function NecessidadesImporter() {
             mensagem: mensagemDetalhada
           });
           
-          // Fazer flush dos logs a cada 50 registros
-          if ((i + 1) % LOG_UPDATE_INTERVAL === 0) {
+          // Fazer flush dos logs na primeira linha e a cada 50 registros
+          if (i === 0 || (i + 1) % LOG_UPDATE_INTERVAL === 0) {
             flushLogs();
           }
         }
