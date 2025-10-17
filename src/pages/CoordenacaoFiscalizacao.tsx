@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useWorkSession } from "@/hooks/useWorkSession";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,7 @@ const CoordenacaoFiscalizacao = () => {
     user,
     loading: authLoading
   } = useAuth();
+  const { activeSession } = useWorkSession(user?.id);
   const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
 
   // Contador de elementos não cadastrados pendentes de aprovação
@@ -38,12 +40,14 @@ const CoordenacaoFiscalizacao = () => {
     refetchInterval: 30000
   });
 
-  // Contador de divergências pendentes de reconciliação
+  // Contador de divergências pendentes de reconciliação (filtrado por sessão ativa)
   const {
     data: countDivergencias = 0
   } = useQuery({
-    queryKey: ["count-divergencias-coordenacao"],
+    queryKey: ["count-divergencias-coordenacao", activeSession?.lote_id, activeSession?.rodovia_id],
     queryFn: async () => {
+      if (!activeSession) return 0;
+      
       const grupos = ['necessidades_placas', 'necessidades_defensas', 'necessidades_porticos', 'necessidades_marcas_longitudinais', 'necessidades_marcas_transversais', 'necessidades_cilindros', 'necessidades_tachas'];
       let totalDivergencias = 0;
       for (const tabela of grupos) {
@@ -52,12 +56,16 @@ const CoordenacaoFiscalizacao = () => {
         } = await supabase.from(tabela as any).select("*", {
           count: "exact",
           head: true
-        }).eq("divergencia", true).eq("reconciliado", false);
+        })
+        .eq("divergencia", true)
+        .eq("reconciliado", false)
+        .eq("lote_id", activeSession.lote_id)
+        .eq("rodovia_id", activeSession.rodovia_id);
         totalDivergencias += count || 0;
       }
       return totalDivergencias;
     },
-    enabled: !!user,
+    enabled: !!user && !!activeSession,
     refetchInterval: 30000
   });
 
