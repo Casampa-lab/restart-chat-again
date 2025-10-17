@@ -237,12 +237,12 @@ export function RegistrarItemNaoCadastrado({
 
           {/* Justificativa */}
           <div className="space-y-2">
-            <Label htmlFor="justificativa">Justificativa para Inclusão *</Label>
+            <Label htmlFor="justificativa">Justificativa/Problema *</Label>
             <Textarea
               id="justificativa"
               value={justificativa}
               onChange={(e) => setJustificativa(e.target.value)}
-              placeholder="Explique o motivo pelo qual este elemento não está no cadastro e deve ser incluído"
+              placeholder="Justifique por que este item deve ser incluido no Inventário ou informe o problema ocorrido para sua rejeição e emissão de Não Conformidade à executora"
               rows={4}
               required
             />

@@ -66,7 +66,6 @@ const formSchema = z.object({
   material_utilizado: z.string().optional(),
   estado_conservacao: z.string().optional(),
   observacao: z.string().optional(),
-  foto_url: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
   fora_plano_manutencao: z.boolean().default(false),
@@ -98,7 +97,6 @@ const IntervencoesInscricoesForm = ({
       material_utilizado: "Termoplástico",
       estado_conservacao: "",
       observacao: "",
-      foto_url: "",
       latitude: "",
       longitude: "",
       fora_plano_manutencao: false,
@@ -141,7 +139,6 @@ const IntervencoesInscricoesForm = ({
         material_utilizado: (inscricaoSelecionada as any).material_utilizado || "Termoplástico",
         estado_conservacao: "",
         observacao: "",
-        foto_url: "",
         latitude: "",
         longitude: "",
         fora_plano_manutencao: false,
@@ -187,7 +184,6 @@ const IntervencoesInscricoesForm = ({
           material_utilizado: data.material_utilizado || null,
           estado_conservacao: data.estado_conservacao || null,
           observacao: data.observacao || null,
-          foto_url: data.foto_url || null,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
         });
@@ -431,20 +427,6 @@ const IntervencoesInscricoesForm = ({
                     <FormLabel>Observações</FormLabel>
                     <FormControl>
                       <Textarea placeholder="Observações sobre a intervenção..." {...field} rows={3} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="foto_url"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>URL da Foto</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Caminho da foto no storage..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

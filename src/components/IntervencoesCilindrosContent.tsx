@@ -50,7 +50,6 @@ interface IntervencaoCilindro {
   cor_refletivo: string | null;
   tipo_refletivo: string | null;
   quantidade: number | null;
-  foto_url: string | null;
   fora_plano_manutencao: boolean;
   justificativa_fora_plano: string | null;
   ficha_cilindros_id: string;
@@ -205,7 +204,6 @@ const IntervencoesCilindrosContent = () => {
           cor_refletivo: intervencaoToEdit.cor_refletivo,
           tipo_refletivo: intervencaoToEdit.tipo_refletivo,
           quantidade: intervencaoToEdit.quantidade,
-          foto_url: intervencaoToEdit.foto_url,
           fora_plano_manutencao: intervencaoToEdit.fora_plano_manutencao,
           justificativa_fora_plano: intervencaoToEdit.justificativa_fora_plano,
         })
@@ -435,13 +433,6 @@ const IntervencoesCilindrosContent = () => {
                   type="number"
                   value={intervencaoToEdit.quantidade || ""}
                   onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, quantidade: e.target.value ? parseInt(e.target.value) : null})}
-                />
-              </div>
-              <div>
-                <Label>URL da Foto</Label>
-                <Input
-                  value={intervencaoToEdit.foto_url || ""}
-                  onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, foto_url: e.target.value})}
                 />
               </div>
               <div>

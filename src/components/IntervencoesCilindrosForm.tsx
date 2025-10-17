@@ -22,7 +22,6 @@ const formSchema = z.object({
   cor_refletivo: z.string().optional(),
   tipo_refletivo: z.string().optional(),
   quantidade: z.string().optional(),
-  foto_url: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
   fora_plano_manutencao: z.boolean().default(false),
@@ -90,7 +89,6 @@ export function IntervencoesCilindrosForm({
       cor_refletivo: "",
       tipo_refletivo: "",
       quantidade: "",
-      foto_url: "",
       latitude: "",
       longitude: "",
       fora_plano_manutencao: false,
@@ -111,7 +109,6 @@ export function IntervencoesCilindrosForm({
         cor_refletivo: (cilindroSelecionado as any).cor_refletivo || "",
         tipo_refletivo: (cilindroSelecionado as any).tipo_refletivo || "",
         quantidade: (cilindroSelecionado as any).quantidade?.toString() || "",
-        foto_url: "",
         latitude: "",
         longitude: "",
         fora_plano_manutencao: false,
@@ -153,7 +150,6 @@ export function IntervencoesCilindrosForm({
           cor_refletivo: data.cor_refletivo || null,
           tipo_refletivo: data.tipo_refletivo || null,
           quantidade: data.quantidade ? parseInt(data.quantidade) : null,
-          foto_url: data.foto_url || null,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
         });
@@ -359,20 +355,6 @@ export function IntervencoesCilindrosForm({
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="foto_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL da Foto</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Caminho da foto no storage..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <div className="col-span-2">
               <Button

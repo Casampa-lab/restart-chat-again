@@ -71,7 +71,6 @@ const formSchema = z.object({
   nivel_risco: z.string().optional(),
   necessita_intervencao: z.boolean().default(false),
   observacao: z.string().optional(),
-  foto_url: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
   fora_plano_manutencao: z.boolean().default(false),
@@ -109,7 +108,6 @@ const DefensasIntervencoesForm = ({
       nivel_risco: "",
       necessita_intervencao: false,
       observacao: "",
-      foto_url: "",
       latitude: "",
       longitude: "",
       fora_plano_manutencao: false,
@@ -150,7 +148,6 @@ const DefensasIntervencoesForm = ({
         nivel_risco: "",
         necessita_intervencao: false,
         observacao: "",
-        foto_url: "",
         latitude: "",
         longitude: "",
         fora_plano_manutencao: false,
@@ -194,7 +191,6 @@ const DefensasIntervencoesForm = ({
           nivel_risco: data.nivel_risco || null,
           necessita_intervencao: data.necessita_intervencao,
           observacao: data.observacao || null,
-          foto_url: data.foto_url || null,
           latitude: data.latitude ? parseFloat(data.latitude) : null,
           longitude: data.longitude ? parseFloat(data.longitude) : null,
           fora_plano_manutencao: data.fora_plano_manutencao,
@@ -369,19 +365,6 @@ const DefensasIntervencoesForm = ({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="foto_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL da Foto</FormLabel>
-              <FormControl>
-                <Input placeholder="URL da foto da intervenção" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
       </div>
 
       <FormField

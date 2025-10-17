@@ -47,7 +47,6 @@ interface IntervencaoDefensa {
   observacao: string | null;
   fora_plano_manutencao: boolean;
   justificativa_fora_plano: string | null;
-  foto_url: string | null;
   necessita_intervencao: boolean;
   defensa_id: string;
   defensas?: {
@@ -194,7 +193,6 @@ const IntervencoesDefensasContent = () => {
           observacao: intervencaoToEdit.observacao,
           fora_plano_manutencao: intervencaoToEdit.fora_plano_manutencao,
           justificativa_fora_plano: intervencaoToEdit.justificativa_fora_plano,
-          foto_url: intervencaoToEdit.foto_url,
           necessita_intervencao: intervencaoToEdit.necessita_intervencao,
         })
         .eq("id", intervencaoToEdit.id);
@@ -408,13 +406,6 @@ const IntervencoesDefensasContent = () => {
                     onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, nivel_risco: e.target.value})}
                   />
                 </div>
-              </div>
-              <div>
-                <Label>URL da Foto</Label>
-                <Input
-                  value={intervencaoToEdit.foto_url || ""}
-                  onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, foto_url: e.target.value})}
-                />
               </div>
               <div>
                 <Label>Observação</Label>

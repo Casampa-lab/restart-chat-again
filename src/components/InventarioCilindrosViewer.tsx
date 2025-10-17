@@ -46,7 +46,6 @@ interface IntervencaoCilindro {
   cor_refletivo: string | null;
   tipo_refletivo: string | null;
   quantidade: number | null;
-  foto_url: string | null;
 }
 
 interface InventarioCilindrosViewerProps {
@@ -772,18 +771,6 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                               </div>
                             )}
                           </div>
-                          {intervencao.foto_url && (
-                            <div className="mt-3 pt-3 border-t">
-                              <span className="text-sm font-medium">Foto da Intervenção:</span>
-                              <div className="mt-2">
-                                <img
-                                  src={supabase.storage.from('cilindros').getPublicUrl(intervencao.foto_url).data.publicUrl}
-                                  alt="Intervenção"
-                                  className="rounded-lg max-w-sm"
-                                />
-                              </div>
-                            </div>
-                          )}
                         </div>
                       ))}
                     </div>
