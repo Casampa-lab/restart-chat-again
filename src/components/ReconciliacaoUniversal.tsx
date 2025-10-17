@@ -230,40 +230,8 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
     }
   };
 
-  const handleRefreshContadores = async () => {
-    // Resetar (não apenas invalidar) para limpar completamente o cache
-    await queryClient.resetQueries({ 
-      queryKey: ["estatisticas-gerais", activeSession.lote_id, activeSession.rodovia_id] 
-    });
-    await queryClient.resetQueries({ 
-      queryKey: ["divergencias"] 
-    });
-    await queryClient.resetQueries({
-      queryKey: ["count-divergencias-coordenacao", activeSession.lote_id, activeSession.rodovia_id]
-    });
-    
-    // Refetch forçado de todas as queries ativas
-    await queryClient.refetchQueries({ 
-      queryKey: ["estatisticas-gerais", activeSession.lote_id, activeSession.rodovia_id],
-      type: 'active'
-    });
-    
-    toast({ title: "✅ Contadores atualizados" });
-  };
-
   return (
     <div className="space-y-6">
-      {/* Botão de Refresh */}
-      <div className="flex justify-end">
-        <Button 
-          onClick={handleRefreshContadores}
-          variant="outline"
-          size="sm"
-        >
-          🔄 Atualizar Contadores
-        </Button>
-      </div>
-
       {/* Estatísticas Gerais */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>

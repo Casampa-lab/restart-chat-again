@@ -1,4 +1,5 @@
 import { ReconciliacaoUniversal } from "@/components/ReconciliacaoUniversal";
+import { LimparReconciliacoesInconsistentes } from "@/components/admin/LimparReconciliacoesInconsistentes";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -61,6 +62,8 @@ export default function ReconciliacaoPendente() {
           </ul>
         </CardContent>
       </Card>
+
+      <LimparReconciliacoesInconsistentes />
 
       {activeSession ? (
         <ReconciliacaoUniversal grupo="placas" activeSession={activeSession} />
