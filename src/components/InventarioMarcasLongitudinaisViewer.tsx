@@ -544,9 +544,12 @@ export function InventarioMarcasLongitudinaisViewer({
                           </TableCell>
                           <TableCell>{marca.cor || "-"}</TableCell>
                           <TableCell className="text-center">
-                            {marca.km_inicial && marca.km_final 
+                            {marca.km_inicial !== null && marca.km_inicial !== undefined && 
+                             marca.km_final !== null && marca.km_final !== undefined
                               ? `${marca.km_inicial.toFixed(2)} - ${marca.km_final.toFixed(2)}`
-                              : marca.km_inicial?.toFixed(2) || "-"}
+                              : marca.km_inicial !== null && marca.km_inicial !== undefined
+                                ? marca.km_inicial.toFixed(2)
+                                : "-"}
                           </TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (
