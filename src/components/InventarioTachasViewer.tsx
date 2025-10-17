@@ -9,11 +9,55 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
+import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
+import { NecessidadeBadge } from "@/components/NecessidadeBadge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+
+// Component to show reconciliation status badge
+function StatusReconciliacaoBadge({ status }: { status: string | null }) {
+  if (!status) return null;
+
+  const config = {
+    pendente_aprovacao: {
+      color: "bg-yellow-100 text-yellow-800 border-yellow-300",
+      icon: "🟡",
+      label: "Aguardando Coordenação"
+    },
+    aprovado: {
+      color: "bg-green-100 text-green-800 border-green-300",
+      icon: "🟢",
+      label: "Substituição Aprovada"
+    },
+    rejeitado: {
+      color: "bg-red-100 text-red-800 border-red-300",
+      icon: "🔴",
+      label: "Mantido como Implantação"
+    }
+  };
+
+  const item = config[status as keyof typeof config];
+  if (!item) return null;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge className={`${item.color} text-xs border`}>
+            {item.icon}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-xs">{item.label}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 interface FichaTacha {
   id: string;
@@ -55,6 +99,9 @@ export function InventarioTachasViewer({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
   const [showOnlyPendentes, setShowOnlyPendentes] = useState(false);
+  const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
+  const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
+  const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
 
   // Buscar tolerância GPS da rodovia
   const { data: rodoviaConfig } = useQuery({
@@ -88,7 +135,7 @@ export function InventarioTachasViewer({
     return R * c;
   };
 
-  const { data: necessidadesMap } = useQuery({
+  const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
     queryKey: ["necessidades-match-tachas", loteId, rodoviaId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -96,22 +143,82 @@ export function InventarioTachasViewer({
         .select("*")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .eq("status_revisao", "pendente_coordenador")
         .not("cadastro_id", "is", null);
       
       if (error) throw error;
       
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
-        map.set(nec.cadastro_id, nec);
+        const existing = map.get(nec.cadastro_id);
+        
+        // Calcular divergência
+        const divergencia = nec.solucao_planilha && nec.servico_inferido && nec.solucao_planilha !== nec.servico_inferido;
+        
+        // Se não existe, adiciona
+        if (!existing) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+            divergencia,
+          });
+          return;
+        }
+        
+        // Prioridade 1: Status de revisão (preferir "ok" sobre "pendente_coordenador")
+        const existingStatusOk = existing.status_revisao === 'ok';
+        const necStatusOk = nec.status_revisao === 'ok';
+        
+        if (necStatusOk && !existingStatusOk) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+            divergencia,
+          });
+          return;
+        }
+        
+        if (!necStatusOk && existingStatusOk) {
+          return;
+        }
+        
+        // Prioridade 2: Tipo de match (preferir "exato" sobre "parcial")
+        if (nec.tipo_match === 'exato' && existing.tipo_match !== 'exato') {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+            divergencia,
+          });
+          return;
+        }
+        
+        if (existing.tipo_match === 'exato' && nec.tipo_match !== 'exato') {
+          return;
+        }
+        
+        // Prioridade 3: Menor distância (critério original)
+        if ((nec.distancia_match_metros || 0) < (existing.distancia_match_metros || 0)) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+            divergencia,
+          });
+        }
       });
       
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
+    staleTime: 0,
+    gcTime: 0,
   });
 
-  const pendentesRevisao = necessidadesMap?.size || 0;
+  // Contar divergências pendentes
+  const pendentesRevisao = Array.from(necessidadesMap?.values() || []).filter(
+    nec => nec.divergencia && !nec.reconciliado
+  ).length;
+
+  // Contar TODAS as necessidades com match (não apenas divergências)
+  const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
   const { data: tachas, isLoading } = useQuery({
     queryKey: ["inventario-tachas", loteId, rodoviaId, searchTerm, searchLat, searchLng],
@@ -160,8 +267,16 @@ export function InventarioTachasViewer({
   const filteredTachas = tachas?.filter(tacha => {
     if (!showOnlyPendentes) return true;
     const nec = necessidadesMap?.get(tacha.id);
-    return nec?.status_revisao === 'pendente_coordenador';
+    return nec?.divergencia && !nec?.reconciliado;
   }) || [];
+
+  const handleReconciliar = async () => {
+    await refetchNecessidades();
+    setReconciliacaoOpen(false);
+    setSelectedNecessidade(null);
+    setSelectedCadastroForReconciliacao(null);
+    toast.success("Reconciliação processada");
+  };
 
   // Função para ordenar dados
   const sortedTachas = filteredTachas ? [...filteredTachas].sort((a, b) => {
@@ -243,34 +358,79 @@ export function InventarioTachasViewer({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {pendentesRevisao > 0 && (
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-500/20 to-orange-400/10 border-2 border-orange-400/40 rounded-lg shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-500/20 border border-orange-400/40">
-                  <AlertCircle className="h-6 w-6 text-orange-500" />
-                </div>
-                <div>
-                  <div className="font-bold text-base flex items-center gap-2">
-                    <span className="text-2xl font-extrabold text-orange-600">{pendentesRevisao}</span>
-                    <span>{pendentesRevisao === 1 ? 'match parcial a revisar' : 'matches parciais a revisar'}</span>
+          {totalMatchesProcessados > 0 && (
+            pendentesRevisao === 0 ? (
+              // Estado OK - Sem divergências
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500/20 border border-green-500/40">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
                   </div>
-                  <div className="text-sm text-muted-foreground mt-0.5">
-                    📐 Sobreposição &lt;75% - Requer verificação manual
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-green-600">{totalMatchesProcessados}</span>
+                      <span>{totalMatchesProcessados === 1 ? 'item verificado' : 'itens verificados'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      ✅ Inventário OK - Projeto e Sistema em conformidade
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      refetchNecessidades();
+                      toast("Atualizando dados...", { description: "Buscando informações mais recentes" });
+                    }}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Atualizar
+                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={showOnlyPendentes}
+                      onCheckedChange={setShowOnlyPendentes}
+                      id="filtro-pendentes-tachas"
+                    />
+                    <Label htmlFor="filtro-pendentes-tachas" className="cursor-pointer text-sm font-medium">
+                      <Filter className="h-4 w-4 inline mr-1" />
+                      Apenas pendentes
+                    </Label>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={showOnlyPendentes}
-                  onCheckedChange={setShowOnlyPendentes}
-                  id="filtro-pendentes-tachas"
-                />
-                <Label htmlFor="filtro-pendentes-tachas" className="cursor-pointer text-sm font-medium">
-                  <Filter className="h-4 w-4 inline mr-1" />
-                  Apenas pendentes
-                </Label>
+            ) : (
+              // Estado com Divergências
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
+                    <AlertCircle className="h-6 w-6 text-warning" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-warning">{pendentesRevisao}</span>
+                      <span>{pendentesRevisao === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={showOnlyPendentes}
+                    onCheckedChange={setShowOnlyPendentes}
+                    id="filtro-pendentes-tachas"
+                  />
+                  <Label htmlFor="filtro-pendentes-tachas" className="cursor-pointer text-sm font-medium">
+                    <Filter className="h-4 w-4 inline mr-1" />
+                    Apenas pendentes
+                  </Label>
+                </div>
               </div>
-            </div>
+            )
           )}
           <div className="space-y-3">
             <div className="flex gap-2">
@@ -413,6 +573,7 @@ export function InventarioTachasViewer({
                           <SortIcon column="quantidade" />
                         </div>
                       </TableHead>
+                      <TableHead>Projeto</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
@@ -449,13 +610,60 @@ export function InventarioTachasViewer({
                         <TableCell>{tacha.espacamento_m || "-"}</TableCell>
                         <TableCell>{tacha.quantidade}</TableCell>
                         <TableCell className="text-center">
-                          {necessidadesMap?.get(tacha.id) ? (
-                            <Badge variant="outline" className="border-orange-400 text-orange-600">
-                              ⚠️ Requer Revisão
-                            </Badge>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">-</span>
-                          )}
+                          {(() => {
+                            const necessidade = necessidadesMap?.get(tacha.id);
+                            return necessidade ? (
+                              <NecessidadeBadge 
+                                necessidade={{
+                                  id: necessidade.id,
+                                  servico: necessidade.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
+                                  distancia_match_metros: necessidade.distancia_match_metros || 0,
+                                  km: necessidade.km_inicial,
+                                  divergencia: necessidade.divergencia,
+                                  reconciliado: necessidade.reconciliado,
+                                  solucao_planilha: necessidade.solucao_planilha,
+                                  servico_inferido: necessidade.servico_inferido,
+                                }}
+                                tipo="tachas" 
+                              />
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground text-xs">
+                                Sem previsão
+                              </Badge>
+                            );
+                          })()}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex items-center gap-2 justify-center">
+                            {(() => {
+                              const necessidade = necessidadesMap?.get(tacha.id);
+                              if (!necessidade) return null;
+                              
+                              return (
+                                <>
+                                  <StatusReconciliacaoBadge 
+                                    status={necessidade.status_reconciliacao} 
+                                  />
+                                  {necessidade?.divergencia && !necessidade.reconciliado && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedNecessidade(necessidade);
+                                        setSelectedCadastroForReconciliacao(tacha);
+                                        setReconciliacaoOpen(true);
+                                      }}
+                                      className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
+                                    >
+                                      <AlertCircle className="h-4 w-4 mr-1" />
+                                      Verificar Match
+                                    </Button>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
@@ -727,6 +935,16 @@ export function InventarioTachasViewer({
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Drawer de Reconciliação */}
+      <ReconciliacaoDrawerUniversal
+        open={reconciliacaoOpen}
+        onOpenChange={setReconciliacaoOpen}
+        necessidade={selectedNecessidade}
+        cadastro={selectedCadastroForReconciliacao}
+        onReconciliar={handleReconciliar}
+        tipoElemento="tachas"
+      />
     </>
   );
 }
