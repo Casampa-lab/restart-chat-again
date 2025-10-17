@@ -666,7 +666,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                   status={necessidade.status_reconciliacao} 
                                 />
                               )}
-                              {necessidade?.divergencia && !necessidade.reconciliado && (!necessidade.status_reconciliacao || necessidade.status_reconciliacao === 'rejeitado') && (
+                              {necessidade?.divergencia && !necessidade.reconciliado && (
                                 <Button
                                   variant="outline"
                                   size="sm"
