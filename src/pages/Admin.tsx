@@ -17,9 +17,7 @@ import { DeleteInventarioSelecionado } from "@/components/admin/DeleteInventario
 import { RemoverDuplicatasInventario } from "@/components/admin/RemoverDuplicatasInventario";
 import { LimparFotosOrfas } from "@/components/admin/LimparFotosOrfas";
 import { NecessidadesImporter } from "@/components/admin/NecessidadesImporter";
-import { NecessidadesAuditor } from "@/components/admin/NecessidadesAuditor";
 import { DeleteNecessidades } from "@/components/admin/DeleteNecessidades";
-import { DiagnosticoMatch } from "@/components/admin/DiagnosticoMatch";
 import { RecalcularMatches } from "@/components/admin/RecalcularMatches";
 import { LimparReconciliacoesInconsistentes } from "@/components/admin/LimparReconciliacoesInconsistentes";
 import { LimparReconciliacoesOrfas } from "@/components/admin/LimparReconciliacoesOrfas";
@@ -177,8 +175,6 @@ const Admin = () => {
             <div className="space-y-6">
               <NecessidadesImporter />
               <RecalcularMatches />
-              <DiagnosticoMatch />
-              <NecessidadesAuditor />
               <DeleteNecessidades />
             </div>
           </TabsContent>
