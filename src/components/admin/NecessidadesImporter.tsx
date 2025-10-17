@@ -509,8 +509,20 @@ export function NecessidadesImporter() {
           tipo_refletivo: row["Tipo Refletivo"] || row["tipo_refletivo"],
           extensao_km: sanitizarNumerico(row["Extensão (km)"] || row["extensao_km"]),
           local_implantacao: row["Local de Implantação"] || row["Local Implantação"] || row["local_implantacao"],
-          espacamento_m: sanitizarNumerico(row["Espaçamento"] || row["espacamento_m"]),
-          quantidade: sanitizarNumerico(row["Quantidade"] || row["quantidade"]),
+          espacamento_m: sanitizarNumerico(
+            row["Espaçamento"] || 
+            row["Espaçamento (m)"] || 
+            row["Espacamento"] ||
+            row["Espacamento (m)"] ||
+            row["espacamento_m"]
+          ),
+          quantidade: sanitizarNumerico(
+            row["Quantidade"] || 
+            row["Qtd"] ||
+            row["Qtde"] ||
+            row["N°"] ||
+            row["quantidade"]
+          ),
           motivo: sanitizarTexto(motivo),
         };
 
