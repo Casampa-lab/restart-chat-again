@@ -62,8 +62,8 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
 interface FichaPortico {
   id: string;
   km: number | null;
-  latitude: number | null;
-  longitude: number | null;
+  latitude_inicial: number | null;
+  longitude_inicial: number | null;
   data_vistoria: string;
   snv: string | null;
   tipo: string;
@@ -158,8 +158,8 @@ export function InventarioPorticosViewer({
           filteredData = filteredData
             .map((portico) => ({
               ...portico,
-              distance: portico.latitude && portico.longitude
-                ? calculateDistance(lat, lng, portico.latitude, portico.longitude)
+              distance: portico.latitude_inicial && portico.longitude_inicial
+                ? calculateDistance(lat, lng, portico.latitude_inicial, portico.longitude_inicial)
                 : Infinity,
             }))
             .filter((portico) => portico.distance <= toleranciaRodovia)
@@ -768,16 +768,16 @@ export function InventarioPorticosViewer({
                       <span className="text-sm font-medium text-muted-foreground">km:</span>
                       <p className="text-sm font-mono">{selectedPortico.km?.toFixed(3) || "-"}</p>
                     </div>
-                    {selectedPortico.latitude && (
+                    {selectedPortico.latitude_inicial && (
                       <div>
                         <span className="text-sm font-medium text-muted-foreground">Latitude:</span>
-                        <p className="text-sm font-mono">{selectedPortico.latitude.toFixed(6)}</p>
+                        <p className="text-sm font-mono">{selectedPortico.latitude_inicial.toFixed(6)}</p>
                       </div>
                     )}
-                    {selectedPortico.longitude && (
+                    {selectedPortico.longitude_inicial && (
                       <div>
                         <span className="text-sm font-medium text-muted-foreground">Longitude:</span>
-                        <p className="text-sm font-mono">{selectedPortico.longitude.toFixed(6)}</p>
+                        <p className="text-sm font-mono">{selectedPortico.longitude_inicial.toFixed(6)}</p>
                       </div>
                     )}
                   </div>

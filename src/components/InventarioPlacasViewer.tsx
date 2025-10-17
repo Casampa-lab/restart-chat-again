@@ -89,8 +89,8 @@ interface FichaPlaca {
   lado: string | null;
   posicao: string | null;
   km: number | null;
-  latitude: number | null;
-  longitude: number | null;
+  latitude_inicial: number | null;
+  longitude_inicial: number | null;
   detalhamento_pagina: number | null;
   suporte: string | null;
   qtde_suporte: number | null;
@@ -218,8 +218,8 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
           filteredData = filteredData
             .map((placa) => ({
               ...placa,
-              distance: placa.latitude && placa.longitude
-                ? calculateDistance(lat, lng, placa.latitude, placa.longitude)
+              distance: placa.latitude_inicial && placa.longitude_inicial
+                ? calculateDistance(lat, lng, placa.latitude_inicial, placa.longitude_inicial)
                 : Infinity,
             }))
             .filter((placa) => placa.distance <= toleranciaRodovia)
@@ -860,13 +860,13 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Latitude:</span>
                       <p className="text-sm">
-                        {selectedPlaca.latitude ? selectedPlaca.latitude.toFixed(6) : "-"}
+                        {selectedPlaca.latitude_inicial ? selectedPlaca.latitude_inicial.toFixed(6) : "-"}
                       </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Longitude:</span>
                       <p className="text-sm">
-                        {selectedPlaca.longitude ? selectedPlaca.longitude.toFixed(6) : "-"}
+                        {selectedPlaca.longitude_inicial ? selectedPlaca.longitude_inicial.toFixed(6) : "-"}
                       </p>
                     </div>
                     <div>

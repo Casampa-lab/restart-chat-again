@@ -28,8 +28,8 @@ const fichaPlacaSchema = z.object({
   snv: z.string().optional(),
   km: z.string().optional(),
   lado: z.string().optional(),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
+  latitude_inicial: z.string().optional(),
+  longitude_inicial: z.string().optional(),
   suporte: z.string().optional(),
   qtde_suporte: z.string().optional(),
   substrato: z.string().optional(),
@@ -191,8 +191,8 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
           snv: values.snv || null,
           km: values.km ? parseFloat(values.km) : null,
           lado: values.lado || null,
-          latitude: values.latitude ? parseFloat(values.latitude) : null,
-          longitude: values.longitude ? parseFloat(values.longitude) : null,
+          latitude_inicial: values.latitude_inicial ? parseFloat(values.latitude_inicial) : null,
+          longitude_inicial: values.longitude_inicial ? parseFloat(values.longitude_inicial) : null,
           suporte: values.suporte || null,
           qtde_suporte: values.qtde_suporte ? parseInt(values.qtde_suporte) : null,
           substrato: values.substrato || null,
@@ -470,7 +470,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                   />
                   <FormField
                     control={form.control}
-                    name="latitude"
+                    name="latitude_inicial"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Latitude</FormLabel>
@@ -483,7 +483,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                   />
                   <FormField
                     control={form.control}
-                    name="longitude"
+                    name="longitude_inicial"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Longitude</FormLabel>
@@ -508,8 +508,8 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                       const loadingToast = toast.loading("Capturando localização...");
                       navigator.geolocation.getCurrentPosition(
                         (position) => {
-                          form.setValue("latitude", position.coords.latitude.toFixed(6));
-                          form.setValue("longitude", position.coords.longitude.toFixed(6));
+                          form.setValue("latitude_inicial", position.coords.latitude.toFixed(6));
+                          form.setValue("longitude_inicial", position.coords.longitude.toFixed(6));
                           toast.dismiss(loadingToast);
                           toast.success("Localização capturada!");
                         },

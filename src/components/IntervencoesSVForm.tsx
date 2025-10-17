@@ -108,13 +108,13 @@ export function IntervencoesSVForm({
       form.setValue("km_referencia", placaSelecionada.km?.toString() || "");
       form.setValue("tipo_placa", placaSelecionada.tipo || "");
       form.setValue("codigo_placa", placaSelecionada.codigo || "");
-      form.setValue("latitude", placaSelecionada.latitude?.toString() || "");
-      form.setValue("longitude", placaSelecionada.longitude?.toString() || "");
+      form.setValue("latitude", placaSelecionada.latitude_inicial?.toString() || "");
+      form.setValue("longitude", placaSelecionada.longitude_inicial?.toString() || "");
       
-      if (placaSelecionada.latitude) {
+      if (placaSelecionada.latitude_inicial) {
         setCoordenadas({
-          latitude: placaSelecionada.latitude.toString(),
-          longitude: placaSelecionada.longitude?.toString() || "",
+          latitude: placaSelecionada.latitude_inicial.toString(),
+          longitude: placaSelecionada.longitude_inicial?.toString() || "",
         });
       }
     }
@@ -178,8 +178,8 @@ export function IntervencoesSVForm({
             km: parseFloat(data.km_referencia),
             tipo: data.tipo_placa,
             codigo: data.codigo_placa,
-            latitude: data.latitude ? parseFloat(data.latitude) : null,
-            longitude: data.longitude ? parseFloat(data.longitude) : null,
+            latitude_inicial: data.latitude ? parseFloat(data.latitude) : null,
+            longitude_inicial: data.longitude ? parseFloat(data.longitude) : null,
             suporte: data.suporte || null,
             substrato: data.substrato || null,
             tipo_pelicula_fundo: data.tipo_pelicula_fundo || null,
