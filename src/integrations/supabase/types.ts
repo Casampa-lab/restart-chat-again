@@ -2363,6 +2363,51 @@ export type Database = {
         }
         Relationships: []
       }
+      importacoes_log: {
+        Row: {
+          created_at: string
+          id: string
+          lote_id: string
+          rodovia_id: string
+          tipo_inventario: string
+          total_registros: number
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lote_id: string
+          rodovia_id: string
+          tipo_inventario: string
+          total_registros?: number
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lote_id?: string
+          rodovia_id?: string
+          tipo_inventario?: string
+          total_registros?: number
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "importacoes_log_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "importacoes_log_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       intervencoes_cilindros: {
         Row: {
           cor_corpo: string

@@ -5,6 +5,7 @@ interface InventoryCount {
   tipo: string;
   tabela: string;
   total: number;
+  importado: boolean; // Se foi feita importação (mesmo que vazia)
 }
 
 const INVENTORY_TYPES = [
@@ -26,18 +27,29 @@ export function useInventoryStatus(
     queryFn: async () => {
       if (!loteId || !rodoviaId) return [];
       
-      // Buscar contagens de todas as tabelas de inventário
+      // Buscar contagens de todas as tabelas de inventário e logs de importação
       const queries = INVENTORY_TYPES.map(async (invType) => {
+        // Contar registros na tabela de inventário
         const { count } = await supabase
           .from(invType.table as any)
           .select("*", { count: "exact", head: true })
           .eq("lote_id", loteId)
           .eq("rodovia_id", rodoviaId);
         
+        // Verificar se há log de importação (mesmo que vazia)
+        const { data: logData } = await supabase
+          .from('importacoes_log')
+          .select('total_registros')
+          .eq('lote_id', loteId)
+          .eq('rodovia_id', rodoviaId)
+          .eq('tipo_inventario', invType.value)
+          .maybeSingle();
+        
         return {
           tipo: invType.value,
           tabela: invType.table,
           total: count || 0,
+          importado: !!logData, // true se existe log de importação
         } as InventoryCount;
       });
       
@@ -47,8 +59,9 @@ export function useInventoryStatus(
   });
 }
 
-export function getStatusIndicator(total: number) {
-  if (total === 0) return { icon: "🔴", color: "text-red-500", label: "Não importado" };
+export function getStatusIndicator(total: number, importado: boolean) {
+  if (!importado) return { icon: "🔴", color: "text-red-500", label: "Não importado" };
+  if (total === 0) return { icon: "🔵", color: "text-blue-500", label: "Importado vazio" };
   if (total < 50) return { icon: "🟡", color: "text-yellow-500", label: "Parcial" };
   return { icon: "🟢", color: "text-green-500", label: `${total} registros` };
 }

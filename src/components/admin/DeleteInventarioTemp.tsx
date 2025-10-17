@@ -4,8 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Trash2, Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function DeleteInventarioTemp() {
+  const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -34,6 +36,14 @@ export function DeleteInventarioTemp() {
       }
 
       toast.success(`${count} registros deletados com sucesso!`);
+      
+      // Invalidar cache para atualizar o semáforo
+      await queryClient.invalidateQueries({ 
+        queryKey: ["inventory-status", lote04Id, br367Id] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["inventory-status", lote04Id, br116Id] 
+      });
     } catch (error: any) {
       console.error('Erro:', error);
       toast.error('Erro ao deletar registros: ' + error.message);

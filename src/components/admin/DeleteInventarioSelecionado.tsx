@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Trash2, Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const TABELAS_INVENTARIO = [
   { value: "ficha_placa", label: "Placas de Sinalização Vertical" },
@@ -19,6 +19,7 @@ const TABELAS_INVENTARIO = [
 ];
 
 export function DeleteInventarioSelecionado() {
+  const queryClient = useQueryClient();
   const [selectedLote, setSelectedLote] = useState<string>("");
   const [selectedRodovia, setSelectedRodovia] = useState<string>("");
   const [selectedTabela, setSelectedTabela] = useState<string>("");
@@ -173,8 +174,32 @@ export function DeleteInventarioSelecionado() {
         } else {
           toast.success(`${count} registros e ${fotosParaDeletar.length} fotos deletados com sucesso!`);
         }
-      } else {
-        toast.success(`${count} registros deletados com sucesso! (Nenhuma foto associada)`);
+      }
+      
+      // Invalidar cache para atualizar o semáforo
+      await queryClient.invalidateQueries({ 
+        queryKey: ["inventory-status", selectedLote, selectedRodovia] 
+      });
+
+      // Deletar o log de importação para este tipo
+      const tipoInventarioMap: Record<string, string> = {
+        "ficha_placa": "placas",
+        "ficha_marcas_longitudinais": "marcas_longitudinais",
+        "ficha_cilindros": "cilindros",
+        "ficha_inscricoes": "inscricoes",
+        "ficha_tachas": "tachas",
+        "ficha_porticos": "porticos",
+        "defensas": "defensas",
+      };
+      
+      const tipoInventario = tipoInventarioMap[selectedTabela];
+      if (tipoInventario) {
+        await supabase
+          .from('importacoes_log')
+          .delete()
+          .eq('lote_id', selectedLote)
+          .eq('rodovia_id', selectedRodovia)
+          .eq('tipo_inventario', tipoInventario);
       }
       
       // Limpar seleção

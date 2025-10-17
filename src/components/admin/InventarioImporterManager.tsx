@@ -1091,6 +1091,24 @@ export function InventarioImporterManager() {
       setProgress("");
       toast.success(`Importação concluída! ${imported} registros importados${hasPhotos ? ` com ${photoArray.length} fotos` : ''}.`);
 
+      // Registrar no log de importações (upsert para atualizar se já existir)
+      const { error: logError } = await supabase
+        .from('importacoes_log')
+        .upsert({
+          lote_id: selectedLote,
+          rodovia_id: selectedRodovia,
+          tipo_inventario: inventoryType,
+          total_registros: imported,
+          usuario_id: user.id,
+        }, {
+          onConflict: 'lote_id,rodovia_id,tipo_inventario'
+        });
+
+      if (logError) {
+        console.error('Erro ao registrar log de importação:', logError);
+        // Não bloquear o fluxo por erro no log
+      }
+
       // Invalidar cache para atualizar o semáforo imediatamente
       await queryClient.invalidateQueries({ 
         queryKey: ["inventory-status", selectedLote, selectedRodovia] 
@@ -1189,7 +1207,8 @@ export function InventarioImporterManager() {
                   {INVENTORY_TYPES.map((type) => {
                     const statusData = inventoryStatus?.find(s => s.tipo === type.value);
                     const total = statusData?.total || 0;
-                    const status = getStatusIndicator(total);
+                    const importado = statusData?.importado || false;
+                    const status = getStatusIndicator(total, importado);
                     
                     return (
                       <SelectItem key={type.value} value={type.value}>
