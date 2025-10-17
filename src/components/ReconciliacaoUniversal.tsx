@@ -108,15 +108,15 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
           const cfg = getConfig(g);
           const { data } = await supabase
             .from(cfg.tabelaNecessidades as any)
-            .select("divergencia, reconciliado")
+            .select("id")
             .eq("divergencia", true)
+            .eq("reconciliado", false)
             .eq("lote_id", activeSession.lote_id)
             .eq("rodovia_id", activeSession.rodovia_id);
 
-          const total = data?.length || 0;
-          const reconciliadas = data?.filter((d: any) => d.reconciliado).length || 0;
+          const pendentes = data?.length || 0;
           
-          return { grupo: g, total, reconciliadas, pendentes: total - reconciliadas };
+          return { grupo: g, total: pendentes, reconciliadas: 0, pendentes };
         })
       );
 
@@ -132,6 +132,8 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
       return { totais, porGrupo: resultados };
     },
     enabled: !!user && !!activeSession,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   // Mutation para reconciliar
@@ -211,8 +213,29 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
     }
   };
 
+  const handleRefreshContadores = () => {
+    queryClient.invalidateQueries({ 
+      queryKey: ["estatisticas-gerais", activeSession.lote_id, activeSession.rodovia_id] 
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["divergencias"]
+    });
+    toast({ title: "✅ Contadores atualizados" });
+  };
+
   return (
     <div className="space-y-6">
+      {/* Botão de Refresh */}
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleRefreshContadores}
+          variant="outline"
+          size="sm"
+        >
+          🔄 Atualizar Contadores
+        </Button>
+      </div>
+
       {/* Estatísticas Gerais */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
