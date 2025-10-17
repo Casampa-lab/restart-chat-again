@@ -135,11 +135,17 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
                 <SelectValue placeholder="Selecione a rodovia" />
               </SelectTrigger>
                 <SelectContent className="bg-popover">
-                  {rodovias.map((rodovia) => (
-                    <SelectItem key={rodovia.id} value={rodovia.id}>
-                      {rodovia.codigo}
+                  {rodovias && rodovias.length > 0 ? (
+                    rodovias.map((rodovia) => (
+                      <SelectItem key={rodovia.id} value={rodovia.id}>
+                        {rodovia.codigo}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-rodovias" disabled>
+                      Nenhuma rodovia disponível para este lote
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
             </Select>
           </div>
