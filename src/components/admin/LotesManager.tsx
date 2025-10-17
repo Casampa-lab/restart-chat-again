@@ -35,6 +35,7 @@ interface Lote {
   id: string;
   numero: string;
   contrato: string;
+  empresa_id?: string;
   unidade_administrativa?: string;
   responsavel_executora?: string;
   email_executora?: string;
@@ -677,7 +678,9 @@ const LotesManager = () => {
             <TableBody>
               {lotes.map(lote => <TableRow key={lote.id}>
                   <TableCell className="font-medium">{lote.numero}</TableCell>
-                  <TableCell>{lote.empresas?.nome || "-"}</TableCell>
+                  <TableCell>
+                    {empresas.find(e => e.id === lote.empresa_id)?.nome || "-"}
+                  </TableCell>
                   <TableCell>
                     {lote.unidade_administrativa ? (
                       <Badge variant="outline">{lote.unidade_administrativa}</Badge>
