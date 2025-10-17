@@ -240,7 +240,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_placas")
-        .select("id, servico, servico_final, cadastro_id, distancia_match_metros, codigo, tipo, km, divergencia, reconciliado, status_reconciliacao, solucao_planilha, servico_inferido, revisao_solicitada, localizado_em_campo")
+        .select("id, servico, servico_final, cadastro_id, distancia_match_metros, codigo, tipo, km, divergencia, reconciliado, status_reconciliacao, solucao_planilha, servico_inferido, revisao_solicitada, localizado_em_campo, lado, suporte, substrato, latitude, longitude")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null)
