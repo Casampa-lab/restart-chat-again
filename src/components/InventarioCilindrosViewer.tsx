@@ -490,7 +490,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
 
             <div className="rounded-md border overflow-x-auto">
               <Table>
-                <TableHeader>
+                <TableHeader className="sticky top-0 bg-muted z-10">
                   <TableRow>
                     {searchLat && searchLon && <TableHead>Distância</TableHead>}
                     <TableHead 

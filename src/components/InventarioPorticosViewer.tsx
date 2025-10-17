@@ -478,7 +478,7 @@ export function InventarioPorticosViewer({
           ) : (
             <div className="border rounded-lg overflow-hidden">
               <Table>
-                <TableHeader>
+                <TableHeader className="sticky top-0 bg-muted z-10">
                   <TableRow>
                     <TableHead 
                       className="cursor-pointer select-none hover:bg-muted/50 text-center"
