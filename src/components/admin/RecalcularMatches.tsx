@@ -38,10 +38,8 @@ interface RecalcularMatchesProps {
   rodoviaId?: string;
 }
 
-export function RecalcularMatches({ loteId: propLoteId, rodoviaId: propRodoviaId }: RecalcularMatchesProps = {}) {
+export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps = {}) {
   const [tipo, setTipo] = useState<string>("");
-  const [internalLoteId, setInternalLoteId] = useState<string>("");
-  const [internalRodoviaId, setInternalRodoviaId] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -51,12 +49,6 @@ export function RecalcularMatches({ loteId: propLoteId, rodoviaId: propRodoviaId
   const [forcarReprocessamento, setForcarReprocessamento] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  // Usar props se disponíveis, senão usar estado interno
-  const loteId = propLoteId || internalLoteId;
-  const rodoviaId = propRodoviaId || internalRodoviaId;
-  const setLoteId = propLoteId ? () => {} : setInternalLoteId;
-  const setRodoviaId = propRodoviaId ? () => {} : setInternalRodoviaId;
 
   // Buscar todas as tolerâncias padrão ao selecionar rodovia
   useEffect(() => {
@@ -101,29 +93,6 @@ export function RecalcularMatches({ loteId: propLoteId, rodoviaId: propRodoviaId
   useEffect(() => {
     setToleranciasCustomizadas({});
   }, [rodoviaId]);
-
-  // Buscar lotes
-  const { data: lotes } = useQuery({
-    queryKey: ["lotes"],
-    queryFn: async () => {
-      const { data } = await supabase.from("lotes").select("*").order("numero");
-      return data || [];
-    },
-  });
-
-  // Buscar rodovias do lote selecionado
-  const { data: rodovias } = useQuery({
-    queryKey: ["rodovias", loteId],
-    queryFn: async () => {
-      if (!loteId) return [];
-      const { data } = await supabase
-        .from("lotes_rodovias")
-        .select("rodovia:rodovias(*)")
-        .eq("lote_id", loteId);
-      return data?.map(lr => lr.rodovia) || [];
-    },
-    enabled: !!loteId,
-  });
 
   // ============= FUNÇÕES DE MATCHING (REUTILIZADAS) =============
 
@@ -567,10 +536,19 @@ export function RecalcularMatches({ loteId: propLoteId, rodoviaId: propRodoviaId
   // ============= PROCESSO DE RECÁLCULO =============
 
   const handleRecalcular = async () => {
-    if (!tipo || !loteId || !rodoviaId) {
+    if (!loteId || !rodoviaId) {
       toast({
         title: "Erro",
-        description: "Selecione o tipo, lote e rodovia antes de continuar",
+        description: "Selecione o lote e rodovia no topo da página primeiro",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!tipo) {
+      toast({
+        title: "Erro",
+        description: "Selecione o tipo de elemento",
         variant: "destructive",
       });
       return;
@@ -989,62 +967,20 @@ export function RecalcularMatches({ loteId: propLoteId, rodoviaId: propRodoviaId
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Mostrar dropdowns de lote/rodovia apenas se não receber props */}
-          {!propLoteId && !propRodoviaId && (
-            <>
-              <div className="space-y-2">
-                <Label>Lote *</Label>
-                <Select value={loteId} onValueChange={(value) => {
-                  setLoteId(value);
-                  setRodoviaId(""); // Limpar rodovia ao mudar lote
-                }} disabled={isProcessing}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o lote" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {lotes?.map(lote => (
-                      <SelectItem key={lote.id} value={lote.id}>
-                        Lote {lote.numero}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Rodovia *</Label>
-                <Select value={rodoviaId} onValueChange={setRodoviaId} disabled={isProcessing || !loteId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={!loteId ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {rodovias?.map((rodovia: any) => (
-                      <SelectItem key={rodovia.id} value={rodovia.id}>
-                        {rodovia.codigo}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
-
-          <div className="space-y-2">
-            <Label>Tipo de Elemento *</Label>
-            <Select value={tipo} onValueChange={setTipo} disabled={isProcessing}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {TIPOS_ELEMENTOS.map(t => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="space-y-2">
+          <Label>Tipo de Elemento *</Label>
+          <Select value={tipo} onValueChange={setTipo} disabled={isProcessing}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o tipo de elemento" />
+            </SelectTrigger>
+            <SelectContent>
+              {TIPOS_ELEMENTOS.map(t => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Tabela de Tolerâncias GPS */}

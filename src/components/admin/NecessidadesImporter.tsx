@@ -33,47 +33,16 @@ interface NecessidadesImporterProps {
   rodoviaId?: string;
 }
 
-export function NecessidadesImporter({ loteId: propLoteId, rodoviaId: propRodoviaId }: NecessidadesImporterProps = {}) {
+export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporterProps = {}) {
   const [tipo, setTipo] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [internalLoteId, setInternalLoteId] = useState<string>("");
-  const [internalRodoviaId, setInternalRodoviaId] = useState<string>("");
   const [progressInfo, setProgressInfo] = useState<{ current: number; total: number } | null>(null);
   const [filtroLog, setFiltroLog] = useState<"todos" | "success" | "warning" | "error">("todos");
   const { toast } = useToast();
   const cancelImportRef = useRef(false);
-
-  // Usar props se disponíveis, senão usar estado interno
-  const loteId = propLoteId || internalLoteId;
-  const rodoviaId = propRodoviaId || internalRodoviaId;
-  const setLoteId = propLoteId ? () => {} : setInternalLoteId;
-  const setRodoviaId = propRodoviaId ? () => {} : setInternalRodoviaId;
-
-  // Buscar lotes
-  const { data: lotes } = useQuery({
-    queryKey: ["lotes"],
-    queryFn: async () => {
-      const { data } = await supabase.from("lotes").select("*").order("numero");
-      return data || [];
-    },
-  });
-
-  // Buscar rodovias do lote selecionado
-  const { data: rodovias } = useQuery({
-    queryKey: ["rodovias", loteId],
-    queryFn: async () => {
-      if (!loteId) return [];
-      const { data } = await supabase
-        .from("lotes_rodovias")
-        .select("rodovia:rodovias(*)")
-        .eq("lote_id", loteId);
-      return data?.map(lr => lr.rodovia) || [];
-    },
-    enabled: !!loteId,
-  });
 
   // Função para converter coordenadas com vírgula para ponto
   const converterCoordenada = (valor: any): number | null => {
@@ -1409,65 +1378,20 @@ ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Veja logs de erro acima par
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Mostrar dropdowns de lote/rodovia apenas se não receber props */}
-          {!propLoteId && !propRodoviaId && (
-            <>
-              {/* Seleção de Lote */}
-              <div className="space-y-2">
-                <Label>Lote *</Label>
-                <Select value={loteId} onValueChange={(value) => {
-                  setLoteId(value);
-                  setRodoviaId(""); // Limpar rodovia ao mudar lote
-                }} disabled={isImporting}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o lote" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {lotes?.map(lote => (
-                      <SelectItem key={lote.id} value={lote.id}>
-                        Lote {lote.numero}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Seleção de Rodovia */}
-              <div className="space-y-2">
-                <Label>Rodovia *</Label>
-                <Select value={rodoviaId} onValueChange={setRodoviaId} disabled={isImporting || !loteId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={!loteId ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {rodovias?.map((rodovia: any) => (
-                      <SelectItem key={rodovia.id} value={rodovia.id}>
-                        {rodovia.codigo}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
-
-          {/* Seleção de tipo */}
-          <div className="space-y-2">
-            <Label>Tipo de Elemento *</Label>
-            <Select value={tipo} onValueChange={setTipo} disabled={isImporting}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {TIPOS_NECESSIDADES.map(t => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="space-y-2">
+          <Label>Tipo de Elemento *</Label>
+          <Select value={tipo} onValueChange={setTipo} disabled={isImporting}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o tipo de elemento" />
+            </SelectTrigger>
+            <SelectContent>
+              {TIPOS_NECESSIDADES.map(t => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Alert informativo sobre tolerância */}

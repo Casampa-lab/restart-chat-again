@@ -24,66 +24,37 @@ interface DeleteNecessidadesProps {
   rodoviaId?: string;
 }
 
-export function DeleteNecessidades({ loteId: propLoteId, rodoviaId: propRodoviaId }: DeleteNecessidadesProps = {}) {
-  const [internalLoteId, setInternalLoteId] = useState<string>("");
-  const [internalRodoviaId, setInternalRodoviaId] = useState<string>("");
+export function DeleteNecessidades({ loteId, rodoviaId }: DeleteNecessidadesProps = {}) {
   const [selectedTabela, setSelectedTabela] = useState<string>("");
   const [deleting, setDeleting] = useState(false);
 
-  // Usar props se disponíveis, senão usar estado interno
-  const selectedLote = propLoteId || internalLoteId;
-  const selectedRodovia = propRodoviaId || internalRodoviaId;
-  const setSelectedLote = propLoteId ? () => {} : setInternalLoteId;
-  const setSelectedRodovia = propRodoviaId ? () => {} : setInternalRodoviaId;
-
-  // Buscar lotes
-  const { data: lotes } = useQuery({
-    queryKey: ["lotes"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("lotes")
-        .select("id, numero")
-        .order("numero");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Buscar rodovias do lote selecionado
-  const { data: rodovias } = useQuery({
-    queryKey: ["rodovias", selectedLote],
-    queryFn: async () => {
-      if (!selectedLote) {
-        return [];
-      }
-
-      const { data, error } = await supabase.rpc('get_rodovias_by_lote', {
-        p_lote_id: selectedLote
-      });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!selectedLote,
-  });
-
-  // Resetar rodovia quando lote mudar
-  useEffect(() => {
-    setSelectedRodovia("");
-  }, [selectedLote]);
-
   const handleDelete = async () => {
-    if (!selectedLote || !selectedRodovia || !selectedTabela) {
-      toast.error("Selecione o lote, rodovia e tipo de necessidade");
+    if (!loteId || !rodoviaId) {
+      toast.error("Selecione o lote e rodovia no topo da página primeiro");
+      return;
+    }
+    
+    if (!selectedTabela) {
+      toast.error("Selecione o tipo de necessidade");
       return;
     }
 
-    const loteNome = lotes?.find(l => l.id === selectedLote)?.numero;
-    const rodoviaNome = rodovias?.find(r => r.id === selectedRodovia)?.codigo;
+    const { data: lote } = await supabase
+      .from("lotes")
+      .select("numero")
+      .eq("id", loteId)
+      .single();
+
+    const { data: rodovia } = await supabase
+      .from("rodovias")
+      .select("codigo")
+      .eq("id", rodoviaId)
+      .single();
+
     const tabelaNome = TABELAS_NECESSIDADES.find(t => t.value === selectedTabela)?.label;
 
     if (!confirm(
-      `Tem certeza que deseja apagar TODAS as necessidades de ${tabelaNome} da ${rodoviaNome} do Lote ${loteNome}?\n\n` +
+      `Tem certeza que deseja apagar TODAS as necessidades de ${tabelaNome} da ${rodovia?.codigo} do Lote ${lote?.numero}?\n\n` +
       `Esta ação não pode ser desfeita!`
     )) {
       return;
@@ -98,8 +69,8 @@ export function DeleteNecessidades({ loteId: propLoteId, rodoviaId: propRodoviaI
       const { count: totalCount, error: countError } = await supabase
         .from(selectedTabela as any)
         .select('*', { count: 'exact', head: true })
-        .eq('lote_id', selectedLote)
-        .eq('rodovia_id', selectedRodovia);
+        .eq('lote_id', loteId)
+        .eq('rodovia_id', rodoviaId);
 
       if (countError) throw countError;
 
@@ -108,8 +79,8 @@ export function DeleteNecessidades({ loteId: propLoteId, rodoviaId: propRodoviaI
       const { data: necessidadesParaDeletar } = await supabase
         .from(selectedTabela as any)
         .select('id')
-        .eq('lote_id', selectedLote)
-        .eq('rodovia_id', selectedRodovia);
+        .eq('lote_id', loteId)
+        .eq('rodovia_id', rodoviaId);
 
       if (necessidadesParaDeletar && necessidadesParaDeletar.length > 0) {
         const necessidadeIds = necessidadesParaDeletar.map((n: any) => n.id);
@@ -125,8 +96,8 @@ export function DeleteNecessidades({ loteId: propLoteId, rodoviaId: propRodoviaI
       const { error: deleteError, count } = await supabase
         .from(selectedTabela as any)
         .delete({ count: 'exact' })
-        .eq('lote_id', selectedLote)
-        .eq('rodovia_id', selectedRodovia);
+        .eq('lote_id', loteId)
+        .eq('rodovia_id', rodoviaId);
 
       if (deleteError) {
         console.error('Erro ao deletar registros:', deleteError);
@@ -136,8 +107,6 @@ export function DeleteNecessidades({ loteId: propLoteId, rodoviaId: propRodoviaI
       toast.success(`${count} necessidades deletadas com sucesso!`);
       
       // Limpar seleção
-      setSelectedLote("");
-      setSelectedRodovia("");
       setSelectedTabela("");
     } catch (error: any) {
       console.error('Erro:', error);
@@ -159,85 +128,25 @@ export function DeleteNecessidades({ loteId: propLoteId, rodoviaId: propRodoviaI
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Mostrar dropdowns de lote/rodovia apenas se não receber props */}
-          {!propLoteId && !propRodoviaId && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="lote">Lote *</Label>
-                <Select value={selectedLote} onValueChange={setSelectedLote}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o lote" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {lotes?.map((lote) => (
-                      <SelectItem key={lote.id} value={lote.id}>
-                        Lote {lote.numero}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="rodovia">Rodovia *</Label>
-                <Select value={selectedRodovia} onValueChange={setSelectedRodovia} disabled={!selectedLote}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={!selectedLote ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {rodovias?.map((rodovia) => (
-                      <SelectItem key={rodovia.id} value={rodovia.id}>
-                        {rodovia.codigo}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="tabela">Tipo de Elemento *</Label>
-            <Select value={selectedTabela} onValueChange={setSelectedTabela}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {TABELAS_NECESSIDADES.map((tabela) => (
-                  <SelectItem key={tabela.value} value={tabela.value}>
-                    {tabela.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="tabela">Tipo de Elemento *</Label>
+          <Select value={selectedTabela} onValueChange={setSelectedTabela}>
+            <SelectTrigger id="tabela">
+              <SelectValue placeholder="Selecione o tipo de elemento" />
+            </SelectTrigger>
+            <SelectContent>
+              {TABELAS_NECESSIDADES.map((tabela) => (
+                <SelectItem key={tabela.value} value={tabela.value}>
+                  {tabela.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-
-        {/* Mensagem quando lote selecionado não tem necessidades */}
-        {selectedLote && rodovias !== undefined && rodovias.length === 0 && (
-          <Alert variant="default" className="border-amber-500/50 bg-amber-500/10">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-900 dark:text-amber-100">
-              Nenhuma necessidade encontrada neste lote
-            </AlertTitle>
-            <AlertDescription className="text-amber-800 dark:text-amber-200">
-              O <strong>Lote {lotes?.find(l => l.id === selectedLote)?.numero}</strong> ainda não possui 
-              necessidades importadas no sistema.
-              <br />
-              <br />
-              Para usar esta funcionalidade:
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Importe necessidades para este lote primeiro</li>
-                <li>Ou selecione um lote diferente que já tenha dados</li>
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
 
         <Button
           onClick={handleDelete}
-          disabled={!selectedLote || !selectedRodovia || !selectedTabela || deleting}
+          disabled={!loteId || !rodoviaId || !selectedTabela || deleting}
           variant="destructive"
           size="lg"
           className="w-full"
