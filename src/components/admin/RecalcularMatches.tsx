@@ -854,14 +854,20 @@ export function RecalcularMatches() {
             // ELEMENTOS NÃO-RECORRENTES (Placas, Defensas, etc)
             if (cadastro_id) {
               servicoFinal = servico_inferido;
-              divergencia = true;
+              divergencia = true; // Match encontrado = sempre reconciliar
             } else {
               servicoFinal = "Implantar";
-              divergencia = true; // ✅ CORRIGIDO: Sem match = divergência para análise
+              divergencia = false; // Sem match + Implantar = não precisa reconciliar
             }
-            if (solucaoPlanilhaNormalizada) {
+            
+            // Se projeto especificou um serviço diferente da inferência:
+            if (solucaoPlanilhaNormalizada && solucaoPlanilhaNormalizada !== servico_inferido) {
               servicoFinal = solucaoPlanilhaNormalizada;
-              divergencia = (solucaoPlanilhaNormalizada !== servico_inferido);
+              divergencia = true; // Projeto ≠ Inferência = reconciliar
+            } else if (solucaoPlanilhaNormalizada) {
+              // Projeto = Inferência, mas usar serviço do projeto
+              servicoFinal = solucaoPlanilhaNormalizada;
+              // NÃO sobrescrever divergencia aqui se já for true (match existe)
             }
           }
 
