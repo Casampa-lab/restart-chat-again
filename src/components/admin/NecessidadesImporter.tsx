@@ -673,19 +673,28 @@ export function NecessidadesImporter() {
 
       // Filtrar linhas vazias (que não têm KM) MAS MANTENDO O NÚMERO DA LINHA ORIGINAL
       const dadosFiltrados = dadosComHeader.filter((row: any) => {
-        // Helper para buscar primeira coluna que EXISTE (aceita 0 como válido)
-        const getFirstDefined = (...keys: string[]) => {
+        // Helper para buscar primeira coluna que EXISTE e tem valor válido (inclusive 0)
+        const getFirstValidValue = (...keys: string[]) => {
           for (const key of keys) {
-            if (row[key] !== undefined) return row[key];
+            const val = row[key];
+            // Considerar válido se existe e não é string vazia
+            // IMPORTANTE: 0 (número ou string "0") é VÁLIDO
+            if (val !== undefined && val !== null && val !== "") {
+              return val;
+            }
+            // Se encontrar explicitamente 0, retornar
+            if (val === 0 || val === "0") {
+              return val;
+            }
           }
           return undefined;
         };
         
         const kmValue = (tipo === "placas" || tipo === "marcas_transversais" || tipo === "porticos")
-          ? getFirstDefined("Km", "KM", "km")
-          : getFirstDefined("Km Inicial", "KM Inicial", "km inicial", "km_inicial");
+          ? getFirstValidValue("Km", "KM", "km")
+          : getFirstValidValue("Km Inicial", "KM Inicial", "km inicial", "km_inicial");
         
-        // Aceitar 0 como válido, filtrar apenas null/undefined/string vazia
+        // Aceitar 0 explicitamente como válido
         return kmValue !== undefined && kmValue !== null && kmValue !== "";
       });
 
