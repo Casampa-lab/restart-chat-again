@@ -69,6 +69,10 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
     queryKey: ["divergencias", grupoAtivo, activeSession.lote_id, activeSession.rodovia_id],
     queryFn: async () => {
       const configAtual = getConfig(grupoAtivo);
+      
+      // Determinar coluna de ordenação baseado no tipo de geometria
+      const colunaOrdenacao = configAtual.tipoGeometria === 'pontual' ? 'km' : 'km_inicial';
+      
       const { data, error } = await supabase
         .from(configAtual.tabelaNecessidades as any)
         .select("*")
@@ -76,12 +80,19 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
         .eq("reconciliado", false)
         .eq("lote_id", activeSession.lote_id)
         .eq("rodovia_id", activeSession.rodovia_id)
-        .order("km", { ascending: true });
+        .order(colunaOrdenacao, { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error(`[Divergências] Erro ao buscar ${grupoAtivo}:`, error);
+        throw error;
+      }
+      
+      console.log(`[Divergências] ${grupoAtivo}: ${data?.length || 0} registros encontrados`);
       return (data || []) as any[];
     },
     enabled: !!user && !!activeSession,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   // Buscar detalhes do cadastro quando seleciona necessidade
