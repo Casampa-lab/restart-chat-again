@@ -654,7 +654,7 @@ export function InventarioTachasViewer({
                                   <StatusReconciliacaoBadge 
                                     status={necessidade.status_reconciliacao} 
                                   />
-                                  {necessidade?.divergencia && !necessidade.reconciliado && (
+                                  {necessidade && !necessidade.reconciliado && (
                                     <Button
                                       variant="outline"
                                       size="sm"
