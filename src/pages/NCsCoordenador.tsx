@@ -29,6 +29,9 @@ interface NaoConformidade {
   user_id: string;
   fiscalNome?: string;
   data_notificacao: string | null;
+  natureza?: string;
+  grau?: string;
+  tipo_obra?: string;
   rodovias: {
     codigo: string;
     nome: string;
@@ -113,50 +116,57 @@ const NCsCoordenador = () => {
     try {
       setLoading(true);
       
-      let query = supabase
+      // Query principal
+      const ncsQuery = (supabase as any)
         .from("nao_conformidades")
-        .select(`
-          id,
-          numero_nc,
-          data_ocorrencia,
-          tipo_nc,
-          problema_identificado,
-          situacao,
-          empresa,
-          km_referencia,
-          user_id,
-          data_notificacao,
-          rodovias(codigo),
-          lotes(numero)
-        `)
+        .select("*")
         .eq("deleted", false)
         .eq("enviado_coordenador", true)
+        .eq("notificada", false)
         .order("created_at", { ascending: false });
 
-      if (selectedLote !== "all") {
-        query = query.eq("lote_id", selectedLote);
-      }
+      const finalQuery = selectedLote !== "all" 
+        ? ncsQuery.eq("lote_id", selectedLote)
+        : ncsQuery;
 
-      const { data, error } = await query;
+      const { data, error } = await finalQuery;
 
       if (error) throw error;
       
-      // Buscar nomes dos fiscais
+      // Buscar dados relacionados
       if (data && data.length > 0) {
-        const userIds = [...new Set(data.map(nc => nc.user_id))];
+        // Buscar rodovias
+        const rodoviaIds = [...new Set(data.map((nc: any) => nc.rodovia_id).filter(Boolean))] as string[];
+        const { data: rodovias } = await supabase
+          .from("rodovias")
+          .select("id, codigo")
+          .in("id", rodoviaIds);
+        const rodoviasMap = new Map(rodovias?.map(r => [r.id, r]) || []);
+
+        // Buscar lotes
+        const loteIds = [...new Set(data.map((nc: any) => nc.lote_id).filter(Boolean))] as string[];
+        const { data: lotes } = await supabase
+          .from("lotes")
+          .select("id, numero")
+          .in("id", loteIds);
+        const lotesMap = new Map(lotes?.map(l => [l.id, l]) || []);
+
+        // Buscar perfis
+        const userIds = [...new Set(data.map((nc: any) => nc.user_id).filter(Boolean))] as string[];
         const { data: profiles } = await supabase
           .from("profiles")
           .select("id, nome")
           .in("id", userIds);
-        
         const profilesMap = new Map(profiles?.map(p => [p.id, p.nome]) || []);
         
-        const ncsWithProfiles = data.map(nc => ({
+        const ncsEnriched = data.map((nc: any) => ({
           ...nc,
+          rodovias: rodoviasMap.get(nc.rodovia_id),
+          lotes: lotesMap.get(nc.lote_id),
           fiscalNome: profilesMap.get(nc.user_id) || "N/A"
         }));
         
-        setNcs(ncsWithProfiles as any);
+        setNcs(ncsEnriched as any);
       } else {
         setNcs([]);
       }
@@ -417,9 +427,9 @@ const NCsCoordenador = () => {
                         <TableHead>Empresa</TableHead>
                         <TableHead>km</TableHead>
                         <TableHead>Tipo</TableHead>
+                        <TableHead>Grau</TableHead>
                         <TableHead>Problema</TableHead>
                         <TableHead>Situação</TableHead>
-                        <TableHead>Data Notificação</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -439,17 +449,14 @@ const NCsCoordenador = () => {
                           <TableCell className="text-sm">{nc.empresa}</TableCell>
                           <TableCell>{nc.km_referencia}</TableCell>
                           <TableCell>{nc.tipo_nc}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{(nc as any).grau || "N/A"}</Badge>
+                          </TableCell>
                           <TableCell className="max-w-xs truncate">{nc.problema_identificado}</TableCell>
                           <TableCell>
                             <Badge className={getSituacaoColor(nc.situacao)}>
                               {nc.situacao}
                             </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {nc.data_notificacao 
-                              ? new Date(nc.data_notificacao).toLocaleDateString('pt-BR')
-                              : <span className="text-muted-foreground">Não enviada</span>
-                            }
                           </TableCell>
                           <TableCell className="text-right">
                             <Button

@@ -21,6 +21,7 @@ export default function ElementosPendentes() {
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showRejectionDialog, setShowRejectionDialog] = useState(false);
   const [observacao, setObservacao] = useState("");
+  const [grauNC, setGrauNC] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState<string>("pendente_aprovacao");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
@@ -120,22 +121,27 @@ export default function ElementosPendentes() {
       return;
     }
 
+    if (!grauNC) {
+      toast.error("Selecione o GRAU da não conformidade");
+      return;
+    }
+
     setIsProcessing(true);
-    const result = await rejeitarElemento(selectedElemento.id, observacao);
+    const result = await rejeitarElemento(selectedElemento.id, observacao, grauNC);
     setIsProcessing(false);
 
     if (result.success) {
       setShowRejectionDialog(false);
       setSelectedElemento(null);
       setObservacao("");
+      setGrauNC("");
       refetch();
       
-      // Toast informando que NC foi criada como rascunho
       toast.success('Elemento rejeitado e NC criada', {
         description: 'Uma NC foi criada automaticamente. Revise em "NCs Coordenador" antes de notificar a executora.',
         action: {
           label: "Ir para NCs",
-          onClick: () => navigate('/coordenacao-fiscalizacao')
+          onClick: () => navigate('/ncs-coordenador')
         }
       });
     }
@@ -435,6 +441,22 @@ export default function ElementosPendentes() {
           </DialogHeader>
           <div className="space-y-4">
             <p>Tem certeza que deseja rejeitar este elemento? Uma NC será criada automaticamente.</p>
+            
+            <div>
+              <Label htmlFor="grau-nc">Grau da NC *</Label>
+              <Select value={grauNC} onValueChange={setGrauNC}>
+                <SelectTrigger id="grau-nc">
+                  <SelectValue placeholder="Selecione o grau" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Leve">Leve</SelectItem>
+                  <SelectItem value="Média">Média</SelectItem>
+                  <SelectItem value="Grave">Grave</SelectItem>
+                  <SelectItem value="Gravíssima">Gravíssima</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
             <div>
               <Label htmlFor="obs-rejeicao">Motivo da Rejeição *</Label>
               <Textarea

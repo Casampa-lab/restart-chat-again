@@ -42,6 +42,12 @@ const mapTipoElementoParaTipoNC = (tipo: TipoElemento): string => {
   return 'Dispositivos de Segurança';
 };
 
+const mapTipoElementoParaNatureza = (tipo: TipoElemento): string => {
+  if (tipo === 'placas' || tipo === 'porticos') return 'S.V.';
+  if (tipo === 'marcas_longitudinais' || tipo === 'tachas' || tipo === 'inscricoes') return 'S.H.';
+  return 'D.S.';
+};
+
 export async function aprovarElemento(elementoId: string, observacao?: string) {
   try {
     // 1. Buscar elemento pendente
@@ -183,7 +189,7 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
   }
 }
 
-export async function rejeitarElemento(elementoId: string, observacao: string) {
+export async function rejeitarElemento(elementoId: string, observacao: string, grau: string) {
   try {
     if (!observacao || observacao.trim() === '') {
       throw new Error('Observação é obrigatória para rejeição');
@@ -237,6 +243,23 @@ export async function rejeitarElemento(elementoId: string, observacao: string) {
       };
       return labels[tipo] || tipo;
     };
+
+    // Buscar dados da empresa executora do lote
+    const { data: loteData } = await supabase
+      .from('lotes')
+      .select(`
+        contrato,
+        empresas (
+          nome
+        )
+      `)
+      .eq('id', elemento.lote_id)
+      .single();
+
+    const empresaNome = loteData?.empresas?.nome || 'A definir';
+
+    // Determinar se é elemento linear (com extensão) ou pontual
+    const isLinear = ['marcas_longitudinais', 'tachas', 'inscricoes', 'defensas'].includes(elemento.tipo_elemento);
     
     const ncData: any = {
       numero_nc: ncNumber,
@@ -244,19 +267,37 @@ export async function rejeitarElemento(elementoId: string, observacao: string) {
       rodovia_id: elemento.rodovia_id,
       lote_id: elemento.lote_id,
       tipo_nc: tipoNC,
+      natureza: mapTipoElementoParaNatureza(elemento.tipo_elemento as TipoElemento),
+      grau: grau,
+      tipo_obra: 'Execução',
       problema_identificado: 'Item Implantado Fora do Projeto',
       descricao_problema: `Elemento não cadastrado rejeitado pelo coordenador.\n\n` +
                            `Tipo: ${getTipoLabel(elemento.tipo_elemento)}\n` +
                            `Justificativa do técnico: ${elemento.justificativa}\n\n` +
                            `Motivo da rejeição: ${observacao}`,
       situacao: 'Não Atendida',
-      empresa: 'A definir',
+      empresa: empresaNome,
       data_ocorrencia: dadosElemento?.data_intervencao || new Date().toISOString().split('T')[0],
-      km_referencia: dadosElemento?.km || dadosElemento?.km_inicial || null,
-      latitude: dadosElemento?.latitude || dadosElemento?.latitude_inicial || null,
-      longitude: dadosElemento?.longitude || dadosElemento?.longitude_inicial || null,
+      data_notificacao: null,
+      
+      // Coordenadas - LINEAR vs PONTUAL
+      ...(isLinear ? {
+        km_inicial: dadosElemento?.km_inicial || null,
+        km_final: dadosElemento?.km_final || null,
+        latitude_inicial: dadosElemento?.latitude_inicial || dadosElemento?.latitude || null,
+        longitude_inicial: dadosElemento?.longitude_inicial || dadosElemento?.longitude || null,
+        latitude_final: dadosElemento?.latitude_final || null,
+        longitude_final: dadosElemento?.longitude_final || null,
+      } : {
+        km_referencia: dadosElemento?.km || dadosElemento?.km_inicial || null,
+        latitude: dadosElemento?.latitude || dadosElemento?.latitude_inicial || null,
+        longitude: dadosElemento?.longitude || dadosElemento?.longitude_inicial || null,
+      }),
+      
+      fotos_urls: elemento.fotos_urls || [],
       observacao: `Rejeitado em ${new Date().toLocaleDateString('pt-BR')} - Coordenador`,
-      enviado_coordenador: true
+      enviado_coordenador: true,
+      notificada: false
     };
 
     const { data: ncCreated, error: ncError } = await supabase
