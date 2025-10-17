@@ -12,11 +12,53 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter } from "lucide-react";
+import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
-import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
+import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+// Component to show reconciliation status badge
+function StatusReconciliacaoBadge({ status }: { status: string | null }) {
+  if (!status) return null;
+
+  const config = {
+    pendente_aprovacao: {
+      color: "bg-yellow-100 text-yellow-800 border-yellow-300",
+      icon: "🟡",
+      label: "Aguardando Coordenação"
+    },
+    aprovado: {
+      color: "bg-green-100 text-green-800 border-green-300",
+      icon: "🟢",
+      label: "Substituição Aprovada"
+    },
+    rejeitado: {
+      color: "bg-red-100 text-red-800 border-red-300",
+      icon: "🔴",
+      label: "Mantido como Implantação"
+    }
+  };
+
+  const item = config[status as keyof typeof config];
+  if (!item) return null;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge className={`${item.color} text-xs border`}>
+            {item.icon}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-xs">{item.label}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 interface Cilindro {
   id: string;
@@ -132,18 +174,69 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
       
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
-        const divergencia = nec.solucao_planilha && nec.servico_inferido && nec.solucao_planilha !== nec.servico_inferido;
-        map.set(nec.cadastro_id, { ...nec, divergencia });
+        const existing = map.get(nec.cadastro_id);
+        
+        // Se não existe, adiciona
+        if (!existing) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+          });
+          return;
+        }
+        
+        // Prioridade 1: Status de revisão (preferir "ok" sobre "pendente_coordenador")
+        const existingStatusOk = existing.status_revisao === 'ok';
+        const necStatusOk = nec.status_revisao === 'ok';
+        
+        if (necStatusOk && !existingStatusOk) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+          });
+          return;
+        }
+        
+        if (!necStatusOk && existingStatusOk) {
+          return;
+        }
+        
+        // Prioridade 2: Tipo de match (preferir "exato" sobre "parcial")
+        if (nec.tipo_match === 'exato' && existing.tipo_match !== 'exato') {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+          });
+          return;
+        }
+        
+        if (existing.tipo_match === 'exato' && nec.tipo_match !== 'exato') {
+          return;
+        }
+        
+        // Prioridade 3: Menor distância (critério original)
+        if ((nec.distancia_match_metros || 0) < (existing.distancia_match_metros || 0)) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+          });
+        }
       });
       
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
+    staleTime: 0,
+    gcTime: 0,
   });
 
-  const divergenciasPendentes = Array.from(necessidadesMap?.values() || []).filter(
-    (nec: any) => nec.divergencia && !nec.solucao_confirmada
+  // Contar divergências pendentes
+  const pendentesRevisao = Array.from(necessidadesMap?.values() || []).filter(
+    nec => nec.divergencia && !nec.reconciliado
   ).length;
+
+  // Contar TODAS as necessidades com match (não apenas divergências)
+  const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
   // Buscar cilindros do inventário
   const { data: cilindros, isLoading } = useQuery({
@@ -213,7 +306,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
   const filteredCilindros = cilindros?.filter(cilindro => {
     if (!showOnlyDivergencias) return true;
     const nec = necessidadesMap?.get(cilindro.id);
-    return nec?.divergencia;
+    return nec?.divergencia && !nec?.reconciliado;
   }) || [];
 
   // Função para ordenar dados
@@ -315,34 +408,79 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Contador de Matches a Reconciliar */}
-          {divergenciasPendentes > 0 && (
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
-                  <AlertCircle className="h-6 w-6 text-warning" />
-                </div>
-                <div>
-                  <div className="font-bold text-base flex items-center gap-2">
-                    <span className="text-2xl font-extrabold text-warning">{divergenciasPendentes}</span>
-                    <span>{divergenciasPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
+          {totalMatchesProcessados > 0 && (
+            pendentesRevisao === 0 ? (
+              // Estado OK - Sem divergências
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500/20 border border-green-500/40">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
                   </div>
-                  <div className="text-sm text-muted-foreground mt-0.5">
-                    🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-green-600">{totalMatchesProcessados}</span>
+                      <span>{totalMatchesProcessados === 1 ? 'item verificado' : 'itens verificados'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      ✅ Inventário OK - Projeto e Sistema em conformidade
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      refetchNecessidades();
+                      toast("Atualizando dados...", { description: "Buscando informações mais recentes" });
+                    }}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Atualizar
+                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={showOnlyDivergencias}
+                      onCheckedChange={setShowOnlyDivergencias}
+                      id="filtro-divergencias-cilindros"
+                    />
+                    <Label htmlFor="filtro-divergencias-cilindros" className="cursor-pointer text-sm font-medium">
+                      <Filter className="h-4 w-4 inline mr-1" />
+                      Apenas pendentes
+                    </Label>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={showOnlyDivergencias}
-                  onCheckedChange={setShowOnlyDivergencias}
-                  id="filtro-divergencias-cilindros"
-                />
-                <Label htmlFor="filtro-divergencias-cilindros" className="cursor-pointer text-sm font-medium">
-                  <Filter className="h-4 w-4 inline mr-1" />
-                  Apenas divergências
-                </Label>
+            ) : (
+              // Estado com Divergências
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
+                    <AlertCircle className="h-6 w-6 text-warning" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-warning">{pendentesRevisao}</span>
+                      <span>{pendentesRevisao === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={showOnlyDivergencias}
+                    onCheckedChange={setShowOnlyDivergencias}
+                    id="filtro-divergencias-cilindros"
+                  />
+                  <Label htmlFor="filtro-divergencias-cilindros" className="cursor-pointer text-sm font-medium">
+                    <Filter className="h-4 w-4 inline mr-1" />
+                    Apenas pendentes
+                  </Label>
+                </div>
               </div>
-            </div>
+            )
           )}
 
           <div className="space-y-4">
@@ -450,6 +588,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                       </div>
                     </TableHead>
                     <TableHead className="text-center">Projeto</TableHead>
+                    <TableHead className="text-center">Status</TableHead>
                     <TableHead className="text-center">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -474,34 +613,59 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <TableCell>{new Date(cilindro.data_vistoria).toLocaleDateString("pt-BR")}</TableCell>
                         <TableCell className="text-center">
                           {(() => {
-                            const nec = necessidadesMap?.get(cilindro.id);
-                            if (!nec) return "-";
-                            
-                            return (
-                              <div
-                                className="cursor-pointer"
-                                onClick={() => {
-                                  setSelectedNecessidade(nec);
-                                  setSelectedCadastroForReconciliacao(cilindro);
-                                  setReconciliacaoOpen(true);
+                            const necessidade = necessidadesMap?.get(cilindro.id);
+                            return necessidade ? (
+                              <NecessidadeBadge 
+                                necessidade={{
+                                  id: necessidade.id,
+                                  servico: necessidade.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
+                                  distancia_match_metros: necessidade.distancia_match_metros || 0,
+                                  km: necessidade.km_inicial,
+                                  divergencia: necessidade.divergencia,
+                                  reconciliado: necessidade.reconciliado,
+                                  solucao_planilha: necessidade.solucao_planilha,
+                                  servico_inferido: necessidade.servico_inferido,
                                 }}
-                              >
-                                <NecessidadeBadge
-                                  necessidade={{
-                                    id: nec.id,
-                                    servico: nec.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
-                                    distancia_match_metros: nec.distancia_match_metros || 0,
-                                    km: nec.km_inicial,
-                                    divergencia: nec.divergencia,
-                                    reconciliado: nec.solucao_confirmada,
-                                    solucao_planilha: nec.solucao_planilha,
-                                    servico_inferido: nec.servico_inferido,
-                                  }}
-                                  tipo="cilindros"
-                                />
-                              </div>
+                                tipo="cilindros" 
+                              />
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground text-xs">
+                                Sem previsão
+                              </Badge>
                             );
                           })()}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex items-center gap-2 justify-center">
+                            {(() => {
+                              const necessidade = necessidadesMap?.get(cilindro.id);
+                              if (!necessidade) return null;
+                              
+                              return (
+                                <>
+                                  <StatusReconciliacaoBadge 
+                                    status={necessidade.status_reconciliacao} 
+                                  />
+                                  {necessidade?.divergencia && !necessidade.reconciliado && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedNecessidade(necessidade);
+                                        setSelectedCadastroForReconciliacao(cilindro);
+                                        setReconciliacaoOpen(true);
+                                      }}
+                                      className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
+                                    >
+                                      <AlertCircle className="h-4 w-4 mr-1" />
+                                      Verificar Match
+                                    </Button>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
                         </TableCell>
                         <TableCell className="text-center">
                           <Button
@@ -787,12 +951,13 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
       </Dialog>
 
       {/* Drawer de Reconciliação */}
-      <ReconciliacaoDrawer
+      <ReconciliacaoDrawerUniversal
         open={reconciliacaoOpen}
         onOpenChange={setReconciliacaoOpen}
         necessidade={selectedNecessidade}
         cadastro={selectedCadastroForReconciliacao}
         onReconciliar={handleReconciliar}
+        tipoElemento="cilindros"
       />
     </>
   );
