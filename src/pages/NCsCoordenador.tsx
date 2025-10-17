@@ -257,7 +257,7 @@ const NCsCoordenador = () => {
         console.error("❌ Erro ao buscar fotos:", fotosError);
       }
 
-      // Buscar dados da supervisora e contrato
+      // Buscar dados da supervisora e contrato DA SUPERVISORA
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -267,6 +267,8 @@ const NCsCoordenador = () => {
         .eq("id", user.id)
         .single();
 
+      console.log('🔍 Profile supervisora_id:', profile?.supervisora_id);
+
       let supervisoraData = { nome_empresa: "Supervisora", contrato: "N/A", logo_url: undefined as string | undefined };
       if (profile?.supervisora_id) {
         const { data: supervisora } = await supabase
@@ -275,6 +277,8 @@ const NCsCoordenador = () => {
           .eq("id", profile.supervisora_id)
           .single();
         
+        console.log('🏢 Dados da Supervisora da tabela supervisoras:', supervisora);
+        
         if (supervisora) {
           supervisoraData.nome_empresa = supervisora.nome_empresa;
           supervisoraData.contrato = supervisora.contrato || "N/A";
@@ -282,8 +286,16 @@ const NCsCoordenador = () => {
         }
       }
 
-      // O contrato da executora vem do lote
-      const contratoExecutora = (ncCompleta as any).lotes?.contrato || "N/A";
+      // Buscar CONTRATO DA EXECUTORA direto da tabela lotes usando o lote_id da NC
+      console.log('🔍 Buscando contrato do lote_id:', ncCompleta.lote_id);
+      const { data: loteData } = await supabase
+        .from("lotes")
+        .select("contrato")
+        .eq("id", ncCompleta.lote_id)
+        .single();
+
+      console.log('📋 Contrato do Lote (Executora) da tabela lotes:', loteData?.contrato);
+      const contratoExecutora = loteData?.contrato || (ncCompleta as any).lotes?.contrato || "N/A";
 
       // Buscar justificativa do elemento pendente se houver
       let justificativa = "";
@@ -297,10 +309,11 @@ const NCsCoordenador = () => {
       }
 
       // Preparar dados para o PDF
-      console.log('📋 Dados para PDF:', {
+      console.log('📋 ✅ CONTRATOS FINAIS PARA PDF:', {
         contratoSupervisora: supervisoraData.contrato,
         contratoExecutora: contratoExecutora,
-        loteContrato: (ncCompleta as any).lotes?.contrato
+        supervisoraNome: supervisoraData.nome_empresa,
+        executoraNome: ncCompleta.empresa
       });
       
       const pdfData = {
