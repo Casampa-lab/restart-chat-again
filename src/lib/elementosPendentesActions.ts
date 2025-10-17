@@ -295,6 +295,7 @@ export async function rejeitarElemento(elementoId: string, observacao: string, g
       }),
       
       observacao: `Rejeitado em ${new Date().toLocaleDateString('pt-BR')} - Coordenador`,
+      comentarios_supervisora: observacao,
       enviado_coordenador: true
     };
 

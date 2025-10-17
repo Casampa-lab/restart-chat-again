@@ -422,8 +422,8 @@ const NCsCoordenador = () => {
                         <TableHead>Número NC</TableHead>
                         <TableHead>Data</TableHead>
                         <TableHead>Fiscal</TableHead>
-                        <TableHead>Rodovia</TableHead>
                         <TableHead>Lote</TableHead>
+                        <TableHead>Rodovia</TableHead>
                         <TableHead>Empresa</TableHead>
                         <TableHead>km</TableHead>
                         <TableHead>Tipo</TableHead>
@@ -439,20 +439,17 @@ const NCsCoordenador = () => {
                           <TableCell className="font-medium">{nc.numero_nc}</TableCell>
                           <TableCell>{new Date(nc.data_ocorrencia).toLocaleDateString('pt-BR')}</TableCell>
                           <TableCell>{nc.fiscalNome || "N/A"}</TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{nc.rodovias?.codigo}</div>
-                              <div className="text-xs text-muted-foreground">{nc.rodovias?.codigo}</div>
-                            </div>
-                          </TableCell>
                           <TableCell>{nc.lotes?.numero}</TableCell>
+                          <TableCell>{nc.rodovias?.codigo}</TableCell>
                           <TableCell className="text-sm">{nc.empresa}</TableCell>
                           <TableCell>{nc.km_referencia}</TableCell>
                           <TableCell>{nc.tipo_nc}</TableCell>
                           <TableCell>
                             <Badge variant="outline">{(nc as any).grau || "N/A"}</Badge>
                           </TableCell>
-                          <TableCell className="max-w-xs truncate">{nc.problema_identificado}</TableCell>
+                          <TableCell className="max-w-xs truncate">
+                            {(nc as any).comentarios_supervisora || nc.problema_identificado}
+                          </TableCell>
                           <TableCell>
                             <Badge className={getSituacaoColor(nc.situacao)}>
                               {nc.situacao}
