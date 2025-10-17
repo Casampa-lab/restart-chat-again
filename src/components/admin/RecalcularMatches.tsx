@@ -43,6 +43,7 @@ export function RecalcularMatches() {
   const [progressInfo, setProgressInfo] = useState<{ current: number; total: number } | null>(null);
   const [toleranciasPadrao, setToleranciasPadrao] = useState<Record<string, number>>({});
   const [toleranciasCustomizadas, setToleranciasCustomizadas] = useState<Record<string, number>>({});
+  const [forcarReprocessamento, setForcarReprocessamento] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -581,11 +582,18 @@ export function RecalcularMatches() {
         mensagem: `🔍 Buscando necessidades de ${tipoConfig.label}...`
       }]);
 
-      const { data: necessidadesData, error: errNec } = await supabase
+      let query = supabase
         .from(tabela_necessidade as any)
         .select("*")
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId);
+
+      // Se não forçar reprocessamento, excluir registros já reconciliados
+      if (!forcarReprocessamento) {
+        query = query.or("reconciliado.is.null,reconciliado.eq.false");
+      }
+
+      const { data: necessidadesData, error: errNec } = await query;
 
       if (errNec) throw errNec;
       
@@ -682,6 +690,10 @@ export function RecalcularMatches() {
         setProgress(((i + 1) / total) * 100);
 
         try {
+          // Se não forçar reprocessamento E já está reconciliado, PULAR
+          if (!forcarReprocessamento && nec.reconciliado) {
+            continue;
+          }
           // Determinar tipo de geometria baseado no tipo de elemento
           const tipoElementoMap: Record<string, 'linear' | 'pontual'> = {
             'marcas_longitudinais': 'linear',
@@ -845,7 +857,7 @@ export function RecalcularMatches() {
               divergencia = true;
             } else {
               servicoFinal = "Implantar";
-              divergencia = false;
+              divergencia = true; // ✅ CORRIGIDO: Sem match = divergência para análise
             }
             if (solucaoPlanilhaNormalizada) {
               servicoFinal = solucaoPlanilhaNormalizada;
@@ -862,9 +874,13 @@ export function RecalcularMatches() {
             servico_inferido,
             servico_final: servicoFinal,
             servico: servicoFinal,
-            divergencia,
-            reconciliado: false
+            divergencia
           };
+
+          // Só resetar reconciliado se forçar reprocessamento
+          if (forcarReprocessamento) {
+            updateData.reconciliado = false;
+          }
 
           // Adicionar status_revisao apenas para tipos que têm essa coluna
           if (TIPOS_COM_STATUS_REVISAO.includes(tipo)) {
@@ -1095,6 +1111,28 @@ export function RecalcularMatches() {
             </Alert>
           </div>
         )}
+
+        {/* Checkbox de Forçar Reprocessamento */}
+        <div className="flex items-start space-x-3 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <input
+            type="checkbox"
+            id="forcar-reprocessamento"
+            checked={forcarReprocessamento}
+            onChange={(e) => setForcarReprocessamento(e.target.checked)}
+            disabled={isProcessing}
+            className="mt-1 h-4 w-4 rounded border-amber-300"
+          />
+          <div className="flex-1 space-y-1">
+            <Label htmlFor="forcar-reprocessamento" className="text-sm font-medium cursor-pointer">
+              Forçar reprocessamento completo
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              ⚠️ <strong>Atenção:</strong> Marca esta opção apenas se quiser recalcular TODOS os registros do zero, 
+              sobrescrevendo decisões manuais já feitas pelo coordenador. No modo normal (desmarcado), 
+              o sistema preserva registros já reconciliados e apenas processa os pendentes.
+            </p>
+          </div>
+        </div>
 
         <Button
           onClick={handleRecalcular}

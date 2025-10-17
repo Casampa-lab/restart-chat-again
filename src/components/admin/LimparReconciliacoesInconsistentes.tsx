@@ -32,7 +32,12 @@ const TABELAS_NECESSIDADES = [
   'necessidades_tachas'
 ];
 
-export function LimparReconciliacoesInconsistentes() {
+interface LimparReconciliacoesInconsistentesProps {
+  loteId?: string;
+  rodoviaId?: string;
+}
+
+export function LimparReconciliacoesInconsistentes({ loteId, rodoviaId }: LimparReconciliacoesInconsistentesProps = {}) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const queryClient = useQueryClient();
 
@@ -92,17 +97,18 @@ export function LimparReconciliacoesInconsistentes() {
 
       return resultados;
     },
-    onSuccess: (resultados) => {
+    onSuccess: async (resultados) => {
       const totalDeletados = resultados.reduce((sum, r) => sum + r.deletados, 0);
       
       toast.success(`${totalDeletados} registros inconsistentes removidos`, {
         description: resultados.map(r => `${r.tabela}: ${r.deletados}`).join(', ')
       });
 
-      // Invalidar todas as queries relacionadas
-      queryClient.invalidateQueries({ queryKey: ["divergencias"] });
-      queryClient.invalidateQueries({ queryKey: ["estatisticasGerais"] });
-      queryClient.invalidateQueries({ queryKey: ["reconciliacoes-inconsistentes"] });
+      // Usar resetQueries para forçar refetch imediato de TODAS as variações
+      await queryClient.resetQueries({ queryKey: ["divergencias"] });
+      await queryClient.resetQueries({ queryKey: ["estatisticas-gerais"] });
+      await queryClient.resetQueries({ queryKey: ["count-divergencias-coordenacao"] });
+      await queryClient.invalidateQueries({ queryKey: ["reconciliacoes-inconsistentes"] });
       
       refetch();
     },
@@ -191,16 +197,21 @@ export function LimparReconciliacoesInconsistentes() {
             </Alert>
           )}
 
-          <Button
-            onClick={() => refetch()}
-            variant="outline"
-            size="sm"
-            disabled={isLoading}
-            className="w-full"
-          >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            Reescanear
-          </Button>
+                <Button
+                  onClick={async () => {
+                    await refetch();
+                    // Invalidar queries dependentes após re-escanear
+                    await queryClient.resetQueries({ queryKey: ["divergencias"] });
+                    await queryClient.resetQueries({ queryKey: ["estatisticas-gerais"] });
+                  }}
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoading}
+                  className="w-full"
+                >
+                  <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                  Reescanear
+                </Button>
         </CardContent>
       </Card>
 

@@ -63,7 +63,10 @@ export default function ReconciliacaoPendente() {
         </CardContent>
       </Card>
 
-      <LimparReconciliacoesInconsistentes />
+      <LimparReconciliacoesInconsistentes 
+        loteId={activeSession?.lote_id} 
+        rodoviaId={activeSession?.rodovia_id} 
+      />
 
       {activeSession ? (
         <ReconciliacaoUniversal grupo="placas" activeSession={activeSession} />
