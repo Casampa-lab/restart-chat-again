@@ -653,11 +653,6 @@ export function InventarioPorticosViewer({
                           })()}
                         </div>
                       </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline" className="text-xs">
-                          {portico.vao_horizontal_m?.toFixed(2) || "-"}
-                        </Badge>
-                      </TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
