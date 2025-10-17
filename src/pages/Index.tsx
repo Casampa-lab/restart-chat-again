@@ -399,10 +399,10 @@ const Index = () => {
                   👤 {user.email}
                 </div>}
               <NotificationBell />
-              <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/modulos")}>
+              {/* <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/modulos")}>
                 <Boxes className="mr-2 h-5 w-5" />
                 Módulos
-              </Button>
+              </Button> */}
               {isAdminOrCoordinator && <div className="relative">
                   <Button variant="secondary" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-shadow" onClick={() => navigate("/coordenacao-fiscalizacao")}>
                     <ClipboardList className="mr-2 h-5 w-5" />
