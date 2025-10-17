@@ -888,19 +888,6 @@ export function RecalcularMatches() {
 
           if (updateError) throw updateError;
 
-          // Log a cada 10 processados
-          if ((i + 1) % 10 === 0) {
-            const tipoIcon = tipoGeometria === 'linear' ? '📏' : '📍';
-            const matchIcon = cadastro_id ? "✅" : "🆕";
-            const divIcon = divergencia ? " ⚠️" : "";
-            const recorrenteIcon = isRecorrente ? " 🔄" : "";
-            
-            setLogs(prev => [...prev, {
-              tipo: divergencia ? "warning" : "success",
-              mensagem: `${tipoIcon}${matchIcon} [${i + 1}/${total}] ${tipoConfig.label}: ${servicoFinal}${divIcon}${recorrenteIcon}`
-            }]);
-          }
-
         } catch (error: any) {
           erros++;
           setLogs(prev => [...prev, {
