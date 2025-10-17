@@ -116,6 +116,9 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
 
           const pendentes = data?.length || 0;
           
+          // Log temporário para debug
+          console.log(`[Estatísticas] ${g}: ${pendentes} divergências`);
+          
           return { grupo: g, total: pendentes, reconciliadas: 0, pendentes };
         })
       );
@@ -134,6 +137,9 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
     enabled: !!user && !!activeSession,
     staleTime: 0,
     gcTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   // Mutation para reconciliar
@@ -214,20 +220,21 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
   };
 
   const handleRefreshContadores = async () => {
-    // Invalidar TODAS as queries relacionadas a contagens
-    await queryClient.invalidateQueries({ 
+    // Resetar (não apenas invalidar) para limpar completamente o cache
+    await queryClient.resetQueries({ 
       queryKey: ["estatisticas-gerais", activeSession.lote_id, activeSession.rodovia_id] 
     });
-    await queryClient.invalidateQueries({
-      queryKey: ["divergencias"]
+    await queryClient.resetQueries({ 
+      queryKey: ["divergencias"] 
     });
-    await queryClient.invalidateQueries({
+    await queryClient.resetQueries({
       queryKey: ["count-divergencias-coordenacao", activeSession.lote_id, activeSession.rodovia_id]
     });
     
-    // Refetch imediato para garantir dados atualizados
+    // Refetch forçado de todas as queries ativas
     await queryClient.refetchQueries({ 
-      queryKey: ["estatisticas-gerais", activeSession.lote_id, activeSession.rodovia_id] 
+      queryKey: ["estatisticas-gerais", activeSession.lote_id, activeSession.rodovia_id],
+      type: 'active'
     });
     
     toast({ title: "✅ Contadores atualizados" });
