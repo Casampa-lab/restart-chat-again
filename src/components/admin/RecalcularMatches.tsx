@@ -33,10 +33,15 @@ interface LogEntry {
   mensagem: string;
 }
 
-export function RecalcularMatches() {
+interface RecalcularMatchesProps {
+  loteId?: string;
+  rodoviaId?: string;
+}
+
+export function RecalcularMatches({ loteId: propLoteId, rodoviaId: propRodoviaId }: RecalcularMatchesProps = {}) {
   const [tipo, setTipo] = useState<string>("");
-  const [loteId, setLoteId] = useState<string>("");
-  const [rodoviaId, setRodoviaId] = useState<string>("");
+  const [internalLoteId, setInternalLoteId] = useState<string>("");
+  const [internalRodoviaId, setInternalRodoviaId] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -46,6 +51,12 @@ export function RecalcularMatches() {
   const [forcarReprocessamento, setForcarReprocessamento] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Usar props se disponíveis, senão usar estado interno
+  const loteId = propLoteId || internalLoteId;
+  const rodoviaId = propRodoviaId || internalRodoviaId;
+  const setLoteId = propLoteId ? () => {} : setInternalLoteId;
+  const setRodoviaId = propRodoviaId ? () => {} : setInternalRodoviaId;
 
   // Buscar todas as tolerâncias padrão ao selecionar rodovia
   useEffect(() => {
@@ -979,40 +990,45 @@ export function RecalcularMatches() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label>Lote *</Label>
-            <Select value={loteId} onValueChange={(value) => {
-              setLoteId(value);
-              setRodoviaId(""); // Limpar rodovia ao mudar lote
-            }} disabled={isProcessing}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o lote" />
-              </SelectTrigger>
-              <SelectContent>
-                {lotes?.map(lote => (
-                  <SelectItem key={lote.id} value={lote.id}>
-                    Lote {lote.numero}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Mostrar dropdowns de lote/rodovia apenas se não receber props */}
+          {!propLoteId && !propRodoviaId && (
+            <>
+              <div className="space-y-2">
+                <Label>Lote *</Label>
+                <Select value={loteId} onValueChange={(value) => {
+                  setLoteId(value);
+                  setRodoviaId(""); // Limpar rodovia ao mudar lote
+                }} disabled={isProcessing}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o lote" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lotes?.map(lote => (
+                      <SelectItem key={lote.id} value={lote.id}>
+                        Lote {lote.numero}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <Label>Rodovia *</Label>
-            <Select value={rodoviaId} onValueChange={setRodoviaId} disabled={isProcessing || !loteId}>
-              <SelectTrigger>
-                <SelectValue placeholder={!loteId ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
-              </SelectTrigger>
-              <SelectContent>
-                {rodovias?.map((rodovia: any) => (
-                  <SelectItem key={rodovia.id} value={rodovia.id}>
-                    {rodovia.codigo}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <div className="space-y-2">
+                <Label>Rodovia *</Label>
+                <Select value={rodoviaId} onValueChange={setRodoviaId} disabled={isProcessing || !loteId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={!loteId ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rodovias?.map((rodovia: any) => (
+                      <SelectItem key={rodovia.id} value={rodovia.id}>
+                        {rodovia.codigo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
 
           <div className="space-y-2">
             <Label>Tipo de Elemento *</Label>

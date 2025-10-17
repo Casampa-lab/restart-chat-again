@@ -5,8 +5,13 @@ import { useSupervisora } from "@/hooks/useSupervisora";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { MapPin, CheckCircle2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import EmpresasManager from "@/components/admin/EmpresasManager";
 import LotesManager from "@/components/admin/LotesManager";
 import RodoviasManager from "@/components/admin/RodoviasManager";
@@ -32,6 +37,31 @@ const Admin = () => {
   const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedLoteId, setSelectedLoteId] = useState<string>("");
+  const [selectedRodoviaId, setSelectedRodoviaId] = useState<string>("");
+
+  // Buscar lotes
+  const { data: lotes } = useQuery({
+    queryKey: ["admin-lotes"],
+    queryFn: async () => {
+      const { data } = await supabase.from("lotes").select("*").order("numero");
+      return data || [];
+    },
+  });
+
+  // Buscar rodovias do lote selecionado
+  const { data: rodovias } = useQuery({
+    queryKey: ["admin-rodovias", selectedLoteId],
+    queryFn: async () => {
+      if (!selectedLoteId) return [];
+      const { data } = await supabase
+        .from("lotes_rodovias")
+        .select("rodovia:rodovias(*)")
+        .eq("lote_id", selectedLoteId);
+      return data?.map(lr => lr.rodovia) || [];
+    },
+    enabled: !!selectedLoteId,
+  });
 
   useEffect(() => {
     const checkAdminOrCoordinator = async () => {
@@ -173,9 +203,77 @@ const Admin = () => {
 
           <TabsContent value="necessidades">
             <div className="space-y-6">
-              <NecessidadesImporter />
-              <RecalcularMatches />
-              <DeleteNecessidades />
+              {/* Card de Seleção de Contexto */}
+              <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Contexto de Trabalho
+                  </CardTitle>
+                  <CardDescription>
+                    Selecione o lote e rodovia para facilitar a gestão das necessidades
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Dropdown Lote */}
+                    <div>
+                      <Label htmlFor="admin-lote">Lote</Label>
+                      <Select value={selectedLoteId} onValueChange={(value) => {
+                        setSelectedLoteId(value);
+                        setSelectedRodoviaId(""); // Reset rodovia ao trocar lote
+                      }}>
+                        <SelectTrigger id="admin-lote">
+                          <SelectValue placeholder="Selecione o lote" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {lotes?.map((lote) => (
+                            <SelectItem key={lote.id} value={lote.id}>
+                              Lote {lote.numero}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Dropdown Rodovia */}
+                    <div>
+                      <Label htmlFor="admin-rodovia">Rodovia</Label>
+                      <Select 
+                        value={selectedRodoviaId} 
+                        onValueChange={setSelectedRodoviaId}
+                        disabled={!selectedLoteId}
+                      >
+                        <SelectTrigger id="admin-rodovia">
+                          <SelectValue placeholder={selectedLoteId ? "Selecione a rodovia" : "Primeiro selecione o lote"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {rodovias?.map((rodovia: any) => (
+                            <SelectItem key={rodovia.id} value={rodovia.id}>
+                              {rodovia.codigo}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  {/* Indicador visual */}
+                  {selectedLoteId && selectedRodoviaId && (
+                    <Alert className="mt-4 bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <AlertDescription className="text-green-800 dark:text-green-200">
+                        <strong>Contexto ativo:</strong> Lote {lotes?.find(l => l.id === selectedLoteId)?.numero} - {rodovias?.find((r: any) => r.id === selectedRodoviaId)?.codigo}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Componentes com props compartilhadas */}
+              <NecessidadesImporter loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
+              <RecalcularMatches loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
+              <DeleteNecessidades loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
             </div>
           </TabsContent>
 

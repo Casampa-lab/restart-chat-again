@@ -28,18 +28,29 @@ interface LogEntry {
   mensagem: string;
 }
 
-export function NecessidadesImporter() {
+interface NecessidadesImporterProps {
+  loteId?: string;
+  rodoviaId?: string;
+}
+
+export function NecessidadesImporter({ loteId: propLoteId, rodoviaId: propRodoviaId }: NecessidadesImporterProps = {}) {
   const [tipo, setTipo] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [loteId, setLoteId] = useState<string>("");
-  const [rodoviaId, setRodoviaId] = useState<string>("");
+  const [internalLoteId, setInternalLoteId] = useState<string>("");
+  const [internalRodoviaId, setInternalRodoviaId] = useState<string>("");
   const [progressInfo, setProgressInfo] = useState<{ current: number; total: number } | null>(null);
   const [filtroLog, setFiltroLog] = useState<"todos" | "success" | "warning" | "error">("todos");
   const { toast } = useToast();
   const cancelImportRef = useRef(false);
+
+  // Usar props se disponíveis, senão usar estado interno
+  const loteId = propLoteId || internalLoteId;
+  const rodoviaId = propRodoviaId || internalRodoviaId;
+  const setLoteId = propLoteId ? () => {} : setInternalLoteId;
+  const setRodoviaId = propRodoviaId ? () => {} : setInternalRodoviaId;
 
   // Buscar lotes
   const { data: lotes } = useQuery({
@@ -1399,42 +1410,47 @@ ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Veja logs de erro acima par
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Seleção de Lote */}
-          <div className="space-y-2">
-            <Label>Lote *</Label>
-            <Select value={loteId} onValueChange={(value) => {
-              setLoteId(value);
-              setRodoviaId(""); // Limpar rodovia ao mudar lote
-            }} disabled={isImporting}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o lote" />
-              </SelectTrigger>
-              <SelectContent>
-                {lotes?.map(lote => (
-                  <SelectItem key={lote.id} value={lote.id}>
-                    Lote {lote.numero}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Mostrar dropdowns de lote/rodovia apenas se não receber props */}
+          {!propLoteId && !propRodoviaId && (
+            <>
+              {/* Seleção de Lote */}
+              <div className="space-y-2">
+                <Label>Lote *</Label>
+                <Select value={loteId} onValueChange={(value) => {
+                  setLoteId(value);
+                  setRodoviaId(""); // Limpar rodovia ao mudar lote
+                }} disabled={isImporting}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o lote" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lotes?.map(lote => (
+                      <SelectItem key={lote.id} value={lote.id}>
+                        Lote {lote.numero}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          {/* Seleção de Rodovia */}
-          <div className="space-y-2">
-            <Label>Rodovia *</Label>
-            <Select value={rodoviaId} onValueChange={setRodoviaId} disabled={isImporting || !loteId}>
-              <SelectTrigger>
-                <SelectValue placeholder={!loteId ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
-              </SelectTrigger>
-              <SelectContent>
-                {rodovias?.map((rodovia: any) => (
-                  <SelectItem key={rodovia.id} value={rodovia.id}>
-                    {rodovia.codigo}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              {/* Seleção de Rodovia */}
+              <div className="space-y-2">
+                <Label>Rodovia *</Label>
+                <Select value={rodoviaId} onValueChange={setRodoviaId} disabled={isImporting || !loteId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={!loteId ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rodovias?.map((rodovia: any) => (
+                      <SelectItem key={rodovia.id} value={rodovia.id}>
+                        {rodovia.codigo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
 
           {/* Seleção de tipo */}
           <div className="space-y-2">

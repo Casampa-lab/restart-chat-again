@@ -19,11 +19,22 @@ const TABELAS_NECESSIDADES = [
   { value: "necessidades_marcas_transversais", label: "Zebrados (Marcas Transversais)" },
 ];
 
-export function DeleteNecessidades() {
-  const [selectedLote, setSelectedLote] = useState<string>("");
-  const [selectedRodovia, setSelectedRodovia] = useState<string>("");
+interface DeleteNecessidadesProps {
+  loteId?: string;
+  rodoviaId?: string;
+}
+
+export function DeleteNecessidades({ loteId: propLoteId, rodoviaId: propRodoviaId }: DeleteNecessidadesProps = {}) {
+  const [internalLoteId, setInternalLoteId] = useState<string>("");
+  const [internalRodoviaId, setInternalRodoviaId] = useState<string>("");
   const [selectedTabela, setSelectedTabela] = useState<string>("");
   const [deleting, setDeleting] = useState(false);
+
+  // Usar props se disponíveis, senão usar estado interno
+  const selectedLote = propLoteId || internalLoteId;
+  const selectedRodovia = propRodoviaId || internalRodoviaId;
+  const setSelectedLote = propLoteId ? () => {} : setInternalLoteId;
+  const setSelectedRodovia = propRodoviaId ? () => {} : setInternalRodoviaId;
 
   // Buscar lotes
   const { data: lotes } = useQuery({
@@ -149,37 +160,42 @@ export function DeleteNecessidades() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="lote">Lote *</Label>
-            <Select value={selectedLote} onValueChange={setSelectedLote}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o lote" />
-              </SelectTrigger>
-              <SelectContent>
-                {lotes?.map((lote) => (
-                  <SelectItem key={lote.id} value={lote.id}>
-                    Lote {lote.numero}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Mostrar dropdowns de lote/rodovia apenas se não receber props */}
+          {!propLoteId && !propRodoviaId && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="lote">Lote *</Label>
+                <Select value={selectedLote} onValueChange={setSelectedLote}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o lote" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lotes?.map((lote) => (
+                      <SelectItem key={lote.id} value={lote.id}>
+                        Lote {lote.numero}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="rodovia">Rodovia *</Label>
-            <Select value={selectedRodovia} onValueChange={setSelectedRodovia} disabled={!selectedLote}>
-              <SelectTrigger>
-                <SelectValue placeholder={!selectedLote ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
-              </SelectTrigger>
-              <SelectContent>
-                {rodovias?.map((rodovia) => (
-                  <SelectItem key={rodovia.id} value={rodovia.id}>
-                    {rodovia.codigo}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="rodovia">Rodovia *</Label>
+                <Select value={selectedRodovia} onValueChange={setSelectedRodovia} disabled={!selectedLote}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={!selectedLote ? "Selecione primeiro o lote" : "Selecione a rodovia"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rodovias?.map((rodovia) => (
+                      <SelectItem key={rodovia.id} value={rodovia.id}>
+                        {rodovia.codigo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="tabela">Tipo de Elemento *</Label>
