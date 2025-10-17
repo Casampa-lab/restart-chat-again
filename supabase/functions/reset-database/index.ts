@@ -104,6 +104,56 @@ serve(async (req) => {
     await supabaseAdmin.from('rodovias').delete().neq('id', '00000000-0000-0000-0000-000000000000')
     await supabaseAdmin.from('lotes').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
+    // 11.5. Aguardar migrations recriarem dados base (lotes e rodovias)
+    console.log('⏳ Aguardando migrations recriarem dados base...')
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // 11.6. Recriar vínculos essenciais lote-rodovia
+    console.log('🔗 Recriando vínculos lote-rodovia...')
+    
+    // Buscar Lote 99
+    const { data: lote99, error: loteError } = await supabaseAdmin
+      .from('lotes')
+      .select('id')
+      .eq('numero', 99)
+      .maybeSingle()
+
+    if (loteError) {
+      console.log('⚠️ Erro ao buscar Lote 99:', loteError.message)
+    }
+
+    // Buscar BR-116
+    const { data: br116, error: rodoviaError } = await supabaseAdmin
+      .from('rodovias')
+      .select('id')
+      .eq('codigo', 'BR-116')
+      .maybeSingle()
+
+    if (rodoviaError) {
+      console.log('⚠️ Erro ao buscar BR-116:', rodoviaError.message)
+    }
+
+    // Recriar vínculo se ambos existirem
+    if (lote99 && br116) {
+      const { error: vinculoError } = await supabaseAdmin
+        .from('lotes_rodovias')
+        .insert({
+          lote_id: lote99.id,
+          rodovia_id: br116.id,
+          km_inicial: 0,
+          km_final: 999
+        })
+
+      if (vinculoError) {
+        console.log('⚠️ Erro ao recriar vínculo Lote 99 - BR-116:', vinculoError.message)
+      } else {
+        console.log('✅ Vínculo Lote 99 - BR-116 recriado com sucesso')
+      }
+    } else {
+      console.log('⚠️ Lote 99 ou BR-116 não encontrados após reset. Vínculo não recriado.')
+      console.log(`   Lote 99 encontrado: ${!!lote99}, BR-116 encontrada: ${!!br116}`)
+    }
+
     // 12. Deletar empresas
     console.log('Deletando empresas...')
     await supabaseAdmin.from('empresas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
