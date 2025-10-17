@@ -180,6 +180,40 @@ export function DiagnosticoMatch() {
       console.log(`- Cadastro encontrado: ${cadastros?.length || 0}`);
       console.log(`- Cadastro com coordenadas: ${cadastros?.filter((c: any) => c[cadastroLatField] && c[cadastroLongField]).length || 0}`);
 
+      // Buscar configuração de tolerância da rodovia
+      const { data: rodoviaConfig } = await supabase
+        .from('rodovias')
+        .select(`
+          tolerancia_match_metros,
+          tolerancia_placas_metros,
+          tolerancia_porticos_metros,
+          tolerancia_defensas_metros,
+          tolerancia_marcas_metros,
+          tolerancia_cilindros_metros,
+          tolerancia_tachas_metros,
+          tolerancia_inscricoes_metros
+        `)
+        .eq('id', rodoviaId)
+        .single();
+
+      const toleranciaMap: Record<string, string> = {
+        'placas': 'tolerancia_placas_metros',
+        'porticos': 'tolerancia_porticos_metros',
+        'defensas': 'tolerancia_defensas_metros',
+        'marcas_longitudinais': 'tolerancia_marcas_metros',
+        'cilindros': 'tolerancia_cilindros_metros',
+        'tachas': 'tolerancia_tachas_metros',
+        'marcas_transversais': 'tolerancia_inscricoes_metros'
+      };
+
+      const colunaEspecifica = toleranciaMap[tipoServico];
+      const toleranciaUsada = 
+        (rodoviaConfig && colunaEspecifica ? rodoviaConfig[colunaEspecifica as keyof typeof rodoviaConfig] as number : null) ||
+        rodoviaConfig?.tolerancia_match_metros || 
+        50;
+
+      console.log(`📍 Tolerância GPS configurada: ${toleranciaUsada}m para ${tipoConfig.label}`);
+
       const diagnosticos: ResultadoDiagnostico[] = [];
 
       // 3. Para cada necessidade, encontrar o cadastro mais próximo

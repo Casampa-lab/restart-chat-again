@@ -733,16 +733,29 @@ export function NecessidadesImporter() {
         return R * c;
       };
 
-      // Buscar tolerância da rodovia selecionada
+      // Buscar todas as tolerâncias específicas da rodovia
       const { data: rodoviaData } = await supabase
         .from('rodovias')
-        .select('tolerancia_match_metros')
+        .select(`
+          tolerancia_match_metros,
+          tolerancia_placas_metros,
+          tolerancia_porticos_metros,
+          tolerancia_defensas_metros,
+          tolerancia_marcas_metros,
+          tolerancia_cilindros_metros,
+          tolerancia_tachas_metros,
+          tolerancia_inscricoes_metros
+        `)
         .eq('id', rodoviaId)
         .single();
       
-      const tolerancia = rodoviaData?.tolerancia_match_metros || 50;
+      // Usar tolerância específica para placas: específica > genérica > padrão 50m
+      const tolerancia = 
+        rodoviaData?.tolerancia_placas_metros ||
+        rodoviaData?.tolerancia_match_metros || 
+        50;
       
-      console.log(`🎯 Usando tolerância de match: ${tolerancia}m (rodovia ID: ${rodoviaId})`);
+      console.log(`📍 Tolerância GPS para Placas: ${tolerancia}m (rodovia ID: ${rodoviaId})`);
 
       // 4. Processar cada linha
       const total = dadosFiltrados.length;

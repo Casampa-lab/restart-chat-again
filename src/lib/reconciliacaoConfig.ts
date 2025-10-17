@@ -18,6 +18,8 @@ export interface ReconciliacaoConfig {
   iconeCadastro: string;
   tipoGeometria: 'linear' | 'pontual';
   recorrente: boolean;
+  toleranciaPadraoMetros: number;
+  colunaTolerancia: string;
 }
 
 export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = {
@@ -30,6 +32,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     iconeCadastro: '📷',
     tipoGeometria: 'pontual',
     recorrente: false,
+    toleranciaPadraoMetros: 50,
+    colunaTolerancia: 'tolerancia_placas_metros',
   },
   defensas: {
     tabelaNecessidades: 'necessidades_defensas',
@@ -40,6 +44,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     iconeCadastro: '📷',
     tipoGeometria: 'linear',
     recorrente: false,
+    toleranciaPadraoMetros: 20,
+    colunaTolerancia: 'tolerancia_defensas_metros',
   },
   porticos: {
     tabelaNecessidades: 'necessidades_porticos',
@@ -50,6 +56,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     iconeCadastro: '📷',
     tipoGeometria: 'pontual',
     recorrente: false,
+    toleranciaPadraoMetros: 200,
+    colunaTolerancia: 'tolerancia_porticos_metros',
   },
   marcas_longitudinais: {
     tabelaNecessidades: 'necessidades_marcas_longitudinais',
@@ -60,6 +68,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     iconeCadastro: '📷',
     tipoGeometria: 'linear',
     recorrente: true,
+    toleranciaPadraoMetros: 20,
+    colunaTolerancia: 'tolerancia_marcas_metros',
   },
   inscricoes: {
     tabelaNecessidades: 'necessidades_marcas_transversais',
@@ -70,6 +80,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     iconeCadastro: '📷',
     tipoGeometria: 'pontual',
     recorrente: true,
+    toleranciaPadraoMetros: 30,
+    colunaTolerancia: 'tolerancia_inscricoes_metros',
   },
   cilindros: {
     tabelaNecessidades: 'necessidades_cilindros',
@@ -80,6 +92,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     iconeCadastro: '📷',
     tipoGeometria: 'linear',
     recorrente: true,
+    toleranciaPadraoMetros: 25,
+    colunaTolerancia: 'tolerancia_cilindros_metros',
   },
   tachas: {
     tabelaNecessidades: 'necessidades_tachas',
@@ -90,6 +104,8 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     iconeCadastro: '📷',
     tipoGeometria: 'linear',
     recorrente: true,
+    toleranciaPadraoMetros: 25,
+    colunaTolerancia: 'tolerancia_tachas_metros',
   },
 };
 
@@ -146,6 +162,10 @@ export function getComportamentoServico(tipo: GrupoElemento): string {
     ? 'substituição automática por desgaste natural'
     : 'avaliação manual de danos específicos';
   return `Matching ${geometria}, ${recorrencia}`;
+}
+
+export function getColunaTolerancia(tipo: GrupoElemento): string {
+  return RECONCILIACAO_CONFIG[tipo].colunaTolerancia;
 }
 
 export function formatarCampo(campo: string, valor: any): string {

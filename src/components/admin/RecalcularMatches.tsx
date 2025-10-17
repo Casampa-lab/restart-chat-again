@@ -567,18 +567,43 @@ export function RecalcularMatches() {
         mensagem: `✅ ${cadastros.length} itens no cadastro`
       }]);
 
-      // 3. Buscar tolerância da rodovia
+      // 3. Buscar todas as tolerâncias específicas da rodovia
       const { data: rodoviaData } = await supabase
         .from('rodovias')
-        .select('tolerancia_match_metros')
+        .select(`
+          tolerancia_match_metros,
+          tolerancia_placas_metros,
+          tolerancia_porticos_metros,
+          tolerancia_defensas_metros,
+          tolerancia_marcas_metros,
+          tolerancia_cilindros_metros,
+          tolerancia_tachas_metros,
+          tolerancia_inscricoes_metros
+        `)
         .eq('id', rodoviaId)
         .single();
       
-      const tolerancia = rodoviaData?.tolerancia_match_metros || 50;
+      // Mapear tipo de elemento → coluna específica de tolerância
+      const toleranciaMap: Record<string, string> = {
+        'placas': 'tolerancia_placas_metros',
+        'porticos': 'tolerancia_porticos_metros',
+        'defensas': 'tolerancia_defensas_metros',
+        'marcas_longitudinais': 'tolerancia_marcas_metros',
+        'cilindros': 'tolerancia_cilindros_metros',
+        'tachas': 'tolerancia_tachas_metros',
+        'marcas_transversais': 'tolerancia_inscricoes_metros'
+      };
+
+      // Selecionar tolerância: específica > genérica > padrão 50m
+      const colunaEspecifica = toleranciaMap[tipo];
+      const tolerancia = 
+        (rodoviaData && colunaEspecifica ? rodoviaData[colunaEspecifica as keyof typeof rodoviaData] as number : null) ||
+        rodoviaData?.tolerancia_match_metros || 
+        50;
 
       setLogs(prev => [...prev, {
         tipo: "info",
-        mensagem: `⚙️ Tolerância de matching: ${tolerancia}m`
+        mensagem: `📍 Tolerância GPS: ${tolerancia}m para ${tipoConfig.label}`
       }]);
 
       // 4. Processar cada necessidade

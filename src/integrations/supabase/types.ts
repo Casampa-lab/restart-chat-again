@@ -4946,21 +4946,42 @@ export type Database = {
           codigo: string
           created_at: string | null
           id: string
+          tolerancia_cilindros_metros: number | null
+          tolerancia_defensas_metros: number | null
+          tolerancia_inscricoes_metros: number | null
+          tolerancia_marcas_metros: number | null
           tolerancia_match_metros: number | null
+          tolerancia_placas_metros: number | null
+          tolerancia_porticos_metros: number | null
+          tolerancia_tachas_metros: number | null
           uf: string | null
         }
         Insert: {
           codigo: string
           created_at?: string | null
           id?: string
+          tolerancia_cilindros_metros?: number | null
+          tolerancia_defensas_metros?: number | null
+          tolerancia_inscricoes_metros?: number | null
+          tolerancia_marcas_metros?: number | null
           tolerancia_match_metros?: number | null
+          tolerancia_placas_metros?: number | null
+          tolerancia_porticos_metros?: number | null
+          tolerancia_tachas_metros?: number | null
           uf?: string | null
         }
         Update: {
           codigo?: string
           created_at?: string | null
           id?: string
+          tolerancia_cilindros_metros?: number | null
+          tolerancia_defensas_metros?: number | null
+          tolerancia_inscricoes_metros?: number | null
+          tolerancia_marcas_metros?: number | null
           tolerancia_match_metros?: number | null
+          tolerancia_placas_metros?: number | null
+          tolerancia_porticos_metros?: number | null
+          tolerancia_tachas_metros?: number | null
           uf?: string | null
         }
         Relationships: []

@@ -16,6 +16,13 @@ interface Rodovia {
   codigo: string;
   uf: string;
   tolerancia_match_metros: number | null;
+  tolerancia_placas_metros: number | null;
+  tolerancia_porticos_metros: number | null;
+  tolerancia_defensas_metros: number | null;
+  tolerancia_marcas_metros: number | null;
+  tolerancia_cilindros_metros: number | null;
+  tolerancia_tachas_metros: number | null;
+  tolerancia_inscricoes_metros: number | null;
 }
 
 const RodoviasManager = () => {
@@ -25,12 +32,26 @@ const RodoviasManager = () => {
     codigo: "",
     uf: "",
     tolerancia_match_metros: "50",
+    tolerancia_placas_metros: "50",
+    tolerancia_porticos_metros: "200",
+    tolerancia_defensas_metros: "20",
+    tolerancia_marcas_metros: "20",
+    tolerancia_cilindros_metros: "25",
+    tolerancia_tachas_metros: "25",
+    tolerancia_inscricoes_metros: "30",
   });
   const [editingRodovia, setEditingRodovia] = useState<Rodovia | null>(null);
   const [editFormData, setEditFormData] = useState({
     codigo: "",
     uf: "",
     tolerancia_match_metros: "50",
+    tolerancia_placas_metros: "50",
+    tolerancia_porticos_metros: "200",
+    tolerancia_defensas_metros: "20",
+    tolerancia_marcas_metros: "20",
+    tolerancia_cilindros_metros: "25",
+    tolerancia_tachas_metros: "25",
+    tolerancia_inscricoes_metros: "30",
   });
   const [bulkTolerance, setBulkTolerance] = useState("25");
   const [bulkUpdateLoading, setBulkUpdateLoading] = useState(false);
@@ -61,13 +82,31 @@ const RodoviasManager = () => {
       const { error } = await supabase.from("rodovias").insert({
         codigo: formData.codigo,
         uf: formData.uf || null,
-        tolerancia_match_metros: formData.tolerancia_match_metros ? parseInt(formData.tolerancia_match_metros) : 50,
+        tolerancia_match_metros: parseInt(formData.tolerancia_match_metros) || 50,
+        tolerancia_placas_metros: parseInt(formData.tolerancia_placas_metros) || 50,
+        tolerancia_porticos_metros: parseInt(formData.tolerancia_porticos_metros) || 200,
+        tolerancia_defensas_metros: parseInt(formData.tolerancia_defensas_metros) || 20,
+        tolerancia_marcas_metros: parseInt(formData.tolerancia_marcas_metros) || 20,
+        tolerancia_cilindros_metros: parseInt(formData.tolerancia_cilindros_metros) || 25,
+        tolerancia_tachas_metros: parseInt(formData.tolerancia_tachas_metros) || 25,
+        tolerancia_inscricoes_metros: parseInt(formData.tolerancia_inscricoes_metros) || 30,
       });
 
       if (error) throw error;
 
       toast.success("Rodovia cadastrada com sucesso!");
-      setFormData({ codigo: "", uf: "", tolerancia_match_metros: "50" });
+      setFormData({ 
+        codigo: "", 
+        uf: "", 
+        tolerancia_match_metros: "50",
+        tolerancia_placas_metros: "50",
+        tolerancia_porticos_metros: "200",
+        tolerancia_defensas_metros: "20",
+        tolerancia_marcas_metros: "20",
+        tolerancia_cilindros_metros: "25",
+        tolerancia_tachas_metros: "25",
+        tolerancia_inscricoes_metros: "30",
+      });
       loadRodovias();
     } catch (error: any) {
       toast.error("Erro ao cadastrar rodovia: " + error.message);
@@ -85,7 +124,14 @@ const RodoviasManager = () => {
         .update({
           codigo: editFormData.codigo,
           uf: editFormData.uf || null,
-          tolerancia_match_metros: parseInt(editFormData.tolerancia_match_metros),
+          tolerancia_match_metros: parseInt(editFormData.tolerancia_match_metros) || 50,
+          tolerancia_placas_metros: parseInt(editFormData.tolerancia_placas_metros) || 50,
+          tolerancia_porticos_metros: parseInt(editFormData.tolerancia_porticos_metros) || 200,
+          tolerancia_defensas_metros: parseInt(editFormData.tolerancia_defensas_metros) || 20,
+          tolerancia_marcas_metros: parseInt(editFormData.tolerancia_marcas_metros) || 20,
+          tolerancia_cilindros_metros: parseInt(editFormData.tolerancia_cilindros_metros) || 25,
+          tolerancia_tachas_metros: parseInt(editFormData.tolerancia_tachas_metros) || 25,
+          tolerancia_inscricoes_metros: parseInt(editFormData.tolerancia_inscricoes_metros) || 30,
         })
         .eq("id", editingRodovia.id);
 
@@ -202,9 +248,9 @@ const RodoviasManager = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="tolerancia_match_rodovia">
-                  Tolerância Match GPS (m) - Novas Importações
+                  Tolerância Genérica GPS (m)
                   <span className="text-xs text-muted-foreground ml-2">
-                    (Usado ao importar necessidades. Fallback se lote não especificar)
+                    (Fallback quando tipo específico não configurado)
                   </span>
                 </Label>
                 <Input
@@ -217,6 +263,193 @@ const RodoviasManager = () => {
                   onChange={(e) => setFormData({ ...formData, tolerancia_match_metros: e.target.value })}
                   placeholder="50"
                 />
+              </div>
+            </div>
+
+            <div className="border-t pt-4 space-y-4">
+              <div className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                <h3 className="font-medium">Tolerâncias Específicas por Tipo de Elemento</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Configure tolerâncias GPS individuais para cada tipo. Se não especificado, usa a tolerância genérica acima.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label htmlFor="tol_placas" className="flex items-center gap-1">
+                          🚏 Placas (m)
+                          <Info className="h-3 w-3 text-muted-foreground" />
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs max-w-xs">Elementos pequenos, maior variação GPS esperada</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Input
+                    id="tol_placas"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={formData.tolerancia_placas_metros}
+                    onChange={(e) => setFormData({ ...formData, tolerancia_placas_metros: e.target.value })}
+                    placeholder="50"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label htmlFor="tol_porticos" className="flex items-center gap-1">
+                          🌉 Pórticos (m)
+                          <Info className="h-3 w-3 text-muted-foreground" />
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs max-w-xs">Estruturas grandes e visíveis, tolera maior imprecisão GPS</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Input
+                    id="tol_porticos"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={formData.tolerancia_porticos_metros}
+                    onChange={(e) => setFormData({ ...formData, tolerancia_porticos_metros: e.target.value })}
+                    placeholder="200"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label htmlFor="tol_defensas" className="flex items-center gap-1">
+                          🛣️ Defensas (m)
+                          <Info className="h-3 w-3 text-muted-foreground" />
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs max-w-xs">Matching baseado em sobreposição de trechos, GPS é só auxiliar</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Input
+                    id="tol_defensas"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={formData.tolerancia_defensas_metros}
+                    onChange={(e) => setFormData({ ...formData, tolerancia_defensas_metros: e.target.value })}
+                    placeholder="20"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label htmlFor="tol_marcas" className="flex items-center gap-1">
+                          ➖ Marcas Long. (m)
+                          <Info className="h-3 w-3 text-muted-foreground" />
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs max-w-xs">Elementos extensos, fácil localização precisa</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Input
+                    id="tol_marcas"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={formData.tolerancia_marcas_metros}
+                    onChange={(e) => setFormData({ ...formData, tolerancia_marcas_metros: e.target.value })}
+                    placeholder="20"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label htmlFor="tol_inscricoes" className="flex items-center gap-1">
+                          ➡️ Inscrições (m)
+                          <Info className="h-3 w-3 text-muted-foreground" />
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs max-w-xs">Setas e zebrados, áreas pintadas visíveis</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Input
+                    id="tol_inscricoes"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={formData.tolerancia_inscricoes_metros}
+                    onChange={(e) => setFormData({ ...formData, tolerancia_inscricoes_metros: e.target.value })}
+                    placeholder="30"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label htmlFor="tol_cilindros" className="flex items-center gap-1">
+                          🔴 Cilindros (m)
+                          <Info className="h-3 w-3 text-muted-foreground" />
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs max-w-xs">Sequências de cilindros, localização por conjunto</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Input
+                    id="tol_cilindros"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={formData.tolerancia_cilindros_metros}
+                    onChange={(e) => setFormData({ ...formData, tolerancia_cilindros_metros: e.target.value })}
+                    placeholder="25"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label htmlFor="tol_tachas" className="flex items-center gap-1">
+                          💎 Tachas (m)
+                          <Info className="h-3 w-3 text-muted-foreground" />
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs max-w-xs">Faixas de tachas, localização por trecho</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Input
+                    id="tol_tachas"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={formData.tolerancia_tachas_metros}
+                    onChange={(e) => setFormData({ ...formData, tolerancia_tachas_metros: e.target.value })}
+                    placeholder="25"
+                  />
+                </div>
               </div>
             </div>
 
@@ -320,6 +553,13 @@ const RodoviasManager = () => {
                             codigo: rodovia.codigo,
                             uf: rodovia.uf || "",
                             tolerancia_match_metros: String(rodovia.tolerancia_match_metros || 50),
+                            tolerancia_placas_metros: String(rodovia.tolerancia_placas_metros || 50),
+                            tolerancia_porticos_metros: String(rodovia.tolerancia_porticos_metros || 200),
+                            tolerancia_defensas_metros: String(rodovia.tolerancia_defensas_metros || 20),
+                            tolerancia_marcas_metros: String(rodovia.tolerancia_marcas_metros || 20),
+                            tolerancia_cilindros_metros: String(rodovia.tolerancia_cilindros_metros || 25),
+                            tolerancia_tachas_metros: String(rodovia.tolerancia_tachas_metros || 25),
+                            tolerancia_inscricoes_metros: String(rodovia.tolerancia_inscricoes_metros || 30),
                           });
                         }}
                       >
@@ -349,32 +589,35 @@ const RodoviasManager = () => {
       </Card>
 
       <Dialog open={!!editingRodovia} onOpenChange={(open) => !open && setEditingRodovia(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Rodovia</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-codigo">Código da Rodovia *</Label>
-              <Input
-                id="edit-codigo"
-                placeholder="BR-101"
-                value={editFormData.codigo}
-                onChange={(e) => setEditFormData({ ...editFormData, codigo: e.target.value })}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-codigo">Código da Rodovia *</Label>
+                <Input
+                  id="edit-codigo"
+                  placeholder="BR-101"
+                  value={editFormData.codigo}
+                  onChange={(e) => setEditFormData({ ...editFormData, codigo: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-uf">UF (opcional)</Label>
+                <Input
+                  id="edit-uf"
+                  placeholder="SC"
+                  maxLength={2}
+                  value={editFormData.uf}
+                  onChange={(e) => setEditFormData({ ...editFormData, uf: e.target.value.toUpperCase() })}
+                />
+              </div>
             </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="edit-uf">UF (opcional)</Label>
-              <Input
-                id="edit-uf"
-                placeholder="SC"
-                maxLength={2}
-                value={editFormData.uf}
-                onChange={(e) => setEditFormData({ ...editFormData, uf: e.target.value.toUpperCase() })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-tolerancia">Tolerância GPS (metros)</Label>
+              <Label htmlFor="edit-tolerancia">Tolerância Genérica GPS (metros)</Label>
               <Input
                 id="edit-tolerancia"
                 type="number"
@@ -383,6 +626,95 @@ const RodoviasManager = () => {
                 value={editFormData.tolerancia_match_metros}
                 onChange={(e) => setEditFormData({ ...editFormData, tolerancia_match_metros: e.target.value })}
               />
+            </div>
+
+            <div className="border-t pt-4 space-y-4">
+              <h4 className="font-medium text-sm">Tolerâncias Específicas por Tipo</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-placas">🚏 Placas (m)</Label>
+                  <Input
+                    id="edit-placas"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={editFormData.tolerancia_placas_metros}
+                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_placas_metros: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-porticos">🌉 Pórticos (m)</Label>
+                  <Input
+                    id="edit-porticos"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={editFormData.tolerancia_porticos_metros}
+                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_porticos_metros: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-defensas">🛣️ Defensas (m)</Label>
+                  <Input
+                    id="edit-defensas"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={editFormData.tolerancia_defensas_metros}
+                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_defensas_metros: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-marcas">➖ Marcas Long. (m)</Label>
+                  <Input
+                    id="edit-marcas"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={editFormData.tolerancia_marcas_metros}
+                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_marcas_metros: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-inscricoes">➡️ Inscrições (m)</Label>
+                  <Input
+                    id="edit-inscricoes"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={editFormData.tolerancia_inscricoes_metros}
+                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_inscricoes_metros: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-cilindros">🔴 Cilindros (m)</Label>
+                  <Input
+                    id="edit-cilindros"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={editFormData.tolerancia_cilindros_metros}
+                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_cilindros_metros: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-tachas">💎 Tachas (m)</Label>
+                  <Input
+                    id="edit-tachas"
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={editFormData.tolerancia_tachas_metros}
+                    onChange={(e) => setEditFormData({ ...editFormData, tolerancia_tachas_metros: e.target.value })}
+                  />
+                </div>
+              </div>
             </div>
           </div>
           <DialogFooter>
