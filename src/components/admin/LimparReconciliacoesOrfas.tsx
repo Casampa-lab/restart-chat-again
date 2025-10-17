@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -9,51 +9,38 @@ export function LimparReconciliacoesOrfas() {
   const [limpando, setLimpando] = useState(false);
   const [contador, setContador] = useState<number | null>(null);
 
-  const handleVerificar = async () => {
+  const handleAnalisarELimpar = async () => {
     setLimpando(true);
+    setContador(null); // Reset do estado visual
+    
     try {
-      const { data, error } = await supabase
-        .rpc('find_orphaned_reconciliacoes');
-
-      if (error) throw error;
-
-      setContador(data?.length || 0);
-      
-      if (data && data.length > 0) {
-        toast.info(`Encontradas ${data.length} reconciliações órfãs`, {
-          description: "Clique em 'Executar Limpeza' para removê-las"
-        });
-      } else {
-        toast.success("Nenhuma reconciliação órfã encontrada! ✓");
-      }
-    } catch (error: any) {
-      console.error('Erro ao verificar:', error);
-      toast.error('Erro ao verificar: ' + error.message);
-    } finally {
-      setLimpando(false);
-    }
-  };
-
-  const handleLimpar = async () => {
-    if (!window.confirm('Confirma a limpeza de reconciliações órfãs? Esta ação não pode ser desfeita.')) {
-      return;
-    }
-
-    setLimpando(true);
-    try {
-      // Buscar reconciliações órfãs
+      // 1️⃣ VERIFICAR
       const { data: reconciliacoesOrfas, error: findError } = await supabase
         .rpc('find_orphaned_reconciliacoes');
 
       if (findError) throw findError;
 
-      if (!reconciliacoesOrfas || reconciliacoesOrfas.length === 0) {
-        toast.info("Nenhuma reconciliação órfã para limpar");
-        setContador(0);
+      const qtd = reconciliacoesOrfas?.length || 0;
+      setContador(qtd);
+
+      // 2️⃣ SE NÃO HOUVER ÓRFÃS → Mostrar sucesso e parar
+      if (qtd === 0) {
+        toast.success("✓ Nenhuma reconciliação órfã encontrada!");
         return;
       }
 
-      // Deletar as reconciliações órfãs
+      // 3️⃣ SE HOUVER ÓRFÃS → Pedir confirmação
+      const confirmar = window.confirm(
+        `Encontradas ${qtd} reconciliação${qtd > 1 ? 'ões' : ''} órfã${qtd > 1 ? 's' : ''}.\n\n` +
+        'Deseja removê-las? Esta ação não pode ser desfeita.'
+      );
+
+      if (!confirmar) {
+        toast.info('Limpeza cancelada');
+        return;
+      }
+
+      // 4️⃣ LIMPAR
       const { error: deleteError } = await supabase
         .from('reconciliacoes')
         .delete()
@@ -61,11 +48,12 @@ export function LimparReconciliacoesOrfas() {
 
       if (deleteError) throw deleteError;
 
-      toast.success(`✓ ${reconciliacoesOrfas.length} reconciliações órfãs removidas!`);
+      toast.success(`✓ ${qtd} reconciliação${qtd > 1 ? 'ões' : ''} órfã${qtd > 1 ? 's' : ''} removida${qtd > 1 ? 's' : ''}!`);
       setContador(0);
+      
     } catch (error: any) {
-      console.error('Erro ao limpar:', error);
-      toast.error('Erro ao limpar: ' + error.message);
+      console.error('Erro:', error);
+      toast.error('Erro ao processar: ' + error.message);
     } finally {
       setLimpando(false);
     }
@@ -83,24 +71,24 @@ export function LimparReconciliacoesOrfas() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex gap-2">
-          <Button 
-            onClick={handleVerificar}
-            disabled={limpando}
-            variant="outline"
-          >
-            {limpando ? "Verificando..." : "Verificar Órfãs"}
-          </Button>
-          
-          <Button 
-            onClick={handleLimpar}
-            disabled={limpando || contador === 0}
-            variant="destructive"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            {limpando ? "Limpando..." : "Executar Limpeza"}
-          </Button>
-        </div>
+        <Button 
+          onClick={handleAnalisarELimpar}
+          disabled={limpando}
+          variant="destructive"
+          className="w-full"
+        >
+          {limpando ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Analisando...
+            </>
+          ) : (
+            <>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Analisar e Limpar Órfãs
+            </>
+          )}
+        </Button>
 
         {contador !== null && (
           <div className={`p-3 rounded border ${
