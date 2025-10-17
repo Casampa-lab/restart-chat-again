@@ -603,24 +603,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="lado" />
                         </div>
                       </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("servico")}
-                      >
-                        <div className="flex items-center justify-center">
-                          Projeto
-                          <SortIcon column="servico" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("status_reconciliacao")}
-                      >
-                        <div className="flex items-center justify-center">
-                          Status
-                          <SortIcon column="status_reconciliacao" />
-                        </div>
-                      </TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
@@ -638,6 +620,24 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                         <div className="whitespace-normal leading-tight flex items-center justify-center">
                           Tipo<br/>(película legenda/orla)
                           <SortIcon column="tipo_pelicula_legenda_orla" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("servico")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Projeto
+                          <SortIcon column="servico" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("status_reconciliacao")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Status
+                          <SortIcon column="status_reconciliacao" />
                         </div>
                       </TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -663,6 +663,23 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           </TableCell>
                           <TableCell className="text-center">{placa.km?.toFixed(2) || "-"}</TableCell>
                           <TableCell>{placa.lado || "-"}</TableCell>
+                          {searchLat && searchLng && (
+                            <TableCell>
+                              <Badge variant="secondary">
+                                {(placa as any).distance?.toFixed(1)}m
+                              </Badge>
+                            </TableCell>
+                          )}
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="text-xs">
+                              {placa.tipo_pelicula_fundo || "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="text-xs">
+                              {placa.tipo_pelicula_legenda_orla || "-"}
+                            </Badge>
+                          </TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (
                               <NecessidadeBadge 
@@ -702,23 +719,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                 </Button>
                               )}
                             </div>
-                          </TableCell>
-                          {searchLat && searchLng && (
-                            <TableCell>
-                              <Badge variant="secondary">
-                                {(placa as any).distance?.toFixed(1)}m
-                              </Badge>
-                            </TableCell>
-                          )}
-                          <TableCell className="text-center">
-                            <Badge variant="outline" className="text-xs">
-                              {placa.tipo_pelicula_fundo || "-"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge variant="outline" className="text-xs">
-                              {placa.tipo_pelicula_legenda_orla || "-"}
-                            </Badge>
                           </TableCell>
                           <TableCell className="text-right">
                           <Button

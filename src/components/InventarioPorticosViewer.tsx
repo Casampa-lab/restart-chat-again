@@ -507,24 +507,6 @@ export function InventarioPorticosViewer({
                         <SortIcon column="tipo" />
                       </div>
                     </TableHead>
-                    <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                      onClick={() => handleSort("servico")}
-                    >
-                      <div className="flex items-center justify-center">
-                        Projeto
-                        <SortIcon column="servico" />
-                      </div>
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                      onClick={() => handleSort("status_reconciliacao")}
-                    >
-                      <div className="flex items-center justify-center">
-                        Status
-                        <SortIcon column="status_reconciliacao" />
-                      </div>
-                    </TableHead>
                     <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50 text-center"
                       onClick={() => handleSort("lado")}
@@ -559,6 +541,24 @@ export function InventarioPorticosViewer({
                         <SortIcon column="vao_horizontal_m" />
                       </div>
                     </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                      onClick={() => handleSort("servico")}
+                    >
+                      <div className="flex items-center justify-center">
+                        Projeto
+                        <SortIcon column="servico" />
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                      onClick={() => handleSort("status_reconciliacao")}
+                    >
+                      <div className="flex items-center justify-center">
+                        Status
+                        <SortIcon column="status_reconciliacao" />
+                      </div>
+                    </TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -582,6 +582,30 @@ export function InventarioPorticosViewer({
                           className={getTipoBadgeColor(portico.tipo)}
                         >
                           {portico.tipo}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {portico.lado || "-"}
+                      </TableCell>
+                      {searchLat && searchLng && (
+                        <TableCell className="text-center">
+                          {(portico as any).distance !== undefined ? (
+                            <Badge variant="outline" className="text-xs">
+                              {Math.round((portico as any).distance)}m
+                            </Badge>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                      )}
+                      <TableCell className="text-center">
+                        <Badge variant="outline" className="text-xs">
+                          {portico.altura_livre_m?.toFixed(2) || "-"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline" className="text-xs">
+                          {portico.vao_horizontal_m?.toFixed(2) || "-"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
@@ -628,25 +652,6 @@ export function InventarioPorticosViewer({
                             );
                           })()}
                         </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {portico.lado || "-"}
-                      </TableCell>
-                      {searchLat && searchLng && (
-                        <TableCell className="text-center">
-                          {(portico as any).distance !== undefined ? (
-                            <Badge variant="outline" className="text-xs">
-                              {Math.round((portico as any).distance)}m
-                            </Badge>
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                      )}
-                      <TableCell className="text-center">
-                        <Badge variant="outline" className="text-xs">
-                          {portico.altura_livre_m?.toFixed(2) || "-"}
-                        </Badge>
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="outline" className="text-xs">

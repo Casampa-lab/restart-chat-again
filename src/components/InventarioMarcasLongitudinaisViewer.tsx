@@ -447,24 +447,6 @@ export function InventarioMarcasLongitudinaisViewer({
                           <SortIcon column="km_inicial" />
                         </div>
                       </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("servico")}
-                      >
-                        <div className="flex items-center justify-center">
-                          Projeto
-                          <SortIcon column="servico" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("status_revisao")}
-                      >
-                        <div className="flex items-center justify-center">
-                          Status
-                          <SortIcon column="status_revisao" />
-                        </div>
-                      </TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
@@ -482,6 +464,24 @@ export function InventarioMarcasLongitudinaisViewer({
                         <div className="whitespace-normal leading-tight flex items-center justify-center">
                           Extensão (km)
                           <SortIcon column="extensao_metros" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("servico")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Projeto
+                          <SortIcon column="servico" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("status_revisao")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Status
+                          <SortIcon column="status_revisao" />
                         </div>
                       </TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -507,6 +507,23 @@ export function InventarioMarcasLongitudinaisViewer({
                               : marca.km_inicial !== null && marca.km_inicial !== undefined
                                 ? marca.km_inicial.toFixed(2)
                                 : "-"}
+                          </TableCell>
+                          {searchLat && searchLng && (
+                            <TableCell>
+                              <Badge variant="secondary">
+                                {(marca as any).distance?.toFixed(1)}m
+                              </Badge>
+                            </TableCell>
+                          )}
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="text-xs">
+                              {marca.material || "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="text-xs">
+                              {marca.extensao_metros ? (marca.extensao_metros / 1000).toFixed(2) : "-"} km
+                            </Badge>
                           </TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (
@@ -539,23 +556,6 @@ export function InventarioMarcasLongitudinaisViewer({
                             ) : (
                               <span className="text-xs text-muted-foreground">-</span>
                             )}
-                          </TableCell>
-                          {searchLat && searchLng && (
-                            <TableCell>
-                              <Badge variant="secondary">
-                                {(marca as any).distance?.toFixed(1)}m
-                              </Badge>
-                            </TableCell>
-                          )}
-                          <TableCell className="text-center">
-                            <Badge variant="outline" className="text-xs">
-                              {marca.material || "-"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge variant="outline" className="text-xs">
-                              {marca.extensao_metros ? (marca.extensao_metros / 1000).toFixed(2) : "-"} km
-                            </Badge>
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
