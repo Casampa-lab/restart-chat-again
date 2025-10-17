@@ -172,6 +172,19 @@ export function NecessidadesImporter() {
     if (sinaisRemocao.some(Boolean)) {
       return "Remover";
     }
+    
+    // COM match + sem sinais de remoção = pode ser Manter ou Substituir
+    // Se tem indicação explícita de manutenção, usar Manter
+    const sinaisManutencao = [
+      row.acao?.toLowerCase().includes("manter"),
+      row.acao?.toLowerCase().includes("conservar"),
+      row.acao?.toLowerCase().includes("manutencao"),
+      row.acao?.toLowerCase().includes("manutenção"),
+    ];
+    
+    if (sinaisManutencao.some(Boolean)) {
+      return "Manter";
+    }
 
     // Caso contrário = substituição
     return "Substituir";
@@ -1000,11 +1013,11 @@ export function NecessidadesImporter() {
             // Normalizar valores da planilha
             if (solucaoPlanilha.includes("substitu")) {
               solucaoPlanilhaNormalizada = "Substituir";
-            } else if (solucaoPlanilha.includes("implant")) {
+            } else if (solucaoPlanilha.includes("implant") || solucaoPlanilha.includes("instala")) {
               solucaoPlanilhaNormalizada = "Implantar";
-            } else if (solucaoPlanilha.includes("remov")) {
+            } else if (solucaoPlanilha.includes("remov") || solucaoPlanilha.includes("desativ")) {
               solucaoPlanilhaNormalizada = "Remover";
-            } else if (solucaoPlanilha.includes("manter")) {
+            } else if (solucaoPlanilha.includes("mant") || solucaoPlanilha.includes("conserv") || solucaoPlanilha.includes("manut")) {
               solucaoPlanilhaNormalizada = "Manter";
             }
           }
@@ -1021,8 +1034,19 @@ export function NecessidadesImporter() {
             divergenciasPendentes++;
           }
           
-          // 5. Manter compatibilidade com campo "servico" legado
-          const servico = servicoFinal;
+          // 5. Validar servico antes de usar
+          const servicosValidos = ["Implantar", "Substituir", "Remover", "Manter"];
+          let servico = servicoFinal;
+
+          if (!servicosValidos.includes(servico)) {
+            console.warn(`⚠️ Linha ${linhaExcel}: Serviço inválido "${servico}". Usando "Implantar" como fallback.`);
+            logsBuffer.push({
+              tipo: "warning",
+              linha: linhaExcel,
+              mensagem: `⚠️ Serviço inválido "${servico}" normalizado para "Implantar"`
+            });
+            servico = "Implantar";
+          }
 
           // Inserir necessidade
           const tabelaNecessidade = `necessidades_${tipo}` as 
@@ -1180,6 +1204,8 @@ export function NecessidadesImporter() {
           if (dadosInsercao) {
             dadosDebug.servico = dadosInsercao.servico;
             dadosDebug.servico_final = dadosInsercao.servico_final;
+            dadosDebug.servico_inferido = dadosInsercao.servico_inferido;
+            dadosDebug.solucao_planilha = dados?.solucao_planilha;
           }
           
           console.error(`❌ ERRO LINHA ${linhaExcel}:`, dadosDebug);
@@ -1195,7 +1221,11 @@ export function NecessidadesImporter() {
           if (erroNumerico) {
             mensagemDetalhada = `❌ FALHA: Valor inválido em campo numérico. Verifique se há textos em colunas numéricas. `;
           } else if (erroConstraint) {
-            mensagemDetalhada = `❌ FALHA: Violação de constraint (ex: serviço deve ser Implantar/Substituir/Remover/Manter). `;
+            // Capturar detalhes específicos de violação de constraint
+            const detalheConstraint = dadosInsercao 
+              ? `servico="${dadosInsercao.servico}" (inferido="${dadosInsercao.servico_inferido}", planilha="${dados?.solucao_planilha}")`
+              : '';
+            mensagemDetalhada = `❌ FALHA: Violação de constraint. ${detalheConstraint} `;
           } else if (erroNotNull) {
             mensagemDetalhada = `❌ FALHA: Campo obrigatório vazio. `;
           } else {
