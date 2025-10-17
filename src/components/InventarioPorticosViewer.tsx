@@ -442,33 +442,30 @@ export function InventarioPorticosViewer({
             )
           )}
 
-          <div className="space-y-3">
-            <Input
-              placeholder="Pesquisar por tipo, SNV ou lado..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-md"
-            />
-            
-            <div className="border-t pt-3">
-              <p className="text-sm font-medium mb-2">Buscar por Coordenadas GPS (raio de 50m)</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Input
-                  placeholder="Latitude"
-                  value={searchLat}
-                  onChange={(e) => setSearchLat(e.target.value)}
-                  type="number"
-                  step="0.000001"
-                />
-                <Input
-                  placeholder="Longitude"
-                  value={searchLng}
-                  onChange={(e) => setSearchLng(e.target.value)}
-                  type="number"
-                  step="0.000001"
-                />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar por tipo, SNV ou lado..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
+            <Input
+              type="number"
+              step="0.000001"
+              placeholder="Latitude (buscar por GPS)"
+              value={searchLat}
+              onChange={(e) => setSearchLat(e.target.value)}
+            />
+            <Input
+              type="number"
+              step="0.000001"
+              placeholder="Longitude (buscar por GPS)"
+              value={searchLng}
+              onChange={(e) => setSearchLng(e.target.value)}
+            />
           </div>
 
           {!porticos || porticos.length === 0 ? (

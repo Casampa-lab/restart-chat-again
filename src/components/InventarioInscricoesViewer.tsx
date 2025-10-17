@@ -414,53 +414,30 @@ export function InventarioInscricoesViewer({
           )
         )}
 
-          <div className="space-y-3">
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Pesquisar por tipo, cor ou material..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar por tipo, cor ou material..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
-            
-            <div className="border-t pt-3">
-              <p className="text-sm font-medium mb-2 text-muted-foreground">
-                Buscar por Coordenadas GPS (raio de {toleranciaMetros}m)
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  type="number"
-                  step="0.000001"
-                  placeholder="Latitude"
-                  value={searchLat}
-                  onChange={(e) => setSearchLat(e.target.value)}
-                />
-                <Input
-                  type="number"
-                  step="0.000001"
-                  placeholder="Longitude"
-                  value={searchLng}
-                  onChange={(e) => setSearchLng(e.target.value)}
-                />
-              </div>
-              {searchLat && searchLng && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSearchLat("");
-                    setSearchLng("");
-                  }}
-                  className="mt-2 text-xs"
-                >
-                  Limpar coordenadas
-                </Button>
-              )}
-            </div>
+            <Input
+              type="number"
+              step="0.000001"
+              placeholder="Latitude (buscar por GPS)"
+              value={searchLat}
+              onChange={(e) => setSearchLat(e.target.value)}
+            />
+            <Input
+              type="number"
+              step="0.000001"
+              placeholder="Longitude (buscar por GPS)"
+              value={searchLng}
+              onChange={(e) => setSearchLng(e.target.value)}
+            />
           </div>
 
           {isLoading ? (
