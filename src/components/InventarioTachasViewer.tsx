@@ -501,7 +501,7 @@ export function InventarioTachasViewer({
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
-                      {searchLat && searchLng && <TableHead>Distância</TableHead>}
+                      {searchLat && searchLng && <TableHead className="text-center">Distância</TableHead>}
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("snv")}
@@ -512,46 +512,46 @@ export function InventarioTachasViewer({
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("corpo")}
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-center">
                           Corpo
                           <SortIcon column="corpo" />
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("refletivo")}
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-center">
                           Refletivo
                           <SortIcon column="refletivo" />
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("cor_refletivo")}
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-center">
                           Cor Refletivo
                           <SortIcon column="cor_refletivo" />
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("km_inicial")}
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-center">
                           km Inicial
                           <SortIcon column="km_inicial" />
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("extensao_km")}
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-center">
                           Extensão (km)
                           <SortIcon column="extensao_km" />
                         </div>
@@ -566,19 +566,19 @@ export function InventarioTachasViewer({
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("espacamento_m")}
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-center">
                           Espaçamento (m)
                           <SortIcon column="espacamento_m" />
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("quantidade")}
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-center">
                           Quantidade
                           <SortIcon column="quantidade" />
                         </div>
@@ -592,24 +592,24 @@ export function InventarioTachasViewer({
                     {sortedTachas.map((tacha) => (
                       <TableRow key={tacha.id} className="hover:bg-muted/50">
                         {searchLat && searchLng && (
-                          <TableCell>
+                          <TableCell className="text-center">
                             <Badge variant="secondary">
                               {(tacha as any).distance?.toFixed(1)}m
                             </Badge>
                           </TableCell>
                         )}
                         <TableCell className="font-mono text-sm">{tacha.snv || "-"}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">
                           {tacha.corpo || <span className="text-muted-foreground italic text-xs">Não especificado</span>}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">
                           {tacha.refletivo || <span className="text-muted-foreground italic text-xs">Não especificado</span>}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">
                           {tacha.cor_refletivo || <span className="text-muted-foreground italic text-xs">Não especificado</span>}
                         </TableCell>
-                        <TableCell>{tacha.km_inicial.toFixed(2)}</TableCell>
-                        <TableCell>{tacha.extensao_km?.toFixed(2) || "-"}</TableCell>
+                        <TableCell className="text-center">{tacha.km_inicial.toFixed(2)}</TableCell>
+                        <TableCell className="text-center">{tacha.extensao_km?.toFixed(2) || "-"}</TableCell>
                         <TableCell>
                           {tacha.local_implantacao && tacha.local_implantacao !== "Não se Aplica" ? (
                             tacha.local_implantacao
@@ -617,8 +617,8 @@ export function InventarioTachasViewer({
                             <span className="text-muted-foreground italic text-xs">Não especificado no cadastro</span>
                           )}
                         </TableCell>
-                        <TableCell>{tacha.espacamento_m || "-"}</TableCell>
-                        <TableCell>{tacha.quantidade}</TableCell>
+                        <TableCell className="text-center">{tacha.espacamento_m || "-"}</TableCell>
+                        <TableCell className="text-center">{tacha.quantidade}</TableCell>
                         <TableCell className="text-center">
                           {(() => {
                             const necessidade = necessidadesMap?.get(tacha.id);
