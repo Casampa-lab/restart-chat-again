@@ -211,13 +211,13 @@ const RodoviasManager = () => {
         <CardContent>
           <Alert className="mb-4">
             <Info className="h-4 w-4" />
-            <AlertTitle>⚠️ Importante: Quando a Tolerância GPS é Aplicada</AlertTitle>
+            <AlertTitle>⚠️ Importante: Quando as Tolerâncias GPS São Aplicadas</AlertTitle>
             <AlertDescription className="text-sm space-y-2">
               <p>
-                <strong>A tolerância de match GPS é aplicada APENAS durante a importação de necessidades.</strong>
+                <strong>As tolerâncias GPS são aplicadas APENAS durante a importação de necessidades.</strong>
               </p>
               <p>
-                Alterar este valor aqui NÃO afetará necessidades já importadas. Para reimportar com nova tolerância, 
+                Alterar os valores aqui NÃO afetará necessidades já importadas. Para reimportar com novas tolerâncias, 
                 você precisará excluir as necessidades antigas e importá-las novamente.
               </p>
             </AlertDescription>
@@ -245,34 +245,15 @@ const RodoviasManager = () => {
                   maxLength={2}
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tolerancia_match_rodovia">
-                  Tolerância Genérica GPS (m)
-                  <span className="text-xs text-muted-foreground ml-2">
-                    (Fallback quando tipo específico não configurado)
-                  </span>
-                </Label>
-                <Input
-                  id="tolerancia_match_rodovia"
-                  type="number"
-                  min="10"
-                  max="500"
-                  step="5"
-                  value={formData.tolerancia_match_metros}
-                  onChange={(e) => setFormData({ ...formData, tolerancia_match_metros: e.target.value })}
-                  placeholder="50"
-                />
-              </div>
             </div>
 
             <div className="border-t pt-4 space-y-4">
               <div className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
-                <h3 className="font-medium">Tolerâncias Específicas por Tipo de Elemento</h3>
+                <h3 className="font-medium">Tolerâncias GPS por Tipo de Elemento</h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                Configure tolerâncias GPS individuais para cada tipo. Se não especificado, usa a tolerância genérica acima.
+                Configure tolerâncias GPS específicas para cada tipo de elemento da rodovia.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -466,73 +447,15 @@ const RodoviasManager = () => {
           <CardTitle>Rodovias Cadastradas</CardTitle>
           <CardDescription>
             KMs específicos são configurados ao vincular rodovia ao lote. 
-            Tolerância GPS é aplicada apenas em novas importações de necessidades.
+            Tolerâncias GPS são aplicadas apenas em novas importações de necessidades.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Alert className="mb-4 border-amber-500/50 bg-amber-500/10">
-            <Settings className="h-4 w-4" />
-            <AlertTitle>⚡ Atualização Rápida em Massa</AlertTitle>
-            <AlertDescription className="space-y-3">
-              <p className="text-sm">
-                Altere a tolerância GPS de <strong>todas as rodovias</strong> de uma vez 
-                (útil para corrigir matches excessivos).
-              </p>
-              <div className="flex gap-3 items-end">
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor="bulk-tolerance">Nova Tolerância (metros)</Label>
-                  <Input
-                    id="bulk-tolerance"
-                    type="number"
-                    min="10"
-                    max="500"
-                    step="5"
-                    value={bulkTolerance}
-                    onChange={(e) => setBulkTolerance(e.target.value)}
-                    className="max-w-xs"
-                    placeholder="25"
-                  />
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={handleBulkUpdate}
-                  disabled={!bulkTolerance || bulkUpdateLoading}
-                  className="border-amber-600 text-amber-600 hover:bg-amber-600 hover:text-white"
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Aplicar em Todas ({rodovias.length} rodovias)
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                ⚠️ Lembre-se: isso só afeta <strong>novas importações</strong>. Necessidades 
-                já importadas mantêm a tolerância original.
-              </p>
-            </AlertDescription>
-          </Alert>
-          
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Código</TableHead>
                 <TableHead>UF</TableHead>
-                <TableHead>
-                  <div className="flex items-center gap-1">
-                    Tolerância GPS (m)
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="h-3 w-3 text-muted-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-xs">
-                          <p className="text-xs">
-                            Valor usado durante a importação de necessidades. 
-                            Alterar não afeta dados já importados.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </TableHead>
                 <TableHead className="w-24">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -541,7 +464,6 @@ const RodoviasManager = () => {
                 <TableRow key={rodovia.id}>
                   <TableCell className="font-medium">{rodovia.codigo}</TableCell>
                   <TableCell>{rodovia.uf || "-"}</TableCell>
-                  <TableCell>{rodovia.tolerancia_match_metros || 50}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
@@ -578,7 +500,7 @@ const RodoviasManager = () => {
               ))}
               {rodovias.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  <TableCell colSpan={3} className="text-center text-muted-foreground">
                     Nenhuma rodovia cadastrada
                   </TableCell>
                 </TableRow>
@@ -615,21 +537,9 @@ const RodoviasManager = () => {
                 />
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-tolerancia">Tolerância Genérica GPS (metros)</Label>
-              <Input
-                id="edit-tolerancia"
-                type="number"
-                min="10"
-                max="500"
-                value={editFormData.tolerancia_match_metros}
-                onChange={(e) => setEditFormData({ ...editFormData, tolerancia_match_metros: e.target.value })}
-              />
-            </div>
 
             <div className="border-t pt-4 space-y-4">
-              <h4 className="font-medium text-sm">Tolerâncias Específicas por Tipo</h4>
+              <h4 className="font-medium text-sm">Tolerâncias GPS por Tipo de Elemento</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-placas">🚏 Placas (m)</Label>
