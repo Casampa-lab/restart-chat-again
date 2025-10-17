@@ -22,6 +22,9 @@ const TIPOS_ELEMENTOS = [
   { value: "marcas_transversais", label: "Inscrições/Marcas Transversais", tabela_cadastro: "ficha_inscricoes", tabela_necessidade: "necessidades_marcas_transversais" },
 ];
 
+// Tipos que possuem a coluna status_revisao
+const TIPOS_COM_STATUS_REVISAO = ['defensas', 'marcas_longitudinais', 'tachas'];
+
 interface LogEntry {
   tipo: "success" | "warning" | "error" | "info";
   mensagem: string;
@@ -857,9 +860,13 @@ export function RecalcularMatches() {
             servico_final: servicoFinal,
             servico: servicoFinal,
             divergencia,
-            reconciliado: false,
-            status_revisao: 'ok'
+            reconciliado: false
           };
+
+          // Adicionar status_revisao apenas para tipos que têm essa coluna
+          if (TIPOS_COM_STATUS_REVISAO.includes(tipo)) {
+            updateData.status_revisao = 'ok';
+          }
 
           if (cadastro_id !== null) updateData.cadastro_id = cadastro_id;
           if (distancia_match_metros !== null) updateData.distancia_match_metros = distancia_match_metros;
