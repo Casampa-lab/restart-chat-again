@@ -408,11 +408,17 @@ const Index = () => {
                         {(countPendentes || 0) > 0 && (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="cursor-help">
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate('/elementos-pendentes');
+                                }}
+                                className="cursor-pointer hover:opacity-80 transition-opacity"
+                              >
                                 <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-red-500 text-white font-bold text-xs">
                                   {countPendentes}
                                 </Badge>
-                              </span>
+                              </button>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>Elementos Pendentes de Aprovação</p>
@@ -424,11 +430,17 @@ const Index = () => {
                         {(countDivergencias || 0) > 0 && (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="cursor-help">
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate('/reconciliacoes-pendentes');
+                                }}
+                                className="cursor-pointer hover:opacity-80 transition-opacity"
+                              >
                                 <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-orange-500 text-white font-bold text-xs">
                                   {countDivergencias}
                                 </Badge>
-                              </span>
+                              </button>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>Divergências na Reconciliação</p>
@@ -440,11 +452,17 @@ const Index = () => {
                         {(countIntervencoesPendentes || 0) > 0 && (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="cursor-help">
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate('/revisao-intervencoes');
+                                }}
+                                className="cursor-pointer hover:opacity-80 transition-opacity"
+                              >
                                 <Badge className="h-6 min-w-[1.5rem] px-1.5 rounded-full bg-blue-500 text-white font-bold text-xs">
                                   {countIntervencoesPendentes}
                                 </Badge>
-                              </span>
+                              </button>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>Intervenções Aguardando Revisão</p>
