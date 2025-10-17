@@ -165,8 +165,8 @@ export function InventarioImporterManager() {
         
         // Headers típicos por tipo de inventário (case insensitive)
         const typicalHeaders: Record<string, string[]> = {
-          "placas": ["br", "snv", "km", "código da placa", "codigo da placa", "lado", "tipo", "latitude", "longitude"],
-          "marcas_longitudinais": ["br", "snv", "km", "tipo de demarcação", "cor", "largura", "extensão"],
+          "placas": ["br", "snv", "km", "código", "lado", "tipo", "latitude", "longitude"],
+          "marcas_longitudinais": ["br", "snv", "km", "tipo", "demarcação", "cor", "largura", "extensão"],
           "cilindros": ["br", "snv", "km", "cor", "quantidade", "tipo"],
           "inscricoes": ["br", "snv", "km", "sigla", "tipo", "cor", "dimensões"],
           "tachas": ["br", "snv", "km", "tipo", "cor", "quantidade"],
@@ -176,18 +176,36 @@ export function InventarioImporterManager() {
         
         const expectedHeaders = typicalHeaders[inventoryType] || ["br", "snv", "km"];
         
-        // Verificar se a primeira linha contém pelo menos 2 headers típicos
+        // Verificar se alguma célula é muito longa (indica título, não header)
+        const hasLongCell = firstRow.some(cell => String(cell || '').trim().length > 50);
+        if (hasLongCell) {
+          console.log(`📋 Linha de título detectada (célula longa encontrada). Headers na linha 2`);
+          return { headerRow: 1, dataStartRow: 2 };
+        }
+        
+        // Verificar se a primeira linha contém headers típicos com matching mais preciso
         const firstRowHeaders = firstRow.map(cell => 
           String(cell || '').trim().toLowerCase()
         );
         
-        const matchCount = expectedHeaders.filter(header => 
-          firstRowHeaders.some(cell => cell.includes(header) || header.includes(cell))
-        ).length;
+        console.log(`🔍 Analisando primeira linha:`, firstRowHeaders.slice(0, 5));
         
-        // Se encontrou pelo menos 2 headers típicos, assume que é linha de header
-        if (matchCount >= 2) {
-          console.log(`✅ Headers detectados na linha 1 (${matchCount} campos identificados)`);
+        const matchedHeaders: string[] = [];
+        expectedHeaders.forEach(header => {
+          const found = firstRowHeaders.some(cell => {
+            // Matching mais preciso: célula deve ser similar ao header
+            const similarity = cell === header || 
+                              (cell.includes(header) && cell.length < header.length + 10);
+            return similarity;
+          });
+          if (found) matchedHeaders.push(header);
+        });
+        
+        console.log(`🎯 Headers encontrados:`, matchedHeaders);
+        
+        // Se encontrou pelo menos 3 headers típicos, assume que é linha de header
+        if (matchedHeaders.length >= 3) {
+          console.log(`✅ Headers detectados na linha 1 (${matchedHeaders.length} campos identificados)`);
           return { headerRow: 0, dataStartRow: 1 };
         }
         
