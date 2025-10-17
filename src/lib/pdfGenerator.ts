@@ -21,6 +21,7 @@ interface NCData {
   km_inicial?: number;
   km_final?: number;
   km_referencia?: number;
+  snv?: string;
   rodovia: {
     codigo: string;
     uf: string;
@@ -98,10 +99,13 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
      'Rodovia', `${ncData.rodovia.codigo}/${ncData.rodovia.uf}`,
      'Lote', ncData.lote.numero],
     ['Km', ncData.km_inicial && ncData.km_final 
-        ? `${ncData.km_inicial} ao ${ncData.km_final}` 
-        : ncData.km_referencia?.toString() || 'N/A',
-     'Supervisora', ncData.supervisora.nome_empresa.substring(0, 25)],
-    ['Construtora', ncData.empresa.nome.substring(0, 40)],
+        ? `${ncData.km_inicial.toFixed(3)} ao ${ncData.km_final.toFixed(3)}` 
+        : (ncData.km_referencia ? `km ${ncData.km_referencia.toFixed(3)}` : 'N/A'),
+     'SNV', ncData.snv || 'N/A'],
+    ['Supervisora', ncData.supervisora.nome_empresa.substring(0, 40),
+     'Contrato', ncData.lote.contrato || 'N/A'],
+    ['Construtora', ncData.empresa.nome.substring(0, 40),
+     'Contrato', ncData.lote.contrato || 'N/A'],
   ];
 
   autoTable(doc, {
@@ -123,17 +127,20 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
   doc.setFont('helvetica', 'bold');
   doc.text('Natureza:', margin, yPos);
   doc.setFont('helvetica', 'normal');
-  doc.text(ncData.natureza || 'N/A', margin + 18, yPos);
+  const naturezaText = ncData.natureza || '⚠️ NÃO INFORMADO';
+  doc.text(naturezaText, margin + 18, yPos);
   
   doc.setFont('helvetica', 'bold');
   doc.text('Grau:', margin + 60, yPos);
   doc.setFont('helvetica', 'normal');
-  doc.text(ncData.grau || 'N/A', margin + 72, yPos);
+  const grauText = ncData.grau || '⚠️ NÃO INFORMADO';
+  doc.text(grauText, margin + 72, yPos);
   
   doc.setFont('helvetica', 'bold');
   doc.text('Tipo:', margin + 110, yPos);
   doc.setFont('helvetica', 'normal');
-  doc.text(ncData.tipo_obra || 'N/A', margin + 122, yPos);
+  const tipoObraText = ncData.tipo_obra || '⚠️ NÃO INFORMADO';
+  doc.text(tipoObraText, margin + 122, yPos);
   
   yPos += 8;
 
@@ -199,8 +206,15 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(6);
         const gpsY = yFoto + fotoHeight + 4;
-        const gpsText = `${foto.sentido || 'N/A'} | ${foto.latitude?.toFixed(5) || 'N/A'}, ${foto.longitude?.toFixed(5) || 'N/A'}`;
-        doc.text(gpsText, xPos, gpsY);
+        
+        if (foto.latitude && foto.longitude) {
+          const gpsText = `${foto.sentido || 'N/A'} | GPS: ${foto.latitude.toFixed(6)}, ${foto.longitude.toFixed(6)}`;
+          doc.text(gpsText, xPos, gpsY);
+        } else {
+          doc.setTextColor(255, 0, 0);
+          doc.text('⚠️ GPS não capturado', xPos, gpsY);
+          doc.setTextColor(0, 0, 0);
+        }
       } else {
         doc.rect(xPos, yFoto + 2, fotoWidth, fotoHeight);
         doc.setFontSize(6);

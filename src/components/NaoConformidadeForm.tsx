@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { MapPin, Save, Bell, Camera, X } from "lucide-react";
-import { TIPOS_NC, PROBLEMAS_POR_TIPO, SITUACOES_NC, type TipoNC } from "@/constants/naoConformidades";
+import { TIPOS_NC, PROBLEMAS_POR_TIPO, SITUACOES_NC, TIPO_NC_TO_NATUREZA, GRAUS_NC, TIPOS_OBRA, type TipoNC } from "@/constants/naoConformidades";
 import { generateNCPDF } from "@/lib/pdfGenerator";
 
 interface FotoData {
@@ -28,6 +28,16 @@ interface LoteInfo {
   empresa: {
     nome: string;
   };
+}
+
+interface SupervisoraInfo {
+  nome: string;
+  contrato: string;
+}
+
+interface EmpresaInfo {
+  nome: string;
+  contrato: string;
 }
 const NaoConformidadeForm = ({
   loteId,
@@ -55,6 +65,9 @@ const NaoConformidadeForm = ({
   } | null>(null);
   
   const [empresaNome, setEmpresaNome] = useState<string>("");
+  const [supervisoraInfo, setSupervisoraInfo] = useState<SupervisoraInfo | null>(null);
+  const [empresaInfo, setEmpresaInfo] = useState<EmpresaInfo | null>(null);
+  
   const [formData, setFormData] = useState({
     data_ocorrencia: new Date().toISOString().split("T")[0],
     numero_nc: "",
@@ -68,7 +81,11 @@ const NaoConformidadeForm = ({
     observacao: "Verificar prazo de atendimento e informar à supervisora para agendamento de nova vistoria após a execução do serviço.",
     km_referencia: "",
     km_inicial: "",
-    km_final: ""
+    km_final: "",
+    natureza: "",
+    grau: "",
+    tipo_obra: "",
+    snv: ""
   });
 
   // Estado para as 4 fotos
@@ -79,24 +96,59 @@ const NaoConformidadeForm = ({
     { arquivo: null, url: "", latitude: null, longitude: null, sentido: "", descricao: "", uploading: false },
   ]);
 
-  // Buscar empresa do lote automaticamente
+  // Buscar dados completos do lote automaticamente
   useEffect(() => {
-    const loadEmpresaDoLote = async () => {
+    const loadDadosCompletos = async () => {
       try {
-        const {
-          data,
-          error
-        } = await supabase.from("lotes").select("empresas(nome)").eq("id", loteId).single();
-        if (error) throw error;
-        if (data && (data as any).empresas) {
-          setEmpresaNome((data as any).empresas.nome);
+        // Buscar lote com empresa e supervisora
+        const { data: lote, error: loteError } = await supabase
+          .from("lotes")
+          .select(`
+            id,
+            numero,
+            contrato,
+            empresa_id,
+            empresas (
+              id,
+              nome,
+              cnpj,
+              supervisora_id,
+              supervisoras (
+                id,
+                nome_empresa
+              )
+            )
+          `)
+          .eq("id", loteId)
+          .single();
+
+        if (loteError) throw loteError;
+
+        if (lote && (lote as any).empresas) {
+          const empresa = (lote as any).empresas;
+          
+          // Empresa Executora
+          setEmpresaNome(empresa.nome);
+          setEmpresaInfo({
+            nome: empresa.nome,
+            contrato: lote.contrato || "N/A"
+          });
+
+          // Supervisora
+          if (empresa.supervisoras) {
+            setSupervisoraInfo({
+              nome: empresa.supervisoras.nome_empresa,
+              contrato: "N/A"
+            });
+          }
         }
       } catch (error: any) {
-        console.error("Erro ao buscar empresa do lote:", error);
+        console.error("Erro ao buscar dados:", error);
         toast.error("Erro ao carregar informações do lote");
       }
     };
-    loadEmpresaDoLote();
+
+    loadDadosCompletos();
   }, [loteId]);
   const getCurrentLocation = () => {
     setGpsLoading(true);
@@ -173,13 +225,15 @@ const NaoConformidadeForm = ({
     });
   };
 
-  // Resetar problema quando tipo_nc mudar
+  // Resetar problema e preencher natureza quando tipo_nc mudar
   useEffect(() => {
     if (formData.tipo_nc) {
-      setFormData(prev => ({
-        ...prev,
-        problema_identificado: ""
-      }));
+      // Resetar problema
+      setFormData(prev => ({ ...prev, problema_identificado: "" }));
+      
+      // Preencher natureza automaticamente
+      const natureza = TIPO_NC_TO_NATUREZA[formData.tipo_nc] || "";
+      setFormData(prev => ({ ...prev, natureza }));
     }
   }, [formData.tipo_nc]);
 
@@ -336,7 +390,11 @@ const NaoConformidadeForm = ({
         observacao: "",
         km_referencia: "",
         km_inicial: "",
-        km_final: ""
+        km_final: "",
+        natureza: "",
+        grau: "",
+        tipo_obra: "",
+        snv: ""
       });
 
       // Limpar localizações e fotos
@@ -370,6 +428,22 @@ const NaoConformidadeForm = ({
 
     if (!formData.data_notificacao) {
       toast.error("Preencha a Data da Notificação primeiro");
+      return;
+    }
+
+    // Validar campos obrigatórios do modelo 2018
+    if (!formData.natureza || !formData.grau || !formData.tipo_obra) {
+      toast.error("Preencha: Natureza, Grau e Tipo de Obra");
+      return;
+    }
+
+    if (!formData.snv || formData.snv.trim() === '') {
+      toast.error("Preencha o campo SNV (Rodovia)");
+      return;
+    }
+
+    if (!empresaInfo || !supervisoraInfo) {
+      toast.error("Dados de empresa/supervisora não encontrados. Configure o lote.");
       return;
     }
 
@@ -411,6 +485,10 @@ const NaoConformidadeForm = ({
         data_atendimento: null, // Deixar vazio
         data_notificacao: formData.data_notificacao,
         observacao: formData.observacao || null,
+        natureza: formData.natureza,
+        grau: formData.grau,
+        tipo_obra: formData.tipo_obra,
+        snv: formData.snv,
       };
 
       // Adicionar campos conforme o tipo de NC
@@ -480,6 +558,7 @@ const NaoConformidadeForm = ({
                 sentido: foto.sentido || null,
                 descricao: foto.descricao || null,
                 ordem: fotoIndex + 1,
+                snv: formData.snv,
               });
 
             if (fotoError) throw fotoError;
@@ -582,9 +661,10 @@ const NaoConformidadeForm = ({
         },
         supervisora: supervisoraData,
         fotos: fotosBanco || [],
-        natureza: ncCompleta.tipo_nc, // Usando tipo_nc como natureza
-        grau: "Média", // Pode ser adicionado ao formulário posteriormente
-        tipo_obra: "Manutenção", // Pode ser adicionado ao formulário posteriormente
+        natureza: (ncCompleta as any).natureza || "N/A",
+        grau: (ncCompleta as any).grau || "N/A",
+        tipo_obra: (ncCompleta as any).tipo_obra || "N/A",
+        snv: (ncCompleta as any).snv || "N/A",
         comentarios_supervisora: "",
         comentarios_executora: "",
       };
@@ -643,7 +723,11 @@ const NaoConformidadeForm = ({
         observacao: "",
         km_referencia: "",
         km_inicial: "",
-        km_final: ""
+        km_final: "",
+        natureza: "",
+        grau: "",
+        tipo_obra: "",
+        snv: ""
       });
 
       // Limpar localizações e fotos para o próximo registro
@@ -686,6 +770,17 @@ const NaoConformidadeForm = ({
           {/* Primeira Etapa - Notificação */}
           <div className="border-b pb-2 mb-4">
             <h3 className="text-base font-semibold">Primeira Etapa - Notificação</h3>
+            {empresaInfo && supervisoraInfo && (
+              <div className="text-sm text-muted-foreground mt-2 space-y-1">
+                <p>📋 <strong>Executora:</strong> {empresaInfo.nome} | Contrato: {empresaInfo.contrato}</p>
+                <p>🏢 <strong>Supervisora:</strong> {supervisoraInfo.nome}</p>
+              </div>
+            )}
+            {(!empresaInfo || !supervisoraInfo) && (
+              <p className="text-sm text-red-500 mt-2">
+                ⚠️ Configure a empresa do lote antes de criar NCs
+              </p>
+            )}
           </div>
 
           {/* Linha 1: Data e Número NC */}
@@ -699,11 +794,33 @@ const NaoConformidadeForm = ({
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="data_notificacao">Data da Notificação *</Label>
+              <Input id="data_notificacao" type="date" value={formData.data_notificacao} onChange={e => setFormData({
+              ...formData,
+              data_notificacao: e.target.value
+            })} required />
+            </div>
+          </div>
+
+          {/* Linha 1.5: Número NC e SNV */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label htmlFor="numero_nc">Número da Não Conformidade *</Label>
-              <Input id="numero_nc" type="text" placeholder="Ex: NC-001" value={formData.numero_nc} onChange={e => setFormData({
+              <Input id="numero_nc" type="text" placeholder="Ex: NC00001" value={formData.numero_nc} onChange={e => setFormData({
               ...formData,
               numero_nc: e.target.value
             })} required />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="snv">SNV (Rodovia) *</Label>
+              <Input 
+                id="snv"
+                value={formData.snv}
+                onChange={e => setFormData({ ...formData, snv: e.target.value })}
+                placeholder="Ex: BR-116/MG"
+                required
+              />
             </div>
           </div>
 
@@ -739,6 +856,59 @@ const NaoConformidadeForm = ({
                   {problemasDisponiveis.map(problema => <SelectItem key={problema} value={problema}>
                       {problema}
                     </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Campos Modelo 2018: Natureza, Grau, Tipo de Obra */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="natureza">Natureza *</Label>
+              <Input 
+                id="natureza"
+                value={formData.natureza}
+                readOnly
+                className="bg-muted cursor-not-allowed"
+                placeholder="Preenchida automaticamente"
+              />
+              <p className="text-xs text-muted-foreground">
+                Preenchida automaticamente baseada no Tipo de NC
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="grau">Grau *</Label>
+              <Select 
+                value={formData.grau}
+                onValueChange={value => setFormData({ ...formData, grau: value })}
+                required
+              >
+                <SelectTrigger id="grau">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {GRAUS_NC.map(grau => (
+                    <SelectItem key={grau} value={grau}>{grau}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tipo_obra">Tipo de Obra *</Label>
+              <Select 
+                value={formData.tipo_obra}
+                onValueChange={value => setFormData({ ...formData, tipo_obra: value })}
+                required
+              >
+                <SelectTrigger id="tipo_obra">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIPOS_OBRA.map(tipo => (
+                    <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
