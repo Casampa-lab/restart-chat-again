@@ -295,8 +295,7 @@ export async function rejeitarElemento(elementoId: string, observacao: string, g
       }),
       
       observacao: `Rejeitado em ${new Date().toLocaleDateString('pt-BR')} - Coordenador`,
-      enviado_coordenador: true,
-      notificada: false
+      enviado_coordenador: true
     };
 
     const { data: ncCreated, error: ncError } = await supabase

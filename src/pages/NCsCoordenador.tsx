@@ -116,13 +116,13 @@ const NCsCoordenador = () => {
     try {
       setLoading(true);
       
-      // Query principal
+      // Query principal sem o campo notificada que não existe
       const ncsQuery = (supabase as any)
         .from("nao_conformidades")
         .select("*")
         .eq("deleted", false)
         .eq("enviado_coordenador", true)
-        .eq("notificada", false)
+        .is("data_notificacao", null)
         .order("created_at", { ascending: false });
 
       const finalQuery = selectedLote !== "all" 
