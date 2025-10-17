@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { Plus, Trash2, Info, Settings } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-
 interface Rodovia {
   id: string;
   codigo: string;
@@ -24,17 +23,42 @@ interface Rodovia {
   tolerancia_tachas_metros: number | null;
   tolerancia_inscricoes_metros: number | null;
 }
-
-const TOLERANCIA_CONFIG = [
-  { key: 'tolerancia_placas_metros', icon: '🚏', label: 'Placas', default: 50 },
-  { key: 'tolerancia_porticos_metros', icon: '🌉', label: 'Pórticos', default: 200 },
-  { key: 'tolerancia_defensas_metros', icon: '🛣️', label: 'Defensas', default: 20 },
-  { key: 'tolerancia_marcas_metros', icon: '➖', label: 'Marcas Long.', default: 20 },
-  { key: 'tolerancia_cilindros_metros', icon: '🔴', label: 'Cilindros', default: 25 },
-  { key: 'tolerancia_tachas_metros', icon: '💎', label: 'Tachas', default: 25 },
-  { key: 'tolerancia_inscricoes_metros', icon: '➡️', label: 'Inscrições', default: 30 },
-];
-
+const TOLERANCIA_CONFIG = [{
+  key: 'tolerancia_placas_metros',
+  icon: '🚏',
+  label: 'Placas',
+  default: 50
+}, {
+  key: 'tolerancia_porticos_metros',
+  icon: '🌉',
+  label: 'Pórticos',
+  default: 200
+}, {
+  key: 'tolerancia_defensas_metros',
+  icon: '🛣️',
+  label: 'Defensas',
+  default: 20
+}, {
+  key: 'tolerancia_marcas_metros',
+  icon: '➖',
+  label: 'Marcas Long.',
+  default: 20
+}, {
+  key: 'tolerancia_cilindros_metros',
+  icon: '🔴',
+  label: 'Cilindros',
+  default: 25
+}, {
+  key: 'tolerancia_tachas_metros',
+  icon: '💎',
+  label: 'Tachas',
+  default: 25
+}, {
+  key: 'tolerancia_inscricoes_metros',
+  icon: '➡️',
+  label: 'Inscrições',
+  default: 30
+}];
 const RodoviasManager = () => {
   const [rodovias, setRodovias] = useState<Rodovia[]>([]);
   const [loading, setLoading] = useState(false);
@@ -48,35 +72,32 @@ const RodoviasManager = () => {
     tolerancia_marcas_metros: "20",
     tolerancia_cilindros_metros: "25",
     tolerancia_tachas_metros: "25",
-    tolerancia_inscricoes_metros: "30",
+    tolerancia_inscricoes_metros: "30"
   });
   const [bulkTolerance, setBulkTolerance] = useState("25");
   const [bulkUpdateLoading, setBulkUpdateLoading] = useState(false);
-
   useEffect(() => {
     loadRodovias();
   }, []);
-
   const loadRodovias = async () => {
     try {
-      const { data, error } = await supabase
-        .from("rodovias")
-        .select("*")
-        .order("codigo");
-
+      const {
+        data,
+        error
+      } = await supabase.from("rodovias").select("*").order("codigo");
       if (error) throw error;
       setRodovias(data || []);
     } catch (error: any) {
       toast.error("Erro ao carregar rodovias: " + error.message);
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const { error } = await supabase.from("rodovias").insert({
+      const {
+        error
+      } = await supabase.from("rodovias").insert({
         codigo: formData.codigo,
         uf: formData.uf || null,
         tolerancia_match_metros: parseInt(formData.tolerancia_match_metros) || 50,
@@ -86,15 +107,13 @@ const RodoviasManager = () => {
         tolerancia_marcas_metros: parseInt(formData.tolerancia_marcas_metros) || 20,
         tolerancia_cilindros_metros: parseInt(formData.tolerancia_cilindros_metros) || 25,
         tolerancia_tachas_metros: parseInt(formData.tolerancia_tachas_metros) || 25,
-        tolerancia_inscricoes_metros: parseInt(formData.tolerancia_inscricoes_metros) || 30,
+        tolerancia_inscricoes_metros: parseInt(formData.tolerancia_inscricoes_metros) || 30
       });
-
       if (error) throw error;
-
       toast.success("Rodovia cadastrada com sucesso!");
-      setFormData({ 
-        codigo: "", 
-        uf: "", 
+      setFormData({
+        codigo: "",
+        uf: "",
         tolerancia_match_metros: "50",
         tolerancia_placas_metros: "50",
         tolerancia_porticos_metros: "200",
@@ -102,7 +121,7 @@ const RodoviasManager = () => {
         tolerancia_marcas_metros: "20",
         tolerancia_cilindros_metros: "25",
         tolerancia_tachas_metros: "25",
-        tolerancia_inscricoes_metros: "30",
+        tolerancia_inscricoes_metros: "30"
       });
       loadRodovias();
     } catch (error: any) {
@@ -111,24 +130,18 @@ const RodoviasManager = () => {
       setLoading(false);
     }
   };
-
-
   const handleBulkUpdate = async () => {
     if (!bulkTolerance) return;
-
     const confirmMsg = `Tem certeza que deseja alterar a tolerância GPS de TODAS as ${rodovias.length} rodovias para ${bulkTolerance}m?\n\nIsso só afetará novas importações de necessidades.`;
-
     if (!confirm(confirmMsg)) return;
-
     setBulkUpdateLoading(true);
     try {
-      const { error } = await supabase
-        .from("rodovias")
-        .update({ tolerancia_match_metros: parseInt(bulkTolerance) })
-        .neq("id", "00000000-0000-0000-0000-000000000000");
-
+      const {
+        error
+      } = await supabase.from("rodovias").update({
+        tolerancia_match_metros: parseInt(bulkTolerance)
+      }).neq("id", "00000000-0000-0000-0000-000000000000");
       if (error) throw error;
-
       toast.success(`✅ Tolerância atualizada para ${bulkTolerance}m em ${rodovias.length} rodovias!`);
       loadRodovias();
     } catch (error: any) {
@@ -137,44 +150,34 @@ const RodoviasManager = () => {
       setBulkUpdateLoading(false);
     }
   };
-
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir esta rodovia?")) return;
-
     try {
       // Verifica se há lotes vinculados
-      const { data: lotes, error: checkError } = await supabase
-        .from("lotes_rodovias")
-        .select("id")
-        .eq("rodovia_id", id)
-        .limit(1);
-
+      const {
+        data: lotes,
+        error: checkError
+      } = await supabase.from("lotes_rodovias").select("id").eq("rodovia_id", id).limit(1);
       if (checkError) throw checkError;
-
       if (lotes && lotes.length > 0) {
         toast.error("Não é possível excluir: existem lotes vinculados a esta rodovia");
         return;
       }
-
-      const { error } = await supabase.from("rodovias").delete().eq("id", id);
-
+      const {
+        error
+      } = await supabase.from("rodovias").delete().eq("id", id);
       if (error) throw error;
-
       toast.success("Rodovia excluída!");
       loadRodovias();
     } catch (error: any) {
       toast.error("Erro ao excluir: " + error.message);
     }
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Cadastrar Nova Rodovia</CardTitle>
-          <CardDescription>
-            Adicione rodovias do programa BR-LEGAL (KMs serão definidos por lote)
-          </CardDescription>
+          <CardDescription>Adicione rodovias (kms serão definidos por lote)</CardDescription>
         </CardHeader>
         <CardContent>
           <Alert className="mb-4">
@@ -194,24 +197,18 @@ const RodoviasManager = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="codigo">Código *</Label>
-                <Input
-                  id="codigo"
-                  value={formData.codigo}
-                  onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
-                  placeholder="Ex: BR-040"
-                  required
-                />
+                <Input id="codigo" value={formData.codigo} onChange={e => setFormData({
+                ...formData,
+                codigo: e.target.value
+              })} placeholder="Ex: BR-040" required />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="uf">UF</Label>
-                <Input
-                  id="uf"
-                  value={formData.uf}
-                  onChange={(e) => setFormData({ ...formData, uf: e.target.value })}
-                  placeholder="Ex: MG"
-                  maxLength={2}
-                />
+                <Input id="uf" value={formData.uf} onChange={e => setFormData({
+                ...formData,
+                uf: e.target.value
+              })} placeholder="Ex: MG" maxLength={2} />
               </div>
             </div>
 
@@ -239,15 +236,10 @@ const RodoviasManager = () => {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <Input
-                    id="tol_placas"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={formData.tolerancia_placas_metros}
-                    onChange={(e) => setFormData({ ...formData, tolerancia_placas_metros: e.target.value })}
-                    placeholder="50"
-                  />
+                  <Input id="tol_placas" type="number" min="10" max="300" value={formData.tolerancia_placas_metros} onChange={e => setFormData({
+                  ...formData,
+                  tolerancia_placas_metros: e.target.value
+                })} placeholder="50" />
                 </div>
 
                 <div className="space-y-2">
@@ -264,15 +256,10 @@ const RodoviasManager = () => {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <Input
-                    id="tol_porticos"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={formData.tolerancia_porticos_metros}
-                    onChange={(e) => setFormData({ ...formData, tolerancia_porticos_metros: e.target.value })}
-                    placeholder="200"
-                  />
+                  <Input id="tol_porticos" type="number" min="10" max="300" value={formData.tolerancia_porticos_metros} onChange={e => setFormData({
+                  ...formData,
+                  tolerancia_porticos_metros: e.target.value
+                })} placeholder="200" />
                 </div>
 
                 <div className="space-y-2">
@@ -289,15 +276,10 @@ const RodoviasManager = () => {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <Input
-                    id="tol_defensas"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={formData.tolerancia_defensas_metros}
-                    onChange={(e) => setFormData({ ...formData, tolerancia_defensas_metros: e.target.value })}
-                    placeholder="20"
-                  />
+                  <Input id="tol_defensas" type="number" min="10" max="300" value={formData.tolerancia_defensas_metros} onChange={e => setFormData({
+                  ...formData,
+                  tolerancia_defensas_metros: e.target.value
+                })} placeholder="20" />
                 </div>
 
                 <div className="space-y-2">
@@ -314,15 +296,10 @@ const RodoviasManager = () => {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <Input
-                    id="tol_marcas"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={formData.tolerancia_marcas_metros}
-                    onChange={(e) => setFormData({ ...formData, tolerancia_marcas_metros: e.target.value })}
-                    placeholder="20"
-                  />
+                  <Input id="tol_marcas" type="number" min="10" max="300" value={formData.tolerancia_marcas_metros} onChange={e => setFormData({
+                  ...formData,
+                  tolerancia_marcas_metros: e.target.value
+                })} placeholder="20" />
                 </div>
 
                 <div className="space-y-2">
@@ -339,15 +316,10 @@ const RodoviasManager = () => {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <Input
-                    id="tol_inscricoes"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={formData.tolerancia_inscricoes_metros}
-                    onChange={(e) => setFormData({ ...formData, tolerancia_inscricoes_metros: e.target.value })}
-                    placeholder="30"
-                  />
+                  <Input id="tol_inscricoes" type="number" min="10" max="300" value={formData.tolerancia_inscricoes_metros} onChange={e => setFormData({
+                  ...formData,
+                  tolerancia_inscricoes_metros: e.target.value
+                })} placeholder="30" />
                 </div>
 
                 <div className="space-y-2">
@@ -364,15 +336,10 @@ const RodoviasManager = () => {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <Input
-                    id="tol_cilindros"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={formData.tolerancia_cilindros_metros}
-                    onChange={(e) => setFormData({ ...formData, tolerancia_cilindros_metros: e.target.value })}
-                    placeholder="25"
-                  />
+                  <Input id="tol_cilindros" type="number" min="10" max="300" value={formData.tolerancia_cilindros_metros} onChange={e => setFormData({
+                  ...formData,
+                  tolerancia_cilindros_metros: e.target.value
+                })} placeholder="25" />
                 </div>
 
                 <div className="space-y-2">
@@ -389,15 +356,10 @@ const RodoviasManager = () => {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <Input
-                    id="tol_tachas"
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={formData.tolerancia_tachas_metros}
-                    onChange={(e) => setFormData({ ...formData, tolerancia_tachas_metros: e.target.value })}
-                    placeholder="25"
-                  />
+                  <Input id="tol_tachas" type="number" min="10" max="300" value={formData.tolerancia_tachas_metros} onChange={e => setFormData({
+                  ...formData,
+                  tolerancia_tachas_metros: e.target.value
+                })} placeholder="25" />
                 </div>
               </div>
             </div>
@@ -414,8 +376,8 @@ const RodoviasManager = () => {
         <CardHeader>
           <CardTitle>Rodovias Cadastradas</CardTitle>
           <CardDescription>
-            kms específicos são configurados ao vincular rodovia ao lote. 
-            Novas distâncias de tolerâncias GPS são aplicadas apenas em novas importações de projeto na aba Projetos.
+            KMs específicos são configurados ao vincular rodovia ao lote. 
+            Tolerâncias GPS são aplicadas apenas em novas importações de necessidades.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -427,56 +389,41 @@ const RodoviasManager = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rodovias.map((rodovia) => (
-                <TableRow key={rodovia.id}>
+              {rodovias.map(rodovia => <TableRow key={rodovia.id}>
                   <TableCell>
-                    <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium whitespace-nowrap">
-                        {rodovia.codigo}/{rodovia.uf || "N/A"}
+                        {rodovia.codigo} ({rodovia.uf || "N/A"})
                       </span>
                       <span className="text-muted-foreground">•</span>
-                      <div className="flex flex-wrap gap-2">
-                        {TOLERANCIA_CONFIG.map((config) => {
-                          const valor = rodovia[config.key as keyof Rodovia] || config.default;
-                          return (
-                            <div 
-                              key={config.key} 
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-muted text-xs"
-                            >
+                      <div className="flex flex-wrap gap-1.5">
+                        {TOLERANCIA_CONFIG.map(config => {
+                      const valor = rodovia[config.key as keyof Rodovia] || config.default;
+                      return <div key={config.key} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted text-xs">
                               <span>{config.icon}</span>
                               <span>{valor}m</span>
-                            </div>
-                          );
-                        })}
+                            </div>;
+                    })}
                       </div>
                     </div>
                   </TableCell>
                   
                   <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(rodovia.id)}
-                    >
+                    <Button variant="destructive" size="sm" onClick={() => handleDelete(rodovia.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </TableCell>
-                </TableRow>
-              ))}
-              {rodovias.length === 0 && (
-                <TableRow>
+                </TableRow>)}
+              {rodovias.length === 0 && <TableRow>
                   <TableCell colSpan={2} className="text-center text-muted-foreground">
                     Nenhuma rodovia cadastrada
                   </TableCell>
-                </TableRow>
-              )}
+                </TableRow>}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-    </div>
-  );
+    </div>;
 };
-
 export default RodoviasManager;
