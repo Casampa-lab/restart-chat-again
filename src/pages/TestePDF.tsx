@@ -13,10 +13,12 @@ const TestePDF = () => {
         tipo_nc: "Sinalização Horizontal",
         problema_identificado: "Falta de pintura na faixa central",
         descricao_problema: "Durante inspeção na BR-101, foi identificada ausência de pintura na faixa de divisão de fluxo, no trecho entre km 250 e km 252. A sinalização está desgastada e compromete a segurança dos usuários da via.",
+        justificativa: "Elemento não cadastrado identificado durante vistoria de campo. Sinalização necessária para segurança viária.",
         observacao: "Requer correção urgente",
         km_inicial: 250,
         km_final: 252,
         km_referencia: 251,
+        snv: "BR-101-0250-N",
         rodovia: {
           codigo: "BR-101",
           uf: "SC"
@@ -30,12 +32,13 @@ const TestePDF = () => {
           email_fiscal_execucao: "maria.santos@dnit.gov.br"
         },
         empresa: {
-          nome: "Construtora Exemplo LTDA"
+          nome: "Construtora Exemplo LTDA",
+          contrato_executora: "EXEC/2024/789"
         },
         supervisora: {
           nome_empresa: "Operavia Engenharia",
           contrato: "SUP/2024/456",
-          logo_url: "/logo-operavia.jpg" // Logo de exemplo
+          logo_url: "/logo-operavia.jpg"
         },
         fotos: [
           {

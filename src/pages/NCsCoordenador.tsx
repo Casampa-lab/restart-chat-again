@@ -257,7 +257,7 @@ const NCsCoordenador = () => {
         console.error("❌ Erro ao buscar fotos:", fotosError);
       }
 
-      // Buscar dados da supervisora
+      // Buscar dados da supervisora e contrato
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -271,14 +271,29 @@ const NCsCoordenador = () => {
       if (profile?.supervisora_id) {
         const { data: supervisora } = await supabase
           .from("supervisoras")
-          .select("nome_empresa, logo_url")
+          .select("nome_empresa, logo_url, contrato")
           .eq("id", profile.supervisora_id)
           .single();
         
         if (supervisora) {
           supervisoraData.nome_empresa = supervisora.nome_empresa;
+          supervisoraData.contrato = supervisora.contrato || "N/A";
           supervisoraData.logo_url = supervisora.logo_url || undefined;
         }
+      }
+
+      // O contrato da executora vem do lote
+      const contratoExecutora = (ncCompleta as any).lotes?.contrato || "N/A";
+
+      // Buscar justificativa do elemento pendente se houver
+      let justificativa = "";
+      const { data: elementoPendente } = await supabase
+        .from("elementos_pendentes_aprovacao")
+        .select("justificativa")
+        .limit(1);
+      
+      if (elementoPendente && elementoPendente.length > 0 && elementoPendente[0]?.justificativa) {
+        justificativa = elementoPendente[0].justificativa;
       }
 
       // Preparar dados para o PDF
@@ -288,10 +303,12 @@ const NCsCoordenador = () => {
         tipo_nc: ncCompleta.tipo_nc,
         problema_identificado: ncCompleta.problema_identificado,
         descricao_problema: ncCompleta.descricao_problema || "",
+        justificativa: justificativa,
         observacao: ncCompleta.observacao || "",
         km_inicial: ncCompleta.km_inicial,
         km_final: ncCompleta.km_final,
         km_referencia: ncCompleta.km_referencia,
+        snv: "N/A",
         rodovia: {
           codigo: (ncCompleta as any).rodovias?.codigo || "N/A",
           uf: (ncCompleta as any).rodovias?.uf || "N/A",
@@ -306,6 +323,7 @@ const NCsCoordenador = () => {
         },
         empresa: {
           nome: ncCompleta.empresa,
+          contrato_executora: contratoExecutora,
         },
         supervisora: supervisoraData,
         fotos: fotos || [],

@@ -17,6 +17,7 @@ interface NCData {
   tipo_nc: string;
   problema_identificado: string;
   descricao_problema?: string;
+  justificativa?: string;
   observacao?: string;
   km_inicial?: number;
   km_final?: number;
@@ -36,6 +37,7 @@ interface NCData {
   };
   empresa: {
     nome: string;
+    contrato_executora?: string;
   };
   supervisora: {
     nome_empresa: string;
@@ -103,9 +105,9 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
         : (ncData.km_referencia ? `km ${ncData.km_referencia.toFixed(3)}` : 'N/A'),
      'SNV', ncData.snv || 'N/A'],
     ['Supervisora', ncData.supervisora.nome_empresa.substring(0, 40),
-     'Contrato', ncData.lote.contrato || 'N/A'],
+     'Contrato', ncData.supervisora.contrato || 'N/A'],
     ['Construtora', ncData.empresa.nome.substring(0, 40),
-     'Contrato', ncData.lote.contrato || 'N/A'],
+     'Contrato', ncData.empresa.contrato_executora || 'N/A'],
   ];
 
   autoTable(doc, {
@@ -152,7 +154,7 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
   
-  const descResumida = (ncData.descricao_problema || ncData.problema_identificado).substring(0, 200);
+  const descResumida = (ncData.justificativa || ncData.descricao_problema || ncData.problema_identificado).substring(0, 200);
   const descLines = doc.splitTextToSize(descResumida, pageWidth - 2 * margin);
   doc.text(descLines.slice(0, 3), margin, yPos);
   yPos += 12;
