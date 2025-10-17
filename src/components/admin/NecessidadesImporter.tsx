@@ -1372,7 +1372,10 @@ ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Veja logs de erro acima par
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Importar Projeto</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Upload className="h-5 w-5" />
+          Importar Projeto
+        </CardTitle>
         <CardDescription>
           Importar planilhas do projeto com match automático ao cadastro
         </CardDescription>
