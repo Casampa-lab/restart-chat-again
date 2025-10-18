@@ -63,8 +63,204 @@ interface AdicionarLogosOptions {
   contrato?: string;
 }
 
+interface CabecalhoSUPRAOptions {
+  worksheet: ExcelJS.Worksheet;
+  titulo: string;
+  contrato: string;
+  logoOrgao?: string;
+  logoSupervisora?: string;
+  numColunas: number;
+}
+
 /**
- * Adiciona logos e informações da supervisora no cabeçalho do Excel
+ * Adiciona cabeçalho no padrão SUPRA com logos e título
+ */
+export async function adicionarCabecalhoSUPRA(
+  options: CabecalhoSUPRAOptions
+): Promise<number> {
+  const { worksheet, titulo, contrato, logoOrgao, logoSupervisora, numColunas } = options;
+
+  // Inserir 6 linhas no topo para o cabeçalho
+  worksheet.spliceRows(1, 0, [], [], [], [], [], []);
+
+  // Linhas 1-3: Título principal com logos
+  const ultimaColuna = String.fromCharCode(64 + numColunas);
+  worksheet.mergeCells(`A1:${ultimaColuna}3`);
+  const celulaTitulo = worksheet.getCell("A1");
+  celulaTitulo.value = titulo;
+  celulaTitulo.font = { name: "Arial", size: 14, bold: true };
+  celulaTitulo.alignment = { horizontal: "center", vertical: "middle" };
+  worksheet.getRow(1).height = 20;
+  worksheet.getRow(2).height = 20;
+  worksheet.getRow(3).height = 20;
+
+  // Logo DNIT (esquerda)
+  if (logoOrgao) {
+    try {
+      const ALTURA_LOGO = 50;
+      const base64Image = await urlToBase64(logoOrgao);
+      const base64Data = extractBase64(base64Image);
+      const extension = getImageExtension(base64Image);
+      const dimensoes = await calcularDimensoesLogo(base64Image, ALTURA_LOGO);
+
+      const imageId = worksheet.workbook.addImage({
+        base64: base64Data,
+        extension: extension,
+      });
+
+      worksheet.addImage(imageId, {
+        tl: { col: 0, row: 0 },
+        ext: dimensoes,
+      });
+    } catch (error) {
+      console.error("Erro ao adicionar logo DNIT:", error);
+    }
+  }
+
+  // Logo Supervisora (direita)
+  if (logoSupervisora) {
+    try {
+      const ALTURA_LOGO = 50;
+      const base64Image = await urlToBase64(logoSupervisora);
+      const base64Data = extractBase64(base64Image);
+      const extension = getImageExtension(base64Image);
+      const dimensoes = await calcularDimensoesLogo(base64Image, ALTURA_LOGO);
+
+      const imageId = worksheet.workbook.addImage({
+        base64: base64Data,
+        extension: extension,
+      });
+
+      const colunaDireita = Math.max(0, numColunas - 2);
+      worksheet.addImage(imageId, {
+        tl: { col: colunaDireita, row: 0 },
+        ext: dimensoes,
+      });
+    } catch (error) {
+      console.error("Erro ao adicionar logo Supervisora:", error);
+    }
+  }
+
+  // Linha 4: Contrato
+  worksheet.mergeCells(`A4:${ultimaColuna}4`);
+  const celulaContrato = worksheet.getCell("A4");
+  celulaContrato.value = `Contrato: ${contrato}`;
+  celulaContrato.font = { name: "Arial", size: 11, bold: true };
+  celulaContrato.alignment = { horizontal: "center", vertical: "middle" };
+  worksheet.getRow(4).height = 25;
+
+  // Linha 5: Espaçamento
+  worksheet.getRow(5).height = 10;
+
+  // Linha 6: Retornar número da linha onde devem começar os cabeçalhos
+  return 6;
+}
+
+/**
+ * Formata cabeçalhos das colunas no padrão SUPRA
+ */
+export function formatarCabecalhosColunas(
+  worksheet: ExcelJS.Worksheet,
+  linhaCabecalho: number,
+  cabecalhos: string[]
+): void {
+  const row = worksheet.getRow(linhaCabecalho);
+  row.values = cabecalhos;
+  row.font = { name: "Arial", size: 10, bold: true };
+  row.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+  row.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFE0E0E0" },
+  };
+  row.height = 30;
+
+  // Adicionar bordas
+  row.eachCell((cell) => {
+    cell.border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
+  });
+}
+
+/**
+ * Adiciona rodapé com data de geração e branding
+ */
+export function adicionarRodape(
+  worksheet: ExcelJS.Worksheet,
+  ultimaLinha: number,
+  numColunas: number
+): void {
+  const linhaRodape = ultimaLinha + 1;
+  const row = worksheet.getRow(linhaRodape);
+  
+  // Data de geração (primeira coluna)
+  const mesAno = new Date().toLocaleDateString("pt-BR", { 
+    month: "long", 
+    year: "numeric" 
+  }).toUpperCase();
+  row.getCell(1).value = mesAno;
+  row.getCell(1).font = { name: "Arial", size: 10, bold: true };
+  row.getCell(1).alignment = { horizontal: "left", vertical: "middle" };
+  
+  // Branding (última coluna)
+  row.getCell(numColunas).value = "v4 operavia.online";
+  row.getCell(numColunas).font = { name: "Arial", size: 10, bold: true, color: { argb: "FF0066CC" } };
+  row.getCell(numColunas).alignment = { horizontal: "right", vertical: "middle" };
+  
+  row.height = 25;
+  
+  // Borda superior dupla
+  row.eachCell((cell, colNumber) => {
+    if (colNumber === 1 || colNumber === numColunas) {
+      cell.border = {
+        top: { style: "double" },
+      };
+    }
+  });
+}
+
+/**
+ * Formata células de dados no padrão SUPRA
+ */
+export function formatarCelulasDados(
+  worksheet: ExcelJS.Worksheet,
+  primeiraLinha: number,
+  ultimaLinha: number
+): void {
+  for (let i = primeiraLinha; i <= ultimaLinha; i++) {
+    const row = worksheet.getRow(i);
+    row.height = 20;
+    row.font = { name: "Arial", size: 10 };
+    
+    row.eachCell((cell) => {
+      // Bordas finas
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      
+      // Alinhamento baseado no tipo de valor
+      const value = cell.value;
+      if (typeof value === "number") {
+        cell.alignment = { horizontal: "right", vertical: "middle" };
+      } else if (value && String(value).match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        // Data
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+      } else {
+        cell.alignment = { horizontal: "left", vertical: "middle" };
+      }
+    });
+  }
+}
+
+/**
+ * Adiciona logos e informações da supervisora no cabeçalho do Excel (versão antiga)
  */
 export async function adicionarLogosHeader(
   worksheet: ExcelJS.Worksheet,
@@ -146,7 +342,7 @@ export async function adicionarLogosHeader(
 }
 
 /**
- * Cria workbook Excel com logos e dados
+ * Cria workbook Excel com logos e dados (versão antiga)
  */
 export async function criarWorkbookComLogos(
   dados: any[],

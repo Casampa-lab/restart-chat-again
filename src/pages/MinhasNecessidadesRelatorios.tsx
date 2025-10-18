@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Download, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { criarWorkbookComLogos } from "@/lib/excelLogoHelper";
+import { criarWorkbookComLogos, adicionarCabecalhoSUPRA, formatarCabecalhosColunas, adicionarRodape, formatarCelulasDados } from "@/lib/excelLogoHelper";
 import { useSupervisora } from "@/hooks/useSupervisora";
 import logoOperaVia from "@/assets/logo-operavia.jpg";
 import { format } from "date-fns";
@@ -23,6 +23,149 @@ const TIPOS_RELATORIO = [
   { value: "porticos", label: "Pórticos", tabelaCadastro: "ficha_porticos", tabelaIntervencoes: "ficha_porticos_intervencoes" },
   { value: "defensas", label: "Defensas", tabelaCadastro: "defensas", tabelaIntervencoes: "defensas_intervencoes" },
 ];
+
+const TITULOS_SUPRA: Record<string, string> = {
+  marcas_longitudinais: "1.8.1 - CONDIÇÃO INICIAL DO TRECHO - SH1 - Sinalização Horizontal Longitudinal",
+  tachas: "1.8.2 - CONDIÇÃO INICIAL DO TRECHO - SH2 - Sinalização Horizontal - Tachas",
+  marcas_transversais: "1.8.3 - CONDIÇÃO INICIAL DO TRECHO - SH3 - Sinalização Horizontal - Transversal, Zebrados e Legendas",
+  cilindros: "1.8.4 - CONDIÇÃO INICIAL DO TRECHO - SH4 - Dispositivos Auxiliares - Cilindros",
+  placas: "1.8.5 - CONDIÇÃO INICIAL DO TRECHO - SV1 - Sinalização Vertical - Placas",
+  porticos: "1.8.6 - CONDIÇÃO INICIAL DO TRECHO - SV2 - Sinalização Vertical - Pórticos, Bandeiras e Semipórticos",
+  defensas: "1.8.7 - CONDIÇÃO INICIAL DO TRECHO - DS - Dispositivos de Segurança - Defensas",
+};
+
+const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string }>> = {
+  marcas_longitudinais: [
+    { field: "rodovia", header: "BR" },
+    { field: "snv", header: "SNV" },
+    { field: "codigo", header: "Código" },
+    { field: "posicao", header: "Posição" },
+    { field: "km_inicial", header: "Km Inicial" },
+    { field: "latitude_inicial", header: "Latitude Inicial" },
+    { field: "longitude_inicial", header: "Longitude Inicial" },
+    { field: "km_final", header: "Km Final" },
+    { field: "latitude_final", header: "Latitude Final" },
+    { field: "longitude_final", header: "Longitude Final" },
+    { field: "tipo_demarcacao", header: "Tipo Demarcação" },
+    { field: "cor", header: "Cor" },
+    { field: "largura_cm", header: "Largura (cm)" },
+    { field: "espessura_cm", header: "Espessura (cm)" },
+    { field: "traco_m", header: "Traço (m)" },
+    { field: "espacamento_m", header: "Espaçamento (m)" },
+    { field: "material", header: "Material" },
+    { field: "extensao_metros", header: "Extensão (m)" },
+    { field: "area_m2", header: "Área (m²)" },
+    { field: null, header: "Serviço" },
+  ],
+  tachas: [
+    { field: "rodovia", header: "BR" },
+    { field: "snv", header: "SNV" },
+    { field: "tipo_tacha", header: "Tipo" },
+    { field: "lado", header: "Lado" },
+    { field: "km_inicial", header: "Km Inicial" },
+    { field: "latitude_inicial", header: "Latitude Inicial" },
+    { field: "longitude_inicial", header: "Longitude Inicial" },
+    { field: "km_final", header: "Km Final" },
+    { field: "latitude_final", header: "Latitude Final" },
+    { field: "longitude_final", header: "Longitude Final" },
+    { field: "espacamento_m", header: "Espaçamento (m)" },
+    { field: "cor", header: "Cor" },
+    { field: "quantidade", header: "Quantidade" },
+    { field: "material", header: "Material" },
+    { field: null, header: "Serviço" },
+  ],
+  marcas_transversais: [
+    { field: "rodovia", header: "BR" },
+    { field: "snv", header: "SNV" },
+    { field: "sigla", header: "Sigla" },
+    { field: "tipo_inscricao", header: "Tipo" },
+    { field: "km_inicial", header: "Km Inicial" },
+    { field: "latitude_inicial", header: "Latitude Inicial" },
+    { field: "longitude_inicial", header: "Longitude Inicial" },
+    { field: "km_final", header: "Km Final" },
+    { field: "latitude_final", header: "Latitude Final" },
+    { field: "longitude_final", header: "Longitude Final" },
+    { field: "cor", header: "Cor" },
+    { field: "dimensoes", header: "Dimensões" },
+    { field: "espessura_mm", header: "Espessura (mm)" },
+    { field: "material_utilizado", header: "Material" },
+    { field: "area_m2", header: "Área (m²)" },
+    { field: null, header: "Serviço" },
+  ],
+  cilindros: [
+    { field: "rodovia", header: "BR" },
+    { field: "snv", header: "SNV" },
+    { field: "cor_corpo", header: "Cor do Corpo" },
+    { field: "cor_refletivo", header: "Cor do Refletivo" },
+    { field: "tipo_refletivo", header: "Tipo de Refletivo" },
+    { field: "local_implantacao", header: "Local de Implantação" },
+    { field: "km_inicial", header: "Km Inicial" },
+    { field: "latitude_inicial", header: "Latitude Inicial" },
+    { field: "longitude_inicial", header: "Longitude Inicial" },
+    { field: "km_final", header: "Km Final" },
+    { field: "latitude_final", header: "Latitude Final" },
+    { field: "longitude_final", header: "Longitude Final" },
+    { field: "espacamento_m", header: "Espaçamento (m)" },
+    { field: "quantidade", header: "Quantidade" },
+    { field: "extensao_km", header: "Extensão (km)" },
+    { field: null, header: "Serviço" },
+  ],
+  placas: [
+    { field: "rodovia", header: "BR" },
+    { field: "snv", header: "SNV" },
+    { field: "tipo", header: "Tipo de placa" },
+    { field: "codigo", header: "Código da placa" },
+    { field: "velocidade", header: "Velocidade" },
+    { field: "lado", header: "Lado" },
+    { field: "posicao", header: "Posição" },
+    { field: "km", header: "Km" },
+    { field: "latitude_inicial", header: "Latitude" },
+    { field: "longitude_inicial", header: "Longitude" },
+    { field: "detalhamento_pagina", header: "Detalhamento (página)" },
+    { field: "suporte", header: "Tipo de Suporte" },
+    { field: "qtde_suporte", header: "Quantidade de Suporte" },
+    { field: "tipo_secao_suporte", header: "Tipo de Seção de Suporte" },
+    { field: "secao_suporte_mm", header: "Seção do Suporte (mm)" },
+    { field: "substrato", header: "Tipo de Substrato" },
+    { field: "si_sinal_impresso", header: "SI (Sinal Impresso)" },
+    { field: "tipo_pelicula_fundo", header: "Tipo (película fundo)" },
+    { field: "cor_pelicula_fundo", header: "Cor (película fundo)" },
+    { field: "retro_pelicula_fundo", header: "Retrorrefletância (película fundo)" },
+    { field: "tipo_pelicula_legenda_orla", header: "Tipo (película legenda/orla)" },
+    { field: "cor_pelicula_legenda_orla", header: "Cor (película legenda/orla)" },
+    { field: "retro_pelicula_legenda_orla", header: "Retrorrefletância (película legenda/orla)" },
+    { field: "dimensoes_mm", header: "Dimensões (mm)" },
+    { field: "area_m2", header: "Área (m²)" },
+    { field: "link_fotografia", header: "Link da Fotografia" },
+    { field: null, header: "Serviço" },
+  ],
+  porticos: [
+    { field: "rodovia", header: "BR" },
+    { field: "snv", header: "SNV" },
+    { field: "tipo", header: "Tipo de Dispositivo" },
+    { field: "km", header: "Km" },
+    { field: "latitude_inicial", header: "Latitude" },
+    { field: "longitude_inicial", header: "Longitude" },
+    { field: "vao_horizontal_m", header: "Vão Horizontal (m)" },
+    { field: "altura_livre_m", header: "Altura Livre (m)" },
+    { field: "descricao", header: "Descrição" },
+    { field: null, header: "Serviço" },
+  ],
+  defensas: [
+    { field: "rodovia", header: "BR" },
+    { field: "snv", header: "SNV" },
+    { field: "tipo_defensa", header: "Tipo de Dispositivo" },
+    { field: "lado", header: "Lado" },
+    { field: "km_inicial", header: "Km Inicial" },
+    { field: "latitude_inicial", header: "Latitude Inicial" },
+    { field: "longitude_inicial", header: "Longitude Inicial" },
+    { field: "km_final", header: "Km Final" },
+    { field: "latitude_final", header: "Latitude Final" },
+    { field: "longitude_final", header: "Longitude Final" },
+    { field: "extensao_metros", header: "Extensão (m)" },
+    { field: null, header: "Serviço" },
+  ],
+};
 
 export default function MinhasNecessidadesRelatorios() {
   const navigate = useNavigate();
@@ -353,6 +496,8 @@ export default function MinhasNecessidadesRelatorios() {
   const gerarRelatorioInicial = async () => {
     try {
       setGerando(true);
+      toast.info("Gerando relatório SUPRA...");
+      
       const tipoConfig = TIPOS_RELATORIO.find(t => t.value === tipoSelecionado);
       if (!tipoConfig) return;
 
@@ -374,147 +519,258 @@ export default function MinhasNecessidadesRelatorios() {
           lote: lr.lotes?.numero || "",
           rodovia: lr.rodovias?.codigo || "",
         }));
-      } else {
-        // Buscar dados do CADASTRO normal
-        const orderByColumn = (tipoSelecionado === "placas" || tipoSelecionado === "porticos") ? "km" : "km_inicial";
-        const { data, error } = await supabase
-          .from(tipoConfig.tabelaCadastro as any)
-          .select("*")
-          .order(orderByColumn);
 
-        if (error) throw error;
-        
-        // Buscar lotes e rodovias separadamente para mapear os nomes
-        const { data: lotes } = await supabase.from("lotes").select("id, numero");
-        const { data: rodovias } = await supabase.from("rodovias").select("id, codigo");
-        
-        // Criar mapa de lotes e rodovias
-        const lotesMap = new Map((lotes || []).map(l => [l.id, l.numero]));
-        const rodoviasMap = new Map((rodovias || []).map(r => [r.id, r.codigo]));
-        
-        // Transformar dados: remover IDs técnicos e adicionar nomes legíveis
-        cadastro = (data || []).map((item: any) => {
-          const { id, user_id, lote_id, rodovia_id, created_at, updated_at, enviado_coordenador, ...resto } = item;
-          const rodovia = rodoviasMap.get(rodovia_id);
-          return {
-            lote: lotesMap.get(lote_id) || "",
-            rodovia: rodovia || "",
-            ...resto,
-          };
+        // Gerar Excel simples para Dados das Rodovias (sem formatação SUPRA)
+        const workbook = await criarWorkbookComLogos(cadastro, "Dados", {
+          logoSupervisoraUrl: supervisora?.logo_url,
+          logoOrgaoUrl: supervisora?.usar_logo_orgao_relatorios 
+            ? supervisora?.logo_orgao_fiscalizador_url 
+            : null,
+          nomeEmpresa: supervisora?.nome_empresa,
+          contrato: supervisora?.contrato,
         });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { 
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+        });
+        const nomeArquivo = `Dados_Rodovias_${new Date().toISOString().split("T")[0]}.xlsx`;
+        
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = nomeArquivo;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        toast.success("Relatório gerado com sucesso!");
+        return;
       }
+
+      // Para outros tipos, usar formatação SUPRA
+      const orderByColumn = (tipoSelecionado === "placas" || tipoSelecionado === "porticos") ? "km" : "km_inicial";
+      const { data, error } = await supabase
+        .from(tipoConfig.tabelaCadastro as any)
+        .select("*")
+        .order(orderByColumn);
+
+      if (error) throw error;
+      
+      // Buscar lotes e rodovias separadamente para mapear os nomes
+      const { data: lotes } = await supabase.from("lotes").select("id, numero");
+      const { data: rodovias } = await supabase.from("rodovias").select("id, codigo");
+      
+      const lotesMap = new Map((lotes || []).map(l => [l.id, l.numero]));
+      const rodoviasMap = new Map((rodovias || []).map(r => [r.id, r.codigo]));
+      
+      // Transformar dados
+      cadastro = (data || []).map((item: any) => {
+        const { id, user_id, lote_id, rodovia_id, created_at, updated_at, enviado_coordenador, ...resto } = item;
+        const rodovia = rodoviasMap.get(rodovia_id);
+        return {
+          lote: lotesMap.get(lote_id) || "",
+          rodovia: rodovia || "",
+          ...resto,
+        };
+      });
 
       if (!cadastro || cadastro.length === 0) {
         toast.warning("Nenhum dado de cadastro encontrado para este tipo");
         return;
       }
 
-      // Adicionar coluna SERVIÇO vazia (exceto para Dados das Rodovias)
-      const dadosComServico = tipoSelecionado === "dados_rodovias" 
-        ? cadastro 
-        : (cadastro as any[]).map((item: any) => ({
-            ...item,
-            servico: "", // VAZIO no relatório inicial
-          }));
+      // Criar workbook com formatação SUPRA
+      const ExcelJS = (await import("exceljs")).default;
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("CADASTRO INICIAL");
 
-      // Gerar Excel com logos
-      const workbook = await criarWorkbookComLogos(dadosComServico, "CADASTRO INICIAL", {
-        logoSupervisoraUrl: supervisora?.logo_url,
-        logoOrgaoUrl: supervisora?.usar_logo_orgao_relatorios 
-          ? supervisora?.logo_orgao_fiscalizador_url 
-          : null,
-        nomeEmpresa: supervisora?.nome_empresa,
-        contrato: supervisora?.contrato,
+      // Obter mapeamento de campos SUPRA
+      const camposSUPRA = CAMPOS_SUPRA[tipoSelecionado] || [];
+      const cabecalhos = camposSUPRA.map(c => c.header);
+      
+      // Adicionar cabeçalho SUPRA
+      const tituloSUPRA = TITULOS_SUPRA[tipoSelecionado] || tipoConfig.label;
+      const contrato = supervisora?.contrato || "Contrato não informado";
+      const logoDNIT = supervisora?.usar_logo_orgao_relatorios 
+        ? supervisora?.logo_orgao_fiscalizador_url 
+        : "/logo-dnit.jpg";
+      const logoSupervisora = supervisora?.logo_url || null;
+
+      const linhaInicioDados = await adicionarCabecalhoSUPRA({
+        worksheet,
+        titulo: tituloSUPRA,
+        contrato,
+        logoOrgao: logoDNIT,
+        logoSupervisora,
+        numColunas: cabecalhos.length,
       });
 
-      // NOVA: Buscar intervenções se houver tabela de intervenções E filtro de data
+      // Formatar cabeçalhos das colunas
+      formatarCabecalhosColunas(worksheet, linhaInicioDados, cabecalhos);
+
+      // Adicionar dados
+      const primeiraLinhaDados = linhaInicioDados + 1;
+      cadastro.forEach((item: any, index: number) => {
+        const row = worksheet.getRow(primeiraLinhaDados + index);
+        const valores = camposSUPRA.map(campo => {
+          if (campo.field === null) return ""; // Coluna SERVIÇO vazia
+          
+          const valor = item[campo.field];
+          
+          // Formatação de valores
+          if (valor === null || valor === undefined) return "";
+          
+          if (typeof valor === "number") {
+            // Coordenadas: 6 decimais
+            if (campo.field.includes("latitude") || campo.field.includes("longitude")) {
+              return Number(valor.toFixed(6));
+            }
+            // KM: 3 decimais
+            if (campo.field.includes("km") && !campo.field.includes("extensao")) {
+              return Number(valor.toFixed(3));
+            }
+            // Área: 2 decimais
+            if (campo.field.includes("area_m2")) {
+              return Number(valor.toFixed(2));
+            }
+            return valor;
+          }
+          
+          // Datas
+          if (campo.field.includes("data") && valor) {
+            try {
+              return format(new Date(valor), "dd/MM/yyyy");
+            } catch {
+              return valor;
+            }
+          }
+          
+          return valor;
+        });
+        
+        row.values = valores;
+      });
+
+      const ultimaLinhaDados = primeiraLinhaDados + cadastro.length - 1;
+
+      // Formatar células de dados
+      formatarCelulasDados(worksheet, primeiraLinhaDados, ultimaLinhaDados);
+
+      // Adicionar rodapé
+      adicionarRodape(worksheet, ultimaLinhaDados, cabecalhos.length);
+
+      // Auto-ajustar largura das colunas
+      worksheet.columns.forEach((column, index) => {
+        let maxLength = cabecalhos[index]?.length || 10;
+        column.eachCell?.({ includeEmpty: false }, cell => {
+          const cellLength = cell.value ? String(cell.value).length : 10;
+          if (cellLength > maxLength) maxLength = cellLength;
+        });
+        column.width = Math.min(Math.max(maxLength + 2, 12), 50);
+      });
+
+      // MANUTENÇÃO EXECUTADA (se houver filtro de datas)
       if (tipoConfig.tabelaIntervencoes && (dataInicio || dataFim)) {
         let query = supabase
           .from(tipoConfig.tabelaIntervencoes as any)
           .select("*")
           .order("data_intervencao", { ascending: false });
 
-        if (dataInicio) {
-          query = query.gte("data_intervencao", dataInicio);
-        }
-        if (dataFim) {
-          query = query.lte("data_intervencao", dataFim);
-        }
+        if (dataInicio) query = query.gte("data_intervencao", dataInicio);
+        if (dataFim) query = query.lte("data_intervencao", dataFim);
 
         const { data: intervencoesRaw, error: erroIntervencoes } = await query;
 
         if (!erroIntervencoes && intervencoesRaw && intervencoesRaw.length > 0) {
-          // Transformar intervenções: remover IDs técnicos
-          const intervencoes = intervencoesRaw.map((item: any) => {
-            const { id, created_at, ...resto } = item;
-            return resto;
-          });
-          
-          // Criar aba de MANUTENÇÃO EXECUTADA
           const manutencaoSheet = workbook.addWorksheet("MANUTENÇÃO EXECUTADA");
           
-          // Headers baseados nas colunas das intervenções
-          const headers = Object.keys(intervencoes[0]);
-          manutencaoSheet.addRow(headers);
-
-          // Adicionar dados
-          intervencoes.forEach((int: any) => {
-            const row = headers.map(h => {
-              const value = int[h];
-              // Formatar datas
-              if (h.includes("data") && value) {
-                return format(new Date(value), "dd/MM/yyyy");
-              }
-              // Destacar serviços fora do plano
-              if (h === "fora_plano_manutencao") {
-                return value ? "⚠️ SIM" : "Não";
-              }
-              return value;
-            });
-            manutencaoSheet.addRow(row);
+          // Mesmo cabeçalho SUPRA
+          const linhaInicioManutencao = await adicionarCabecalhoSUPRA({
+            worksheet: manutencaoSheet,
+            titulo: tituloSUPRA.replace("CONDIÇÃO INICIAL", "MANUTENÇÃO EXECUTADA"),
+            contrato,
+            logoOrgao: logoDNIT,
+            logoSupervisora,
+            numColunas: cabecalhos.length,
           });
 
-          // Aplicar estilo nas linhas "fora do plano"
-          intervencoes.forEach((int: any, index: number) => {
+          formatarCabecalhosColunas(manutencaoSheet, linhaInicioManutencao, cabecalhos);
+
+          // Adicionar dados das intervenções
+          const primeiraLinhaManutencao = linhaInicioManutencao + 1;
+          intervencoesRaw.forEach((int: any, index: number) => {
+            const row = manutencaoSheet.getRow(primeiraLinhaManutencao + index);
+            const valores = camposSUPRA.map(campo => {
+              if (campo.field === null) return int.motivo || ""; // Coluna SERVIÇO preenchida
+              
+              const valor = int[campo.field];
+              if (valor === null || valor === undefined) return "";
+              
+              if (typeof valor === "number") {
+                if (campo.field.includes("latitude") || campo.field.includes("longitude")) {
+                  return Number(valor.toFixed(6));
+                }
+                if (campo.field.includes("km") && !campo.field.includes("extensao")) {
+                  return Number(valor.toFixed(3));
+                }
+                if (campo.field.includes("area_m2")) {
+                  return Number(valor.toFixed(2));
+                }
+                return valor;
+              }
+              
+              if (campo.field.includes("data") && valor) {
+                try {
+                  return format(new Date(valor), "dd/MM/yyyy");
+                } catch {
+                  return valor;
+                }
+              }
+              
+              return valor;
+            });
+            
+            row.values = valores;
+
+            // Destacar linhas fora do plano
             if (int.fora_plano_manutencao) {
-              const rowNum = index + 2; // +2 porque header é row 1 e dados começam em 2
-              const row = manutencaoSheet.getRow(rowNum);
               row.eachCell((cell) => {
                 cell.fill = {
                   type: "pattern",
                   pattern: "solid",
-                  fgColor: { argb: "FFFFF3CD" }, // amarelo claro
+                  fgColor: { argb: "FFFFF3CD" },
                 };
                 cell.font = {
+                  name: "Arial",
+                  size: 10,
                   bold: true,
-                  color: { argb: "FF856404" }, // laranja escuro
                 };
               });
             }
           });
+
+          const ultimaLinhaManutencao = primeiraLinhaManutencao + intervencoesRaw.length - 1;
+          formatarCelulasDados(manutencaoSheet, primeiraLinhaManutencao, ultimaLinhaManutencao);
+          adicionarRodape(manutencaoSheet, ultimaLinhaManutencao, cabecalhos.length);
+
+          // Auto-ajustar colunas
+          manutencaoSheet.columns.forEach((column, index) => {
+            let maxLength = cabecalhos[index]?.length || 10;
+            column.eachCell?.({ includeEmpty: false }, cell => {
+              const cellLength = cell.value ? String(cell.value).length : 10;
+              if (cellLength > maxLength) maxLength = cellLength;
+            });
+            column.width = Math.min(Math.max(maxLength + 2, 12), 50);
+          });
         }
       }
-
-      // Sheet DIC (dicionário)
-      const dicData = [
-        { Campo: "servico", Descrição: "Tipo de serviço (Inclusão/Substituição/Remoção)" },
-        { Campo: "km_inicial", Descrição: "Quilômetro inicial" },
-        { Campo: "km_final", Descrição: "Quilômetro final" },
-        { Campo: "fora_plano_manutencao", Descrição: "Serviço executado fora do plano de manutenção" },
-        { Campo: "justificativa_fora_plano", Descrição: "Justificativa para serviço fora do plano" },
-      ];
-      const dicSheet = workbook.addWorksheet("DIC");
-      dicSheet.addRow(Object.keys(dicData[0]));
-      dicData.forEach(row => {
-        dicSheet.addRow(Object.values(row));
-      });
 
       // Download
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { 
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
       });
-      const nomeArquivo = `1.8.X_CONDICAO_INICIAL_${tipoConfig.label}_${new Date().toISOString().split("T")[0]}.xlsx`;
+      const nomeArquivo = `Relatorio_SUPRA_${tipoConfig.label}_${new Date().toISOString().split("T")[0]}.xlsx`;
       
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -523,9 +779,9 @@ export default function MinhasNecessidadesRelatorios() {
       link.click();
       window.URL.revokeObjectURL(url);
 
-      toast.success("Relatório Inicial gerado com sucesso!");
+      toast.success("Relatório SUPRA gerado com sucesso!");
     } catch (error: any) {
-      console.error("Erro ao gerar relatório inicial:", error);
+      console.error("Erro ao gerar relatório:", error);
       toast.error("Erro ao gerar relatório: " + error.message);
     } finally {
       setGerando(false);
