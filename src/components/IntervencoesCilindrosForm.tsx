@@ -19,6 +19,9 @@ const formSchema = z.object({
   motivo: z.string().min(1, "Motivo é obrigatório"),
   km_inicial: z.string().min(1, "km Inicial é obrigatório"),
   km_final: z.string().min(1, "km Final é obrigatório"),
+  local_implantacao: z.string().optional(),
+  espacamento_m: z.string().optional(),
+  extensao_km: z.string().optional(),
   cor_corpo: z.string().min(1, "Cor do corpo é obrigatória"),
   cor_refletivo: z.string().optional(),
   tipo_refletivo: z.string().optional(),
@@ -86,6 +89,9 @@ export function IntervencoesCilindrosForm({
       motivo: "",
       km_inicial: "",
       km_final: "",
+      local_implantacao: "",
+      espacamento_m: "",
+      extensao_km: "",
       cor_corpo: "",
       cor_refletivo: "",
       tipo_refletivo: "",
@@ -106,6 +112,9 @@ export function IntervencoesCilindrosForm({
         motivo: "",
         km_inicial: cilindroSelecionado.km_inicial?.toString() || "",
         km_final: cilindroSelecionado.km_final?.toString() || "",
+        local_implantacao: (cilindroSelecionado as any).local_implantacao || "",
+        espacamento_m: (cilindroSelecionado as any).espacamento_m?.toString() || "",
+        extensao_km: (cilindroSelecionado as any).extensao_km?.toString() || "",
         cor_corpo: (cilindroSelecionado as any).cor_corpo || "",
         cor_refletivo: (cilindroSelecionado as any).cor_refletivo || "",
         tipo_refletivo: (cilindroSelecionado as any).tipo_refletivo || "",
@@ -147,10 +156,18 @@ export function IntervencoesCilindrosForm({
           ficha_cilindros_id: cilindroSelecionado.id,
           data_intervencao: data.data_intervencao,
           motivo: data.motivo,
+          km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
+          km_final: data.km_final ? parseFloat(data.km_final) : null,
+          snv: data.snv || null,
+          local_implantacao: data.local_implantacao || null,
+          espacamento_m: data.espacamento_m ? parseFloat(data.espacamento_m) : null,
+          extensao_km: data.extensao_km ? parseFloat(data.extensao_km) : null,
           cor_corpo: data.cor_corpo || null,
           cor_refletivo: data.cor_refletivo || null,
           tipo_refletivo: data.tipo_refletivo || null,
           quantidade: data.quantidade ? parseInt(data.quantidade) : null,
+          latitude: data.latitude ? parseFloat(data.latitude) : null,
+          longitude: data.longitude ? parseFloat(data.longitude) : null,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
         });
@@ -441,6 +458,68 @@ export function IntervencoesCilindrosForm({
                         <Input 
                           type="number" 
                           placeholder="Ex: 100" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="local_implantacao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Local de Implantação</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Eixo">Eixo</SelectItem>
+                          <SelectItem value="Bordo">Bordo</SelectItem>
+                          <SelectItem value="Canteiro Central">Canteiro Central</SelectItem>
+                          <SelectItem value="Acostamento">Acostamento</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="espacamento_m"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Espaçamento (m)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="0.01" 
+                          placeholder="Ex: 4.00" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="extensao_km"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Extensão (km)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="0.001" 
+                          placeholder="Ex: 0.500" 
                           {...field} 
                         />
                       </FormControl>

@@ -776,17 +776,23 @@ export type Database = {
           created_at: string
           data_aprovacao_coordenador: string | null
           data_intervencao: string
+          espacamento_m: number | null
+          extensao_km: number | null
           ficha_cilindros_id: string
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
           id: string
           justificativa_fora_plano: string | null
+          km_final: number | null
+          km_inicial: number | null
           latitude: number | null
+          local_implantacao: string | null
           longitude: number | null
           motivo: string
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
           quantidade: number | null
+          snv: string | null
           tipo_refletivo: string | null
         }
         Insert: {
@@ -797,17 +803,23 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
+          espacamento_m?: number | null
+          extensao_km?: number | null
           ficha_cilindros_id: string
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
           latitude?: number | null
+          local_implantacao?: string | null
           longitude?: number | null
           motivo: string
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
+          snv?: string | null
           tipo_refletivo?: string | null
         }
         Update: {
@@ -818,17 +830,23 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
+          espacamento_m?: number | null
+          extensao_km?: number | null
           ficha_cilindros_id?: string
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
           latitude?: number | null
+          local_implantacao?: string | null
           longitude?: number | null
           motivo?: string
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
+          snv?: string | null
           tipo_refletivo?: string | null
         }
         Relationships: []
