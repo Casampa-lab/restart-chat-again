@@ -321,87 +321,87 @@ export function IntervencoesSVForm({
                     )}
                   />
 
-                  <div className="grid md:grid-cols-[1fr_140px] gap-8 items-start">
-                    <FormField
-                      control={form.control}
-                      name="tipo_placa"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo de Placa *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione o tipo" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Regulamentação">Regulamentação</SelectItem>
-                              <SelectItem value="Advertência">Advertência</SelectItem>
-                              <SelectItem value="Indicação">Indicação</SelectItem>
-                              <SelectItem value="Outros">Outros</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="md:pt-8 flex justify-end items-start">
-                      <PlacaPreview codigo={codigoAtual} size="large" showLabel />
-                    </div>
-                  </div>
-
                   <FormField
                     control={form.control}
-                    name="codigo_placa"
+                    name="tipo_placa"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Código da Placa *</FormLabel>
-                        {form.watch("tipo_placa") === "Outros" ? (
+                        <FormLabel>Tipo de Placa *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <Input placeholder="Digite o código" {...field} />
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o tipo" />
+                            </SelectTrigger>
                           </FormControl>
-                        ) : (
-                          <Select 
-                            onValueChange={field.onChange} 
-                            value={field.value}
-                            disabled={codigosFiltrados.length === 0}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full">
-                                {field.value ? (
-                                  <span className="truncate">
-                                    {(() => {
-                                      const placa = codigosFiltrados.find(p => p.codigo === field.value);
-                                      const texto = placa ? `${placa.codigo} - ${placa.nome}` : field.value;
-                                      return texto.length > 60 ? texto.substring(0, 57) + "..." : texto;
-                                    })()}
-                                  </span>
-                                ) : (
-                                  <SelectValue placeholder={
-                                    form.watch("tipo_placa") 
-                                      ? "Selecione o código" 
-                                      : "Selecione primeiro o tipo"
-                                  } />
-                                )}
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="max-h-[300px]" align="start">
-                              {codigosFiltrados.map((placa) => (
-                                <SelectItem key={placa.codigo} value={placa.codigo} className="cursor-pointer">
-                                  <div className="flex items-center gap-2 py-1">
-                                    <PlacaPreview codigo={placa.codigo} size="small" />
-                                    <span className="text-sm leading-tight">{placa.codigo} - {placa.nome}</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
+                          <SelectContent>
+                            <SelectItem value="Regulamentação">Regulamentação</SelectItem>
+                            <SelectItem value="Advertência">Advertência</SelectItem>
+                            <SelectItem value="Indicação">Indicação</SelectItem>
+                            <SelectItem value="Outros">Outros</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  <div className="flex justify-end -mt-2 mb-4">
+                    <PlacaPreview codigo={codigoAtual} size="large" showLabel />
+                  </div>
+
+                  <div className="md:max-w-[85%]">
+                    <FormField
+                      control={form.control}
+                      name="codigo_placa"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Código da Placa *</FormLabel>
+                          {form.watch("tipo_placa") === "Outros" ? (
+                            <FormControl>
+                              <Input placeholder="Digite o código" {...field} />
+                            </FormControl>
+                          ) : (
+                            <Select 
+                              onValueChange={field.onChange} 
+                              value={field.value}
+                              disabled={codigosFiltrados.length === 0}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="w-full">
+                                  {field.value ? (
+                                    <span className="truncate">
+                                      {(() => {
+                                        const placa = codigosFiltrados.find(p => p.codigo === field.value);
+                                        const texto = placa ? `${placa.codigo} - ${placa.nome}` : field.value;
+                                        return texto.length > 60 ? texto.substring(0, 57) + "..." : texto;
+                                      })()}
+                                    </span>
+                                  ) : (
+                                    <SelectValue placeholder={
+                                      form.watch("tipo_placa") 
+                                        ? "Selecione o código" 
+                                        : "Selecione primeiro o tipo"
+                                    } />
+                                  )}
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="max-h-[300px]" align="start">
+                                {codigosFiltrados.map((placa) => (
+                                  <SelectItem key={placa.codigo} value={placa.codigo} className="cursor-pointer">
+                                    <div className="flex items-center gap-2 py-1">
+                                      <PlacaPreview codigo={placa.codigo} size="small" />
+                                      <span className="text-sm leading-tight">{placa.codigo} - {placa.nome}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <div className="md:col-span-2 space-y-2">
                     <FormLabel>Coordenadas GPS</FormLabel>
