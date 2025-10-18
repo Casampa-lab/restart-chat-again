@@ -16,6 +16,8 @@ const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
   km: z.string().min(1, "KM é obrigatório"),
+  snv: z.string().optional(),
+  descricao: z.string().optional(),
   tipo: z.string().optional(),
   altura_livre_m: z.string().optional(),
   vao_horizontal_m: z.string().optional(),
@@ -142,9 +144,14 @@ export function IntervencoesPorticosForm({
           ficha_porticos_id: porticoSelecionado.id,
           data_intervencao: data.data_intervencao,
           motivo: data.motivo,
+          km: data.km ? parseFloat(data.km) : null,
+          snv: data.snv || null,
+          descricao: data.descricao || null,
           tipo: data.tipo || null,
           altura_livre_m: data.altura_livre_m ? parseFloat(data.altura_livre_m) : null,
           vao_horizontal_m: data.vao_horizontal_m ? parseFloat(data.vao_horizontal_m) : null,
+          latitude: data.latitude ? parseFloat(data.latitude) : null,
+          longitude: data.longitude ? parseFloat(data.longitude) : null,
           observacao: data.observacao || null,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
@@ -226,6 +233,20 @@ export function IntervencoesPorticosForm({
                     <FormLabel>KM *</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.001" placeholder="0.000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="snv"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SNV (Segmento Nacional de Vias)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: BR-040-200-350" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -386,6 +407,24 @@ export function IntervencoesPorticosForm({
 
             {/* SEÇÃO 4: Observações e Justificativas */}
             <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="descricao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descrição do Pórtico</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Descrição adicional sobre o pórtico..."
+                        className="min-h-[80px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="observacao"

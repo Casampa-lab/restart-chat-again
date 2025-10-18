@@ -1768,17 +1768,20 @@ export type Database = {
           created_at: string
           data_aprovacao_coordenador: string | null
           data_intervencao: string
+          descricao: string | null
           ficha_porticos_id: string
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
           id: string
           justificativa_fora_plano: string | null
+          km: number | null
           latitude: number | null
           longitude: number | null
           motivo: string
           observacao: string | null
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
+          snv: string | null
           tipo: string | null
           vao_horizontal_m: number | null
         }
@@ -1789,17 +1792,20 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
+          descricao?: string | null
           ficha_porticos_id: string
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km?: number | null
           latitude?: number | null
           longitude?: number | null
           motivo: string
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          snv?: string | null
           tipo?: string | null
           vao_horizontal_m?: number | null
         }
@@ -1810,17 +1816,20 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
+          descricao?: string | null
           ficha_porticos_id?: string
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km?: number | null
           latitude?: number | null
           longitude?: number | null
           motivo?: string
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          snv?: string | null
           tipo?: string | null
           vao_horizontal_m?: number | null
         }
