@@ -57,7 +57,7 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
   tachas: [
     { field: "rodovia", header: "BR" },
     { field: "snv", header: "SNV" },
-    { field: "refletivo", header: "Descrição" },
+    { field: "descricao", header: "Descrição" },
     { field: "corpo", header: "Corpo" },
     { field: "tipo_refletivo", header: "Tipo do refletivo" },
     { field: "cor_refletivo", header: "Cor do refletivo" },
@@ -196,6 +196,7 @@ const obterDadosDicionario = (tipo: string, camposSUPRA: any[]) => {
     substrato: "Material do substrato",
     tipo_defensa: "Tipo de defensa metálica",
     tipo_inscricao: "Tipo de inscrição viária",
+    descricao: "Descrição do dispositivo (Bidirecional/Monodirecional)",
     refletivo: "Descrição do dispositivo (Bidirecional/Monodirecional)",
     tipo_refletivo: "Tipo do refletivo utilizado conforme NBR 14.644/2021",
     corpo: "Material do corpo da tacha",
