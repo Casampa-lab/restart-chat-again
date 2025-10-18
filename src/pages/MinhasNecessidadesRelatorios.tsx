@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { criarWorkbookComLogos, adicionarCabecalhoSUPRA, formatarCabecalhosColunas, adicionarRodape, formatarCelulasDados } from "@/lib/excelLogoHelper";
 import { useSupervisora } from "@/hooks/useSupervisora";
-import logoOperaVia from "@/assets/logo-operavia.jpg";
+import logoOperaVia from "@/assets/logo-operavia.png";
 import { format } from "date-fns";
 
 const TIPOS_RELATORIO = [

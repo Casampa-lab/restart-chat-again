@@ -36,7 +36,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import logoOperaVia from "@/assets/logo-operavia.jpg";
+import logoOperaVia from "@/assets/logo-operavia.png";
 
 interface IntervencaoSV {
   id: string;

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, TrendingUp, MapPin, FileCheck, Calendar } from "lucide-react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
-import logoOperaVia from "@/assets/logo-operavia.jpg";
+import logoOperaVia from "@/assets/logo-operavia.png";
 
 const TIPOS_NECESSIDADES = [
   { value: "cilindros", label: "Cilindros Delimitadores" },

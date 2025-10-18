@@ -28,7 +28,7 @@ import { LimparReconciliacoesInconsistentes } from "@/components/admin/LimparRec
 import { LimparReconciliacoesOrfas } from "@/components/admin/LimparReconciliacoesOrfas";
 import { ResetDatabaseButton } from "@/components/admin/ResetDatabaseButton";
 
-import logoOperaVia from "@/assets/logo-operavia.jpg";
+import logoOperaVia from "@/assets/logo-operavia.png";
 
 const Admin = () => {
   const navigate = useNavigate();

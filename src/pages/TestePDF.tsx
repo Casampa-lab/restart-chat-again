@@ -38,7 +38,7 @@ const TestePDF = () => {
         supervisora: {
           nome_empresa: "Operavia Engenharia",
           contrato: "SUP/2024/456",
-          logo_url: "/logo-operavia.jpg"
+          logo_url: "/logo-operavia.png"
         },
         fotos: [
           {
