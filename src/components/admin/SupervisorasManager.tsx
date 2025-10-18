@@ -15,6 +15,7 @@ interface Supervisora {
   nome_empresa: string;
   contrato: string | null;
   logo_url: string | null;
+  logo_orgao_fiscalizador_url: string | null;
   usar_logo_customizado: boolean;
   codigo_convite: string | null;
   created_at: string;
@@ -31,6 +32,7 @@ export const SupervisorasManager = () => {
     usar_logo_customizado: false,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoOrgaoFile, setLogoOrgaoFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -96,6 +98,7 @@ export const SupervisorasManager = () => {
     try {
       setUploading(true);
       let logoUrl = editingSupervisora?.logo_url || null;
+      let logoOrgaoUrl = editingSupervisora?.logo_orgao_fiscalizador_url || null;
 
       // Upload de logo se houver arquivo
       if (logoFile) {
@@ -114,6 +117,23 @@ export const SupervisorasManager = () => {
         logoUrl = publicUrl;
       }
 
+      // Upload logo órgão fiscalizador se fornecido
+      if (logoOrgaoFile) {
+        const fileExt = logoOrgaoFile.name.split(".").pop();
+        const fileName = `orgao-${Math.random()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from("supervisora-logos")
+          .upload(fileName, logoOrgaoFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("supervisora-logos")
+          .getPublicUrl(fileName);
+
+        logoOrgaoUrl = publicUrl;
+      }
+
       if (editingSupervisora) {
         // Atualizar
         const { error } = await supabase
@@ -122,6 +142,7 @@ export const SupervisorasManager = () => {
             nome_empresa: formData.nome_empresa,
             contrato: formData.contrato,
             logo_url: logoUrl,
+            logo_orgao_fiscalizador_url: logoOrgaoUrl,
             usar_logo_customizado: formData.usar_logo_customizado,
           })
           .eq("id", editingSupervisora.id);
@@ -136,6 +157,7 @@ export const SupervisorasManager = () => {
             nome_empresa: formData.nome_empresa,
             contrato: formData.contrato,
             logo_url: logoUrl,
+            logo_orgao_fiscalizador_url: logoOrgaoUrl,
             usar_logo_customizado: formData.usar_logo_customizado,
           });
 
@@ -212,6 +234,8 @@ export const SupervisorasManager = () => {
       contrato: supervisora.contrato || "",
       usar_logo_customizado: supervisora.usar_logo_customizado,
     });
+    setLogoFile(null);
+    setLogoOrgaoFile(null);
     setIsDialogOpen(true);
   };
 
@@ -224,6 +248,7 @@ export const SupervisorasManager = () => {
       usar_logo_customizado: false 
     });
     setLogoFile(null);
+    setLogoOrgaoFile(null);
   };
 
   return (
@@ -253,7 +278,7 @@ export const SupervisorasManager = () => {
                 Nova Supervisora
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-h-[90vh] flex flex-col">
+            <DialogContent className="max-h-[90vh] max-w-2xl flex flex-col overflow-hidden">
               <DialogHeader className="flex-shrink-0">
                 <DialogTitle>
                   {editingSupervisora ? "Editar Supervisora" : "Nova Supervisora"}
@@ -263,7 +288,7 @@ export const SupervisorasManager = () => {
                 </DialogDescription>
               </DialogHeader>
               
-              <div className="space-y-4 py-4 overflow-y-auto flex-1 px-1 pb-20">
+              <div className="space-y-4 py-4 overflow-y-auto overflow-x-hidden flex-1 px-1 pb-20">
                 <div className="space-y-2">
                   <Label htmlFor="nome">Nome da Empresa *</Label>
                   <Input
@@ -284,25 +309,45 @@ export const SupervisorasManager = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="logo">Logo da Empresa</Label>
-                  <Input
-                    id="logo"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+            <div className="space-y-2">
+              <Label htmlFor="logo">Logo da Empresa</Label>
+              <Input
+                id="logo"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+              />
+              {editingSupervisora?.logo_url && (
+                <div className="mt-2">
+                  <p className="text-sm text-muted-foreground">Logo atual:</p>
+                  <img 
+                    src={editingSupervisora.logo_url} 
+                    alt="Logo atual" 
+                    className="h-16 mt-1 object-contain"
                   />
-                  {editingSupervisora?.logo_url && (
-                    <div className="mt-2">
-                      <p className="text-sm text-muted-foreground">Logo atual:</p>
-                      <img 
-                        src={editingSupervisora.logo_url} 
-                        alt="Logo atual" 
-                        className="h-16 mt-1 object-contain"
-                      />
-                    </div>
-                  )}
                 </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="logo-orgao">Logo do Órgão Fiscalizador</Label>
+              <Input
+                id="logo-orgao"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setLogoOrgaoFile(e.target.files?.[0] || null)}
+              />
+              {editingSupervisora?.logo_orgao_fiscalizador_url && (
+                <div className="mt-2">
+                  <p className="text-sm text-muted-foreground">Logo atual:</p>
+                  <img 
+                    src={editingSupervisora.logo_orgao_fiscalizador_url} 
+                    alt="Logo órgão fiscalizador" 
+                    className="h-16 mt-1 object-contain"
+                  />
+                </div>
+              )}
+            </div>
 
                 <div className="flex items-center justify-between space-x-2">
                   <div className="space-y-0.5">
