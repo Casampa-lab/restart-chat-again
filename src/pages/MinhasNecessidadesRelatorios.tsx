@@ -167,6 +167,57 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
   ],
 };
 
+// Função auxiliar para obter dicionário de campos
+const obterDadosDicionario = (tipo: string, camposSUPRA: any[]) => {
+  const descricoes: Record<string, string> = {
+    lote: "Número do lote de manutenção",
+    rodovia: "Código da rodovia (BR)",
+    snv: "Segmento Nacional de Rodovia",
+    km: "Quilômetro de localização do elemento",
+    km_inicial: "Quilômetro inicial do trecho",
+    km_final: "Quilômetro final do trecho",
+    latitude: "Coordenada de latitude (GPS)",
+    longitude: "Coordenada de longitude (GPS)",
+    latitude_inicial: "Coordenada de latitude inicial",
+    longitude_inicial: "Coordenada de longitude inicial",
+    latitude_final: "Coordenada de latitude final",
+    longitude_final: "Coordenada de longitude final",
+    lado: "Lado da pista (D - Direito, E - Esquerdo)",
+    tipo: "Tipo ou classificação do elemento",
+    codigo: "Código de identificação do elemento",
+    extensao: "Extensão total em metros ou quilômetros",
+    extensao_metros: "Extensão total em metros",
+    area_m2: "Área em metros quadrados",
+    data_vistoria: "Data de realização da vistoria",
+    data_implantacao: "Data de instalação do elemento",
+    observacao: "Observações adicionais",
+    tipo_demarcacao: "Tipo de demarcação viária",
+    cor: "Cor do elemento",
+    material: "Material utilizado na fabricação",
+    espessura_cm: "Espessura em centímetros",
+    largura_cm: "Largura em centímetros",
+    quantidade: "Quantidade de elementos",
+    dimensoes: "Dimensões do elemento",
+    dimensoes_mm: "Dimensões em milímetros",
+    suporte: "Tipo de suporte utilizado",
+    substrato: "Material do substrato",
+    tipo_defensa: "Tipo de defensa metálica",
+    tipo_inscricao: "Tipo de inscrição viária",
+    tipo_tacha: "Tipo de tacha refletiva",
+    espacamento_m: "Espaçamento entre elementos em metros",
+    vao_horizontal_m: "Vão horizontal do pórtico em metros",
+    altura_livre_m: "Altura livre do pórtico em metros",
+  };
+
+  return camposSUPRA
+    .filter(campo => campo.field !== null)
+    .map(campo => ({
+      campo: campo.field,
+      nome: campo.header,
+      descricao: descricoes[campo.field] || "Campo específico do tipo de elemento",
+    }));
+};
+
 export default function MinhasNecessidadesRelatorios() {
   const navigate = useNavigate();
   const { data: supervisora } = useSupervisora();
@@ -764,6 +815,138 @@ export default function MinhasNecessidadesRelatorios() {
           });
         }
       }
+
+      // Aba DIC - Dicionário de Campos
+      const dicSheet = workbook.addWorksheet("DIC");
+      dicSheet.addRow(["DICIONÁRIO DE CAMPOS"]);
+      dicSheet.mergeCells("A1:C1");
+      const dicHeader = dicSheet.getCell("A1");
+      dicHeader.font = { name: "Arial", size: 14, bold: true };
+      dicHeader.alignment = { horizontal: "center", vertical: "middle" };
+      dicSheet.getRow(1).height = 25;
+      dicSheet.addRow([]);
+
+      const dicData = obterDadosDicionario(tipoSelecionado, camposSUPRA);
+      dicSheet.addRow(["Campo", "Nome no Relatório", "Descrição"]);
+      const dicHeaderRow = dicSheet.getRow(3);
+      dicHeaderRow.font = { name: "Arial", size: 10, bold: true };
+      dicHeaderRow.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFE0E0E0" },
+      };
+
+      dicData.forEach(item => {
+        dicSheet.addRow([item.campo, item.nome, item.descricao]);
+      });
+
+      dicSheet.getColumn(1).width = 25;
+      dicSheet.getColumn(2).width = 30;
+      dicSheet.getColumn(3).width = 60;
+
+      // Aba Localização - Dados das Rodovias e Lotes
+      const localizacaoSheet = workbook.addWorksheet("Localização");
+      localizacaoSheet.addRow(["DADOS DE LOCALIZAÇÃO"]);
+      localizacaoSheet.mergeCells("A1:G1");
+      const locHeader = localizacaoSheet.getCell("A1");
+      locHeader.font = { name: "Arial", size: 14, bold: true };
+      locHeader.alignment = { horizontal: "center", vertical: "middle" };
+      localizacaoSheet.getRow(1).height = 25;
+      localizacaoSheet.addRow([]);
+
+      const { data: rodoviasLoc } = await supabase
+        .from("rodovias")
+        .select("*")
+        .order("codigo");
+
+      const { data: lotesLoc } = await supabase
+        .from("lotes")
+        .select("*")
+        .order("numero");
+
+      const { data: empresasLoc } = await supabase
+        .from("empresas")
+        .select("*");
+
+      const empresasMapLoc = new Map((empresasLoc || []).map((e: any) => [e.id, e.nome]));
+      const rodoviasMapLoc = new Map((rodoviasLoc || []).map((r: any) => [r.id, r.codigo]));
+
+      localizacaoSheet.addRow(["=== RODOVIAS ==="]);
+      localizacaoSheet.addRow([]);
+      localizacaoSheet.addRow([
+        "Código",
+        "Descrição",
+        "UF",
+        "SNV Inicial",
+        "SNV Final",
+        "Km Inicial",
+        "Km Final",
+      ]);
+
+      const rodoviaHeaderRow = localizacaoSheet.lastRow;
+      if (rodoviaHeaderRow) {
+        rodoviaHeaderRow.font = { bold: true };
+        rodoviaHeaderRow.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFE0E0E0" },
+        };
+      }
+
+      (rodoviasLoc || []).forEach((rod: any) => {
+        localizacaoSheet.addRow([
+          rod.codigo || "",
+          rod.nome || rod.descricao || "",
+          rod.uf || "",
+          rod.snv_inicial || "",
+          rod.snv_final || "",
+          rod.km_inicial || "",
+          rod.km_final || "",
+        ]);
+      });
+
+      localizacaoSheet.addRow([]);
+      localizacaoSheet.addRow([]);
+      localizacaoSheet.addRow(["=== LOTES ==="]);
+      localizacaoSheet.addRow([]);
+      localizacaoSheet.addRow([
+        "Número",
+        "Rodovia",
+        "Km Inicial",
+        "Km Final",
+        "Empresa",
+      ]);
+
+      const loteHeaderRow = localizacaoSheet.lastRow;
+      if (loteHeaderRow) {
+        loteHeaderRow.font = { bold: true };
+        loteHeaderRow.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFE0E0E0" },
+        };
+      }
+
+      (lotesLoc || []).forEach((lote: any) => {
+        localizacaoSheet.addRow([
+          lote.numero || "",
+          rodoviasMapLoc.get(lote.rodovia_id) || "",
+          lote.km_inicial || "",
+          lote.km_final || "",
+          empresasMapLoc.get(lote.empresa_id) || "",
+        ]);
+      });
+
+      localizacaoSheet.columns.forEach(column => {
+        if (column) {
+          let maxLength = 10;
+          column.eachCell?.({ includeEmpty: true }, (cell) => {
+            const cellValue = cell.value ? cell.value.toString() : '';
+            maxLength = Math.max(maxLength, cellValue.length);
+          });
+          column.width = Math.min(maxLength + 2, 50);
+        }
+      });
 
       // Download
       const buffer = await workbook.xlsx.writeBuffer();

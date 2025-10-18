@@ -80,19 +80,18 @@ export async function adicionarCabecalhoSUPRA(
 ): Promise<number> {
   const { worksheet, titulo, contrato, logoOrgao, logoSupervisora, numColunas } = options;
 
-  // Inserir 6 linhas no topo para o cabeçalho
-  worksheet.spliceRows(1, 0, [], [], [], [], [], []);
+  // Inserir 2 linhas no topo para o cabeçalho
+  worksheet.spliceRows(1, 0, [], []);
 
-  // Linhas 1-3: Título principal com logos
+  // Linha 1: Título principal com contrato + logos
   const ultimaColuna = String.fromCharCode(64 + numColunas);
-  worksheet.mergeCells(`A1:${ultimaColuna}3`);
+  worksheet.mergeCells(`A1:${ultimaColuna}1`);
   const celulaTitulo = worksheet.getCell("A1");
-  celulaTitulo.value = titulo;
+  const tituloComContrato = contrato ? `${titulo} - Contrato: ${contrato}` : titulo;
+  celulaTitulo.value = tituloComContrato;
   celulaTitulo.font = { name: "Arial", size: 14, bold: true };
   celulaTitulo.alignment = { horizontal: "center", vertical: "middle" };
-  worksheet.getRow(1).height = 20;
-  worksheet.getRow(2).height = 20;
-  worksheet.getRow(3).height = 20;
+  worksheet.getRow(1).height = 60;
 
   // Logo DNIT (esquerda)
   if (logoOrgao) {
@@ -111,6 +110,7 @@ export async function adicionarCabecalhoSUPRA(
       worksheet.addImage(imageId, {
         tl: { col: 0, row: 0 },
         ext: dimensoes,
+        editAs: "oneCell",
       });
     } catch (error) {
       console.error("Erro ao adicionar logo DNIT:", error);
@@ -135,25 +135,15 @@ export async function adicionarCabecalhoSUPRA(
       worksheet.addImage(imageId, {
         tl: { col: colunaDireita, row: 0 },
         ext: dimensoes,
+        editAs: "oneCell",
       });
     } catch (error) {
       console.error("Erro ao adicionar logo Supervisora:", error);
     }
   }
 
-  // Linha 4: Contrato
-  worksheet.mergeCells(`A4:${ultimaColuna}4`);
-  const celulaContrato = worksheet.getCell("A4");
-  celulaContrato.value = `Contrato: ${contrato}`;
-  celulaContrato.font = { name: "Arial", size: 11, bold: true };
-  celulaContrato.alignment = { horizontal: "center", vertical: "middle" };
-  worksheet.getRow(4).height = 25;
-
-  // Linha 5: Espaçamento
-  worksheet.getRow(5).height = 10;
-
-  // Linha 6: Retornar número da linha onde devem começar os cabeçalhos
-  return 6;
+  // Linha 2: Retornar número da linha onde devem começar os cabeçalhos
+  return 2;
 }
 
 /**
