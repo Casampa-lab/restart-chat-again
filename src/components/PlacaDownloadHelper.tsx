@@ -47,7 +47,11 @@ export const PlacaDownloadHelper = ({ codigo, onUploadSuccess }: PlacaDownloadHe
         <Download className="h-4 w-4 text-muted-foreground" />
         <AlertDescription>
           <button
-            onClick={() => setShowSources(!showSources)}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setShowSources(!showSources);
+            }}
             className="w-full flex items-center justify-between text-sm font-medium text-foreground hover:text-primary transition-colors"
           >
             <span>Onde encontrar placas SVG?</span>
