@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ChatAssistant } from "@/components/ChatAssistant";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -46,44 +47,44 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/auth/reset-password" element={<ResetPassword />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/coordenacao-fiscalizacao" element={<CoordenacaoFiscalizacao />} />
-          <Route path="/minhas-ncs" element={<MinhasNCs />} />
-          <Route path="/ncs-coordenador" element={<NCsCoordenador />} />
-          <Route path="/minhas-frentes-liberadas" element={<MinhasFrentesLiberadas />} />
-          <Route path="/minhas-retrorrefletividades" element={<MinhasRetrorrefletividades />} />
-          <Route path="/minhas-defensas" element={<MinhasDefensas />} />
-          <Route path="/minhas-intervencoes-sh" element={<MinhasIntervencoesSH />} />
-          <Route path="/minhas-intervencoes-inscricoes" element={<MinhasIntervencoesInscricoes />} />
-          <Route path="/minhas-intervencoes-sv" element={<MinhasIntervencoesSV />} />
-          <Route path="/minhas-intervencoes-tacha" element={<MinhasIntervencoesTacha />} />
-          <Route path="/minhas-intervencoes" element={<MinhasIntervencoes />} />
-          <Route path="/meus-registros-nc" element={<MeusRegistrosNC />} />
-          <Route path="/minhas-fichas-verificacao" element={<MinhasFichasVerificacao />} />
-          <Route path="/minhas-fichas-placa" element={<MinhasFichasPlaca />} />
-          <Route path="/minhas-necessidades" element={<MinhasNecessidades />} />
-          <Route path="/minhas-necessidades-relatorios" element={<MinhasNecessidadesRelatorios />} />
-          <Route path="/revisao-intervencoes" element={<RevisaoIntervencoes />} />
-          <Route path="/dashboard-necessidades" element={<DashboardNecessidades />} />
-          <Route path="/modulos" element={<Modulos />} />
-          <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
-          <Route path="/teste-pdf" element={<TestePDF />} />
-          <Route path="/elementos-pendentes" element={<ElementosPendentes />} />
-          <Route path="/meus-elementos-pendentes" element={<MeusElementosPendentes />} />
-          <Route path="/relatorio-medicao" element={<RelatorioMedicao />} />
-          <Route path="/reconciliacoes-pendentes" element={<ReconciliacaoPendente />} />
-          <Route path="/modo-campo" element={<ModoCampo />} />
-          <Route path="/modo-campo/inventario-dinamico" element={<InventarioDinamicoComAlerta />} />
-          <Route path="/modo-campo/registrar-intervencao" element={<RegistrarIntervencaoCampo />} />
-          <Route path="/admin/auditoria-sinalizacoes" element={<AuditoriaSinalizacoes />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/modulos" element={<Modulos />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/modo-campo" element={<ModoCampo />} />
+        <Route path="/minhas-ncs" element={<MinhasNCs />} />
+        <Route path="/meus-registros-nc" element={<MeusRegistrosNC />} />
+        <Route path="/minhas-fichas-verificacao" element={<MinhasFichasVerificacao />} />
+        <Route path="/minhas-fichas-placa" element={<MinhasFichasPlaca />} />
+        <Route path="/minhas-retrorrefletividades" element={<MinhasRetrorrefletividades />} />
+        <Route path="/minhas-necessidades" element={<MinhasNecessidades />} />
+        <Route path="/minhas-intervencoes" element={<MinhasIntervencoes />} />
+        <Route path="/minhas-defensas" element={<MinhasDefensas />} />
+        <Route path="/minhas-frentes-liberadas" element={<MinhasFrentesLiberadas />} />
+        <Route path="/revisao-intervencoes" element={<RevisaoIntervencoes />} />
+        <Route path="/elementos-pendentes" element={<ElementosPendentes />} />
+        <Route path="/meus-elementos-pendentes" element={<MeusElementosPendentes />} />
+        <Route path="/minhas-intervencoes-inscricoes" element={<MinhasIntervencoesInscricoes />} />
+        <Route path="/minhas-intervencoes-sv" element={<MinhasIntervencoesSV />} />
+        <Route path="/minhas-intervencoes-sh" element={<MinhasIntervencoesSH />} />
+        <Route path="/minhas-intervencoes-tacha" element={<MinhasIntervencoesTacha />} />
+        <Route path="/minhas-necessidades-relatorios" element={<MinhasNecessidadesRelatorios />} />
+        <Route path="/reconciliacao-pendente" element={<ReconciliacaoPendente />} />
+        <Route path="/registrar-intervencao-campo" element={<RegistrarIntervencaoCampo />} />
+        <Route path="/dashboard-necessidades" element={<DashboardNecessidades />} />
+        <Route path="/auditoria-sinalizacoes" element={<AuditoriaSinalizacoes />} />
+        <Route path="/inventario-dinamico" element={<InventarioDinamicoComAlerta />} />
+        <Route path="/coordenacao-fiscalizacao" element={<CoordenacaoFiscalizacao />} />
+        <Route path="/ncs-coordenador" element={<NCsCoordenador />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
+        <Route path="/relatorio-medicao" element={<RelatorioMedicao />} />
+        <Route path="/teste-pdf" element={<TestePDF />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <ChatAssistant />
+    </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
