@@ -1,15 +1,25 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
-import { Search, FileText, Calendar, User } from "lucide-react";
+import { Search, FileText, Calendar, User, ArrowLeft, Home } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 interface AuditoriaRow {
   tipo_elemento: string;
@@ -43,6 +53,7 @@ const TIPOS_ELEMENTO_LABELS: Record<string, string> = {
 };
 
 export default function AuditoriaInventario() {
+  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [tipoFiltro, setTipoFiltro] = useState<string>("todos");
   const [origemFiltro, setOrigemFiltro] = useState<string>("todos");
@@ -87,6 +98,29 @@ export default function AuditoriaInventario() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Breadcrumb */}
+      <div className="flex items-center justify-between">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/" className="flex items-center gap-1">
+                <Home className="h-4 w-4" />
+                Início
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Auditoria de Inventário</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
+        <Button variant="outline" onClick={() => navigate("/")}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar
+        </Button>
+      </div>
+
       <div className="space-y-2">
         <h1 className="text-3xl font-bold">Auditoria do Inventário Dinâmico</h1>
         <p className="text-muted-foreground">

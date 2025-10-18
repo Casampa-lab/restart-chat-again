@@ -11,7 +11,7 @@ import { getConfig, type GrupoElemento } from "@/lib/reconciliacaoConfig";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy, X, FileText } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy, X, FileText, FileSearch, History as HistoryIcon, Activity } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeSimples from "@/components/NaoConformidadeSimples";
@@ -564,6 +564,61 @@ const Index = () => {
                   <span className="font-semibold">
                     {activeSession.rodovia?.codigo || "Carregando..."}
                   </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Seção VABLE - Rastreabilidade */}
+            <Card className="border-2 border-primary/30 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
+                <CardTitle className="flex items-center gap-2 text-2xl">
+                  <Activity className="h-6 w-6 text-primary" />
+                  VABLE - Sistema de Rastreabilidade
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Controle de intervenções conforme IN 3/2025 do DNIT
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid md:grid-cols-3 gap-4">
+                  {/* Card 1: Documentação */}
+                  <Button
+                    variant="outline"
+                    className="h-auto flex-col items-start p-4 hover:bg-primary/5 transition-all"
+                    onClick={() => navigate('/documentacao-vable')}
+                  >
+                    <FileSearch className="h-8 w-8 mb-2 text-primary" />
+                    <h3 className="font-semibold text-left">Documentação VABLE</h3>
+                    <p className="text-xs text-muted-foreground text-left mt-1">
+                      Entenda o sistema de rastreabilidade
+                    </p>
+                  </Button>
+
+                  {/* Card 2: Auditoria */}
+                  <Button
+                    variant="outline"
+                    className="h-auto flex-col items-start p-4 hover:bg-primary/5 transition-all"
+                    onClick={() => navigate('/auditoria-inventario')}
+                  >
+                    <HistoryIcon className="h-8 w-8 mb-2 text-primary" />
+                    <h3 className="font-semibold text-left">Auditoria de Inventário</h3>
+                    <p className="text-xs text-muted-foreground text-left mt-1">
+                      🟢🟡⚪ Histórico completo de alterações
+                    </p>
+                  </Button>
+
+                  {/* Card 3: Inventário Dinâmico */}
+                  <Button
+                    variant="outline"
+                    className="h-auto flex-col items-start p-4 hover:bg-primary/5 transition-all"
+                    onClick={() => navigate('/baseline-evolucao')}
+                  >
+                    <Activity className="h-8 w-8 mb-2 text-primary" />
+                    <h3 className="font-semibold text-left">Inventário Dinâmico</h3>
+                    <p className="text-xs text-muted-foreground text-left mt-1">
+                      Comparação Baseline × Estado Atual
+                    </p>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

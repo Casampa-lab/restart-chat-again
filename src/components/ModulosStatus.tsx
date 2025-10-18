@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Route, Radio, Scale, MonitorPlay, BarChart3, FileText, Check, Clock } from "lucide-react";
+import { Route, Radio, Scale, MonitorPlay, BarChart3, FileText, Check, Clock, FileSearch, History as HistoryIcon, Activity } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Modulo {
   codigo: string;
@@ -8,6 +9,7 @@ interface Modulo {
   descricao: string;
   icone: string;
   status: "disponivel" | "desenvolvimento";
+  rota?: string;
 }
 
 const MODULOS_INFO: Modulo[] = [
@@ -17,6 +19,30 @@ const MODULOS_INFO: Modulo[] = [
     descricao: "Gestão de sinalização horizontal, vertical e dispositivos de segurança",
     icone: "Route",
     status: "disponivel"
+  },
+  {
+    codigo: "vable-docs",
+    nome: "Documentação VABLE",
+    descricao: "Sistema de rastreabilidade e controle de intervenções (IN 3/2025)",
+    icone: "FileSearch",
+    status: "disponivel",
+    rota: "/documentacao-vable"
+  },
+  {
+    codigo: "auditoria-inventario",
+    nome: "Auditoria de Inventário",
+    descricao: "Rastreamento completo de alterações no inventário rodoviário",
+    icone: "History",
+    status: "disponivel",
+    rota: "/auditoria-inventario"
+  },
+  {
+    codigo: "inventario-dinamico",
+    nome: "Inventário Dinâmico",
+    descricao: "Comparação Baseline vs Estado Atual da rodovia",
+    icone: "Activity",
+    status: "disponivel",
+    rota: "/baseline-evolucao"
   },
   {
     codigo: "radares",
@@ -61,10 +87,15 @@ const ICON_MAP: Record<string, any> = {
   Scale,
   MonitorPlay,
   BarChart3,
-  FileText
+  FileText,
+  FileSearch,
+  History: HistoryIcon,
+  Activity
 };
 
 export const ModulosStatus = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-4">
       <div>
@@ -82,9 +113,10 @@ export const ModulosStatus = () => {
               key={modulo.codigo} 
               className={`relative overflow-hidden transition-all ${
                 isDisponivel 
-                  ? "border-primary/50 shadow-md hover:shadow-lg" 
+                  ? "border-primary/50 shadow-md hover:shadow-lg cursor-pointer" 
                   : "opacity-60 border-dashed"
               }`}
+              onClick={() => modulo.rota && isDisponivel && navigate(modulo.rota)}
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
