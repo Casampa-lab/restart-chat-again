@@ -494,6 +494,21 @@ serve(async (req) => {
     const fieldMapping = FIELD_MAPPINGS[tableName] || {};
     const validFields = VALID_FIELDS[tableName] || [];
 
+    // Debug para cilindros
+    if (inventoryType === "cilindros" && normalizedData.length > 0) {
+      console.log("=== DEBUG CILINDROS - MAPEAMENTO ===");
+      console.log("Mapeamentos disponíveis:", Object.keys(fieldMapping).slice(0, 10));
+      for (const [key, value] of Object.entries(normalizedData[0])) {
+        console.log(`Chave Excel: "${key}", Valor: "${value}"`);
+        const cleanKey = String(key).replace(/\s+/g, ' ').trim();
+        if (fieldMapping[cleanKey]) {
+          console.log(`  ✓ Mapeado para: "${fieldMapping[cleanKey]}"`);
+        } else {
+          console.log(`  ✗ SEM MAPEAMENTO para: "${cleanKey}"`);
+        }
+      }
+    }
+
     // Preparar dados para inserção
     const recordsToInsert = normalizedData.map((row: any) => {
       // Determinar campo de data padrão baseado na tabela
