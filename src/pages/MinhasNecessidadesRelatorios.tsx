@@ -138,8 +138,8 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
     { field: "vao_horizontal_m", header: "Vão Horizontal" },
     { field: "lado", header: "Lado" },
     { field: "km", header: "Km" },
-    { field: "latitude", header: "Latitude" },
-    { field: "longitude", header: "Longitude" },
+    { field: "latitude_inicial", header: "Latitude" },
+    { field: "longitude_inicial", header: "Longitude" },
     { field: "link_fotografia", header: "Link da Fotografia" },
   ],
   defensas: [
