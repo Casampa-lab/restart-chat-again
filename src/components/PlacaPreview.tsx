@@ -1,17 +1,20 @@
 import { ImageOff } from "lucide-react";
 import { getImagemPlaca } from "@/constants/imagensPlacas";
+import { PlacaDownloadHelper } from "./PlacaDownloadHelper";
 import { useState } from "react";
 
 interface PlacaPreviewProps {
   codigo: string | null | undefined;
   size?: "small" | "large";
   showLabel?: boolean;
+  showDownloadHelper?: boolean;
 }
 
 export const PlacaPreview = ({ 
   codigo, 
   size = "large",
-  showLabel = false 
+  showLabel = false,
+  showDownloadHelper = true
 }: PlacaPreviewProps) => {
   const [imageError, setImageError] = useState(false);
   const imagePath = getImagemPlaca(codigo);
@@ -32,13 +35,20 @@ export const PlacaPreview = ({
     );
   }
 
-  // Placeholder quando a imagem não existe ou falhou ao carregar
+  // Quando a imagem não existe ou falhou ao carregar
   if (!hasImage) {
     return (
-      <div className={`${sizeClasses[size]} border border-border rounded-lg flex flex-col items-center justify-center text-muted-foreground bg-muted/10`}>
-        <ImageOff className={size === "large" ? "w-6 h-6 mb-1" : "w-3 h-3"} />
-        {size === "large" && showLabel && (
-          <span className="text-xs text-center px-1">{codigo}</span>
+      <div className="space-y-3">
+        <div className={`${sizeClasses[size]} border border-border rounded-lg flex flex-col items-center justify-center text-muted-foreground bg-muted/10`}>
+          <ImageOff className={size === "large" ? "w-6 h-6 mb-1" : "w-3 h-3"} />
+          {size === "large" && showLabel && (
+            <span className="text-xs text-center px-1">{codigo}</span>
+          )}
+        </div>
+        
+        {/* Mostra o helper apenas no tamanho large e quando habilitado */}
+        {size === "large" && showDownloadHelper && (
+          <PlacaDownloadHelper codigo={codigo} />
         )}
       </div>
     );

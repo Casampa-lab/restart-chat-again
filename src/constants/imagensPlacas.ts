@@ -8,7 +8,7 @@ type CategoriaPlaca = 'regulamentacao' | 'advertencia' | 'indicacao';
 /**
  * Detecta a categoria da placa baseado no código
  */
-const detectarCategoria = (codigo: string): CategoriaPlaca | null => {
+export const detectarCategoria = (codigo: string): CategoriaPlaca | null => {
   const prefixo = codigo.split('-')[0];
   
   if (prefixo === 'R') return 'regulamentacao';
