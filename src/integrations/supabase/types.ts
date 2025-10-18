@@ -446,6 +446,9 @@ export type Database = {
           fotos_urls: string[] | null
           id: string
           justificativa_fora_plano: string | null
+          km_final: number | null
+          km_inicial: number | null
+          lado: string | null
           latitude: number | null
           longitude: number | null
           motivo: string
@@ -454,6 +457,7 @@ export type Database = {
           observacao: string | null
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
+          snv: string | null
           tipo_avaria: string | null
           tipo_defensa: string | null
         }
@@ -470,6 +474,9 @@ export type Database = {
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          lado?: string | null
           latitude?: number | null
           longitude?: number | null
           motivo: string
@@ -478,6 +485,7 @@ export type Database = {
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          snv?: string | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
         }
@@ -494,6 +502,9 @@ export type Database = {
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          lado?: string | null
           latitude?: number | null
           longitude?: number | null
           motivo?: string
@@ -502,6 +513,7 @@ export type Database = {
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          snv?: string | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
         }

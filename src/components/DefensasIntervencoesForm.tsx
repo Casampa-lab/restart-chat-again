@@ -67,6 +67,7 @@ const formSchema = z.object({
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   km_final: z.string().min(1, "KM final é obrigatório"),
   lado: z.string().min(1, "Lado é obrigatório"),
+  snv: z.string().optional(),
   tipo_defensa: z.string().optional(),
   extensao_metros: z.string().optional(),
   tipo_avaria: z.string().optional(),
@@ -107,6 +108,7 @@ const DefensasIntervencoesForm = ({
       km_inicial: "",
       km_final: "",
       lado: "",
+      snv: "",
       tipo_defensa: "",
       extensao_metros: "",
       tipo_avaria: "",
@@ -147,6 +149,10 @@ const DefensasIntervencoesForm = ({
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
         motivo: "",
+        km_inicial: (defensaSelecionada as any).km_inicial?.toString() || "",
+        km_final: (defensaSelecionada as any).km_final?.toString() || "",
+        lado: (defensaSelecionada as any).lado || "",
+        snv: (defensaSelecionada as any).snv || "",
         tipo_defensa: (defensaSelecionada as any).tipo_defensa || "",
         extensao_metros: (defensaSelecionada as any).extensao_metros?.toString() || "",
         tipo_avaria: "",
@@ -190,6 +196,10 @@ const DefensasIntervencoesForm = ({
           defensa_id: defensaSelecionada.id,
           data_intervencao: data.data_intervencao,
           motivo: data.motivo,
+          km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
+          km_final: data.km_final ? parseFloat(data.km_final) : null,
+          lado: data.lado || null,
+          snv: data.snv || null,
           tipo_defensa: data.tipo_defensa || null,
           extensao_metros: data.extensao_metros ? parseFloat(data.extensao_metros) : null,
           tipo_avaria: data.tipo_avaria || null,
@@ -305,6 +315,20 @@ const DefensasIntervencoesForm = ({
                   <SelectItem value="Central">Central</SelectItem>
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="snv"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>SNV</FormLabel>
+              <FormControl>
+                <Input placeholder="Ex: 116BMG1010" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
