@@ -1910,6 +1910,7 @@ export type Database = {
           refletivo: string | null
           rodovia_id: string
           snv: string | null
+          tipo_refletivo: string | null
           ultima_intervencao_id: string | null
           updated_at: string
           user_id: string
@@ -1940,6 +1941,7 @@ export type Database = {
           refletivo?: string | null
           rodovia_id: string
           snv?: string | null
+          tipo_refletivo?: string | null
           ultima_intervencao_id?: string | null
           updated_at?: string
           user_id: string
@@ -1970,6 +1972,7 @@ export type Database = {
           refletivo?: string | null
           rodovia_id?: string
           snv?: string | null
+          tipo_refletivo?: string | null
           ultima_intervencao_id?: string | null
           updated_at?: string
           user_id?: string
@@ -2056,6 +2059,7 @@ export type Database = {
           pendente_aprovacao_coordenador: boolean | null
           quantidade: number | null
           snv: string | null
+          tipo_refletivo: string | null
           tipo_tacha: string | null
         }
         Insert: {
@@ -2084,6 +2088,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           snv?: string | null
+          tipo_refletivo?: string | null
           tipo_tacha?: string | null
         }
         Update: {
@@ -2112,6 +2117,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           snv?: string | null
+          tipo_refletivo?: string | null
           tipo_tacha?: string | null
         }
         Relationships: []
@@ -4307,6 +4313,7 @@ export type Database = {
           solicitado_por: string | null
           solucao_planilha: string | null
           status_revisao: string | null
+          tipo_refletivo: string | null
           updated_at: string | null
           user_id: string
         }
@@ -4348,6 +4355,7 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           status_revisao?: string | null
+          tipo_refletivo?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -4389,6 +4397,7 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           status_revisao?: string | null
+          tipo_refletivo?: string | null
           updated_at?: string | null
           user_id?: string
         }

@@ -71,6 +71,7 @@ interface FichaTacha {
   snv: string | null;
   corpo: string | null;
   refletivo: string | null;
+  tipo_refletivo: string | null;
   cor_refletivo: string | null;
   extensao_km: number | null;
   local_implantacao: string | null;
@@ -843,6 +844,9 @@ export function InventarioTachasViewer({
                         )}
                         {intervencao.refletivo && (
                           <p><strong>Descrição:</strong> {intervencao.refletivo}</p>
+                        )}
+                        {intervencao.tipo_refletivo && (
+                          <p><strong>Tipo do Refletivo:</strong> {intervencao.tipo_refletivo}</p>
                         )}
                         {intervencao.cor_refletivo && (
                           <p><strong>Cor do Refletivo:</strong> {intervencao.cor_refletivo}</p>

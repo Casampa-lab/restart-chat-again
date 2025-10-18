@@ -35,6 +35,7 @@ const formSchema = z.object({
   snv: z.string().optional(),
   corpo: z.string().optional(),
   refletivo: z.string().optional(),
+  tipo_refletivo: z.string().optional(),
   cor_refletivo: z.string().optional(),
   local_implantacao: z.string().optional(),
   quantidade: z.string().optional(),
@@ -87,6 +88,7 @@ export function IntervencoesTachaForm({
       snv: "",
       corpo: "",
       refletivo: "",
+      tipo_refletivo: "",
       cor_refletivo: "",
       local_implantacao: "",
       quantidade: "",
@@ -110,6 +112,7 @@ export function IntervencoesTachaForm({
         snv: (tachaSelecionada as any).snv || "",
         corpo: (tachaSelecionada as any).corpo || "",
         refletivo: (tachaSelecionada as any).refletivo || "",
+        tipo_refletivo: (tachaSelecionada as any).tipo_refletivo || "",
         cor_refletivo: (tachaSelecionada as any).cor_refletivo || "",
         local_implantacao: (tachaSelecionada as any).local_implantacao || "",
         quantidade: (tachaSelecionada as any).quantidade?.toString() || "",
@@ -154,6 +157,7 @@ export function IntervencoesTachaForm({
         snv: values.snv || null,
         corpo: values.corpo || null,
         refletivo: values.refletivo || null,
+        tipo_refletivo: values.tipo_refletivo || null,
         cor_refletivo: values.cor_refletivo || null,
         local_implantacao: values.local_implantacao || null,
         quantidade: values.quantidade ? parseInt(values.quantidade) : null,
@@ -386,6 +390,33 @@ export function IntervencoesTachaForm({
                         <SelectContent className="bg-background z-50">
                           <SelectItem value="Bidirecional">Bidirecional</SelectItem>
                           <SelectItem value="Monodirecional">Monodirecional</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tipo_refletivo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo do Refletivo (NBR 14.644/2021)</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione (opcional)" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-background z-50">
+                          <SelectItem value="I">Tipo I - Baixa Intensidade</SelectItem>
+                          <SelectItem value="II">Tipo II - Média Intensidade</SelectItem>
+                          <SelectItem value="III">Tipo III - Alta Intensidade</SelectItem>
+                          <SelectItem value="IV">Tipo IV - Não Retrorrefletiva</SelectItem>
+                          <SelectItem value="VII">Tipo VII - Prismática Alta Intensidade</SelectItem>
+                          <SelectItem value="IX">Tipo IX - Prismática Altíssima Intensidade</SelectItem>
+                          <SelectItem value="X">Tipo X - Prismática Fluorescente</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

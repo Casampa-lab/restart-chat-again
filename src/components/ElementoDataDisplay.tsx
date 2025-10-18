@@ -86,9 +86,9 @@ const fieldLabels: Record<string, string> = {
   quantidade: 'Quantidade',
   corpo: 'Corpo',
   refletivo: 'Descrição',
+  tipo_refletivo: 'Tipo do Refletivo (NBR 14.644/2021)',
   cor_refletivo: 'Cor do Refletivo',
   local_implantacao: 'Local de Implantação',
-  tipo_refletivo: 'Tipo Refletivo',
   cor_corpo: 'Cor do Corpo',
   
   // Inscrições
