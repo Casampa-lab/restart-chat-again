@@ -508,52 +508,31 @@ serve(async (req) => {
           continue;
         }
         
-        // Normalizar chave removendo espaços extras entre palavras
-        const cleanKey = key.replace(/\s+/g, ' ').trim();
-        let normalizedKey = cleanKey.toLowerCase().replace(/\s+/g, "_");
+      // Normalizar chave removendo espaços extras entre palavras
+      const cleanKey = key.replace(/\s+/g, ' ').trim();
+      let normalizedKey = cleanKey.toLowerCase().replace(/\s+/g, "_");
+      
+      // Aplicar mapeamento específico se existir
+      const originalKey = cleanKey; // Guardar chave original limpa para verificações especiais
+      
+      if (fieldMapping[cleanKey]) {
+        normalizedKey = fieldMapping[cleanKey];
+      } else if (fieldMapping[normalizedKey]) {
+        normalizedKey = fieldMapping[normalizedKey];
+      }
+      
+      // Se o mapeamento retornou string vazia, pular este campo
+      if (normalizedKey === '') {
+        continue;
+      }
         
-        // Aplicar mapeamento específico se existir
-        const originalKey = cleanKey; // Guardar chave original limpa para verificações especiais
-        
-        // Log para debug de descrição em tachas - ANTES do mapeamento
-        if (tableName === "ficha_tachas" && cleanKey.toLowerCase().includes('descri')) {
-          console.log(`[TACHA DESCRICAO - ANTES MAPEAMENTO] Key original: "${key}", CleanKey: "${cleanKey}", NormalizedKey antes: "${normalizedKey}", Valor: "${value}", Tipo: ${typeof value}`);
-        }
-        
-        if (fieldMapping[cleanKey]) {
-          normalizedKey = fieldMapping[cleanKey];
-        } else if (fieldMapping[normalizedKey]) {
-          normalizedKey = fieldMapping[normalizedKey];
-        }
-        
-        // Log para debug de descrição em tachas - DEPOIS do mapeamento
-        if (tableName === "ficha_tachas" && cleanKey.toLowerCase().includes('descri')) {
-          console.log(`[TACHA DESCRICAO - DEPOIS MAPEAMENTO] NormalizedKey depois: "${normalizedKey}", FieldMapping tem cleanKey?: ${!!fieldMapping[cleanKey]}, Mapeamento: ${fieldMapping[cleanKey]}`);
-        }
-        
-        // Se o mapeamento retornou string vazia, pular este campo
-        if (normalizedKey === '') {
-          if (tableName === "ficha_tachas" && cleanKey.toLowerCase().includes('descri')) {
-            console.log(`[TACHA DESCRICAO - SKIP] Campo pulado porque mapeamento retornou string vazia`);
-          }
-          continue;
-        }
-        
-        // Ignorar se a normalização resultar em string vazia
-        if (!normalizedKey || normalizedKey === '_' || normalizedKey.includes('__empty')) {
-          continue;
-        }
-        
-        // Log para debug de descrição em tachas
-        if (tableName === "ficha_tachas" && normalizedKey === "descricao") {
-          console.log(`[TACHA DESCRICAO - VALIDACAO] Key original: "${key}", Normalizada: "${normalizedKey}", Valor: "${value}", Tipo: ${typeof value}, validFields inclui? ${validFields.includes(normalizedKey)}`);
-        }
-        
-        // Apenas adicionar se o campo for válido para esta tabela
-        if (validFields.length === 0 || validFields.includes(normalizedKey)) {
-          if (tableName === "ficha_tachas" && normalizedKey === "descricao") {
-            console.log(`[TACHA DESCRICAO - PASSOU VALIDACAO] Campo está nos validFields`);
-          }
+      // Ignorar se a normalização resultar em string vazia
+      if (!normalizedKey || normalizedKey === '_' || normalizedKey.includes('__empty')) {
+        continue;
+      }
+      
+      // Apenas adicionar se o campo for válido para esta tabela
+      if (validFields.length === 0 || validFields.includes(normalizedKey)) {
           // Se é o campo de foto e temos fotos, substituir pelo URL
           if (hasPhotos && photoFieldName && key === photoFieldName) {
             const photoFileName = value as string;
@@ -561,18 +540,10 @@ serve(async (req) => {
               record[normalizedKey] = photoMap[photoFileName];
               hasValidData = true;
             }
-          } else {
-            // Log para debug de descrição em tachas - TESTE DE VALOR
-            if (tableName === "ficha_tachas" && normalizedKey === "descricao") {
-              console.log(`[TACHA DESCRICAO - TESTE VALOR] Valor: "${value}", undefined?: ${value === undefined}, null?: ${value === null}, vazio?: ${value === ''}, traço?: ${value === '-'}`);
-            }
-            
-            // Apenas adicionar se o valor não for undefined ou null ou vazio
-            if (value !== undefined && value !== null && value !== '' && value !== '-') {
-              if (tableName === "ficha_tachas" && normalizedKey === "descricao") {
-                console.log(`[TACHA DESCRICAO - VALOR ACEITO] Valor será adicionado ao record`);
-              }
-              hasValidData = true;
+        } else {
+          // Apenas adicionar se o valor não for undefined ou null ou vazio
+          if (value !== undefined && value !== null && value !== '' && value !== '-') {
+            hasValidData = true;
               
               // Limpar valores com porcentagem (ex: "55.10%" → 55.10)
               // IMPORTANTE: Fazer isso ANTES de qualquer outra conversão
@@ -616,17 +587,12 @@ serve(async (req) => {
               } else if (normalizedKey === "espessura_cm" && originalKey.toLowerCase().includes("(mm)")) {
                 // Converter de mm para cm
                 record[normalizedKey] = Number(cleanedValue) / 10;
-              } else {
-                record[normalizedKey] = cleanedValue;
-              }
-              
-              // Log específico para descrição em tachas
-              if (tableName === "ficha_tachas" && normalizedKey === "descricao") {
-                console.log(`[TACHA DESCRICAO - ADICIONADO AO RECORD] Campo: "${normalizedKey}", Valor final: "${record[normalizedKey]}", CleanedValue: "${cleanedValue}"`);
-              }
-              
-              // Log específico para tachas
-              if (tableName === "ficha_tachas" && (normalizedKey === "descricao" || normalizedKey === "cor_refletivo" || normalizedKey === "local_implantacao" || normalizedKey === "espacamento_m")) {
+            } else {
+              record[normalizedKey] = cleanedValue;
+            }
+            
+            // Log específico para tachas
+            if (tableName === "ficha_tachas" && (normalizedKey === "descricao" || normalizedKey === "cor_refletivo" || normalizedKey === "local_implantacao" || normalizedKey === "espacamento_m")) {
                 console.log(`[TACHA DEBUG] INSERIDO: ${normalizedKey} = ${value} (tipo: ${typeof value})`);
               }
             } else {

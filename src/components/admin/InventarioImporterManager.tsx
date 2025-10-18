@@ -870,9 +870,10 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
             return isNaN(num) ? null : num;
           };
           
+          record.descricao = getVal("Descrição", "Descricao", "descrição", "descricao", "DESCRIÇÃO", "DESCRICAO");
           record.snv = getVal("SNV", "snv");
           record.corpo = getVal("Corpo", "corpo");
-          record.refletivo = getVal("Refletivo", "refletivo");
+          record.tipo_refletivo = getVal("Refletivo", "refletivo", "tipo_refletivo");
           record.cor_refletivo = getVal("Cor do refletivo", "Cor do Refletivo", "cor_do_refletivo", "cor_refletivo");
           
           const kmIni = getVal("Km Inicial", "Km inicial", "km_inicial", "km inicial");
