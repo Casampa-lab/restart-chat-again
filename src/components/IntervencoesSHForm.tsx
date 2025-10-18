@@ -56,6 +56,7 @@ const formSchema = z.object({
   motivo: z.string().min(1, "Motivo é obrigatório"),
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   km_final: z.string().min(1, "KM final é obrigatório"),
+  snv: z.string().optional(),
   tipo_demarcacao: z.string().optional(),
   cor: z.string().optional(),
   largura_cm: z.string().optional(),
@@ -85,6 +86,7 @@ const IntervencoesSHForm = ({
       motivo: "",
       km_inicial: "",
       km_final: "",
+      snv: "",
       tipo_demarcacao: "",
       cor: "",
       largura_cm: "",
@@ -123,6 +125,9 @@ const IntervencoesSHForm = ({
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
         motivo: "",
+        km_inicial: marcaSelecionada.km_inicial?.toString() || "",
+        km_final: marcaSelecionada.km_final?.toString() || "",
+        snv: (marcaSelecionada as any).snv || "",
         tipo_demarcacao: (marcaSelecionada as any).tipo_demarcacao || "",
         cor: (marcaSelecionada as any).cor || "",
         largura_cm: (marcaSelecionada as any).largura_cm?.toString() || "",
@@ -164,11 +169,16 @@ const IntervencoesSHForm = ({
           ficha_marcas_longitudinais_id: marcaSelecionada.id,
           data_intervencao: data.data_intervencao,
           motivo: data.motivo,
+          km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
+          km_final: data.km_final ? parseFloat(data.km_final) : null,
+          snv: data.snv || null,
           tipo_demarcacao: data.tipo_demarcacao || null,
           cor: data.cor || null,
           largura_cm: data.largura_cm ? parseFloat(data.largura_cm) : null,
           espessura_cm: data.espessura_cm ? parseFloat(data.espessura_cm) : null,
           material: data.material || null,
+          latitude: data.latitude ? parseFloat(data.latitude) : null,
+          longitude: data.longitude ? parseFloat(data.longitude) : null,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
         });
@@ -263,6 +273,20 @@ const IntervencoesSHForm = ({
                     <FormLabel>KM Final</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.001" placeholder="0.000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="snv"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SNV</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: 116BMG1010" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
