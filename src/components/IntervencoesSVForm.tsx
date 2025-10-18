@@ -345,7 +345,7 @@ export function IntervencoesSVForm({
                     )}
                   />
 
-                <div className="grid md:grid-cols-[1fr_auto] gap-4 items-start">
+                <div className="grid md:grid-cols-[1fr_180px] gap-6 items-start">
                   <FormField
                     control={form.control}
                     name="codigo_placa"
@@ -363,7 +363,7 @@ export function IntervencoesSVForm({
                             disabled={codigosFiltrados.length === 0}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="w-full">
                                 <SelectValue placeholder={
                                   form.watch("tipo_placa") 
                                     ? "Selecione o código" 
@@ -371,12 +371,12 @@ export function IntervencoesSVForm({
                                 } />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="max-h-[300px]">
+                            <SelectContent className="max-h-[300px] max-w-[calc(100vw-2rem)]">
                               {codigosFiltrados.map((placa) => (
-                                <SelectItem key={placa.codigo} value={placa.codigo}>
-                                  <div className="flex items-center gap-2">
+                                <SelectItem key={placa.codigo} value={placa.codigo} className="cursor-pointer">
+                                  <div className="flex items-center gap-2 py-1">
                                     <PlacaPreview codigo={placa.codigo} size="small" />
-                                    <span>{placa.codigo} - {placa.nome}</span>
+                                    <span className="text-sm leading-tight">{placa.codigo} - {placa.nome}</span>
                                   </div>
                                 </SelectItem>
                               ))}
@@ -388,7 +388,7 @@ export function IntervencoesSVForm({
                     )}
                   />
                   
-                  <div className="md:pt-8">
+                  <div className="md:pt-8 flex justify-end">
                     <PlacaPreview codigo={codigoAtual} size="large" showLabel />
                   </div>
                 </div>
