@@ -8,17 +8,28 @@ interface PlacaPreviewProps {
   size?: "small" | "large";
   showLabel?: boolean;
   showDownloadHelper?: boolean;
+  onImageUpdate?: () => void;
 }
 
 export const PlacaPreview = ({ 
   codigo, 
   size = "large",
   showLabel = false,
-  showDownloadHelper = true
+  showDownloadHelper = true,
+  onImageUpdate
 }: PlacaPreviewProps) => {
   const [imageError, setImageError] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const imagePath = getImagemPlaca(codigo);
   const hasImage = imagePath && !imageError;
+
+  const handleUploadSuccess = () => {
+    setImageError(false);
+    setRefreshKey(prev => prev + 1);
+    if (onImageUpdate) {
+      onImageUpdate();
+    }
+  };
   
   const sizeClasses = {
     small: "w-5 h-5",
@@ -48,7 +59,7 @@ export const PlacaPreview = ({
         
         {/* Mostra o helper apenas no tamanho large e quando habilitado */}
         {size === "large" && showDownloadHelper && (
-          <PlacaDownloadHelper codigo={codigo} />
+          <PlacaDownloadHelper codigo={codigo} onUploadSuccess={handleUploadSuccess} />
         )}
       </div>
     );
@@ -59,6 +70,7 @@ export const PlacaPreview = ({
     <div className="flex flex-col items-center gap-2">
       <div className={`${sizeClasses[size]} border border-border rounded-lg p-1 flex items-center justify-center bg-background shadow-sm`}>
         <img 
+          key={refreshKey}
           src={imagePath} 
           alt={`Placa ${codigo}`}
           className="w-full h-full object-contain"

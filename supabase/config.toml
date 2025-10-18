@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.download-vgeo-layer]
 verify_jwt = false
+
+[functions.upload-placa-svg]
+verify_jwt = true

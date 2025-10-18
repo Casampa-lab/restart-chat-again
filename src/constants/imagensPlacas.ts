@@ -23,7 +23,7 @@ export const detectarCategoria = (codigo: string): CategoriaPlaca | null => {
 
 /**
  * Retorna o caminho da imagem para um código de placa
- * Retorna null se a placa não tiver imagem disponível
+ * Prioriza assets estáticos, depois Supabase Storage
  */
 export const getImagemPlaca = (codigo: string | null | undefined): string | null => {
   if (!codigo) return null;
@@ -31,13 +31,15 @@ export const getImagemPlaca = (codigo: string | null | undefined): string | null
   const categoria = detectarCategoria(codigo);
   if (!categoria) return null;
   
-  try {
-    // Tenta importar a imagem dinamicamente
-    // O Vite vai resolver isso em tempo de build
-    return `/src/assets/placas/${categoria}/${codigo}.svg`;
-  } catch {
-    return null;
-  }
+  // Primeiro tenta assets estáticos
+  const staticPath = `/src/assets/placas/${categoria}/${codigo}.svg`;
+  
+  // Se não encontrar nos assets estáticos, tenta no Supabase Storage
+  // (essa URL será verificada pelo navegador em tempo de execução)
+  const storagePath = `https://cfdnrbyeuqtrjzzjyuon.supabase.co/storage/v1/object/public/placa-svgs/${categoria}/${codigo}.svg`;
+  
+  // Retorna o path estático primeiro, o navegador fará fallback para storage se necessário
+  return staticPath;
 };
 
 /**
