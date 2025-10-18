@@ -196,6 +196,7 @@ const obterDadosDicionario = (tipo: string, camposSUPRA: any[]) => {
     substrato: "Material do substrato",
     tipo_defensa: "Tipo de defensa metálica",
     tipo_inscricao: "Tipo de inscrição viária",
+    sigla: "Sigla ou abreviação da inscrição viária",
     descricao: "Descrição do dispositivo (Bidirecional/Monodirecional)",
     refletivo: "Descrição do dispositivo (Bidirecional/Monodirecional)",
     tipo_refletivo: "Tipo do refletivo utilizado conforme NBR 14.644/2021",

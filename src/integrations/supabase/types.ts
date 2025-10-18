@@ -888,6 +888,7 @@ export type Database = {
           origem: string | null
           rodovia_id: string
           sigla: string | null
+          snv: string | null
           tipo_inscricao: string
           ultima_intervencao_id: string | null
           updated_at: string
@@ -917,6 +918,7 @@ export type Database = {
           origem?: string | null
           rodovia_id: string
           sigla?: string | null
+          snv?: string | null
           tipo_inscricao: string
           ultima_intervencao_id?: string | null
           updated_at?: string
@@ -946,6 +948,7 @@ export type Database = {
           origem?: string | null
           rodovia_id?: string
           sigla?: string | null
+          snv?: string | null
           tipo_inscricao?: string
           ultima_intervencao_id?: string | null
           updated_at?: string

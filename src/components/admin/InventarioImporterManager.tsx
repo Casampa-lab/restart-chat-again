@@ -926,6 +926,10 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           
           const sigla = getVal("Sigla", "sigla");
           const descricao = getVal("Descrição", "Descricao", "descrição", "descricao");
+          
+          // Mapear campos diretamente
+          record.sigla = sigla || null;
+          record.snv = getVal("SNV", "snv") || null;
           record.tipo_inscricao = [sigla, descricao].filter(Boolean).join(" - ") || "Não especificado";
           record.cor = getVal("Cor", "cor") || "Branca";
           
@@ -946,12 +950,9 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           const area = getVal("Área (m²)", "Area m2", "Área", "area");
           record.area_m2 = area ? Number(area) : null;
           
+          // Observação apenas com BR
           const br = getVal("BR", "br");
-          const snv = getVal("SNV", "snv");
-          const obs = [];
-          if (br) obs.push(`BR: ${br}`);
-          if (snv) obs.push(`SNV: ${snv}`);
-          record.observacao = obs.length > 0 ? obs.join(" | ") : null;
+          record.observacao = br ? `BR: ${br}` : null;
           
           record.data_vistoria = new Date().toISOString().split('T')[0];
         }
