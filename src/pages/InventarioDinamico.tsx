@@ -95,6 +95,10 @@ export default function InventarioDinamico() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
+              <BreadcrumbLink href="/modulos">VABLE</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
               <BreadcrumbPage>Inventário Dinâmico</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
