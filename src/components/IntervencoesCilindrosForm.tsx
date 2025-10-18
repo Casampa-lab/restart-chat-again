@@ -7,10 +7,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, Check, Milestone } from "lucide-react";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
@@ -180,14 +181,15 @@ export function IntervencoesCilindrosForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Dados Básicos da Intervenção */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="data_intervencao"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Data da Intervenção *</FormLabel>
+                    <FormLabel>Data da Intervenção</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -215,7 +217,7 @@ export function IntervencoesCilindrosForm({
                 name="motivo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Motivo *</FormLabel>
+                    <FormLabel>Motivo da Intervenção</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -240,7 +242,7 @@ export function IntervencoesCilindrosForm({
                 name="km_inicial"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>km Inicial *</FormLabel>
+                    <FormLabel>km Inicial</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -259,7 +261,7 @@ export function IntervencoesCilindrosForm({
                 name="km_final"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>km Final *</FormLabel>
+                    <FormLabel>km Final</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -272,171 +274,225 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="cor_corpo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cor (Corpo) *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Amarela">Amarela</SelectItem>
-                        <SelectItem value="Branca">Branca</SelectItem>
-                        <SelectItem value="Preta">Preta</SelectItem>
-                        <SelectItem value="Laranja">Laranja</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="cor_refletivo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cor (Refletivo)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Amarela">Amarela</SelectItem>
-                        <SelectItem value="Branca">Branca</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="tipo_refletivo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo Refletivo</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="III">III</SelectItem>
-                        <SelectItem value="X">X</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="quantidade"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quantidade (und)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="Ex: 100" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
-            <div className="col-span-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={capturarCoordenadas}
-                disabled={isCapturing}
-                className="w-full"
-              >
-                {isCapturing ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
-                ) : (
-                  <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS</>
-                )}
-              </Button>
-            </div>
+            {/* Localização GPS */}
+            <div className="md:col-span-2 space-y-4 border-l-4 border-green-500 pl-4 bg-green-50/50 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-green-600" />
+                <h3 className="font-semibold text-green-700 text-lg">Localização GPS</h3>
+              </div>
+              
+              <div className="space-y-3">
+                <Button
+                  type="button"
+                  onClick={capturarCoordenadas}
+                  disabled={isCapturing}
+                  variant="outline"
+                  className="w-full border-green-500 text-green-700 hover:bg-green-50"
+                >
+                  {isCapturing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Capturando coordenadas...
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Capturar Coordenadas Automáticas
+                    </>
+                  )}
+                </Button>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="latitude"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Latitude</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="any" placeholder="-15.123456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="latitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Latitude</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="any"
+                            placeholder="-15.123456"
+                            className="border-green-300 focus:border-green-500"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="longitude"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Longitude</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="any" placeholder="-47.123456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                  <FormField
+                    control={form.control}
+                    name="longitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Longitude</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="any"
+                            placeholder="-47.123456"
+                            className="border-green-300 focus:border-green-500"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-            <FormField
-              control={form.control}
-              name="fora_plano_manutencao"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={field.onChange}
-                      className="h-4 w-4"
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Fora do Plano de Manutenção</FormLabel>
+                {(form.watch("latitude") && form.watch("longitude")) && (
+                  <div className="flex items-center gap-2 text-sm text-green-600 bg-green-100 p-2 rounded">
+                    <Check className="h-4 w-4" />
+                    <span>Coordenadas capturadas com sucesso</span>
                   </div>
-                </FormItem>
-              )}
-            />
+                )}
+              </div>
+            </div>
 
-            {form.watch("fora_plano_manutencao") && (
+            {/* Características dos Cilindros */}
+            <div className="space-y-4 border-l-4 border-primary pl-4 bg-primary/5 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <Milestone className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-primary text-lg">Características dos Cilindros</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="cor_corpo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cor (Corpo)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Amarela">Amarela</SelectItem>
+                          <SelectItem value="Branca">Branca</SelectItem>
+                          <SelectItem value="Preta">Preta</SelectItem>
+                          <SelectItem value="Laranja">Laranja</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="cor_refletivo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cor (Refletivo)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Amarela">Amarela</SelectItem>
+                          <SelectItem value="Branca">Branca</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tipo_refletivo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo Refletivo</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="III">III</SelectItem>
+                          <SelectItem value="X">X</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="quantidade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantidade (und)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="Ex: 100" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Observações e Justificativas */}
+            <div className="space-y-4">
               <FormField
                 control={form.control}
-                name="justificativa_fora_plano"
+                name="fora_plano_manutencao"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Justificativa *</FormLabel>
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
-                      <Textarea placeholder="Explique o motivo da intervenção fora do plano..." {...field} />
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Fora do Plano de Manutenção
+                      </FormLabel>
+                    </div>
                   </FormItem>
                 )}
               />
-            )}
+
+              {form.watch("fora_plano_manutencao") && (
+                <FormField
+                  control={form.control}
+                  name="justificativa_fora_plano"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Justificativa</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Explique o motivo da intervenção estar fora do plano de manutenção"
+                          className="min-h-[100px]"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
 
             {!hideSubmitButton && (
               <Button type="submit" className="w-full" disabled={isSubmitting || (!cilindroSelecionado && modo !== 'controlado')}>
