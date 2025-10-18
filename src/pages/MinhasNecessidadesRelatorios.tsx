@@ -57,9 +57,9 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
   tachas: [
     { field: "rodovia", header: "BR" },
     { field: "snv", header: "SNV" },
-    { field: "cor", header: "Cor" },
-    { field: "tipo_tacha", header: "Tipo de Tacha" },
-    { field: "lado", header: "Lado" },
+    { field: "corpo", header: "Corpo" },
+    { field: "refletivo", header: "Refletivo" },
+    { field: "cor_refletivo", header: "Cor do Refletivo" },
     { field: "km_inicial", header: "Km Inicial" },
     { field: "latitude_inicial", header: "Latitude Inicial" },
     { field: "longitude_inicial", header: "Longitude Inicial" },
@@ -68,7 +68,7 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
     { field: "longitude_final", header: "Longitude Final" },
     { field: "espacamento_m", header: "Espaçamento (m)" },
     { field: "quantidade", header: "Quantidade" },
-    { field: "material", header: "Material" },
+    { field: "local_implantacao", header: "Local de Implantação" },
     { field: "extensao_km", header: "Extensão (km)" },
   ],
   marcas_transversais: [
