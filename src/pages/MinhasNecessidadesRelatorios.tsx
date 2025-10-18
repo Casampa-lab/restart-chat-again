@@ -669,8 +669,11 @@ export default function MinhasNecessidadesRelatorios() {
           
           const valor = item[campo.field];
           
-          // Formatação de valores
+          // Formatação de valores - Tratar zero como valor válido
           if (valor === null || valor === undefined) return "";
+          
+          // Verificar se é zero (valor válido que deve ser exibido)
+          if (valor === 0) return 0;
           
           if (typeof valor === "number") {
             // Coordenadas: 6 decimais
@@ -685,6 +688,11 @@ export default function MinhasNecessidadesRelatorios() {
             if (campo.field.includes("area_m2")) {
               return Number(valor.toFixed(2));
             }
+            // Espaçamento e extensão: 2 decimais
+            if (campo.field.includes("espacamento") || campo.field.includes("extensao")) {
+              return Number(valor.toFixed(2));
+            }
+            // Quantidade e outros números inteiros
             return valor;
           }
           
@@ -830,6 +838,9 @@ export default function MinhasNecessidadesRelatorios() {
               const valor = int[campo.field];
               if (valor === null || valor === undefined) return "";
               
+              // Verificar se é zero (valor válido que deve ser exibido)
+              if (valor === 0) return 0;
+              
               if (typeof valor === "number") {
                 if (campo.field.includes("latitude") || campo.field.includes("longitude")) {
                   return Number(valor.toFixed(6));
@@ -838,6 +849,10 @@ export default function MinhasNecessidadesRelatorios() {
                   return Number(valor.toFixed(3));
                 }
                 if (campo.field.includes("area_m2")) {
+                  return Number(valor.toFixed(2));
+                }
+                // Espaçamento e extensão: 2 decimais
+                if (campo.field.includes("espacamento") || campo.field.includes("extensao")) {
                   return Number(valor.toFixed(2));
                 }
                 return valor;
