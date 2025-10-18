@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
+import { CODIGOS_PLACAS } from "@/constants/codigosPlacas";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
@@ -55,6 +56,7 @@ export function IntervencoesSVForm({
   const [isLoading, setIsLoading] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [coordenadas, setCoordenadas] = useState({ latitude: "", longitude: "" });
+  const [codigosFiltrados, setCodigosFiltrados] = useState<readonly {codigo: string, nome: string}[]>([]);
 
   const capturarCoordenadas = () => {
     setIsCapturing(true);
@@ -129,6 +131,26 @@ export function IntervencoesSVForm({
       return () => subscription.unsubscribe();
     }
   }, [modo, onDataChange, form]);
+
+  // Filtra códigos de placa baseado no tipo selecionado
+  useEffect(() => {
+    const tipoPlaca = form.watch("tipo_placa");
+    
+    if (tipoPlaca === "Regulamentação") {
+      setCodigosFiltrados(CODIGOS_PLACAS.REGULAMENTACAO);
+    } else if (tipoPlaca === "Advertência") {
+      setCodigosFiltrados(CODIGOS_PLACAS.ADVERTENCIA);
+    } else if (tipoPlaca === "Indicação") {
+      setCodigosFiltrados(CODIGOS_PLACAS.INDICACAO);
+    } else {
+      setCodigosFiltrados([]);
+    }
+    
+    // Limpa o código quando o tipo muda (exceto quando é preenchimento inicial)
+    if (tipoPlaca && !placaSelecionada) {
+      form.setValue("codigo_placa", "");
+    }
+  }, [form.watch("tipo_placa")]);
 
   const onSubmit = async (data: FormValues) => {
     // Em modo controlado, não faz submit direto
@@ -298,9 +320,19 @@ export function IntervencoesSVForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Tipo de Placa *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Regulamentação, Advertência" {...field} />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o tipo" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Regulamentação">Regulamentação</SelectItem>
+                            <SelectItem value="Advertência">Advertência</SelectItem>
+                            <SelectItem value="Indicação">Indicação</SelectItem>
+                            <SelectItem value="Outros">Outros</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -312,9 +344,34 @@ export function IntervencoesSVForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Código da Placa *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: R-1, A-21" {...field} />
-                        </FormControl>
+                        {form.watch("tipo_placa") === "Outros" ? (
+                          <FormControl>
+                            <Input placeholder="Digite o código" {...field} />
+                          </FormControl>
+                        ) : (
+                          <Select 
+                            onValueChange={field.onChange} 
+                            value={field.value}
+                            disabled={codigosFiltrados.length === 0}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={
+                                  form.watch("tipo_placa") 
+                                    ? "Selecione o código" 
+                                    : "Selecione primeiro o tipo"
+                                } />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="max-h-[300px]">
+                              {codigosFiltrados.map((placa) => (
+                                <SelectItem key={placa.codigo} value={placa.codigo}>
+                                  {placa.codigo} - {placa.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
