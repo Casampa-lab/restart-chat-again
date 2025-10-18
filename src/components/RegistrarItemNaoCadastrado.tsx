@@ -298,7 +298,7 @@ export function RegistrarItemNaoCadastrado({
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <p className="text-sm text-yellow-800">
               <strong>Atenção:</strong> Esta solicitação será enviada para análise do coordenador. 
-              Após a aprovação, o elemento será incluído no inventário dinâmico e você poderá 
+              Após a aprovação, o elemento será incluído no inventário dinâmico e o técnico poderá 
               registrar intervenções normalmente.
             </p>
           </div>
