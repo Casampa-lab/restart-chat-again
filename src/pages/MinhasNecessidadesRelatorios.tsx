@@ -630,16 +630,17 @@ export default function MinhasNecessidadesRelatorios() {
         return;
       }
 
-      // Criar workbook com formatação SUPRA
+      // Criar workbook - usar template se disponível
       const ExcelJS = (await import("exceljs")).default;
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("CADASTRO INICIAL");
+      let workbook: any;
+      let worksheet: any;
+      let linhaInicioDados: number;
 
       // Obter mapeamento de campos SUPRA
       const camposSUPRA = CAMPOS_SUPRA[tipoSelecionado] || [];
       const cabecalhos = camposSUPRA.map(c => c.header);
       
-      // Adicionar cabeçalho SUPRA
+      // Variáveis para cabeçalho SUPRA (usadas também na aba de manutenção)
       const tituloSUPRA = TITULOS_SUPRA[tipoSelecionado] || tipoConfig.label;
       const contrato = supervisora?.contrato || "Contrato não informado";
       const logoDNIT = supervisora?.usar_logo_orgao_relatorios 
@@ -647,17 +648,70 @@ export default function MinhasNecessidadesRelatorios() {
         : "/logo-dnit.jpg";
       const logoSupervisora = supervisora?.logo_url || null;
 
-      const linhaInicioDados = await adicionarCabecalhoSUPRA({
-        worksheet,
-        titulo: tituloSUPRA,
-        contrato,
-        logoOrgao: logoDNIT,
-        logoSupervisora,
-        numColunas: cabecalhos.length,
-      });
+      if (tipoConfig.templatePath && tipoConfig.abaOriginal) {
+        // USAR TEMPLATE .xlsm
+        try {
+          const response = await fetch(tipoConfig.templatePath);
+          if (!response.ok) throw new Error("Template não encontrado");
+          
+          const buffer = await response.arrayBuffer();
+          workbook = new ExcelJS.Workbook();
+          await workbook.xlsx.load(buffer);
 
-      // Formatar cabeçalhos das colunas
-      formatarCabecalhosColunas(worksheet, linhaInicioDados, cabecalhos);
+          // Adicionar aba temporária com dados do inventário
+          const tempSheet = workbook.addWorksheet("INVENTARIO_TEMP");
+
+          // Adicionar cabeçalhos na primeira linha
+          const headerRow = tempSheet.getRow(1);
+          headerRow.values = cabecalhos;
+          headerRow.font = { name: "Arial", size: 10, bold: true };
+          headerRow.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFE0E0E0" },
+          };
+          headerRow.eachCell((cell) => {
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+            cell.alignment = { horizontal: "center", vertical: "middle" };
+          });
+
+          linhaInicioDados = 1;
+          worksheet = tempSheet;
+        } catch (error) {
+          console.error("Erro ao carregar template, criando do zero:", error);
+          workbook = new ExcelJS.Workbook();
+          worksheet = workbook.addWorksheet("CADASTRO INICIAL");
+
+          linhaInicioDados = await adicionarCabecalhoSUPRA({
+            worksheet,
+            titulo: tituloSUPRA,
+            contrato,
+            logoOrgao: logoDNIT,
+            logoSupervisora,
+            numColunas: cabecalhos.length,
+          });
+          formatarCabecalhosColunas(worksheet, linhaInicioDados, cabecalhos);
+        }
+      } else {
+        // Criar do zero (sem template)
+        workbook = new ExcelJS.Workbook();
+        worksheet = workbook.addWorksheet("CADASTRO INICIAL");
+
+        linhaInicioDados = await adicionarCabecalhoSUPRA({
+          worksheet,
+          titulo: tituloSUPRA,
+          contrato,
+          logoOrgao: logoDNIT,
+          logoSupervisora,
+          numColunas: cabecalhos.length,
+        });
+        formatarCabecalhosColunas(worksheet, linhaInicioDados, cabecalhos);
+      }
 
       // Adicionar dados
       const primeiraLinhaDados = linhaInicioDados + 1;
@@ -1093,6 +1147,26 @@ export default function MinhasNecessidadesRelatorios() {
       // Auto-ajustar largura
       ladoSheet.getColumn(1).width = 10;
       ladoSheet.getColumn(2).width = 60;
+
+      // Se usou template, remover aba original e renomear temporária
+      if (tipoConfig.templatePath && tipoConfig.abaOriginal) {
+        try {
+          // Remover aba original do template
+          const abaOriginal = workbook.getWorksheet(tipoConfig.abaOriginal);
+          if (abaOriginal) {
+            workbook.removeWorksheet(abaOriginal.id);
+          }
+          
+          // Renomear aba temporária para o nome original
+          const abaTemp = workbook.getWorksheet("INVENTARIO_TEMP");
+          if (abaTemp) {
+            abaTemp.name = tipoConfig.abaOriginal;
+          }
+        } catch (error) {
+          console.error("Erro ao manipular abas do template:", error);
+          // Continuar mesmo se houver erro na manipulação das abas
+        }
+      }
 
       // Download
       const buffer = await workbook.xlsx.writeBuffer();

@@ -2,7 +2,7 @@
 
 ## 📋 Visão Geral
 
-Este procedimento descreve como gerar **Relatórios Iniciais** por lote e como marcar serviços executados **fora do plano de manutenção** para evidenciar divergências nos relatórios de medição.
+Este procedimento descreve como gerar **Relatórios Iniciais** por lote usando templates SUPRA oficiais (.xlsm) e como marcar serviços executados **fora do plano de manutenção** para evidenciar divergências nos relatórios de medição.
 
 ---
 
@@ -18,15 +18,16 @@ Este procedimento descreve como gerar **Relatórios Iniciais** por lote e como m
 2. Na aba **"Relatório Inicial"**:
    - Selecione o **Tipo de Elemento** (ex: SH Longitudinal, Placas, etc.)
    - Clique em **"Gerar"**
-3. O sistema gerará uma planilha Excel com:
-   - **Aba 1 - CADASTRO INICIAL**: Estado dos elementos antes das intervenções
-   - **Aba 2 - MANUTENÇÃO EXECUTADA**: Serviços realizados no período
-   - **Aba 3 - DIC**: Dicionário de dados
+3. O sistema gerará uma planilha Excel usando os **templates SUPRA oficiais** (.xlsm) com:
+   - **Aba Principal** (ex: SH1(cadastro), SV1(cadastro), DS(cadastro)): Estado dos elementos antes das intervenções
+   - **Aba Dicionário** (ex: DicSH1, DicDV1, DicDS): Descrição dos campos
+   - **Aba "Lado"**: Nomenclatura de posicionamento (Direito, Esquerdo, Central, Ambos)
+   - **Abas auxiliares originais do template**: Preservadas conforme padrão SUPRA
 
 ### O que o relatório contém:
+- Todos os **elementos visuais e formatações originais** dos templates SUPRA
 - Cadastro inicial de todos os elementos do tipo selecionado
-- Lista de intervenções de manutenção executadas
-- Colunas destacadas para identificar serviços fora do plano
+- Dados de localização (rodovias, lotes, empresas)
 
 ---
 
