@@ -84,7 +84,7 @@ export default function RegistrarIntervencaoCampo() {
         pendente_aprovacao_coordenador: isConforme,
       };
 
-      // Se não conforme, criar NC primeiro
+      // Se não conforme, criar NC
       if (!isConforme) {
         const { error: ncError } = await supabase
           .from('registro_nc' as any)
@@ -102,28 +102,26 @@ export default function RegistrarIntervencaoCampo() {
         if (ncError) throw ncError;
       }
 
-      // Inserir intervenção na tabela correspondente
-      const tabelaMap: Record<string, string> = {
-        placas: 'ficha_placa_intervencoes',
-        marcas_longitudinais: 'ficha_marcas_longitudinais_intervencoes',
-        tachas: 'ficha_tachas_intervencoes',
-        defensas: 'defensas_intervencoes',
-        cilindros: 'ficha_cilindros_intervencoes',
-        porticos: 'ficha_porticos_intervencoes',
-        inscricoes: 'ficha_inscricoes_intervencoes',
-      };
-
-      const tabela = tabelaMap[tipoSelecionado];
-      if (!tabela) {
-        throw new Error('Tipo de elemento inválido');
-      }
-
-      const { error } = await supabase.from(tabela as any).insert(payload as any);
+      // Inserir em elementos_pendentes_aprovacao
+      const { error } = await supabase
+        .from('elementos_pendentes_aprovacao')
+        .insert({
+          user_id: user!.id,
+          lote_id: activeSession.lote_id,
+          rodovia_id: activeSession.rodovia_id,
+          tipo_elemento: tipoSelecionado,
+          dados_elemento: payload,
+          justificativa: isConforme 
+            ? 'Intervenção conforme registrada em campo' 
+            : justificativaNC,
+          fotos_urls: fotos,
+          status: isConforme ? 'pendente_aprovacao' : 'rejeitado'
+        });
 
       if (error) throw error;
 
       toast.success(isConforme 
-        ? 'Intervenção conforme registrada!' 
+        ? 'Intervenção enviada para aprovação!' 
         : 'Não conformidade registrada!'
       );
       
