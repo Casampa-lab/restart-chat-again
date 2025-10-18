@@ -40,6 +40,7 @@ import RegistrarIntervencaoCampo from "./pages/RegistrarIntervencaoCampo";
 import AuditoriaSinalizacoes from "./pages/AuditoriaSinalizacoes";
 import DocumentacaoVABLE from "./pages/DocumentacaoVABLE";
 import AuditoriaInventario from "./pages/AuditoriaInventario";
+import InventarioDinamico from "./pages/InventarioDinamico";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +80,7 @@ const App = () => (
         <Route path="/auditoria-inventario" element={<AuditoriaInventario />} />
         <Route path="/documentacao-vable" element={<DocumentacaoVABLE />} />
         <Route path="/inventario-dinamico" element={<InventarioDinamicoComAlerta />} />
+        <Route path="/baseline-evolucao" element={<InventarioDinamico />} />
         <Route path="/coordenacao-fiscalizacao" element={<CoordenacaoFiscalizacao />} />
         <Route path="/ncs-coordenador" element={<NCsCoordenador />} />
         <Route path="/reset-password" element={<ResetPassword />} />
