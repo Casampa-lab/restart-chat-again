@@ -57,3 +57,25 @@ export function extractBase64(dataUrl: string): string {
 export function getImageFormat(dataUrl: string): 'PNG' | 'JPEG' {
   return dataUrl.includes('image/png') ? 'PNG' : 'JPEG';
 }
+
+/**
+ * Calcula dimensões do logo para PDF mantendo aspect ratio
+ */
+export async function calcularDimensoesPDF(
+  dataUrl: string,
+  alturaMM: number
+): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const aspectRatio = img.width / img.height;
+      const larguraMM = alturaMM * aspectRatio;
+      resolve({
+        width: larguraMM,
+        height: alturaMM,
+      });
+    };
+    img.onerror = () => reject(new Error("Erro ao calcular dimensões"));
+    img.src = dataUrl;
+  });
+}

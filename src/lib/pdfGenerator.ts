@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { urlToBase64 } from './pdfHelpers';
+import { urlToBase64, calcularDimensoesPDF } from './pdfHelpers';
 
 interface FotoData {
   foto_url: string;
@@ -59,11 +59,14 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
   let yPos = 15;
 
   // ==================== HEADER COM LOGOS ====================
+  const ALTURA_LOGO_MM = 12; // Altura padrão para ambos os logos
+  
   // Logo DNIT (esquerda)
   try {
     const logoDNIT = '/logo-dnit.jpg';
     const dnitBase64 = await urlToBase64(logoDNIT);
-    doc.addImage(dnitBase64, 'JPEG', margin, yPos, 30, 10);
+    const dimDNIT = await calcularDimensoesPDF(dnitBase64, ALTURA_LOGO_MM);
+    doc.addImage(dnitBase64, 'JPEG', margin, yPos, dimDNIT.width, dimDNIT.height);
   } catch (error) {
     console.error('Erro ao carregar logo DNIT:', error);
     doc.setFontSize(8);
@@ -74,7 +77,15 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
   if (ncData.supervisora.logo_url) {
     try {
       const logoSupBase64 = await urlToBase64(ncData.supervisora.logo_url);
-      doc.addImage(logoSupBase64, 'PNG', pageWidth - margin - 35, yPos, 35, 12);
+      const dimSup = await calcularDimensoesPDF(logoSupBase64, ALTURA_LOGO_MM);
+      doc.addImage(
+        logoSupBase64,
+        'PNG',
+        pageWidth - margin - dimSup.width,
+        yPos,
+        dimSup.width,
+        dimSup.height
+      );
     } catch (error) {
       console.error('Erro ao carregar logo supervisora:', error);
       doc.setFontSize(8);

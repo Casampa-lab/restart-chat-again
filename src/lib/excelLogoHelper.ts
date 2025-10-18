@@ -34,6 +34,28 @@ function getImageExtension(dataUrl: string): "png" | "jpeg" {
   return "jpeg";
 }
 
+/**
+ * Calcula dimensões do logo mantendo aspect ratio
+ */
+async function calcularDimensoesLogo(
+  dataUrl: string,
+  alturaDesejada: number
+): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const aspectRatio = img.width / img.height;
+      const larguraCalculada = alturaDesejada * aspectRatio;
+      resolve({
+        width: larguraCalculada,
+        height: alturaDesejada,
+      });
+    };
+    img.onerror = () => reject(new Error("Erro ao carregar imagem"));
+    img.src = dataUrl;
+  });
+}
+
 interface AdicionarLogosOptions {
   logoSupervisoraUrl?: string | null;
   logoOrgaoUrl?: string | null;
@@ -76,9 +98,11 @@ export async function adicionarLogosHeader(
   // Adicionar logo da supervisora (lado esquerdo)
   if (logoSupervisoraUrl) {
     try {
+      const ALTURA_PADRAO = 60;
       const base64Image = await urlToBase64(logoSupervisoraUrl);
       const base64Data = extractBase64(base64Image);
       const extension = getImageExtension(base64Image);
+      const dimensoes = await calcularDimensoesLogo(base64Image, ALTURA_PADRAO);
 
       const imageId = worksheet.workbook.addImage({
         base64: base64Data,
@@ -87,7 +111,7 @@ export async function adicionarLogosHeader(
 
       worksheet.addImage(imageId, {
         tl: { col: 0, row: 0 }, // Top-left: coluna A, linha 1
-        ext: { width: 150, height: 60 },
+        ext: dimensoes,
       });
     } catch (error) {
       console.error("Erro ao adicionar logo supervisora:", error);
@@ -97,9 +121,11 @@ export async function adicionarLogosHeader(
   // Adicionar logo do órgão fiscalizador (lado direito)
   if (logoOrgaoUrl) {
     try {
+      const ALTURA_PADRAO = 60;
       const base64Image = await urlToBase64(logoOrgaoUrl);
       const base64Data = extractBase64(base64Image);
       const extension = getImageExtension(base64Image);
+      const dimensoes = await calcularDimensoesLogo(base64Image, ALTURA_PADRAO);
 
       const imageId = worksheet.workbook.addImage({
         base64: base64Data,
@@ -111,7 +137,7 @@ export async function adicionarLogosHeader(
       
       worksheet.addImage(imageId, {
         tl: { col: lastCol - 1, row: 0 }, // Duas colunas antes do fim
-        ext: { width: 150, height: 60 },
+        ext: dimensoes,
       });
     } catch (error) {
       console.error("Erro ao adicionar logo órgão:", error);
