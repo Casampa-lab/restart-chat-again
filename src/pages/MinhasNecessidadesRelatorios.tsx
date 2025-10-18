@@ -648,61 +648,25 @@ export default function MinhasNecessidadesRelatorios() {
         : "/logo-dnit.jpg";
       const logoSupervisora = supervisora?.logo_url || null;
 
-      if (tipoConfig.templatePath && tipoConfig.abaOriginal) {
-        // USAR TEMPLATE .xlsm - PRESERVANDO TODOS OS ELEMENTOS VISUAIS
-        try {
-          const response = await fetch(tipoConfig.templatePath);
-          if (!response.ok) throw new Error("Template não encontrado");
-          
-          const buffer = await response.arrayBuffer();
-          workbook = new ExcelJS.Workbook();
-          await workbook.xlsx.load(buffer);
+      // SEMPRE criar uma planilha nova com os dados corretos
+      let workbookTemp = new ExcelJS.Workbook();
+      let worksheetDados = workbookTemp.addWorksheet("CADASTRO INICIAL");
 
-          // LOCALIZAR A ABA ORIGINAL DO TEMPLATE (ex: "SH1(cadastro)")
-          worksheet = workbook.getWorksheet(tipoConfig.abaOriginal);
-          
-          if (!worksheet) {
-            throw new Error(`Aba "${tipoConfig.abaOriginal}" não encontrada no template`);
-          }
-
-          // INSERIR DADOS A PARTIR DA LINHA 2 (linha 1 já tem cabeçalhos formatados do template)
-          // NÃO criar nova aba, NÃO adicionar cabeçalhos, NÃO remover nada, NÃO renomear nada
-          linhaInicioDados = 3; // Linha do cabeçalho (dados começam na linha 4)
-        } catch (error) {
-          console.error("Erro ao carregar template, criando do zero:", error);
-          workbook = new ExcelJS.Workbook();
-          worksheet = workbook.addWorksheet("CADASTRO INICIAL");
-
-          linhaInicioDados = await adicionarCabecalhoSUPRA({
-            worksheet,
-            titulo: tituloSUPRA,
-            contrato,
-            logoOrgao: logoDNIT,
-            logoSupervisora,
-            numColunas: cabecalhos.length,
-          });
-          formatarCabecalhosColunas(worksheet, linhaInicioDados, cabecalhos);
-        }
-      } else {
-        // Criar do zero (sem template)
-        workbook = new ExcelJS.Workbook();
-        worksheet = workbook.addWorksheet("CADASTRO INICIAL");
-
-        linhaInicioDados = await adicionarCabecalhoSUPRA({
-          worksheet,
-          titulo: tituloSUPRA,
-          contrato,
-          logoOrgao: logoDNIT,
-          logoSupervisora,
-          numColunas: cabecalhos.length,
-        });
-        formatarCabecalhosColunas(worksheet, linhaInicioDados, cabecalhos);
-      }
+      // Adicionar cabeçalhos SUPRA e formatar
+      linhaInicioDados = await adicionarCabecalhoSUPRA({
+        worksheet: worksheetDados,
+        titulo: tituloSUPRA,
+        contrato,
+        logoOrgao: logoDNIT,
+        logoSupervisora,
+        numColunas: cabecalhos.length,
+      });
+      formatarCabecalhosColunas(worksheetDados, linhaInicioDados, cabecalhos);
 
       // Adicionar dados
       const primeiraLinhaDados = linhaInicioDados + 1;
       cadastro.forEach((item: any, index: number) => {
-        const row = worksheet.getRow(primeiraLinhaDados + index);
+        const row = worksheetDados.getRow(primeiraLinhaDados + index);
         
         // Mapear e formatar valores
         const valores = camposSUPRA.map(campo => {
@@ -741,46 +705,70 @@ export default function MinhasNecessidadesRelatorios() {
           return valor;
         });
         
-        // Inserir dados célula por célula (mais confiável com templates .xlsm)
-        valores.forEach((valor, colIndex) => {
-          const cell = row.getCell(colIndex + 1);
-          cell.value = valor;
-          
-          // Se estiver usando template, aplicar bordas finas para manter padrão visual
-          if (tipoConfig.templatePath && tipoConfig.abaOriginal) {
-            cell.border = {
-              top: { style: "thin" },
-              left: { style: "thin" },
-              bottom: { style: "thin" },
-              right: { style: "thin" }
-            };
-          }
-        });
-        
-        // Garantir que a linha seja commitada
+        row.values = [null, ...valores]; // null para offset de índice
         row.commit();
       });
 
       const ultimaLinhaDados = primeiraLinhaDados + cadastro.length - 1;
 
-      // Formatar células de dados (apenas se NÃO estiver usando template)
-      if (!tipoConfig.templatePath || !tipoConfig.abaOriginal) {
-        formatarCelulasDados(worksheet, primeiraLinhaDados, ultimaLinhaDados);
-        
-        // Adicionar rodapé
-        adicionarRodape(worksheet, ultimaLinhaDados, cabecalhos.length);
-      }
+      // Formatar células de dados
+      formatarCelulasDados(worksheetDados, primeiraLinhaDados, ultimaLinhaDados);
+      
+      // Adicionar rodapé
+      adicionarRodape(worksheetDados, ultimaLinhaDados, cabecalhos.length);
 
-      // Auto-ajustar largura das colunas (apenas se NÃO estiver usando template)
-      if (!tipoConfig.templatePath || !tipoConfig.abaOriginal) {
-        worksheet.columns.forEach((column, index) => {
-          let maxLength = cabecalhos[index]?.length || 10;
-          column.eachCell?.({ includeEmpty: false }, cell => {
-            const cellLength = cell.value ? String(cell.value).length : 10;
-            if (cellLength > maxLength) maxLength = cellLength;
-          });
-          column.width = Math.max(maxLength + 2, 12);
+      // Auto-ajustar largura das colunas
+      worksheetDados.columns.forEach((column, index) => {
+        let maxLength = cabecalhos[index]?.length || 10;
+        column.eachCell?.({ includeEmpty: false }, cell => {
+          const cellLength = cell.value ? String(cell.value).length : 10;
+          if (cellLength > maxLength) maxLength = cellLength;
         });
+        column.width = Math.max(maxLength + 2, 12);
+      });
+
+      // Se houver template, copiar a aba gerada para dentro do template
+      if (tipoConfig.templatePath && tipoConfig.abaOriginal) {
+        try {
+          console.log("Copiando aba gerada para o template:", tipoConfig.templatePath);
+          const response = await fetch(tipoConfig.templatePath);
+          if (!response.ok) throw new Error("Template não encontrado");
+          
+          const buffer = await response.arrayBuffer();
+          workbook = new ExcelJS.Workbook();
+          await workbook.xlsx.load(buffer);
+          
+          // Adicionar a aba gerada ao template (mantém aba original do template)
+          worksheet = workbook.addWorksheet("CADASTRO INICIAL");
+          
+          // Copiar todos os dados da aba gerada
+          worksheetDados.eachRow((row, rowNumber) => {
+            const targetRow = worksheet.getRow(rowNumber);
+            row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+              const targetCell = targetRow.getCell(colNumber);
+              targetCell.value = cell.value;
+              targetCell.style = cell.style;
+            });
+            targetRow.commit();
+          });
+          
+          // Copiar larguras das colunas
+          worksheetDados.columns.forEach((col, index) => {
+            if (worksheet.columns[index]) {
+              worksheet.columns[index].width = col.width;
+            }
+          });
+          
+          console.log("Aba copiada com sucesso para o template");
+        } catch (error) {
+          console.error("Erro ao copiar para template, usando planilha gerada:", error);
+          workbook = workbookTemp;
+          worksheet = worksheetDados;
+        }
+      } else {
+        // Sem template, usar a planilha gerada
+        workbook = workbookTemp;
+        worksheet = worksheetDados;
       }
 
       // MANUTENÇÃO EXECUTADA (se houver filtro de datas)
