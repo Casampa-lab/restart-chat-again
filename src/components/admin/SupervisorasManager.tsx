@@ -7,15 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Building2, Upload, Users, Copy, RefreshCw } from "lucide-react";
+import { Pencil, Plus, Trash2, Building2, Upload, Copy, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 interface Supervisora {
   id: string;
   nome_empresa: string;
   contrato: string | null;
-  email_prefixo: string | null;
-  email_envio: string | null;
   logo_url: string | null;
   usar_logo_customizado: boolean;
   codigo_convite: string | null;
@@ -30,8 +28,6 @@ export const SupervisorasManager = () => {
   const [formData, setFormData] = useState({
     nome_empresa: "",
     contrato: "",
-    email_prefixo: "",
-    email_envio: "",
     usar_logo_customizado: false,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -125,8 +121,6 @@ export const SupervisorasManager = () => {
           .update({
             nome_empresa: formData.nome_empresa,
             contrato: formData.contrato,
-            email_prefixo: formData.email_prefixo || null,
-            email_envio: formData.email_envio || null,
             logo_url: logoUrl,
             usar_logo_customizado: formData.usar_logo_customizado,
           })
@@ -141,8 +135,6 @@ export const SupervisorasManager = () => {
           .insert({
             nome_empresa: formData.nome_empresa,
             contrato: formData.contrato,
-            email_prefixo: formData.email_prefixo || null,
-            email_envio: formData.email_envio || null,
             logo_url: logoUrl,
             usar_logo_customizado: formData.usar_logo_customizado,
           });
@@ -218,8 +210,6 @@ export const SupervisorasManager = () => {
     setFormData({
       nome_empresa: supervisora.nome_empresa,
       contrato: supervisora.contrato || "",
-      email_prefixo: supervisora.email_prefixo || "",
-      email_envio: supervisora.email_envio || "",
       usar_logo_customizado: supervisora.usar_logo_customizado,
     });
     setIsDialogOpen(true);
@@ -230,9 +220,7 @@ export const SupervisorasManager = () => {
     setEditingSupervisora(null);
     setFormData({ 
       nome_empresa: "", 
-      contrato: "", 
-      email_prefixo: "", 
-      email_envio: "",
+      contrato: "",
       usar_logo_customizado: false 
     });
     setLogoFile(null);
@@ -257,9 +245,7 @@ export const SupervisorasManager = () => {
                 setEditingSupervisora(null);
                 setFormData({ 
                   nome_empresa: "", 
-                  contrato: "", 
-                  email_prefixo: "", 
-                  email_envio: "",
+                  contrato: "",
                   usar_logo_customizado: false 
                 });
               }}>
@@ -296,46 +282,6 @@ export const SupervisorasManager = () => {
                     onChange={(e) => setFormData({ ...formData, contrato: e.target.value })}
                     placeholder="Ex: Contrato N° 123/2024"
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email_prefixo">Prefixo de Email</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      id="email_prefixo"
-                      value={formData.email_prefixo}
-                      onChange={(e) => {
-                        // Remove caracteres especiais e converte para minúsculas
-                        const value = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '');
-                        setFormData({ ...formData, email_prefixo: value });
-                      }}
-                      placeholder="Ex: supervisora"
-                      maxLength={20}
-                      className="flex-1"
-                    />
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">
-                      @operavia.online
-                    </span>
-                  </div>
-                  {formData.email_prefixo && (
-                    <p className="text-sm text-muted-foreground">
-                      Email de usuários: <strong>{formData.email_prefixo}@operavia.online</strong>
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email_envio">Email de Envio (Remetente das Notificações)</Label>
-                  <Input
-                    id="email_envio"
-                    type="email"
-                    value={formData.email_envio}
-                    onChange={(e) => setFormData({ ...formData, email_envio: e.target.value })}
-                    placeholder="Ex: noreply@supervisora.com.br"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Este email será usado como remetente nas notificações de NC
-                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -401,14 +347,11 @@ export const SupervisorasManager = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Contrato</TableHead>
-                <TableHead>Email de Envio</TableHead>
-                <TableHead className="text-center">Logo</TableHead>
-                <TableHead className="text-center">Logo Ativo</TableHead>
-                <TableHead>Código Convite</TableHead>
-                <TableHead className="text-center">Usuários</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+            <TableHead>Nome da Empresa</TableHead>
+            <TableHead>Contrato</TableHead>
+            <TableHead className="text-center">Logo</TableHead>
+            <TableHead>Código Convite</TableHead>
+            <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -420,15 +363,6 @@ export const SupervisorasManager = () => {
                   <TableCell className="text-sm text-muted-foreground">
                     {supervisora.contrato || "—"}
                   </TableCell>
-                  <TableCell className="text-sm">
-                    {supervisora.email_prefixo ? (
-                      <code className="text-xs bg-muted px-2 py-1 rounded">
-                        {supervisora.email_prefixo}@operavia.online
-                      </code>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </TableCell>
                   <TableCell className="text-center">
                     {supervisora.logo_url ? (
                       <img 
@@ -439,9 +373,6 @@ export const SupervisorasManager = () => {
                     ) : (
                       <span className="text-muted-foreground text-sm">Sem logo</span>
                     )}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {supervisora.usar_logo_customizado ? "✓" : "—"}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -477,18 +408,6 @@ export const SupervisorasManager = () => {
                         </Button>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        // TODO: Implementar gerenciamento de usuários
-                        toast.info("Gerenciamento de usuários em breve");
-                      }}
-                    >
-                      <Users className="h-4 w-4" />
-                    </Button>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
