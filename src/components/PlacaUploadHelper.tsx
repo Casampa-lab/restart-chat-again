@@ -9,12 +9,14 @@ interface PlacaUploadHelperProps {
   codigo: string;
   categoria: string;
   onUploadSuccess?: (url: string) => void;
+  compact?: boolean;
 }
 
 export const PlacaUploadHelper = ({ 
   codigo, 
   categoria,
-  onUploadSuccess 
+  onUploadSuccess,
+  compact = false
 }: PlacaUploadHelperProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -117,25 +119,40 @@ export const PlacaUploadHelper = ({
 
   return (
     <div className="space-y-3">
-      <Alert className="border-primary/30 bg-primary/5">
-        <Upload className="h-4 w-4 text-primary" />
-        <AlertDescription>
-          <div className="space-y-2">
-            <p className="text-base font-medium text-foreground">
-              Faça upload da placa {codigo}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Nome esperado: <code className="bg-muted px-1 py-0.5 rounded">{codigo}.svg</code>
-            </p>
-          </div>
-        </AlertDescription>
-      </Alert>
+      {!compact && (
+        <Alert className="border-primary/30 bg-primary/5">
+          <Upload className="h-4 w-4 text-primary" />
+          <AlertDescription>
+            <div className="space-y-2">
+              <p className="text-base font-medium text-foreground">
+                Faça upload da placa {codigo}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Nome esperado: <code className="bg-muted px-1 py-0.5 rounded">{codigo}.svg</code>
+              </p>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {compact && (
+        <div className="mb-2">
+          <p className="text-sm font-medium text-foreground">
+            Faça upload da placa {codigo}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Nome esperado: <code className="bg-muted px-1 py-0.5 rounded text-xs">{codigo}.svg</code>
+          </p>
+        </div>
+      )}
 
       {/* Área de Drop */}
       <div
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
-        className="border-2 border-dashed border-border rounded-lg p-8 min-h-[200px] flex flex-col items-center justify-center text-center hover:border-primary/50 transition-colors cursor-pointer"
+        className={`border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center text-center hover:border-primary/50 transition-colors cursor-pointer ${
+          compact ? 'p-4 min-h-[120px]' : 'p-8 min-h-[200px]'
+        }`}
         onClick={() => fileInputRef.current?.click()}
       >
         <input
@@ -150,28 +167,28 @@ export const PlacaUploadHelper = ({
         />
 
         {!preview ? (
-          <div className="space-y-3">
-            <Upload className="h-12 w-12 mx-auto text-muted-foreground" />
-            <p className="text-base font-medium text-foreground">
-              Arraste o arquivo SVG aqui ou clique para selecionar
+          <div className={compact ? "space-y-2" : "space-y-3"}>
+            <Upload className={`mx-auto text-muted-foreground ${compact ? 'h-8 w-8' : 'h-12 w-12'}`} />
+            <p className={`text-foreground ${compact ? 'text-sm font-medium' : 'text-base font-medium'}`}>
+              {compact ? 'Arraste arquivo ou clique' : 'Arraste o arquivo SVG aqui ou clique para selecionar'}
             </p>
-            <p className="text-sm text-muted-foreground">
-              Apenas arquivos .svg até 1MB
+            <p className="text-xs text-muted-foreground">
+              Apenas .svg até 1MB
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            <div className="bg-background border border-border rounded-lg p-4 inline-block">
+          <div className={compact ? "space-y-2" : "space-y-3"}>
+            <div className="bg-background border border-border rounded-lg p-2 inline-block">
               <img 
                 src={preview} 
                 alt="Preview" 
-                className="w-32 h-32 object-contain"
+                className={compact ? "w-16 h-16 object-contain" : "w-32 h-32 object-contain"}
               />
             </div>
-            <p className="text-base font-medium text-foreground">
+            <p className={`text-foreground ${compact ? 'text-sm font-medium' : 'text-base font-medium'}`}>
               {file?.name}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {(file?.size ?? 0 / 1024).toFixed(1)} KB
             </p>
           </div>
