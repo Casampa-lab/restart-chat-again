@@ -390,6 +390,7 @@ export const UsuariosManager = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
+              <TableHead>E-mail</TableHead>
               <TableHead>Perfil</TableHead>
               <TableHead>Supervisora</TableHead>
               <TableHead className="text-right">Ações</TableHead>
@@ -399,6 +400,9 @@ export const UsuariosManager = () => {
             {profiles.map((profile) => (
               <TableRow key={profile.id}>
                 <TableCell className="font-medium">{profile.nome}</TableCell>
+                <TableCell className="text-muted-foreground font-mono text-sm">
+                  {profile.email || "—"}
+                </TableCell>
                 <TableCell>{getRoleName(profile)}</TableCell>
                 <TableCell>
                   {profile.supervisoras?.nome_empresa || (
@@ -450,7 +454,7 @@ export const UsuariosManager = () => {
             ))}
             {profiles.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
                   Nenhum usuário encontrado
                 </TableCell>
               </TableRow>
