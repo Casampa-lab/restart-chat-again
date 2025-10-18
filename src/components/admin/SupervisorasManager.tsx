@@ -315,7 +315,7 @@ export const SupervisorasManager = () => {
                   />
                 </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="logo">Logo da Empresa</Label>
               <Input
                 id="logo"
@@ -324,18 +324,33 @@ export const SupervisorasManager = () => {
                 onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
               />
               {editingSupervisora?.logo_url && (
-                <div className="mt-2">
-                  <p className="text-sm text-muted-foreground">Logo atual:</p>
-                  <img 
-                    src={editingSupervisora.logo_url} 
-                    alt="Logo atual" 
-                    className="h-16 mt-1 object-contain"
-                  />
+                <div className="border rounded-lg p-3 bg-muted/30">
+                  <p className="text-sm text-muted-foreground mb-2">Logo atual:</p>
+                  <div className="flex items-center justify-between gap-4">
+                    <img 
+                      src={editingSupervisora.logo_url} 
+                      alt="Logo atual" 
+                      className="h-16 object-contain"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="usar-logo" className="text-sm font-normal cursor-pointer">
+                        Usar no sistema
+                      </Label>
+                      <Switch
+                        id="usar-logo"
+                        checked={formData.usar_logo_customizado}
+                        onCheckedChange={(checked) => 
+                          setFormData({ ...formData, usar_logo_customizado: checked })
+                        }
+                        disabled={!editingSupervisora?.logo_url && !logoFile}
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="logo-orgao">Logo do Órgão Fiscalizador</Label>
               <Input
                 id="logo-orgao"
@@ -344,52 +359,32 @@ export const SupervisorasManager = () => {
                 onChange={(e) => setLogoOrgaoFile(e.target.files?.[0] || null)}
               />
               {editingSupervisora?.logo_orgao_fiscalizador_url && (
-                <div className="mt-2">
-                  <p className="text-sm text-muted-foreground">Logo atual:</p>
-                  <img 
-                    src={editingSupervisora.logo_orgao_fiscalizador_url} 
-                    alt="Logo órgão fiscalizador" 
-                    className="h-16 mt-1 object-contain"
-                  />
+                <div className="border rounded-lg p-3 bg-muted/30">
+                  <p className="text-sm text-muted-foreground mb-2">Logo atual:</p>
+                  <div className="flex items-center justify-between gap-4">
+                    <img 
+                      src={editingSupervisora.logo_orgao_fiscalizador_url} 
+                      alt="Logo órgão fiscalizador" 
+                      className="h-16 object-contain"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="usar-logo-orgao" className="text-sm font-normal cursor-pointer">
+                        Incluir nos relatórios
+                      </Label>
+                      <Switch
+                        id="usar-logo-orgao"
+                        checked={formData.usar_logo_orgao_relatorios}
+                        onCheckedChange={(checked) => 
+                          setFormData({ ...formData, usar_logo_orgao_relatorios: checked })
+                        }
+                        disabled={!editingSupervisora?.logo_orgao_fiscalizador_url && !logoOrgaoFile}
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
 
-                <div className="flex items-center justify-between space-x-2">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="usar-logo">Usar logo customizado</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Exibir logo da supervisora no sistema
-                    </p>
-                  </div>
-                  <Switch
-                    id="usar-logo"
-                    checked={formData.usar_logo_customizado}
-                    onCheckedChange={(checked) => 
-                      setFormData({ ...formData, usar_logo_customizado: checked })
-                    }
-                    disabled={!editingSupervisora?.logo_url && !logoFile}
-                    className="scale-125 data-[state=checked]:bg-primary"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between space-x-2">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="usar-logo-orgao">Incluir logo do órgão nos relatórios</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Exibir logo do órgão fiscalizador nos relatórios Excel/PDF
-                    </p>
-                  </div>
-                  <Switch
-                    id="usar-logo-orgao"
-                    checked={formData.usar_logo_orgao_relatorios}
-                    onCheckedChange={(checked) => 
-                      setFormData({ ...formData, usar_logo_orgao_relatorios: checked })
-                    }
-                    disabled={!editingSupervisora?.logo_orgao_fiscalizador_url && !logoOrgaoFile}
-                    className="scale-125 data-[state=checked]:bg-primary"
-                  />
-                </div>
               </div>
 
               <DialogFooter className="flex-shrink-0 bg-background pt-4 border-t shadow-lg">
