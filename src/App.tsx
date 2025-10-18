@@ -74,12 +74,12 @@ const App = () => (
         <Route path="/minhas-intervencoes-tacha" element={<MinhasIntervencoesTacha />} />
         <Route path="/minhas-necessidades-relatorios" element={<MinhasNecessidadesRelatorios />} />
         <Route path="/reconciliacao-pendente" element={<ReconciliacaoPendente />} />
-        <Route path="/registrar-intervencao-campo" element={<RegistrarIntervencaoCampo />} />
+        <Route path="/modo-campo/registrar-intervencao" element={<RegistrarIntervencaoCampo />} />
         <Route path="/dashboard-necessidades" element={<DashboardNecessidades />} />
         <Route path="/auditoria-sinalizacoes" element={<AuditoriaSinalizacoes />} />
         <Route path="/auditoria-inventario" element={<AuditoriaInventario />} />
         <Route path="/documentacao-vable" element={<DocumentacaoVABLE />} />
-        <Route path="/inventario-dinamico" element={<InventarioDinamicoComAlerta />} />
+        <Route path="/modo-campo/inventario-dinamico" element={<InventarioDinamicoComAlerta />} />
         <Route path="/baseline-evolucao" element={<InventarioDinamico />} />
         <Route path="/coordenacao-fiscalizacao" element={<CoordenacaoFiscalizacao />} />
         <Route path="/ncs-coordenador" element={<NCsCoordenador />} />

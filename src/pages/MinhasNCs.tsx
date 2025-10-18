@@ -148,7 +148,7 @@ const MinhasNCs = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <Button variant="navigation" onClick={() => navigate("/")}>
+          <Button variant="navigation" onClick={() => navigate(-1)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar
           </Button>
