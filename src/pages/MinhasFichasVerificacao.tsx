@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft, Eye, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useWorkSession } from "@/hooks/useWorkSession";
+import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import {
   Table,
   TableBody,
@@ -47,9 +49,20 @@ export default function MinhasFichasVerificacao() {
   const [selectedFicha, setSelectedFicha] = useState<Ficha | null>(null);
   const [itens, setItens] = useState<Item[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [userId, setUserId] = useState<string>();
+  
+  const { activeSession } = useWorkSession(userId);
 
   useEffect(() => {
-    fetchFichas();
+    const getUserAndFetch = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+      fetchFichas();
+    };
+    getUserAndFetch();
   }, []);
 
   const fetchFichas = async () => {
@@ -101,10 +114,16 @@ export default function MinhasFichasVerificacao() {
           Voltar
         </Button>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Minhas Fichas de Verificação (3.1.19)</CardTitle>
-          </CardHeader>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <CardTitle>Minhas Fichas de Verificação (3.1.19)</CardTitle>
+          {activeSession && (
+            <Button onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Ficha
+            </Button>
+          )}
+        </CardHeader>
           <CardContent>
             {loading ? (
               <p>Carregando...</p>
@@ -245,6 +264,25 @@ export default function MinhasFichasVerificacao() {
                 </div>
               )}
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para criar nova ficha */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nova Ficha de Verificação</DialogTitle>
+          </DialogHeader>
+          {activeSession && (
+            <FichaVerificacaoForm 
+              loteId={activeSession.lote_id}
+              rodoviaId={activeSession.rodovia_id}
+              onSuccess={() => {
+                setCreateDialogOpen(false);
+                fetchFichas();
+              }}
+            />
           )}
         </DialogContent>
       </Dialog>

@@ -13,6 +13,7 @@ import { extractDateFromPhotos } from "@/lib/photoMetadata";
 interface FichaVerificacaoSHFormProps {
   loteId: string;
   rodoviaId: string;
+  onSuccess?: () => void;
 }
 
 interface ItemSH {
@@ -64,7 +65,7 @@ const createEmptyItem = (): Omit<ItemSH, 'file' | 'preview'> => ({
   velocidade: "", velocidade_conforme: true, velocidade_obs: "",
 });
 
-export function FichaVerificacaoSHForm({ loteId, rodoviaId }: FichaVerificacaoSHFormProps) {
+export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVerificacaoSHFormProps) {
   const [contrato, setContrato] = useState("");
   const [empresa, setEmpresa] = useState("");
   const [snv, setSnv] = useState("");
@@ -237,6 +238,11 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId }: FichaVerificacaoSH
       setDataVerificacao(new Date().toISOString().split('T')[0]);
       itens.forEach(i => URL.revokeObjectURL(i.preview));
       setItens([]);
+
+      // Call onSuccess callback
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error: any) {
       toast.error("Erro ao criar ficha: " + error.message);
     } finally {

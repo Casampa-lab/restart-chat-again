@@ -14,6 +14,7 @@ import { extractDateFromPhotos } from "@/lib/photoMetadata";
 interface FichaVerificacaoSVFormProps {
   loteId: string;
   rodoviaId: string;
+  onSuccess?: () => void;
 }
 
 interface ItemSV {
@@ -77,7 +78,7 @@ const createEmptyItem = (): Omit<ItemSV, 'file' | 'preview'> => ({
   velocidade: "", velocidade_conforme: true, velocidade_obs: "",
 });
 
-export function FichaVerificacaoSVForm({ loteId, rodoviaId }: FichaVerificacaoSVFormProps) {
+export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVerificacaoSVFormProps) {
   const [contrato, setContrato] = useState("");
   const [empresa, setEmpresa] = useState("");
   const [snv, setSnv] = useState("");
@@ -256,6 +257,11 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId }: FichaVerificacaoSV
       setDataVerificacao(new Date().toISOString().split('T')[0]);
       itens.forEach(i => URL.revokeObjectURL(i.preview));
       setItens([]);
+
+      // Call onSuccess callback
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error: any) {
       toast.error("Erro ao criar ficha: " + error.message);
     } finally {
