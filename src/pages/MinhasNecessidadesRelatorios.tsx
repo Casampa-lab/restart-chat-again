@@ -54,6 +54,23 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
     { field: "extensao_metros", header: "Extensão (km)" },
     { field: "area_m2", header: "Área (m²)" },
   ],
+  tachas: [
+    { field: "rodovia", header: "BR" },
+    { field: "snv", header: "SNV" },
+    { field: "cor", header: "Cor" },
+    { field: "tipo_tacha", header: "Tipo de Tacha" },
+    { field: "lado", header: "Lado" },
+    { field: "km_inicial", header: "Km Inicial" },
+    { field: "latitude_inicial", header: "Latitude Inicial" },
+    { field: "longitude_inicial", header: "Longitude Inicial" },
+    { field: "km_final", header: "Km Final" },
+    { field: "latitude_final", header: "Latitude Final" },
+    { field: "longitude_final", header: "Longitude Final" },
+    { field: "espacamento_m", header: "Espaçamento (m)" },
+    { field: "quantidade", header: "Quantidade" },
+    { field: "material", header: "Material" },
+    { field: "extensao_km", header: "Extensão (km)" },
+  ],
   marcas_transversais: [
     { field: "rodovia", header: "BR" },
     { field: "snv", header: "SNV" },
@@ -70,7 +87,6 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
     { field: "espessura_mm", header: "Espessura (mm)" },
     { field: "material_utilizado", header: "Material" },
     { field: "area_m2", header: "Área (m²)" },
-    { field: null, header: "Serviço" },
   ],
   cilindros: [
     { field: "rodovia", header: "BR" },
@@ -88,7 +104,6 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
     { field: "espacamento_m", header: "Espaçamento (m)" },
     { field: "quantidade", header: "Quantidade" },
     { field: "extensao_km", header: "Extensão (km)" },
-    { field: null, header: "Serviço" },
   ],
   placas: [
     { field: "rodovia", header: "BR" },
@@ -117,7 +132,6 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
     { field: "dimensoes_mm", header: "Dimensões (mm)" },
     { field: "area_m2", header: "Área (m²)" },
     { field: "link_fotografia", header: "Link da Fotografia" },
-    { field: null, header: "Serviço" },
   ],
   porticos: [
     { field: "rodovia", header: "BR" },
@@ -129,7 +143,6 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
     { field: "vao_horizontal_m", header: "Vão Horizontal (m)" },
     { field: "altura_livre_m", header: "Altura Livre (m)" },
     { field: "descricao", header: "Descrição" },
-    { field: null, header: "Serviço" },
   ],
   defensas: [
     { field: "rodovia", header: "BR" },
@@ -143,7 +156,6 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
     { field: "latitude_final", header: "Latitude Final" },
     { field: "longitude_final", header: "Longitude Final" },
     { field: "extensao_metros", header: "Extensão (m)" },
-    { field: null, header: "Serviço" },
   ],
 };
 
