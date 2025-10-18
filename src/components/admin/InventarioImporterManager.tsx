@@ -1083,6 +1083,7 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           
           record.latitude = getVal("Latitude", "latitude");
           record.longitude = getVal("Longitude", "longitude");
+          record.link_fotografia = getVal("Link da Fotografia", "Link da fotografia", "link_fotografia");
           
           record.data_vistoria = new Date().toISOString().split('T')[0];
         }
