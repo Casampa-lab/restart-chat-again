@@ -705,7 +705,10 @@ export default function MinhasNecessidadesRelatorios() {
           return valor;
         });
         
-        row.values = [null, ...valores]; // null para offset de índice
+        // Inserir valores célula por célula a partir da coluna 1
+        valores.forEach((valor, colIndex) => {
+          row.getCell(colIndex + 1).value = valor;
+        });
         row.commit();
       });
 
