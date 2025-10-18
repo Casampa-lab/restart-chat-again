@@ -121,10 +121,10 @@ export const PlacaUploadHelper = ({
         <Upload className="h-4 w-4 text-primary" />
         <AlertDescription>
           <div className="space-y-2">
-            <p className="text-sm font-medium text-foreground">
+            <p className="text-base font-medium text-foreground">
               Faça upload da placa {codigo}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Nome esperado: <code className="bg-muted px-1 py-0.5 rounded">{codigo}.svg</code>
             </p>
           </div>
@@ -135,7 +135,7 @@ export const PlacaUploadHelper = ({
       <div
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
-        className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
+        className="border-2 border-dashed border-border rounded-lg p-8 min-h-[200px] flex flex-col items-center justify-center text-center hover:border-primary/50 transition-colors cursor-pointer"
         onClick={() => fileInputRef.current?.click()}
       >
         <input
@@ -150,12 +150,12 @@ export const PlacaUploadHelper = ({
         />
 
         {!preview ? (
-          <div className="space-y-2">
-            <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
+          <div className="space-y-3">
+            <Upload className="h-12 w-12 mx-auto text-muted-foreground" />
+            <p className="text-base font-medium text-foreground">
               Arraste o arquivo SVG aqui ou clique para selecionar
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Apenas arquivos .svg até 1MB
             </p>
           </div>
@@ -165,13 +165,13 @@ export const PlacaUploadHelper = ({
               <img 
                 src={preview} 
                 alt="Preview" 
-                className="w-24 h-24 object-contain"
+                className="w-32 h-32 object-contain"
               />
             </div>
-            <p className="text-sm font-medium text-foreground">
+            <p className="text-base font-medium text-foreground">
               {file?.name}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {(file?.size ?? 0 / 1024).toFixed(1)} KB
             </p>
           </div>
