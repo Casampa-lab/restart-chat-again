@@ -5028,6 +5028,7 @@ export type Database = {
           nome_empresa: string
           updated_at: string | null
           usar_logo_customizado: boolean | null
+          usar_logo_orgao_relatorios: boolean | null
         }
         Insert: {
           codigo_convite?: string | null
@@ -5041,6 +5042,7 @@ export type Database = {
           nome_empresa: string
           updated_at?: string | null
           usar_logo_customizado?: boolean | null
+          usar_logo_orgao_relatorios?: boolean | null
         }
         Update: {
           codigo_convite?: string | null
@@ -5054,6 +5056,7 @@ export type Database = {
           nome_empresa?: string
           updated_at?: string | null
           usar_logo_customizado?: boolean | null
+          usar_logo_orgao_relatorios?: boolean | null
         }
         Relationships: []
       }

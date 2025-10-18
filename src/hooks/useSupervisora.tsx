@@ -5,8 +5,11 @@ import { useAuth } from "./useAuth";
 export interface SupervisoraConfig {
   id: string;
   nome_empresa: string;
+  contrato: string | null;
   logo_url: string | null;
+  logo_orgao_fiscalizador_url: string | null;
   usar_logo_customizado: boolean;
+  usar_logo_orgao_relatorios: boolean;
   codigo_convite: string | null;
   created_at: string;
   updated_at: string;

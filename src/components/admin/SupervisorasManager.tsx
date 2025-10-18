@@ -17,6 +17,7 @@ interface Supervisora {
   logo_url: string | null;
   logo_orgao_fiscalizador_url: string | null;
   usar_logo_customizado: boolean;
+  usar_logo_orgao_relatorios: boolean;
   codigo_convite: string | null;
   created_at: string;
 }
@@ -30,6 +31,7 @@ export const SupervisorasManager = () => {
     nome_empresa: "",
     contrato: "",
     usar_logo_customizado: false,
+    usar_logo_orgao_relatorios: true,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoOrgaoFile, setLogoOrgaoFile] = useState<File | null>(null);
@@ -138,13 +140,14 @@ export const SupervisorasManager = () => {
         // Atualizar
         const { error } = await supabase
           .from("supervisoras")
-          .update({
-            nome_empresa: formData.nome_empresa,
-            contrato: formData.contrato,
-            logo_url: logoUrl,
-            logo_orgao_fiscalizador_url: logoOrgaoUrl,
-            usar_logo_customizado: formData.usar_logo_customizado,
-          })
+        .update({
+          nome_empresa: formData.nome_empresa,
+          contrato: formData.contrato,
+          logo_url: logoUrl,
+          logo_orgao_fiscalizador_url: logoOrgaoUrl,
+          usar_logo_customizado: formData.usar_logo_customizado,
+          usar_logo_orgao_relatorios: formData.usar_logo_orgao_relatorios,
+        })
           .eq("id", editingSupervisora.id);
 
         if (error) throw error;
@@ -233,6 +236,7 @@ export const SupervisorasManager = () => {
       nome_empresa: supervisora.nome_empresa,
       contrato: supervisora.contrato || "",
       usar_logo_customizado: supervisora.usar_logo_customizado,
+      usar_logo_orgao_relatorios: supervisora.usar_logo_orgao_relatorios ?? true,
     });
     setLogoFile(null);
     setLogoOrgaoFile(null);
@@ -245,7 +249,8 @@ export const SupervisorasManager = () => {
     setFormData({ 
       nome_empresa: "", 
       contrato: "",
-      usar_logo_customizado: false 
+      usar_logo_customizado: false,
+      usar_logo_orgao_relatorios: true
     });
     setLogoFile(null);
     setLogoOrgaoFile(null);
@@ -271,7 +276,8 @@ export const SupervisorasManager = () => {
                 setFormData({ 
                   nome_empresa: "", 
                   contrato: "",
-                  usar_logo_customizado: false 
+                  usar_logo_customizado: false,
+                  usar_logo_orgao_relatorios: true
                 });
               }}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -363,6 +369,24 @@ export const SupervisorasManager = () => {
                       setFormData({ ...formData, usar_logo_customizado: checked })
                     }
                     disabled={!editingSupervisora?.logo_url && !logoFile}
+                    className="scale-125 data-[state=checked]:bg-primary"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="usar-logo-orgao">Incluir logo do órgão nos relatórios</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Exibir logo do órgão fiscalizador nos relatórios Excel/PDF
+                    </p>
+                  </div>
+                  <Switch
+                    id="usar-logo-orgao"
+                    checked={formData.usar_logo_orgao_relatorios}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, usar_logo_orgao_relatorios: checked })
+                    }
+                    disabled={!editingSupervisora?.logo_orgao_fiscalizador_url && !logoOrgaoFile}
                     className="scale-125 data-[state=checked]:bg-primary"
                   />
                 </div>

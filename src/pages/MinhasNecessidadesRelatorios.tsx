@@ -420,9 +420,11 @@ export default function MinhasNecessidadesRelatorios() {
       // Gerar Excel com logos
       const workbook = await criarWorkbookComLogos(dadosComServico, "CADASTRO INICIAL", {
         logoSupervisoraUrl: supervisora?.logo_url,
-        logoOrgaoUrl: (supervisora as any)?.logo_orgao_fiscalizador_url,
+        logoOrgaoUrl: supervisora?.usar_logo_orgao_relatorios 
+          ? supervisora?.logo_orgao_fiscalizador_url 
+          : null,
         nomeEmpresa: supervisora?.nome_empresa,
-        contrato: (supervisora as any)?.contrato,
+        contrato: supervisora?.contrato,
       });
 
       // NOVA: Buscar intervenções se houver tabela de intervenções E filtro de data
@@ -622,9 +624,11 @@ export default function MinhasNecessidadesRelatorios() {
       // Gerar Excel com logos
       const workbook = await criarWorkbookComLogos(dadosMesclados, "Dados", {
         logoSupervisoraUrl: supervisora?.logo_url,
-        logoOrgaoUrl: (supervisora as any)?.logo_orgao_fiscalizador_url,
+        logoOrgaoUrl: supervisora?.usar_logo_orgao_relatorios 
+          ? supervisora?.logo_orgao_fiscalizador_url 
+          : null,
         nomeEmpresa: supervisora?.nome_empresa,
-        contrato: (supervisora as any)?.contrato,
+        contrato: supervisora?.contrato,
       });
 
       // Sheet DIC
