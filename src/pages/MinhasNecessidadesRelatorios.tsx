@@ -14,14 +14,14 @@ import logoOperaVia from "@/assets/logo-operavia.jpg";
 import { format } from "date-fns";
 
 const TIPOS_RELATORIO = [
-  { value: "dados_rodovias", label: "Dados das Rodovias", tabelaCadastro: "dados_rodovias", tabelaIntervencoes: null },
-  { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabelaCadastro: "ficha_marcas_longitudinais", tabelaIntervencoes: "ficha_marcas_longitudinais_intervencoes" },
-  { value: "tachas", label: "Tachas", tabelaCadastro: "ficha_tachas", tabelaIntervencoes: "ficha_tachas_intervencoes" },
-  { value: "marcas_transversais", label: "Zebrados", tabelaCadastro: "ficha_inscricoes", tabelaIntervencoes: "ficha_inscricoes_intervencoes" },
-  { value: "cilindros", label: "Cilindros", tabelaCadastro: "ficha_cilindros", tabelaIntervencoes: "ficha_cilindros_intervencoes" },
-  { value: "placas", label: "Placas", tabelaCadastro: "ficha_placa", tabelaIntervencoes: "ficha_placa_intervencoes" },
-  { value: "porticos", label: "Pórticos", tabelaCadastro: "ficha_porticos", tabelaIntervencoes: "ficha_porticos_intervencoes" },
-  { value: "defensas", label: "Defensas", tabelaCadastro: "defensas", tabelaIntervencoes: "defensas_intervencoes" },
+  { value: "dados_rodovias", label: "Dados das Rodovias", tabelaCadastro: "dados_rodovias", tabelaIntervencoes: null, templatePath: null, abaOriginal: null },
+  { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabelaCadastro: "ficha_marcas_longitudinais", tabelaIntervencoes: "ficha_marcas_longitudinais_intervencoes", templatePath: "/templates/supra/inicial/SH1.xlsm", abaOriginal: "SH1(cadastro)" },
+  { value: "tachas", label: "Tachas", tabelaCadastro: "ficha_tachas", tabelaIntervencoes: "ficha_tachas_intervencoes", templatePath: "/templates/supra/inicial/SH2.xlsm", abaOriginal: "SH2(cadastro)" },
+  { value: "marcas_transversais", label: "Zebrados", tabelaCadastro: "ficha_inscricoes", tabelaIntervencoes: "ficha_inscricoes_intervencoes", templatePath: "/templates/supra/inicial/SH3.xlsm", abaOriginal: "SH3(cadastro)" },
+  { value: "cilindros", label: "Cilindros", tabelaCadastro: "ficha_cilindros", tabelaIntervencoes: "ficha_cilindros_intervencoes", templatePath: "/templates/supra/inicial/SH4.xlsm", abaOriginal: "SH4(cadastro)" },
+  { value: "placas", label: "Placas", tabelaCadastro: "ficha_placa", tabelaIntervencoes: "ficha_placa_intervencoes", templatePath: "/templates/supra/inicial/SV1.xlsm", abaOriginal: "SV1(cadastro)" },
+  { value: "porticos", label: "Pórticos", tabelaCadastro: "ficha_porticos", tabelaIntervencoes: "ficha_porticos_intervencoes", templatePath: "/templates/supra/inicial/SV2.xlsm", abaOriginal: "SV2(cadastro)" },
+  { value: "defensas", label: "Defensas", tabelaCadastro: "defensas", tabelaIntervencoes: "defensas_intervencoes", templatePath: "/templates/supra/inicial/DS.xlsm", abaOriginal: "DS(cadastro)" },
 ];
 
 const TITULOS_SUPRA: Record<string, string> = {
