@@ -2014,11 +2014,14 @@ export type Database = {
           data_aprovacao_coordenador: string | null
           data_intervencao: string
           descricao: string | null
+          espacamento_m: number | null
           ficha_tachas_id: string
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
           id: string
           justificativa_fora_plano: string | null
+          km_final: number | null
+          km_inicial: number | null
           lado: string | null
           latitude: number | null
           longitude: number | null
@@ -2028,6 +2031,7 @@ export type Database = {
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
           quantidade: number | null
+          snv: string | null
           tipo_tacha: string | null
         }
         Insert: {
@@ -2038,11 +2042,14 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
           descricao?: string | null
+          espacamento_m?: number | null
           ficha_tachas_id: string
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
           lado?: string | null
           latitude?: number | null
           longitude?: number | null
@@ -2052,6 +2059,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
+          snv?: string | null
           tipo_tacha?: string | null
         }
         Update: {
@@ -2062,11 +2070,14 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           descricao?: string | null
+          espacamento_m?: number | null
           ficha_tachas_id?: string
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
           lado?: string | null
           latitude?: number | null
           longitude?: number | null
@@ -2076,6 +2087,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
+          snv?: string | null
           tipo_tacha?: string | null
         }
         Relationships: []

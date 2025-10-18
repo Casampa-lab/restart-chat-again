@@ -32,11 +32,13 @@ const formSchema = z.object({
   motivo: z.string().min(1, "Motivo é obrigatório"),
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   km_final: z.string().min(1, "KM final é obrigatório"),
+  snv: z.string().optional(),
   tipo_tacha: z.string().optional(),
   lado: z.string().optional(),
   cor: z.string().optional(),
   material: z.string().optional(),
   quantidade: z.string().optional(),
+  espacamento_m: z.string().optional(),
   observacao: z.string().optional(),
   descricao: z.string().optional(),
   latitude: z.string().optional(),
@@ -83,11 +85,13 @@ export function IntervencoesTachaForm({
       motivo: "",
       km_inicial: "",
       km_final: "",
+      snv: "",
       tipo_tacha: "",
       lado: "",
       cor: "",
       material: "",
       quantidade: "",
+      espacamento_m: "",
       observacao: "",
       descricao: "",
       latitude: "",
@@ -103,11 +107,15 @@ export function IntervencoesTachaForm({
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
         motivo: "",
-        tipo_tacha: (tachaSelecionada as any).corpo || "",
-        lado: (tachaSelecionada as any).local_implantacao || "",
-        cor: (tachaSelecionada as any).cor_refletivo || "",
-        material: (tachaSelecionada as any).refletivo || "",
+        km_inicial: tachaSelecionada.km_inicial?.toString() || "",
+        km_final: tachaSelecionada.km_final?.toString() || "",
+        snv: (tachaSelecionada as any).snv || "",
+        tipo_tacha: (tachaSelecionada as any).tipo_tacha || "",
+        lado: (tachaSelecionada as any).lado || "",
+        cor: (tachaSelecionada as any).cor || "",
+        material: (tachaSelecionada as any).material || "",
         quantidade: (tachaSelecionada as any).quantidade?.toString() || "",
+        espacamento_m: (tachaSelecionada as any).espacamento_m?.toString() || "",
         observacao: "",
         descricao: "",
         latitude: "",
@@ -144,11 +152,17 @@ export function IntervencoesTachaForm({
         ficha_tachas_id: tachaSelecionada.id,
         data_intervencao: values.data_intervencao,
         motivo: values.motivo,
+        km_inicial: values.km_inicial ? parseFloat(values.km_inicial) : null,
+        km_final: values.km_final ? parseFloat(values.km_final) : null,
+        snv: values.snv || null,
         tipo_tacha: values.tipo_tacha || null,
         lado: values.lado || null,
         cor: values.cor || null,
         material: values.material || null,
         quantidade: values.quantidade ? parseInt(values.quantidade) : null,
+        espacamento_m: values.espacamento_m ? parseFloat(values.espacamento_m) : null,
+        latitude: values.latitude ? parseFloat(values.latitude) : null,
+        longitude: values.longitude ? parseFloat(values.longitude) : null,
         observacao: values.observacao || null,
         descricao: values.descricao || null,
         fora_plano_manutencao: values.fora_plano_manutencao,
@@ -242,6 +256,20 @@ export function IntervencoesTachaForm({
                     <FormLabel>KM Final *</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.001" placeholder="0.000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="snv"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SNV</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: 116BMG1010" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -427,6 +455,20 @@ export function IntervencoesTachaForm({
                       <FormLabel>Quantidade</FormLabel>
                       <FormControl>
                         <Input type="number" min="1" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="espacamento_m"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Espaçamento (m)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" placeholder="Ex: 8.00" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
