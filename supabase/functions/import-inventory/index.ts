@@ -517,6 +517,11 @@ serve(async (req) => {
           continue;
         }
         
+        // Log para debug de descrição em tachas
+        if (tableName === "ficha_tachas" && normalizedKey === "descricao") {
+          console.log(`[TACHA DESCRICAO] Key original: "${key}", Normalizada: "${normalizedKey}", Valor: "${value}", Tipo: ${typeof value}, validFields inclui? ${validFields.includes(normalizedKey)}`);
+        }
+        
         // Apenas adicionar se o campo for válido para esta tabela
         if (validFields.length === 0 || validFields.includes(normalizedKey)) {
           // Se é o campo de foto e temos fotos, substituir pelo URL
@@ -578,11 +583,11 @@ serve(async (req) => {
               }
               
               // Log específico para tachas
-              if (tableName === "ficha_tachas" && (normalizedKey === "cor_refletivo" || normalizedKey === "local_implantacao" || normalizedKey === "espacamento_m")) {
-                console.log(`[TACHA DEBUG] INSERIDO: ${normalizedKey} = ${value}`);
+              if (tableName === "ficha_tachas" && (normalizedKey === "descricao" || normalizedKey === "cor_refletivo" || normalizedKey === "local_implantacao" || normalizedKey === "espacamento_m")) {
+                console.log(`[TACHA DEBUG] INSERIDO: ${normalizedKey} = ${value} (tipo: ${typeof value})`);
               }
-            } else if (tableName === "ficha_tachas" && (normalizedKey === "cor_refletivo" || normalizedKey === "local_implantacao" || normalizedKey === "espacamento_m")) {
-              console.log(`[TACHA DEBUG] REJEITADO (valor vazio/null/-): ${normalizedKey} = ${value}`);
+            } else if (tableName === "ficha_tachas" && (normalizedKey === "descricao" || normalizedKey === "cor_refletivo" || normalizedKey === "local_implantacao" || normalizedKey === "espacamento_m")) {
+              console.log(`[TACHA DEBUG] REJEITADO (valor vazio/null/-): ${normalizedKey} = ${value} (tipo: ${typeof value})`);
             }
           }
         }
