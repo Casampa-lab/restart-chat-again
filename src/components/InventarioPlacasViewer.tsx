@@ -940,7 +940,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   </h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Largura (m):</span>
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {selectedPlaca.altura_m ? "Largura (m):" : "Diâmetro (m):"}
+                      </span>
                       <p className="text-sm">{selectedPlaca.largura_m?.toFixed(2) || "-"}</p>
                     </div>
                     <div>

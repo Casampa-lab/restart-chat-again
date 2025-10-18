@@ -139,7 +139,12 @@ export function ElementoDataDisplay({ dados_elemento, tipo_elemento }: ElementoD
   );
 
   const renderField = (key: string, value: any) => {
-    const label = fieldLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    let label = fieldLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    
+    // Se for largura_m e não houver altura_m (placa circular), exibir "Diâmetro"
+    if (key === 'largura_m' && !dados_elemento.altura_m) {
+      label = 'Diâmetro (m)';
+    }
     
     // Formatar valores especiais
     let displayValue = value;
