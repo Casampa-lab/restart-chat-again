@@ -3324,6 +3324,7 @@ export type Database = {
           observacao: string | null
           observacao_usuario: string | null
           quantidade: number | null
+          reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
           servico: string
@@ -3364,6 +3365,7 @@ export type Database = {
           observacao?: string | null
           observacao_usuario?: string | null
           quantidade?: number | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
           servico: string
@@ -3404,6 +3406,7 @@ export type Database = {
           observacao?: string | null
           observacao_usuario?: string | null
           quantidade?: number | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
           servico?: string
@@ -3486,6 +3489,7 @@ export type Database = {
           observacao_usuario: string | null
           percentual_veiculos_pesados: number | null
           quantidade_laminas: number | null
+          reconciliado: boolean | null
           reconciliado_por: string | null
           risco: string | null
           rodovia_id: string
@@ -3551,6 +3555,7 @@ export type Database = {
           observacao_usuario?: string | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           risco?: string | null
           rodovia_id: string
@@ -3616,6 +3621,7 @@ export type Database = {
           observacao_usuario?: string | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           risco?: string | null
           rodovia_id?: string
@@ -3692,6 +3698,7 @@ export type Database = {
           observacao: string | null
           observacao_usuario: string | null
           posicao: string | null
+          reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
           servico: string
@@ -3737,6 +3744,7 @@ export type Database = {
           observacao?: string | null
           observacao_usuario?: string | null
           posicao?: string | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
           servico: string
@@ -3782,6 +3790,7 @@ export type Database = {
           observacao?: string | null
           observacao_usuario?: string | null
           posicao?: string | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
           servico?: string
@@ -3852,6 +3861,7 @@ export type Database = {
           material_utilizado: string | null
           observacao: string | null
           observacao_usuario: string | null
+          reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
           servico: string
@@ -3896,6 +3906,7 @@ export type Database = {
           material_utilizado?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
           servico: string
@@ -3940,6 +3951,7 @@ export type Database = {
           material_utilizado?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
           servico?: string
@@ -4004,6 +4016,7 @@ export type Database = {
           observacao: string | null
           observacao_reconciliacao: string | null
           observacao_usuario: string | null
+          reconciliado: boolean | null
           reconciliado_em: string | null
           reconciliado_por: string | null
           rejeitado_em: string | null
@@ -4052,6 +4065,7 @@ export type Database = {
           observacao?: string | null
           observacao_reconciliacao?: string | null
           observacao_usuario?: string | null
+          reconciliado?: boolean | null
           reconciliado_em?: string | null
           reconciliado_por?: string | null
           rejeitado_em?: string | null
@@ -4100,6 +4114,7 @@ export type Database = {
           observacao?: string | null
           observacao_reconciliacao?: string | null
           observacao_usuario?: string | null
+          reconciliado?: boolean | null
           reconciliado_em?: string | null
           reconciliado_por?: string | null
           rejeitado_em?: string | null
@@ -4167,6 +4182,7 @@ export type Database = {
           lote_id: string
           motivo: string | null
           observacao_usuario: string | null
+          reconciliado: boolean | null
           reconciliado_por: string | null
           revisao_solicitada: boolean | null
           rodovia_id: string
@@ -4201,6 +4217,7 @@ export type Database = {
           lote_id: string
           motivo?: string | null
           observacao_usuario?: string | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           revisao_solicitada?: boolean | null
           rodovia_id: string
@@ -4235,6 +4252,7 @@ export type Database = {
           lote_id?: string
           motivo?: string | null
           observacao_usuario?: string | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           revisao_solicitada?: boolean | null
           rodovia_id?: string
@@ -4302,6 +4320,7 @@ export type Database = {
           observacao: string | null
           observacao_usuario: string | null
           quantidade: number | null
+          reconciliado: boolean | null
           reconciliado_por: string | null
           refletivo: string | null
           rodovia_id: string
@@ -4344,6 +4363,7 @@ export type Database = {
           observacao?: string | null
           observacao_usuario?: string | null
           quantidade?: number | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           refletivo?: string | null
           rodovia_id: string
@@ -4386,6 +4406,7 @@ export type Database = {
           observacao?: string | null
           observacao_usuario?: string | null
           quantidade?: number | null
+          reconciliado?: boolean | null
           reconciliado_por?: string | null
           refletivo?: string | null
           rodovia_id?: string
