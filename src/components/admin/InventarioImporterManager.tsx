@@ -798,8 +798,8 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           record.lado = getVal("Lado", "lado");
           record.posicao = getVal("Posição", "Posicao", "posição", "posicao");
           record.km = getVal("Km", "km") ? Number(getVal("Km", "km")) : null;
-          record.latitude = getVal("Latitude", "latitude");
-          record.longitude = getVal("Longitude", "longitude");
+          record.latitude_inicial = getVal("Latitude", "latitude");
+          record.longitude_inicial = getVal("Longitude", "longitude");
           record.detalhamento_pagina = getVal("Detalhamento (página)", "Detalhamento pagina", "detalhamento") ? Number(getVal("Detalhamento (página)", "Detalhamento pagina", "detalhamento")) : null;
           
           record.suporte = getVal("Tipo de Suporte", "Tipo de suporte", "tipo_de_suporte", "suporte");
