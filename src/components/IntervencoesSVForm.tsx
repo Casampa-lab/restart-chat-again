@@ -17,14 +17,22 @@ import { PlacaPreview } from "@/components/PlacaPreview";
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
-  suporte: z.string().optional(),
+  
+  // SEÇÃO 1: CHAPA DA PLACA E PELÍCULAS
   substrato: z.string().optional(),
   tipo_pelicula_fundo: z.string().optional(),
   retro_pelicula_fundo: z.string().optional(),
+  tipo_pelicula_legenda_orla: z.string().optional(),
   retro_pelicula_legenda_orla: z.string().optional(),
+  
+  // SEÇÃO 2: SUPORTE FÍSICO
+  suporte: z.string().optional(),
+  substrato_suporte: z.string().optional(),
+  
   placa_recuperada: z.boolean().default(false),
   fora_plano_manutencao: z.boolean().default(false),
   justificativa_fora_plano: z.string().optional(),
+  
   // Campos para criar nova placa caso não exista no inventário
   km_referencia: z.string().optional(),
   tipo_placa: z.string().optional(),
@@ -90,11 +98,13 @@ export function IntervencoesSVForm({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       motivo: "",
-    suporte: "",
-    substrato: "",
-    tipo_pelicula_fundo: "",
-    retro_pelicula_fundo: "",
-    retro_pelicula_legenda_orla: "",
+      suporte: "",
+      substrato: "",
+      substrato_suporte: "",
+      tipo_pelicula_fundo: "",
+      tipo_pelicula_legenda_orla: "",
+      retro_pelicula_fundo: "",
+      retro_pelicula_legenda_orla: "",
       placa_recuperada: false,
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
@@ -182,7 +192,9 @@ export function IntervencoesSVForm({
         
         if (data.suporte) updateData.suporte = data.suporte;
         if (data.substrato) updateData.substrato = data.substrato;
+        if (data.substrato_suporte) updateData.substrato_suporte = data.substrato_suporte;
         if (data.tipo_pelicula_fundo) updateData.tipo_pelicula_fundo = data.tipo_pelicula_fundo;
+        if (data.tipo_pelicula_legenda_orla) updateData.tipo_pelicula_legenda_orla = data.tipo_pelicula_legenda_orla;
         
         if (Object.keys(updateData).length > 0) {
           const { error: updateError } = await supabase
@@ -211,7 +223,9 @@ export function IntervencoesSVForm({
             longitude_inicial: data.longitude ? parseFloat(data.longitude) : null,
             suporte: data.suporte || null,
             substrato: data.substrato || null,
+            substrato_suporte: data.substrato_suporte || null,
             tipo_pelicula_fundo: data.tipo_pelicula_fundo || null,
+            tipo_pelicula_legenda_orla: data.tipo_pelicula_legenda_orla || null,
             data_vistoria: data.data_intervencao,
           })
           .select()
@@ -237,12 +251,16 @@ export function IntervencoesSVForm({
           motivo: data.motivo,
           suporte: data.suporte || null,
           substrato: data.substrato || null,
+          substrato_suporte: data.substrato_suporte || null,
           tipo_pelicula_fundo_novo: data.tipo_pelicula_fundo || null,
+          tipo_pelicula_legenda_orla: data.tipo_pelicula_legenda_orla || null,
           retro_fundo: data.retro_pelicula_fundo ? parseFloat(data.retro_pelicula_fundo) : null,
           retro_orla_legenda: data.retro_pelicula_legenda_orla ? parseFloat(data.retro_pelicula_legenda_orla) : null,
           placa_recuperada: data.placa_recuperada,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
+          latitude: data.latitude ? parseFloat(data.latitude) : null,
+          longitude: data.longitude ? parseFloat(data.longitude) : null,
         });
 
       if (intervencaoError) {
@@ -439,39 +457,20 @@ export function IntervencoesSVForm({
                 </>
               )}
 
-            {/* Tipo de Suporte e Substrato */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="suporte"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Suporte</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Poste Simples">Poste Simples</SelectItem>
-                        <SelectItem value="Poste Duplo">Poste Duplo</SelectItem>
-                        <SelectItem value="Pórtico">Pórtico</SelectItem>
-                        <SelectItem value="Semi-pórtico">Semi-pórtico</SelectItem>
-                        <SelectItem value="Fixação em estrutura existente">Fixação em estrutura existente</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
+            {/* ========== SEÇÃO 1: CHAPA DA PLACA E PELÍCULAS ========== */}
+            <div className="space-y-4 border-l-4 border-primary pl-4 bg-primary/5 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
+                <h3 className="font-semibold text-primary text-lg">Chapa da Placa e Películas</h3>
+              </div>
+              
+              {/* Tipo de Substrato (Chapa) */}
               <FormField
                 control={form.control}
                 name="substrato"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tipo de Substrato</FormLabel>
+                    <FormLabel>Tipo de Substrato (Chapa)</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -488,62 +487,149 @@ export function IntervencoesSVForm({
                   </FormItem>
                 )}
               />
-            </div>
+              
+              {/* Película Fundo: Tipo + Retrorrefletividade */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="tipo_pelicula_fundo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Película Fundo</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Grau Técnico I">Grau Técnico I</SelectItem>
+                          <SelectItem value="Grau Técnico II">Grau Técnico II</SelectItem>
+                          <SelectItem value="Alta Intensidade">Alta Intensidade</SelectItem>
+                          <SelectItem value="Diamond Grade">Diamond Grade</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Película Fundo e Retrorrefletividade */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="tipo_pelicula_fundo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Película Fundo</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                <FormField
+                  control={form.control}
+                  name="retro_pelicula_fundo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Retrorrefletividade Fundo (cd/lx/m²)</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
+                        <Input type="number" step="0.1" placeholder="0.0" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Grau Técnico I">Grau Técnico I</SelectItem>
-                        <SelectItem value="Grau Técnico II">Grau Técnico II</SelectItem>
-                        <SelectItem value="Alta Intensidade">Alta Intensidade</SelectItem>
-                        <SelectItem value="Diamond Grade">Diamond Grade</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Película Legenda/Orla: Tipo + Retrorrefletividade */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="tipo_pelicula_legenda_orla"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Película Legenda/Orla</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Grau Técnico I">Grau Técnico I</SelectItem>
+                          <SelectItem value="Grau Técnico II">Grau Técnico II</SelectItem>
+                          <SelectItem value="Alta Intensidade">Alta Intensidade</SelectItem>
+                          <SelectItem value="Diamond Grade">Diamond Grade</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="retro_pelicula_fundo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Retrorefletividade Película Fundo (cd/lx/m²)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.1" placeholder="0.0" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="retro_pelicula_legenda_orla"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Retrorrefletividade Legenda/Orla (cd/lx/m²)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.1" placeholder="0.0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            <FormField
-              control={form.control}
-              name="retro_pelicula_legenda_orla"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Retrorefletividade Película Legenda/Orla (cd/lx/m²)</FormLabel>
-                  <FormControl>
-                    <Input type="number" step="0.1" placeholder="0.0" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* ========== SEÇÃO 2: SUPORTE FÍSICO ========== */}
+            <div className="space-y-4 border-l-4 border-secondary pl-4 bg-secondary/5 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-secondary"></div>
+                <h3 className="font-semibold text-secondary text-lg">Suporte Físico</h3>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Tipo de Suporte */}
+                <FormField
+                  control={form.control}
+                  name="suporte"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Suporte</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Poste Simples">Poste Simples</SelectItem>
+                          <SelectItem value="Poste Duplo">Poste Duplo</SelectItem>
+                          <SelectItem value="Pórtico">Pórtico</SelectItem>
+                          <SelectItem value="Semi-pórtico">Semi-pórtico</SelectItem>
+                          <SelectItem value="Fixação em estrutura existente">Fixação em estrutura existente</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                {/* Tipo de Substrato do Suporte - NOVO */}
+                <FormField
+                  control={form.control}
+                  name="substrato_suporte"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Substrato (Suporte)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Aço">Aço</SelectItem>
+                          <SelectItem value="Madeira">Madeira</SelectItem>
+                          <SelectItem value="Ecológico">Ecológico</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
             <FormField
               control={form.control}

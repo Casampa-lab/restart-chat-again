@@ -49,6 +49,8 @@ interface IntervencaoSV {
   dimensoes: string | null;
   material: string | null;
   tipo_suporte: string | null;
+  substrato_suporte: string | null;
+  tipo_pelicula_legenda_orla: string | null;
   estado_conservacao: string;
   quantidade: number;
   observacao: string | null;
@@ -86,7 +88,7 @@ const MinhasIntervencoesSV = () => {
         .order("data_intervencao", { ascending: false });
 
       if (error) throw error;
-      setIntervencoes(data || []);
+      setIntervencoes((data || []) as unknown as IntervencaoSV[]);
 
       const { data: lotesData } = await supabase.from("lotes").select("id, numero");
       if (lotesData) {
@@ -271,6 +273,8 @@ const MinhasIntervencoesSV = () => {
                       <TableHead>Dimensões</TableHead>
                       <TableHead>Material</TableHead>
                       <TableHead>Suporte</TableHead>
+                      <TableHead>Substrato Suporte</TableHead>
+                      <TableHead>Película L/O</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead>Qtd</TableHead>
                       <TableHead>Status</TableHead>
@@ -302,6 +306,8 @@ const MinhasIntervencoesSV = () => {
                         <TableCell>{intervencao.dimensoes || "-"}</TableCell>
                         <TableCell>{intervencao.material || "-"}</TableCell>
                         <TableCell>{intervencao.tipo_suporte || "-"}</TableCell>
+                        <TableCell>{intervencao.substrato_suporte || "-"}</TableCell>
+                        <TableCell>{intervencao.tipo_pelicula_legenda_orla || "-"}</TableCell>
                         <TableCell>{intervencao.estado_conservacao}</TableCell>
                         <TableCell>{intervencao.quantidade}</TableCell>
                         <TableCell>
