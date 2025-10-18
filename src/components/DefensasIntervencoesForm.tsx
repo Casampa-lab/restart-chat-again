@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, Check, Shield } from "lucide-react";
 
 interface DefensasIntervencoesFormProps {
   defensaSelecionada?: any;
@@ -216,7 +216,9 @@ const DefensasIntervencoesForm = ({
   };
 
   const formContent = (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      
+      {/* ========== SEÇÃO 1: DADOS BÁSICOS DA INTERVENÇÃO ========== */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -307,242 +309,274 @@ const DefensasIntervencoesForm = ({
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="tipo_defensa"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Defensa</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {TIPOS_DEFENSA.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>
-                      {tipo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="extensao_metros"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Extensão (metros)</FormLabel>
-              <FormControl>
-                <Input type="number" step="0.1" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="tipo_avaria"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Avaria</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo de avaria" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {TIPOS_AVARIA.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>
-                      {tipo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="estado_conservacao"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estado de Conservação</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o estado" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {ESTADOS_CONSERVACAO.map((estado) => (
-                    <SelectItem key={estado} value={estado}>
-                      {estado}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="nivel_risco"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nível de Risco</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o nível de risco" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {NIVEIS_RISCO.map((nivel) => (
-                    <SelectItem key={nivel} value={nivel}>
-                      {nivel}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
       </div>
 
-      <FormField
-        control={form.control}
-        name="observacao"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Observações</FormLabel>
-            <FormControl>
-              <Textarea placeholder="Observações adicionais sobre a intervenção" {...field} rows={3} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {/* ========== SEÇÃO 2: LOCALIZAÇÃO GPS (VERDE) ========== */}
+      <div className="space-y-4 border-l-4 border-green-500 pl-4 bg-green-50/50 py-4 rounded-r-lg">
+        <div className="flex items-center gap-2">
+          <MapPin className="h-5 w-5 text-green-600" />
+          <h3 className="font-semibold text-green-700 text-lg">Localização GPS</h3>
+        </div>
+        
+        <div className="space-y-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={capturarCoordenadas}
+            disabled={isCapturing}
+            className="w-full"
+          >
+            {isCapturing ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
+            ) : (
+              <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS Automáticas</>
+            )}
+          </Button>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <FormField
+              control={form.control}
+              name="latitude"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Latitude</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="any" placeholder="-15.123456" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-      <div className="col-span-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={capturarCoordenadas}
-          disabled={isCapturing}
-          className="w-full"
-        >
-          {isCapturing ? (
-            <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
-          ) : (
-            <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS</>
-          )}
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="latitude"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Latitude</FormLabel>
-              <FormControl>
-                <Input type="number" step="any" placeholder="-15.123456" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="longitude"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Longitude</FormLabel>
-              <FormControl>
-                <Input type="number" step="any" placeholder="-47.123456" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      <FormField
-        control={form.control}
-        name="necessita_intervencao"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-            <FormControl>
-              <input
-                type="checkbox"
-                checked={field.value}
-                onChange={field.onChange}
-                className="h-4 w-4"
-              />
-            </FormControl>
-            <div className="space-y-1 leading-none">
-              <FormLabel>Necessita Intervenção Urgente</FormLabel>
+            <FormField
+              control={form.control}
+              name="longitude"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Longitude</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="any" placeholder="-47.123456" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          {(form.watch("latitude") && form.watch("longitude")) && (
+            <div className="flex items-center gap-2 text-sm text-green-600 bg-green-100 p-2 rounded">
+              <Check className="h-4 w-4" />
+              <span>Coordenadas capturadas com sucesso</span>
             </div>
-          </FormItem>
-        )}
-      />
+          )}
+        </div>
+      </div>
 
-      <FormField
-        control={form.control}
-        name="fora_plano_manutencao"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-            <FormControl>
-              <input
-                type="checkbox"
-                checked={field.value}
-                onChange={field.onChange}
-                className="h-4 w-4"
-              />
-            </FormControl>
-            <div className="space-y-1 leading-none">
-              <FormLabel>Fora do Plano de Manutenção</FormLabel>
-            </div>
-          </FormItem>
-        )}
-      />
+      {/* ========== SEÇÃO 3: CARACTERÍSTICAS DA DEFENSA (AZUL) ========== */}
+      <div className="space-y-4 border-l-4 border-primary pl-4 bg-primary/5 py-4 rounded-r-lg">
+        <div className="flex items-center gap-2">
+          <Shield className="h-5 w-5 text-primary" />
+          <h3 className="font-semibold text-primary text-lg">Características da Defensa</h3>
+        </div>
+        
+        {/* Grid - Tipo e Dimensões */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="tipo_defensa"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Defensa</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {TIPOS_DEFENSA.map((tipo) => (
+                      <SelectItem key={tipo} value={tipo}>
+                        {tipo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      {form.watch("fora_plano_manutencao") && (
+          <FormField
+            control={form.control}
+            name="extensao_metros"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Extensão (metros)</FormLabel>
+                <FormControl>
+                  <Input type="number" step="0.1" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
+        {/* Grid - Avaliação de Danos */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="tipo_avaria"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Avaria</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {TIPOS_AVARIA.map((tipo) => (
+                      <SelectItem key={tipo} value={tipo}>
+                        {tipo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="estado_conservacao"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estado de Conservação</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o estado" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {ESTADOS_CONSERVACAO.map((estado) => (
+                      <SelectItem key={estado} value={estado}>
+                        {estado}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="nivel_risco"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nível de Risco</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o nível" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {NIVEIS_RISCO.map((nivel) => (
+                      <SelectItem key={nivel} value={nivel}>
+                        {nivel}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
+      {/* ========== SEÇÃO 4: OBSERVAÇÕES E JUSTIFICATIVAS ========== */}
+      <div className="space-y-4">
         <FormField
           control={form.control}
-          name="justificativa_fora_plano"
+          name="observacao"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Justificativa *</FormLabel>
+              <FormLabel>Observações</FormLabel>
               <FormControl>
-                <Textarea placeholder="Justifique o motivo da intervenção estar fora do plano de manutenção" {...field} rows={3} />
+                <Textarea placeholder="Observações adicionais sobre a intervenção" {...field} rows={3} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-      )}
+
+        <FormField
+          control={form.control}
+          name="necessita_intervencao"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <input
+                  type="checkbox"
+                  checked={field.value}
+                  onChange={field.onChange}
+                  className="h-4 w-4"
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Necessita Intervenção Urgente</FormLabel>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="fora_plano_manutencao"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <input
+                  type="checkbox"
+                  checked={field.value}
+                  onChange={field.onChange}
+                  className="h-4 w-4"
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Fora do Plano de Manutenção</FormLabel>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        {form.watch("fora_plano_manutencao") && (
+          <FormField
+            control={form.control}
+            name="justificativa_fora_plano"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Justificativa *</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Justifique o motivo da intervenção estar fora do plano de manutenção" {...field} rows={3} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+      </div>
 
       {!hideSubmitButton && (
-        <Button type="submit" disabled={!defensaSelecionada}>
-          {form.formState.isSubmitting ? "Salvando..." : "Registrar Intervenção"}
+        <Button type="submit" className="w-full" disabled={!defensaSelecionada}>
+          {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Registrar Intervenção
         </Button>
       )}
     </form>
