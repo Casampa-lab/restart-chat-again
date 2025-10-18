@@ -28,6 +28,9 @@ export const PlacaDownloadHelper = ({ codigo }: PlacaDownloadHelperProps) => {
   const wikimediaSearchUrl = `https://commons.wikimedia.org/w/index.php?search=${encodeURIComponent(`Brasil ${codigo}`)}&title=Special:MediaSearch&type=image`;
   
   const pastaDestino = `src/assets/placas/${categoria}/`;
+  
+  // GitHub não tem placas indicativas
+  const temGitHub = categoria !== 'indicacao';
 
   return (
     <Alert className="border-primary/20 bg-primary/5">
@@ -47,18 +50,20 @@ export const PlacaDownloadHelper = ({ codigo }: PlacaDownloadHelperProps) => {
         </div>
 
         <div className="flex flex-col gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start h-auto py-2"
-            onClick={() => window.open(githubUrl, '_blank')}
-          >
-            <ExternalLink className="h-3 w-3 mr-2 flex-shrink-0" />
-            <div className="flex flex-col items-start text-xs">
-              <span className="font-medium">Baixar do GitHub</span>
-              <span className="text-[10px] text-muted-foreground">sergio-ishii-pinhais/Brazil-PlacasDeTransito-SVG</span>
-            </div>
-          </Button>
+          {temGitHub && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start h-auto py-2"
+              onClick={() => window.open(githubUrl, '_blank')}
+            >
+              <ExternalLink className="h-3 w-3 mr-2 flex-shrink-0" />
+              <div className="flex flex-col items-start text-xs">
+                <span className="font-medium">Baixar do GitHub</span>
+                <span className="text-[10px] text-muted-foreground">sergio-ishii-pinhais/Brazil-PlacasDeTransito-SVG</span>
+              </div>
+            </Button>
+          )}
           
           <Button
             variant="outline"
@@ -72,6 +77,12 @@ export const PlacaDownloadHelper = ({ codigo }: PlacaDownloadHelperProps) => {
               <span className="text-[10px] text-muted-foreground">Imagens de domínio público</span>
             </div>
           </Button>
+          
+          {categoria === 'indicacao' && (
+            <div className="text-[10px] text-amber-600 dark:text-amber-500 pt-1 border-t border-border">
+              ⚠️ Placas indicativas não estão disponíveis no GitHub. Use Wikimedia Commons ou crie SVGs customizados.
+            </div>
+          )}
         </div>
 
         <div className="text-[10px] text-muted-foreground pt-1 border-t border-border">

@@ -30,12 +30,14 @@ Quando você seleciona uma placa que não tem imagem, o sistema mostra automatic
 
 Escolha uma das fontes abaixo:
 
-#### Opção A: GitHub (Recomendado)
+#### Opção A: GitHub (Para Regulamentação e Advertência)
 **Repositório:** [sergio-ishii-pinhais/Brazil-PlacasDeTransito-SVG](https://github.com/sergio-ishii-pinhais/Brazil-PlacasDeTransito-SVG)
 
+**⚠️ Limitação:** Este repositório contém apenas placas de **Regulamentação** (R-) e **Advertência** (A-). Não possui placas indicativas.
+
 **Como baixar:**
-1. Clique no botão "Baixar do GitHub" no helper
-2. Navegue até a pasta da categoria (regulamentacao, advertencia ou indicacao)
+1. Clique no botão "Baixar do GitHub" no helper (aparece apenas para R- e A-)
+2. Navegue até a pasta da categoria (regulamentacao ou advertencia)
 3. Clique no arquivo SVG desejado (ex: R-1.svg)
 4. Clique no botão "Download" (ícone de download no canto superior direito)
 5. Ou clique com botão direito em "Raw" e selecione "Salvar link como..."
@@ -140,6 +142,8 @@ Aqui está uma lista das placas mais utilizadas em rodovias. Recomendamos começ
 - **A-21b**: Cruzamento de vias
 
 ### Indicação (Top 10)
+⚠️ **Nota:** Placas indicativas não estão disponíveis no repositório GitHub. Use Wikimedia Commons ou considere criar SVGs customizados.
+
 - **ID-1** a **ID-10**: Indicações de destino
 - **SAU-01**: Hospital
 - **SAU-02**: Pronto-socorro
@@ -178,16 +182,23 @@ O sistema detecta automaticamente pela **primeira letra** do código:
 **Fontes confiáveis:**
 
 1. **GitHub**: [sergio-ishii-pinhais/Brazil-PlacasDeTransito-SVG](https://github.com/sergio-ishii-pinhais/Brazil-PlacasDeTransito-SVG)
-   - Coleção organizada por categoria
-   - Placas vetoriais de alta qualidade
+   - ✅ Placas de **Regulamentação** (R-) e **Advertência** (A-)
+   - ❌ **Não possui** placas indicativas (ID-, SAU-, TAD-, etc.)
+   - Coleção organizada e vetoriais de alta qualidade
 
 2. **Wikimedia Commons**: [commons.wikimedia.org](https://commons.wikimedia.org/)
-   - Busque por "Brasil [código da placa]"
-   - Imagens de domínio público
+   - ✅ Possui **todas as categorias** incluindo indicativas
+   - Busque por "Brasil [código da placa]" ou "Brazilian road sign [código]"
+   - Imagens de domínio público em SVG
+   - **Recomendado para placas indicativas**
 
 3. **Manual de Sinalização do CONTRAN**: [gov.br/transportes](https://www.gov.br/transportes/pt-br/assuntos/transito/senatran/manuais-brasileiros-de-sinalizacao-de-transito)
-   - Especificações oficiais
-   - PDFs com todas as placas
+   - Especificações oficiais de todas as placas
+   - PDFs com todas as placas (pode ser necessário vetorizar)
+   
+4. **Alternativa para Placas Indicativas:**
+   - Considere criar SVGs customizados usando ferramentas como Inkscape ou Figma
+   - Siga as especificações do Manual do CONTRAN para dimensões e cores
 
 ## 📊 Status da Cobertura
 
