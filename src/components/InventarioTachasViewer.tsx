@@ -69,6 +69,7 @@ interface FichaTacha {
   longitude_final: number | null;
   data_vistoria: string;
   snv: string | null;
+  descricao: string | null;
   corpo: string | null;
   refletivo: string | null;
   cor_refletivo: string | null;

@@ -484,10 +484,19 @@ export function IntervencoesTachaForm({
                 name="descricao"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descrição</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Descrição da intervenção..." {...field} />
-                    </FormControl>
+                    <FormLabel>Descrição do Dispositivo</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione (opcional)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Tacha monodirecional">Tacha monodirecional</SelectItem>
+                        <SelectItem value="Tacha bidirecional">Tacha bidirecional</SelectItem>
+                        <SelectItem value="Tachão">Tachão</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

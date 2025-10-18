@@ -57,7 +57,7 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
   tachas: [
     { field: "rodovia", header: "BR" },
     { field: "snv", header: "SNV" },
-    { field: null, header: "Descrição" }, // Campo não existe no banco - precisa ser implementado
+    { field: "descricao", header: "Descrição" },
     { field: "corpo", header: "Corpo" },
     { field: "refletivo", header: "Refletivo" },
     { field: "cor_refletivo", header: "Cor do refletivo" },

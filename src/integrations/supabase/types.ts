@@ -1890,6 +1890,7 @@ export type Database = {
           created_at: string
           data_ultima_modificacao: string | null
           data_vistoria: string
+          descricao: string | null
           enviado_coordenador: boolean | null
           espacamento_m: number | null
           extensao_km: number | null
@@ -1919,6 +1920,7 @@ export type Database = {
           created_at?: string
           data_ultima_modificacao?: string | null
           data_vistoria: string
+          descricao?: string | null
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
@@ -1948,6 +1950,7 @@ export type Database = {
           created_at?: string
           data_ultima_modificacao?: string | null
           data_vistoria?: string
+          descricao?: string | null
           enviado_coordenador?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
