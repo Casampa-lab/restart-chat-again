@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupervisora } from "@/hooks/useSupervisora";
+import { useWorkSession } from "@/hooks/useWorkSession";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,6 +34,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { data: supervisora } = useSupervisora();
+  const { activeSession } = useWorkSession(user?.id);
   const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -103,6 +105,14 @@ const Admin = () => {
       checkAdminOrCoordinator();
     }
   }, [user, authLoading, navigate]);
+
+  // Preencher automaticamente lote e rodovia com base na sessão ativa
+  useEffect(() => {
+    if (activeSession?.lote_id && activeSession?.rodovia_id) {
+      setSelectedLoteId(activeSession.lote_id);
+      setSelectedRodoviaId(activeSession.rodovia_id);
+    }
+  }, [activeSession]);
 
   if (authLoading || loading) {
     return (
