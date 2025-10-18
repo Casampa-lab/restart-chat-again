@@ -924,13 +924,27 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
             return null;
           };
           
-          const sigla = getVal("Sigla", "sigla");
-          const descricao = getVal("Descrição", "Descricao", "descrição", "descricao");
+          const siglaRaw = getVal("Sigla", "sigla");
+          const descricaoRaw = getVal("Descrição", "Descricao", "descrição", "descricao");
+          
+          // Se vier junto no formato "SIGLA - Descrição", separar
+          let sigla = siglaRaw;
+          let tipo_inscricao = descricaoRaw;
+          
+          if (siglaRaw && siglaRaw.includes(" - ")) {
+            const partes = siglaRaw.split(" - ");
+            sigla = partes[0].trim();
+            tipo_inscricao = partes.slice(1).join(" - ").trim();
+          } else if (descricaoRaw && descricaoRaw.includes(" - ") && !siglaRaw) {
+            const partes = descricaoRaw.split(" - ");
+            sigla = partes[0].trim();
+            tipo_inscricao = partes.slice(1).join(" - ").trim();
+          }
           
           // Mapear campos diretamente
           record.sigla = sigla || null;
           record.snv = getVal("SNV", "snv") || null;
-          record.tipo_inscricao = [sigla, descricao].filter(Boolean).join(" - ") || "Não especificado";
+          record.tipo_inscricao = tipo_inscricao || "Não especificado";
           record.cor = getVal("Cor", "cor") || "Branca";
           
           const km = getVal("Km", "km");
