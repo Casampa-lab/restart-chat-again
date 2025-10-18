@@ -369,11 +369,21 @@ export function IntervencoesSVForm({
                           >
                             <FormControl>
                               <SelectTrigger className="w-full">
-                                <SelectValue placeholder={
-                                  form.watch("tipo_placa") 
-                                    ? "Selecione o código" 
-                                    : "Selecione primeiro o tipo"
-                                } />
+                                {field.value ? (
+                                  <span className="truncate">
+                                    {(() => {
+                                      const placa = codigosFiltrados.find(p => p.codigo === field.value);
+                                      const texto = placa ? `${placa.codigo} - ${placa.nome}` : field.value;
+                                      return texto.length > 60 ? texto.substring(0, 57) + "..." : texto;
+                                    })()}
+                                  </span>
+                                ) : (
+                                  <SelectValue placeholder={
+                                    form.watch("tipo_placa") 
+                                      ? "Selecione o código" 
+                                      : "Selecione primeiro o tipo"
+                                  } />
+                                )}
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="max-h-[300px]" align="start">
