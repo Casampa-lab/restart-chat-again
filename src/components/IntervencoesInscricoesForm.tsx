@@ -59,6 +59,7 @@ const formSchema = z.object({
   motivo: z.string().min(1, "Motivo é obrigatório"),
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   km_final: z.string().min(1, "KM final é obrigatório"),
+  snv: z.string().optional(),
   sigla: z.string().optional(),
   tipo_inscricao: z.string().optional(),
   cor: z.string().optional(),
@@ -179,6 +180,9 @@ const IntervencoesInscricoesForm = ({
           ficha_inscricoes_id: inscricaoSelecionada.id,
           data_intervencao: data.data_intervencao,
           motivo: data.motivo,
+          km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
+          km_final: data.km_final ? parseFloat(data.km_final) : null,
+          snv: data.snv || null,
           sigla: data.sigla || null,
           tipo_inscricao: data.tipo_inscricao || null,
           cor: data.cor || null,
@@ -187,6 +191,8 @@ const IntervencoesInscricoesForm = ({
           espessura_mm: data.espessura_mm ? parseFloat(data.espessura_mm) : null,
           material_utilizado: data.material_utilizado || null,
           estado_conservacao: data.estado_conservacao || null,
+          latitude: data.latitude ? parseFloat(data.latitude) : null,
+          longitude: data.longitude ? parseFloat(data.longitude) : null,
           observacao: data.observacao || null,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
@@ -282,6 +288,20 @@ const IntervencoesInscricoesForm = ({
                     <FormLabel>KM Final *</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.001" placeholder="0.000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="snv"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SNV (Segmento Nacional de Vias)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: BR-040-200-350" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

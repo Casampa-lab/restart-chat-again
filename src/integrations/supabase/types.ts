@@ -993,6 +993,8 @@ export type Database = {
           fotos_urls: string[] | null
           id: string
           justificativa_fora_plano: string | null
+          km_final: number | null
+          km_inicial: number | null
           latitude: number | null
           longitude: number | null
           material_utilizado: string | null
@@ -1001,6 +1003,7 @@ export type Database = {
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
           sigla: string | null
+          snv: string | null
           tipo_inscricao: string | null
         }
         Insert: {
@@ -1019,6 +1022,8 @@ export type Database = {
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
           latitude?: number | null
           longitude?: number | null
           material_utilizado?: string | null
@@ -1027,6 +1032,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           sigla?: string | null
+          snv?: string | null
           tipo_inscricao?: string | null
         }
         Update: {
@@ -1045,6 +1051,8 @@ export type Database = {
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
           latitude?: number | null
           longitude?: number | null
           material_utilizado?: string | null
@@ -1053,6 +1061,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           sigla?: string | null
+          snv?: string | null
           tipo_inscricao?: string | null
         }
         Relationships: []
