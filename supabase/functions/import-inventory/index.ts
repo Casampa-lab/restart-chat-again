@@ -306,7 +306,7 @@ serve(async (req) => {
         "retrorrefletância_(película_legenda/orla)_(cd.lux/m-2)": "retro_pelicula_legenda_orla",
       },
       ficha_cilindros: {
-        // Variações com espaços e maiúsculas
+        // Variações EXATAS das colunas Excel (com maiúsculas e espaços)
         "Cor (Corpo)": "cor_corpo",
         "Cor (Refletivo)": "cor_refletivo",
         "Tipo Refletivo": "tipo_refletivo",
@@ -320,7 +320,21 @@ serve(async (req) => {
         "Longitude Inicial": "longitude_inicial",
         "Latitude Final": "latitude_final",
         "Longitude Final": "longitude_final",
-        // Variações minúsculas com underscores
+        // Variações minúsculas (após normalização)
+        "cor (corpo)": "cor_corpo",
+        "cor (refletivo)": "cor_refletivo",
+        "tipo refletivo": "tipo_refletivo",
+        "extensão (km)": "extensao_km",
+        "espaçamento (m)": "espacamento_m",
+        "local de implantação": "local_implantacao",
+        "quantidade (und)": "quantidade",
+        "km inicial": "km_inicial",
+        "km final": "km_final",
+        "latitude inicial": "latitude_inicial",
+        "longitude inicial": "longitude_inicial",
+        "latitude final": "latitude_final",
+        "longitude final": "longitude_final",
+        // Variações com underscores
         "cor_(corpo)": "cor_corpo",
         "cor_corpo": "cor_corpo",
         "cor_(refletivo)": "cor_refletivo",
