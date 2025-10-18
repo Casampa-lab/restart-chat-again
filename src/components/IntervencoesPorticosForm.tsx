@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, Check, Building2 } from "lucide-react";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
@@ -176,7 +176,8 @@ export function IntervencoesPorticosForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* SEÇÃO 1: Dados Básicos da Intervenção */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -230,155 +231,219 @@ export function IntervencoesPorticosForm({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="tipo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Estrutura</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Pórtico">Pórtico</SelectItem>
-                        <SelectItem value="Semipórtico (BS)">Semipórtico (BS)</SelectItem>
-                        <SelectItem value="Semipórtico (BD)">Semipórtico (BD)</SelectItem>
-                        <SelectItem value="Braço Projetado">Braço Projetado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="altura_livre_m"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Altura Livre (m)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" placeholder="Ex: 7.25" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="vao_horizontal_m"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vão Horizontal (m)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" placeholder="Ex: 15.90" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
-            <FormField
-              control={form.control}
-              name="observacao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Observações</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Observações sobre a intervenção..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="col-span-2">
+            {/* SEÇÃO 2: Localização GPS */}
+            <div className="md:col-span-2 space-y-4 border-l-4 border-green-500 pl-4 bg-green-50/50 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-green-600" />
+                <h3 className="font-semibold text-green-700 text-lg">Localização GPS</h3>
+              </div>
+              
               <Button
                 type="button"
                 variant="outline"
                 onClick={capturarCoordenadas}
                 disabled={isCapturing}
-                className="w-full"
+                className="w-full hover:bg-green-50 hover:border-green-500 transition-colors"
               >
                 {isCapturing ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Capturando localização...
+                  </>
                 ) : (
-                  <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS</>
+                  <>
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Capturar Coordenadas Automáticas
+                  </>
                 )}
               </Button>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="latitude"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Latitude</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="any" placeholder="-15.123456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="latitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Latitude</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="any" 
+                          placeholder="-15.123456" 
+                          {...field}
+                          className="border-green-200 focus:border-green-500"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="longitude"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Longitude</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="any" placeholder="-47.123456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                <FormField
+                  control={form.control}
+                  name="longitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Longitude</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="any" 
+                          placeholder="-47.123456" 
+                          {...field}
+                          className="border-green-200 focus:border-green-500"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            <FormField
-              control={form.control}
-              name="fora_plano_manutencao"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={field.onChange}
-                      className="h-4 w-4"
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Fora do Plano de Manutenção</FormLabel>
-                  </div>
-                </FormItem>
+              {form.watch("latitude") && form.watch("longitude") && (
+                <div className="flex items-center gap-2 text-green-700 text-sm bg-green-100/50 p-2 rounded-md">
+                  <Check className="h-4 w-4" />
+                  <span>Coordenadas capturadas com sucesso</span>
+                </div>
               )}
-            />
+            </div>
 
-            {form.watch("fora_plano_manutencao") && (
+            {/* SEÇÃO 3: Características da Estrutura */}
+            <div className="space-y-4 border-l-4 border-primary pl-4 bg-primary/5 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-primary text-lg">Características da Estrutura</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="tipo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Estrutura</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-primary/20">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Pórtico">Pórtico</SelectItem>
+                          <SelectItem value="Semipórtico (BS)">Semipórtico (BS)</SelectItem>
+                          <SelectItem value="Semipórtico (BD)">Semipórtico (BD)</SelectItem>
+                          <SelectItem value="Braço Projetado">Braço Projetado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="altura_livre_m"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Altura Livre (m)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="0.01" 
+                          placeholder="Ex: 7.25" 
+                          {...field}
+                          className="border-primary/20"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="vao_horizontal_m"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Vão Horizontal (m)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="0.01" 
+                          placeholder="Ex: 15.90" 
+                          {...field}
+                          className="border-primary/20"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* SEÇÃO 4: Observações e Justificativas */}
+            <div className="space-y-4">
               <FormField
                 control={form.control}
-                name="justificativa_fora_plano"
+                name="observacao"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Justificativa *</FormLabel>
+                    <FormLabel>Observações</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Explique o motivo da intervenção fora do plano..." {...field} />
+                      <Textarea 
+                        placeholder="Observações sobre a intervenção..." 
+                        {...field}
+                        className="min-h-[100px]"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            )}
+
+              <FormField
+                control={form.control}
+                name="fora_plano_manutencao"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="h-4 w-4"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Fora do Plano de Manutenção</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("fora_plano_manutencao") && (
+                <FormField
+                  control={form.control}
+                  name="justificativa_fora_plano"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Justificativa *</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Explique o motivo da intervenção fora do plano..." 
+                          {...field}
+                          className="min-h-[100px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
 
             {!hideSubmitButton && (
               <Button type="submit" className="w-full mt-6" disabled={isSubmitting || (!porticoSelecionado && modo !== 'controlado')}>
