@@ -12,7 +12,7 @@ const INVENTORY_TABLES: Record<string, string> = {
   placas: "ficha_placa",
   necessidades_placas: "necessidades_placas",
   marcas_longitudinais: "ficha_marcas_longitudinais",
-  cilindros: "intervencoes_cilindros",
+  cilindros: "ficha_cilindros",
   inscricoes: "ficha_inscricoes",
   tachas: "ficha_tachas",
   porticos: "ficha_porticos",
@@ -305,15 +305,23 @@ serve(async (req) => {
         "retrorrefletância_(película_fundo)_(cd.lux/m-2)": "retro_pelicula_fundo",
         "retrorrefletância_(película_legenda/orla)_(cd.lux/m-2)": "retro_pelicula_legenda_orla",
       },
-      intervencoes_cilindros: {
-        "extensão_(km)": "extensao_km",
-        "espaçamento_(m)": "espacamento_m",
-        "tipo_refletivo": "tipo_refletivo",
-        "cor_refletivo": "cor_refletivo",
+      ficha_cilindros: {
+        "cor_(corpo)": "cor_corpo",
         "cor_corpo": "cor_corpo",
-        "data": "data_intervencao",
-        "data_intervenção": "data_intervencao",
+        "cor_(refletivo)": "cor_refletivo",
+        "cor_refletivo": "cor_refletivo",
+        "tipo_refletivo": "tipo_refletivo",
+        "extensão_(km)": "extensao_km",
+        "extensao_(km)": "extensao_km",
+        "espaçamento_(m)": "espacamento_m",
+        "espacamento_(m)": "espacamento_m",
+        "local_de_implantação": "local_implantacao",
+        "local_implantacao": "local_implantacao",
+        "quantidade_(und)": "quantidade",
+        "quantidade": "quantidade",
+        "data": "data_vistoria",
         "br": "",
+        "snv": "snv",
       },
       ficha_tachas: {
         "Descrição": "descricao",
@@ -401,11 +409,13 @@ serve(async (req) => {
         "origem", "modificado_por_intervencao", "ultima_intervencao_id",
         "data_ultima_modificacao"
       ],
-      intervencoes_cilindros: [
-        "cor_corpo", "cor_refletivo", "data_intervencao", "espacamento_m",
-        "extensao_km", "km_final", "km_inicial", "latitude_final", "latitude_inicial",
-        "local_implantacao", "longitude_final", "longitude_inicial", "observacao",
-        "quantidade", "snv", "tipo_refletivo"
+      ficha_cilindros: [
+        "cor_corpo", "cor_refletivo", "tipo_refletivo", "data_vistoria", 
+        "espacamento_m", "extensao_km", "km_final", "km_inicial", 
+        "latitude_final", "latitude_inicial", "local_implantacao", 
+        "longitude_final", "longitude_inicial", "observacao", "quantidade", 
+        "snv", "origem", "modificado_por_intervencao", "ultima_intervencao_id",
+        "data_ultima_modificacao"
       ],
       ficha_tachas: [
         "descricao", "corpo", "tipo_refletivo", "cor_refletivo", "data_vistoria", "espacamento_m",
