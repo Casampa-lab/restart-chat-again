@@ -441,6 +441,15 @@ export function InventarioTachasViewer({
                         </div>
                       </TableHead>
                       <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("descricao")}
+                      >
+                        <div className="flex items-center">
+                          Descrição
+                          <SortIcon column="descricao" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
                         className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("corpo")}
                       >
@@ -496,15 +505,6 @@ export function InventarioTachasViewer({
                       </TableHead>
                       <TableHead 
                         className="text-center cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("espacamento_m")}
-                      >
-                        <div className="flex items-center justify-center">
-                          Espaçamento (m)
-                          <SortIcon column="espacamento_m" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("quantidade")}
                       >
                         <div className="flex items-center justify-center">
@@ -528,6 +528,9 @@ export function InventarioTachasViewer({
                           </TableCell>
                         )}
                         <TableCell className="font-mono text-sm">{tacha.snv || "-"}</TableCell>
+                        <TableCell>
+                          {tacha.descricao || <span className="text-muted-foreground italic text-xs">Não informado</span>}
+                        </TableCell>
                         <TableCell className="text-center">
                           {tacha.corpo || <span className="text-muted-foreground italic text-xs">Não especificado</span>}
                         </TableCell>
@@ -546,7 +549,6 @@ export function InventarioTachasViewer({
                             <span className="text-muted-foreground italic text-xs">Não especificado no cadastro</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-center">{tacha.espacamento_m || "-"}</TableCell>
                         <TableCell className="text-center">{tacha.quantidade}</TableCell>
                         <TableCell className="text-center">
                           {(() => {
