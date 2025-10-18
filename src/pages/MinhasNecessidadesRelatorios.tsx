@@ -717,7 +717,7 @@ export default function MinhasNecessidadesRelatorios() {
           const cellLength = cell.value ? String(cell.value).length : 10;
           if (cellLength > maxLength) maxLength = cellLength;
         });
-        column.width = Math.min(Math.max(maxLength + 2, 12), 50);
+        column.width = Math.max(maxLength + 2, 12);
       });
 
       // MANUTENÇÃO EXECUTADA (se houver filtro de datas)
@@ -811,13 +811,27 @@ export default function MinhasNecessidadesRelatorios() {
               const cellLength = cell.value ? String(cell.value).length : 10;
               if (cellLength > maxLength) maxLength = cellLength;
             });
-            column.width = Math.min(Math.max(maxLength + 2, 12), 50);
+            column.width = Math.max(maxLength + 2, 12);
           });
         }
       }
 
       // Aba DIC - Dicionário de Campos
-      const dicSheet = workbook.addWorksheet("DIC");
+      const getNomeDIC = (tipo: string): string => {
+        const mapeamento: Record<string, string> = {
+          marcas_longitudinais: "DIC_SH",
+          tachas: "DIC_SH",
+          marcas_transversais: "DIC_SH",
+          cilindros: "DIC_SH",
+          placas: "DIC_SV",
+          porticos: "DIC_SV",
+          defensas: "DIC_DS",
+        };
+        return mapeamento[tipo] || "DIC";
+      };
+
+      const nomeDIC = getNomeDIC(tipoSelecionado);
+      const dicSheet = workbook.addWorksheet(nomeDIC);
       dicSheet.addRow(["DICIONÁRIO DE CAMPOS"]);
       dicSheet.mergeCells("A1:C1");
       const dicHeader = dicSheet.getCell("A1");
@@ -843,6 +857,82 @@ export default function MinhasNecessidadesRelatorios() {
       dicSheet.getColumn(1).width = 25;
       dicSheet.getColumn(2).width = 30;
       dicSheet.getColumn(3).width = 60;
+
+      // Aba "Cód" - Dicionário de Códigos (APENAS para Placas/Pórticos)
+      if (tipoSelecionado === "placas" || tipoSelecionado === "porticos") {
+        const codSheet = workbook.addWorksheet("Cód");
+
+        // Título
+        codSheet.addRow(["Dicionário de Códigos"]);
+        codSheet.mergeCells("A1:D1");
+        const codTitleCell = codSheet.getCell("A1");
+        codTitleCell.font = { name: "Arial", size: 14, bold: true };
+        codTitleCell.alignment = { horizontal: "center", vertical: "middle" };
+        codSheet.getRow(1).height = 25;
+
+        codSheet.addRow([]); // Linha vazia
+
+        // Cabeçalhos
+        codSheet.addRow(["Tipo de placa", "Subgrupo", "Código da placa", "Observações"]);
+        const codHeaderRow = codSheet.getRow(3);
+        codHeaderRow.font = { name: "Arial", size: 10, bold: true };
+        codHeaderRow.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFE0E0E0" },
+        };
+        codHeaderRow.eachCell((cell) => {
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+        });
+
+        // Dados conforme SUPRA
+        const codigosData = [
+          ["Regulamentação", "Simples", "R-X", "Conforme Manual Brasileiro de Sinalização de Trânsito Volume I"],
+          ["", "Compostas", "RM-X", "Corresponde ao valor crescente de implantação. O primeiro seria RM-1, o segundo RM-2 e assim sucessivamente."],
+          ["Advertência", "Simples", "A-X", "Conforme Manual Brasileiro de Sinalização de Trânsito Volume II"],
+          ["", "Compostas", "AM-X", "Corresponde ao valor crescente de implantação. O primeiro seria AM-1, o segundo AM-2 e assim sucessivamente."],
+          ["", "Marcador de alinhamento", "MA-X", "Corresponde ao valor crescente de implantação."],
+          ["", "Marcador de obstáculo", "MO-X", "Corresponde ao valor crescente de implantação."],
+          ["", "Marcador de perigo", "MP-X", "Corresponde ao valor crescente de implantação."],
+          ["Indicação", "Distância, sentido", "I-X", "Corresponde ao valor crescente de implantação."],
+          ["", "Serviços auxiliares", "S-X", "Corresponde ao valor crescente de implantação."],
+          ["", "Turística", "T-X", "Corresponde ao valor crescente de implantação."],
+          ["", "Educativa", "E-X", "Corresponde ao valor crescente de implantação."],
+          ["", "Marco quilométrico", "MQ-XXX", "Corresponde ao valor do km. Para o km 00 seria MQ-000, para o km 50 seria MQ-050."],
+          ["", "Placa institucional", "PI-X", "Corresponde ao valor crescente de implantação."],
+          ["", "Brasão de rodovia", "B-X", "Corresponde ao valor crescente de implantação."],
+        ];
+
+        codigosData.forEach((item) => {
+          const row = codSheet.addRow(item);
+          row.eachCell((cell) => {
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+            cell.font = { name: "Arial", size: 10 };
+            cell.alignment = { vertical: "top", wrapText: true };
+          });
+        });
+
+        // Auto-ajustar largura
+        codSheet.getColumn(1).width = 20;
+        codSheet.getColumn(2).width = 30;
+        codSheet.getColumn(3).width = 20;
+        codSheet.getColumn(4).width = 80;
+        
+        // Ajustar altura das linhas para acomodar texto wrapped
+        for (let i = 4; i <= codigosData.length + 3; i++) {
+          codSheet.getRow(i).height = 30;
+        }
+      }
 
       // Aba Localização - Dados das Rodovias e Lotes
       const localizacaoSheet = workbook.addWorksheet("Localização");
@@ -944,9 +1034,65 @@ export default function MinhasNecessidadesRelatorios() {
             const cellValue = cell.value ? cell.value.toString() : '';
             maxLength = Math.max(maxLength, cellValue.length);
           });
-          column.width = Math.min(maxLength + 2, 50);
+          column.width = maxLength + 2;
         }
       });
+
+      // Aba "Lado" - Nomenclatura de Posição (UNIVERSAL)
+      const ladoSheet = workbook.addWorksheet("Lado");
+
+      // Título
+      ladoSheet.addRow(["Nomenclatura - Lado/Posição"]);
+      ladoSheet.mergeCells("A1:B1");
+      const ladoTitleCell = ladoSheet.getCell("A1");
+      ladoTitleCell.font = { name: "Arial", size: 14, bold: true };
+      ladoTitleCell.alignment = { horizontal: "center", vertical: "middle" };
+      ladoSheet.getRow(1).height = 25;
+
+      ladoSheet.addRow([]); // Linha vazia
+
+      // Cabeçalhos
+      ladoSheet.addRow(["Código", "Descrição"]);
+      const ladoHeaderRow = ladoSheet.getRow(3);
+      ladoHeaderRow.font = { name: "Arial", size: 10, bold: true };
+      ladoHeaderRow.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFE0E0E0" },
+      };
+      ladoHeaderRow.eachCell((cell) => {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+
+      // Dados conforme padrão SUPRA
+      const ladosData = [
+        ["D", "Direito (sentido crescente da quilometragem)"],
+        ["E", "Esquerdo (sentido crescente da quilometragem)"],
+        ["C", "Central (Eixo ou Canteiro Central)"],
+        ["A", "Ambos (Direito e Esquerdo)"],
+      ];
+
+      ladosData.forEach((item) => {
+        const row = ladoSheet.addRow(item);
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+          cell.font = { name: "Arial", size: 10 };
+        });
+      });
+
+      // Auto-ajustar largura
+      ladoSheet.getColumn(1).width = 10;
+      ladoSheet.getColumn(2).width = 60;
 
       // Download
       const buffer = await workbook.xlsx.writeBuffer();
