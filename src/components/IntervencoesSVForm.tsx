@@ -265,7 +265,8 @@ export function IntervencoesSVForm({
   const formContent = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Primeira linha: 3 colunas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="data_intervencao"
@@ -306,21 +307,26 @@ export function IntervencoesSVForm({
               />
 
               {!placaSelecionada && (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="km_referencia"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>KM de Referência *</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.001" placeholder="123.456" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="km_referencia"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>KM de Referência *</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.001" placeholder="123.456" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
 
+            {/* Tipo de Placa + Imagem */}
+            {!placaSelecionada && (
+              <>
+                <div className="grid md:grid-cols-[1fr_140px] gap-4 items-start">
                   <FormField
                     control={form.control}
                     name="tipo_placa"
@@ -345,51 +351,52 @@ export function IntervencoesSVForm({
                     )}
                   />
 
-                  <div className="flex justify-start -mt-2 mb-4">
+                  <div className="md:pt-8 flex justify-end">
                     <PlacaPreview codigo={codigoAtual} size="large" showLabel />
                   </div>
+                </div>
 
-                  <FormField
-                    control={form.control}
-                    name="codigo_placa"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Código da Placa *</FormLabel>
-                        {form.watch("tipo_placa") === "Outros" ? (
+                <FormField
+                  control={form.control}
+                  name="codigo_placa"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Código da Placa *</FormLabel>
+                      {form.watch("tipo_placa") === "Outros" ? (
+                        <FormControl>
+                          <Input placeholder="Digite o código" {...field} />
+                        </FormControl>
+                      ) : (
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                          disabled={codigosFiltrados.length === 0}
+                        >
                           <FormControl>
-                            <Input placeholder="Digite o código" {...field} />
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder={
+                                form.watch("tipo_placa") 
+                                  ? "Selecione o código" 
+                                  : "Selecione primeiro o tipo"
+                              } />
+                            </SelectTrigger>
                           </FormControl>
-                        ) : (
-                          <Select 
-                            onValueChange={field.onChange} 
-                            value={field.value}
-                            disabled={codigosFiltrados.length === 0}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder={
-                                  form.watch("tipo_placa") 
-                                    ? "Selecione o código" 
-                                    : "Selecione primeiro o tipo"
-                                } />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="max-h-[300px]" align="start">
-                              {codigosFiltrados.map((placa) => (
-                                <SelectItem key={placa.codigo} value={placa.codigo} className="cursor-pointer">
-                                  <div className="flex items-center gap-2 py-1">
-                                    <PlacaPreview codigo={placa.codigo} size="small" />
-                                    <span className="text-sm leading-tight">{placa.codigo} - {placa.nome}</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <SelectContent className="max-h-[300px]" align="start">
+                            {codigosFiltrados.map((placa) => (
+                              <SelectItem key={placa.codigo} value={placa.codigo} className="cursor-pointer">
+                                <div className="flex items-center gap-2 py-1">
+                                  <PlacaPreview codigo={placa.codigo} size="small" />
+                                  <span className="text-sm leading-tight">{placa.codigo} - {placa.nome}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                   <div className="md:col-span-2 space-y-2">
                     <FormLabel>Coordenadas GPS</FormLabel>
@@ -430,6 +437,8 @@ export function IntervencoesSVForm({
                 </>
               )}
 
+            {/* Tipo de Suporte e Substrato */}
+            <div className="grid md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="suporte"
@@ -477,7 +486,10 @@ export function IntervencoesSVForm({
                   </FormItem>
                 )}
               />
+            </div>
 
+            {/* Película Fundo e Retrorrefletividade */}
+            <div className="grid md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="tipo_pelicula_fundo"
@@ -515,21 +527,21 @@ export function IntervencoesSVForm({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="retro_pelicula_legenda_orla"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Retrorefletividade Película Legenda/Orla (cd/lx/m²)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.1" placeholder="0.0" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
+
+            <FormField
+              control={form.control}
+              name="retro_pelicula_legenda_orla"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Retrorefletividade Película Legenda/Orla (cd/lx/m²)</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="0.1" placeholder="0.0" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
