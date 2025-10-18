@@ -73,6 +73,7 @@ interface FichaTacha {
   refletivo: string | null;
   tipo_refletivo: string | null;
   cor_refletivo: string | null;
+  descricao: string | null;
   extensao_km: number | null;
   local_implantacao: string | null;
   espacamento_m: number | null;
@@ -193,7 +194,7 @@ export function InventarioTachasViewer({
 
       if (searchTerm) {
         query = query.or(
-          `snv.ilike.%${searchTerm}%,corpo.ilike.%${searchTerm}%,cor_refletivo.ilike.%${searchTerm}%,local_implantacao.ilike.%${searchTerm}%`
+          `snv.ilike.%${searchTerm}%,corpo.ilike.%${searchTerm}%,cor_refletivo.ilike.%${searchTerm}%,local_implantacao.ilike.%${searchTerm}%,descricao.ilike.%${searchTerm}%`
         );
       }
 
@@ -717,7 +718,7 @@ export function InventarioTachasViewer({
                 {/* Características */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3">Características</h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-4 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Corpo:</span>
                       <p className="text-sm">{selectedTacha.corpo || "-"}</p>
@@ -727,10 +728,21 @@ export function InventarioTachasViewer({
                       <p className="text-sm">{selectedTacha.refletivo || "-"}</p>
                     </div>
                     <div>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo do Refletivo:</span>
+                      <p className="text-sm">{selectedTacha.tipo_refletivo || "Não informado"}</p>
+                    </div>
+                    <div>
                       <span className="text-sm font-medium text-muted-foreground">Cor do Refletivo:</span>
                       <p className="text-sm">{selectedTacha.cor_refletivo || "Não informado"}</p>
                     </div>
                   </div>
+                  
+                  {selectedTacha.descricao && (
+                    <div className="mt-4 pt-4 border-t">
+                      <span className="text-sm font-medium text-muted-foreground">Descrição:</span>
+                      <p className="text-sm mt-1">{selectedTacha.descricao}</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Localização Inicial */}
