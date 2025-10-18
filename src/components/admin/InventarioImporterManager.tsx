@@ -1024,10 +1024,14 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           record.extensao_km = toNumber(extKm);
           
           const espac = getVal("Espaçamento", "Espacamento", "espaçamento", "espacamento");
-          record.espacamento_m = toNumber(espac);
+          const espacVal = toNumber(espac);
+          record.espacamento_m = espacVal;
+          console.log(`[CILINDROS] Espaçamento: "${espac}" → ${espacVal}`);
           
           const qtd = getVal("Quantidade", "quantidade");
-          record.quantidade = toNumber(qtd);
+          const qtdVal = toNumber(qtd);
+          record.quantidade = qtdVal;
+          console.log(`[CILINDROS] Quantidade: "${qtd}" → ${qtdVal}`);
           
           const br = getVal("BR", "br");
           if (br) {
