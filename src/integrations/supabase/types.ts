@@ -886,6 +886,7 @@ export type Database = {
           modificado_por_intervencao: boolean | null
           observacao: string | null
           origem: string | null
+          outros_materiais: string | null
           rodovia_id: string
           sigla: string | null
           snv: string | null
@@ -916,6 +917,7 @@ export type Database = {
           modificado_por_intervencao?: boolean | null
           observacao?: string | null
           origem?: string | null
+          outros_materiais?: string | null
           rodovia_id: string
           sigla?: string | null
           snv?: string | null
@@ -946,6 +948,7 @@ export type Database = {
           modificado_por_intervencao?: boolean | null
           observacao?: string | null
           origem?: string | null
+          outros_materiais?: string | null
           rodovia_id?: string
           sigla?: string | null
           snv?: string | null
