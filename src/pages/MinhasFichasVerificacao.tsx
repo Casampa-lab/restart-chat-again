@@ -107,7 +107,7 @@ export default function MinhasFichasVerificacao() {
       <div className="max-w-7xl mx-auto space-y-4">
         <Button
           variant="navigation"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
