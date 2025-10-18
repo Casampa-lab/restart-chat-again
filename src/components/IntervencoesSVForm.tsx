@@ -321,31 +321,36 @@ export function IntervencoesSVForm({
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="tipo_placa"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo de Placa *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o tipo" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Regulamentação">Regulamentação</SelectItem>
-                            <SelectItem value="Advertência">Advertência</SelectItem>
-                            <SelectItem value="Indicação">Indicação</SelectItem>
-                            <SelectItem value="Outros">Outros</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid md:grid-cols-[1fr_140px] gap-8 items-start">
+                    <FormField
+                      control={form.control}
+                      name="tipo_placa"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo de Placa *</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o tipo" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Regulamentação">Regulamentação</SelectItem>
+                              <SelectItem value="Advertência">Advertência</SelectItem>
+                              <SelectItem value="Indicação">Indicação</SelectItem>
+                              <SelectItem value="Outros">Outros</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="md:pt-8 flex justify-end items-start">
+                      <PlacaPreview codigo={codigoAtual} size="large" showLabel />
+                    </div>
+                  </div>
 
-                <div className="grid md:grid-cols-[1fr_140px] gap-8 items-start">
                   <FormField
                     control={form.control}
                     name="codigo_placa"
@@ -387,11 +392,6 @@ export function IntervencoesSVForm({
                       </FormItem>
                     )}
                   />
-                  
-                  <div className="md:pt-8 flex justify-end items-start">
-                    <PlacaPreview codigo={codigoAtual} size="large" showLabel />
-                  </div>
-                </div>
 
                   <div className="md:col-span-2 space-y-2">
                     <FormLabel>Coordenadas GPS</FormLabel>
