@@ -383,10 +383,12 @@ export function IntervencoesSVForm({
                           </FormControl>
                           <SelectContent className="max-h-[300px]" align="start">
                             {codigosFiltrados.map((placa) => (
-                              <SelectItem key={placa.codigo} value={placa.codigo} className="cursor-pointer">
-                                <div className="flex items-center gap-2 py-1">
-                                  <PlacaPreview codigo={placa.codigo} size="small" />
-                                  <span className="text-sm leading-tight">{placa.codigo} - {placa.nome}</span>
+                              <SelectItem key={placa.codigo} value={placa.codigo} className="cursor-pointer py-1 h-auto min-h-0">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-8 h-8 flex-shrink-0">
+                                    <PlacaPreview codigo={placa.codigo} size="small" />
+                                  </div>
+                                  <span className="text-xs leading-tight">{placa.codigo} - {placa.nome}</span>
                                 </div>
                               </SelectItem>
                             ))}
