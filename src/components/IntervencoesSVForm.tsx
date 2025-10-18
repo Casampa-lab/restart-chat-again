@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { CODIGOS_PLACAS } from "@/constants/codigosPlacas";
+import { PlacaPreview } from "@/components/PlacaPreview";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
@@ -57,6 +58,7 @@ export function IntervencoesSVForm({
   const [isCapturing, setIsCapturing] = useState(false);
   const [coordenadas, setCoordenadas] = useState({ latitude: "", longitude: "" });
   const [codigosFiltrados, setCodigosFiltrados] = useState<readonly {codigo: string, nome: string}[]>([]);
+  const [codigoAtual, setCodigoAtual] = useState<string | null>(null);
 
   const capturarCoordenadas = () => {
     setIsCapturing(true);
@@ -151,6 +153,11 @@ export function IntervencoesSVForm({
       form.setValue("codigo_placa", "");
     }
   }, [form.watch("tipo_placa")]);
+
+  // Atualiza o código atual para o preview
+  useEffect(() => {
+    setCodigoAtual(form.watch("codigo_placa"));
+  }, [form.watch("codigo_placa")]);
 
   const onSubmit = async (data: FormValues) => {
     // Em modo controlado, não faz submit direto
@@ -338,6 +345,7 @@ export function IntervencoesSVForm({
                     )}
                   />
 
+                <div className="grid md:grid-cols-[1fr_auto] gap-4 items-start">
                   <FormField
                     control={form.control}
                     name="codigo_placa"
@@ -366,7 +374,10 @@ export function IntervencoesSVForm({
                             <SelectContent className="max-h-[300px]">
                               {codigosFiltrados.map((placa) => (
                                 <SelectItem key={placa.codigo} value={placa.codigo}>
-                                  {placa.codigo} - {placa.nome}
+                                  <div className="flex items-center gap-2">
+                                    <PlacaPreview codigo={placa.codigo} size="small" />
+                                    <span>{placa.codigo} - {placa.nome}</span>
+                                  </div>
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -376,6 +387,11 @@ export function IntervencoesSVForm({
                       </FormItem>
                     )}
                   />
+                  
+                  <div className="md:pt-8">
+                    <PlacaPreview codigo={codigoAtual} size="large" showLabel />
+                  </div>
+                </div>
 
                   <div className="md:col-span-2 space-y-2">
                     <FormLabel>Coordenadas GPS</FormLabel>
