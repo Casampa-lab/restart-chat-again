@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, Check } from "lucide-react";
 import { CODIGOS_PLACAS } from "@/constants/codigosPlacas";
 import { PlacaPreview } from "@/components/PlacaPreview";
 
@@ -415,44 +415,85 @@ export function IntervencoesSVForm({
                   )}
                 />
 
-                  <div className="md:col-span-2 space-y-2">
-                    <FormLabel>Coordenadas GPS</FormLabel>
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={capturarCoordenadas}
-                        disabled={isCapturing}
-                      >
-                        {isCapturing ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <MapPin className="mr-2 h-4 w-4" />
-                        )}
-                        Capturar Coordenadas
-                      </Button>
-                      <FormField
-                        control={form.control}
-                        name="latitude"
-                        render={({ field }) => (
-                          <FormControl>
-                            <Input placeholder="Latitude" {...field} className="flex-1" />
-                          </FormControl>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="longitude"
-                        render={({ field }) => (
-                          <FormControl>
-                            <Input placeholder="Longitude" {...field} className="flex-1" />
-                          </FormControl>
-                        )}
-                      />
-                    </div>
-                  </div>
+        {/* ========== SEÇÃO: LOCALIZAÇÃO GPS ========== */}
+        <div className="md:col-span-2 space-y-4 border-l-4 border-green-500 pl-4 bg-green-50/50 py-4 rounded-r-lg">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-green-600" />
+            <h3 className="font-semibold text-green-700 text-lg">Localização GPS</h3>
+          </div>
+          
+          <div className="space-y-3">
+            {/* Botão de Captura */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={capturarCoordenadas}
+              disabled={isCapturing}
+              className="w-full sm:w-auto border-green-500 hover:bg-green-50"
+            >
+              {isCapturing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Capturando...
+                </>
+              ) : (
+                <>
+                  <MapPin className="mr-2 h-4 w-4" />
+                  Capturar Coordenadas Automáticas
                 </>
               )}
+            </Button>
+            
+            {/* Campos de Coordenadas */}
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="latitude"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-green-700">Latitude</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="-15.7942" 
+                        {...field} 
+                        className="border-green-200 focus:border-green-500"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="longitude"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-green-700">Longitude</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="-47.8822" 
+                        {...field} 
+                        className="border-green-200 focus:border-green-500"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            {/* Indicador Visual de Status */}
+            {(form.watch("latitude") && form.watch("longitude")) && (
+              <div className="flex items-center gap-2 text-sm text-green-600 bg-green-100 p-2 rounded">
+                <Check className="h-4 w-4" />
+                <span>Coordenadas capturadas com sucesso</span>
+              </div>
+            )}
+          </div>
+        </div>
+              </>
+            )}
 
             {/* ========== SEÇÃO 1: CHAPA DA PLACA E PELÍCULAS ========== */}
             <div className="space-y-4 border-l-4 border-primary pl-4 bg-primary/5 py-4 rounded-r-lg">
