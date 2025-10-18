@@ -51,7 +51,7 @@ const CAMPOS_SUPRA: Record<string, Array<{ field: string | null; header: string 
     { field: "espacamento_m", header: "Espaçamento (m)" },
     { field: "material", header: "Material" },
     { field: "outros_materiais", header: "Outros materiais" },
-    { field: "extensao_km", header: "Extensão (km)" },
+    { field: "extensao_metros", header: "Extensão (km)" },
     { field: "area_m2", header: "Área (m²)" },
   ],
   marcas_transversais: [
@@ -724,16 +724,40 @@ export default function MinhasNecessidadesRelatorios() {
           // Adicionar a aba gerada ao template (mantém aba original do template)
           worksheet = workbook.addWorksheet("CADASTRO INICIAL");
           
-          // Copiar todos os dados da aba gerada
-          worksheetDados.eachRow((row, rowNumber) => {
-            const targetRow = worksheet.getRow(rowNumber);
-            row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-              const targetCell = targetRow.getCell(colNumber);
-              targetCell.value = cell.value;
-              targetCell.style = cell.style;
-            });
-            targetRow.commit();
+          // Adicionar o cabeçalho SUPRA diretamente na aba do template
+          const linhaInicioTemplate = await adicionarCabecalhoSUPRA({
+            worksheet: worksheet,
+            titulo: tituloSUPRA,
+            contrato,
+            logoOrgao: logoDNIT,
+            logoSupervisora,
+            numColunas: cabecalhos.length,
           });
+          
+          formatarCabecalhosColunas(worksheet, linhaInicioTemplate, cabecalhos);
+          
+          // Copiar APENAS os dados (a partir da linha após o cabeçalho do worksheetDados)
+          const primeiraLinhaDadosOrigem = primeiraLinhaDados;
+          const primeiraLinhaDadosDestino = linhaInicioTemplate + 1;
+          
+          cadastro.forEach((item: any, index: number) => {
+            const rowOrigem = worksheetDados.getRow(primeiraLinhaDadosOrigem + index);
+            const rowDestino = worksheet.getRow(primeiraLinhaDadosDestino + index);
+            
+            rowOrigem.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+              const targetCell = rowDestino.getCell(colNumber);
+              targetCell.value = cell.value;
+              if (cell.style) {
+                targetCell.style = { ...cell.style };
+              }
+            });
+            rowDestino.height = rowOrigem.height;
+            rowDestino.commit();
+          });
+          
+          const ultimaLinhaTemplate = primeiraLinhaDadosDestino + cadastro.length - 1;
+          formatarCelulasDados(worksheet, primeiraLinhaDadosDestino, ultimaLinhaTemplate);
+          adicionarRodape(worksheet, ultimaLinhaTemplate, cabecalhos.length);
           
           // Copiar larguras das colunas
           worksheetDados.columns.forEach((col, index) => {
