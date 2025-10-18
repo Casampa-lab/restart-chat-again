@@ -29,7 +29,6 @@ const formSchema = z.object({
   suporte: z.string().optional(),
   substrato_suporte: z.string().optional(),
   
-  placa_recuperada: z.boolean().default(false),
   fora_plano_manutencao: z.boolean().default(false),
   justificativa_fora_plano: z.string().optional(),
   
@@ -105,7 +104,6 @@ export function IntervencoesSVForm({
       tipo_pelicula_legenda_orla: "",
       retro_pelicula_fundo: "",
       retro_pelicula_legenda_orla: "",
-      placa_recuperada: false,
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
       km_referencia: "",
@@ -256,7 +254,6 @@ export function IntervencoesSVForm({
           tipo_pelicula_legenda_orla: data.tipo_pelicula_legenda_orla || null,
           retro_fundo: data.retro_pelicula_fundo ? parseFloat(data.retro_pelicula_fundo) : null,
           retro_orla_legenda: data.retro_pelicula_legenda_orla ? parseFloat(data.retro_pelicula_legenda_orla) : null,
-          placa_recuperada: data.placa_recuperada,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
           latitude: data.latitude ? parseFloat(data.latitude) : null,
@@ -630,26 +627,6 @@ export function IntervencoesSVForm({
                 />
               </div>
             </div>
-
-            <FormField
-              control={form.control}
-              name="placa_recuperada"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={field.onChange}
-                      className="h-4 w-4"
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Placa Recuperada</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}
