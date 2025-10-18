@@ -35,7 +35,7 @@ const fichaPlacaSchema = z.object({
   substrato: z.string().optional(),
   tipo_pelicula_fundo: z.string().optional(),
   altura_m: z.string().optional(),
-  distancia_m: z.string().optional(),
+  largura_m: z.string().optional(),
   dimensoes_mm: z.string().optional(),
   area_m2: z.string().optional(),
   retro_pelicula_fundo: z.string().optional(),
@@ -200,7 +200,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
           retro_pelicula_fundo: values.retro_pelicula_fundo ? parseFloat(values.retro_pelicula_fundo) : null,
           retro_pelicula_legenda_orla: values.retro_pelicula_legenda_orla ? parseFloat(values.retro_pelicula_legenda_orla) : null,
           altura_m: values.altura_m ? parseFloat(values.altura_m) : null,
-          distancia_m: values.distancia_m ? parseFloat(values.distancia_m) : null,
+          largura_m: values.largura_m ? parseFloat(values.largura_m) : null,
           dimensoes_mm: values.dimensoes_mm || null,
           area_m2: values.area_m2 ? parseFloat(values.area_m2) : null,
           foto_frontal_url: photoUrls.frontal || null,
@@ -602,10 +602,10 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                   />
                   <FormField
                     control={form.control}
-                    name="distancia_m"
+                    name="largura_m"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Distância (m)</FormLabel>
+                        <FormLabel>Largura (m)</FormLabel>
                         <FormControl>
                           <Input type="number" step="0.01" {...field} />
                         </FormControl>

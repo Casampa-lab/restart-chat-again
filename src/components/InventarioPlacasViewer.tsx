@@ -107,7 +107,7 @@ interface FichaPlaca {
   dimensoes_mm: string | null;
   area_m2: number | null;
   altura_m: number | null;
-  distancia_m: number | null;
+  largura_m: number | null;
   link_fotografia: string | null;
   foto_url: string | null;
   foto_frontal_url: string | null;
@@ -941,7 +941,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Largura (m):</span>
-                      <p className="text-sm">{selectedPlaca.distancia_m?.toFixed(2) || "-"}</p>
+                      <p className="text-sm">{selectedPlaca.largura_m?.toFixed(2) || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Altura (m):</span>

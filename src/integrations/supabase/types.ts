@@ -1357,7 +1357,6 @@ export type Database = {
           descricao: string | null
           detalhamento_pagina: number | null
           dimensoes_mm: string | null
-          distancia_m: number | null
           empresa: string | null
           enviado_coordenador: boolean | null
           foto_base_url: string | null
@@ -1370,6 +1369,7 @@ export type Database = {
           id: string
           km: number | null
           lado: string | null
+          largura_m: number | null
           latitude_inicial: number | null
           link_fotografia: string | null
           longitude_inicial: number | null
@@ -1413,7 +1413,6 @@ export type Database = {
           descricao?: string | null
           detalhamento_pagina?: number | null
           dimensoes_mm?: string | null
-          distancia_m?: number | null
           empresa?: string | null
           enviado_coordenador?: boolean | null
           foto_base_url?: string | null
@@ -1426,6 +1425,7 @@ export type Database = {
           id?: string
           km?: number | null
           lado?: string | null
+          largura_m?: number | null
           latitude_inicial?: number | null
           link_fotografia?: string | null
           longitude_inicial?: number | null
@@ -1469,7 +1469,6 @@ export type Database = {
           descricao?: string | null
           detalhamento_pagina?: number | null
           dimensoes_mm?: string | null
-          distancia_m?: number | null
           empresa?: string | null
           enviado_coordenador?: boolean | null
           foto_base_url?: string | null
@@ -1482,6 +1481,7 @@ export type Database = {
           id?: string
           km?: number | null
           lado?: string | null
+          largura_m?: number | null
           latitude_inicial?: number | null
           link_fotografia?: string | null
           longitude_inicial?: number | null

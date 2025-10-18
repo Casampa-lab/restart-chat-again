@@ -820,7 +820,7 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           
           const larguraM = getVal("Largura (m)", "Largura(m)", "Largura m", "Largura  (m)", "largura_m", "largura");
           const alturaM = getVal("Altura (m)", "Altura m", "altura");
-          record.distancia_m = larguraM ? Number(larguraM) : null;
+          record.largura_m = larguraM ? Number(larguraM) : null;
           record.altura_m = alturaM && alturaM !== "-" ? Number(alturaM) : null;
           record.area_m2 = getVal("Área (m²)", "Area m2", "area") ? Number(getVal("Área (m²)", "Area m2", "area")) : null;
           

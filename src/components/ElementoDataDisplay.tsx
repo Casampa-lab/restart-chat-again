@@ -37,7 +37,7 @@ const fieldLabels: Record<string, string> = {
   secao_suporte_mm: 'Seção do Suporte (mm)',
   qtde_suporte: 'Qtd. Suportes',
   altura_m: 'Altura (m)',
-  distancia_m: 'Distância (m)',
+  largura_m: 'Largura (m)',
   area_m2: 'Área (m²)',
   dimensoes_mm: 'Dimensões (mm)',
   numero_patrimonio: 'Número Patrimônio',
@@ -99,7 +99,6 @@ const fieldLabels: Record<string, string> = {
   // Pórticos
   tipo_portico: 'Tipo de Pórtico',
   altura_maxima_m: 'Altura Máxima (m)',
-  largura_m: 'Largura (m)',
   
   // Outros
   snv: 'SNV',
