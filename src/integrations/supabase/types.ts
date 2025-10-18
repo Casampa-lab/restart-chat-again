@@ -5230,7 +5230,29 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_auditoria_inventario: {
+        Row: {
+          aprovado_por: string | null
+          aprovado_por_nome: string | null
+          cadastrado_por: string | null
+          data_aprovacao_coordenador: string | null
+          data_cadastro: string | null
+          data_intervencao: string | null
+          data_ultima_modificacao: string | null
+          elemento_id: string | null
+          identificador: string | null
+          localizacao_km: number | null
+          lote_id: string | null
+          modificado_por_intervencao: boolean | null
+          motivo_intervencao: string | null
+          rodovia_id: string | null
+          tipo_elemento: string | null
+          tipo_origem_cadastro: string | null
+          tipo_ultima_intervencao: string | null
+          ultima_intervencao_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       aplicar_intervencao_cilindros: {
@@ -5288,6 +5310,10 @@ export type Database = {
           codigo: string
           id: string
         }[]
+      }
+      get_tipo_origem_badge: {
+        Args: { p_tipo_origem: string }
+        Returns: string
       }
       get_user_supervisora_id: {
         Args: { _user_id: string }
