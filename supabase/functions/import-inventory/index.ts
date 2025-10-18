@@ -308,7 +308,11 @@ serve(async (req) => {
       },
       ficha_tachas: {
         "Descrição": "descricao",
+        "Descricao": "descricao",
+        "descrição": "descricao",
         "descricao": "descricao",
+        "DESCRIÇÃO": "descricao",
+        "DESCRICAO": "descricao",
         "Corpo": "corpo",
         "corpo": "corpo",
         "Refletivo": "tipo_refletivo",
