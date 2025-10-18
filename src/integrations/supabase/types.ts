@@ -396,6 +396,7 @@ export type Database = {
           dados_depois: Json
           id: string
           intervencao_id: string
+          tipo_origem: string | null
         }
         Insert: {
           aplicado_por?: string | null
@@ -405,6 +406,7 @@ export type Database = {
           dados_depois: Json
           id?: string
           intervencao_id: string
+          tipo_origem?: string | null
         }
         Update: {
           aplicado_por?: string | null
@@ -414,6 +416,7 @@ export type Database = {
           dados_depois?: Json
           id?: string
           intervencao_id?: string
+          tipo_origem?: string | null
         }
         Relationships: [
           {
@@ -460,6 +463,7 @@ export type Database = {
           snv: string | null
           tipo_avaria: string | null
           tipo_defensa: string | null
+          tipo_origem: string | null
         }
         Insert: {
           aplicado_ao_inventario?: boolean | null
@@ -488,6 +492,7 @@ export type Database = {
           snv?: string | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
+          tipo_origem?: string | null
         }
         Update: {
           aplicado_ao_inventario?: boolean | null
@@ -516,6 +521,7 @@ export type Database = {
           snv?: string | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
+          tipo_origem?: string | null
         }
         Relationships: []
       }
@@ -743,6 +749,7 @@ export type Database = {
           dados_depois: Json
           id: string
           intervencao_id: string
+          tipo_origem: string | null
         }
         Insert: {
           aplicado_por?: string | null
@@ -752,6 +759,7 @@ export type Database = {
           dados_depois: Json
           id?: string
           intervencao_id: string
+          tipo_origem?: string | null
         }
         Update: {
           aplicado_por?: string | null
@@ -761,6 +769,7 @@ export type Database = {
           dados_depois?: Json
           id?: string
           intervencao_id?: string
+          tipo_origem?: string | null
         }
         Relationships: [
           {
@@ -805,6 +814,7 @@ export type Database = {
           pendente_aprovacao_coordenador: boolean | null
           quantidade: number | null
           snv: string | null
+          tipo_origem: string | null
           tipo_refletivo: string | null
         }
         Insert: {
@@ -832,6 +842,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           snv?: string | null
+          tipo_origem?: string | null
           tipo_refletivo?: string | null
         }
         Update: {
@@ -859,6 +870,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           snv?: string | null
+          tipo_origem?: string | null
           tipo_refletivo?: string | null
         }
         Relationships: []
@@ -976,6 +988,7 @@ export type Database = {
           dados_depois: Json
           id: string
           intervencao_id: string
+          tipo_origem: string | null
         }
         Insert: {
           aplicado_por?: string | null
@@ -985,6 +998,7 @@ export type Database = {
           dados_depois: Json
           id?: string
           intervencao_id: string
+          tipo_origem?: string | null
         }
         Update: {
           aplicado_por?: string | null
@@ -994,6 +1008,7 @@ export type Database = {
           dados_depois?: Json
           id?: string
           intervencao_id?: string
+          tipo_origem?: string | null
         }
         Relationships: [
           {
@@ -1041,6 +1056,7 @@ export type Database = {
           sigla: string | null
           snv: string | null
           tipo_inscricao: string | null
+          tipo_origem: string | null
         }
         Insert: {
           aplicado_ao_inventario?: boolean | null
@@ -1070,6 +1086,7 @@ export type Database = {
           sigla?: string | null
           snv?: string | null
           tipo_inscricao?: string | null
+          tipo_origem?: string | null
         }
         Update: {
           aplicado_ao_inventario?: boolean | null
@@ -1099,6 +1116,7 @@ export type Database = {
           sigla?: string | null
           snv?: string | null
           tipo_inscricao?: string | null
+          tipo_origem?: string | null
         }
         Relationships: []
       }
@@ -1221,6 +1239,7 @@ export type Database = {
           dados_depois: Json
           id: string
           intervencao_id: string
+          tipo_origem: string | null
         }
         Insert: {
           aplicado_por?: string | null
@@ -1230,6 +1249,7 @@ export type Database = {
           dados_depois: Json
           id?: string
           intervencao_id: string
+          tipo_origem?: string | null
         }
         Update: {
           aplicado_por?: string | null
@@ -1239,6 +1259,7 @@ export type Database = {
           dados_depois?: Json
           id?: string
           intervencao_id?: string
+          tipo_origem?: string | null
         }
         Relationships: [
           {
@@ -1284,6 +1305,7 @@ export type Database = {
           pendente_aprovacao_coordenador: boolean | null
           snv: string | null
           tipo_demarcacao: string | null
+          tipo_origem: string | null
         }
         Insert: {
           aplicado_ao_inventario?: boolean | null
@@ -1311,6 +1333,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
           tipo_demarcacao?: string | null
+          tipo_origem?: string | null
         }
         Update: {
           aplicado_ao_inventario?: boolean | null
@@ -1338,6 +1361,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
           tipo_demarcacao?: string | null
+          tipo_origem?: string | null
         }
         Relationships: []
       }
@@ -1570,6 +1594,7 @@ export type Database = {
           dados_depois: Json
           id: string
           intervencao_id: string
+          tipo_origem: string | null
         }
         Insert: {
           aplicado_por?: string | null
@@ -1579,6 +1604,7 @@ export type Database = {
           dados_depois: Json
           id?: string
           intervencao_id: string
+          tipo_origem?: string | null
         }
         Update: {
           aplicado_por?: string | null
@@ -1588,6 +1614,7 @@ export type Database = {
           dados_depois?: Json
           id?: string
           intervencao_id?: string
+          tipo_origem?: string | null
         }
         Relationships: [
           {
@@ -1628,6 +1655,7 @@ export type Database = {
           retro_orla_legenda: number | null
           substrato: string | null
           suporte: string | null
+          tipo_origem: string | null
           tipo_pelicula_fundo_novo: string | null
         }
         Insert: {
@@ -1651,6 +1679,7 @@ export type Database = {
           retro_orla_legenda?: number | null
           substrato?: string | null
           suporte?: string | null
+          tipo_origem?: string | null
           tipo_pelicula_fundo_novo?: string | null
         }
         Update: {
@@ -1674,6 +1703,7 @@ export type Database = {
           retro_orla_legenda?: number | null
           substrato?: string | null
           suporte?: string | null
+          tipo_origem?: string | null
           tipo_pelicula_fundo_novo?: string | null
         }
         Relationships: [
@@ -1778,6 +1808,7 @@ export type Database = {
           dados_depois: Json
           id: string
           intervencao_id: string
+          tipo_origem: string | null
         }
         Insert: {
           aplicado_por?: string | null
@@ -1787,6 +1818,7 @@ export type Database = {
           dados_depois: Json
           id?: string
           intervencao_id: string
+          tipo_origem?: string | null
         }
         Update: {
           aplicado_por?: string | null
@@ -1796,6 +1828,7 @@ export type Database = {
           dados_depois?: Json
           id?: string
           intervencao_id?: string
+          tipo_origem?: string | null
         }
         Relationships: [
           {
@@ -1837,6 +1870,7 @@ export type Database = {
           pendente_aprovacao_coordenador: boolean | null
           snv: string | null
           tipo: string | null
+          tipo_origem: string | null
           vao_horizontal_m: number | null
         }
         Insert: {
@@ -1861,6 +1895,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
           tipo?: string | null
+          tipo_origem?: string | null
           vao_horizontal_m?: number | null
         }
         Update: {
@@ -1885,6 +1920,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
           tipo?: string | null
+          tipo_origem?: string | null
           vao_horizontal_m?: number | null
         }
         Relationships: []
@@ -2002,6 +2038,7 @@ export type Database = {
           dados_depois: Json
           id: string
           intervencao_id: string
+          tipo_origem: string | null
         }
         Insert: {
           aplicado_por?: string | null
@@ -2011,6 +2048,7 @@ export type Database = {
           dados_depois: Json
           id?: string
           intervencao_id: string
+          tipo_origem?: string | null
         }
         Update: {
           aplicado_por?: string | null
@@ -2020,6 +2058,7 @@ export type Database = {
           dados_depois?: Json
           id?: string
           intervencao_id?: string
+          tipo_origem?: string | null
         }
         Relationships: [
           {
@@ -2065,6 +2104,7 @@ export type Database = {
           pendente_aprovacao_coordenador: boolean | null
           quantidade: number | null
           snv: string | null
+          tipo_origem: string | null
           tipo_refletivo: string | null
           tipo_tacha: string | null
         }
@@ -2094,6 +2134,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           snv?: string | null
+          tipo_origem?: string | null
           tipo_refletivo?: string | null
           tipo_tacha?: string | null
         }
@@ -2123,6 +2164,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           snv?: string | null
+          tipo_origem?: string | null
           tipo_refletivo?: string | null
           tipo_tacha?: string | null
         }
@@ -5273,6 +5315,14 @@ export type Database = {
       }
       user_has_module_access: {
         Args: { _modulo_codigo: string; _user_id: string }
+        Returns: boolean
+      }
+      validar_campos_manutencao_pre_projeto: {
+        Args: {
+          p_dados_novos: Json
+          p_tipo_elemento: string
+          p_tipo_origem: string
+        }
         Returns: boolean
       }
     }
