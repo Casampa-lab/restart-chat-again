@@ -160,6 +160,16 @@ serve(async (req) => {
       console.log("Colunas:", Object.keys(normalizedData[0]));
       console.log("Dados:", normalizedData[0]);
       
+      // Log específico para cilindros
+      if (inventoryType === "cilindros") {
+        console.log("=== CILINDROS - DADOS BRUTOS ===");
+        for (const [key, value] of Object.entries(normalizedData[0])) {
+          if (key.toLowerCase().includes('espaçamento') || key.toLowerCase().includes('quantidade')) {
+            console.log(`[CILINDROS] Chave: "${key}", Valor: "${value}", Tipo: ${typeof value}, Vazio?: ${value === '' || value === null || value === undefined}`);
+          }
+        }
+      }
+      
       // Log específico para Descrição em tachas
       if (inventoryType === "tachas") {
         for (const [key, value] of Object.entries(normalizedData[0])) {
