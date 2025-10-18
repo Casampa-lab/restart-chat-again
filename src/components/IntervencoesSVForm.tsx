@@ -345,7 +345,7 @@ export function IntervencoesSVForm({
                     )}
                   />
 
-                <div className="grid md:grid-cols-[1fr_180px] gap-6 items-start">
+                <div className="grid md:grid-cols-[1fr_140px] gap-8 items-start">
                   <FormField
                     control={form.control}
                     name="codigo_placa"
@@ -371,7 +371,7 @@ export function IntervencoesSVForm({
                                 } />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="max-h-[300px] max-w-[calc(100vw-2rem)]">
+                            <SelectContent className="max-h-[300px]" align="start">
                               {codigosFiltrados.map((placa) => (
                                 <SelectItem key={placa.codigo} value={placa.codigo} className="cursor-pointer">
                                   <div className="flex items-center gap-2 py-1">
@@ -388,7 +388,7 @@ export function IntervencoesSVForm({
                     )}
                   />
                   
-                  <div className="md:pt-8 flex justify-end">
+                  <div className="md:pt-8 flex justify-end items-start">
                     <PlacaPreview codigo={codigoAtual} size="large" showLabel />
                   </div>
                 </div>
