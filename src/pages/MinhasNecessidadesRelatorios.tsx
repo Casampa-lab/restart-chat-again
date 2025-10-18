@@ -649,7 +649,7 @@ export default function MinhasNecessidadesRelatorios() {
       const logoSupervisora = supervisora?.logo_url || null;
 
       if (tipoConfig.templatePath && tipoConfig.abaOriginal) {
-        // USAR TEMPLATE .xlsm
+        // USAR TEMPLATE .xlsm - PRESERVANDO TODOS OS ELEMENTOS VISUAIS
         try {
           const response = await fetch(tipoConfig.templatePath);
           if (!response.ok) throw new Error("Template não encontrado");
@@ -658,30 +658,16 @@ export default function MinhasNecessidadesRelatorios() {
           workbook = new ExcelJS.Workbook();
           await workbook.xlsx.load(buffer);
 
-          // Adicionar aba temporária com dados do inventário
-          const tempSheet = workbook.addWorksheet("INVENTARIO_TEMP");
+          // LOCALIZAR A ABA ORIGINAL DO TEMPLATE (ex: "SH1(cadastro)")
+          worksheet = workbook.getWorksheet(tipoConfig.abaOriginal);
+          
+          if (!worksheet) {
+            throw new Error(`Aba "${tipoConfig.abaOriginal}" não encontrada no template`);
+          }
 
-          // Adicionar cabeçalhos na primeira linha
-          const headerRow = tempSheet.getRow(1);
-          headerRow.values = cabecalhos;
-          headerRow.font = { name: "Arial", size: 10, bold: true };
-          headerRow.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FFE0E0E0" },
-          };
-          headerRow.eachCell((cell) => {
-            cell.border = {
-              top: { style: "thin" },
-              left: { style: "thin" },
-              bottom: { style: "thin" },
-              right: { style: "thin" },
-            };
-            cell.alignment = { horizontal: "center", vertical: "middle" };
-          });
-
-          linhaInicioDados = 1;
-          worksheet = tempSheet;
+          // INSERIR DADOS A PARTIR DA LINHA 2 (linha 1 já tem cabeçalhos formatados do template)
+          // NÃO criar nova aba, NÃO adicionar cabeçalhos, NÃO remover nada, NÃO renomear nada
+          linhaInicioDados = 1; // Linha do cabeçalho (dados começam na linha 2)
         } catch (error) {
           console.error("Erro ao carregar template, criando do zero:", error);
           workbook = new ExcelJS.Workbook();
@@ -754,25 +740,41 @@ export default function MinhasNecessidadesRelatorios() {
         });
         
         row.values = valores;
+        
+        // Se estiver usando template, aplicar bordas finas para manter padrão visual
+        if (tipoConfig.templatePath && tipoConfig.abaOriginal) {
+          row.eachCell((cell) => {
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" }
+            };
+          });
+        }
       });
 
       const ultimaLinhaDados = primeiraLinhaDados + cadastro.length - 1;
 
-      // Formatar células de dados
-      formatarCelulasDados(worksheet, primeiraLinhaDados, ultimaLinhaDados);
+      // Formatar células de dados (apenas se NÃO estiver usando template)
+      if (!tipoConfig.templatePath || !tipoConfig.abaOriginal) {
+        formatarCelulasDados(worksheet, primeiraLinhaDados, ultimaLinhaDados);
+        
+        // Adicionar rodapé
+        adicionarRodape(worksheet, ultimaLinhaDados, cabecalhos.length);
+      }
 
-      // Adicionar rodapé
-      adicionarRodape(worksheet, ultimaLinhaDados, cabecalhos.length);
-
-      // Auto-ajustar largura das colunas
-      worksheet.columns.forEach((column, index) => {
-        let maxLength = cabecalhos[index]?.length || 10;
-        column.eachCell?.({ includeEmpty: false }, cell => {
-          const cellLength = cell.value ? String(cell.value).length : 10;
-          if (cellLength > maxLength) maxLength = cellLength;
+      // Auto-ajustar largura das colunas (apenas se NÃO estiver usando template)
+      if (!tipoConfig.templatePath || !tipoConfig.abaOriginal) {
+        worksheet.columns.forEach((column, index) => {
+          let maxLength = cabecalhos[index]?.length || 10;
+          column.eachCell?.({ includeEmpty: false }, cell => {
+            const cellLength = cell.value ? String(cell.value).length : 10;
+            if (cellLength > maxLength) maxLength = cellLength;
+          });
+          column.width = Math.max(maxLength + 2, 12);
         });
-        column.width = Math.max(maxLength + 2, 12);
-      });
+      }
 
       // MANUTENÇÃO EXECUTADA (se houver filtro de datas)
       if (tipoConfig.tabelaIntervencoes && (dataInicio || dataFim)) {
@@ -870,50 +872,53 @@ export default function MinhasNecessidadesRelatorios() {
         }
       }
 
-      // Aba DIC - Dicionário de Campos
-      const getNomeDIC = (tipo: string): string => {
-        const mapeamento: Record<string, string> = {
-          marcas_longitudinais: "DIC_SH",
-          tachas: "DIC_SH",
-          marcas_transversais: "DIC_SH",
-          cilindros: "DIC_SH",
-          placas: "DIC_SV",
-          porticos: "DIC_SV",
-          defensas: "DIC_DS",
+      // Aba DIC - Dicionário de Campos (apenas se NÃO estiver usando template)
+      if (!tipoConfig.templatePath || !tipoConfig.abaOriginal) {
+        const getNomeDIC = (tipo: string): string => {
+          const mapeamento: Record<string, string> = {
+            marcas_longitudinais: "DIC_SH",
+            tachas: "DIC_SH",
+            marcas_transversais: "DIC_SH",
+            cilindros: "DIC_SH",
+            placas: "DIC_SV",
+            porticos: "DIC_SV",
+            defensas: "DIC_DS",
+          };
+          return mapeamento[tipo] || "DIC";
         };
-        return mapeamento[tipo] || "DIC";
-      };
 
-      const nomeDIC = getNomeDIC(tipoSelecionado);
-      const dicSheet = workbook.addWorksheet(nomeDIC);
-      dicSheet.addRow(["DICIONÁRIO DE CAMPOS"]);
-      dicSheet.mergeCells("A1:C1");
-      const dicHeader = dicSheet.getCell("A1");
-      dicHeader.font = { name: "Arial", size: 14, bold: true };
-      dicHeader.alignment = { horizontal: "center", vertical: "middle" };
-      dicSheet.getRow(1).height = 25;
-      dicSheet.addRow([]);
+        const nomeDIC = getNomeDIC(tipoSelecionado);
+        const dicSheet = workbook.addWorksheet(nomeDIC);
+        dicSheet.addRow(["DICIONÁRIO DE CAMPOS"]);
+        dicSheet.mergeCells("A1:C1");
+        const dicHeader = dicSheet.getCell("A1");
+        dicHeader.font = { name: "Arial", size: 14, bold: true };
+        dicHeader.alignment = { horizontal: "center", vertical: "middle" };
+        dicSheet.getRow(1).height = 25;
+        dicSheet.addRow([]);
 
-      const dicData = obterDadosDicionario(tipoSelecionado, camposSUPRA);
-      dicSheet.addRow(["Campo", "Nome no Relatório", "Descrição"]);
-      const dicHeaderRow = dicSheet.getRow(3);
-      dicHeaderRow.font = { name: "Arial", size: 10, bold: true };
-      dicHeaderRow.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFE0E0E0" },
-      };
+        const dicData = obterDadosDicionario(tipoSelecionado, camposSUPRA);
+        dicSheet.addRow(["Campo", "Nome no Relatório", "Descrição"]);
+        const dicHeaderRow = dicSheet.getRow(3);
+        dicHeaderRow.font = { name: "Arial", size: 10, bold: true };
+        dicHeaderRow.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFE0E0E0" },
+        };
 
-      dicData.forEach(item => {
-        dicSheet.addRow([item.campo, item.nome, item.descricao]);
-      });
+        dicData.forEach(item => {
+          dicSheet.addRow([item.campo, item.nome, item.descricao]);
+        });
 
-      dicSheet.getColumn(1).width = 25;
-      dicSheet.getColumn(2).width = 30;
-      dicSheet.getColumn(3).width = 60;
+        dicSheet.getColumn(1).width = 25;
+        dicSheet.getColumn(2).width = 30;
+        dicSheet.getColumn(3).width = 60;
+      }
 
-      // Aba "Cód" - Dicionário de Códigos (APENAS para Placas/Pórticos)
-      if (tipoSelecionado === "placas" || tipoSelecionado === "porticos") {
+      // Aba "Cód" - Dicionário de Códigos (APENAS para Placas/Pórticos e se NÃO estiver usando template)
+      if ((tipoSelecionado === "placas" || tipoSelecionado === "porticos") && 
+          (!tipoConfig.templatePath || !tipoConfig.abaOriginal)) {
         const codSheet = workbook.addWorksheet("Cód");
 
         // Título
@@ -988,8 +993,9 @@ export default function MinhasNecessidadesRelatorios() {
         }
       }
 
-      // Aba Localização - Dados das Rodovias e Lotes
-      const localizacaoSheet = workbook.addWorksheet("Localização");
+      // Aba Localização - Dados das Rodovias e Lotes (apenas se NÃO estiver usando template)
+      if (!tipoConfig.templatePath || !tipoConfig.abaOriginal) {
+        const localizacaoSheet = workbook.addWorksheet("Localização");
       localizacaoSheet.addRow(["DADOS DE LOCALIZAÇÃO"]);
       localizacaoSheet.mergeCells("A1:G1");
       const locHeader = localizacaoSheet.getCell("A1");
@@ -1091,9 +1097,11 @@ export default function MinhasNecessidadesRelatorios() {
           column.width = maxLength + 2;
         }
       });
+      }
 
-      // Aba "Lado" - Nomenclatura de Posição (UNIVERSAL)
-      const ladoSheet = workbook.addWorksheet("Lado");
+      // Aba "Lado" - Nomenclatura de Posição (UNIVERSAL) - apenas se NÃO estiver usando template
+      if (!tipoConfig.templatePath || !tipoConfig.abaOriginal) {
+        const ladoSheet = workbook.addWorksheet("Lado");
 
       // Título
       ladoSheet.addRow(["Nomenclatura - Lado/Posição"]);
@@ -1147,26 +1155,9 @@ export default function MinhasNecessidadesRelatorios() {
       // Auto-ajustar largura
       ladoSheet.getColumn(1).width = 10;
       ladoSheet.getColumn(2).width = 60;
-
-      // Se usou template, remover aba original e renomear temporária
-      if (tipoConfig.templatePath && tipoConfig.abaOriginal) {
-        try {
-          // Remover aba original do template
-          const abaOriginal = workbook.getWorksheet(tipoConfig.abaOriginal);
-          if (abaOriginal) {
-            workbook.removeWorksheet(abaOriginal.id);
-          }
-          
-          // Renomear aba temporária para o nome original
-          const abaTemp = workbook.getWorksheet("INVENTARIO_TEMP");
-          if (abaTemp) {
-            abaTemp.name = tipoConfig.abaOriginal;
-          }
-        } catch (error) {
-          console.error("Erro ao manipular abas do template:", error);
-          // Continuar mesmo se houver erro na manipulação das abas
-        }
       }
+
+      // NÃO remover nem renomear abas do template - preservar estrutura original
 
       // Download
       const buffer = await workbook.xlsx.writeBuffer();
