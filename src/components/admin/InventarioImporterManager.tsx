@@ -818,7 +818,7 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           record.cor_pelicula_legenda_orla = getVal("Cor (película legenda/orla)", "Cor pelicula legenda/orla", "cor_pelicula_legenda_orla");
           record.retro_pelicula_legenda_orla = getVal("Retrorrefletância (película legenda/orla) (cd.lux/m-2)", "Retrorrefletância (película legenda/orla)", "Retrorrefletancia pelicula legenda/orla") ? Number(getVal("Retrorrefletância (película legenda/orla) (cd.lux/m-2)", "Retrorrefletância (película legenda/orla)", "Retrorrefletancia pelicula legenda/orla")) : null;
           
-          const larguraM = getVal("Largura (m)", "Largura m", "largura");
+          const larguraM = getVal("Largura (m)", "Largura(m)", "Largura m", "Largura  (m)", "largura_m", "largura");
           const alturaM = getVal("Altura (m)", "Altura m", "altura");
           record.distancia_m = larguraM ? Number(larguraM) : null;
           record.altura_m = alturaM && alturaM !== "-" ? Number(alturaM) : null;
