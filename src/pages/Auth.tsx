@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Monitor, Smartphone } from "lucide-react";
 import logoOperaVia from "@/assets/logo-operavia.png";
 const Auth = () => {
   const navigate = useNavigate();
@@ -17,6 +19,10 @@ const Auth = () => {
   const [codigoConvite, setCodigoConvite] = useState("");
   const [telefone, setTelefone] = useState("");
   const [loading, setLoading] = useState(false);
+  const [modoAcesso, setModoAcesso] = useState<'web' | 'campo'>(() => {
+    const savedModo = localStorage.getItem('modoAcesso') as 'web' | 'campo';
+    return savedModo || 'web';
+  });
   useEffect(() => {
     // Recuperar último email usado
     const lastEmail = localStorage.getItem("lastEmail");
@@ -39,7 +45,8 @@ const Auth = () => {
         console.log(`[Auth] Sessão verificada em ${Date.now() - startTime}ms`, { hasSession: !!session });
         
         if (session) {
-          navigate("/");
+          const savedModo = localStorage.getItem('modoAcesso') as 'web' | 'campo' || 'web';
+          navigate(savedModo === 'campo' ? "/modo-campo" : "/");
         }
       } catch (error) {
         console.error('[Auth] Erro ao verificar sessão:', error);
@@ -58,7 +65,8 @@ const Auth = () => {
       console.log('[Auth] Estado de autenticação mudou:', event);
       
       if (event === 'SIGNED_IN' && session) {
-        navigate("/");
+        const savedModo = localStorage.getItem('modoAcesso') as 'web' | 'campo' || 'web';
+        navigate(savedModo === 'campo' ? "/modo-campo" : "/");
       }
       // SIGNED_OUT não precisa fazer nada - usuário já está em /auth
     });
@@ -102,7 +110,7 @@ const Auth = () => {
         console.log(`[Auth] Login bem-sucedido em ${Date.now() - startTime}ms`);
         localStorage.setItem("lastEmail", email);
         toast.success("Login realizado com sucesso!");
-        navigate("/");
+        navigate(modoAcesso === 'campo' ? "/modo-campo" : "/");
       } else {
         console.log('[Auth] Tentando cadastro...');
         const signupPromise = supabase.auth.signUp({
@@ -165,6 +173,63 @@ const Auth = () => {
           <div className="flex flex-col items-center gap-2 bg-card rounded-xl p-8 shadow-lg">
             <img src={logoOperaVia} alt="OperaVia" className="h-48 w-48 object-contain" />
           </div>
+          
+          {/* Seleção de Modo */}
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle className="text-xl text-center">Escolha o Modo de Acesso</CardTitle>
+              <CardDescription className="text-center">
+                Selecione a interface ideal para seu contexto
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Modo Web Completo */}
+                <button
+                  onClick={() => {
+                    setModoAcesso('web');
+                    localStorage.setItem('modoAcesso', 'web');
+                  }}
+                  className={`p-6 rounded-lg border-2 transition-all ${
+                    modoAcesso === 'web' 
+                      ? 'border-primary bg-primary/10 shadow-lg' 
+                      : 'border-muted hover:border-primary/50'
+                  }`}
+                >
+                  <Monitor className="h-12 w-12 mx-auto mb-3 text-primary" />
+                  <h3 className="font-bold text-lg mb-2">Sistema Web</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Escritório • Dashboard completo • Relatórios • VABLE
+                  </p>
+                  {modoAcesso === 'web' && (
+                    <Badge className="mt-3 bg-primary">Selecionado</Badge>
+                  )}
+                </button>
+
+                {/* Modo Campo */}
+                <button
+                  onClick={() => {
+                    setModoAcesso('campo');
+                    localStorage.setItem('modoAcesso', 'campo');
+                  }}
+                  className={`p-6 rounded-lg border-2 transition-all ${
+                    modoAcesso === 'campo' 
+                      ? 'border-green-600 bg-green-50 shadow-lg' 
+                      : 'border-muted hover:border-green-600/50'
+                  }`}
+                >
+                  <Smartphone className="h-12 w-12 mx-auto mb-3 text-green-600" />
+                  <h3 className="font-bold text-lg mb-2">Modo Campo</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Mobile • GPS • Fotos • Intervenções rápidas
+                  </p>
+                  {modoAcesso === 'campo' && (
+                    <Badge className="mt-3 bg-green-600">Selecionado</Badge>
+                  )}
+                </button>
+              </div>
+            </CardContent>
+          </Card>
           
           <Card className="w-full">
             <CardHeader>
