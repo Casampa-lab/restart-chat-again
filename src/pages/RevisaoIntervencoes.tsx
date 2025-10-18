@@ -277,7 +277,7 @@ export default function RevisaoIntervencoes() {
             if (tipo.value === "intervencoes_sh") {
               descricao = `${item.tipo_demarcacao || ""} - ${item.cor || ""} - ${item.extensao_metros || 0}m`;
             } else if (tipo.value === "intervencoes_tacha") {
-              descricao = `${item.descricao || ""} - ${item.quantidade || 0} unid.`;
+              descricao = `${item.refletivo || ""} - ${item.quantidade || 0} unid.`;
             } else if (tipo.value === "ficha_placa_intervencoes") {
               descricao = `Placa - ${item.motivo || ""}`;
             } else {

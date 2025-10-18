@@ -84,9 +84,8 @@ const fieldLabels: Record<string, string> = {
   
   // Tachas e Cilindros (campos compartilhados)
   quantidade: 'Quantidade',
-  descricao: 'Descrição',
   corpo: 'Corpo',
-  refletivo: 'Refletivo',
+  refletivo: 'Descrição',
   cor_refletivo: 'Cor do Refletivo',
   local_implantacao: 'Local de Implantação',
   tipo_refletivo: 'Tipo Refletivo',

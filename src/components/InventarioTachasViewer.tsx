@@ -69,7 +69,6 @@ interface FichaTacha {
   longitude_final: number | null;
   data_vistoria: string;
   snv: string | null;
-  descricao: string | null;
   corpo: string | null;
   refletivo: string | null;
   cor_refletivo: string | null;
@@ -839,14 +838,11 @@ export function InventarioTachasViewer({
                         {intervencao.quantidade && (
                           <p><strong>Quantidade:</strong> {intervencao.quantidade}</p>
                         )}
-                        {intervencao.descricao && (
-                          <p><strong>Descrição:</strong> {intervencao.descricao}</p>
-                        )}
                         {intervencao.corpo && (
                           <p><strong>Corpo:</strong> {intervencao.corpo}</p>
                         )}
                         {intervencao.refletivo && (
-                          <p><strong>Refletivo:</strong> {intervencao.refletivo}</p>
+                          <p><strong>Descrição:</strong> {intervencao.refletivo}</p>
                         )}
                         {intervencao.cor_refletivo && (
                           <p><strong>Cor do Refletivo:</strong> {intervencao.cor_refletivo}</p>

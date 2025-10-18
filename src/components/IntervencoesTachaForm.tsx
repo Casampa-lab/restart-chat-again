@@ -33,7 +33,6 @@ const formSchema = z.object({
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   km_final: z.string().min(1, "KM final é obrigatório"),
   snv: z.string().optional(),
-  descricao: z.string().optional(),
   corpo: z.string().optional(),
   refletivo: z.string().optional(),
   cor_refletivo: z.string().optional(),
@@ -86,7 +85,6 @@ export function IntervencoesTachaForm({
       km_inicial: "",
       km_final: "",
       snv: "",
-      descricao: "",
       corpo: "",
       refletivo: "",
       cor_refletivo: "",
@@ -110,7 +108,6 @@ export function IntervencoesTachaForm({
         km_inicial: tachaSelecionada.km_inicial?.toString() || "",
         km_final: tachaSelecionada.km_final?.toString() || "",
         snv: (tachaSelecionada as any).snv || "",
-        descricao: (tachaSelecionada as any).descricao || "",
         corpo: (tachaSelecionada as any).corpo || "",
         refletivo: (tachaSelecionada as any).refletivo || "",
         cor_refletivo: (tachaSelecionada as any).cor_refletivo || "",
@@ -155,7 +152,6 @@ export function IntervencoesTachaForm({
         km_inicial: values.km_inicial ? parseFloat(values.km_inicial) : null,
         km_final: values.km_final ? parseFloat(values.km_final) : null,
         snv: values.snv || null,
-        descricao: values.descricao || null,
         corpo: values.corpo || null,
         refletivo: values.refletivo || null,
         cor_refletivo: values.cor_refletivo || null,
@@ -380,7 +376,7 @@ export function IntervencoesTachaForm({
                   name="refletivo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Refletivo</FormLabel>
+                      <FormLabel>Descrição</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -477,31 +473,8 @@ export function IntervencoesTachaForm({
               </div>
             </div>
 
-            {/* ========== SEÇÃO 4: DESCRIÇÃO E OBSERVAÇÕES ========== */}
+            {/* ========== SEÇÃO 4: OBSERVAÇÕES ========== */}
             <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="descricao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descrição do Dispositivo</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione (opcional)" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Tacha monodirecional">Tacha monodirecional</SelectItem>
-                        <SelectItem value="Tacha bidirecional">Tacha bidirecional</SelectItem>
-                        <SelectItem value="Tachão">Tachão</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <FormField
                 control={form.control}
                 name="observacao"
