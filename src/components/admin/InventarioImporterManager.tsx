@@ -1075,7 +1075,7 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
         placas: ['km', 'codigo', 'lado', 'rodovia_id'],
         marcas_longitudinais: ['km_inicial', 'km_final', 'tipo_demarcacao', 'rodovia_id'],
         cilindros: ['km_inicial', 'cor_corpo', 'rodovia_id'],
-        tachas: ['km_inicial', 'tipo_tacha', 'lado', 'rodovia_id'],
+        tachas: ['km_inicial', 'descricao', 'local_implantacao', 'rodovia_id'],
         inscricoes: ['km_inicial', 'sigla', 'tipo_inscricao', 'rodovia_id'],
         porticos: ['km', 'tipo', 'rodovia_id'],
         defensas: ['km_inicial', 'tramo', 'lado', 'rodovia_id'],

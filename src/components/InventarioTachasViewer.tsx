@@ -839,14 +839,20 @@ export function InventarioTachasViewer({
                         {intervencao.quantidade && (
                           <p><strong>Quantidade:</strong> {intervencao.quantidade}</p>
                         )}
-                        {intervencao.tipo_tacha && (
-                          <p><strong>Tipo:</strong> {intervencao.tipo_tacha}</p>
+                        {intervencao.descricao && (
+                          <p><strong>Descrição:</strong> {intervencao.descricao}</p>
                         )}
-                        {intervencao.cor && (
-                          <p><strong>Cor:</strong> {intervencao.cor}</p>
+                        {intervencao.corpo && (
+                          <p><strong>Corpo:</strong> {intervencao.corpo}</p>
                         )}
-                        {intervencao.material && (
-                          <p><strong>Material:</strong> {intervencao.material}</p>
+                        {intervencao.refletivo && (
+                          <p><strong>Refletivo:</strong> {intervencao.refletivo}</p>
+                        )}
+                        {intervencao.cor_refletivo && (
+                          <p><strong>Cor do Refletivo:</strong> {intervencao.cor_refletivo}</p>
+                        )}
+                        {intervencao.local_implantacao && (
+                          <p><strong>Local de Implantação:</strong> {intervencao.local_implantacao}</p>
                         )}
                         {intervencao.descricao && (
                           <p><strong>Descrição:</strong> {intervencao.descricao}</p>

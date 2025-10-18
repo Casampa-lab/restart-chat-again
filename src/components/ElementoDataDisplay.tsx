@@ -82,16 +82,15 @@ const fieldLabels: Record<string, string> = {
   traco_m: 'Traço (m)',
   espacamento_m: 'Espaçamento (m)',
   
-  // Tachas
+  // Tachas e Cilindros (campos compartilhados)
   quantidade: 'Quantidade',
-  tipo_tacha: 'Tipo de Tacha',
-  cor_tacha: 'Cor',
-  
-  // Cilindros
-  tipo_refletivo: 'Tipo Refletivo',
-  cor_refletivo: 'Cor Refletiva',
-  cor_corpo: 'Cor do Corpo',
+  descricao: 'Descrição',
+  corpo: 'Corpo',
+  refletivo: 'Refletivo',
+  cor_refletivo: 'Cor do Refletivo',
   local_implantacao: 'Local de Implantação',
+  tipo_refletivo: 'Tipo Refletivo',
+  cor_corpo: 'Cor do Corpo',
   
   // Inscrições
   tipo_inscricao: 'Tipo de Inscrição',
