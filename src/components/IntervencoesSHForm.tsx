@@ -8,9 +8,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, Check, PaintBucket } from "lucide-react";
 
 interface IntervencoesSHFormProps {
   marcaSelecionada?: {
@@ -197,14 +198,15 @@ const IntervencoesSHForm = ({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Dados Básicos da Intervenção */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="data_intervencao"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Data da Intervenção *</FormLabel>
+                    <FormLabel>Data da Intervenção</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -218,11 +220,11 @@ const IntervencoesSHForm = ({
                 name="motivo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Motivo da Intervenção *</FormLabel>
+                    <FormLabel>Motivo da Intervenção</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
+                          <SelectValue placeholder="Selecione o motivo" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -244,7 +246,7 @@ const IntervencoesSHForm = ({
                 name="km_inicial"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>KM Inicial *</FormLabel>
+                    <FormLabel>KM Inicial</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.001" placeholder="0.000" {...field} />
                     </FormControl>
@@ -258,7 +260,7 @@ const IntervencoesSHForm = ({
                 name="km_final"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>KM Final *</FormLabel>
+                    <FormLabel>KM Final</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.001" placeholder="0.000" {...field} />
                     </FormControl>
@@ -266,190 +268,254 @@ const IntervencoesSHForm = ({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="tipo_demarcacao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Demarcação</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {TIPOS_DEMARCACAO.map((tipo) => (
-                          <SelectItem key={tipo} value={tipo}>
-                            {tipo}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="cor"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cor</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a cor" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {CORES.map((cor) => (
-                          <SelectItem key={cor} value={cor}>
-                            {cor}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="largura_cm"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Largura (cm)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.1" placeholder="0.0" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="espessura_cm"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Espessura (cm)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.1" placeholder="0.0" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="material"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Material Utilizado</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o material" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {MATERIAIS.map((material) => (
-                          <SelectItem key={material} value={material}>
-                            {material}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="col-span-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={capturarCoordenadas}
-                  disabled={isCapturing}
-                  className="w-full"
-                >
-                  {isCapturing ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
-                  ) : (
-                    <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS</>
-                  )}
-                </Button>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="latitude"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Latitude</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="any" placeholder="-15.123456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="longitude"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Longitude</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="any" placeholder="-47.123456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
-            <FormField
-              control={form.control}
-              name="fora_plano_manutencao"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={field.onChange}
-                      className="h-4 w-4"
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Fora do Plano de Manutenção</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
+            {/* Localização GPS */}
+            <div className="md:col-span-2 space-y-4 border-l-4 border-green-500 pl-4 bg-green-50/50 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-green-600" />
+                <h3 className="font-semibold text-green-700 text-lg">Localização GPS</h3>
+              </div>
+              
+              <div className="space-y-3">
+                <Button
+                  type="button"
+                  onClick={capturarCoordenadas}
+                  disabled={isCapturing}
+                  variant="outline"
+                  className="w-full border-green-500 text-green-700 hover:bg-green-50"
+                >
+                  {isCapturing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Capturando coordenadas...
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Capturar Coordenadas Automáticas
+                    </>
+                  )}
+                </Button>
 
-            {form.watch("fora_plano_manutencao") && (
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="latitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Latitude</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="any"
+                            placeholder="-15.7942"
+                            className="border-green-300 focus:border-green-500"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="longitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Longitude</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="any"
+                            placeholder="-47.8822"
+                            className="border-green-300 focus:border-green-500"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {(form.watch("latitude") && form.watch("longitude")) && (
+                  <div className="flex items-center gap-2 text-sm text-green-600 bg-green-100 p-2 rounded">
+                    <Check className="h-4 w-4" />
+                    <span>Coordenadas capturadas com sucesso</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Características da Demarcação */}
+            <div className="space-y-4 border-l-4 border-primary pl-4 bg-primary/5 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <PaintBucket className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-primary text-lg">Características da Demarcação</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="tipo_demarcacao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Demarcação</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {TIPOS_DEMARCACAO.map((tipo) => (
+                            <SelectItem key={tipo} value={tipo}>
+                              {tipo}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="cor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cor</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a cor" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {CORES.map((cor) => (
+                            <SelectItem key={cor} value={cor}>
+                              {cor}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="largura_cm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Largura (cm)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="0.1" 
+                          placeholder="10" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="espessura_cm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Espessura (cm)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="0.1" 
+                          placeholder="0.3" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <FormField
+                  control={form.control}
+                  name="material"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Material Utilizado</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o material" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {MATERIAIS.map((material) => (
+                            <SelectItem key={material} value={material}>
+                              {material}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Observações e Justificativas */}
+            <div className="space-y-4">
               <FormField
                 control={form.control}
-                name="justificativa_fora_plano"
+                name="fora_plano_manutencao"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Justificativa *</FormLabel>
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
-                      <Textarea placeholder="Explique o motivo da intervenção fora do plano..." {...field} rows={3} />
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Fora do Plano de Manutenção
+                      </FormLabel>
+                    </div>
                   </FormItem>
                 )}
               />
-            )}
+
+              {form.watch("fora_plano_manutencao") && (
+                <FormField
+                  control={form.control}
+                  name="justificativa_fora_plano"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Justificativa</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Explique o motivo da intervenção estar fora do plano de manutenção"
+                          className="min-h-[100px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
 
             {!hideSubmitButton && (
               <Button type="submit" className="w-full" disabled={!marcaSelecionada && modo !== 'controlado'}>
