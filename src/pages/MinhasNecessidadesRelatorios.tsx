@@ -667,7 +667,7 @@ export default function MinhasNecessidadesRelatorios() {
 
           // INSERIR DADOS A PARTIR DA LINHA 2 (linha 1 já tem cabeçalhos formatados do template)
           // NÃO criar nova aba, NÃO adicionar cabeçalhos, NÃO remover nada, NÃO renomear nada
-          linhaInicioDados = 1; // Linha do cabeçalho (dados começam na linha 2)
+          linhaInicioDados = 3; // Linha do cabeçalho (dados começam na linha 4)
         } catch (error) {
           console.error("Erro ao carregar template, criando do zero:", error);
           workbook = new ExcelJS.Workbook();
