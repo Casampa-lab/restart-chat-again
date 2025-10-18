@@ -703,6 +703,8 @@ export default function MinhasNecessidadesRelatorios() {
       const primeiraLinhaDados = linhaInicioDados + 1;
       cadastro.forEach((item: any, index: number) => {
         const row = worksheet.getRow(primeiraLinhaDados + index);
+        
+        // Mapear e formatar valores
         const valores = camposSUPRA.map(campo => {
           if (campo.field === null) return ""; // Coluna SERVIÇO vazia
           
@@ -739,19 +741,24 @@ export default function MinhasNecessidadesRelatorios() {
           return valor;
         });
         
-        row.values = valores;
-        
-        // Se estiver usando template, aplicar bordas finas para manter padrão visual
-        if (tipoConfig.templatePath && tipoConfig.abaOriginal) {
-          row.eachCell((cell) => {
+        // Inserir dados célula por célula (mais confiável com templates .xlsm)
+        valores.forEach((valor, colIndex) => {
+          const cell = row.getCell(colIndex + 1);
+          cell.value = valor;
+          
+          // Se estiver usando template, aplicar bordas finas para manter padrão visual
+          if (tipoConfig.templatePath && tipoConfig.abaOriginal) {
             cell.border = {
               top: { style: "thin" },
               left: { style: "thin" },
               bottom: { style: "thin" },
               right: { style: "thin" }
             };
-          });
-        }
+          }
+        });
+        
+        // Garantir que a linha seja commitada
+        row.commit();
       });
 
       const ultimaLinhaDados = primeiraLinhaDados + cadastro.length - 1;
