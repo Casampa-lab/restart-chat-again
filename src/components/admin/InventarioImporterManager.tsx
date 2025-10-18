@@ -824,8 +824,14 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           record.altura_m = alturaM && alturaM !== "-" ? Number(alturaM) : null;
           record.area_m2 = getVal("Área (m²)", "Area m2", "area") ? Number(getVal("Área (m²)", "Area m2", "area")) : null;
           
-          if (larguraM && alturaM && alturaM !== "-") {
-            record.dimensoes_mm = `${(Number(larguraM) * 1000).toFixed(0)}x${(Number(alturaM) * 1000).toFixed(0)}`;
+          if (larguraM) {
+            if (alturaM && alturaM !== "-") {
+              // Placa retangular: LARGURAxALTURA
+              record.dimensoes_mm = `${(Number(larguraM) * 1000).toFixed(0)}x${(Number(alturaM) * 1000).toFixed(0)}`;
+            } else {
+              // Placa circular: apenas diâmetro
+              record.dimensoes_mm = `${(Number(larguraM) * 1000).toFixed(0)}`;
+            }
           }
           
           record.link_fotografia = getVal("Link da Fotografia", "Link da fotografia", "link_fotografia");
