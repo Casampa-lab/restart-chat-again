@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, Check, PaintBucket } from "lucide-react";
 
 interface IntervencoesInscricoesFormProps {
   inscricaoSelecionada?: {
@@ -217,7 +217,9 @@ const IntervencoesInscricoesForm = ({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            
+            {/* ========== SEÇÃO 1: DADOS BÁSICOS DA INTERVENÇÃO ========== */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -285,149 +287,236 @@ const IntervencoesInscricoesForm = ({
                   </FormItem>
                 )}
               />
+            </div>
 
-              <FormField
-                control={form.control}
-                name="sigla"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sigla</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+            {/* ========== SEÇÃO 2: LOCALIZAÇÃO GPS (VERDE) ========== */}
+            <div className="space-y-4 border-l-4 border-green-500 pl-4 bg-green-50/50 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-green-600" />
+                <h3 className="font-semibold text-green-700 text-lg">Localização GPS</h3>
+              </div>
+              
+              <div className="space-y-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={capturarCoordenadas}
+                  disabled={isCapturing}
+                  className="w-full"
+                >
+                  {isCapturing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Capturando coordenadas...
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Capturar Coordenadas Automáticas
+                    </>
+                  )}
+                </Button>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="latitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Latitude</FormLabel>
+                        <FormControl>
+                          <Input placeholder="-23.123456" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="longitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Longitude</FormLabel>
+                        <FormControl>
+                          <Input placeholder="-46.123456" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                {(form.watch("latitude") && form.watch("longitude")) && (
+                  <div className="flex items-center gap-2 text-sm text-green-600 bg-green-100 p-2 rounded">
+                    <Check className="h-4 w-4" />
+                    <span>Coordenadas capturadas com sucesso</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ========== SEÇÃO 3: CARACTERÍSTICAS DA INSCRIÇÃO (AZUL) ========== */}
+            <div className="space-y-4 border-l-4 border-primary pl-4 bg-primary/5 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <PaintBucket className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-primary text-lg">Características da Inscrição</h3>
+              </div>
+              
+              {/* Grid principal - 3 campos em linha */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="sigla"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sigla</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a sigla" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {SIGLAS_INSCRICAO.map((sigla) => (
+                            <SelectItem key={sigla} value={sigla}>
+                              {sigla}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tipo_inscricao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Inscrição</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {TIPOS_INSCRICAO.map((tipo) => (
+                            <SelectItem key={tipo} value={tipo}>
+                              {tipo}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="cor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cor</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a cor" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {CORES.map((cor) => (
+                            <SelectItem key={cor} value={cor}>
+                              {cor}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Grid secundário - dimensões e medidas */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="area_m2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Área Executada (m²)</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a sigla" />
-                        </SelectTrigger>
+                        <Input type="number" step="0.01" placeholder="0.00" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        {SIGLAS_INSCRICAO.map((sigla) => (
-                          <SelectItem key={sigla} value={sigla}>
-                            {sigla}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="tipo_inscricao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descrição / Tipo de Inscrição</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                <FormField
+                  control={form.control}
+                  name="espessura_mm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Espessura (mm)</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
+                        <Input type="number" step="0.01" placeholder="3.00" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        {TIPOS_INSCRICAO.map((tipo) => (
-                          <SelectItem key={tipo} value={tipo}>
-                            {tipo}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="cor"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cor</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                <FormField
+                  control={form.control}
+                  name="dimensoes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dimensões</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a cor" />
-                        </SelectTrigger>
+                        <Input placeholder="Ex: 3x2m, 10x1,5m" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        {CORES.map((cor) => (
-                          <SelectItem key={cor} value={cor}>
-                            {cor}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Material - full width */}
+              <div className="grid grid-cols-1">
+                <FormField
+                  control={form.control}
+                  name="material_utilizado"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Material Utilizado</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o material" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {MATERIAIS.map((material) => (
+                            <SelectItem key={material} value={material}>
+                              {material}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
-              <FormField
-                control={form.control}
-                name="area_m2"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Área Executada (m²)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" placeholder="0.00" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="espessura_mm"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Espessura (mm)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" placeholder="3.00" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="dimensoes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Dimensões</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: 3x2m, 10x1,5m" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="material_utilizado"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Material Utilizado</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o material" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {MATERIAIS.map((material) => (
-                          <SelectItem key={material} value={material}>
-                            {material}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
+            {/* ========== SEÇÃO 4: OBSERVAÇÕES E ESTADO ========== */}
+            <div className="space-y-4">
               <FormField
                 control={form.control}
                 name="estado_conservacao"
@@ -455,7 +544,7 @@ const IntervencoesInscricoesForm = ({
                 control={form.control}
                 name="observacao"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem>
                     <FormLabel>Observações</FormLabel>
                     <FormControl>
                       <Textarea placeholder="Observações sobre a intervenção..." {...field} rows={3} />
@@ -465,86 +554,40 @@ const IntervencoesInscricoesForm = ({
                 )}
               />
 
-              <div className="col-span-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={capturarCoordenadas}
-                  disabled={isCapturing}
-                  className="w-full"
-                >
-                  {isCapturing ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
-                  ) : (
-                    <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS</>
+              <FormField
+                control={form.control}
+                name="fora_plano_manutencao"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-2">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="h-4 w-4"
+                      />
+                    </FormControl>
+                    <FormLabel className="!mt-0">Fora do Plano de Manutenção</FormLabel>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("fora_plano_manutencao") && (
+                <FormField
+                  control={form.control}
+                  name="justificativa_fora_plano"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Justificativa</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Justifique por que está fora do plano..." {...field} rows={3} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </Button>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="latitude"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Latitude</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="any" placeholder="-15.123456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="longitude"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Longitude</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="any" placeholder="-47.123456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="fora_plano_manutencao"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={field.onChange}
-                      className="h-4 w-4"
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Fora do Plano de Manutenção</FormLabel>
-                  </div>
-                </FormItem>
+                />
               )}
-            />
-
-            {form.watch("fora_plano_manutencao") && (
-              <FormField
-                control={form.control}
-                name="justificativa_fora_plano"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Justificativa *</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Explique o motivo da intervenção fora do plano..." {...field} rows={3} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+            </div>
 
             {!hideSubmitButton && (
               <Button type="submit" className="w-full" disabled={!inscricaoSelecionada && modo !== 'controlado'}>
