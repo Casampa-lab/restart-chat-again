@@ -46,9 +46,21 @@ export function RetrorrefletividadeModalSimples({
   const [longitude, setLongitude] = useState<number | null>(null);
   const [capturandoGPS, setCapturandoGPS] = useState(false);
 
+  // Cálculo conforme DNIT 080/2014-ME e NBR 14723:2012
+  // Descarta o maior e o menor valor, calcula média dos valores centrais
   const media = useMemo(() => {
     const validos = medicoes.filter(m => m > 0);
-    return validos.length > 0 ? validos.reduce((a, b) => a + b) / validos.length : 0;
+    if (validos.length < 3) return 0; // Mínimo 3 para descartar 2 extremos
+    
+    // Ordena valores
+    const ordenados = [...validos].sort((a, b) => a - b);
+    
+    // Descarta o menor (índice 0) e o maior (último índice)
+    const centrais = ordenados.slice(1, -1);
+    
+    // Calcula média dos valores centrais
+    const soma = centrais.reduce((a, b) => a + b, 0);
+    return Math.round(soma / centrais.length);
   }, [medicoes]);
 
   const handleCapturarGPS = () => {
