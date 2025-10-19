@@ -2288,24 +2288,28 @@ export type Database = {
           retro_bd_conforme: boolean | null
           retro_bd_gps_lat: number | null
           retro_bd_gps_lng: number | null
+          retro_bd_medias: Json | null
           retro_bd_medicoes: Json | null
           retro_bd_obs: string | null
           retro_be: number | null
           retro_be_conforme: boolean | null
           retro_be_gps_lat: number | null
           retro_be_gps_lng: number | null
+          retro_be_medias: Json | null
           retro_be_medicoes: Json | null
           retro_be_obs: string | null
           retro_e: number | null
           retro_e_conforme: boolean | null
           retro_e_gps_lat: number | null
           retro_e_gps_lng: number | null
+          retro_e_medias: Json | null
           retro_e_medicoes: Json | null
           retro_e_obs: string | null
           retro_sv: number | null
           retro_sv_conforme: boolean | null
           retro_sv_gps_lat: number | null
           retro_sv_gps_lng: number | null
+          retro_sv_medias: Json | null
           retro_sv_obs: string | null
           sentido: string | null
           substrato: string | null
@@ -2370,24 +2374,28 @@ export type Database = {
           retro_bd_conforme?: boolean | null
           retro_bd_gps_lat?: number | null
           retro_bd_gps_lng?: number | null
+          retro_bd_medias?: Json | null
           retro_bd_medicoes?: Json | null
           retro_bd_obs?: string | null
           retro_be?: number | null
           retro_be_conforme?: boolean | null
           retro_be_gps_lat?: number | null
           retro_be_gps_lng?: number | null
+          retro_be_medias?: Json | null
           retro_be_medicoes?: Json | null
           retro_be_obs?: string | null
           retro_e?: number | null
           retro_e_conforme?: boolean | null
           retro_e_gps_lat?: number | null
           retro_e_gps_lng?: number | null
+          retro_e_medias?: Json | null
           retro_e_medicoes?: Json | null
           retro_e_obs?: string | null
           retro_sv?: number | null
           retro_sv_conforme?: boolean | null
           retro_sv_gps_lat?: number | null
           retro_sv_gps_lng?: number | null
+          retro_sv_medias?: Json | null
           retro_sv_obs?: string | null
           sentido?: string | null
           substrato?: string | null
@@ -2452,24 +2460,28 @@ export type Database = {
           retro_bd_conforme?: boolean | null
           retro_bd_gps_lat?: number | null
           retro_bd_gps_lng?: number | null
+          retro_bd_medias?: Json | null
           retro_bd_medicoes?: Json | null
           retro_bd_obs?: string | null
           retro_be?: number | null
           retro_be_conforme?: boolean | null
           retro_be_gps_lat?: number | null
           retro_be_gps_lng?: number | null
+          retro_be_medias?: Json | null
           retro_be_medicoes?: Json | null
           retro_be_obs?: string | null
           retro_e?: number | null
           retro_e_conforme?: boolean | null
           retro_e_gps_lat?: number | null
           retro_e_gps_lng?: number | null
+          retro_e_medias?: Json | null
           retro_e_medicoes?: Json | null
           retro_e_obs?: string | null
           retro_sv?: number | null
           retro_sv_conforme?: boolean | null
           retro_sv_gps_lat?: number | null
           retro_sv_gps_lng?: number | null
+          retro_sv_medias?: Json | null
           retro_sv_obs?: string | null
           sentido?: string | null
           substrato?: string | null

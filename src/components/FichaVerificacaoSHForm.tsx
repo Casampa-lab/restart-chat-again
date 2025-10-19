@@ -39,18 +39,21 @@ interface ItemSH {
   largura_obs: string;
   retro_bd: string;
   retro_bd_medicoes?: number[];
+  retro_bd_medias: number[]; // Array com as 10 médias expurgadas
   retro_bd_conforme: boolean;
   retro_bd_obs: string;
   retro_bd_gps_lat?: number;
   retro_bd_gps_lng?: number;
   retro_e: string;
   retro_e_medicoes?: number[];
+  retro_e_medias: number[]; // Array com as 10 médias expurgadas
   retro_e_conforme: boolean;
   retro_e_obs: string;
   retro_e_gps_lat?: number;
   retro_e_gps_lng?: number;
   retro_be: string;
   retro_be_medicoes?: number[];
+  retro_be_medias: number[]; // Array com as 10 médias expurgadas
   retro_be_conforme: boolean;
   retro_be_obs: string;
   retro_be_gps_lat?: number;
@@ -75,9 +78,9 @@ interface ItemSH {
 const createEmptyItem = (): Omit<ItemSH, 'file' | 'preview'> => ({
   latitude: "", longitude: "", sentido: "", km: "",
   largura_cm: "", largura_conforme: true, largura_obs: "",
-  retro_bd: "", retro_bd_conforme: true, retro_bd_obs: "",
-  retro_e: "", retro_e_conforme: true, retro_e_obs: "",
-  retro_be: "", retro_be_conforme: true, retro_be_obs: "",
+  retro_bd: "", retro_bd_medias: [], retro_bd_conforme: true, retro_bd_obs: "",
+  retro_e: "", retro_e_medias: [], retro_e_conforme: true, retro_e_obs: "",
+  retro_be: "", retro_be_medias: [], retro_be_conforme: true, retro_be_obs: "",
   marcas: "", marcas_conforme: true, marcas_obs: "",
   material: "", material_conforme: true, material_obs: "",
   tachas: "", tachas_conforme: true, tachas_obs: "",
@@ -267,18 +270,21 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
             largura_obs: item.largura_obs || null,
             retro_bd: item.retro_bd ? parseFloat(item.retro_bd) : null,
             retro_bd_medicoes: item.retro_bd_medicoes || null,
+            retro_bd_medias: item.retro_bd_medias.length > 0 ? item.retro_bd_medias : null,
             retro_bd_conforme: item.retro_bd_conforme,
             retro_bd_obs: item.retro_bd_obs || null,
             retro_bd_gps_lat: item.retro_bd_gps_lat || null,
             retro_bd_gps_lng: item.retro_bd_gps_lng || null,
             retro_e: item.retro_e ? parseFloat(item.retro_e) : null,
             retro_e_medicoes: item.retro_e_medicoes || null,
+            retro_e_medias: item.retro_e_medias.length > 0 ? item.retro_e_medias : null,
             retro_e_conforme: item.retro_e_conforme,
             retro_e_obs: item.retro_e_obs || null,
             retro_e_gps_lat: item.retro_e_gps_lat || null,
             retro_e_gps_lng: item.retro_e_gps_lng || null,
             retro_be: item.retro_be ? parseFloat(item.retro_be) : null,
             retro_be_medicoes: item.retro_be_medicoes || null,
+            retro_be_medias: item.retro_be_medias.length > 0 ? item.retro_be_medias : null,
             retro_be_conforme: item.retro_be_conforme,
             retro_be_obs: item.retro_be_obs || null,
             retro_be_gps_lat: item.retro_be_gps_lat || null,
@@ -298,7 +304,7 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
             velocidade: item.velocidade || null,
             velocidade_conforme: item.velocidade_conforme,
             velocidade_obs: item.velocidade_obs || null,
-          });
+          } as any);
 
         if (itemError) throw itemError;
       }
@@ -538,14 +544,19 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   {/* Retro BD */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
-                      <Label>Retro BD (mcd/lux)</Label>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Retro BD (mcd/lux)</Label>
+                        <Badge variant={item.retro_bd_medias.length === 10 ? "default" : "secondary"}>
+                          {item.retro_bd_medias.length}/10 medições
+                        </Badge>
+                      </div>
                       <div className="flex gap-2">
                         <Input
                           type="number"
                           step="0.1"
                           value={item.retro_bd}
                           readOnly
-                          placeholder="Clique em Medir"
+                          placeholder={item.retro_bd_medias.length === 0 ? "Clique em Medir" : `Média de ${item.retro_bd_medias.length} pontos`}
                           className="cursor-not-allowed bg-muted"
                         />
                         <Button
@@ -553,12 +564,33 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                           variant="outline"
                           size="sm"
                           onClick={() => {
+                            if (item.retro_bd_medias.length >= 10) {
+                              toast.error("Já foram feitas 10 medições. Máximo atingido.");
+                              return;
+                            }
                             setRetroModalContext({ itemIndex: index, campo: 'retro_bd' });
                             setRetroModalOpen(true);
                           }}
+                          disabled={item.retro_bd_medias.length >= 10}
                         >
-                          📊 Medir
+                          📊 {item.retro_bd_medias.length === 0 ? "Medir" : "Adicionar"}
                         </Button>
+                        {item.retro_bd_medias.length > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const newItens = [...itens];
+                              newItens[index].retro_bd_medias = [];
+                              newItens[index].retro_bd = '';
+                              setItens(newItens);
+                              toast.info("Medições de RETRO BD limpas.");
+                            }}
+                          >
+                            🗑️
+                          </Button>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -580,14 +612,19 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   {/* Retro E */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
-                      <Label>Retro E (mcd/lux)</Label>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Retro E (mcd/lux)</Label>
+                        <Badge variant={item.retro_e_medias.length === 10 ? "default" : "secondary"}>
+                          {item.retro_e_medias.length}/10 medições
+                        </Badge>
+                      </div>
                       <div className="flex gap-2">
                         <Input
                           type="number"
                           step="0.1"
                           value={item.retro_e}
                           readOnly
-                          placeholder="Clique em Medir"
+                          placeholder={item.retro_e_medias.length === 0 ? "Clique em Medir" : `Média de ${item.retro_e_medias.length} pontos`}
                           className="cursor-not-allowed bg-muted"
                         />
                         <Button
@@ -595,12 +632,33 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                           variant="outline"
                           size="sm"
                           onClick={() => {
+                            if (item.retro_e_medias.length >= 10) {
+                              toast.error("Já foram feitas 10 medições. Máximo atingido.");
+                              return;
+                            }
                             setRetroModalContext({ itemIndex: index, campo: 'retro_e' });
                             setRetroModalOpen(true);
                           }}
+                          disabled={item.retro_e_medias.length >= 10}
                         >
-                          📊 Medir
+                          📊 {item.retro_e_medias.length === 0 ? "Medir" : "Adicionar"}
                         </Button>
+                        {item.retro_e_medias.length > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const newItens = [...itens];
+                              newItens[index].retro_e_medias = [];
+                              newItens[index].retro_e = '';
+                              setItens(newItens);
+                              toast.info("Medições de RETRO E limpas.");
+                            }}
+                          >
+                            🗑️
+                          </Button>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -622,14 +680,19 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   {/* Retro BE */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
-                      <Label>Retro BE (mcd/lux)</Label>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Retro BE (mcd/lux)</Label>
+                        <Badge variant={item.retro_be_medias.length === 10 ? "default" : "secondary"}>
+                          {item.retro_be_medias.length}/10 medições
+                        </Badge>
+                      </div>
                       <div className="flex gap-2">
                         <Input
                           type="number"
                           step="0.1"
                           value={item.retro_be}
                           readOnly
-                          placeholder="Clique em Medir"
+                          placeholder={item.retro_be_medias.length === 0 ? "Clique em Medir" : `Média de ${item.retro_be_medias.length} pontos`}
                           className="cursor-not-allowed bg-muted"
                         />
                         <Button
@@ -637,12 +700,33 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                           variant="outline"
                           size="sm"
                           onClick={() => {
+                            if (item.retro_be_medias.length >= 10) {
+                              toast.error("Já foram feitas 10 medições. Máximo atingido.");
+                              return;
+                            }
                             setRetroModalContext({ itemIndex: index, campo: 'retro_be' });
                             setRetroModalOpen(true);
                           }}
+                          disabled={item.retro_be_medias.length >= 10}
                         >
-                          📊 Medir
+                          📊 {item.retro_be_medias.length === 0 ? "Medir" : "Adicionar"}
                         </Button>
+                        {item.retro_be_medias.length > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const newItens = [...itens];
+                              newItens[index].retro_be_medias = [];
+                              newItens[index].retro_be = '';
+                              setItens(newItens);
+                              toast.info("Medições de RETRO BE limpas.");
+                            }}
+                          >
+                            🗑️
+                          </Button>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -812,17 +896,37 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
               dataVerificacao={dataVerificacao}
               onComplete={(resultado) => {
                 const newItens = [...itens];
-                newItens[retroModalContext.itemIndex][retroModalContext.campo] = resultado.media.toFixed(1);
-                newItens[retroModalContext.itemIndex][`${retroModalContext.campo}_medicoes`] = resultado.medicoes;
-                newItens[retroModalContext.itemIndex][`${retroModalContext.campo}_obs`] = resultado.observacao;
-                if (resultado.latitude && resultado.longitude) {
-                  newItens[retroModalContext.itemIndex][`${retroModalContext.campo}_gps_lat`] = resultado.latitude;
-                  newItens[retroModalContext.itemIndex][`${retroModalContext.campo}_gps_lng`] = resultado.longitude;
+                const campo = retroModalContext.campo;
+                const campoMedias = `${campo}_medias`;
+                
+                // Adiciona a nova média ao array (máximo 10)
+                const mediasAtuais = ((newItens[retroModalContext.itemIndex] as any)[campoMedias] as number[]) || [];
+                if (mediasAtuais.length < 10) {
+                  mediasAtuais.push(resultado.media);
+                } else {
+                  toast.error("Já foram feitas 10 medições para este campo. Máximo atingido.");
+                  return;
                 }
+                
+                (newItens[retroModalContext.itemIndex] as any)[campoMedias] = mediasAtuais;
+                
+                // Recalcula a média das médias
+                const mediaFinal = mediasAtuais.reduce((acc, val) => acc + val, 0) / mediasAtuais.length;
+                newItens[retroModalContext.itemIndex][campo] = mediaFinal.toFixed(1);
+                
+                // Salva outras informações (última medição)
+                (newItens[retroModalContext.itemIndex] as any)[`${campo}_medicoes`] = resultado.medicoes;
+                (newItens[retroModalContext.itemIndex] as any)[`${campo}_obs`] = resultado.observacao;
+                if (resultado.latitude && resultado.longitude) {
+                  (newItens[retroModalContext.itemIndex] as any)[`${campo}_gps_lat`] = resultado.latitude;
+                  (newItens[retroModalContext.itemIndex] as any)[`${campo}_gps_lng`] = resultado.longitude;
+                }
+                
                 setItens(newItens);
                 setRetroModalOpen(false);
                 setRetroModalContext(null);
-                toast.success(`${retroModalContext.campo.toUpperCase().replace('_', ' ')}: ${resultado.media.toFixed(1)} mcd/lux (média de ${resultado.medicoes.filter(m => m > 0).length} leituras)`);
+                
+                toast.success(`${campo.toUpperCase().replace('_', ' ')}: Ponto ${mediasAtuais.length}/10 adicionado. Média atual: ${mediaFinal.toFixed(1)} mcd/lux`);
               }}
             />
           )}
