@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Camera as CameraIcon, X, Loader2 } from 'lucide-react';
@@ -18,6 +19,8 @@ export function CameraCapture({
 }: CameraCaptureProps) {
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const isNative = Capacitor.isNativePlatform();
 
   const takePicture = async () => {
     if (photos.length >= maxPhotos) {
@@ -25,8 +28,14 @@ export function CameraCapture({
       return;
     }
 
+    // Se está na web, usar input file
+    if (!isNative) {
+      fileInputRef.current?.click();
+      return;
+    }
+
     try {
-      // Verificar permissões
+      // Verificar permissões (apenas nativo)
       const permission = await Camera.checkPermissions();
       
       if (permission.camera !== 'granted') {
@@ -48,11 +57,41 @@ export function CameraCapture({
         throw new Error('Erro ao capturar imagem');
       }
 
-      // Upload para Supabase Storage
+      await uploadPhoto(image.dataUrl);
+    } catch (error: any) {
+      console.error('Erro ao capturar foto:', error);
+      toast.error('Erro ao capturar foto: ' + error.message);
+    }
+  };
+
+  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (photos.length >= maxPhotos) {
+      toast.error(`Máximo de ${maxPhotos} fotos atingido`);
+      return;
+    }
+
+    try {
+      // Converter para DataUrl
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        await uploadPhoto(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } catch (error: any) {
+      console.error('Erro ao processar foto:', error);
+      toast.error('Erro ao processar foto');
+    }
+  };
+
+  const uploadPhoto = async (dataUrl: string) => {
+    try {
       setUploading(true);
       
       // Converter DataUrl para Blob
-      const response = await fetch(image.dataUrl);
+      const response = await fetch(dataUrl);
       const blob = await response.blob();
       
       // Gerar nome único para o arquivo
@@ -81,8 +120,8 @@ export function CameraCapture({
       
       toast.success('Foto capturada e enviada!');
     } catch (error: any) {
-      console.error('Erro ao capturar foto:', error);
-      toast.error('Erro ao capturar foto: ' + error.message);
+      console.error('Erro ao fazer upload:', error);
+      toast.error('Erro ao fazer upload da foto');
     } finally {
       setUploading(false);
     }
@@ -97,6 +136,16 @@ export function CameraCapture({
 
   return (
     <div className="space-y-4">
+      {/* Input file oculto para web */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleFileInput}
+        className="hidden"
+      />
+      
       <Button
         type="button"
         variant="outline"
