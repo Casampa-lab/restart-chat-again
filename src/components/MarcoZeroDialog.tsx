@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, Trophy } from "lucide-react";
+import { CheckCircle2, Trophy, FileSpreadsheet } from "lucide-react";
 
 interface MarcoZeroDialogProps {
   loteId: string;
@@ -30,6 +31,7 @@ export function MarcoZeroDialog({
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Verificar se já existe marco_zero para este lote/rodovia
   const { data: marcoExistente } = useQuery({
@@ -65,10 +67,16 @@ export function MarcoZeroDialog({
       queryClient.invalidateQueries({ queryKey: ["marco-zero"] });
       toast({
         title: "🎯 Marco Zero Registrado!",
-        description: "O momento do inventário dinâmico definitivo foi gravado com sucesso.",
+        description: "Redirecionando para geração de Relatórios Iniciais...",
+        duration: 3000,
       });
       setOpen(false);
       onMarcoCreated?.();
+      
+      // Redirecionar após pequeno delay
+      setTimeout(() => {
+        navigate("/minhas-necessidades-relatorios");
+      }, 1500);
     },
     onError: (error) => {
       console.error("Erro ao criar marco zero:", error);
@@ -127,8 +135,24 @@ export function MarcoZeroDialog({
               </p>
             </div>
 
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+              <div className="flex items-start gap-2">
+                <FileSpreadsheet className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-blue-900 mb-2">
+                    📋 Próximo Passo Obrigatório:
+                  </p>
+                  <ol className="text-blue-800 space-y-1 list-decimal list-inside text-left">
+                    <li>Gerar <strong>Relatório Inicial SUPRA</strong> (templates .xlsm oficiais)</li>
+                    <li>Documentar oficialmente esta baseline aos fiscalizadores</li>
+                    <li>Iniciar registro de intervenções de manutenção</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
             <p className="text-sm text-muted-foreground italic">
-              Deseja gravar este momento histórico no sistema?
+              Deseja gravar este marco e ir direto para os relatórios?
             </p>
           </DialogDescription>
         </DialogHeader>
@@ -139,14 +163,14 @@ export function MarcoZeroDialog({
             className="flex-1"
             onClick={() => setOpen(false)}
           >
-            Depois
+            Gravar Depois
           </Button>
           <Button
             className="flex-1"
             onClick={() => criarMarcoMutation.mutate()}
             disabled={criarMarcoMutation.isPending}
           >
-            {criarMarcoMutation.isPending ? "Gravando..." : "Gravar Marco Zero"}
+            {criarMarcoMutation.isPending ? "Gravando..." : "Gravar e Ir para Relatórios"}
           </Button>
         </div>
       </DialogContent>

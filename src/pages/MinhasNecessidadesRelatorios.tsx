@@ -5,11 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Download, FileSpreadsheet } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ArrowLeft, Download, FileSpreadsheet, Info } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { criarWorkbookComLogos, adicionarCabecalhoSUPRA, formatarCabecalhosColunas, adicionarRodape, formatarCelulasDados } from "@/lib/excelLogoHelper";
 import { useSupervisora } from "@/hooks/useSupervisora";
+import { useMarcoZeroRecente } from "@/hooks/useMarcoZeroRecente";
+import { useWorkSession } from "@/hooks/useWorkSession";
+import { useAuth } from "@/hooks/useAuth";
 import logoOperaVia from "@/assets/logo-operavia.png";
 import { format } from "date-fns";
 
@@ -239,7 +243,13 @@ const obterDadosDicionario = (tipo: string, camposSUPRA: any[]) => {
 
 export default function MinhasNecessidadesRelatorios() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: supervisora } = useSupervisora();
+  const { activeSession } = useWorkSession(user?.id);
+  const { data: marcoZeroRecente } = useMarcoZeroRecente({
+    loteId: activeSession?.lote_id,
+    rodoviaId: activeSession?.rodovia_id,
+  });
   const [tipoSelecionado, setTipoSelecionado] = useState<string>("dados_rodovias");
   const [gerando, setGerando] = useState(false);
   const [dataInicio, setDataInicio] = useState<string>("");
@@ -1398,6 +1408,23 @@ export default function MinhasNecessidadesRelatorios() {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
+        {/* Banner Marco Zero Recente */}
+        {marcoZeroRecente && (
+          <Alert className="mb-6 bg-blue-50 border-blue-200">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertTitle className="text-blue-900 font-semibold">
+              🎯 Marco Zero Registrado Recentemente!
+            </AlertTitle>
+            <AlertDescription className="text-blue-800">
+              Um Marco Zero foi estabelecido em{" "}
+              <strong>{format(new Date(marcoZeroRecente.created_at), "dd/MM/yyyy 'às' HH:mm")}</strong>.
+              Este é o momento ideal para gerar o <strong>Relatório Inicial SUPRA</strong> que documenta 
+              oficialmente a baseline consolidada do inventário. Selecione o tipo de elemento abaixo 
+              e clique em "Gerar" na aba "Relatório Inicial".
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Tabs defaultValue="inicial" className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-[600px] mx-auto">
             <TabsTrigger value="inicial">Relatório Inicial</TabsTrigger>

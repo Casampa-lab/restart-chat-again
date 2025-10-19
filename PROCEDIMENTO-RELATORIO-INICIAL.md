@@ -1,5 +1,32 @@
 # Procedimento - Relatório Inicial e Marcação de Divergências
 
+## ⚠️ MOMENTO CORRETO PARA GERAR O RELATÓRIO INICIAL
+
+O **Relatório Inicial SUPRA** deve ser gerado **imediatamente após** o registro do **Marco Zero**, pois:
+
+✅ Representa a "foto oficial" do inventário consolidado  
+✅ É a baseline de referência para todas as medições futuras  
+✅ Documenta o estado real da rodovia após reconciliação completa  
+✅ É exigido pelos órgãos fiscalizadores antes de iniciar intervenções  
+
+### 🔄 Fluxo Recomendado:
+
+```
+1. Importar Inventário (Cadastro + Projeto)
+           ↓
+2. Reconciliar divergências até zero pendentes
+           ↓
+3. 🎯 GRAVAR MARCO ZERO ← Momento da consolidação
+           ↓
+4. 📊 GERAR RELATÓRIO INICIAL SUPRA ← Documentação obrigatória
+           ↓
+5. Enviar aos fiscalizadores
+           ↓
+6. Iniciar intervenções de manutenção
+```
+
+---
+
 ## 📋 Visão Geral
 
 Este procedimento descreve como gerar **Relatórios Iniciais** por lote usando templates SUPRA oficiais (.xlsm) e como marcar serviços executados **fora do plano de manutenção** para evidenciar divergências nos relatórios de medição.
