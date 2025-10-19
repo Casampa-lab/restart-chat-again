@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { toast } from "sonner";
 import { useWorkSession } from "@/hooks/useWorkSession";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -60,6 +61,7 @@ export default function MinhasFichasVerificacao() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [userId, setUserId] = useState<string>();
+  const [filtroStatus, setFiltroStatus] = useState<string>("todas");
   
   const { activeSession } = useWorkSession(userId);
 
@@ -72,6 +74,27 @@ export default function MinhasFichasVerificacao() {
       fetchFichas();
     };
     getUserAndFetch();
+
+    // Configurar realtime para atualizações automáticas
+    const channel = supabase
+      .channel('ficha-verificacao-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'ficha_verificacao'
+        },
+        () => {
+          console.log('Ficha atualizada, recarregando lista...');
+          fetchFichas();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchFichas = async () => {
@@ -171,6 +194,23 @@ export default function MinhasFichasVerificacao() {
     }
   };
 
+  const fichasFiltradas = fichas.filter(ficha => {
+    if (filtroStatus === "todas") return true;
+    if (filtroStatus === "rascunho") return !ficha.status || ficha.status === "rascunho";
+    if (filtroStatus === "pendente") return ficha.status === "pendente_aprovacao_coordenador";
+    if (filtroStatus === "aprovado") return ficha.status === "aprovado";
+    if (filtroStatus === "rejeitado") return ficha.status === "rejeitado";
+    return true;
+  });
+
+  const contadores = {
+    todas: fichas.length,
+    rascunho: fichas.filter(f => !f.status || f.status === "rascunho").length,
+    pendente: fichas.filter(f => f.status === "pendente_aprovacao_coordenador").length,
+    aprovado: fichas.filter(f => f.status === "aprovado").length,
+    rejeitado: fichas.filter(f => f.status === "rejeitado").length,
+  };
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto space-y-4">
@@ -199,6 +239,32 @@ export default function MinhasFichasVerificacao() {
             ) : fichas.length === 0 ? (
               <p className="text-muted-foreground">Nenhuma ficha encontrada.</p>
             ) : (
+              <>
+                <Tabs value={filtroStatus} onValueChange={setFiltroStatus} className="mb-4">
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="todas">
+                      Todas ({contadores.todas})
+                    </TabsTrigger>
+                    <TabsTrigger value="rascunho">
+                      Rascunhos ({contadores.rascunho})
+                    </TabsTrigger>
+                    <TabsTrigger value="pendente">
+                      Pendentes ({contadores.pendente})
+                    </TabsTrigger>
+                    <TabsTrigger value="aprovado">
+                      Aprovadas ({contadores.aprovado})
+                    </TabsTrigger>
+                    <TabsTrigger value="rejeitado">
+                      Rejeitadas ({contadores.rejeitado})
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+                {fichasFiltradas.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    Nenhuma ficha encontrada com este status.
+                  </p>
+                ) : (
               <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -212,7 +278,7 @@ export default function MinhasFichasVerificacao() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {fichas.map((ficha) => (
+                      {fichasFiltradas.map((ficha) => (
                         <TableRow key={ficha.id}>
                           <TableCell>
                             <Badge variant={ficha.tipo === "Sinalização Horizontal" ? "default" : "secondary"}>
@@ -291,6 +357,8 @@ export default function MinhasFichasVerificacao() {
                     </TableBody>
                   </Table>
               </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
@@ -410,6 +478,7 @@ export default function MinhasFichasVerificacao() {
               onSuccess={() => {
                 setCreateDialogOpen(false);
                 fetchFichas();
+                toast.success("Ficha criada! Aparecerá na lista em instantes.");
               }}
             />
           )}
