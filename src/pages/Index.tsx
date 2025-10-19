@@ -441,7 +441,7 @@ const Index = () => {
                               <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  navigate('/reconciliacoes-pendentes');
+                                  navigate('/reconciliacao-pendente');
                                 }}
                                 className="cursor-pointer hover:opacity-80 transition-opacity"
                               >
