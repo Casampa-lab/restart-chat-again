@@ -3486,6 +3486,7 @@ export type Database = {
           motivo: string | null
           observacao: string | null
           observacao_usuario: string | null
+          overlap_porcentagem: number | null
           quantidade: number | null
           reconciliado: boolean | null
           reconciliado_por: string | null
@@ -3497,6 +3498,7 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
+          tipo_match: string | null
           tipo_refletivo: string | null
           updated_at: string | null
           user_id: string
@@ -3528,6 +3530,7 @@ export type Database = {
           motivo?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
           quantidade?: number | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
@@ -3539,6 +3542,7 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
+          tipo_match?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
           user_id: string
@@ -3570,6 +3574,7 @@ export type Database = {
           motivo?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
           quantidade?: number | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
@@ -3581,6 +3586,7 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
+          tipo_match?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
           user_id?: string
@@ -3653,6 +3659,7 @@ export type Database = {
           nivel_risco: string | null
           observacao: string | null
           observacao_usuario: string | null
+          overlap_porcentagem: number | null
           percentual_veiculos_pesados: number | null
           quantidade_laminas: number | null
           reconciliado: boolean | null
@@ -3671,6 +3678,7 @@ export type Database = {
           terminal_saida: string | null
           tipo_avaria: string | null
           tipo_defensa: string | null
+          tipo_match: string | null
           tramo: string | null
           updated_at: string | null
           user_id: string
@@ -3720,6 +3728,7 @@ export type Database = {
           nivel_risco?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
           reconciliado?: boolean | null
@@ -3738,6 +3747,7 @@ export type Database = {
           terminal_saida?: string | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
+          tipo_match?: string | null
           tramo?: string | null
           updated_at?: string | null
           user_id: string
@@ -3787,6 +3797,7 @@ export type Database = {
           nivel_risco?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
           reconciliado?: boolean | null
@@ -3805,6 +3816,7 @@ export type Database = {
           terminal_saida?: string | null
           tipo_avaria?: string | null
           tipo_defensa?: string | null
+          tipo_match?: string | null
           tramo?: string | null
           updated_at?: string | null
           user_id?: string
@@ -3866,6 +3878,7 @@ export type Database = {
           material: string | null
           observacao: string | null
           observacao_usuario: string | null
+          overlap_porcentagem: number | null
           posicao: string | null
           reconciliado: boolean | null
           reconciliado_por: string | null
@@ -3879,6 +3892,7 @@ export type Database = {
           solucao_planilha: string | null
           status_revisao: string | null
           tipo_demarcacao: string | null
+          tipo_match: string | null
           traco_m: number | null
           updated_at: string | null
           user_id: string
@@ -3913,6 +3927,7 @@ export type Database = {
           material?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
           posicao?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
@@ -3926,6 +3941,7 @@ export type Database = {
           solucao_planilha?: string | null
           status_revisao?: string | null
           tipo_demarcacao?: string | null
+          tipo_match?: string | null
           traco_m?: number | null
           updated_at?: string | null
           user_id: string
@@ -3960,6 +3976,7 @@ export type Database = {
           material?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
           posicao?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
@@ -3973,6 +3990,7 @@ export type Database = {
           solucao_planilha?: string | null
           status_revisao?: string | null
           tipo_demarcacao?: string | null
+          tipo_match?: string | null
           traco_m?: number | null
           updated_at?: string | null
           user_id?: string
@@ -4033,6 +4051,7 @@ export type Database = {
           material_utilizado: string | null
           observacao: string | null
           observacao_usuario: string | null
+          overlap_porcentagem: number | null
           reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
@@ -4045,6 +4064,7 @@ export type Database = {
           solicitado_por: string | null
           solucao_planilha: string | null
           tipo_inscricao: string | null
+          tipo_match: string | null
           updated_at: string | null
           user_id: string
         }
@@ -4079,6 +4099,7 @@ export type Database = {
           material_utilizado?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
@@ -4091,6 +4112,7 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           tipo_inscricao?: string | null
+          tipo_match?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -4125,6 +4147,7 @@ export type Database = {
           material_utilizado?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
@@ -4137,6 +4160,7 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           tipo_inscricao?: string | null
+          tipo_match?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -4500,6 +4524,7 @@ export type Database = {
           lote_id: string
           observacao: string | null
           observacao_usuario: string | null
+          overlap_porcentagem: number | null
           quantidade: number | null
           reconciliado: boolean | null
           reconciliado_por: string | null
@@ -4513,6 +4538,7 @@ export type Database = {
           solicitado_por: string | null
           solucao_planilha: string | null
           status_revisao: string | null
+          tipo_match: string | null
           tipo_refletivo: string | null
           updated_at: string | null
           user_id: string
@@ -4544,6 +4570,7 @@ export type Database = {
           lote_id: string
           observacao?: string | null
           observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
           quantidade?: number | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
@@ -4557,6 +4584,7 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           status_revisao?: string | null
+          tipo_match?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
           user_id: string
@@ -4588,6 +4616,7 @@ export type Database = {
           lote_id?: string
           observacao?: string | null
           observacao_usuario?: string | null
+          overlap_porcentagem?: number | null
           quantidade?: number | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
@@ -4601,6 +4630,7 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           status_revisao?: string | null
+          tipo_match?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
           user_id?: string
