@@ -47,7 +47,8 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
   const [fotosVinculadas, setFotosVinculadas] = useState<Set<string>>(new Set());
 
   // Hook para status de importação
-  const { data: inventoryStatus } = useInventoryStatus(propLoteId, propRodoviaId);
+  const { inventoryCounts } = useInventoryStatus(propLoteId, propRodoviaId);
+  const inventoryStatus = inventoryCounts.data;
 
   const handleExcelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

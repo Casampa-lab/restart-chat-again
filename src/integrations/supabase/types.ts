@@ -5470,6 +5470,76 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_inventario_consolidado: {
+        Row: {
+          criado_por: string | null
+          data_marco: string | null
+          lote_id: string | null
+          marco_id: string | null
+          rodovia_id: string | null
+          total_cilindros: number | null
+          total_defensas: number | null
+          total_geral: number | null
+          total_inscricoes: number | null
+          total_marcas_longitudinais: number | null
+          total_placas: number | null
+          total_porticos: number | null
+          total_tachas: number | null
+        }
+        Insert: {
+          criado_por?: string | null
+          data_marco?: string | null
+          lote_id?: string | null
+          marco_id?: string | null
+          rodovia_id?: string | null
+          total_cilindros?: never
+          total_defensas?: never
+          total_geral?: never
+          total_inscricoes?: never
+          total_marcas_longitudinais?: never
+          total_placas?: never
+          total_porticos?: never
+          total_tachas?: never
+        }
+        Update: {
+          criado_por?: string | null
+          data_marco?: string | null
+          lote_id?: string | null
+          marco_id?: string | null
+          rodovia_id?: string | null
+          total_cilindros?: never
+          total_defensas?: never
+          total_geral?: never
+          total_inscricoes?: never
+          total_marcas_longitudinais?: never
+          total_placas?: never
+          total_porticos?: never
+          total_tachas?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marcos_inventario_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marcos_inventario_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marcos_inventario_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       aplicar_intervencao_cilindros: {

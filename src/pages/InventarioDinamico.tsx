@@ -9,9 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GitCompare, TrendingUp, Database, FileText, ArrowLeft, Home } from "lucide-react";
+import { GitCompare, TrendingUp, Database, FileText, ArrowLeft, Home, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -48,8 +49,38 @@ interface EvolucaoGeral {
 
 export default function InventarioDinamico() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [grupoSelecionado, setGrupoSelecionado] = useState<string>("sh");
   const [tipoElemento, setTipoElemento] = useState<string>("marcas_longitudinais");
+
+  // Buscar Marco Zero da sessão ativa do usuário
+  const { data: marcoZeroData } = useQuery({
+    queryKey: ["marco-zero-sessao-ativa", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      // Buscar sessão ativa do usuário
+      const { data: sessao } = await supabase
+        .from("sessoes_trabalho")
+        .select("lote_id, rodovia_id")
+        .eq("user_id", user.id)
+        .eq("ativa", true)
+        .maybeSingle();
+      
+      if (!sessao) return null;
+      
+      // Buscar Marco Zero
+      const { data } = await supabase
+        .from("vw_inventario_consolidado")
+        .select("*")
+        .eq("lote_id", sessao.lote_id)
+        .eq("rodovia_id", sessao.rodovia_id)
+        .maybeSingle();
+      
+      return data;
+    },
+    enabled: !!user,
+  });
 
   // Buscar estatísticas gerais
   const { data: evolucaoGeral } = useQuery({
@@ -150,62 +181,99 @@ export default function InventarioDinamico() {
       </div>
 
       {/* Estatísticas Gerais */}
-      <div className="grid md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Total de Elementos</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{totaisGerais?.total || 0}</div>
-            <p className="text-xs text-muted-foreground">Todos os tipos</p>
-          </CardContent>
-        </Card>
+      {marcoZeroData ? (
+        // VERSÃO CONSOLIDADA - Após Marco Zero
+        <div className="grid md:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                Inventário Consolidado
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-600">
+                {marcoZeroData.total_geral}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Baseline estabelecido em {format(new Date(marcoZeroData.data_marco), "dd/MM/yyyy", { locale: ptBR })}
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Status do Marco Zero</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white mb-2">
+                ✅ Marco Zero Registrado
+              </Badge>
+              <p className="text-xs text-muted-foreground">
+                Contadores unificados em fonte única consolidada
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        // VERSÃO ORIGINAL - Antes do Marco Zero
+        <div className="grid md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Total de Elementos</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{totaisGerais?.total || 0}</div>
+              <p className="text-xs text-muted-foreground">Todos os tipos</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>⚪ Cadastro Inicial</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{totaisGerais?.originais || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              {totaisGerais?.total
-                ? ((totaisGerais.originais / totaisGerais.total) * 100).toFixed(1)
-                : 0}
-              % do total
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>⚪ Cadastro Inicial</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{totaisGerais?.originais || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                {totaisGerais?.total
+                  ? ((totaisGerais.originais / totaisGerais.total) * 100).toFixed(1)
+                  : 0}
+                % do total
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>🟡 Manutenção Pré-Projeto</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{totaisGerais?.manutencao || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              {totaisGerais?.total
-                ? ((totaisGerais.manutencao / totaisGerais.total) * 100).toFixed(1)
-                : 0}
-              % do total
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>🟡 Manutenção Pré-Projeto</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{totaisGerais?.manutencao || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                {totaisGerais?.total
+                  ? ((totaisGerais.manutencao / totaisGerais.total) * 100).toFixed(1)
+                  : 0}
+                % do total
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>🟢 Execução de Projeto</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{totaisGerais?.execucao || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              {totaisGerais?.total
-                ? ((totaisGerais.execucao / totaisGerais.total) * 100).toFixed(1)
-                : 0}
-              % do total
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>🟢 Execução de Projeto</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{totaisGerais?.execucao || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                {totaisGerais?.total
+                  ? ((totaisGerais.execucao / totaisGerais.total) * 100).toFixed(1)
+                  : 0}
+                % do total
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Tabs por Grupo de Elementos */}
       <Card>

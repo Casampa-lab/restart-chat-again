@@ -8,6 +8,12 @@ interface InventoryCount {
   importado: boolean; // Se foi feita importação (mesmo que vazia)
 }
 
+interface MarcoZeroData {
+  existe: boolean;
+  data?: string;
+  totalConsolidado?: number;
+}
+
 const INVENTORY_TYPES = [
   { value: "placas", label: "Placas de Sinalização", table: "ficha_placa" },
   { value: "cilindros", label: "Cilindros Delimitadores", table: "ficha_cilindros" },
@@ -22,7 +28,7 @@ export function useInventoryStatus(
   loteId?: string,
   rodoviaId?: string
 ) {
-  return useQuery<InventoryCount[]>({
+  const inventoryCounts = useQuery<InventoryCount[]>({
     queryKey: ["inventory-status", loteId, rodoviaId],
     queryFn: async () => {
       if (!loteId || !rodoviaId) return [];
@@ -57,6 +63,33 @@ export function useInventoryStatus(
     },
     enabled: !!loteId && !!rodoviaId,
   });
+
+  // Query para verificar Marco Zero
+  const marcoZero = useQuery<MarcoZeroData>({
+    queryKey: ["marco-zero-status", loteId, rodoviaId],
+    queryFn: async () => {
+      if (!loteId || !rodoviaId) return { existe: false };
+      
+      const { data } = await supabase
+        .from("vw_inventario_consolidado")
+        .select("data_marco, total_geral")
+        .eq("lote_id", loteId)
+        .eq("rodovia_id", rodoviaId)
+        .maybeSingle();
+      
+      return {
+        existe: !!data,
+        data: data?.data_marco,
+        totalConsolidado: data?.total_geral,
+      };
+    },
+    enabled: !!loteId && !!rodoviaId,
+  });
+
+  return { 
+    inventoryCounts, 
+    marcoZero 
+  };
 }
 
 export function getStatusIndicator(total: number, importado: boolean) {
