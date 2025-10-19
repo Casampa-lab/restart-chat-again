@@ -166,24 +166,28 @@ export default function InventarioDinamicoComAlerta() {
 
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate('/modo-campo')}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Inventário Dinâmico</h1>
-          {activeSession && (
-            <p className="text-sm text-muted-foreground">
-              Lote {activeSession.lote?.numero || '-'} | {activeSession.rodovia?.codigo || '-'}
-            </p>
-          )}
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Button
+              variant="outline"
+              size="default"
+              onClick={() => navigate('/modo-campo')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">Inventário Dinâmico</h1>
+            {activeSession && (
+              <p className="text-sm text-muted-foreground">
+                Lote {activeSession.lote?.numero || '-'} | {activeSession.rodovia?.codigo || '-'}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
 
       {/* Status GPS */}
       <Card className="mb-4">
