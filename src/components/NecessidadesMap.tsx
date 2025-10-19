@@ -330,20 +330,51 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
 
   useEffect(() => {
     const loadGeojson = async () => {
-      // Carregar apenas SNV
-      const { data: dataSnv } = await supabase
-        .from("configuracoes")
-        .select("valor")
-        .eq("chave", "mapa_geojson_snv")
-        .maybeSingle();
-      
-      if (dataSnv?.valor) {
-        try {
-          setGeojsonSnvData(JSON.parse(dataSnv.valor));
-          toast.success("Camada SNV carregada");
-        } catch (error) {
-          console.error("Erro ao carregar GeoJSON SNV:", error);
+      // Carregar SNV do novo sistema de Storage
+      try {
+        console.log('🗺️ Carregando SNV do sistema...');
+        
+        // Carregar metadados da camada ativa
+        const { data: configData } = await supabase
+          .from('configuracoes')
+          .select('valor')
+          .eq('chave', 'snv_geojson_metadata')
+          .maybeSingle();
+
+        if (configData?.valor) {
+          const metadata = JSON.parse(configData.valor);
+          if (metadata.versao && metadata.storage_path) {
+            console.log(`📥 Carregando SNV versão ${metadata.versao} do Storage...`);
+            
+            const { data: publicUrlData } = supabase.storage
+              .from('snv-layers')
+              .getPublicUrl(metadata.storage_path);
+
+            if (publicUrlData?.publicUrl) {
+              const response = await fetch(publicUrlData.publicUrl);
+              const geojson = await response.json();
+              setGeojsonSnvData(geojson);
+              toast.success(`Camada SNV ${metadata.versao} carregada (${metadata.features_count} features)`);
+              console.log(`✅ SNV ${metadata.versao} carregado`);
+              return;
+            }
+          }
         }
+
+        // Fallback: tentar cache antigo (mapa_geojson_snv)
+        console.log('⚠️ Tentando carregar cache antigo...');
+        const { data: dataSnv } = await supabase
+          .from("configuracoes")
+          .select("valor")
+          .eq("chave", "mapa_geojson_snv")
+          .maybeSingle();
+        
+        if (dataSnv?.valor) {
+          setGeojsonSnvData(JSON.parse(dataSnv.valor));
+          toast.success("Camada SNV carregada (cache antigo)");
+        }
+      } catch (error) {
+        console.error("Erro ao carregar GeoJSON SNV:", error);
       }
     };
     loadGeojson();

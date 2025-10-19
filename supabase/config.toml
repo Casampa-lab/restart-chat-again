@@ -3,6 +3,9 @@ project_id = "cfdnrbyeuqtrjzzjyuon"
 [functions.chat-assistant]
 verify_jwt = true
 
+[functions.process-snv-shapefile]
+verify_jwt = true
+
 [functions.reset-database]
 verify_jwt = false
 

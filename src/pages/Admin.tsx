@@ -26,6 +26,9 @@ import { DeleteNecessidades } from "@/components/admin/DeleteNecessidades";
 import { RecalcularMatches } from "@/components/admin/RecalcularMatches";
 import { LimparReconciliacoesInconsistentes } from "@/components/admin/LimparReconciliacoesInconsistentes";
 import { LimparReconciliacoesOrfas } from "@/components/admin/LimparReconciliacoesOrfas";
+import { DiagnosticoMatch } from "@/components/admin/DiagnosticoMatch";
+import { LimparFotosOrfas } from "@/components/admin/LimparFotosOrfas";
+import { SnvShapefileUploader } from "@/components/admin/SnvShapefileUploader";
 import { ResetDatabaseButton } from "@/components/admin/ResetDatabaseButton";
 
 import logoOperaVia from "@/assets/logo-operavia.png";
@@ -353,18 +356,30 @@ const Admin = () => {
           </TabsContent>
 
           {isAdmin && (
-            <TabsContent value="auditoria">
-              <div className="text-center py-8">
-                <p className="text-muted-foreground mb-4">
-                  Clique no botão abaixo para acessar o painel completo de Auditoria de Sinalizações GPS
-                </p>
-                <Button 
-                  size="lg"
-                  onClick={() => navigate("/admin/auditoria-sinalizacoes")}
-                >
-                  Abrir Painel de Auditoria GPS
-                </Button>
-              </div>
+            <TabsContent value="auditoria" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>🔍 Auditoria de GPS</CardTitle>
+                  <CardDescription>
+                    Diagnóstico de registros com coordenadas ausentes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <DiagnosticoMatch />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>🗺️ Gestão de Camada SNV</CardTitle>
+                  <CardDescription>
+                    Upload e conversão automática de shapefiles SNV para GeoJSON
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SnvShapefileUploader />
+                </CardContent>
+              </Card>
             </TabsContent>
           )}
 
