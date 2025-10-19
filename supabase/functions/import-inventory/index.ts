@@ -421,7 +421,7 @@ serve(async (req) => {
     // Campos válidos por tabela (baseado no schema)
     const VALID_FIELDS: Record<string, string[]> = {
       necessidades_placas: [
-        "codigo", "tipo", "dimensoes_mm", "km", "lado", "latitude", "longitude",
+        "codigo", "tipo", "dimensoes_mm", "km", "lado", "latitude_inicial", "longitude_inicial",
         "observacao", "snv", "br", "uf", "velocidade", "substrato", "suporte",
         "altura_m", "distancia_m", "area_m2", "servico", "solucao_planilha",
         "estado_conservacao", "divergencia_identificada", "cadastro_id"
@@ -447,8 +447,8 @@ serve(async (req) => {
         "altura_m", "area_m2", "br", "codigo", "contrato", "data_implantacao",
         "data_vistoria", "descricao", "dimensoes_mm", "distancia_m", "empresa",
         "foto_base_url", "foto_frontal_url", "foto_identificacao_url",
-        "foto_lateral_url", "foto_posterior_url", "km", "lado", "latitude",
-        "longitude", "modelo", "numero_patrimonio", "qtde_suporte",
+        "foto_lateral_url", "foto_posterior_url", "km", "lado", "latitude_inicial",
+        "longitude_inicial", "modelo", "numero_patrimonio", "qtde_suporte",
         "retro_pelicula_fundo", "retro_pelicula_legenda_orla",
         "snv", "substrato", "suporte", "tipo", "uf", "velocidade",
         "tipo_pelicula_fundo", "cor_pelicula_fundo",
