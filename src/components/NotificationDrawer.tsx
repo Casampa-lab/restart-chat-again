@@ -19,16 +19,9 @@ import { AlertCircle, CheckCheck, X } from "lucide-react";
 interface NotificationDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  coordenadorData?: {
-    totalPendencias: number;
-    notificacoesNaoLidas: number;
-    elementosPendentes: number;
-    divergenciasPendentes: number;
-    intervencoesPendentes: number;
-  };
 }
 
-export function NotificationDrawer({ open, onOpenChange, coordenadorData }: NotificationDrawerProps) {
+export function NotificationDrawer({ open, onOpenChange }: NotificationDrawerProps) {
   const { notificacoes, marcarComoLida, marcarTodasComoLidas } = useNotificacoes();
   const navigate = useNavigate();
 
@@ -69,38 +62,6 @@ export function NotificationDrawer({ open, onOpenChange, coordenadorData }: Noti
             )}
           </div>
         </DrawerHeader>
-
-        {coordenadorData && (
-          <div className="mx-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 rounded-lg mb-4 border border-blue-200 dark:border-blue-800">
-            <h3 className="font-bold text-lg mb-3 text-blue-900 dark:text-blue-100">📊 Tarefas Pendentes</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-900 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                <span className="text-sm">📢 Notificações não lidas</span>
-                <Badge variant="secondary">{coordenadorData.notificacoesNaoLidas}</Badge>
-              </div>
-              <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-900 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                <span className="text-sm">📋 Elementos não cadastrados</span>
-                <Badge variant="secondary">{coordenadorData.elementosPendentes}</Badge>
-              </div>
-              <div 
-                className="flex justify-between items-center p-2 bg-white dark:bg-gray-900 rounded hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
-                onClick={() => {
-                  onOpenChange(false);
-                  navigate('/reconciliacao-pendente');
-                }}
-              >
-                <span className="text-sm font-semibold">🔄 Divergências a reconciliar</span>
-                <Badge variant="destructive" className="text-base font-bold">
-                  {coordenadorData.divergenciasPendentes}
-                </Badge>
-              </div>
-              <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-900 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                <span className="text-sm">✅ Intervenções para aprovar</span>
-                <Badge variant="secondary">{coordenadorData.intervencoesPendentes}</Badge>
-              </div>
-            </div>
-          </div>
-        )}
 
         <ScrollArea className="h-[60vh] px-4">
           {notificacoes.length === 0 ? (
