@@ -474,7 +474,7 @@ serve(async (req) => {
       ],
       ficha_porticos: [
         "altura_livre_m", "data_vistoria", "foto_url",
-        "km", "lado", "latitude", "longitude", "snv", "tipo",
+        "km", "lado", "latitude_inicial", "longitude_inicial", "snv", "tipo",
         "vao_horizontal_m",
         "origem", "modificado_por_intervencao", "ultima_intervencao_id",
         "data_ultima_modificacao"
