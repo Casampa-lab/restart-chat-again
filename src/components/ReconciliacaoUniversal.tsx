@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle, CheckCircle2, XCircle, MapPin } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { GrupoElemento, getConfig, formatarCampo, CAMPO_LABELS } from "@/lib/reconciliacaoConfig";
@@ -45,6 +46,11 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
   const [justificativa, setJustificativa] = useState("");
   const [decisao, setDecisao] = useState<"projeto" | "inferencia" | null>(null);
   const [grupoAtivo, setGrupoAtivo] = useState<GrupoElemento>(grupo);
+  
+  // Estados para reconciliação em lote
+  const [itensSelecionados, setItensSelecionados] = useState<Set<string>>(new Set());
+  const [mostrarConfirmacaoLote, setMostrarConfirmacaoLote] = useState(false);
+  const [justificativaLote, setJustificativaLote] = useState("");
 
   // Buscar tolerância GPS da rodovia da necessidade selecionada
   const { data: rodoviaConfig } = useQuery({
@@ -230,6 +236,80 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
     }
   };
 
+  // Mutation para reconciliação em lote
+  const reconciliarLoteMutation = useMutation({
+    mutationFn: async ({ 
+      ids, 
+      justificativa 
+    }: { 
+      ids: string[];
+      justificativa: string;
+    }) => {
+      const configAtual = getConfig(grupoAtivo);
+      
+      // Buscar todas as necessidades selecionadas
+      const { data: necessidades, error: fetchError } = await supabase
+        .from(configAtual.tabelaNecessidades as any)
+        .select("*")
+        .in("id", ids);
+
+      if (fetchError) throw fetchError;
+      if (!necessidades) throw new Error("Necessidades não encontradas");
+
+      // Preparar updates - SEMPRE usa decisão do projeto
+      const updates = necessidades.map((nec: any) => ({
+        id: nec.id,
+        servico_final: nec.solucao_planilha || nec.servico,
+        servico: nec.solucao_planilha || nec.servico,
+        reconciliado: true,
+        reconciliado_por: user?.id,
+        data_reconciliacao: new Date().toISOString(),
+        justificativa_reconciliacao: justificativa || "Reconciliação em lote - Decisão do Projeto",
+      }));
+
+      // Executar em paralelo
+      const promises = updates.map(update => 
+        supabase
+          .from(configAtual.tabelaNecessidades as any)
+          .update(update)
+          .eq("id", update.id)
+      );
+
+      const results = await Promise.all(promises);
+      
+      // Verificar erros
+      const erros = results.filter(r => r.error);
+      if (erros.length > 0) {
+        throw new Error(`Falha ao atualizar ${erros.length} itens`);
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["divergencias", grupoAtivo, activeSession.lote_id, activeSession.rodovia_id] });
+      queryClient.invalidateQueries({ queryKey: ["estatisticas-gerais", activeSession.lote_id, activeSession.rodovia_id] });
+      toast({
+        title: "Reconciliação em lote concluída",
+        description: `${variables.ids.length} divergências foram reconciliadas usando a decisão do projeto.`,
+      });
+      setItensSelecionados(new Set());
+      setMostrarConfirmacaoLote(false);
+      setJustificativaLote("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro na reconciliação em lote",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const confirmarReconciliacaoLote = () => {
+    reconciliarLoteMutation.mutate({
+      ids: Array.from(itensSelecionados),
+      justificativa: justificativaLote,
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Estatísticas Gerais */}
@@ -311,6 +391,19 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead className="w-12">
+                            <Checkbox
+                              checked={itensSelecionados.size === divergencias?.length && divergencias?.length > 0}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setItensSelecionados(new Set(divergencias?.map(d => d.id) || []));
+                                } else {
+                                  setItensSelecionados(new Set());
+                                }
+                              }}
+                              disabled={!divergencias || divergencias.length === 0}
+                            />
+                          </TableHead>
                           <TableHead>KM</TableHead>
                           <TableHead>Identificação</TableHead>
                           <TableHead className="text-center">Projeto 🎨</TableHead>
@@ -322,6 +415,20 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
                       <TableBody>
                         {divergencias?.map((div) => (
                           <TableRow key={div.id}>
+                            <TableCell>
+                              <Checkbox
+                                checked={itensSelecionados.has(div.id)}
+                                onCheckedChange={(checked) => {
+                                  const novo = new Set(itensSelecionados);
+                                  if (checked) {
+                                    novo.add(div.id);
+                                  } else {
+                                    novo.delete(div.id);
+                                  }
+                                  setItensSelecionados(novo);
+                                }}
+                              />
+                            </TableCell>
                             <TableCell className="font-mono">
                               {div.km?.toFixed(3) || div.km_inicial?.toFixed(3) || 'N/A'}
                             </TableCell>
@@ -618,6 +725,119 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
               disabled={!decisao || reconciliarMutation.isPending}
             >
               {reconciliarMutation.isPending ? "Salvando..." : "Confirmar Decisão"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Barra de Ações Flutuante */}
+      {itensSelecionados.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-6 py-4 rounded-lg shadow-2xl flex items-center gap-4 z-50 border-2 border-primary-foreground/20">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5" />
+            <span className="font-semibold">
+              {itensSelecionados.size} {itensSelecionados.size === 1 ? 'item selecionado' : 'itens selecionados'}
+            </span>
+          </div>
+          <Button 
+            onClick={() => setMostrarConfirmacaoLote(true)}
+            variant="secondary"
+            size="sm"
+            className="font-semibold"
+          >
+            🎨 Reconciliar com Decisão do Projeto
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setItensSelecionados(new Set())}
+            className="text-primary-foreground hover:bg-primary-foreground/20"
+          >
+            Cancelar
+          </Button>
+        </div>
+      )}
+
+      {/* Modal de Confirmação em Lote */}
+      <Dialog open={mostrarConfirmacaoLote} onOpenChange={setMostrarConfirmacaoLote}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              🎨 Confirmar Reconciliação em Lote
+            </DialogTitle>
+            <DialogDescription>
+              {itensSelecionados.size} divergências serão reconciliadas usando a <strong>Decisão do Projeto</strong>
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Lista de itens selecionados */}
+            <div className="border rounded-lg p-3 bg-muted/50">
+              <p className="text-sm font-medium mb-2">Itens que serão reconciliados:</p>
+              <div className="max-h-48 overflow-y-auto space-y-1">
+                {Array.from(itensSelecionados).map(id => {
+                  const div = divergencias?.find(d => d.id === id);
+                  if (!div) return null;
+                  
+                  const configAtual = getConfig(grupoAtivo);
+                  const identificacao = configAtual.tipoGeometria === 'pontual'
+                    ? `KM ${div.km?.toFixed(3)} - ${div.codigo || div.tipo}`
+                    : `KM ${div.km_inicial?.toFixed(3)} a ${div.km_final?.toFixed(3)} - ${div.codigo || div.tipo}`;
+                  
+                  return (
+                    <div key={id} className="text-sm p-2 bg-background rounded border">
+                      {identificacao}
+                      <Badge variant="outline" className="ml-2 text-xs">
+                        Projeto: {div.solucao_planilha || div.servico}
+                      </Badge>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* Justificativa opcional */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Justificativa (opcional)
+              </label>
+              <Textarea
+                placeholder="Ex: Reconciliação em lote após validação técnica..."
+                value={justificativaLote}
+                onChange={(e) => setJustificativaLote(e.target.value)}
+                rows={3}
+              />
+            </div>
+            
+            {/* Aviso */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex gap-2">
+              <AlertCircle className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+              <p className="text-sm text-blue-800">
+                Todos os itens selecionados serão marcados como <strong>"Substituir"</strong> ou <strong>"Manter"</strong> 
+                conforme definido na planilha de projeto.
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setMostrarConfirmacaoLote(false);
+                setJustificativaLote("");
+              }}
+              disabled={reconciliarLoteMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={confirmarReconciliacaoLote}
+              disabled={reconciliarLoteMutation.isPending}
+            >
+              {reconciliarLoteMutation.isPending && (
+                <span className="mr-2">⏳</span>
+              )}
+              Confirmar {itensSelecionados.size} Reconciliações
             </Button>
           </DialogFooter>
         </DialogContent>
