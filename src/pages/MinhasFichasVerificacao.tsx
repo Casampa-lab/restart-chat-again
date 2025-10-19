@@ -197,7 +197,7 @@ export default function MinhasFichasVerificacao() {
   };
 
   const fichasFiltradas = mostrarEnviadas
-    ? fichas.filter(f => f.status && f.status !== "rascunho")
+    ? fichas
     : fichas.filter(f => !f.status || f.status === "rascunho");
 
   return (
@@ -247,8 +247,8 @@ export default function MinhasFichasVerificacao() {
             ) : fichasFiltradas.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
                 {mostrarEnviadas 
-                  ? "Nenhuma ficha enviada encontrada." 
-                  : "Nenhum rascunho encontrado. Marque 'Mostrar fichas enviadas' para ver fichas já enviadas."}
+                  ? "Nenhuma ficha cadastrada ainda"
+                  : "Nenhuma ficha não enviada"}
               </p>
             ) : (
               <div className="overflow-x-auto">
