@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, Plus } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { useWorkSession } from "@/hooks/useWorkSession";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
@@ -267,13 +268,23 @@ export default function MinhasFichasVerificacao() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleViewDetails(ficha)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleViewDetails(ficha)}
+                                  >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    Ver Detalhes
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Visualizar pontos de verificação</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </TableCell>
                         </TableRow>
                       ))}
