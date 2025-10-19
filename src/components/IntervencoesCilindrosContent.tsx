@@ -75,7 +75,10 @@ const IntervencoesCilindrosContent = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       try {
         // Buscar TODAS as intervenções do usuário
