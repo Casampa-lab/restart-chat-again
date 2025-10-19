@@ -3,8 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye, Plus } from "lucide-react";
+import { ArrowLeft, Eye, Plus, Send, Edit, Trash2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useWorkSession } from "@/hooks/useWorkSession";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
@@ -64,6 +74,8 @@ export default function MinhasFichasVerificacao() {
   const [userId, setUserId] = useState<string>();
   const [filtroStatus, setFiltroStatus] = useState<string>("todas");
   const [mostrarEnviadas, setMostrarEnviadas] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [fichaToDelete, setFichaToDelete] = useState<string | null>(null);
   
   const { activeSession } = useWorkSession(userId);
 
@@ -196,6 +208,55 @@ export default function MinhasFichasVerificacao() {
     }
   };
 
+  const handleEnviarParaCoordenador = async (fichaId: string) => {
+    try {
+      const { error } = await supabase
+        .from("ficha_verificacao")
+        .update({ 
+          status: 'pendente_aprovacao_coordenador',
+          enviado_coordenador_em: new Date().toISOString()
+        })
+        .eq("id", fichaId);
+
+      if (error) throw error;
+
+      toast.success("Ficha enviada para validação do coordenador!");
+      fetchFichas();
+    } catch (error: any) {
+      toast.error("Erro ao enviar ficha: " + error.message);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!fichaToDelete) return;
+
+    try {
+      // Deletar itens da ficha
+      const { error: itensError } = await supabase
+        .from("ficha_verificacao_itens")
+        .delete()
+        .eq("ficha_id", fichaToDelete);
+
+      if (itensError) throw itensError;
+
+      // Deletar ficha
+      const { error } = await supabase
+        .from("ficha_verificacao")
+        .delete()
+        .eq("id", fichaToDelete);
+
+      if (error) throw error;
+
+      toast.success("Ficha excluída com sucesso!");
+      fetchFichas();
+    } catch (error: any) {
+      toast.error("Erro ao excluir ficha: " + error.message);
+    } finally {
+      setDeleteDialogOpen(false);
+      setFichaToDelete(null);
+    }
+  };
+
   const fichasFiltradas = mostrarEnviadas
     ? fichas
     : fichas.filter(f => !f.status || f.status === "rascunho");
@@ -320,23 +381,73 @@ export default function MinhasFichasVerificacao() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleViewDetails(ficha)}
-                                  >
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    Ver Detalhes
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Visualizar pontos de verificação</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <div className="flex justify-end gap-2">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleEnviarParaCoordenador(ficha.id)}
+                                      disabled={ficha.status && ficha.status !== "rascunho"}
+                                      title={
+                                        ficha.status && ficha.status !== "rascunho"
+                                          ? "Ficha já foi enviada ao coordenador"
+                                          : "Enviar para Coordenador"
+                                      }
+                                    >
+                                      <Send className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{ficha.status && ficha.status !== "rascunho" ? "Já enviada" : "Enviar para coordenador"}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleViewDetails(ficha)}
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Visualizar pontos de verificação</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setFichaToDelete(ficha.id);
+                                        setDeleteDialogOpen(true);
+                                      }}
+                                      disabled={ficha.status && ficha.status !== "rascunho"}
+                                      title={
+                                        ficha.status && ficha.status !== "rascunho"
+                                          ? "Não é possível excluir fichas enviadas"
+                                          : "Excluir ficha"
+                                      }
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{ficha.status && ficha.status !== "rascunho" ? "Não pode excluir" : "Excluir ficha"}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -468,6 +579,25 @@ export default function MinhasFichasVerificacao() {
           )}
         </DialogContent>
       </Dialog>
+      {/* Dialog de confirmação de exclusão */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta ficha? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setFichaToDelete(null)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
