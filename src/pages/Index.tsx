@@ -16,11 +16,8 @@ import { NotificationBell } from "@/components/NotificationBell";
 import SessionSelector from "@/components/SessionSelector";
 import NaoConformidadeSimples from "@/components/NaoConformidadeSimples";
 
-import RetrorrefletividadeEstaticaForm from "@/components/RetrorrefletividadeEstaticaForm";
-import RetrorrefletividadeDinamicaForm from "@/components/RetrorrefletividadeDinamicaForm";
 import DefensasForm from "@/components/DefensasForm";
 import { RegistroNCForm } from "@/components/RegistroNCForm";
-import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
 import { InventarioPlacasViewer } from "@/components/InventarioPlacasViewer";
 import { InventarioMarcasLongitudinaisViewer } from "@/components/InventarioMarcasLongitudinaisViewer";
@@ -658,34 +655,20 @@ const Index = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Controle de Qualidade</CardTitle>
-                    <CardDescription>Registre medições de retrorefletividade e inspeções de qualidade dos elementos de sinalização</CardDescription>
+                    <CardDescription>Use o Modo Campo para registrar Fichas de Verificação com medições de retrorefletividade</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-end">
-                        <Button variant="secondary" onClick={() => navigate("/minhas-retrorrefletividades")} className="shadow-md hover:shadow-lg transition-shadow">
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver meus registros
-                        </Button>
-                      </div>
-                      <Tabs defaultValue="estatica" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="estatica">
-                            <span className="text-xs font-bold mr-2">3.1.3.1</span>
-                            Estática
-                          </TabsTrigger>
-                          <TabsTrigger value="dinamica">
-                            <span className="text-xs font-bold mr-2">3.1.3.2</span>
-                            Dinâmica
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="estatica" className="mt-4">
-                          <RetrorrefletividadeEstaticaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                        </TabsContent>
-                        <TabsContent value="dinamica" className="mt-4">
-                          <RetrorrefletividadeDinamicaForm loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                        </TabsContent>
-                      </Tabs>
+                    <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                      <p className="text-muted-foreground text-center">
+                        As Fichas de Verificação agora incluem medições de retrorefletividade integradas.
+                      </p>
+                      <Button 
+                        size="lg" 
+                        onClick={() => navigate("/modo-campo")}
+                        className="shadow-md hover:shadow-lg transition-shadow"
+                      >
+                        Ir para Modo Campo
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
