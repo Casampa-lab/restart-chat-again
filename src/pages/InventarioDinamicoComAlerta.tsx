@@ -209,13 +209,28 @@ export default function InventarioDinamicoComAlerta() {
 
   const contadores = getContadores();
 
-  const necessidadesFiltradas = position && necessidades.length > 0
-    ? sortByProximity(
-        tipoAtivo === null ? necessidades : necessidades.filter(n => n.tipo_elemento === tipoAtivo),
-        position.latitude,
-        position.longitude
-      )
-    : tipoAtivo === null ? necessidades : necessidades.filter(n => n.tipo_elemento === tipoAtivo);
+  const necessidadesFiltradas = (() => {
+    const filtradas = tipoAtivo === null 
+      ? necessidades 
+      : necessidades.filter(n => n.tipo_elemento === tipoAtivo);
+    
+    if (!position) return filtradas;
+    
+    // Separar necessidades com e sem coordenadas
+    const comCoordenadas = filtradas.filter(n => n.latitude_inicial && n.longitude_inicial);
+    const semCoordenadas = filtradas.filter(n => !n.latitude_inicial || !n.longitude_inicial);
+    
+    // Ordenar as que têm coordenadas por proximidade
+    const ordenadas = sortByProximity(comCoordenadas, position.latitude, position.longitude);
+    
+    // Ordenar as sem coordenadas por km
+    const semCoordenadasOrdenadas = semCoordenadas.sort((a, b) => 
+      (a.km_inicial || 0) - (b.km_inicial || 0)
+    );
+    
+    // Juntar: primeiro as próximas, depois as sem coordenadas
+    return [...ordenadas, ...semCoordenadasOrdenadas];
+  })();
 
   // Agrupar necessidades por tipo para visualização "Todos"
   const necessidadesAgrupadas = () => {
@@ -411,16 +426,23 @@ export default function InventarioDinamicoComAlerta() {
                               {nec.lado}
                             </Badge>
                           )}
-                        </div>
                       </div>
-                      {nec.distance !== undefined && (
+                    </div>
+                    <div className="flex gap-2">
+                      {nec.distance !== undefined && nec.latitude_inicial && nec.longitude_inicial && (
                         <Badge variant={nec.distance <= RAIO_ALERTA ? 'destructive' : 'secondary'}>
                           {nec.distance < 1000 
                             ? `${Math.round(nec.distance)}m` 
                             : `${(nec.distance / 1000).toFixed(2)}km`}
                         </Badge>
                       )}
+                      {(!nec.latitude_inicial || !nec.longitude_inicial) && (
+                        <Badge variant="outline" className="text-muted-foreground">
+                          📍 Sem GPS
+                        </Badge>
+                      )}
                     </div>
+                  </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm mb-3">{nec.acao}</p>
@@ -486,13 +508,20 @@ export default function InventarioDinamicoComAlerta() {
                       )}
                     </div>
                   </div>
-                  {nec.distance !== undefined && (
-                    <Badge variant={nec.distance <= RAIO_ALERTA ? 'destructive' : 'secondary'}>
-                      {nec.distance < 1000 
-                        ? `${Math.round(nec.distance)}m` 
-                        : `${(nec.distance / 1000).toFixed(2)}km`}
-                    </Badge>
-                  )}
+                  <div className="flex gap-2">
+                    {nec.distance !== undefined && nec.latitude_inicial && nec.longitude_inicial && (
+                      <Badge variant={nec.distance <= RAIO_ALERTA ? 'destructive' : 'secondary'}>
+                        {nec.distance < 1000 
+                          ? `${Math.round(nec.distance)}m` 
+                          : `${(nec.distance / 1000).toFixed(2)}km`}
+                      </Badge>
+                    )}
+                    {(!nec.latitude_inicial || !nec.longitude_inicial) && (
+                      <Badge variant="outline" className="text-muted-foreground">
+                        📍 Sem GPS
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
