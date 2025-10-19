@@ -72,14 +72,13 @@ const IntervencoesSHContent = () => {
 
       try {
         const { data: intervencoesData, error: intervencoesError } = await supabase
-          .from("intervencoes_sh")
+          .from("ficha_marcas_longitudinais_intervencoes")
           .select("*")
           .eq("user_id", user.id)
           .order("data_intervencao", { ascending: false });
 
         if (intervencoesError) throw intervencoesError;
-
-        setIntervencoes(intervencoesData || []);
+        setIntervencoes(intervencoesData as any || []);
 
         const { data: lotesData } = await supabase
           .from("lotes")

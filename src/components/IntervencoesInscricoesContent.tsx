@@ -22,18 +22,23 @@ import {
 interface IntervencaoInscricao {
   id: string;
   data_intervencao: string;
-  km_inicial: number;
-  km_final: number;
-  tipo_intervencao: string;
-  tipo_inscricao: string;
-  cor: string;
+  km_inicial: number | null;
+  km_final: number | null;
+  motivo: string;
+  tipo_inscricao: string | null;
+  cor: string | null;
   dimensoes: string | null;
-  area_m2: number;
+  area_m2: number | null;
   material_utilizado: string | null;
   observacao: string | null;
-  lote_id: string;
-  rodovia_id: string;
-  enviado_coordenador: boolean;
+  ficha_inscricoes_id: string | null;
+  pendente_aprovacao_coordenador: boolean;
+  ficha_inscricoes?: {
+    lote_id: string;
+    rodovia_id: string;
+    km_inicial: number;
+    km_final: number;
+  } | null;
 }
 
 const IntervencoesInscricoesContent = () => {
@@ -42,21 +47,34 @@ const IntervencoesInscricoesContent = () => {
   const [loading, setLoading] = useState(true);
   const [lotes, setLotes] = useState<Record<string, string>>({});
   const [rodovias, setRodovias] = useState<Record<string, string>>({});
-  const [selectedIntervencoes, setSelectedIntervencoes] = useState<Set<string>>(new Set());
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [intervencaoToDelete, setIntervencaoToDelete] = useState<string | null>(null);
-  const [showEnviadas, setShowEnviadas] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       if (!user) return;
       try {
+        // Buscar TODAS as intervenções do usuário
         const { data: intervencoesData } = await supabase
-          .from("intervencoes_inscricoes")
+          .from("ficha_inscricoes_intervencoes")
           .select("*")
           .eq("user_id", user.id)
           .order("data_intervencao", { ascending: false });
-        setIntervencoes(intervencoesData || []);
+        
+        // Para cada intervenção com FK, buscar dados da inscrição
+        const intervencoesFull = await Promise.all(
+          (intervencoesData || []).map(async (int) => {
+            if (int.ficha_inscricoes_id) {
+              const { data: inscricao } = await supabase
+                .from("ficha_inscricoes")
+                .select("id, lote_id, rodovia_id, km_inicial, km_final")
+                .eq("id", int.ficha_inscricoes_id)
+                .single();
+              return { ...int, ficha_inscricoes: inscricao };
+            }
+            return { ...int, ficha_inscricoes: null };
+          })
+        );
+        
+        setIntervencoes(intervencoesFull);
 
         const { data: lotesData } = await supabase.from("lotes").select("id, numero");
         if (lotesData) {
@@ -80,62 +98,28 @@ const IntervencoesInscricoesContent = () => {
     loadData();
   }, [user]);
 
-  const handleToggleSelect = (id: string) => {
-    const newSelection = new Set(selectedIntervencoes);
-    if (newSelection.has(id)) {
-      newSelection.delete(id);
-    } else {
-      newSelection.add(id);
-    }
-    setSelectedIntervencoes(newSelection);
-  };
-
-  const handleEnviarSelecionadas = async () => {
-    if (selectedIntervencoes.size === 0) return;
-    try {
-      await supabase.from("intervencoes_inscricoes").update({ enviado_coordenador: true }).in("id", Array.from(selectedIntervencoes));
-      toast.success(`${selectedIntervencoes.size} intervenção(ões) enviada(s)!`);
-      setSelectedIntervencoes(new Set());
-      const { data } = await supabase.from("intervencoes_inscricoes").select("*").eq("user_id", user!.id).order("data_intervencao", { ascending: false });
-      setIntervencoes(data || []);
-    } catch (error: any) {
-      toast.error("Erro: " + error.message);
-    }
-  };
-
-  const filteredIntervencoes = showEnviadas ? intervencoes : intervencoes.filter(i => !i.enviado_coordenador);
-
   if (loading) return <div className="flex items-center justify-center py-8"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <label htmlFor="show-enviadas-insc" className="text-sm cursor-pointer">Mostrar intervenções enviadas</label>
-          <input type="checkbox" id="show-enviadas-insc" checked={showEnviadas} onChange={(e) => setShowEnviadas(e.target.checked)} className="h-4 w-4 cursor-pointer" />
-        </div>
-        {selectedIntervencoes.size > 0 && (
-          <Button onClick={handleEnviarSelecionadas}><Send className="mr-2 h-4 w-4" />Enviar {selectedIntervencoes.size} ao Coordenador</Button>
-        )}
-      </div>
       <Card>
         <CardHeader>
           <CardTitle>Minhas Intervenções em Inscrições</CardTitle>
           <CardDescription>Histórico de intervenções em inscrições registradas</CardDescription>
         </CardHeader>
         <CardContent>
-          {filteredIntervencoes.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">{showEnviadas ? "Nenhuma intervenção registrada ainda." : "Nenhuma intervenção não enviada"}</div>
+          {intervencoes.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">Nenhuma intervenção registrada ainda.</div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-12">Sel.</TableHead>
                     <TableHead>Data</TableHead>
                     <TableHead>Lote</TableHead>
                     <TableHead>Rodovia</TableHead>
                     <TableHead>Trecho (km)</TableHead>
+                    <TableHead>Motivo</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead>Cor</TableHead>
                     <TableHead>Área (m²)</TableHead>
@@ -143,19 +127,30 @@ const IntervencoesInscricoesContent = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredIntervencoes.map((int) => (
-                    <TableRow key={int.id}>
-                      <TableCell><input type="checkbox" checked={selectedIntervencoes.has(int.id)} onChange={() => handleToggleSelect(int.id)} disabled={int.enviado_coordenador} className="h-4 w-4" /></TableCell>
-                      <TableCell>{format(new Date(int.data_intervencao), "dd/MM/yyyy")}</TableCell>
-                      <TableCell>{lotes[int.lote_id] || "-"}</TableCell>
-                      <TableCell>{rodovias[int.rodovia_id] || "-"}</TableCell>
-                      <TableCell>{int.km_inicial.toFixed(3)} - {int.km_final.toFixed(3)}</TableCell>
-                      <TableCell>{int.tipo_intervencao}</TableCell>
-                      <TableCell>{int.cor}</TableCell>
-                      <TableCell>{int.area_m2.toFixed(2)}</TableCell>
-                      <TableCell>{int.enviado_coordenador ? <Badge variant="outline" className="bg-green-50">Enviada</Badge> : <Badge variant="outline" className="bg-yellow-50">Não enviada</Badge>}</TableCell>
-                    </TableRow>
-                  ))}
+                  {intervencoes.map((int) => {
+                    const loteId = int.ficha_inscricoes?.lote_id || "";
+                    const rodoviaid = int.ficha_inscricoes?.rodovia_id || "";
+                    const kmInicial = int.km_inicial || int.ficha_inscricoes?.km_inicial || 0;
+                    const kmFinal = int.km_final || int.ficha_inscricoes?.km_final || 0;
+                    return (
+                      <TableRow key={int.id}>
+                        <TableCell>{format(new Date(int.data_intervencao), "dd/MM/yyyy")}</TableCell>
+                        <TableCell>{lotes[loteId] || "-"}</TableCell>
+                        <TableCell>{rodovias[rodoviaid] || "-"}</TableCell>
+                        <TableCell>{kmInicial.toFixed(3)} - {kmFinal.toFixed(3)}</TableCell>
+                        <TableCell>{int.motivo}</TableCell>
+                        <TableCell>{int.tipo_inscricao || "-"}</TableCell>
+                        <TableCell>{int.cor || "-"}</TableCell>
+                        <TableCell>{int.area_m2?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>
+                          {int.pendente_aprovacao_coordenador ? 
+                            <Badge variant="outline" className="bg-yellow-50">Pendente</Badge> : 
+                            <Badge variant="outline" className="bg-green-50">Aprovada</Badge>
+                          }
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

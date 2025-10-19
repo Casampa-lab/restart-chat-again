@@ -152,6 +152,7 @@ export default function RegistrarIntervencaoCampo() {
       // Montar payload base com campos comuns
       const payloadIntervencao: any = {
         ...payload,
+        user_id: user!.id,
         fotos_urls: fotos,
         latitude: position?.latitude,
         longitude: position?.longitude,

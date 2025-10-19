@@ -69,32 +69,31 @@ const IntervencoesPorticosContent = () => {
       if (!user) return;
 
       try {
-        // Buscar pórticos do usuário primeiro
-        const { data: userPorticos } = await supabase
-          .from("ficha_porticos")
-          .select("id, lote_id, rodovia_id, km")
-          .eq("user_id", user.id);
-
-        const porticosMap = new Map(
-          (userPorticos || []).map(p => [p.id, p])
-        );
-
-        // Buscar intervenções dos pórticos do usuário
+        // Buscar TODAS as intervenções do usuário
         const { data: intervencoesData, error: intervencoesError } = await supabase
           .from("ficha_porticos_intervencoes")
           .select("*")
-          .in("ficha_porticos_id", Array.from(porticosMap.keys()))
+          .eq("user_id", user.id)
           .order("data_intervencao", { ascending: false });
 
         if (intervencoesError) throw intervencoesError;
 
-        // Combinar dados manualmente
-        const intervencoesComDados = (intervencoesData || []).map(i => ({
-          ...i,
-          ficha_porticos: porticosMap.get(i.ficha_porticos_id)
-        }));
+        // Para cada intervenção com FK, buscar dados do pórtico
+        const intervencoesFull = await Promise.all(
+          (intervencoesData || []).map(async (int) => {
+            if (int.ficha_porticos_id) {
+              const { data: portico } = await supabase
+                .from("ficha_porticos")
+                .select("id, lote_id, rodovia_id, km")
+                .eq("id", int.ficha_porticos_id)
+                .single();
+              return { ...int, ficha_porticos: portico };
+            }
+            return { ...int, ficha_porticos: null };
+          })
+        );
 
-        setIntervencoes(intervencoesComDados as IntervencaoPortico[]);
+        setIntervencoes(intervencoesFull as IntervencaoPortico[]);
 
         const { data: lotesData } = await supabase
           .from("lotes")

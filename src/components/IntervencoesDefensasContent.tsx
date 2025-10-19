@@ -73,32 +73,31 @@ const IntervencoesDefensasContent = () => {
       if (!user) return;
 
       try {
-        // Buscar defensas do usuário primeiro
-        const { data: userDefensas } = await supabase
-          .from("defensas")
-          .select("id, lote_id, rodovia_id, km_inicial, km_final")
-          .eq("user_id", user.id);
-
-        const defensasMap = new Map(
-          (userDefensas || []).map(d => [d.id, d])
-        );
-
-        // Buscar intervenções das defensas do usuário
+        // Buscar TODAS as intervenções do usuário
         const { data: intervencoesData, error: intervencoesError } = await supabase
           .from("defensas_intervencoes")
           .select("*")
-          .in("defensa_id", Array.from(defensasMap.keys()))
+          .eq("user_id", user.id)
           .order("data_intervencao", { ascending: false });
 
         if (intervencoesError) throw intervencoesError;
 
-        // Combinar dados manualmente
-        const intervencoesComDados = (intervencoesData || []).map(i => ({
-          ...i,
-          defensas: defensasMap.get(i.defensa_id)
-        }));
+        // Para cada intervenção com FK, buscar dados da defensa
+        const intervencoesFull = await Promise.all(
+          (intervencoesData || []).map(async (int) => {
+            if (int.defensa_id) {
+              const { data: defensa } = await supabase
+                .from("defensas")
+                .select("id, lote_id, rodovia_id, km_inicial, km_final")
+                .eq("id", int.defensa_id)
+                .single();
+              return { ...int, defensas: defensa };
+            }
+            return { ...int, defensas: null };
+          })
+        );
 
-        setIntervencoes(intervencoesComDados as IntervencaoDefensa[]);
+        setIntervencoes(intervencoesFull as IntervencaoDefensa[]);
 
         const { data: lotesData } = await supabase
           .from("lotes")

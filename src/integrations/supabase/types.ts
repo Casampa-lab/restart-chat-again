@@ -464,6 +464,7 @@ export type Database = {
           tipo_avaria: string | null
           tipo_defensa: string | null
           tipo_origem: string | null
+          user_id: string | null
         }
         Insert: {
           aplicado_ao_inventario?: boolean | null
@@ -493,6 +494,7 @@ export type Database = {
           tipo_avaria?: string | null
           tipo_defensa?: string | null
           tipo_origem?: string | null
+          user_id?: string | null
         }
         Update: {
           aplicado_ao_inventario?: boolean | null
@@ -522,6 +524,7 @@ export type Database = {
           tipo_avaria?: string | null
           tipo_defensa?: string | null
           tipo_origem?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -816,6 +819,7 @@ export type Database = {
           snv: string | null
           tipo_origem: string | null
           tipo_refletivo: string | null
+          user_id: string | null
         }
         Insert: {
           aplicado_ao_inventario?: boolean | null
@@ -844,6 +848,7 @@ export type Database = {
           snv?: string | null
           tipo_origem?: string | null
           tipo_refletivo?: string | null
+          user_id?: string | null
         }
         Update: {
           aplicado_ao_inventario?: boolean | null
@@ -872,6 +877,7 @@ export type Database = {
           snv?: string | null
           tipo_origem?: string | null
           tipo_refletivo?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1057,6 +1063,7 @@ export type Database = {
           snv: string | null
           tipo_inscricao: string | null
           tipo_origem: string | null
+          user_id: string | null
         }
         Insert: {
           aplicado_ao_inventario?: boolean | null
@@ -1087,6 +1094,7 @@ export type Database = {
           snv?: string | null
           tipo_inscricao?: string | null
           tipo_origem?: string | null
+          user_id?: string | null
         }
         Update: {
           aplicado_ao_inventario?: boolean | null
@@ -1117,6 +1125,7 @@ export type Database = {
           snv?: string | null
           tipo_inscricao?: string | null
           tipo_origem?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1306,6 +1315,7 @@ export type Database = {
           snv: string | null
           tipo_demarcacao: string | null
           tipo_origem: string | null
+          user_id: string | null
         }
         Insert: {
           aplicado_ao_inventario?: boolean | null
@@ -1334,6 +1344,7 @@ export type Database = {
           snv?: string | null
           tipo_demarcacao?: string | null
           tipo_origem?: string | null
+          user_id?: string | null
         }
         Update: {
           aplicado_ao_inventario?: boolean | null
@@ -1362,6 +1373,7 @@ export type Database = {
           snv?: string | null
           tipo_demarcacao?: string | null
           tipo_origem?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1657,6 +1669,7 @@ export type Database = {
           suporte: string | null
           tipo_origem: string | null
           tipo_pelicula_fundo_novo: string | null
+          user_id: string | null
         }
         Insert: {
           aplicado_ao_inventario?: boolean | null
@@ -1681,6 +1694,7 @@ export type Database = {
           suporte?: string | null
           tipo_origem?: string | null
           tipo_pelicula_fundo_novo?: string | null
+          user_id?: string | null
         }
         Update: {
           aplicado_ao_inventario?: boolean | null
@@ -1705,6 +1719,7 @@ export type Database = {
           suporte?: string | null
           tipo_origem?: string | null
           tipo_pelicula_fundo_novo?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1871,6 +1886,7 @@ export type Database = {
           snv: string | null
           tipo: string | null
           tipo_origem: string | null
+          user_id: string | null
           vao_horizontal_m: number | null
         }
         Insert: {
@@ -1896,6 +1912,7 @@ export type Database = {
           snv?: string | null
           tipo?: string | null
           tipo_origem?: string | null
+          user_id?: string | null
           vao_horizontal_m?: number | null
         }
         Update: {
@@ -1921,6 +1938,7 @@ export type Database = {
           snv?: string | null
           tipo?: string | null
           tipo_origem?: string | null
+          user_id?: string | null
           vao_horizontal_m?: number | null
         }
         Relationships: []
@@ -2107,6 +2125,7 @@ export type Database = {
           tipo_origem: string | null
           tipo_refletivo: string | null
           tipo_tacha: string | null
+          user_id: string | null
         }
         Insert: {
           aplicado_ao_inventario?: boolean | null
@@ -2137,6 +2156,7 @@ export type Database = {
           tipo_origem?: string | null
           tipo_refletivo?: string | null
           tipo_tacha?: string | null
+          user_id?: string | null
         }
         Update: {
           aplicado_ao_inventario?: boolean | null
@@ -2167,6 +2187,7 @@ export type Database = {
           tipo_origem?: string | null
           tipo_refletivo?: string | null
           tipo_tacha?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

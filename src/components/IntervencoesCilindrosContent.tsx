@@ -78,32 +78,31 @@ const IntervencoesCilindrosContent = () => {
       if (!user) return;
 
       try {
-        // Buscar cilindros do usuário primeiro
-        const { data: userCilindros } = await supabase
-          .from("ficha_cilindros")
-          .select("id, lote_id, rodovia_id, km_inicial, km_final")
-          .eq("user_id", user.id);
-
-        const cilindrosMap = new Map(
-          (userCilindros || []).map(c => [c.id, c])
-        );
-
-        // Buscar intervenções dos cilindros do usuário
+        // Buscar TODAS as intervenções do usuário
         const { data: intervencoesData, error: intervencoesError } = await supabase
           .from("ficha_cilindros_intervencoes")
           .select("*")
-          .in("ficha_cilindros_id", Array.from(cilindrosMap.keys()))
+          .eq("user_id", user.id)
           .order("data_intervencao", { ascending: false });
 
         if (intervencoesError) throw intervencoesError;
 
-        // Combinar dados manualmente
-        const intervencoesComDados = (intervencoesData || []).map(i => ({
-          ...i,
-          ficha_cilindros: cilindrosMap.get(i.ficha_cilindros_id)
-        }));
+        // Para cada intervenção com FK, buscar dados do cilindro
+        const intervencoesFull = await Promise.all(
+          (intervencoesData || []).map(async (int) => {
+            if (int.ficha_cilindros_id) {
+              const { data: cilindro } = await supabase
+                .from("ficha_cilindros")
+                .select("id, lote_id, rodovia_id, km_inicial, km_final")
+                .eq("id", int.ficha_cilindros_id)
+                .single();
+              return { ...int, ficha_cilindros: cilindro };
+            }
+            return { ...int, ficha_cilindros: null };
+          })
+        );
 
-        setIntervencoes(intervencoesComDados as IntervencaoCilindro[]);
+        setIntervencoes(intervencoesFull as IntervencaoCilindro[]);
 
         const { data: lotesData } = await supabase
           .from("lotes")

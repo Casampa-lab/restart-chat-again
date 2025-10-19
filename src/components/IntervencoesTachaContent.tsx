@@ -34,8 +34,8 @@ const IntervencoesTachaContent = () => {
     const loadData = async () => {
       if (!user) return;
       try {
-        const { data: intervencoesData } = await supabase.from("intervencoes_tacha").select("*").eq("user_id", user.id).order("data_intervencao", { ascending: false });
-        setIntervencoes(intervencoesData || []);
+        const { data: intervencoesData } = await supabase.from("ficha_tachas_intervencoes").select("*").eq("user_id", user.id).order("data_intervencao", { ascending: false });
+        setIntervencoes(intervencoesData as any || []);
         const { data: lotesData } = await supabase.from("lotes").select("id, numero");
         if (lotesData) {
           const lotesMap: Record<string, string> = {};
@@ -67,17 +67,17 @@ const IntervencoesTachaContent = () => {
   const handleEnviarSelecionadas = async () => {
     if (selectedIntervencoes.size === 0) return;
     try {
-      await supabase.from("intervencoes_tacha").update({ enviado_coordenador: true }).in("id", Array.from(selectedIntervencoes));
+      await supabase.from("ficha_tachas_intervencoes").update({ pendente_aprovacao_coordenador: false } as any).in("id", Array.from(selectedIntervencoes));
       toast.success(`${selectedIntervencoes.size} intervenção(ões) enviada(s)!`);
       setSelectedIntervencoes(new Set());
-      const { data } = await supabase.from("intervencoes_tacha").select("*").eq("user_id", user!.id).order("data_intervencao", { ascending: false });
-      setIntervencoes(data || []);
+      const { data } = await supabase.from("ficha_tachas_intervencoes").select("*").eq("user_id", user!.id).order("data_intervencao", { ascending: false });
+      setIntervencoes(data as any || []);
     } catch (error: any) {
       toast.error("Erro: " + error.message);
     }
   };
 
-  const filteredIntervencoes = showEnviadas ? intervencoes : intervencoes.filter(i => !i.enviado_coordenador);
+  const filteredIntervencoes = showEnviadas ? intervencoes : intervencoes.filter((i: any) => i.pendente_aprovacao_coordenador);
 
   if (loading) return <div className="flex items-center justify-center py-8"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
 

@@ -77,13 +77,13 @@ const IntervencoesSVContent = () => {
   const fetchIntervencoes = async () => {
     try {
       const { data, error } = await supabase
-        .from("intervencoes_sv")
+        .from("ficha_placa_intervencoes")
         .select("*")
         .eq("user_id", user?.id)
         .order("data_intervencao", { ascending: false });
 
       if (error) throw error;
-      setIntervencoes(data || []);
+      setIntervencoes(data as any || []);
 
       const { data: lotesData } = await supabase.from("lotes").select("id, numero");
       if (lotesData) {
