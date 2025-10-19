@@ -33,6 +33,13 @@ interface Ficha {
   status: string;
 }
 
+interface FichaComEstatisticas extends Ficha {
+  total_pontos: number;
+  pontos_conformes: number;
+  pontos_nao_conformes: number;
+  percentual_conformidade: number;
+}
+
 interface Item {
   ordem: number;
   foto_url: string;
@@ -45,7 +52,7 @@ interface Item {
 
 export default function MinhasFichasVerificacao() {
   const navigate = useNavigate();
-  const [fichas, setFichas] = useState<Ficha[]>([]);
+  const [fichas, setFichas] = useState<FichaComEstatisticas[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFicha, setSelectedFicha] = useState<Ficha | null>(null);
   const [itens, setItens] = useState<Item[]>([]);
@@ -71,14 +78,74 @@ export default function MinhasFichasVerificacao() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      const { data, error } = await supabase
+      const { data: fichasData, error: fichasError } = await supabase
         .from("ficha_verificacao")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setFichas(data || []);
+      if (fichasError) throw fichasError;
+
+      // Para cada ficha, calcular estatísticas de conformidade
+      const fichasComEstatisticas = await Promise.all(
+        (fichasData || []).map(async (ficha) => {
+          const { data: itens, error: itensError } = await supabase
+            .from("ficha_verificacao_itens")
+            .select("*")
+            .eq("ficha_id", ficha.id);
+
+          if (itensError) {
+            console.error("Erro ao buscar itens:", itensError);
+            return {
+              ...ficha,
+              total_pontos: 0,
+              pontos_conformes: 0,
+              pontos_nao_conformes: 0,
+              percentual_conformidade: 0
+            };
+          }
+
+          const total_pontos = itens?.length || 0;
+          let pontos_conformes = 0;
+          let pontos_nao_conformes = 0;
+
+          // Para SH: verificar retro_bd_conforme, retro_e_conforme, retro_be_conforme
+          // Para SV: verificar retro_sv_conforme
+          itens?.forEach(item => {
+            const campos = ficha.tipo === "Sinalização Horizontal" 
+              ? ['retro_bd_conforme', 'retro_e_conforme', 'retro_be_conforme']
+              : ['retro_sv_conforme'];
+
+            const todosCamposConformes = campos.every(campo => 
+              item[campo] === true || item[campo] === null
+            );
+
+            const algumCampoNaoConforme = campos.some(campo => 
+              item[campo] === false
+            );
+
+            if (algumCampoNaoConforme) {
+              pontos_nao_conformes++;
+            } else if (todosCamposConformes) {
+              pontos_conformes++;
+            }
+          });
+
+          const percentual = total_pontos > 0 
+            ? (pontos_conformes / total_pontos) * 100 
+            : 0;
+
+          return {
+            ...ficha,
+            total_pontos,
+            pontos_conformes,
+            pontos_nao_conformes,
+            percentual_conformidade: percentual
+          };
+        })
+      );
+
+      setFichas(fichasComEstatisticas);
     } catch (error: any) {
       toast.error("Erro ao carregar fichas: " + error.message);
     } finally {
@@ -135,12 +202,12 @@ export default function MinhasFichasVerificacao() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Empresa</TableHead>
-                        <TableHead>SNV</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Ações</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead className="text-center">Pontos Verificados</TableHead>
+                  <TableHead>Conformidade</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -154,8 +221,38 @@ export default function MinhasFichasVerificacao() {
                           <TableCell>
                             {new Date(ficha.data_verificacao).toLocaleDateString('pt-BR')}
                           </TableCell>
-                          <TableCell>{ficha.empresa || "-"}</TableCell>
-                          <TableCell>{ficha.snv || "-"}</TableCell>
+                          <TableCell>
+                            <div className="text-center">
+                              <p className="font-semibold text-lg">{ficha.total_pontos}</p>
+                              <p className="text-xs text-muted-foreground">pontos</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <Badge 
+                                variant={
+                                  ficha.percentual_conformidade >= 90 ? "default" :
+                                  ficha.percentual_conformidade >= 70 ? "secondary" :
+                                  "destructive"
+                                }
+                                className="w-full justify-center text-base"
+                              >
+                                {ficha.percentual_conformidade.toFixed(0)}% conforme
+                              </Badge>
+                              <div className="flex gap-2 text-xs justify-center">
+                                <span className="flex items-center gap-1">
+                                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                  {ficha.pontos_conformes} OK
+                                </span>
+                                {ficha.pontos_nao_conformes > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                                    {ficha.pontos_nao_conformes} NC
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </TableCell>
                           <TableCell>
                             <Badge variant={
                               ficha.status === 'rascunho' || !ficha.status ? 'outline' :
