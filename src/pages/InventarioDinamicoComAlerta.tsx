@@ -465,12 +465,12 @@ export default function InventarioDinamicoComAlerta() {
                         
                         {/* Características técnicas específicas */}
                         <div className="flex flex-wrap gap-2 text-xs">
-                          {nec.codigo && (
-                            <span className="text-muted-foreground">📋 {nec.codigo}</span>
-                          )}
-                          {nec.tipo && (
-                            <span className="text-muted-foreground">🔧 {nec.tipo}</span>
-                          )}
+                      {nec.codigo && (
+                        <span className="text-muted-foreground">📋 {nec.codigo}</span>
+                      )}
+                      {nec.tipo && nec.tipo !== nec.codigo && (
+                        <span className="text-muted-foreground">🔧 {nec.tipo}</span>
+                      )}
                           {nec.cor && (
                             <span className="text-muted-foreground">🎨 {nec.cor}</span>
                           )}
@@ -602,12 +602,12 @@ export default function InventarioDinamicoComAlerta() {
                     
                     {/* Características técnicas específicas */}
                     <div className="flex flex-wrap gap-2 text-xs">
-                      {nec.codigo && (
-                        <span className="text-muted-foreground">📋 {nec.codigo}</span>
-                      )}
-                      {nec.tipo && (
-                        <span className="text-muted-foreground">🔧 {nec.tipo}</span>
-                      )}
+                  {nec.codigo && (
+                    <span className="text-muted-foreground">📋 {nec.codigo}</span>
+                  )}
+                  {nec.tipo && nec.tipo !== nec.codigo && (
+                    <span className="text-muted-foreground">🔧 {nec.tipo}</span>
+                  )}
                       {nec.cor && (
                         <span className="text-muted-foreground">🎨 {nec.cor}</span>
                       )}
