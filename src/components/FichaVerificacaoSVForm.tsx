@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Camera, X, MapPin } from "lucide-react";
+import { Camera, X, MapPin, Info } from "lucide-react";
 import { TODAS_PLACAS } from "@/constants/codigosPlacas";
 import { extractDateFromPhotos } from "@/lib/photoMetadata";
 import { RetrorrefletividadeModalSimples } from "./RetrorrefletividadeModalSimples";
@@ -100,8 +102,8 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (itens.length >= 3) {
-      toast.error("Máximo de 3 pontos de verificação permitidos");
+    if (itens.length >= 10) {
+      toast.error("Máximo de 10 pontos de verificação por ficha (conforme IN 3/2025)");
       return;
     }
 
@@ -169,6 +171,16 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
     if (itens.length === 0) {
       toast.error("Adicione pelo menos 1 ponto de verificação");
       return;
+    }
+
+    // Validação IN 3/2025
+    if (itens.length < 10) {
+      const confirmar = window.confirm(
+        `⚠️ ATENÇÃO: A IN 3/2025 exige 10 pontos de medição a cada 10 km.\n\n` +
+        `Você está enviando apenas ${itens.length} ponto(s).\n\n` +
+        `Deseja continuar mesmo assim?`
+      );
+      if (!confirmar) return;
     }
 
     try {
@@ -305,6 +317,19 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertTitle>Requisitos IN 3/2025 (Item 3.1.19)</AlertTitle>
+        <AlertDescription>
+          <ul className="list-disc pl-5 space-y-1 text-sm mt-2">
+            <li><strong>10 pontos de medição</strong> a cada 10 km de rodovia</li>
+            <li><strong>10 leituras consecutivas</strong> por ponto (descarte da maior e menor)</li>
+            <li><strong>Registro fotográfico obrigatório</strong> de cada ponto</li>
+            <li><strong>GPS específico</strong> para cada medição de retrorrefletância</li>
+          </ul>
+        </AlertDescription>
+      </Alert>
+
       <Card>
         <CardHeader>
           <CardTitle>Informações Gerais - Sinalização Vertical</CardTitle>
@@ -363,8 +388,18 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Pontos de Verificação (Máx. 3)</span>
-            {itens.length < 3 && (
+            <div className="flex items-center gap-3">
+              <span>Pontos de Verificação</span>
+              <Badge variant={itens.length >= 10 ? "default" : "outline"} className="text-xs">
+                {itens.length}/10 pontos
+              </Badge>
+              {itens.length >= 10 && (
+                <Badge variant="default" className="text-xs bg-green-600">
+                  ✓ Conforme IN 3/2025
+                </Badge>
+              )}
+            </div>
+            {itens.length < 10 && (
               <Label htmlFor="item-upload-sv" className="cursor-pointer">
                 <Button type="button" size="sm" asChild>
                   <span>
