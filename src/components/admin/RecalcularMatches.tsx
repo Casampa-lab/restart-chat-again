@@ -1005,60 +1005,96 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
               )}
             </div>
             
-            <div className="grid gap-2">
-              {TIPOS_ELEMENTOS.map((elemento) => (
-                <div key={elemento.value} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center p-3 bg-background rounded border">
-                  <div className="font-medium text-sm">
-                    {elemento.label}
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Padrão:</span>
-                    <Badge variant="outline">
-                      {toleranciasPadrao[elemento.value]}m
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min={10}
-                      max={500}
-                      placeholder={`${toleranciasPadrao[elemento.value]}m`}
-                      value={toleranciasCustomizadas[elemento.value] ?? ""}
-                      onChange={(e) => {
-                        const val = e.target.value ? parseInt(e.target.value) : undefined;
-                        setToleranciasCustomizadas(prev => {
-                          if (val === undefined) {
-                            const { [elemento.value]: _, ...rest } = prev;
-                            return rest;
-                          }
-                          return { ...prev, [elemento.value]: val };
-                        });
-                      }}
-                      disabled={isProcessing}
-                      className="w-24"
-                    />
-                    <span className="text-xs text-muted-foreground">metros</span>
-                    {toleranciasCustomizadas[elemento.value] && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
+            <div className="grid gap-3">
+              {TIPOS_ELEMENTOS.map((elemento) => {
+                const isCustomizado = toleranciasCustomizadas[elemento.value] !== undefined;
+                const valorAtual = isCustomizado 
+                  ? toleranciasCustomizadas[elemento.value]
+                  : toleranciasPadrao[elemento.value];
+
+                return (
+                  <div 
+                    key={elemento.value} 
+                    className="space-y-2 p-4 bg-background rounded-lg border hover:border-primary/50 transition-colors"
+                  >
+                    {/* Linha Superior: Nome + Badges */}
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <div className="font-medium text-sm flex items-center gap-2">
+                        {elemento.label}
+                        {isCustomizado && (
+                          <Badge variant="secondary" className="text-xs">
+                            ✏️ Customizado
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-muted-foreground">Padrão:</span>
+                          <Badge variant="outline" className="font-mono">
+                            {toleranciasPadrao[elemento.value]}m
+                          </Badge>
+                        </div>
+                        
+                        {isCustomizado && (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-muted-foreground">→ Usando:</span>
+                            <Badge variant="default" className="font-mono">
+                              {valorAtual}m
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Linha Inferior: Input Editável */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <Label htmlFor={`tol-${elemento.value}`} className="text-xs text-muted-foreground min-w-[100px]">
+                        Nova tolerância:
+                      </Label>
+                      <Input
+                        id={`tol-${elemento.value}`}
+                        type="number"
+                        min={10}
+                        max={500}
+                        placeholder={`Ex: ${toleranciasPadrao[elemento.value]}`}
+                        value={toleranciasCustomizadas[elemento.value] ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value ? parseInt(e.target.value) : undefined;
                           setToleranciasCustomizadas(prev => {
-                            const { [elemento.value]: _, ...rest } = prev;
-                            return rest;
+                            if (val === undefined) {
+                              const { [elemento.value]: _, ...rest } = prev;
+                              return rest;
+                            }
+                            return { ...prev, [elemento.value]: val };
                           });
                         }}
                         disabled={isProcessing}
-                        className="h-8"
-                      >
-                        ✕
-                      </Button>
-                    )}
+                        className="flex-1 max-w-[140px] font-mono"
+                      />
+                      <span className="text-xs text-muted-foreground">metros</span>
+                      
+                      {isCustomizado && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setToleranciasCustomizadas(prev => {
+                              const { [elemento.value]: _, ...rest } = prev;
+                              return rest;
+                            });
+                          }}
+                          disabled={isProcessing}
+                          className="h-8 px-2"
+                          title="Resetar ao padrão"
+                        >
+                          <XCircle className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             
             <Alert>
