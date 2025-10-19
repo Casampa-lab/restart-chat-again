@@ -817,7 +817,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
             if (sLower.includes("substit") || sLower.includes("troca")) return "Substituir";
             if (sLower.includes("remov") || sLower.includes("desativ") || sLower.includes("retirar")) return "Remover";
             if (sLower.includes("manter") || sLower.includes("manutenção")) return "Manter";
-            return s;
+            return "Manter"; // Fallback seguro para valores não reconhecidos
           };
 
           const solucaoPlanilhaNormalizada = normalizarServico(nec.solucao_planilha);
