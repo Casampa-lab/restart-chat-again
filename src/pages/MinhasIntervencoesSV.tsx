@@ -213,7 +213,7 @@ const MinhasIntervencoesSV = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <img src={logoOperaVia} alt="OperaVia" className="h-16 object-contain" />
-            <Button variant="navigation" size="sm" onClick={() => navigate("/")}>
+            <Button variant="navigation" size="sm" onClick={() => navigate("/minhas-intervencoes")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar
             </Button>
