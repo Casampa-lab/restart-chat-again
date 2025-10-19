@@ -487,7 +487,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
       .eq('rodovia_id', rodoviaId);
 
     if (!forcarReprocessamento) {
-      needsQuery.or('status_reconciliacao.is.null,status_reconciliacao.neq.aprovado_coordenador');
+      needsQuery.is('cadastro_id', null);
     }
 
     const { data: necessidades, error: needError } = await needsQuery;
