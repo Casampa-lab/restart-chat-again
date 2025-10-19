@@ -12,11 +12,26 @@ import {
 import { useWorkSession } from '@/hooks/useWorkSession';
 import { useAuth } from '@/hooks/useAuth';
 import { SessionManagerMobile } from '@/components/SessionManagerMobile';
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
 
 export default function ModoCampo() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { activeSession, refreshSession } = useWorkSession(user?.id);
+
+  const handleVoltar = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await CapApp.minimizeApp();
+      } catch (error) {
+        console.error('Erro ao minimizar app:', error);
+        navigate('/');
+      }
+    } else {
+      navigate('/');
+    }
+  };
 
   const menuItems = [
     {
@@ -61,7 +76,7 @@ export default function ModoCampo() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/')}
+            onClick={handleVoltar}
             className="h-12 w-12"
           >
             <ArrowLeft className="h-6 w-6" />
