@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
+import { ConsolidatedInventoryBadge } from "@/components/ConsolidatedInventoryBadge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GitCompare, TrendingUp, Database, FileText, ArrowLeft, Home, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
@@ -186,18 +187,13 @@ export default function InventarioDinamico() {
         <div className="grid md:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                Inventário Consolidado
-              </CardDescription>
+              <CardDescription>Estado Consolidado</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600">
-                {marcoZeroData.total_geral}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Baseline estabelecido em {format(new Date(marcoZeroData.data_marco), "dd/MM/yyyy", { locale: ptBR })}
-              </p>
+            <CardContent className="flex items-center justify-between">
+              <ConsolidatedInventoryBadge 
+                total={marcoZeroData.total_geral}
+                dataMarcoZero={new Date(marcoZeroData.data_marco)}
+              />
             </CardContent>
           </Card>
           
