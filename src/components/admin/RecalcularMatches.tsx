@@ -325,7 +325,10 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
 
   const criarElementoNoInventario = async (necessidade: any, tipo: string, userId?: string, coordenadorId?: string) => {
     const tipoConfig = TIPOS_ELEMENTOS.find(t => t.value === tipo);
-    if (!tipoConfig) return null;
+    if (!tipoConfig) {
+      console.error(`Tipo não encontrado: ${tipo}`);
+      return null;
+    }
 
     const baseData: any = {
       user_id: userId || necessidade.user_id,
@@ -609,7 +612,21 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           .update(matchData)
           .eq('id', nec.id);
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          addLog("error", `❌ Erro ao atualizar necessidade ${nec.id}: ${updateError.message}`);
+          throw updateError;
+        }
+
+        // LOG: Match encontrado ou não
+        if (matchesCandidatos.length > 0) {
+          if (usarMatchLinear) {
+            addLog("success", `✅ Match linear: ${matchesCandidatos[0].overlap_porcentagem.toFixed(1)}% sobreposição`);
+          } else {
+            addLog("success", `✅ Match pontual: ${matchesCandidatos[0].distancia_metros}m de distância`);
+          }
+        } else {
+          addLog("info", `ℹ️ Nenhum match encontrado para necessidade ${nec.id}`);
+        }
 
         if (divergenciaIdentificada) {
           resultados.divergencias++;
@@ -617,26 +634,37 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           resultados.matches++;
         }
 
-        if (nec.tipo_origem === 'execucao' && matchesCandidatos.length === 0 && servicoInferido === 'Implantar') {
+        // CORREÇÃO: Criar elemento para "Implantar" independente de tipo_origem
+        if (matchesCandidatos.length === 0 && servicoInferido === 'Implantar') {
           try {
+            addLog("info", `🆕 Criando novo elemento no inventário para Implantar...`);
+            
             const novoElemento: any = await criarElementoNoInventario(nec, tipo, user?.id, coordenadorData?.id);
             
-            if (novoElemento) {
+            if (novoElemento && novoElemento.id) {
               const elementoId = novoElemento.id;
-              if (elementoId) {
-                await supabase
-                  .from(tipoConfig.tabela_necessidade as any)
-                  .update({ 
-                    cadastro_id: elementoId,
-                    divergencia: false
-                  })
-                  .eq('id', nec.id);
-                
+              
+              // Atualizar cadastro_id na necessidade
+              const { error: linkError } = await supabase
+                .from(tipoConfig.tabela_necessidade as any)
+                .update({ 
+                  cadastro_id: elementoId,
+                  divergencia: false
+                })
+                .eq('id', nec.id);
+              
+              if (linkError) {
+                addLog("error", `❌ Erro ao vincular elemento criado: ${linkError.message}`);
+              } else {
                 resultados.elementosNovos++;
+                addLog("success", `✅ Elemento criado e vinculado: ${elementoId}`);
               }
+            } else {
+              addLog("warning", `⚠️ Elemento não foi criado ou ID não retornado`);
             }
           } catch (err: any) {
-            // Silenciar erro de criação
+            addLog("error", `❌ ERRO ao criar elemento: ${err.message}`);
+            console.error("Erro detalhado ao criar elemento:", err);
           }
         }
       } catch (err: any) {
