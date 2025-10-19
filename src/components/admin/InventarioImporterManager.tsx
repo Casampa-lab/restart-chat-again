@@ -1091,8 +1091,8 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           const km = getVal("Km", "km");
           record.km = km ? Number(km) : null;
           
-          record.latitude = getVal("Latitude", "latitude");
-          record.longitude = getVal("Longitude", "longitude");
+          record.latitude_inicial = getVal("Latitude", "latitude");
+          record.longitude_inicial = getVal("Longitude", "longitude");
           record.link_fotografia = getVal("Link da Fotografia", "Link da fotografia", "link_fotografia");
           
           record.data_vistoria = new Date().toISOString().split('T')[0];
