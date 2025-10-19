@@ -82,8 +82,6 @@ const createEmptyItem = (): Omit<ItemSV, 'file' | 'preview'> => ({
 });
 
 export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVerificacaoSVFormProps) {
-  const [contrato, setContrato] = useState("");
-  const [empresa, setEmpresa] = useState("");
   const [snv, setSnv] = useState("");
   const [dataVerificacao, setDataVerificacao] = useState('');
   const [itens, setItens] = useState<ItemSV[]>([]);
@@ -183,8 +181,6 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
           lote_id: loteId,
           rodovia_id: rodoviaId,
           tipo: "Sinalização Vertical",
-          contrato: contrato || null,
-          empresa: empresa || null,
           snv: snv || null,
           data_verificacao: dataVerificacao,
         })
@@ -272,8 +268,6 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
 
   const handleLimparFormulario = () => {
     setFichaIdCriada(null);
-    setContrato("");
-    setEmpresa("");
     setSnv("");
     setDataVerificacao('');
     itens.forEach(i => URL.revokeObjectURL(i.preview));
@@ -313,14 +307,6 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Contrato</Label>
-              <Input value={contrato} onChange={(e) => setContrato(e.target.value)} />
-            </div>
-            <div>
-              <Label>Empresa</Label>
-              <Input value={empresa} onChange={(e) => setEmpresa(e.target.value)} />
-            </div>
             <div>
               <Label>SNV</Label>
               <Input value={snv} onChange={(e) => setSnv(e.target.value)} />
