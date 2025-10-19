@@ -65,13 +65,13 @@ const formSchema = z.object({
   snv: z.string().optional(),
   tipo_demarcacao: z.string().optional(),
   cor: z.string().optional(),
+  posicao: z.string().optional(),
+  codigo: z.string().optional(),
   largura_cm: z.string().optional(),
   espessura_cm: z.string().optional(),
   material: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
-  fora_plano_manutencao: z.boolean().default(false),
-  justificativa_fora_plano: z.string().optional(),
 });
 
 const IntervencoesSHForm = ({ 
@@ -96,13 +96,13 @@ const IntervencoesSHForm = ({
       snv: "",
       tipo_demarcacao: "",
       cor: "",
+      posicao: "",
+      codigo: "",
       largura_cm: "",
       espessura_cm: "",
       material: "",
       latitude: "",
       longitude: "",
-      fora_plano_manutencao: false,
-      justificativa_fora_plano: "",
     },
   });
 
@@ -118,13 +118,13 @@ const IntervencoesSHForm = ({
         snv: (marcaSelecionada as any).snv || "",
         tipo_demarcacao: (marcaSelecionada as any).tipo_demarcacao || "",
         cor: (marcaSelecionada as any).cor || "",
+        posicao: (marcaSelecionada as any).posicao || "",
+        codigo: (marcaSelecionada as any).codigo || "",
         largura_cm: (marcaSelecionada as any).largura_cm?.toString() || "",
         espessura_cm: (marcaSelecionada as any).espessura_cm?.toString() || "",
         material: (marcaSelecionada as any).material || "",
         latitude: "",
         longitude: "",
-        fora_plano_manutencao: false,
-        justificativa_fora_plano: "",
       });
     }
   }, [marcaSelecionada, modo, form]);
@@ -163,13 +163,13 @@ const IntervencoesSHForm = ({
           snv: data.snv || null,
           tipo_demarcacao: data.tipo_demarcacao || null,
           cor: data.cor || null,
+          posicao: data.posicao || null,
+          codigo: data.codigo || null,
           largura_cm: data.largura_cm ? parseFloat(data.largura_cm) : null,
           espessura_cm: data.espessura_cm ? parseFloat(data.espessura_cm) : null,
           material: data.material || null,
           latitude: data.latitude ? parseFloat(data.latitude) : null,
           longitude: data.longitude ? parseFloat(data.longitude) : null,
-          fora_plano_manutencao: data.fora_plano_manutencao,
-          justificativa_fora_plano: data.justificativa_fora_plano || null,
           tipo_origem: tipoOrigem,
         });
 
@@ -442,49 +442,6 @@ const IntervencoesSHForm = ({
                   )}
                 />
               </div>
-            </div>
-
-            {/* Observações e Justificativas */}
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="fora_plano_manutencao"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Fora do Plano de Manutenção
-                      </FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              {form.watch("fora_plano_manutencao") && (
-                <FormField
-                  control={form.control}
-                  name="justificativa_fora_plano"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Justificativa</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Explique o motivo da intervenção estar fora do plano de manutenção"
-                          className="min-h-[100px]"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
             </div>
 
             {!hideSubmitButton && (

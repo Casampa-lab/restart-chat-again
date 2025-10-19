@@ -77,8 +77,6 @@ const formSchema = z.object({
   observacao: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
-  fora_plano_manutencao: z.boolean().default(false),
-  justificativa_fora_plano: z.string().optional(),
 });
 
 const IntervencoesInscricoesForm = ({ 
@@ -109,8 +107,6 @@ const IntervencoesInscricoesForm = ({
       observacao: "",
       latitude: "",
       longitude: "",
-      fora_plano_manutencao: false,
-      justificativa_fora_plano: "",
     },
   });
 
@@ -131,8 +127,6 @@ const IntervencoesInscricoesForm = ({
         observacao: "",
         latitude: "",
         longitude: "",
-        fora_plano_manutencao: false,
-        justificativa_fora_plano: "",
       });
     }
   }, [inscricaoSelecionada, modo, form]);
@@ -179,8 +173,6 @@ const IntervencoesInscricoesForm = ({
           latitude: data.latitude ? parseFloat(data.latitude) : null,
           longitude: data.longitude ? parseFloat(data.longitude) : null,
           observacao: data.observacao || null,
-          fora_plano_manutencao: data.fora_plano_manutencao,
-          justificativa_fora_plano: data.justificativa_fora_plano || null,
           tipo_origem: tipoOrigem,
         });
 
@@ -529,43 +521,10 @@ const IntervencoesInscricoesForm = ({
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="fora_plano_manutencao"
-                render={({ field }) => (
-                  <FormItem className="flex items-center gap-2">
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        checked={field.value}
-                        onChange={field.onChange}
-                        className="h-4 w-4"
-                      />
-                    </FormControl>
-                    <FormLabel className="!mt-0">Fora do Plano de Manutenção</FormLabel>
-                  </FormItem>
-                )}
-              />
-
-              {form.watch("fora_plano_manutencao") && (
-                <FormField
-                  control={form.control}
-                  name="justificativa_fora_plano"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Justificativa</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Justifique por que está fora do plano..." {...field} rows={3} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
             </div>
 
             {!hideSubmitButton && (
-              <Button type="submit" className="w-full" disabled={!inscricaoSelecionada && modo !== 'controlado'}>
+              <Button type="submit" className="w-full" disabled={(isManutencaoPreProjeto && !inscricaoSelecionada) || modo === 'controlado'}>
                 {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Salvar Intervenção
               </Button>

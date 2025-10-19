@@ -12,11 +12,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info, Lock } from "lucide-react";
+import { Info, Lock, Loader2, MapPin, Check, Wrench } from "lucide-react";
 import { useTipoOrigem } from "@/hooks/useTipoOrigem";
-import { LABELS_TIPO_ORIGEM } from "@/constants/camposEstruturais";
+import { LABELS_TIPO_ORIGEM, TIPOS_ORIGEM } from "@/constants/camposEstruturais";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MapPin, Check, Wrench } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 interface IntervencoesTachaFormProps {
   tachaSelecionada?: {
@@ -49,8 +49,6 @@ const formSchema = z.object({
   observacao: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
-  fora_plano_manutencao: z.boolean().default(false),
-  justificativa_fora_plano: z.string().optional(),
 });
 
 export function IntervencoesTachaForm({ 
@@ -62,6 +60,7 @@ export function IntervencoesTachaForm({
   loteId,
   rodoviaId
 }: IntervencoesTachaFormProps) {
+  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoPreProjeto } = useTipoOrigem('tachas');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
@@ -81,8 +80,6 @@ export function IntervencoesTachaForm({
       observacao: "",
       latitude: "",
       longitude: "",
-      fora_plano_manutencao: false,
-      justificativa_fora_plano: "",
     },
   });
 
@@ -105,8 +102,6 @@ export function IntervencoesTachaForm({
         observacao: "",
         latitude: "",
         longitude: "",
-        fora_plano_manutencao: false,
-        justificativa_fora_plano: "",
       });
     }
   }, [tachaSelecionada, modo, form]);
@@ -127,14 +122,15 @@ export function IntervencoesTachaForm({
       return;
     }
     
-    if (!tachaSelecionada) {
-      toast.error("Selecione uma tacha do inventário primeiro");
+    // Validação: Manutenção Pré-Projeto exige tacha existente
+    if (isManutencaoPreProjeto && !tachaSelecionada) {
+      toast.error("Para Manutenção Pré-Projeto, selecione uma tacha do inventário primeiro");
       return;
     }
 
     try {
       const { error } = await supabase.from("ficha_tachas_intervencoes").insert({
-        ficha_tachas_id: tachaSelecionada.id,
+        ficha_tachas_id: tachaSelecionada?.id || null,
         data_intervencao: values.data_intervencao,
         motivo: values.motivo,
         km_inicial: values.km_inicial ? parseFloat(values.km_inicial) : null,
@@ -150,8 +146,7 @@ export function IntervencoesTachaForm({
         latitude: values.latitude ? parseFloat(values.latitude) : null,
         longitude: values.longitude ? parseFloat(values.longitude) : null,
         observacao: values.observacao || null,
-        fora_plano_manutencao: values.fora_plano_manutencao,
-        justificativa_fora_plano: values.justificativa_fora_plano || null,
+        tipo_origem: tipoOrigem,
       });
 
       if (error) throw error;
@@ -176,6 +171,27 @@ export function IntervencoesTachaForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-6 p-4 bg-muted rounded-lg space-y-3">
+          <Label className="text-base font-semibold">Tipo de Intervenção</Label>
+          <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="manutencao_pre_projeto" id="pre-tacha" />
+              <Label htmlFor="pre-tacha" className="flex items-center gap-2 cursor-pointer font-normal">
+                🟡 {LABELS_TIPO_ORIGEM.manutencao_pre_projeto}
+                <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="execucao" id="exec-tacha" />
+              <Label htmlFor="exec-tacha" className="cursor-pointer font-normal">
+                🟢 {LABELS_TIPO_ORIGEM.execucao}
+              </Label>
+            </div>
+          </RadioGroup>
+          {isManutencaoPreProjeto && (
+            <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
+          )}
+        </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
@@ -276,8 +292,15 @@ export function IntervencoesTachaForm({
                   name="tipo_tacha"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tipo de Tacha</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel className="flex items-center gap-2">
+                        Tipo de Tacha
+                        {isCampoEstruturalBloqueado('tipo_tacha') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        disabled={isCampoEstruturalBloqueado('tipo_tacha')}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione (opcional)" />
@@ -299,8 +322,15 @@ export function IntervencoesTachaForm({
                   name="material"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Material</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel className="flex items-center gap-2">
+                        Material
+                        {isCampoEstruturalBloqueado('material') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        disabled={isCampoEstruturalBloqueado('material')}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione (opcional)" />
@@ -322,8 +352,15 @@ export function IntervencoesTachaForm({
                   name="tipo_refletivo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tipo do Refletivo (NBR 14.644/2021)</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel className="flex items-center gap-2">
+                        Tipo do Refletivo (NBR 14.644/2021)
+                        {isCampoEstruturalBloqueado('tipo_refletivo') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        disabled={isCampoEstruturalBloqueado('tipo_refletivo')}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione (opcional)" />
@@ -349,8 +386,15 @@ export function IntervencoesTachaForm({
                   name="cor"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cor</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel className="flex items-center gap-2">
+                        Cor
+                        {isCampoEstruturalBloqueado('cor') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        disabled={isCampoEstruturalBloqueado('cor')}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione (opcional)" />
@@ -439,52 +483,23 @@ export function IntervencoesTachaForm({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="fora_plano_manutencao"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        checked={field.value}
-                        onChange={field.onChange}
-                        className="h-4 w-4"
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Fora do Plano de Manutenção</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              {form.watch("fora_plano_manutencao") && (
-                <FormField
-                  control={form.control}
-                  name="justificativa_fora_plano"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Justificativa *</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Explique o motivo da intervenção fora do plano..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
             </div>
 
             {!hideSubmitButton && (
-              <Button type="submit" className="w-full" disabled={!tachaSelecionada && modo !== 'controlado'}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={
+                  (isManutencaoPreProjeto && !tachaSelecionada) || 
+                  modo === 'controlado'
+                }
+              >
                 {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Salvar Intervenção
               </Button>
             )}
           </form>
-    </Form>
+        </Form>
       </CardContent>
     </Card>
   );

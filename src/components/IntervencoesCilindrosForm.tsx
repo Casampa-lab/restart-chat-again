@@ -6,12 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin, Check, Milestone } from "lucide-react";
+import { Loader2, Milestone, Lock, Info } from "lucide-react";
+import { useTipoOrigem } from "@/hooks/useTipoOrigem";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM } from "@/constants/camposEstruturais";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
@@ -28,8 +32,6 @@ const formSchema = z.object({
   quantidade: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
-  fora_plano_manutencao: z.boolean().default(false),
-  justificativa_fora_plano: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -59,7 +61,7 @@ export function IntervencoesCilindrosForm({
   rodoviaId
 }: IntervencoesCilindrosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCapturing, setIsCapturing] = useState(false);
+  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoPreProjeto } = useTipoOrigem('cilindros');
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -78,8 +80,6 @@ export function IntervencoesCilindrosForm({
       quantidade: "",
       latitude: "",
       longitude: "",
-      fora_plano_manutencao: false,
-      justificativa_fora_plano: "",
     },
   });
 
@@ -101,8 +101,6 @@ export function IntervencoesCilindrosForm({
         quantidade: (cilindroSelecionado as any).quantidade?.toString() || "",
         latitude: "",
         longitude: "",
-        fora_plano_manutencao: false,
-        justificativa_fora_plano: "",
       });
     }
   }, [cilindroSelecionado, modo, form]);
@@ -123,8 +121,9 @@ export function IntervencoesCilindrosForm({
       return;
     }
     
-    if (!cilindroSelecionado) {
-      toast.error("Selecione um cilindro do inventário primeiro");
+    // Validação: Manutenção Pré-Projeto exige cilindro existente
+    if (isManutencaoPreProjeto && !cilindroSelecionado) {
+      toast.error("Para Manutenção Pré-Projeto, selecione um cilindro do inventário primeiro");
       return;
     }
 
@@ -133,7 +132,7 @@ export function IntervencoesCilindrosForm({
       const { error } = await supabase
         .from("ficha_cilindros_intervencoes")
         .insert({
-          ficha_cilindros_id: cilindroSelecionado.id,
+          ficha_cilindros_id: cilindroSelecionado?.id || null,
           data_intervencao: data.data_intervencao,
           motivo: data.motivo,
           km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
@@ -148,8 +147,7 @@ export function IntervencoesCilindrosForm({
           quantidade: data.quantidade ? parseInt(data.quantidade) : null,
           latitude: data.latitude ? parseFloat(data.latitude) : null,
           longitude: data.longitude ? parseFloat(data.longitude) : null,
-          fora_plano_manutencao: data.fora_plano_manutencao,
-          justificativa_fora_plano: data.justificativa_fora_plano || null,
+          tipo_origem: tipoOrigem,
         });
 
       if (error) throw error;
@@ -177,6 +175,27 @@ export function IntervencoesCilindrosForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-6 p-4 bg-muted rounded-lg space-y-3">
+          <Label className="text-base font-semibold">Tipo de Intervenção</Label>
+          <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="manutencao_pre_projeto" id="pre-cilindro" />
+              <Label htmlFor="pre-cilindro" className="flex items-center gap-2 cursor-pointer font-normal">
+                🟡 {LABELS_TIPO_ORIGEM.manutencao_pre_projeto}
+                <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="execucao" id="exec-cilindro" />
+              <Label htmlFor="exec-cilindro" className="cursor-pointer font-normal">
+                🟢 {LABELS_TIPO_ORIGEM.execucao}
+              </Label>
+            </div>
+          </RadioGroup>
+          {isManutencaoPreProjeto && (
+            <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
+          )}
+        </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Dados Básicos da Intervenção */}
@@ -286,8 +305,15 @@ export function IntervencoesCilindrosForm({
                   name="cor_corpo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cor (Corpo)</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel className="flex items-center gap-2">
+                        Cor (Corpo)
+                        {isCampoEstruturalBloqueado('cor_corpo') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={isCampoEstruturalBloqueado('cor_corpo')}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione" />
@@ -310,8 +336,15 @@ export function IntervencoesCilindrosForm({
                   name="cor_refletivo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cor (Refletivo)</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel className="flex items-center gap-2">
+                        Cor (Refletivo)
+                        {isCampoEstruturalBloqueado('cor_refletivo') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={isCampoEstruturalBloqueado('cor_refletivo')}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione" />
@@ -332,8 +365,15 @@ export function IntervencoesCilindrosForm({
                   name="tipo_refletivo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tipo Refletivo</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel className="flex items-center gap-2">
+                        Tipo Refletivo
+                        {isCampoEstruturalBloqueado('tipo_refletivo') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={isCampoEstruturalBloqueado('tipo_refletivo')}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione" />
@@ -431,51 +471,16 @@ export function IntervencoesCilindrosForm({
               </div>
             </div>
 
-            {/* Observações e Justificativas */}
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="fora_plano_manutencao"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Fora do Plano de Manutenção
-                      </FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              {form.watch("fora_plano_manutencao") && (
-                <FormField
-                  control={form.control}
-                  name="justificativa_fora_plano"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Justificativa</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Explique o motivo da intervenção estar fora do plano de manutenção"
-                          className="min-h-[100px]"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            </div>
-
             {!hideSubmitButton && (
-              <Button type="submit" className="w-full" disabled={isSubmitting || (!cilindroSelecionado && modo !== 'controlado')}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={
+                  isSubmitting || 
+                  (isManutencaoPreProjeto && !cilindroSelecionado) || 
+                  modo === 'controlado'
+                }
+              >
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Registrar Intervenção
               </Button>

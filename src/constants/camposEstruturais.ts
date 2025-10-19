@@ -21,6 +21,9 @@ export const CAMPOS_ESTRUTURAIS = {
     'cor',
     'posicao',
     'codigo',
+    'largura_cm',
+    'espessura_cm',
+    'material',
   ],
   inscricoes: [
     'sigla',
@@ -32,6 +35,7 @@ export const CAMPOS_ESTRUTURAIS = {
     'tipo_tacha',
     'cor',
     'material',
+    'tipo_refletivo',
   ],
   cilindros: [
     'cor_corpo',
@@ -42,6 +46,7 @@ export const CAMPOS_ESTRUTURAIS = {
     'tipo',
     'altura_livre_m',
     'vao_horizontal_m',
+    'descricao',
   ],
   defensas: [
     'tipo_defensa',

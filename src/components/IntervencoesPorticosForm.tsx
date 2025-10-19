@@ -10,7 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin, Check, Building2 } from "lucide-react";
+import { Loader2, Building2, Lock, Info } from "lucide-react";
+import { useTipoOrigem } from "@/hooks/useTipoOrigem";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM } from "@/constants/camposEstruturais";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
@@ -24,8 +30,6 @@ const formSchema = z.object({
   observacao: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
-  fora_plano_manutencao: z.boolean().default(false),
-  justificativa_fora_plano: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -55,8 +59,7 @@ export function IntervencoesPorticosForm({
   rodoviaId
 }: IntervencoesPorticosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCapturing, setIsCapturing] = useState(false);
-
+  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoPreProjeto } = useTipoOrigem('porticos');
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -70,8 +73,7 @@ export function IntervencoesPorticosForm({
       observacao: "",
       latitude: "",
       longitude: "",
-      fora_plano_manutencao: false,
-      justificativa_fora_plano: "",
+      descricao: "",
     },
   });
 
@@ -81,14 +83,14 @@ export function IntervencoesPorticosForm({
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
         motivo: "",
+        km: porticoSelecionado.km?.toString() || "",
         tipo: porticoSelecionado.tipo || "",
         altura_livre_m: (porticoSelecionado as any).altura_livre_m?.toString() || "",
         vao_horizontal_m: (porticoSelecionado as any).vao_horizontal_m?.toString() || "",
+        descricao: (porticoSelecionado as any).descricao || "",
         observacao: "",
         latitude: "",
         longitude: "",
-        fora_plano_manutencao: false,
-        justificativa_fora_plano: "",
       });
     }
   }, [porticoSelecionado, modo, form]);
@@ -112,8 +114,9 @@ export function IntervencoesPorticosForm({
       return;
     }
     
-    if (!porticoSelecionado) {
-      toast.error("Selecione um pórtico do inventário primeiro");
+    // Validação: Manutenção Pré-Projeto exige pórtico existente
+    if (isManutencaoPreProjeto && !porticoSelecionado) {
+      toast.error("Para Manutenção Pré-Projeto, selecione um pórtico do inventário primeiro");
       return;
     }
 
@@ -122,7 +125,7 @@ export function IntervencoesPorticosForm({
       const { error } = await supabase
         .from("ficha_porticos_intervencoes")
         .insert({
-          ficha_porticos_id: porticoSelecionado.id,
+          ficha_porticos_id: porticoSelecionado?.id || null,
           data_intervencao: data.data_intervencao,
           motivo: data.motivo,
           km: data.km ? parseFloat(data.km) : null,
@@ -134,8 +137,7 @@ export function IntervencoesPorticosForm({
           latitude: data.latitude ? parseFloat(data.latitude) : null,
           longitude: data.longitude ? parseFloat(data.longitude) : null,
           observacao: data.observacao || null,
-          fora_plano_manutencao: data.fora_plano_manutencao,
-          justificativa_fora_plano: data.justificativa_fora_plano || null,
+          tipo_origem: tipoOrigem,
         });
 
       if (error) throw error;
@@ -163,6 +165,27 @@ export function IntervencoesPorticosForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-6 p-4 bg-muted rounded-lg space-y-3">
+          <Label className="text-base font-semibold">Tipo de Intervenção</Label>
+          <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="manutencao_pre_projeto" id="pre-portico" />
+              <Label htmlFor="pre-portico" className="flex items-center gap-2 cursor-pointer font-normal">
+                🟡 {LABELS_TIPO_ORIGEM.manutencao_pre_projeto}
+                <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="execucao" id="exec-portico" />
+              <Label htmlFor="exec-portico" className="cursor-pointer font-normal">
+                🟢 {LABELS_TIPO_ORIGEM.execucao}
+              </Label>
+            </div>
+          </RadioGroup>
+          {isManutencaoPreProjeto && (
+            <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
+          )}
+        </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* SEÇÃO 1: Dados Básicos da Intervenção */}
@@ -249,8 +272,15 @@ export function IntervencoesPorticosForm({
                   name="tipo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tipo de Estrutura</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel className="flex items-center gap-2">
+                        Tipo de Estrutura
+                        {isCampoEstruturalBloqueado('tipo') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={isCampoEstruturalBloqueado('tipo')}
+                      >
                         <FormControl>
                           <SelectTrigger className="border-primary/20">
                             <SelectValue placeholder="Selecione" />
@@ -273,13 +303,17 @@ export function IntervencoesPorticosForm({
                   name="altura_livre_m"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Altura Livre (m)</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        Altura Livre (m)
+                        {isCampoEstruturalBloqueado('altura_livre_m') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           step="0.01" 
                           placeholder="Ex: 7.25" 
                           {...field}
+                          disabled={isCampoEstruturalBloqueado('altura_livre_m')}
                           className="border-primary/20"
                         />
                       </FormControl>
@@ -293,13 +327,17 @@ export function IntervencoesPorticosForm({
                   name="vao_horizontal_m"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Vão Horizontal (m)</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        Vão Horizontal (m)
+                        {isCampoEstruturalBloqueado('vao_horizontal_m') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           step="0.01" 
                           placeholder="Ex: 15.90" 
                           {...field}
+                          disabled={isCampoEstruturalBloqueado('vao_horizontal_m')}
                           className="border-primary/20"
                         />
                       </FormControl>
@@ -310,19 +348,23 @@ export function IntervencoesPorticosForm({
               </div>
             </div>
 
-            {/* SEÇÃO 4: Observações e Justificativas */}
+            {/* SEÇÃO 4: Observações */}
             <div className="space-y-4">
               <FormField
                 control={form.control}
                 name="descricao"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descrição do Pórtico</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      Descrição do Pórtico
+                      {isCampoEstruturalBloqueado('descricao') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Descrição adicional sobre o pórtico..."
                         className="min-h-[80px]"
                         {...field}
+                        disabled={isCampoEstruturalBloqueado('descricao')}
                       />
                     </FormControl>
                     <FormMessage />
@@ -347,50 +389,18 @@ export function IntervencoesPorticosForm({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="fora_plano_manutencao"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        checked={field.value}
-                        onChange={field.onChange}
-                        className="h-4 w-4"
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Fora do Plano de Manutenção</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              {form.watch("fora_plano_manutencao") && (
-                <FormField
-                  control={form.control}
-                  name="justificativa_fora_plano"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Justificativa *</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Explique o motivo da intervenção fora do plano..." 
-                          {...field}
-                          className="min-h-[100px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
             </div>
 
             {!hideSubmitButton && (
-              <Button type="submit" className="w-full mt-6" disabled={isSubmitting || (!porticoSelecionado && modo !== 'controlado')}>
+              <Button 
+                type="submit" 
+                className="w-full mt-6" 
+                disabled={
+                  isSubmitting || 
+                  (isManutencaoPreProjeto && !porticoSelecionado) || 
+                  modo === 'controlado'
+                }
+              >
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Registrar Intervenção
               </Button>
