@@ -597,14 +597,11 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
         };
 
         if (TIPOS_COM_STATUS_REVISAO.includes(tipo)) {
-          const statusRevisaoAtual = nec.status_revisao;
-          if (statusRevisaoAtual === 'aprovado_coordenador') {
-            matchData.status_revisao = 'aprovado_coordenador';
-          } else if (divergenciaIdentificada || matchesCandidatos.length === 0) {
-            matchData.status_revisao = 'pendente_revisao';
-          } else {
-            matchData.status_revisao = 'match_automatico';
-          }
+        if (divergenciaIdentificada || matchesCandidatos.length === 0) {
+          matchData.status_revisao = 'pendente_coordenador';
+        } else {
+          matchData.status_revisao = 'ok';
+        }
         }
 
         const { error: updateError } = await supabase
