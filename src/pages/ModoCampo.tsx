@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,12 @@ export default function ModoCampo() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { activeSession, refreshSession } = useWorkSession(user?.id);
+
+  // Salvar que o usuário está no modo campo
+  useEffect(() => {
+    localStorage.setItem('modoAcesso', 'campo');
+    localStorage.setItem('lastRoute', '/modo-campo');
+  }, []);
 
   const handleVoltar = async () => {
     if (Capacitor.isNativePlatform()) {

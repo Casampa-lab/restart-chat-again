@@ -351,6 +351,10 @@ const Index = () => {
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
+    } else if (user) {
+      // Salvar que está na tela desktop
+      localStorage.setItem('modoAcesso', 'web');
+      localStorage.setItem('lastRoute', '/');
     }
   }, [user, authLoading, navigate]);
   const handleSignOut = async () => {

@@ -42,11 +42,15 @@ const Auth = () => {
           }
         } = await supabase.auth.getSession();
         
-        console.log(`[Auth] Sessão verificada em ${Date.now() - startTime}ms`, { hasSession: !!session });
+        console.log(`[Auth] Sessão verificada em ${Date.now() - startTime}ms`, { 
+          hasSession: !!session,
+          currentPath: window.location.pathname 
+        });
         
-        if (session) {
+        // APENAS redirecionar se estiver na página de auth
+        if (session && window.location.pathname === '/auth') {
           const savedModo = localStorage.getItem('modoAcesso') as 'web' | 'campo' || 'web';
-          navigate(savedModo === 'campo' ? "/modo-campo" : "/");
+          navigate(savedModo === 'campo' ? "/modo-campo" : "/", { replace: true });
         }
       } catch (error) {
         console.error('[Auth] Erro ao verificar sessão:', error);
@@ -64,9 +68,10 @@ const Auth = () => {
     } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('[Auth] Estado de autenticação mudou:', event);
       
+      // Só redirecionar quando há um SIGNED_IN explícito (login ativo)
       if (event === 'SIGNED_IN' && session) {
         const savedModo = localStorage.getItem('modoAcesso') as 'web' | 'campo' || 'web';
-        navigate(savedModo === 'campo' ? "/modo-campo" : "/");
+        navigate(savedModo === 'campo' ? "/modo-campo" : "/", { replace: true });
       }
       // SIGNED_OUT não precisa fazer nada - usuário já está em /auth
     });

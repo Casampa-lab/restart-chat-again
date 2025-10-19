@@ -16,6 +16,7 @@ export const useAuth = () => {
       (event, session) => {
         console.log(`[useAuth] Evento de autenticação: ${event}`, {
           hasSession: !!session,
+          currentPath: window.location.pathname,
           elapsedTime: `${Date.now() - startTime}ms`
         });
         
@@ -31,7 +32,7 @@ export const useAuth = () => {
       }
     );
 
-    // Get initial session
+    // Get initial session - NÃO redirecionar aqui
     console.log('[useAuth] Buscando sessão inicial...');
     const sessionStart = Date.now();
     
@@ -39,7 +40,8 @@ export const useAuth = () => {
       .then(({ data: { session }, error }) => {
         console.log(`[useAuth] Sessão inicial obtida em ${Date.now() - sessionStart}ms`, {
           hasSession: !!session,
-          hasError: !!error
+          hasError: !!error,
+          currentPath: window.location.pathname
         });
         
         if (error) {
