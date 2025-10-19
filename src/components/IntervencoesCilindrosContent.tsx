@@ -55,6 +55,7 @@ interface IntervencaoCilindro {
   fora_plano_manutencao: boolean;
   justificativa_fora_plano: string | null;
   ficha_cilindros_id: string;
+  pendente_aprovacao_coordenador: boolean;
   ficha_cilindros?: {
     lote_id: string;
     rodovia_id: string;
@@ -75,6 +76,7 @@ const IntervencoesCilindrosContent = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [intervencaoToEdit, setIntervencaoToEdit] = useState<IntervencaoCilindro | null>(null);
   const [novaIntervencaoOpen, setNovaIntervencaoOpen] = useState(false);
+  const [showEnviadas, setShowEnviadas] = useState(true);
 
   const loadData = async () => {
     if (!user) {
@@ -151,6 +153,28 @@ const IntervencoesCilindrosContent = () => {
     setSelectedIntervencoes(newSelection);
   };
 
+  const handleEnviarSelecionadas = async () => {
+    if (selectedIntervencoes.size === 0) {
+      toast.error("Selecione pelo menos uma intervenção para enviar");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("ficha_cilindros_intervencoes")
+        .update({ pendente_aprovacao_coordenador: false })
+        .in("id", Array.from(selectedIntervencoes));
+
+      if (error) throw error;
+
+      toast.success(`${selectedIntervencoes.size} intervenção(ões) enviada(s) ao coordenador!`);
+      setSelectedIntervencoes(new Set());
+      loadData();
+    } catch (error: any) {
+      toast.error("Erro ao enviar intervenções: " + error.message);
+    }
+  };
+
   const handleDelete = async () => {
     if (!intervencaoToDelete) return;
 
@@ -218,32 +242,7 @@ const IntervencoesCilindrosContent = () => {
       if (error) throw error;
 
       toast.success("Intervenção atualizada com sucesso!");
-      
-      // Recarregar dados usando a mesma lógica do useEffect inicial
-      const { data: intervencoesData, error: reloadError } = await supabase
-        .from("ficha_cilindros_intervencoes")
-        .select("*")
-        .eq("user_id", user!.id)
-        .order("data_intervencao", { ascending: false });
-
-      if (reloadError) throw reloadError;
-
-      // Para cada intervenção com FK, buscar dados do cilindro
-      const intervencoesFull = await Promise.all(
-        (intervencoesData || []).map(async (int) => {
-          if (int.ficha_cilindros_id) {
-            const { data: cilindro } = await supabase
-              .from("ficha_cilindros")
-              .select("id, lote_id, rodovia_id, km_inicial, km_final")
-              .eq("id", int.ficha_cilindros_id)
-              .single();
-            return { ...int, ficha_cilindros: cilindro };
-          }
-          return { ...int, ficha_cilindros: null };
-        })
-      );
-
-      setIntervencoes(intervencoesFull as IntervencaoCilindro[]);
+      loadData();
     } catch (error: any) {
       toast.error("Erro ao atualizar intervenção: " + error.message);
     } finally {
@@ -251,6 +250,10 @@ const IntervencoesCilindrosContent = () => {
       setIntervencaoToEdit(null);
     }
   };
+
+  const filteredIntervencoes = showEnviadas 
+    ? intervencoes 
+    : intervencoes.filter(i => i.pendente_aprovacao_coordenador);
 
   if (loading) {
     return (
@@ -262,23 +265,54 @@ const IntervencoesCilindrosContent = () => {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <label htmlFor="show-enviadas-cil" className="text-sm cursor-pointer">
+            Mostrar intervenções enviadas
+          </label>
+          <input
+            type="checkbox"
+            id="show-enviadas-cil"
+            checked={showEnviadas}
+            onChange={(e) => setShowEnviadas(e.target.checked)}
+            className="h-4 w-4 cursor-pointer"
+          />
+        </div>
+        
+        {selectedIntervencoes.size > 0 && (
+          <Button onClick={handleEnviarSelecionadas}>
+            <Send className="mr-2 h-4 w-4" />
+            Enviar {selectedIntervencoes.size} ao Coordenador
+          </Button>
+        )}
+      </div>
+
       <Card>
-        <CardHeader>
-          <CardTitle>Minhas Intervenções em Cilindros</CardTitle>
-          <CardDescription>
-            Histórico de intervenções em cilindros delimitadores registradas
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Minhas Intervenções em Cilindros</CardTitle>
+            <CardDescription>
+              Histórico de intervenções em cilindros delimitadores registradas
+            </CardDescription>
+          </div>
+          <Button onClick={() => setNovaIntervencaoOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Registrar Nova
+          </Button>
         </CardHeader>
         <CardContent>
-          {intervencoes.length === 0 ? (
+          {filteredIntervencoes.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              Nenhuma intervenção registrada ainda.
+              {showEnviadas 
+                ? "Nenhuma intervenção registrada ainda."
+                : "Nenhuma intervenção não enviada"}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12">Sel.</TableHead>
                     <TableHead>Data</TableHead>
                     <TableHead>Lote</TableHead>
                     <TableHead>Rodovia</TableHead>
@@ -288,12 +322,22 @@ const IntervencoesCilindrosContent = () => {
                     <TableHead>Cor Corpo</TableHead>
                     <TableHead>Cor Refletivo</TableHead>
                     <TableHead>Tipo Refletivo</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {intervencoes.map((intervencao) => (
+                  {filteredIntervencoes.map((intervencao) => (
                     <TableRow key={intervencao.id}>
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          checked={selectedIntervencoes.has(intervencao.id)}
+                          onChange={() => handleToggleSelect(intervencao.id)}
+                          disabled={!intervencao.pendente_aprovacao_coordenador}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                      </TableCell>
                       <TableCell>
                         {format(new Date(intervencao.data_intervencao), "dd/MM/yyyy")}
                       </TableCell>
@@ -313,6 +357,13 @@ const IntervencoesCilindrosContent = () => {
                       <TableCell>{intervencao.cor_corpo || "-"}</TableCell>
                       <TableCell>{intervencao.cor_refletivo || "-"}</TableCell>
                       <TableCell>{intervencao.tipo_refletivo || "-"}</TableCell>
+                      <TableCell>
+                        {intervencao.pendente_aprovacao_coordenador ? (
+                          <Badge variant="outline" className="bg-yellow-50">Pendente</Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-green-50">Aprovada</Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
                           <Button

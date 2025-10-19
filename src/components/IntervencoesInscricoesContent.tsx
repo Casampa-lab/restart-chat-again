@@ -3,11 +3,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import { Plus, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Send, Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -51,6 +51,8 @@ const IntervencoesInscricoesContent = () => {
   const [lotes, setLotes] = useState<Record<string, string>>({});
   const [rodovias, setRodovias] = useState<Record<string, string>>({});
   const [novaIntervencaoOpen, setNovaIntervencaoOpen] = useState(false);
+  const [selectedIntervencoes, setSelectedIntervencoes] = useState<Set<string>>(new Set());
+  const [showEnviadas, setShowEnviadas] = useState(true);
 
   const loadData = async () => {
     if (!user) return;
@@ -103,10 +105,68 @@ const IntervencoesInscricoesContent = () => {
     loadData();
   }, [user]);
 
+  const handleToggleSelect = (id: string) => {
+    const newSelection = new Set(selectedIntervencoes);
+    if (newSelection.has(id)) {
+      newSelection.delete(id);
+    } else {
+      newSelection.add(id);
+    }
+    setSelectedIntervencoes(newSelection);
+  };
+
+  const handleEnviarSelecionadas = async () => {
+    if (selectedIntervencoes.size === 0) {
+      toast.error("Selecione pelo menos uma intervenção para enviar");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("ficha_inscricoes_intervencoes")
+        .update({ pendente_aprovacao_coordenador: false })
+        .in("id", Array.from(selectedIntervencoes));
+
+      if (error) throw error;
+
+      toast.success(`${selectedIntervencoes.size} intervenção(ões) enviada(s) ao coordenador!`);
+      setSelectedIntervencoes(new Set());
+      loadData();
+    } catch (error: any) {
+      toast.error("Erro ao enviar intervenções: " + error.message);
+    }
+  };
+
+  const filteredIntervencoes = showEnviadas 
+    ? intervencoes 
+    : intervencoes.filter(i => i.pendente_aprovacao_coordenador);
+
   if (loading) return <div className="flex items-center justify-center py-8"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <label htmlFor="show-enviadas-insc" className="text-sm cursor-pointer">
+            Mostrar intervenções enviadas
+          </label>
+          <input
+            type="checkbox"
+            id="show-enviadas-insc"
+            checked={showEnviadas}
+            onChange={(e) => setShowEnviadas(e.target.checked)}
+            className="h-4 w-4 cursor-pointer"
+          />
+        </div>
+        
+        {selectedIntervencoes.size > 0 && (
+          <Button onClick={handleEnviarSelecionadas}>
+            <Send className="mr-2 h-4 w-4" />
+            Enviar {selectedIntervencoes.size} ao Coordenador
+          </Button>
+        )}
+      </div>
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
@@ -119,13 +179,18 @@ const IntervencoesInscricoesContent = () => {
           </Button>
         </CardHeader>
         <CardContent>
-          {intervencoes.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">Nenhuma intervenção registrada ainda.</div>
+          {filteredIntervencoes.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {showEnviadas 
+                ? "Nenhuma intervenção registrada ainda."
+                : "Nenhuma intervenção não enviada"}
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12">Sel.</TableHead>
                     <TableHead>Data</TableHead>
                     <TableHead>Lote</TableHead>
                     <TableHead>Rodovia</TableHead>
@@ -138,13 +203,22 @@ const IntervencoesInscricoesContent = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {intervencoes.map((int) => {
+                  {filteredIntervencoes.map((int) => {
                     const loteId = int.ficha_inscricoes?.lote_id || "";
                     const rodoviaid = int.ficha_inscricoes?.rodovia_id || "";
                     const kmInicial = int.km_inicial || int.ficha_inscricoes?.km_inicial || 0;
                     const kmFinal = int.km_final || int.ficha_inscricoes?.km_final || 0;
                     return (
                       <TableRow key={int.id}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedIntervencoes.has(int.id)}
+                            onChange={() => handleToggleSelect(int.id)}
+                            disabled={!int.pendente_aprovacao_coordenador}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                        </TableCell>
                         <TableCell>{format(new Date(int.data_intervencao), "dd/MM/yyyy")}</TableCell>
                         <TableCell>{lotes[loteId] || "-"}</TableCell>
                         <TableCell>{rodovias[rodoviaid] || "-"}</TableCell>

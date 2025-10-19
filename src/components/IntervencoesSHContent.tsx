@@ -43,16 +43,20 @@ interface IntervencaoSH {
   data_intervencao: string;
   km_inicial: number;
   km_final: number;
-  tipo_intervencao: string;
+  motivo: string;
   tipo_demarcacao: string;
   cor: string;
   espessura_cm: number | null;
-  area_m2: number;
-  material_utilizado: string | null;
+  largura_cm: number | null;
+  material: string | null;
+  snv: string | null;
   observacao: string | null;
-  lote_id: string;
-  rodovia_id: string;
-  enviado_coordenador: boolean;
+  pendente_aprovacao_coordenador: boolean;
+  ficha_marcas_longitudinais_id: string | null;
+  ficha_marcas_longitudinais?: {
+    lote_id: string;
+    rodovia_id: string;
+  };
 }
 
 const IntervencoesSHContent = () => {
@@ -81,7 +85,23 @@ const IntervencoesSHContent = () => {
           .order("data_intervencao", { ascending: false });
 
         if (intervencoesError) throw intervencoesError;
-        setIntervencoes(intervencoesData as any || []);
+
+        // Para cada intervenção com FK, buscar dados da marca
+        const intervencoesFull = await Promise.all(
+          (intervencoesData || []).map(async (int) => {
+            if (int.ficha_marcas_longitudinais_id) {
+              const { data: marca } = await supabase
+                .from("ficha_marcas_longitudinais")
+                .select("id, lote_id, rodovia_id")
+                .eq("id", int.ficha_marcas_longitudinais_id)
+                .single();
+              return { ...int, ficha_marcas_longitudinais: marca };
+            }
+            return { ...int, ficha_marcas_longitudinais: null };
+          })
+        );
+
+        setIntervencoes(intervencoesFull as any || []);
 
         const { data: lotesData } = await supabase
           .from("lotes")
@@ -134,8 +154,8 @@ const IntervencoesSHContent = () => {
 
     try {
       const { error } = await supabase
-        .from("intervencoes_sh")
-        .update({ enviado_coordenador: true })
+        .from("ficha_marcas_longitudinais_intervencoes")
+        .update({ pendente_aprovacao_coordenador: false })
         .in("id", Array.from(selectedIntervencoes));
 
       if (error) throw error;
@@ -144,7 +164,7 @@ const IntervencoesSHContent = () => {
       setSelectedIntervencoes(new Set());
       
       const { data: intervencoesData } = await supabase
-        .from("intervencoes_sh")
+        .from("ficha_marcas_longitudinais_intervencoes")
         .select("*")
         .eq("user_id", user!.id)
         .order("data_intervencao", { ascending: false });
@@ -159,7 +179,7 @@ const IntervencoesSHContent = () => {
 
     try {
       const { error } = await supabase
-        .from("intervencoes_sh")
+        .from("ficha_marcas_longitudinais_intervencoes")
         .delete()
         .eq("id", intervencaoToDelete);
 
@@ -168,7 +188,7 @@ const IntervencoesSHContent = () => {
       toast.success("Intervenção excluída com sucesso!");
       
       const { data: intervencoesData } = await supabase
-        .from("intervencoes_sh")
+        .from("ficha_marcas_longitudinais_intervencoes")
         .select("*")
         .eq("user_id", user!.id)
         .order("data_intervencao", { ascending: false });
@@ -186,17 +206,17 @@ const IntervencoesSHContent = () => {
 
     try {
       const { error } = await supabase
-        .from("intervencoes_sh")
+        .from("ficha_marcas_longitudinais_intervencoes")
         .update({
           data_intervencao: intervencaoToEdit.data_intervencao,
           km_inicial: intervencaoToEdit.km_inicial,
           km_final: intervencaoToEdit.km_final,
-          tipo_intervencao: intervencaoToEdit.tipo_intervencao,
+          motivo: intervencaoToEdit.motivo,
           tipo_demarcacao: intervencaoToEdit.tipo_demarcacao,
           cor: intervencaoToEdit.cor,
           espessura_cm: intervencaoToEdit.espessura_cm,
-          area_m2: intervencaoToEdit.area_m2,
-          material_utilizado: intervencaoToEdit.material_utilizado,
+          largura_cm: intervencaoToEdit.largura_cm,
+          material: intervencaoToEdit.material,
           observacao: intervencaoToEdit.observacao,
         })
         .eq("id", intervencaoToEdit.id);
@@ -206,7 +226,7 @@ const IntervencoesSHContent = () => {
       toast.success("Intervenção atualizada com sucesso!");
       
       const { data: intervencoesData } = await supabase
-        .from("intervencoes_sh")
+        .from("ficha_marcas_longitudinais_intervencoes")
         .select("*")
         .eq("user_id", user!.id)
         .order("data_intervencao", { ascending: false });
@@ -221,7 +241,7 @@ const IntervencoesSHContent = () => {
 
   const filteredIntervencoes = showEnviadas 
     ? intervencoes 
-    : intervencoes.filter(i => !i.enviado_coordenador);
+    : intervencoes.filter(i => i.pendente_aprovacao_coordenador);
 
   if (loading) {
     return (
@@ -287,50 +307,53 @@ const IntervencoesSHContent = () => {
                     <TableHead>Lote</TableHead>
                     <TableHead>Rodovia</TableHead>
                     <TableHead>Trecho (km)</TableHead>
-                    <TableHead>Tipo Intervenção</TableHead>
+                    <TableHead>Motivo</TableHead>
                     <TableHead>Tipo Demarcação</TableHead>
                     <TableHead>Cor</TableHead>
-                    <TableHead>Área (m²)</TableHead>
-                    <TableHead>Espessura</TableHead>
+                    <TableHead>Largura (cm)</TableHead>
+                    <TableHead>Espessura (cm)</TableHead>
                     <TableHead>Material</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredIntervencoes.map((intervencao) => (
-                    <TableRow key={intervencao.id}>
+                  {filteredIntervencoes.map((intervencao) => {
+                    const loteId = intervencao.ficha_marcas_longitudinais?.lote_id || "";
+                    const rodoviaId = intervencao.ficha_marcas_longitudinais?.rodovia_id || "";
+                    return (
+                      <TableRow key={intervencao.id}>
                       <TableCell>
                         <input
                           type="checkbox"
                           checked={selectedIntervencoes.has(intervencao.id)}
                           onChange={() => handleToggleSelect(intervencao.id)}
-                          disabled={intervencao.enviado_coordenador}
+                          disabled={!intervencao.pendente_aprovacao_coordenador}
                           className="h-4 w-4 rounded border-gray-300"
                         />
                       </TableCell>
                       <TableCell>
                         {format(new Date(intervencao.data_intervencao), "dd/MM/yyyy")}
                       </TableCell>
-                      <TableCell>{lotes[intervencao.lote_id] || "-"}</TableCell>
-                      <TableCell>{rodovias[intervencao.rodovia_id] || "-"}</TableCell>
+                      <TableCell>{lotes[loteId] || "-"}</TableCell>
+                      <TableCell>{rodovias[rodoviaId] || "-"}</TableCell>
                       <TableCell>
                         {intervencao.km_inicial.toFixed(3)} - {intervencao.km_final.toFixed(3)}
                       </TableCell>
-                      <TableCell>{intervencao.tipo_intervencao}</TableCell>
+                      <TableCell>{intervencao.motivo}</TableCell>
                       <TableCell className="max-w-xs truncate">{intervencao.tipo_demarcacao}</TableCell>
                       <TableCell>{intervencao.cor}</TableCell>
-                      <TableCell>{intervencao.area_m2.toFixed(2)}</TableCell>
+                      <TableCell>{intervencao.largura_cm ? `${intervencao.largura_cm} cm` : "-"}</TableCell>
                       <TableCell>{intervencao.espessura_cm ? `${intervencao.espessura_cm} cm` : "-"}</TableCell>
-                      <TableCell>{intervencao.material_utilizado || "-"}</TableCell>
+                      <TableCell>{intervencao.material || "-"}</TableCell>
                       <TableCell>
-                        {intervencao.enviado_coordenador ? (
-                          <Badge variant="outline" className="bg-green-50">
-                            Enviada
+                        {intervencao.pendente_aprovacao_coordenador ? (
+                          <Badge variant="outline" className="bg-yellow-50">
+                            Pendente
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="bg-yellow-50">
-                            Não enviada
+                          <Badge variant="outline" className="bg-green-50">
+                            Aprovada
                           </Badge>
                         )}
                       </TableCell>
@@ -361,7 +384,8 @@ const IntervencoesSHContent = () => {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -370,6 +394,55 @@ const IntervencoesSHContent = () => {
       </Card>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta intervenção? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={novaIntervencaoOpen} onOpenChange={setNovaIntervencaoOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Registrar Nova Intervenção em Sinalização Horizontal</DialogTitle>
+          </DialogHeader>
+          <IntervencoesSHForm 
+            onIntervencaoRegistrada={() => {
+              setNovaIntervencaoOpen(false);
+              const loadData = async () => {
+                const { data } = await supabase
+                  .from("ficha_marcas_longitudinais_intervencoes")
+                  .select("*")
+                  .eq("user_id", user!.id)
+                  .order("data_intervencao", { ascending: false });
+                if (data) {
+                  const full = await Promise.all((data || []).map(async (int: any) => {
+                    if (int.ficha_marcas_longitudinais_id) {
+                      const { data: marca } = await supabase.from("ficha_marcas_longitudinais").select("id, lote_id, rodovia_id").eq("id", int.ficha_marcas_longitudinais_id).single();
+                      return { ...int, ficha_marcas_longitudinais: marca };
+                    }
+                    return { ...int, ficha_marcas_longitudinais: null };
+                  }));
+                  setIntervencoes(full as any);
+                }
+              };
+              loadData();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default IntervencoesSHContent;
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
