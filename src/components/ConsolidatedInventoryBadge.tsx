@@ -27,7 +27,7 @@ export function ConsolidatedInventoryBadge({
             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 text-sm font-semibold cursor-help"
           >
             <CheckCircle2 className="h-4 w-4 mr-1.5" />
-            {total} elementos
+            {total}
             <Info className="h-3 w-3 ml-1.5 opacity-70" />
           </Badge>
         </TooltipTrigger>
