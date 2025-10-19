@@ -121,10 +121,10 @@ export default function InventarioDinamicoComAlerta() {
           const necessidadesMapeadas = data.map((item: any) => ({
             id: item.id,
             tipo_elemento: tabela.tipo,
-            acao: item.acao || item.descricao_servico || 'N/A',
+            acao: item.servico || item.acao || item.descricao_servico || 'N/A',
             km_inicial: item.km_inicial,
             lado: item.lado,
-            descricao_servico: item.descricao_servico,
+            descricao_servico: item.descricao_servico || item.servico,
             latitude_inicial: item.latitude_inicial,
             longitude_inicial: item.longitude_inicial,
           }));
