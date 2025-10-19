@@ -158,7 +158,15 @@ export function RetrorrefletividadeModalSimples({
       {/* Leituras */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Leituras Individuais</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Leituras Individuais</CardTitle>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="text-2xl font-bold px-4 py-2 bg-primary/10">
+                {medicoes.filter(m => m > 0).length}/{numLeituras}
+              </Badge>
+              <span className="text-sm text-muted-foreground">leituras</span>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
