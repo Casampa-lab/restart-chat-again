@@ -5449,6 +5449,10 @@ export type Database = {
           distancia_metros: number
         }[]
       }
+      remover_duplicatas_necessidades: {
+        Args: { p_tabela: string }
+        Returns: number
+      }
       user_has_module_access: {
         Args: { _modulo_codigo: string; _user_id: string }
         Returns: boolean
