@@ -723,15 +723,14 @@ serve(async (req) => {
 
       const { data: insertData, error: insertError } = await supabase
         .from(tableName)
-        .insert(batch)
-        .select();
+        .insert(batch);
 
       if (insertError) {
         console.error("Erro ao inserir lote:", insertError);
         throw insertError;
       }
 
-      totalInserted += insertData?.length || 0;
+      totalInserted += batch.length;
       console.log(`Total inserido até agora: ${totalInserted}/${recordsToInsert.length}`);
     }
 
