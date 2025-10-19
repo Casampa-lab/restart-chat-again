@@ -98,8 +98,6 @@ const DefensasIntervencoesForm = ({
   loteId,
   rodoviaId
 }: DefensasIntervencoesFormProps) => {
-  const [isCapturing, setIsCapturing] = useState(false);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -122,26 +120,6 @@ const DefensasIntervencoesForm = ({
       justificativa_fora_plano: "",
     },
   });
-
-  const capturarCoordenadas = () => {
-    setIsCapturing(true);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude.toString();
-          const lng = position.coords.longitude.toString();
-          form.setValue("latitude", lat);
-          form.setValue("longitude", lng);
-          toast.success(`Coordenadas capturadas: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
-          setIsCapturing(false);
-        },
-        (error) => {
-          toast.error("Erro ao capturar localização");
-          setIsCapturing(false);
-        }
-      );
-    }
-  };
 
   // Preencher formulário com dados da defensa selecionada
   useEffect(() => {
@@ -335,66 +313,6 @@ const DefensasIntervencoesForm = ({
         />
       </div>
 
-      {/* ========== SEÇÃO 2: LOCALIZAÇÃO GPS (VERDE) ========== */}
-      <div className="space-y-4 border-l-4 border-green-500 pl-4 bg-green-50/50 py-4 rounded-r-lg">
-        <div className="flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-green-600" />
-          <h3 className="font-semibold text-green-700 text-lg">Localização GPS</h3>
-        </div>
-        
-        <div className="space-y-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={capturarCoordenadas}
-            disabled={isCapturing}
-            className="w-full"
-          >
-            {isCapturing ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando...</>
-            ) : (
-              <><MapPin className="mr-2 h-4 w-4" />Capturar Coordenadas GPS Automáticas</>
-            )}
-          </Button>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <FormField
-              control={form.control}
-              name="latitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Latitude</FormLabel>
-                  <FormControl>
-                    <Input type="number" step="any" placeholder="-15.123456" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="longitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Longitude</FormLabel>
-                  <FormControl>
-                    <Input type="number" step="any" placeholder="-47.123456" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          
-          {(form.watch("latitude") && form.watch("longitude")) && (
-            <div className="flex items-center gap-2 text-sm text-green-600 bg-green-100 p-2 rounded">
-              <Check className="h-4 w-4" />
-              <span>Coordenadas capturadas com sucesso</span>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* ========== SEÇÃO 3: CARACTERÍSTICAS DA DEFENSA (AZUL) ========== */}
       <div className="space-y-4 border-l-4 border-primary pl-4 bg-primary/5 py-4 rounded-r-lg">
