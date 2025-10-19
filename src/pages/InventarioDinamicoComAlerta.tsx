@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useWorkSession } from '@/hooks/useWorkSession';
@@ -7,12 +8,30 @@ import { useGPSTracking } from '@/hooks/useGPSTracking';
 import { calculateDistance, sortByProximity } from '@/lib/gpsUtils';
 import { AlertaProximidade } from '@/components/AlertaProximidade';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, MapPin, Navigation } from 'lucide-react';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
+
+const TIPO_ELEMENTO_LABELS: Record<string, string> = {
+  placas: "Placas",
+  marcas_longitudinais: "Marcas Longitudinais",
+  inscricoes: "Inscrições",
+  tachas: "Tachas",
+  cilindros: "Cilindros",
+  porticos: "Pórticos",
+  defensas: "Defensas",
+};
+
+interface EvolucaoGeral {
+  tipo_elemento: string;
+  total_elementos: number;
+  originais: number;
+  manutencao_pre_projeto: number;
+  execucao_projeto: number;
+}
 
 interface Necessidade {
   id: string;
@@ -35,11 +54,22 @@ export default function InventarioDinamicoComAlerta() {
   const [necessidades, setNecessidades] = useState<Necessidade[]>([]);
   const [necessidadesProximas, setNecessidadesProximas] = useState<Necessidade[]>([]);
   const [loading, setLoading] = useState(true);
-  const [grupoFiltro, setGrupoFiltro] = useState<'todos' | 'sv' | 'sh' | 'defensas'>('todos');
-  const [subtipoSV, setSubtipoSV] = useState<string>('placas');
-  const [subtipoSH, setSubtipoSH] = useState<string>('marcas_longitudinais');
+  const [grupoFiltro, setGrupoFiltro] = useState<'todos' | 'sv' | 'sh' | 'defensas'>('sh');
+  const [tipoElemento, setTipoElemento] = useState<string>('marcas_longitudinais');
 
   const RAIO_ALERTA = 100; // metros
+
+  // Buscar estatísticas gerais
+  const { data: evolucaoGeral } = useQuery({
+    queryKey: ["evolucao-geral"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("vw_inventario_evolucao_geral" as any)
+        .select("*");
+      if (error) throw error;
+      return data as unknown as EvolucaoGeral[];
+    },
+  });
 
   useEffect(() => {
     if (activeSession) {
@@ -157,13 +187,11 @@ export default function InventarioDinamicoComAlerta() {
     return labels[tipo] || tipo;
   };
 
-  // Determinar qual tipo elemento deve ser exibido baseado no grupo e subtipo
+  // Determinar qual tipo elemento deve ser exibido baseado no grupo
   const getTipoElementoAtivo = () => {
     if (grupoFiltro === 'todos') return 'todos';
-    if (grupoFiltro === 'sv') return subtipoSV;
-    if (grupoFiltro === 'sh') return subtipoSH;
     if (grupoFiltro === 'defensas') return 'defensas';
-    return 'todos';
+    return tipoElemento;
   };
 
   const tipoAtivo = getTipoElementoAtivo();
@@ -177,6 +205,17 @@ export default function InventarioDinamicoComAlerta() {
         position.longitude
       )
     : necessidades.filter(n => tipoAtivo === 'todos' || n.tipo_elemento === tipoAtivo);
+
+  // Quando mudar de grupo, selecionar o primeiro tipo apropriado
+  const handleGrupoChange = (grupo: string) => {
+    setGrupoFiltro(grupo as any);
+    if (grupo === 'sv') setTipoElemento('placas');
+    else if (grupo === 'sh') setTipoElemento('marcas_longitudinais');
+    else if (grupo === 'defensas') setTipoElemento('defensas');
+  };
+
+  // Calcular estatísticas do tipo selecionado
+  const statsAtual = evolucaoGeral?.find((item) => item.tipo_elemento === tipoAtivo);
 
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
@@ -245,7 +284,7 @@ export default function InventarioDinamicoComAlerta() {
       )}
 
       {/* Filtros - Grupos */}
-      <Tabs value={grupoFiltro} onValueChange={(value) => setGrupoFiltro(value as any)} className="mb-4">
+      <Tabs value={grupoFiltro} onValueChange={handleGrupoChange} className="mb-4">
         <TabsList className="grid grid-cols-4 h-auto">
           <TabsTrigger value="todos">Todos</TabsTrigger>
           <TabsTrigger value="sv">🚦 SV</TabsTrigger>
@@ -254,40 +293,82 @@ export default function InventarioDinamicoComAlerta() {
         </TabsList>
       </Tabs>
 
-      {/* Dropdown de Subtipo para SV */}
-      {grupoFiltro === 'sv' && (
-        <Card className="mb-4">
-          <CardContent className="pt-4">
-            <Select value={subtipoSV} onValueChange={setSubtipoSV}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="placas">🚦 Placas</SelectItem>
-                <SelectItem value="porticos">🌉 Pórticos</SelectItem>
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
+      {/* Select horizontal discreto - igual ao desktop */}
+      {grupoFiltro !== 'todos' && grupoFiltro !== 'defensas' && (
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-sm font-medium text-muted-foreground">Tipo:</span>
+          <Select value={tipoElemento} onValueChange={setTipoElemento}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {grupoFiltro === 'sv' && (
+                <>
+                  <SelectItem value="placas">🚦 {TIPO_ELEMENTO_LABELS.placas}</SelectItem>
+                  <SelectItem value="porticos">🌉 {TIPO_ELEMENTO_LABELS.porticos}</SelectItem>
+                </>
+              )}
+              {grupoFiltro === 'sh' && (
+                <>
+                  <SelectItem value="marcas_longitudinais">➖ {TIPO_ELEMENTO_LABELS.marcas_longitudinais}</SelectItem>
+                  <SelectItem value="inscricoes">📝 {TIPO_ELEMENTO_LABELS.inscricoes}</SelectItem>
+                  <SelectItem value="tachas">⚪ {TIPO_ELEMENTO_LABELS.tachas}</SelectItem>
+                  <SelectItem value="cilindros">🔵 {TIPO_ELEMENTO_LABELS.cilindros}</SelectItem>
+                </>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
       )}
 
-      {/* Dropdown de Subtipo para SH */}
-      {grupoFiltro === 'sh' && (
-        <Card className="mb-4">
-          <CardContent className="pt-4">
-            <Select value={subtipoSH} onValueChange={setSubtipoSH}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="marcas_longitudinais">➖ Marcas Longitudinais</SelectItem>
-                <SelectItem value="inscricoes">📝 Inscrições</SelectItem>
-                <SelectItem value="tachas">⚪ Tachas</SelectItem>
-                <SelectItem value="cilindros">🔵 Cilindros</SelectItem>
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
+      {/* Mini Cards de Estatísticas - Grid 2x2 para mobile */}
+      {grupoFiltro !== 'todos' && statsAtual && (
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription className="text-xs">Total</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{statsAtual.total_elementos}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription className="text-xs">⚪ Originais</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{statsAtual.originais}</div>
+              <p className="text-xs text-muted-foreground">
+                {((statsAtual.originais / statsAtual.total_elementos) * 100).toFixed(1)}%
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription className="text-xs">🟡 Manutenção</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{statsAtual.manutencao_pre_projeto}</div>
+              <p className="text-xs text-muted-foreground">
+                {((statsAtual.manutencao_pre_projeto / statsAtual.total_elementos) * 100).toFixed(1)}%
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription className="text-xs">🟢 Execução</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{statsAtual.execucao_projeto}</div>
+              <p className="text-xs text-muted-foreground">
+                {((statsAtual.execucao_projeto / statsAtual.total_elementos) * 100).toFixed(1)}%
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Lista de Necessidades */}
