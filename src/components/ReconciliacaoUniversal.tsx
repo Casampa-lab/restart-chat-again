@@ -259,15 +259,22 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
       if (!necessidades) throw new Error("Necessidades não encontradas");
 
       // Preparar updates - SEMPRE usa decisão do projeto
-      const updates = necessidades.map((nec: any) => ({
+    const updates = necessidades.map((nec: any) => {
+      // Validar se solucao_planilha é um valor válido (não é null, undefined ou "-")
+      const decisaoProjeto = (nec.solucao_planilha && nec.solucao_planilha !== '-') 
+        ? nec.solucao_planilha 
+        : nec.servico;
+      
+      return {
         id: nec.id,
-        servico_final: nec.solucao_planilha || nec.servico,
-        servico: nec.solucao_planilha || nec.servico,
+        servico_final: decisaoProjeto,
+        servico: decisaoProjeto,
         reconciliado: true,
         reconciliado_por: user?.id,
         data_reconciliacao: new Date().toISOString(),
         justificativa_reconciliacao: justificativa || "Reconciliação em lote - Decisão do Projeto",
-      }));
+      };
+    });
 
       // Executar em paralelo
       const promises = updates.map(update => 
