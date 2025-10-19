@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload, FileArchive, CheckCircle, XCircle, Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,9 +29,9 @@ export function SnvShapefileUploader() {
   const [activeMetadata, setActiveMetadata] = useState<SnvMetadata | null>(null);
 
   // Carregar metadados da camada ativa
-  useState(() => {
+  useEffect(() => {
     loadActiveMetadata();
-  });
+  }, []);
 
   const loadActiveMetadata = async () => {
     const { data } = await supabase
