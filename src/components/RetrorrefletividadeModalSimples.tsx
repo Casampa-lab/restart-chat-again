@@ -14,7 +14,13 @@ interface RetrorrefletividadeModalSimplesProps {
   loteId: string;
   rodoviaId: string;
   kmReferencia?: string;
-  onComplete: (resultado: { media: number; medicoes: number[] }) => void;
+  onComplete: (resultado: { 
+    media: number; 
+    medicoes: number[];
+    latitude: number | null;
+    longitude: number | null;
+    observacao: string;
+  }) => void;
 }
 
 const LABELS_CAMPO = {
@@ -98,7 +104,13 @@ export function RetrorrefletividadeModalSimples({
       return;
     }
 
-    onComplete({ media, medicoes });
+    onComplete({ 
+      media, 
+      medicoes,
+      latitude,
+      longitude,
+      observacao 
+    });
   };
 
   return (
@@ -208,7 +220,7 @@ export function RetrorrefletividadeModalSimples({
 
       {/* Botões */}
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={() => onComplete({ media: 0, medicoes: [] })}>
+        <Button type="button" variant="outline" onClick={() => onComplete({ media: 0, medicoes: [], latitude: null, longitude: null, observacao: '' })}>
           Cancelar
         </Button>
         <Button type="button" onClick={handleConfirmar}>

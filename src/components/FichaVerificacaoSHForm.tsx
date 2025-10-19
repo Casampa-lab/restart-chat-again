@@ -32,14 +32,20 @@ interface ItemSH {
   retro_bd_medicoes?: number[];
   retro_bd_conforme: boolean;
   retro_bd_obs: string;
+  retro_bd_gps_lat?: number;
+  retro_bd_gps_lng?: number;
   retro_e: string;
   retro_e_medicoes?: number[];
   retro_e_conforme: boolean;
   retro_e_obs: string;
+  retro_e_gps_lat?: number;
+  retro_e_gps_lng?: number;
   retro_be: string;
   retro_be_medicoes?: number[];
   retro_be_conforme: boolean;
   retro_be_obs: string;
+  retro_be_gps_lat?: number;
+  retro_be_gps_lng?: number;
   marcas: string;
   marcas_conforme: boolean;
   marcas_obs: string;
@@ -212,14 +218,20 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
             retro_bd_medicoes: item.retro_bd_medicoes || null,
             retro_bd_conforme: item.retro_bd_conforme,
             retro_bd_obs: item.retro_bd_obs || null,
+            retro_bd_gps_lat: item.retro_bd_gps_lat || null,
+            retro_bd_gps_lng: item.retro_bd_gps_lng || null,
             retro_e: item.retro_e ? parseFloat(item.retro_e) : null,
             retro_e_medicoes: item.retro_e_medicoes || null,
             retro_e_conforme: item.retro_e_conforme,
             retro_e_obs: item.retro_e_obs || null,
+            retro_e_gps_lat: item.retro_e_gps_lat || null,
+            retro_e_gps_lng: item.retro_e_gps_lng || null,
             retro_be: item.retro_be ? parseFloat(item.retro_be) : null,
             retro_be_medicoes: item.retro_be_medicoes || null,
             retro_be_conforme: item.retro_be_conforme,
             retro_be_obs: item.retro_be_obs || null,
+            retro_be_gps_lat: item.retro_be_gps_lat || null,
+            retro_be_gps_lng: item.retro_be_gps_lng || null,
             marcas: item.marcas || null,
             marcas_conforme: item.marcas_conforme,
             marcas_obs: item.marcas_obs || null,
@@ -425,15 +437,6 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                       />
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCaptureItemLocation(index)}
-                  >
-                    <MapPin className="mr-2 h-4 w-4" />
-                    Capturar Localização
-                  </Button>
 
                   {/* Largura */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
@@ -740,6 +743,11 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                 const newItens = [...itens];
                 newItens[retroModalContext.itemIndex][retroModalContext.campo] = resultado.media.toFixed(1);
                 newItens[retroModalContext.itemIndex][`${retroModalContext.campo}_medicoes`] = resultado.medicoes;
+                newItens[retroModalContext.itemIndex][`${retroModalContext.campo}_obs`] = resultado.observacao;
+                if (resultado.latitude && resultado.longitude) {
+                  newItens[retroModalContext.itemIndex][`${retroModalContext.campo}_gps_lat`] = resultado.latitude;
+                  newItens[retroModalContext.itemIndex][`${retroModalContext.campo}_gps_lng`] = resultado.longitude;
+                }
                 setItens(newItens);
                 setRetroModalOpen(false);
                 setRetroModalContext(null);

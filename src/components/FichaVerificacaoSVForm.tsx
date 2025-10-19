@@ -45,6 +45,8 @@ interface ItemSV {
   retro_sv_medicoes?: number[];
   retro_sv_conforme: boolean;
   retro_sv_obs: string;
+  retro_sv_gps_lat?: number;
+  retro_sv_gps_lng?: number;
   substrato: string;
   substrato_conforme: boolean;
   substrato_obs: string;
@@ -233,6 +235,8 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
             retro_sv_medicoes: item.retro_sv_medicoes || null,
             retro_sv_conforme: item.retro_sv_conforme,
             retro_sv_obs: item.retro_sv_obs || null,
+            retro_sv_gps_lat: item.retro_sv_gps_lat || null,
+            retro_sv_gps_lng: item.retro_sv_gps_lng || null,
             substrato: item.substrato || null,
             substrato_conforme: item.substrato_conforme,
             substrato_obs: item.substrato_obs || null,
@@ -437,15 +441,6 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
                       />
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCaptureItemLocation(index)}
-                  >
-                    <MapPin className="mr-2 h-4 w-4" />
-                    Capturar Localização
-                  </Button>
 
                   {/* Altura */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
@@ -806,6 +801,11 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
                 const newItens = [...itens];
                 newItens[retroModalContext.itemIndex].retro_sv = resultado.media.toFixed(1);
                 newItens[retroModalContext.itemIndex].retro_sv_medicoes = resultado.medicoes;
+                newItens[retroModalContext.itemIndex].retro_sv_obs = resultado.observacao;
+                if (resultado.latitude && resultado.longitude) {
+                  newItens[retroModalContext.itemIndex].retro_sv_gps_lat = resultado.latitude;
+                  newItens[retroModalContext.itemIndex].retro_sv_gps_lng = resultado.longitude;
+                }
                 setItens(newItens);
                 setRetroModalOpen(false);
                 setRetroModalContext(null);
