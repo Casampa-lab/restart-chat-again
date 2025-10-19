@@ -52,53 +52,54 @@ const IntervencoesInscricoesContent = () => {
   const [rodovias, setRodovias] = useState<Record<string, string>>({});
   const [novaIntervencaoOpen, setNovaIntervencaoOpen] = useState(false);
 
-  useEffect(() => {
-    const loadData = async () => {
-      if (!user) return;
-      try {
-        // Buscar TODAS as intervenções do usuário
-        const { data: intervencoesData } = await supabase
-          .from("ficha_inscricoes_intervencoes")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("data_intervencao", { ascending: false });
-        
-        // Para cada intervenção com FK, buscar dados da inscrição
-        const intervencoesFull = await Promise.all(
-          (intervencoesData || []).map(async (int) => {
-            if (int.ficha_inscricoes_id) {
-              const { data: inscricao } = await supabase
-                .from("ficha_inscricoes")
-                .select("id, lote_id, rodovia_id, km_inicial, km_final")
-                .eq("id", int.ficha_inscricoes_id)
-                .single();
-              return { ...int, ficha_inscricoes: inscricao };
-            }
-            return { ...int, ficha_inscricoes: null };
-          })
-        );
-        
-        setIntervencoes(intervencoesFull);
+  const loadData = async () => {
+    if (!user) return;
+    try {
+      // Buscar TODAS as intervenções do usuário
+      const { data: intervencoesData } = await supabase
+        .from("ficha_inscricoes_intervencoes")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("data_intervencao", { ascending: false });
+      
+      // Para cada intervenção com FK, buscar dados da inscrição
+      const intervencoesFull = await Promise.all(
+        (intervencoesData || []).map(async (int) => {
+          if (int.ficha_inscricoes_id) {
+            const { data: inscricao } = await supabase
+              .from("ficha_inscricoes")
+              .select("id, lote_id, rodovia_id, km_inicial, km_final")
+              .eq("id", int.ficha_inscricoes_id)
+              .single();
+            return { ...int, ficha_inscricoes: inscricao };
+          }
+          return { ...int, ficha_inscricoes: null };
+        })
+      );
+      
+      setIntervencoes(intervencoesFull);
 
-        const { data: lotesData } = await supabase.from("lotes").select("id, numero");
-        if (lotesData) {
-          const lotesMap: Record<string, string> = {};
-          lotesData.forEach((lote) => { lotesMap[lote.id] = lote.numero; });
-          setLotes(lotesMap);
-        }
-
-        const { data: rodoviasData } = await supabase.from("rodovias").select("id, codigo");
-        if (rodoviasData) {
-          const rodoviasMap: Record<string, string> = {};
-          rodoviasData.forEach((rodovia) => { rodoviasMap[rodovia.id] = rodovia.codigo; });
-          setRodovias(rodoviasMap);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-      } finally {
-        setLoading(false);
+      const { data: lotesData } = await supabase.from("lotes").select("id, numero");
+      if (lotesData) {
+        const lotesMap: Record<string, string> = {};
+        lotesData.forEach((lote) => { lotesMap[lote.id] = lote.numero; });
+        setLotes(lotesMap);
       }
-    };
+
+      const { data: rodoviasData } = await supabase.from("rodovias").select("id, codigo");
+      if (rodoviasData) {
+        const rodoviasMap: Record<string, string> = {};
+        rodoviasData.forEach((rodovia) => { rodoviasMap[rodovia.id] = rodovia.codigo; });
+        setRodovias(rodoviasMap);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadData();
   }, [user]);
 
@@ -107,9 +108,15 @@ const IntervencoesInscricoesContent = () => {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle>Minhas Intervenções em Inscrições</CardTitle>
-          <CardDescription>Histórico de intervenções em inscrições registradas</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Minhas Intervenções em Inscrições</CardTitle>
+            <CardDescription>Histórico de intervenções em inscrições registradas</CardDescription>
+          </div>
+          <Button onClick={() => setNovaIntervencaoOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Registrar Nova
+          </Button>
         </CardHeader>
         <CardContent>
           {intervencoes.length === 0 ? (
@@ -161,6 +168,20 @@ const IntervencoesInscricoesContent = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={novaIntervencaoOpen} onOpenChange={setNovaIntervencaoOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Registrar Nova Intervenção em Inscrições</DialogTitle>
+          </DialogHeader>
+          <IntervencoesInscricoesForm 
+            onIntervencaoRegistrada={() => {
+              setNovaIntervencaoOpen(false);
+              loadData();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

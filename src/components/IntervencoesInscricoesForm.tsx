@@ -10,7 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, MapPin, Check, PaintBucket } from "lucide-react";
+import { Loader2, MapPin, Check, PaintBucket, Lock, Info } from "lucide-react";
+import { useTipoOrigem } from "@/hooks/useTipoOrigem";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM } from "@/constants/camposEstruturais";
 
 interface IntervencoesInscricoesFormProps {
   inscricaoSelecionada?: {
@@ -175,6 +181,7 @@ const IntervencoesInscricoesForm = ({
           observacao: data.observacao || null,
           fora_plano_manutencao: data.fora_plano_manutencao,
           justificativa_fora_plano: data.justificativa_fora_plano || null,
+          tipo_origem: tipoOrigem,
         });
 
       if (error) throw error;
