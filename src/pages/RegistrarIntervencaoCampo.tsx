@@ -21,6 +21,28 @@ import { IntervencoesCilindrosForm } from '@/components/IntervencoesCilindrosFor
 import { IntervencoesPorticosForm } from '@/components/IntervencoesPorticosForm';
 import { IntervencoesInscricoesForm } from '@/components/IntervencoesInscricoesForm';
 
+// Mapeamento de tipos de elementos para suas tabelas de intervenção
+const TABELAS_INTERVENCAO: Record<string, string> = {
+  'marcas_longitudinais': 'ficha_marcas_longitudinais_intervencoes',
+  'inscricoes': 'ficha_inscricoes_intervencoes',
+  'tachas': 'ficha_tachas_intervencoes',
+  'cilindros': 'ficha_cilindros_intervencoes',
+  'porticos': 'ficha_porticos_intervencoes',
+  'defensas': 'defensas_intervencoes',
+  'placas': 'ficha_placa_intervencoes'
+};
+
+// Mapeamento de tipos de elementos para o campo de FK na tabela de intervenção
+const CAMPOS_FK: Record<string, string> = {
+  'marcas_longitudinais': 'ficha_marcas_longitudinais_id',
+  'inscricoes': 'ficha_inscricoes_id',
+  'tachas': 'ficha_tachas_id',
+  'cilindros': 'ficha_cilindros_id',
+  'porticos': 'ficha_porticos_id',
+  'defensas': 'defensa_id',
+  'placas': 'ficha_placa_id'
+};
+
 const TIPOS_ELEMENTOS = [
   { value: 'cilindros', label: '🔵 Cilindro', component: IntervencoesCilindrosForm },
   { value: 'defensas', label: '🛡️ Defensa', component: DefensasIntervencoesForm },
@@ -105,21 +127,34 @@ export default function RegistrarIntervencaoCampo() {
         if (ncError) throw ncError;
       }
 
-      // Inserir em elementos_pendentes_aprovacao
+      // Salvar diretamente na tabela de intervenções correta
+      const tabelaIntervencao = TABELAS_INTERVENCAO[tipoSelecionado];
+      const campoFK = CAMPOS_FK[tipoSelecionado];
+      
+      if (!tabelaIntervencao) {
+        throw new Error(`Tipo de elemento não mapeado: ${tipoSelecionado}`);
+      }
+
+      // Montar payload base com campos comuns
+      const payloadIntervencao: any = {
+        ...payload,
+        fotos_urls: fotos,
+        latitude: position?.latitude,
+        longitude: position?.longitude,
+        pendente_aprovacao_coordenador: isConforme,
+        aplicado_ao_inventario: false,
+        tipo_origem: 'execucao'
+      };
+
+      // Se houver um elemento selecionado (necessidade vinculada), adicionar FK
+      if (necessidadeProp?.elemento_id) {
+        payloadIntervencao[campoFK] = necessidadeProp.elemento_id;
+      }
+
+      // Inserir na tabela de intervenções específica
       const { error } = await supabase
-        .from('elementos_pendentes_aprovacao')
-        .insert({
-          user_id: user!.id,
-          lote_id: activeSession.lote_id,
-          rodovia_id: activeSession.rodovia_id,
-          tipo_elemento: tipoSelecionado,
-          dados_elemento: payload,
-          justificativa: isConforme 
-            ? 'Intervenção conforme registrada em campo' 
-            : justificativaNC,
-          fotos_urls: fotos,
-          status: isConforme ? 'pendente_aprovacao' : 'rejeitado'
-        });
+        .from(tabelaIntervencao as any)
+        .insert(payloadIntervencao);
 
       if (error) throw error;
 
