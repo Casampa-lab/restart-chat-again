@@ -10,8 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Eye, FileCheck } from "lucide-react";
+import { ArrowLeft, Eye, FileCheck, Download } from "lucide-react";
 import { toast } from "sonner";
+import { exportFichaVerificacaoParaDNIT } from "@/lib/excelExportFichas";
 
 interface FichaComDetalhes {
   id: string;

@@ -30,6 +30,7 @@ interface Ficha {
   contrato: string | null;
   empresa: string | null;
   snv: string | null;
+  status: string;
 }
 
 interface Item {
@@ -131,42 +132,56 @@ export default function MinhasFichasVerificacao() {
               <p className="text-muted-foreground">Nenhuma ficha encontrada.</p>
             ) : (
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Empresa</TableHead>
-                      <TableHead>SNV</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {fichas.map((ficha) => (
-                      <TableRow key={ficha.id}>
-                        <TableCell>
-                          <Badge variant={ficha.tipo === "Sinalização Horizontal" ? "default" : "secondary"}>
-                            {ficha.tipo}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(ficha.data_verificacao).toLocaleDateString('pt-BR')}
-                        </TableCell>
-                        <TableCell>{ficha.empresa || "-"}</TableCell>
-                        <TableCell>{ficha.snv || "-"}</TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleViewDetails(ficha)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tipo</TableHead>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Empresa</TableHead>
+                        <TableHead>SNV</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Ações</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {fichas.map((ficha) => (
+                        <TableRow key={ficha.id}>
+                          <TableCell>
+                            <Badge variant={ficha.tipo === "Sinalização Horizontal" ? "default" : "secondary"}>
+                              {ficha.tipo}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(ficha.data_verificacao).toLocaleDateString('pt-BR')}
+                          </TableCell>
+                          <TableCell>{ficha.empresa || "-"}</TableCell>
+                          <TableCell>{ficha.snv || "-"}</TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              ficha.status === 'rascunho' || !ficha.status ? 'outline' :
+                              ficha.status === 'pendente_aprovacao_coordenador' ? 'secondary' :
+                              ficha.status === 'aprovado' ? 'default' :
+                              'destructive'
+                            }>
+                              {ficha.status === 'rascunho' || !ficha.status ? 'Rascunho' :
+                               ficha.status === 'pendente_aprovacao_coordenador' ? 'Pendente' :
+                               ficha.status === 'aprovado' ? 'Aprovado' :
+                               'Rejeitado'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleViewDetails(ficha)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
               </div>
             )}
           </CardContent>
@@ -231,18 +246,24 @@ export default function MinhasFichasVerificacao() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
                             {Object.entries(item)
                               .filter(([key]) => !['ordem', 'foto_url', 'latitude', 'longitude', 'sentido', 'km', 'ficha_id', 'id', 'created_at'].includes(key))
+                              .filter(([key]) => !key.endsWith('_medicoes')) // Não exibir arrays de medições
                               .filter(([_, value]) => value !== null && value !== undefined && value !== '')
                               .map(([key, value]) => {
                                 if (key.endsWith('_conforme')) return null;
                                 if (key.endsWith('_obs') && !value) return null;
                                 
+                                // Para campos de retrorefletividade, mostrar apenas a média
+                                const isRetro = key.startsWith('retro_');
                                 const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                                 const conforme = item[`${key}_conforme`];
                                 
                                 return (
                                   <div key={key} className="border-l-2 border-primary pl-2">
                                     <p className="font-semibold">{label}:</p>
-                                    <p>{typeof value === 'boolean' ? (value ? 'Sim' : 'Não') : value}</p>
+                                    <p className={isRetro ? "text-lg font-bold text-primary" : ""}>
+                                      {typeof value === 'boolean' ? (value ? 'Sim' : 'Não') : value}
+                                      {isRetro && ' mcd/lux'}
+                                    </p>
                                     {conforme !== undefined && (
                                       <Badge variant={conforme ? "default" : "destructive"} className="mt-1">
                                         {conforme ? "Conforme" : "Não conforme"}

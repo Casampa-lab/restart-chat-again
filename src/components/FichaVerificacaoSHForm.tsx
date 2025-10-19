@@ -5,10 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Camera, X, MapPin } from "lucide-react";
 import { extractDateFromPhotos } from "@/lib/photoMetadata";
+import { RetrorrefletividadeModalSimples } from "./RetrorrefletividadeModalSimples";
 
 interface FichaVerificacaoSHFormProps {
   loteId: string;
@@ -27,12 +29,15 @@ interface ItemSH {
   largura_conforme: boolean;
   largura_obs: string;
   retro_bd: string;
+  retro_bd_medicoes?: number[];
   retro_bd_conforme: boolean;
   retro_bd_obs: string;
   retro_e: string;
+  retro_e_medicoes?: number[];
   retro_e_conforme: boolean;
   retro_e_obs: string;
   retro_be: string;
+  retro_be_medicoes?: number[];
   retro_be_conforme: boolean;
   retro_be_obs: string;
   marcas: string;
@@ -72,6 +77,13 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
   const [dataVerificacao, setDataVerificacao] = useState('');
   const [itens, setItens] = useState<ItemSH[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [fichaIdCriada, setFichaIdCriada] = useState<string | null>(null);
+  const [enviandoCoordenador, setEnviandoCoordenador] = useState(false);
+  const [retroModalOpen, setRetroModalOpen] = useState(false);
+  const [retroModalContext, setRetroModalContext] = useState<{
+    itemIndex: number;
+    campo: 'retro_bd' | 'retro_e' | 'retro_be';
+  } | null>(null);
 
   const handleAddItem = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -201,12 +213,15 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
             largura_conforme: item.largura_conforme,
             largura_obs: item.largura_obs || null,
             retro_bd: item.retro_bd ? parseFloat(item.retro_bd) : null,
+            retro_bd_medicoes: item.retro_bd_medicoes || null,
             retro_bd_conforme: item.retro_bd_conforme,
             retro_bd_obs: item.retro_bd_obs || null,
             retro_e: item.retro_e ? parseFloat(item.retro_e) : null,
+            retro_e_medicoes: item.retro_e_medicoes || null,
             retro_e_conforme: item.retro_e_conforme,
             retro_e_obs: item.retro_e_obs || null,
             retro_be: item.retro_be ? parseFloat(item.retro_be) : null,
+            retro_be_medicoes: item.retro_be_medicoes || null,
             retro_be_conforme: item.retro_be_conforme,
             retro_be_obs: item.retro_be_obs || null,
             marcas: item.marcas || null,
@@ -230,23 +245,47 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
       }
 
       toast.success("Ficha de verificação criada com sucesso!");
-      
-      // Reset form
-      setContrato("");
-      setEmpresa("");
-      setSnv("");
-      setDataVerificacao(new Date().toISOString().split('T')[0]);
-      itens.forEach(i => URL.revokeObjectURL(i.preview));
-      setItens([]);
-
-      // Call onSuccess callback
-      if (onSuccess) {
-        onSuccess();
-      }
+      setFichaIdCriada(ficha.id);
+      // NÃO limpar formulário ainda - aguardar decisão do usuário
     } catch (error: any) {
       toast.error("Erro ao criar ficha: " + error.message);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleLimparFormulario = () => {
+    setFichaIdCriada(null);
+    setContrato("");
+    setEmpresa("");
+    setSnv("");
+    setDataVerificacao('');
+    itens.forEach(i => URL.revokeObjectURL(i.preview));
+    setItens([]);
+    if (onSuccess) onSuccess();
+  };
+
+  const handleEnviarCoordenador = async () => {
+    if (!fichaIdCriada) return;
+    
+    setEnviandoCoordenador(true);
+    try {
+      const { error } = await supabase
+        .from('ficha_verificacao')
+        .update({
+          status: 'pendente_aprovacao_coordenador',
+          enviado_coordenador_em: new Date().toISOString()
+        })
+        .eq('id', fichaIdCriada);
+
+      if (error) throw error;
+
+      toast.success('Ficha enviada para validação do coordenador!');
+      handleLimparFormulario();
+    } catch (error: any) {
+      toast.error('Erro ao enviar: ' + error.message);
+    } finally {
+      setEnviandoCoordenador(false);
     }
   };
 
@@ -282,6 +321,38 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
           </div>
         </CardContent>
       </Card>
+
+      {/* Card de confirmação após criar ficha */}
+      {fichaIdCriada && (
+        <Card className="border-primary">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">Ficha criada com sucesso!</p>
+                <p className="text-sm text-muted-foreground">
+                  Deseja enviar para validação do coordenador?
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleLimparFormulario}
+                >
+                  Continuar Editando
+                </Button>
+                <Button
+                  type="button"
+                  disabled={enviandoCoordenador}
+                  onClick={handleEnviarCoordenador}
+                >
+                  {enviandoCoordenador ? 'Enviando...' : 'Enviar para Coordenador'}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -409,12 +480,27 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
                     <div>
                       <Label>Retro BD (mcd/lux)</Label>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        value={item.retro_bd}
-                        onChange={(e) => handleUpdateItem(index, 'retro_bd', e.target.value)}
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={item.retro_bd}
+                          readOnly
+                          placeholder="Clique em Medir"
+                          className="cursor-not-allowed bg-muted"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setRetroModalContext({ itemIndex: index, campo: 'retro_bd' });
+                            setRetroModalOpen(true);
+                          }}
+                        >
+                          📊 Medir
+                        </Button>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox
@@ -436,12 +522,27 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
                     <div>
                       <Label>Retro E (mcd/lux)</Label>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        value={item.retro_e}
-                        onChange={(e) => handleUpdateItem(index, 'retro_e', e.target.value)}
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={item.retro_e}
+                          readOnly
+                          placeholder="Clique em Medir"
+                          className="cursor-not-allowed bg-muted"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setRetroModalContext({ itemIndex: index, campo: 'retro_e' });
+                            setRetroModalOpen(true);
+                          }}
+                        >
+                          📊 Medir
+                        </Button>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox
@@ -463,12 +564,27 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
                     <div>
                       <Label>Retro BE (mcd/lux)</Label>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        value={item.retro_be}
-                        onChange={(e) => handleUpdateItem(index, 'retro_be', e.target.value)}
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={item.retro_be}
+                          readOnly
+                          placeholder="Clique em Medir"
+                          className="cursor-not-allowed bg-muted"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setRetroModalContext({ itemIndex: index, campo: 'retro_be' });
+                            setRetroModalOpen(true);
+                          }}
+                        >
+                          📊 Medir
+                        </Button>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox
@@ -614,9 +730,39 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
         </CardContent>
       </Card>
 
-      <Button type="submit" className="w-full" disabled={uploading}>
+      <Button type="submit" className="w-full" disabled={uploading || !!fichaIdCriada}>
         {uploading ? "Salvando..." : "Salvar Ficha"}
       </Button>
+
+      {/* Modal de Retrorefletividade */}
+      <Dialog open={retroModalOpen} onOpenChange={setRetroModalOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Medição de Retrorefletividade - Ponto {retroModalContext ? retroModalContext.itemIndex + 1 : ''} 
+              {retroModalContext && ` - ${retroModalContext.campo.toUpperCase().replace('_', ' ')}`}
+            </DialogTitle>
+          </DialogHeader>
+          {retroModalContext && (
+            <RetrorrefletividadeModalSimples
+              tipo="SH"
+              campo={retroModalContext.campo}
+              loteId={loteId}
+              rodoviaId={rodoviaId}
+              kmReferencia={itens[retroModalContext.itemIndex]?.km}
+              onComplete={(resultado) => {
+                const newItens = [...itens];
+                newItens[retroModalContext.itemIndex][retroModalContext.campo] = resultado.media.toFixed(1);
+                newItens[retroModalContext.itemIndex][`${retroModalContext.campo}_medicoes`] = resultado.medicoes;
+                setItens(newItens);
+                setRetroModalOpen(false);
+                setRetroModalContext(null);
+                toast.success(`${retroModalContext.campo.toUpperCase().replace('_', ' ')}: ${resultado.media.toFixed(1)} mcd/lux (média de ${resultado.medicoes.filter(m => m > 0).length} leituras)`);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </form>
   );
 }

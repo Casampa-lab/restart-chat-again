@@ -5,11 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Camera, X, MapPin } from "lucide-react";
 import { TODAS_PLACAS } from "@/constants/codigosPlacas";
 import { extractDateFromPhotos } from "@/lib/photoMetadata";
+import { RetrorrefletividadeModalSimples } from "./RetrorrefletividadeModalSimples";
 
 interface FichaVerificacaoSVFormProps {
   loteId: string;
@@ -40,6 +42,7 @@ interface ItemSV {
   data_imp_verso_conforme: boolean;
   data_imp_verso_obs: string;
   retro_sv: string;
+  retro_sv_medicoes?: number[];
   retro_sv_conforme: boolean;
   retro_sv_obs: string;
   substrato: string;
@@ -85,6 +88,13 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
   const [dataVerificacao, setDataVerificacao] = useState('');
   const [itens, setItens] = useState<ItemSV[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [fichaIdCriada, setFichaIdCriada] = useState<string | null>(null);
+  const [enviandoCoordenador, setEnviandoCoordenador] = useState(false);
+  const [retroModalOpen, setRetroModalOpen] = useState(false);
+  const [retroModalContext, setRetroModalContext] = useState<{
+    itemIndex: number;
+    campo: 'retro_sv';
+  } | null>(null);
 
   const handleAddItem = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -224,6 +234,7 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
             data_imp_verso_conforme: item.data_imp_verso_conforme,
             data_imp_verso_obs: item.data_imp_verso_obs || null,
             retro_sv: item.retro_sv ? parseFloat(item.retro_sv) : null,
+            retro_sv_medicoes: item.retro_sv_medicoes || null,
             retro_sv_conforme: item.retro_sv_conforme,
             retro_sv_obs: item.retro_sv_obs || null,
             substrato: item.substrato || null,
@@ -250,22 +261,47 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
       }
 
       toast.success("Ficha de verificação criada com sucesso!");
-      
-      setContrato("");
-      setEmpresa("");
-      setSnv("");
-      setDataVerificacao(new Date().toISOString().split('T')[0]);
-      itens.forEach(i => URL.revokeObjectURL(i.preview));
-      setItens([]);
-
-      // Call onSuccess callback
-      if (onSuccess) {
-        onSuccess();
-      }
+      setFichaIdCriada(ficha.id);
+      // NÃO limpar formulário ainda - aguardar decisão do usuário
     } catch (error: any) {
       toast.error("Erro ao criar ficha: " + error.message);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleLimparFormulario = () => {
+    setFichaIdCriada(null);
+    setContrato("");
+    setEmpresa("");
+    setSnv("");
+    setDataVerificacao('');
+    itens.forEach(i => URL.revokeObjectURL(i.preview));
+    setItens([]);
+    if (onSuccess) onSuccess();
+  };
+
+  const handleEnviarCoordenador = async () => {
+    if (!fichaIdCriada) return;
+    
+    setEnviandoCoordenador(true);
+    try {
+      const { error } = await supabase
+        .from('ficha_verificacao')
+        .update({
+          status: 'pendente_aprovacao_coordenador',
+          enviado_coordenador_em: new Date().toISOString()
+        })
+        .eq('id', fichaIdCriada);
+
+      if (error) throw error;
+
+      toast.success('Ficha enviada para validação do coordenador!');
+      handleLimparFormulario();
+    } catch (error: any) {
+      toast.error('Erro ao enviar: ' + error.message);
+    } finally {
+      setEnviandoCoordenador(false);
     }
   };
 
@@ -301,6 +337,38 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
           </div>
         </CardContent>
       </Card>
+
+      {/* Card de confirmação após criar ficha */}
+      {fichaIdCriada && (
+        <Card className="border-primary">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">Ficha criada com sucesso!</p>
+                <p className="text-sm text-muted-foreground">
+                  Deseja enviar para validação do coordenador?
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleLimparFormulario}
+                >
+                  Continuar Editando
+                </Button>
+                <Button
+                  type="button"
+                  disabled={enviandoCoordenador}
+                  onClick={handleEnviarCoordenador}
+                >
+                  {enviandoCoordenador ? 'Enviando...' : 'Enviar para Coordenador'}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -528,12 +596,27 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
                     <div>
                       <Label>Retro (cd/lux/m²)</Label>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        value={item.retro_sv}
-                        onChange={(e) => handleUpdateItem(index, 'retro_sv', e.target.value)}
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={item.retro_sv}
+                          readOnly
+                          placeholder="Clique em Medir"
+                          className="cursor-not-allowed bg-muted"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setRetroModalContext({ itemIndex: index, campo: 'retro_sv' });
+                            setRetroModalOpen(true);
+                          }}
+                        >
+                          📊 Medir
+                        </Button>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox
@@ -714,9 +797,38 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
         </CardContent>
       </Card>
 
-      <Button type="submit" className="w-full" disabled={uploading}>
+      <Button type="submit" className="w-full" disabled={uploading || !!fichaIdCriada}>
         {uploading ? "Salvando..." : "Salvar Ficha"}
       </Button>
+
+      {/* Modal de Retrorefletividade */}
+      <Dialog open={retroModalOpen} onOpenChange={setRetroModalOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Medição de Retrorefletividade SV - Ponto {retroModalContext ? retroModalContext.itemIndex + 1 : ''}
+            </DialogTitle>
+          </DialogHeader>
+          {retroModalContext && (
+            <RetrorrefletividadeModalSimples
+              tipo="SV"
+              campo="retro_sv"
+              loteId={loteId}
+              rodoviaId={rodoviaId}
+              kmReferencia={itens[retroModalContext.itemIndex]?.km}
+              onComplete={(resultado) => {
+                const newItens = [...itens];
+                newItens[retroModalContext.itemIndex].retro_sv = resultado.media.toFixed(1);
+                newItens[retroModalContext.itemIndex].retro_sv_medicoes = resultado.medicoes;
+                setItens(newItens);
+                setRetroModalOpen(false);
+                setRetroModalContext(null);
+                toast.success(`Retro SV: ${resultado.media.toFixed(1)} cd/lux/m² (média de ${resultado.medicoes.filter(m => m > 0).length} leituras)`);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </form>
   );
 }
