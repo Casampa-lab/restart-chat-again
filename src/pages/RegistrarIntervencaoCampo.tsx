@@ -87,16 +87,19 @@ export default function RegistrarIntervencaoCampo() {
       // Se não conforme, criar NC
       if (!isConforme) {
         const { error: ncError } = await supabase
-          .from('registro_nc' as any)
+          .from('nao_conformidades')
           .insert({
             user_id: user!.id,
             lote_id: activeSession.lote_id,
             rodovia_id: activeSession.rodovia_id,
+            data_ocorrencia: new Date().toISOString().split('T')[0],
             tipo_nc: 'Não Conformidade de Intervenção',
-            descricao: justificativaNC,
+            descricao_problema: justificativaNC,
+            empresa: activeSession.lote?.empresa?.nome || 'Não especificada',
             latitude: position?.latitude,
             longitude: position?.longitude,
-            status: 'pendente',
+            status_aprovacao: 'pendente',
+            deleted: false
           } as any);
 
         if (ncError) throw ncError;
