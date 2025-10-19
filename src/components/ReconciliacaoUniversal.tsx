@@ -210,7 +210,9 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
     if (!selectedNecessidade || !decisao) return;
 
     const servicoFinal = decisao === "projeto" 
-      ? (selectedNecessidade.solucao_planilha || selectedNecessidade.servico)
+      ? (selectedNecessidade.solucao_planilha && selectedNecessidade.solucao_planilha !== '-'
+          ? selectedNecessidade.solucao_planilha 
+          : selectedNecessidade.servico)
       : selectedNecessidade.servico_inferido;
 
     if (decisao === "inferencia" && !justificativa.trim()) {
