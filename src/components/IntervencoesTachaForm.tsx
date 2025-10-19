@@ -10,6 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info, Lock } from "lucide-react";
+import { useTipoOrigem } from "@/hooks/useTipoOrigem";
+import { LABELS_TIPO_ORIGEM } from "@/constants/camposEstruturais";
+import { Badge } from "@/components/ui/badge";
 import { Loader2, MapPin, Check, Wrench } from "lucide-react";
 
 interface IntervencoesTachaFormProps {

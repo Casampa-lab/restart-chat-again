@@ -84,6 +84,7 @@ const IntervencoesInscricoesForm = ({
   loteId,
   rodoviaId
 }: IntervencoesInscricoesFormProps) => {
+  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoPreProjeto } = useTipoOrigem('inscricoes');
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -200,6 +201,27 @@ const IntervencoesInscricoesForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-6 p-4 bg-muted rounded-lg space-y-3">
+          <Label className="text-base font-semibold">Tipo de Intervenção</Label>
+          <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="manutencao_pre_projeto" id="pre-insc" />
+              <Label htmlFor="pre-insc" className="flex items-center gap-2 cursor-pointer font-normal">
+                🟡 {LABELS_TIPO_ORIGEM.manutencao_pre_projeto}
+                <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="execucao" id="exec-insc" />
+              <Label htmlFor="exec-insc" className="cursor-pointer font-normal">
+                🟢 {LABELS_TIPO_ORIGEM.execucao}
+              </Label>
+            </div>
+          </RadioGroup>
+          {isManutencaoPreProjeto && (
+            <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
+          )}
+        </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
@@ -322,18 +344,25 @@ const IntervencoesInscricoesForm = ({
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="tipo_inscricao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de Inscrição</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o tipo" />
-                          </SelectTrigger>
-                        </FormControl>
+              <FormField
+                control={form.control}
+                name="tipo_inscricao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      Tipo de Inscrição
+                      {isCampoEstruturalBloqueado('tipo_inscricao') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                    </FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value}
+                      disabled={isCampoEstruturalBloqueado('tipo_inscricao')}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                      </FormControl>
                         <SelectContent>
                           {TIPOS_INSCRICAO.map((tipo) => (
                             <SelectItem key={tipo} value={tipo}>
@@ -347,18 +376,25 @@ const IntervencoesInscricoesForm = ({
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="cor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cor</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione a cor" />
-                          </SelectTrigger>
-                        </FormControl>
+              <FormField
+                control={form.control}
+                name="cor"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      Cor
+                      {isCampoEstruturalBloqueado('cor') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                    </FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value}
+                      disabled={isCampoEstruturalBloqueado('cor')}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a cor" />
+                        </SelectTrigger>
+                      </FormControl>
                         <SelectContent>
                           {CORES.map((cor) => (
                             <SelectItem key={cor} value={cor}>
