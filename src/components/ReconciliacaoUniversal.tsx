@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { WorkSession } from "@/hooks/useWorkSession";
+import { MarcoZeroDialog } from "./MarcoZeroDialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -851,6 +852,16 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modal Marco Zero */}
+      {activeSession && user && (
+        <MarcoZeroDialog
+          loteId={activeSession.lote_id}
+          rodoviaId={activeSession.rodovia_id}
+          totalPendentes={estatisticasGerais?.totais.pendentes || 0}
+          userId={user.id}
+        />
+      )}
     </div>
   );
 }

@@ -3224,6 +3224,58 @@ export type Database = {
           },
         ]
       }
+      marcos_inventario: {
+        Row: {
+          created_at: string
+          criado_por: string
+          data_marco: string
+          id: string
+          lote_id: string
+          rodovia_id: string
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          criado_por: string
+          data_marco?: string
+          id?: string
+          lote_id: string
+          rodovia_id: string
+          tipo?: string
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string
+          data_marco?: string
+          id?: string
+          lote_id?: string
+          rodovia_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marcos_inventario_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marcos_inventario_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marcos_inventario_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modulos: {
         Row: {
           ativo: boolean | null
