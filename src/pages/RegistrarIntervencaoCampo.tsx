@@ -161,6 +161,15 @@ export default function RegistrarIntervencaoCampo() {
         tipo_origem: 'execucao'
       };
 
+      // Converter strings vazias para null em campos numéricos
+      Object.keys(payloadIntervencao).forEach(key => {
+        if (payloadIntervencao[key] === "" && 
+            (key.includes("km") || key.includes("_m") || key.includes("quantidade") || 
+             key.includes("area") || key.includes("extensao") || key.includes("espacamento"))) {
+          payloadIntervencao[key] = null;
+        }
+      });
+
       // Se houver um elemento selecionado (necessidade vinculada), adicionar FK
       if (necessidadeProp?.elemento_id) {
         payloadIntervencao[campoFK] = necessidadeProp.elemento_id;
