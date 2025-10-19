@@ -408,6 +408,15 @@ export function InventarioMarcasLongitudinaisViewer({
                       </TableHead>
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("posicao")}
+                      >
+                        <div className="flex items-center">
+                          Posição
+                          <SortIcon column="posicao" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("cor")}
                       >
                         <div className="flex items-center">
@@ -474,6 +483,11 @@ export function InventarioMarcasLongitudinaisViewer({
                           <TableCell>
                             <Badge variant="outline">
                               {marca.tipo_demarcacao || "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="text-xs">
+                              {marca.posicao || "-"}
                             </Badge>
                           </TableCell>
                           <TableCell>{marca.cor || "-"}</TableCell>
