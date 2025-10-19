@@ -76,6 +76,7 @@ export function ReconciliacaoDrawerUniversal({
             servico_final: "Substituir",
             servico: "Substituir",
             localizado_em_campo: true,
+            reconciliado: true,
           })
           .eq("id", necessidade.id);
 
@@ -149,6 +150,7 @@ export function ReconciliacaoDrawerUniversal({
         .update({
           servico_final: 'Implantar',
           servico: 'Implantar',
+          reconciliado: true,
         })
         .eq("id", necessidade.id);
 
