@@ -11,7 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Camera, X, MapPin, Info } from "lucide-react";
-import { extractDateFromPhotos } from "@/lib/photoMetadata";
+import { extractDateFromPhotos, extractGPSFromPhoto, getCurrentGPS } from "@/lib/photoMetadata";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { RetrorrefletividadeModalSimples } from "./RetrorrefletividadeModalSimples";
 
 interface FichaVerificacaoSHFormProps {
@@ -101,14 +108,36 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
     }
 
     const preview = URL.createObjectURL(file);
-    setItens([...itens, { file, preview, ...createEmptyItem() }]);
+    const novoItem = { file, preview, ...createEmptyItem() };
+    
+    // ✅ CAPTURA AUTOMÁTICA DE GPS (Opção 3: Híbrida)
+    toast.info("📍 Capturando coordenadas GPS...");
+    
+    // Tentar extrair GPS da foto (EXIF)
+    let gpsData = await extractGPSFromPhoto(file);
+    
+    // Se não tiver GPS na foto, usar geolocalização do dispositivo
+    if (!gpsData) {
+      console.log("GPS não encontrado na foto, tentando geolocalização do dispositivo...");
+      gpsData = await getCurrentGPS();
+    }
+    
+    if (gpsData) {
+      novoItem.latitude = gpsData.latitude.toFixed(6);
+      novoItem.longitude = gpsData.longitude.toFixed(6);
+      toast.success(`✅ GPS capturado: ${gpsData.latitude.toFixed(6)}, ${gpsData.longitude.toFixed(6)}`);
+    } else {
+      toast.warning("⚠️ Não foi possível capturar GPS automaticamente. Preencha manualmente se necessário.");
+    }
+    
+    setItens([...itens, novoItem]);
     
     // Se é o primeiro item com foto, extrair data e atualizar data de verificação
     if (itens.length === 0) {
       const photoDate = await extractDateFromPhotos(file);
       if (photoDate) {
         setDataVerificacao(photoDate);
-        toast.success(`Data de verificação atualizada: ${photoDate}`);
+        toast.success(`📅 Data de verificação atualizada: ${photoDate}`);
       }
     }
   };
@@ -455,11 +484,18 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                     </div>
                     <div>
                       <Label>Sentido</Label>
-                      <Input
+                      <Select
                         value={item.sentido}
-                        onChange={(e) => handleUpdateItem(index, 'sentido', e.target.value)}
-                        placeholder="Sentido"
-                      />
+                        onValueChange={(value) => handleUpdateItem(index, 'sentido', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o sentido" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Crescente">Crescente</SelectItem>
+                          <SelectItem value="Decrescente">Decrescente</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
                       <Label>km</Label>
@@ -474,7 +510,7 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   </div>
 
                   {/* Largura */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
                       <Label>Largura (cm)</Label>
                       <Input
@@ -501,7 +537,7 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   </div>
 
                   {/* Retro BD */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
                       <Label>Retro BD (mcd/lux)</Label>
                       <div className="flex gap-2">
@@ -543,7 +579,7 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   </div>
 
                   {/* Retro E */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
                       <Label>Retro E (mcd/lux)</Label>
                       <div className="flex gap-2">
@@ -585,7 +621,7 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   </div>
 
                   {/* Retro BE */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
                       <Label>Retro BE (mcd/lux)</Label>
                       <div className="flex gap-2">
@@ -627,7 +663,7 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                   </div>
 
                   {/* Outros campos de forma similar */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
                       <Label>Marcas</Label>
                       <Input
@@ -651,7 +687,7 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
                       <Label>Material</Label>
                       <Input
@@ -675,7 +711,7 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
                       <Label>Tachas</Label>
                       <Input
@@ -699,7 +735,7 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
                       <Label>Data de Implantação</Label>
                       <Input
@@ -724,7 +760,7 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
                     <div>
                       <Label>Velocidade</Label>
                       <Input
