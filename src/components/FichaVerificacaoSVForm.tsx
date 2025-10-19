@@ -206,6 +206,24 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
       return;
     }
 
+    // Validação obrigatória de coordenadas GPS
+    const itensSemGPS = itens.filter((item, index) => 
+      !item.latitude || !item.longitude || item.latitude === "" || item.longitude === ""
+    );
+    
+    if (itensSemGPS.length > 0) {
+      const indices = itens
+        .map((item, idx) => (!item.latitude || !item.longitude || item.latitude === "" || item.longitude === "") ? idx + 1 : null)
+        .filter(idx => idx !== null);
+      
+      toast.error(
+        `⚠️ Coordenadas GPS obrigatórias!\n\n` +
+        `Os seguintes pontos não possuem GPS capturado: ${indices.join(', ')}\n\n` +
+        `Capture as coordenadas antes de enviar.`
+      );
+      return;
+    }
+
     // Validação IN 3/2025
     if (itens.length < 10) {
       const confirmar = window.confirm(
