@@ -9,13 +9,13 @@ import { Trash2, Loader2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const TABELAS_INVENTARIO = [
-  { value: "ficha_placa", label: "Placas de Sinalização Vertical" },
-  { value: "ficha_marcas_longitudinais", label: "Marcas Longitudinais" },
   { value: "ficha_cilindros", label: "Cilindros Delimitadores" },
-  { value: "ficha_inscricoes", label: "Zebrados, Setas, Símbolos e Legendas" },
-  { value: "ficha_tachas", label: "Tachas Refletivas" },
-  { value: "ficha_porticos", label: "Pórticos e Braços Projetados" },
   { value: "defensas", label: "Defensas" },
+  { value: "ficha_marcas_longitudinais", label: "Marcas Longitudinais" },
+  { value: "ficha_placa", label: "Placas de Sinalização Vertical" },
+  { value: "ficha_porticos", label: "Pórticos e Braços Projetados" },
+  { value: "ficha_tachas", label: "Tachas Refletivas" },
+  { value: "ficha_inscricoes", label: "Zebrados, Setas, Símbolos e Legendas" },
 ];
 
 interface DeleteInventarioSelecionadoProps {
