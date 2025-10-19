@@ -532,14 +532,23 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
                 fotosVinculadasLocal.add(pathMatch[1]);
               }
               
-              // Para placas, preencher tanto foto_url quanto foto_frontal_url
-              if (inventoryType === "placas") {
-                record.foto_url = matchedUrl;
-                record.foto_frontal_url = matchedUrl;
-              } else if (inventoryType === "defensas") {
-                record.link_fotografia = matchedUrl;
-              } else {
-                record.foto_url = matchedUrl;
+              // PADRONIZADO: Todos os tipos usam fotos_urls (array)
+              if (matchedUrl) {
+                fotosVinculadasLocal.add(pathMatch[1]);
+                
+                // Campo principal: fotos_urls (compatível com Inventário Dinâmico)
+                record.fotos_urls = [matchedUrl];
+                
+                // Compatibilidade com campos legados (se necessário)
+                if (inventoryType === "placas") {
+                  record.foto_frontal_url = matchedUrl; // Legado
+                } else if (inventoryType === "defensas") {
+                  record.link_fotografia = matchedUrl;  // Legado
+                }
+                
+                if (index < 3) {
+                  console.log(`[FOTO ${index}] ✓✓ Vinculada a fotos_urls[]: ${matchedUrl.substring(0, 80)}...`);
+                }
               }
               
               if (index < 3) {
