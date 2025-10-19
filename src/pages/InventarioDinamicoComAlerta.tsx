@@ -122,11 +122,11 @@ export default function InventarioDinamicoComAlerta() {
             id: item.id,
             tipo_elemento: tabela.tipo,
             acao: item.servico || item.acao || item.descricao_servico || 'N/A',
-            km_inicial: item.km_inicial,
+            km_inicial: item.km_inicial || item.km,
             lado: item.lado,
             descricao_servico: item.descricao_servico || item.servico,
-            latitude_inicial: item.latitude_inicial,
-            longitude_inicial: item.longitude_inicial,
+            latitude_inicial: item.latitude_inicial || item.latitude,
+            longitude_inicial: item.longitude_inicial || item.longitude,
           }));
           todasNecessidades.push(...necessidadesMapeadas);
         }
