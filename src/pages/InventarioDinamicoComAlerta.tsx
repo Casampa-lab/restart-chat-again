@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, MapPin, Navigation } from 'lucide-react';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
@@ -34,7 +35,9 @@ export default function InventarioDinamicoComAlerta() {
   const [necessidades, setNecessidades] = useState<Necessidade[]>([]);
   const [necessidadesProximas, setNecessidadesProximas] = useState<Necessidade[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tipoFiltro, setTipoFiltro] = useState<string>('todos');
+  const [grupoFiltro, setGrupoFiltro] = useState<'todos' | 'sv' | 'sh' | 'defensas'>('todos');
+  const [subtipoSV, setSubtipoSV] = useState<string>('placas');
+  const [subtipoSH, setSubtipoSH] = useState<string>('marcas_longitudinais');
 
   const RAIO_ALERTA = 100; // metros
 
@@ -144,7 +147,7 @@ export default function InventarioDinamicoComAlerta() {
   const getTipoLabel = (tipo: string) => {
     const labels: Record<string, string> = {
       placas: '🚦 Placas',
-      marcas_longitudinais: '➖ Marcas SH',
+      marcas_longitudinais: '➖ Marcas Longitudinais',
       tachas: '⚪ Tachas',
       defensas: '🛡️ Defensas',
       cilindros: '🔵 Cilindros',
@@ -154,15 +157,26 @@ export default function InventarioDinamicoComAlerta() {
     return labels[tipo] || tipo;
   };
 
+  // Determinar qual tipo elemento deve ser exibido baseado no grupo e subtipo
+  const getTipoElementoAtivo = () => {
+    if (grupoFiltro === 'todos') return 'todos';
+    if (grupoFiltro === 'sv') return subtipoSV;
+    if (grupoFiltro === 'sh') return subtipoSH;
+    if (grupoFiltro === 'defensas') return 'defensas';
+    return 'todos';
+  };
+
+  const tipoAtivo = getTipoElementoAtivo();
+
   const necessidadesFiltradas = position && necessidades.length > 0
     ? sortByProximity(
-        tipoFiltro === 'todos' 
+        tipoAtivo === 'todos' 
           ? necessidades 
-          : necessidades.filter(n => n.tipo_elemento === tipoFiltro),
+          : necessidades.filter(n => n.tipo_elemento === tipoAtivo),
         position.latitude,
         position.longitude
       )
-    : necessidades.filter(n => tipoFiltro === 'todos' || n.tipo_elemento === tipoFiltro);
+    : necessidades.filter(n => tipoAtivo === 'todos' || n.tipo_elemento === tipoAtivo);
 
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
@@ -230,15 +244,51 @@ export default function InventarioDinamicoComAlerta() {
         </div>
       )}
 
-      {/* Filtros */}
-      <Tabs value={tipoFiltro} onValueChange={setTipoFiltro} className="mb-4">
+      {/* Filtros - Grupos */}
+      <Tabs value={grupoFiltro} onValueChange={(value) => setGrupoFiltro(value as any)} className="mb-4">
         <TabsList className="grid grid-cols-4 h-auto">
           <TabsTrigger value="todos">Todos</TabsTrigger>
-          <TabsTrigger value="placas">🚦 SV</TabsTrigger>
-          <TabsTrigger value="marcas_longitudinais">➖ SH</TabsTrigger>
+          <TabsTrigger value="sv">🚦 SV</TabsTrigger>
+          <TabsTrigger value="sh">➖ SH</TabsTrigger>
           <TabsTrigger value="defensas">🛡️ Def</TabsTrigger>
         </TabsList>
       </Tabs>
+
+      {/* Dropdown de Subtipo para SV */}
+      {grupoFiltro === 'sv' && (
+        <Card className="mb-4">
+          <CardContent className="pt-4">
+            <Select value={subtipoSV} onValueChange={setSubtipoSV}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="placas">🚦 Placas</SelectItem>
+                <SelectItem value="porticos">🌉 Pórticos</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Dropdown de Subtipo para SH */}
+      {grupoFiltro === 'sh' && (
+        <Card className="mb-4">
+          <CardContent className="pt-4">
+            <Select value={subtipoSH} onValueChange={setSubtipoSH}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="marcas_longitudinais">➖ Marcas Longitudinais</SelectItem>
+                <SelectItem value="inscricoes">📝 Inscrições</SelectItem>
+                <SelectItem value="tachas">⚪ Tachas</SelectItem>
+                <SelectItem value="cilindros">🔵 Cilindros</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Lista de Necessidades */}
       {loading ? (
