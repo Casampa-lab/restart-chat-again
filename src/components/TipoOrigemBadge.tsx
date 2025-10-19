@@ -1,75 +1,63 @@
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Wrench, HardHat, Package, Cpu, Pencil } from "lucide-react";
 
 interface TipoOrigemBadgeProps {
-  tipoOrigem?: string | null;
+  tipoOrigem?: string;
   modificadoPorIntervencao?: boolean;
-  className?: string;
   showLabel?: boolean;
+  className?: string;
 }
 
-/**
- * Badge visual para identificar o tipo de origem/intervenção
- * Conforme Addendum Técnico VABLE:
- * 🟢 Verde - Execução de Projeto
- * 🟡 Amarelo - Manutenção Pré-Projeto
- * ⚪ Branco - Cadastro Inicial
- */
 export function TipoOrigemBadge({ 
-  tipoOrigem, 
-  modificadoPorIntervencao,
-  className,
-  showLabel = true 
+  tipoOrigem = "cadastro_inicial", 
+  modificadoPorIntervencao = false,
+  showLabel = true,
+  className 
 }: TipoOrigemBadgeProps) {
-  // Se não foi modificado por intervenção, é cadastro inicial
-  if (!modificadoPorIntervencao || !tipoOrigem) {
+  // Se foi modificado por intervenção, mostrar badge específico
+  if (modificadoPorIntervencao) {
     return (
-      <Badge 
-        variant="outline" 
-        className={cn(
-          "border-gray-300 bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-          className
-        )}
-      >
-        ⚪ {showLabel && "Cadastro Inicial"}
+      <Badge variant="outline" className={`border-orange-500 text-orange-700 ${className}`}>
+        <Pencil className="h-3 w-3 mr-1" />
+        {showLabel && "Modificado"}
       </Badge>
     );
   }
 
-  // Manutenção pré-projeto
-  if (tipoOrigem === 'manutencao_pre_projeto') {
-    return (
-      <Badge 
-        variant="secondary"
-        className={cn(
-          "border-yellow-500 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-          className
-        )}
-      >
-        🟡 {showLabel && "Manutenção Pré-Projeto"}
-      </Badge>
-    );
-  }
+  const configs = {
+    cadastro_inicial: {
+      icon: Package,
+      label: "Cadastro Inicial",
+      variant: "secondary" as const,
+      color: "text-muted-foreground",
+    },
+    execucao: {
+      icon: HardHat,
+      label: "Execução",
+      variant: "default" as const,
+      color: "text-green-600",
+    },
+    manutencao_pre_projeto: {
+      icon: Wrench,
+      label: "Manutenção",
+      variant: "outline" as const,
+      color: "text-yellow-600",
+    },
+    sistema_match: {
+      icon: Cpu,
+      label: "Sistema/Match",
+      variant: "secondary" as const,
+      color: "text-blue-600",
+    },
+  };
 
-  // Execução de projeto
+  const config = configs[tipoOrigem as keyof typeof configs] || configs.cadastro_inicial;
+  const Icon = config.icon;
+
   return (
-    <Badge 
-      variant="default"
-      className={cn(
-        "border-green-500 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-        className
-      )}
-    >
-      🟢 {showLabel && "Execução"}
+    <Badge variant={config.variant} className={className}>
+      <Icon className={`h-3 w-3 mr-1 ${config.color}`} />
+      {showLabel && config.label}
     </Badge>
   );
-}
-
-/**
- * Versão compacta do badge (apenas emoji)
- */
-export function TipoOrigemIcon({ tipoOrigem, modificadoPorIntervencao }: TipoOrigemBadgeProps) {
-  if (!modificadoPorIntervencao || !tipoOrigem) return <span title="Cadastro Inicial">⚪</span>;
-  if (tipoOrigem === 'manutencao_pre_projeto') return <span title="Manutenção Pré-Projeto">🟡</span>;
-  return <span title="Execução de Projeto">🟢</span>;
 }

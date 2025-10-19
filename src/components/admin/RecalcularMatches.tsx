@@ -11,6 +11,8 @@ import { RefreshCw, CheckCircle2, XCircle, AlertCircle, Target } from "lucide-re
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const TIPOS_ELEMENTOS = [
   { value: "cilindros", label: "Cilindros", tabela_cadastro: "ficha_cilindros", tabela_necessidade: "necessidades_cilindros" },
@@ -533,6 +535,186 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
     return R * c;
   };
 
+  // ============= CRIAR ELEMENTO NO INVENTÁRIO =============
+
+  interface NovoElementoBase {
+    user_id: string;
+    lote_id: string;
+    rodovia_id: string;
+    origem: string;
+    observacao: string;
+    data_vistoria: string;
+    created_at: string;
+  }
+
+  const addLog = (tipo: "success" | "warning" | "error" | "info", mensagem: string) => {
+    setLogs(prev => [...prev, { tipo, mensagem }]);
+  };
+
+  const criarElementoNoInventario = async (
+    tipoElemento: string,
+    necessidade: any,
+    coordenadorId: string,
+    coordenadorNome: string,
+    tabelaCadastro: string
+  ): Promise<string | null> => {
+    const agora = new Date().toISOString();
+    const dataAtual = new Date().toISOString().split('T')[0];
+    
+    const observacao = `Criado automaticamente via reconciliação de necessidades (Coord: ${coordenadorNome} em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })})`;
+    
+    const baseData: NovoElementoBase = {
+      user_id: coordenadorId,
+      lote_id: necessidade.lote_id,
+      rodovia_id: necessidade.rodovia_id,
+      origem: 'sistema_match',
+      observacao,
+      data_vistoria: dataAtual,
+      created_at: agora,
+    };
+
+    let novoElemento: any = { ...baseData };
+
+    // Mapear campos específicos por tipo
+    switch (tipoElemento) {
+      case 'placas':
+        novoElemento = {
+          ...novoElemento,
+          codigo: necessidade.codigo,
+          tipo: necessidade.tipo_placa,
+          modelo: necessidade.codigo,
+          lado: necessidade.lado,
+          km: necessidade.km,
+          latitude_inicial: necessidade.latitude,
+          longitude_inicial: necessidade.longitude,
+          snv: necessidade.snv,
+          suporte: necessidade.suporte,
+          substrato: necessidade.substrato,
+          dimensoes_mm: necessidade.dimensoes_mm,
+          posicao: necessidade.posicao,
+        };
+        break;
+
+      case 'defensas':
+        novoElemento = {
+          ...novoElemento,
+          tipo_defensa: necessidade.tipo_defensa,
+          lado: necessidade.lado,
+          km_inicial: necessidade.km_inicial,
+          km_final: necessidade.km_final,
+          extensao_metros: necessidade.extensao_metros,
+          latitude_inicial: necessidade.latitude,
+          longitude_inicial: necessidade.longitude,
+          snv: necessidade.snv,
+          classificacao_nivel_contencao: necessidade.classificacao_nivel_contencao,
+          nivel_contencao_en1317: necessidade.nivel_contencao_en1317,
+          funcao: necessidade.funcao,
+        };
+        break;
+
+      case 'marcas_longitudinais':
+        novoElemento = {
+          ...novoElemento,
+          tipo_demarcacao: necessidade.tipo_demarcacao,
+          cor: necessidade.cor,
+          posicao: necessidade.posicao,
+          codigo: necessidade.codigo,
+          km_inicial: necessidade.km_inicial,
+          km_final: necessidade.km_final,
+          latitude_inicial: necessidade.latitude,
+          longitude_inicial: necessidade.longitude,
+          snv: necessidade.snv,
+          largura_cm: necessidade.largura_cm,
+          material: necessidade.material,
+        };
+        break;
+
+      case 'marcas_transversais':
+        novoElemento = {
+          ...novoElemento,
+          sigla: necessidade.sigla,
+          tipo_inscricao: necessidade.tipo_inscricao,
+          cor: necessidade.cor,
+          dimensoes: necessidade.dimensoes,
+          km_inicial: necessidade.km_inicial,
+          km_final: necessidade.km_final,
+          latitude_inicial: necessidade.latitude,
+          longitude_inicial: necessidade.longitude,
+          snv: necessidade.snv,
+          area_m2: necessidade.area_m2,
+          espessura_mm: necessidade.espessura_mm,
+        };
+        break;
+
+      case 'tachas':
+        novoElemento = {
+          ...novoElemento,
+          tipo_tacha: necessidade.tipo_tacha,
+          cor: necessidade.cor,
+          km_inicial: necessidade.km_inicial,
+          km_final: necessidade.km_final,
+          latitude_inicial: necessidade.latitude,
+          longitude_inicial: necessidade.longitude,
+          snv: necessidade.snv,
+          quantidade: necessidade.quantidade,
+          material: necessidade.material,
+          espacamento_m: necessidade.espacamento_m,
+        };
+        break;
+
+      case 'cilindros':
+        novoElemento = {
+          ...novoElemento,
+          cor_corpo: necessidade.cor_corpo,
+          cor_refletivo: necessidade.cor_refletivo,
+          tipo_refletivo: necessidade.tipo_refletivo,
+          km_inicial: necessidade.km_inicial,
+          km_final: necessidade.km_final,
+          latitude_inicial: necessidade.latitude,
+          longitude_inicial: necessidade.longitude,
+          snv: necessidade.snv,
+          quantidade: necessidade.quantidade,
+          espacamento_m: necessidade.espacamento_m,
+          extensao_km: necessidade.extensao_km,
+        };
+        break;
+
+      case 'porticos':
+        novoElemento = {
+          ...novoElemento,
+          tipo: necessidade.tipo,
+          vao_horizontal_m: necessidade.vao_horizontal_m,
+          altura_livre_m: necessidade.altura_livre_m,
+          km: necessidade.km,
+          latitude_inicial: necessidade.latitude,
+          longitude_inicial: necessidade.longitude,
+          snv: necessidade.snv,
+        };
+        break;
+
+      default:
+        addLog('error', `Tipo de elemento não suportado: ${tipoElemento}`);
+        return null;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from(tabelaCadastro as any)
+        .insert(novoElemento)
+        .select('id')
+        .single();
+
+      if (error) throw error;
+      if (!data || !('id' in data)) throw new Error("Nenhum dado retornado");
+      
+      addLog('success', `✅ Elemento criado no inventário (${tabelaCadastro}): ID ${(data as any).id}`);
+      return (data as any).id;
+    } catch (error: any) {
+      addLog('error', `❌ Erro ao criar elemento: ${error.message}`);
+      return null;
+    }
+  };
+
   // ============= PROCESSO DE RECÁLCULO =============
 
   const handleRecalcular = async () => {
@@ -560,6 +742,18 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
     setProgressInfo(null);
 
     try {
+      // Buscar informações do coordenador para rastreabilidade
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+      
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('nome')
+        .eq('id', user.id)
+        .single();
+
+      const coordenadorNome = profileData?.nome || user.email || 'Sistema';
+
       const tipoConfig = TIPOS_ELEMENTOS.find(t => t.value === tipo);
       if (!tipoConfig) throw new Error("Tipo inválido");
 
@@ -805,8 +999,65 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
             ];
             servico_inferido = sinaisRemocao.some(Boolean) ? "Remover" : "Substituir";
           } else {
-            elementosNovos++;
-            servico_inferido = "Implantar";
+            // NÃO HÁ MATCH NO CADASTRO
+            // Verificar se é necessidade de execução para criar automaticamente
+            if (nec.tipo_origem === 'execucao') {
+              setLogs(prev => [...prev, {
+                tipo: "warning",
+                mensagem: `⚠️ Necessidade ${nec.id} (execução) sem match - criando elemento no inventário`
+              }]);
+              
+              // CRIAR novo elemento no inventário
+              const novoElementoId = await criarElementoNoInventario(
+                tipo,
+                nec,
+                user.id,
+                coordenadorNome,
+                tabela_cadastro
+              );
+              
+              if (novoElementoId) {
+                cadastro_id = novoElementoId;
+                servico_inferido = 'Implantar';
+                elementosNovos++;
+                
+                setLogs(prev => [...prev, {
+                  tipo: "success",
+                  mensagem: `✅ Elemento criado e vinculado: ${cadastro_id}`
+                }]);
+              } else {
+                setLogs(prev => [...prev, {
+                  tipo: "error",
+                  mensagem: `❌ Falha ao criar elemento para necessidade ${nec.id}`
+                }]);
+                continue; // Pular para próxima necessidade
+              }
+            } 
+            // SE FOR MANUTENÇÃO PRÉ-PROJETO SEM MATCH
+            else if (nec.tipo_origem === 'manutencao_pre_projeto') {
+              setLogs(prev => [...prev, {
+                tipo: "warning",
+                mensagem: `⚠️ Necessidade ${nec.id} (manutenção) sem match - elemento não existe no cadastro`
+              }]);
+              servico_inferido = 'Pendente Revisão';
+              
+              // Atualizar necessidade com status de alerta e não processar mais
+              await supabase
+                .from(tabela_necessidade as any)
+                .update({
+                  servico_inferido: 'Pendente Revisão',
+                  servico_final: 'Pendente Revisão',
+                  servico: 'Pendente Revisão',
+                  divergencia: true,
+                })
+                .eq('id', nec.id);
+              
+              continue; // NÃO criar elemento, apenas sinalizar
+            } else {
+              // Fallback para necessidades sem tipo_origem definido
+              elementosNovos++;
+              servico_inferido = "Implantar";
+            }
           }
 
           // Normalizar solucao_planilha
