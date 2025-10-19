@@ -933,11 +933,6 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
         }
       });
 
-      // Limpar tolerâncias customizadas após alguns segundos
-      setTimeout(() => {
-        setToleranciasCustomizadas({});
-      }, 2000);
-
     } catch (error: any) {
       console.error("Erro no recálculo:", error);
       setLogs(prev => [...prev, {
