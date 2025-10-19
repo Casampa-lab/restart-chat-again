@@ -23,6 +23,7 @@ import { DeleteInventarioSelecionado } from "@/components/admin/DeleteInventario
 import { RemoverDuplicatasInventario } from "@/components/admin/RemoverDuplicatasInventario";
 import { NecessidadesImporter } from "@/components/admin/NecessidadesImporter";
 import { DeleteNecessidades } from "@/components/admin/DeleteNecessidades";
+import { DeleteTodasNecessidades } from "@/components/admin/DeleteTodasNecessidades";
 import { RemoverDuplicatasNecessidades } from "@/components/admin/RemoverDuplicatasNecessidades";
 import { RecalcularMatches } from "@/components/admin/RecalcularMatches";
 import { LimparReconciliacoesInconsistentes } from "@/components/admin/LimparReconciliacoesInconsistentes";
@@ -351,6 +352,7 @@ const Admin = () => {
 
               {/* Componentes com props compartilhadas */}
               <NecessidadesImporter loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
+              <DeleteTodasNecessidades loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
               <RemoverDuplicatasNecessidades />
               <RecalcularMatches loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
               <DeleteNecessidades loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
