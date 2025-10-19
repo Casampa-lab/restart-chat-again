@@ -33,11 +33,11 @@ const formSchema = z.object({
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   km_final: z.string().min(1, "KM final é obrigatório"),
   snv: z.string().optional(),
-  corpo: z.string().optional(),
-  refletivo: z.string().optional(),
+  tipo_tacha: z.string().optional(),
+  material: z.string().optional(),
   tipo_refletivo: z.string().optional(),
-  cor_refletivo: z.string().optional(),
-  local_implantacao: z.string().optional(),
+  cor: z.string().optional(),
+  lado: z.string().optional(),
   quantidade: z.string().optional(),
   espacamento_m: z.string().optional(),
   observacao: z.string().optional(),
@@ -65,11 +65,11 @@ export function IntervencoesTachaForm({
       km_inicial: "",
       km_final: "",
       snv: "",
-      corpo: "",
-      refletivo: "",
+      tipo_tacha: "",
+      material: "",
       tipo_refletivo: "",
-      cor_refletivo: "",
-      local_implantacao: "",
+      cor: "",
+      lado: "",
       quantidade: "",
       espacamento_m: "",
       observacao: "",
@@ -89,11 +89,11 @@ export function IntervencoesTachaForm({
         km_inicial: tachaSelecionada.km_inicial?.toString() || "",
         km_final: tachaSelecionada.km_final?.toString() || "",
         snv: (tachaSelecionada as any).snv || "",
-        corpo: (tachaSelecionada as any).corpo || "",
-        refletivo: (tachaSelecionada as any).refletivo || "",
+        tipo_tacha: (tachaSelecionada as any).tipo_tacha || "",
+        material: (tachaSelecionada as any).material || "",
         tipo_refletivo: (tachaSelecionada as any).tipo_refletivo || "",
-        cor_refletivo: (tachaSelecionada as any).cor_refletivo || "",
-        local_implantacao: (tachaSelecionada as any).local_implantacao || "",
+        cor: (tachaSelecionada as any).cor || "",
+        lado: (tachaSelecionada as any).lado || "",
         quantidade: (tachaSelecionada as any).quantidade?.toString() || "",
         espacamento_m: (tachaSelecionada as any).espacamento_m?.toString() || "",
         observacao: "",
@@ -134,11 +134,11 @@ export function IntervencoesTachaForm({
         km_inicial: values.km_inicial ? parseFloat(values.km_inicial) : null,
         km_final: values.km_final ? parseFloat(values.km_final) : null,
         snv: values.snv || null,
-        corpo: values.corpo || null,
-        refletivo: values.refletivo || null,
+        tipo_tacha: values.tipo_tacha || null,
+        material: values.material || null,
         tipo_refletivo: values.tipo_refletivo || null,
-        cor_refletivo: values.cor_refletivo || null,
-        local_implantacao: values.local_implantacao || null,
+        cor: values.cor || null,
+        lado: values.lado || null,
         quantidade: values.quantidade ? parseInt(values.quantidade) : null,
         espacamento_m: values.espacamento_m ? parseFloat(values.espacamento_m) : null,
         latitude: values.latitude ? parseFloat(values.latitude) : null,
@@ -267,10 +267,10 @@ export function IntervencoesTachaForm({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="corpo"
+                  name="tipo_tacha"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Corpo</FormLabel>
+                      <FormLabel>Tipo de Tacha</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -278,9 +278,9 @@ export function IntervencoesTachaForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Plástico">Plástico</SelectItem>
-                          <SelectItem value="Metal">Metal</SelectItem>
-                          <SelectItem value="Cerâmico">Cerâmico</SelectItem>
+                          <SelectItem value="Refletiva Monodirecional">Refletiva Monodirecional</SelectItem>
+                          <SelectItem value="Refletiva Bidirecional">Refletiva Bidirecional</SelectItem>
+                          <SelectItem value="Não Refletiva">Não Refletiva</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -290,10 +290,10 @@ export function IntervencoesTachaForm({
 
                 <FormField
                   control={form.control}
-                  name="refletivo"
+                  name="material"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Descrição</FormLabel>
+                      <FormLabel>Material</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -301,8 +301,9 @@ export function IntervencoesTachaForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-background z-50">
-                          <SelectItem value="Bidirecional">Bidirecional</SelectItem>
-                          <SelectItem value="Monodirecional">Monodirecional</SelectItem>
+                          <SelectItem value="Plástico">Plástico</SelectItem>
+                          <SelectItem value="Metal">Metal</SelectItem>
+                          <SelectItem value="Cerâmico">Cerâmico</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -339,10 +340,10 @@ export function IntervencoesTachaForm({
 
                 <FormField
                   control={form.control}
-                  name="cor_refletivo"
+                  name="cor"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cor do Refletivo</FormLabel>
+                      <FormLabel>Cor</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -363,10 +364,10 @@ export function IntervencoesTachaForm({
 
                 <FormField
                   control={form.control}
-                  name="local_implantacao"
+                  name="lado"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Local de Implantação</FormLabel>
+                      <FormLabel>Lado</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
