@@ -398,6 +398,8 @@ serve(async (req) => {
       ficha_porticos: {
         "altura_livre_(m)": "altura_livre_m",
         "vão_horizontal_(m)": "vao_horizontal_m",
+        "Latitude": "latitude_inicial",
+        "Longitude": "longitude_inicial",
         "data": "data_vistoria",
         "br": "",
       },
