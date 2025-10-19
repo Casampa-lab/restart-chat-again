@@ -53,7 +53,7 @@ export default function InventarioDinamicoComAlerta() {
   const [necessidades, setNecessidades] = useState<Necessidade[]>([]);
   const [necessidadesProximas, setNecessidadesProximas] = useState<Necessidade[]>([]);
   const [loading, setLoading] = useState(true);
-  const [grupoSelecionado, setGrupoSelecionado] = useState<'sv' | 'sh' | 'defensas'>('sh');
+  const [grupoSelecionado, setGrupoSelecionado] = useState<'todos' | 'sv' | 'sh' | 'defensas'>('todos');
   const [tipoSV, setTipoSV] = useState<'placas' | 'porticos'>('placas');
   const [tipoSH, setTipoSH] = useState<'marcas_longitudinais' | 'cilindros' | 'inscricoes' | 'tachas'>('marcas_longitudinais');
 
@@ -189,21 +189,45 @@ export default function InventarioDinamicoComAlerta() {
 
   // Determinar tipo ativo baseado no grupo e subtipo selecionado
   const getTipoElementoAtivo = () => {
+    if (grupoSelecionado === 'todos') return null; // Mostrar todos
     if (grupoSelecionado === 'defensas') return 'defensas';
     if (grupoSelecionado === 'sv') return tipoSV;
     if (grupoSelecionado === 'sh') return tipoSH;
-    return 'marcas_longitudinais';
+    return null;
   };
 
   const tipoAtivo = getTipoElementoAtivo();
 
+  // Calcular contadores por grupo
+  const getContadores = () => {
+    const todos = necessidades.length;
+    const sh = necessidades.filter(n => ['marcas_longitudinais', 'cilindros', 'inscricoes', 'tachas'].includes(n.tipo_elemento)).length;
+    const sv = necessidades.filter(n => ['placas', 'porticos'].includes(n.tipo_elemento)).length;
+    const def = necessidades.filter(n => n.tipo_elemento === 'defensas').length;
+    return { todos, sh, sv, def };
+  };
+
+  const contadores = getContadores();
+
   const necessidadesFiltradas = position && necessidades.length > 0
     ? sortByProximity(
-        necessidades.filter(n => n.tipo_elemento === tipoAtivo),
+        tipoAtivo === null ? necessidades : necessidades.filter(n => n.tipo_elemento === tipoAtivo),
         position.latitude,
         position.longitude
       )
-    : necessidades.filter(n => n.tipo_elemento === tipoAtivo);
+    : tipoAtivo === null ? necessidades : necessidades.filter(n => n.tipo_elemento === tipoAtivo);
+
+  // Agrupar necessidades por tipo para visualização "Todos"
+  const necessidadesAgrupadas = () => {
+    const grupos: Record<string, Necessidade[]> = {};
+    necessidadesFiltradas.forEach(nec => {
+      if (!grupos[nec.tipo_elemento]) {
+        grupos[nec.tipo_elemento] = [];
+      }
+      grupos[nec.tipo_elemento].push(nec);
+    });
+    return grupos;
+  };
 
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
@@ -273,11 +297,19 @@ export default function InventarioDinamicoComAlerta() {
 
       {/* Filtros - Tabs aninhadas igual ao desktop */}
       <Tabs value={grupoSelecionado} onValueChange={(v) => setGrupoSelecionado(v as any)} className="mb-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="sh">Sinalização Horizontal (SH)</TabsTrigger>
-          <TabsTrigger value="sv">Sinalização Vertical (SV)</TabsTrigger>
-          <TabsTrigger value="defensas">Defensas</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="todos">Todos ({contadores.todos})</TabsTrigger>
+          <TabsTrigger value="sh">SH ({contadores.sh})</TabsTrigger>
+          <TabsTrigger value="sv">SV ({contadores.sv})</TabsTrigger>
+          <TabsTrigger value="defensas">Def ({contadores.def})</TabsTrigger>
         </TabsList>
+
+        {/* Conteúdo Todos - agrupado */}
+        <TabsContent value="todos" className="mt-0">
+          <div className="mt-4">
+            {renderListaNecessidadesAgrupadas()}
+          </div>
+        </TabsContent>
 
         {/* Conteúdo SV */}
         <TabsContent value="sv" className="mt-0">
@@ -328,6 +360,92 @@ export default function InventarioDinamicoComAlerta() {
       </Tabs>
     </div>
   );
+
+  // Função auxiliar para renderizar a lista de necessidades agrupadas (para tab "Todos")
+  function renderListaNecessidadesAgrupadas() {
+    if (loading) {
+      return (
+        <Card className="mt-4">
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">Carregando necessidades...</p>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (necessidadesFiltradas.length === 0) {
+      return (
+        <Card className="mt-4">
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">
+              Nenhuma necessidade encontrada
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    const grupos = necessidadesAgrupadas();
+    const tiposOrdenados = Object.keys(grupos).sort();
+
+    return (
+      <div className="space-y-6">
+        {tiposOrdenados.map(tipo => (
+          <div key={tipo}>
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <h3 className="text-lg font-semibold">{getTipoLabel(tipo)}</h3>
+              <Badge variant="secondary">{grupos[tipo].length}</Badge>
+            </div>
+            <div className="space-y-3">
+              {grupos[tipo].map(nec => (
+                <Card key={nec.id} className="cursor-pointer hover:bg-accent/50 transition-colors">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <div className="flex gap-2 text-sm text-muted-foreground">
+                          <Badge variant="outline">
+                            km {nec.km_inicial?.toFixed(3) || '-'}
+                          </Badge>
+                          {nec.lado && (
+                            <Badge variant="outline">
+                              {nec.lado}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      {nec.distance !== undefined && (
+                        <Badge variant={nec.distance <= RAIO_ALERTA ? 'destructive' : 'secondary'}>
+                          {nec.distance < 1000 
+                            ? `${Math.round(nec.distance)}m` 
+                            : `${(nec.distance / 1000).toFixed(2)}km`}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm mb-3">{nec.acao}</p>
+                    {nec.descricao_servico && (
+                      <p className="text-xs text-muted-foreground">{nec.descricao_servico}</p>
+                    )}
+                    <Button
+                      size="sm"
+                      className="w-full mt-3"
+                      onClick={() => navigate('/modo-campo/registrar-intervencao', {
+                        state: { necessidade: nec }
+                      })}
+                    >
+                      <Navigation className="mr-2 h-4 w-4" />
+                      Registrar Intervenção
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   // Função auxiliar para renderizar a lista de necessidades
   function renderListaNecessidades() {
