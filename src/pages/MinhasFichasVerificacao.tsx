@@ -63,7 +63,7 @@ export default function MinhasFichasVerificacao() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [userId, setUserId] = useState<string>();
   const [filtroStatus, setFiltroStatus] = useState<string>("todas");
-  const [mostrarEnviadas, setMostrarEnviadas] = useState(false);
+  const [mostrarEnviadas, setMostrarEnviadas] = useState(true);
   
   const { activeSession } = useWorkSession(userId);
 
