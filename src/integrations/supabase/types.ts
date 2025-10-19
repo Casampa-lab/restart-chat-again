@@ -442,7 +442,7 @@ export type Database = {
           created_at: string
           data_aprovacao_coordenador: string | null
           data_intervencao: string
-          defensa_id: string
+          defensa_id: string | null
           estado_conservacao: string | null
           extensao_metros: number | null
           fora_plano_manutencao: boolean | null
@@ -471,7 +471,7 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
-          defensa_id: string
+          defensa_id?: string | null
           estado_conservacao?: string | null
           extensao_metros?: number | null
           fora_plano_manutencao?: boolean | null
@@ -500,7 +500,7 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
-          defensa_id?: string
+          defensa_id?: string | null
           estado_conservacao?: string | null
           extensao_metros?: number | null
           fora_plano_manutencao?: boolean | null
@@ -799,7 +799,7 @@ export type Database = {
           data_intervencao: string
           espacamento_m: number | null
           extensao_km: number | null
-          ficha_cilindros_id: string
+          ficha_cilindros_id: string | null
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
           id: string
@@ -827,7 +827,7 @@ export type Database = {
           data_intervencao: string
           espacamento_m?: number | null
           extensao_km?: number | null
-          ficha_cilindros_id: string
+          ficha_cilindros_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
@@ -855,7 +855,7 @@ export type Database = {
           data_intervencao?: string
           espacamento_m?: number | null
           extensao_km?: number | null
-          ficha_cilindros_id?: string
+          ficha_cilindros_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
@@ -1039,7 +1039,7 @@ export type Database = {
           dimensoes: string | null
           espessura_mm: number | null
           estado_conservacao: string | null
-          ficha_inscricoes_id: string
+          ficha_inscricoes_id: string | null
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
           id: string
@@ -1069,7 +1069,7 @@ export type Database = {
           dimensoes?: string | null
           espessura_mm?: number | null
           estado_conservacao?: string | null
-          ficha_inscricoes_id: string
+          ficha_inscricoes_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
@@ -1099,7 +1099,7 @@ export type Database = {
           dimensoes?: string | null
           espessura_mm?: number | null
           estado_conservacao?: string | null
-          ficha_inscricoes_id?: string
+          ficha_inscricoes_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
@@ -1288,7 +1288,7 @@ export type Database = {
           data_intervencao: string
           espessura_cm: number | null
           estado_conservacao: string | null
-          ficha_marcas_longitudinais_id: string
+          ficha_marcas_longitudinais_id: string | null
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
           id: string
@@ -1316,7 +1316,7 @@ export type Database = {
           data_intervencao: string
           espessura_cm?: number | null
           estado_conservacao?: string | null
-          ficha_marcas_longitudinais_id: string
+          ficha_marcas_longitudinais_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
@@ -1344,7 +1344,7 @@ export type Database = {
           data_intervencao?: string
           espessura_cm?: number | null
           estado_conservacao?: string | null
-          ficha_marcas_longitudinais_id?: string
+          ficha_marcas_longitudinais_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
@@ -1640,7 +1640,7 @@ export type Database = {
           created_at: string
           data_aprovacao_coordenador: string | null
           data_intervencao: string
-          ficha_placa_id: string
+          ficha_placa_id: string | null
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
           id: string
@@ -1664,7 +1664,7 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
-          ficha_placa_id: string
+          ficha_placa_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
@@ -1688,7 +1688,7 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
-          ficha_placa_id?: string
+          ficha_placa_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
@@ -1856,7 +1856,7 @@ export type Database = {
           data_aprovacao_coordenador: string | null
           data_intervencao: string
           descricao: string | null
-          ficha_porticos_id: string
+          ficha_porticos_id: string | null
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
           id: string
@@ -1881,7 +1881,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
           descricao?: string | null
-          ficha_porticos_id: string
+          ficha_porticos_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
@@ -1906,7 +1906,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           descricao?: string | null
-          ficha_porticos_id?: string
+          ficha_porticos_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
@@ -2087,7 +2087,7 @@ export type Database = {
           data_intervencao: string
           descricao: string | null
           espacamento_m: number | null
-          ficha_tachas_id: string
+          ficha_tachas_id: string | null
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
           id: string
@@ -2117,7 +2117,7 @@ export type Database = {
           data_intervencao: string
           descricao?: string | null
           espacamento_m?: number | null
-          ficha_tachas_id: string
+          ficha_tachas_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
@@ -2147,7 +2147,7 @@ export type Database = {
           data_intervencao?: string
           descricao?: string | null
           espacamento_m?: number | null
-          ficha_tachas_id?: string
+          ficha_tachas_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
