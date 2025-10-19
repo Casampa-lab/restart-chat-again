@@ -13,6 +13,8 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, MapPin, Camera, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
 import { IntervencoesSVForm } from '@/components/IntervencoesSVForm';
 import { IntervencoesSHForm } from '@/components/IntervencoesSHForm';
 import { IntervencoesTachaForm } from '@/components/IntervencoesTachaForm';
@@ -68,6 +70,18 @@ export default function RegistrarIntervencaoCampo() {
   const [loading, setLoading] = useState(false);
 
   const necessidadeProp = location.state?.necessidade;
+
+  const handleVoltar = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        navigate('/modo-campo');
+      } catch (error) {
+        console.error('Erro ao voltar:', error);
+      }
+    } else {
+      navigate('/modo-campo');
+    }
+  };
 
   useEffect(() => {
     if (necessidadeProp) {
@@ -177,14 +191,18 @@ export default function RegistrarIntervencaoCampo() {
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate('/modo-campo')}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Button
+            variant="outline"
+            size="default"
+            onClick={handleVoltar}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </Button>
+        </div>
         <div>
           <h1 className="text-2xl font-bold">Registrar Intervenção</h1>
           {activeSession && (
