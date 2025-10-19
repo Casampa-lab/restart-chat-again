@@ -125,7 +125,7 @@ export default function RegistrarIntervencaoCampo() {
         : 'Não conformidade registrada!'
       );
       
-      navigate('/modo-campo');
+      navigate('/minhas-intervencoes');
     } catch (error) {
       console.error('Erro ao enviar:', error);
       toast.error('Erro ao registrar intervenção');
