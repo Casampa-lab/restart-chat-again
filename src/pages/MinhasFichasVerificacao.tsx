@@ -8,7 +8,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { toast } from "sonner";
 import { useWorkSession } from "@/hooks/useWorkSession";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -62,6 +63,7 @@ export default function MinhasFichasVerificacao() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [userId, setUserId] = useState<string>();
   const [filtroStatus, setFiltroStatus] = useState<string>("todas");
+  const [mostrarEnviadas, setMostrarEnviadas] = useState(false);
   
   const { activeSession } = useWorkSession(userId);
 
@@ -194,22 +196,9 @@ export default function MinhasFichasVerificacao() {
     }
   };
 
-  const fichasFiltradas = fichas.filter(ficha => {
-    if (filtroStatus === "todas") return true;
-    if (filtroStatus === "rascunho") return !ficha.status || ficha.status === "rascunho";
-    if (filtroStatus === "pendente") return ficha.status === "pendente_aprovacao_coordenador";
-    if (filtroStatus === "aprovado") return ficha.status === "aprovado";
-    if (filtroStatus === "rejeitado") return ficha.status === "rejeitado";
-    return true;
-  });
-
-  const contadores = {
-    todas: fichas.length,
-    rascunho: fichas.filter(f => !f.status || f.status === "rascunho").length,
-    pendente: fichas.filter(f => f.status === "pendente_aprovacao_coordenador").length,
-    aprovado: fichas.filter(f => f.status === "aprovado").length,
-    rejeitado: fichas.filter(f => f.status === "rejeitado").length,
-  };
+  const fichasFiltradas = mostrarEnviadas
+    ? fichas.filter(f => f.status && f.status !== "rascunho")
+    : fichas.filter(f => !f.status || f.status === "rascunho");
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -225,46 +214,43 @@ export default function MinhasFichasVerificacao() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle>Minhas Fichas de Verificação (3.1.19)</CardTitle>
-          {activeSession && (
-            <Button onClick={() => setCreateDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Ficha
-            </Button>
-          )}
+          <div>
+            <CardTitle>Minhas Fichas de Verificação (3.1.19)</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Revise e envie suas fichas para o coordenador e fiscal
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {activeSession && (
+              <Button onClick={() => setCreateDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nova Ficha
+              </Button>
+            )}
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="mostrar-enviadas" 
+                checked={mostrarEnviadas}
+                onCheckedChange={(checked) => setMostrarEnviadas(checked as boolean)}
+              />
+              <Label htmlFor="mostrar-enviadas" className="cursor-pointer text-sm font-normal">
+                Mostrar fichas enviadas
+              </Label>
+            </div>
+          </div>
         </CardHeader>
           <CardContent>
             {loading ? (
               <p>Carregando...</p>
             ) : fichas.length === 0 ? (
               <p className="text-muted-foreground">Nenhuma ficha encontrada.</p>
+            ) : fichasFiltradas.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                {mostrarEnviadas 
+                  ? "Nenhuma ficha enviada encontrada." 
+                  : "Nenhum rascunho encontrado. Marque 'Mostrar fichas enviadas' para ver fichas já enviadas."}
+              </p>
             ) : (
-              <>
-                <Tabs value={filtroStatus} onValueChange={setFiltroStatus} className="mb-4">
-                  <TabsList className="grid w-full grid-cols-5">
-                    <TabsTrigger value="todas">
-                      Todas ({contadores.todas})
-                    </TabsTrigger>
-                    <TabsTrigger value="rascunho">
-                      Rascunhos ({contadores.rascunho})
-                    </TabsTrigger>
-                    <TabsTrigger value="pendente">
-                      Pendentes ({contadores.pendente})
-                    </TabsTrigger>
-                    <TabsTrigger value="aprovado">
-                      Aprovadas ({contadores.aprovado})
-                    </TabsTrigger>
-                    <TabsTrigger value="rejeitado">
-                      Rejeitadas ({contadores.rejeitado})
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-
-                {fichasFiltradas.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">
-                    Nenhuma ficha encontrada com este status.
-                  </p>
-                ) : (
               <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -357,8 +343,6 @@ export default function MinhasFichasVerificacao() {
                     </TableBody>
                   </Table>
               </div>
-                )}
-              </>
             )}
           </CardContent>
         </Card>
