@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, MapPin, Camera, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Camera, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { IntervencoesSVForm } from '@/components/IntervencoesSVForm';
@@ -188,14 +188,16 @@ export default function RegistrarIntervencaoCampo() {
               {TIPOS_ELEMENTOS.find(t => t.value === tipoSelecionado)?.label}
             </Badge>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => {
                 setTipoSelecionado('');
                 setDadosIntervencao(null);
               }}
+              className="h-8"
             >
-              Mudar
+              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+              Alterar
             </Button>
           </div>
 
