@@ -31,6 +31,13 @@ const TIPO_ELEMENTO_LABELS: Record<string, string> = {
   defensas: "Defensas",
 };
 
+const GRUPOS_ELEMENTOS = {
+  todos: ["placas", "marcas_longitudinais", "inscricoes", "tachas", "cilindros", "porticos", "defensas"],
+  sv: ["placas", "porticos"],
+  sh: ["marcas_longitudinais", "inscricoes", "tachas", "cilindros"],
+  def: ["defensas"],
+};
+
 interface EvolucaoGeral {
   tipo_elemento: string;
   total_elementos: number;
@@ -41,7 +48,8 @@ interface EvolucaoGeral {
 
 export default function InventarioDinamico() {
   const navigate = useNavigate();
-  const [tipoElemento, setTipoElemento] = useState<string>("placas");
+  const [grupoSelecionado, setGrupoSelecionado] = useState<string>("sh");
+  const [tipoElemento, setTipoElemento] = useState<string>("marcas_longitudinais");
 
   // Buscar estatísticas gerais
   const { data: evolucaoGeral } = useQuery({
@@ -70,7 +78,7 @@ export default function InventarioDinamico() {
     },
   });
 
-  // Calcular totais
+  // Calcular totais gerais e por grupo
   const totaisGerais = evolucaoGeral?.reduce(
     (acc, item) => ({
       total: acc.total + item.total_elementos,
@@ -80,6 +88,27 @@ export default function InventarioDinamico() {
     }),
     { total: 0, originais: 0, manutencao: 0, execucao: 0 }
   );
+
+  const totaisGrupo = evolucaoGeral
+    ?.filter((item) => GRUPOS_ELEMENTOS[grupoSelecionado as keyof typeof GRUPOS_ELEMENTOS]?.includes(item.tipo_elemento))
+    .reduce(
+      (acc, item) => ({
+        total: acc.total + item.total_elementos,
+        originais: acc.originais + item.originais,
+        manutencao: acc.manutencao + item.manutencao_pre_projeto,
+        execucao: acc.execucao + item.execucao_projeto,
+      }),
+      { total: 0, originais: 0, manutencao: 0, execucao: 0 }
+    );
+
+  // Quando mudar de grupo, selecionar o primeiro tipo do grupo
+  const handleGrupoChange = (grupo: string) => {
+    setGrupoSelecionado(grupo);
+    const primeiroTipo = GRUPOS_ELEMENTOS[grupo as keyof typeof GRUPOS_ELEMENTOS]?.[0];
+    if (primeiroTipo) {
+      setTipoElemento(primeiroTipo);
+    }
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -178,7 +207,7 @@ export default function InventarioDinamico() {
         </Card>
       </div>
 
-      {/* Tabs por Tipo de Elemento */}
+      {/* Tabs por Grupo de Elementos */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -186,79 +215,141 @@ export default function InventarioDinamico() {
             Evolução por Tipo de Elemento
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <Tabs value={tipoElemento} onValueChange={setTipoElemento}>
-            <TabsList className="grid w-full grid-cols-7">
-              <TabsTrigger value="placas">Placas</TabsTrigger>
-              <TabsTrigger value="marcas_longitudinais">Marcas</TabsTrigger>
-              <TabsTrigger value="inscricoes">Inscrições</TabsTrigger>
-              <TabsTrigger value="tachas">Tachas</TabsTrigger>
-              <TabsTrigger value="cilindros">Cilindros</TabsTrigger>
-              <TabsTrigger value="porticos">Pórticos</TabsTrigger>
-              <TabsTrigger value="defensas">Defensas</TabsTrigger>
+        <CardContent className="space-y-4">
+          {/* Tabs de Grupo Principal */}
+          <Tabs value={grupoSelecionado} onValueChange={handleGrupoChange}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="todos">Todos</TabsTrigger>
+              <TabsTrigger value="sv">🚦 SV</TabsTrigger>
+              <TabsTrigger value="sh">🛣️ SH</TabsTrigger>
+              <TabsTrigger value="def">🛡️ Def</TabsTrigger>
             </TabsList>
+          </Tabs>
 
-            <TabsContent value={tipoElemento} className="space-y-4 mt-4">
-              {/* Estatísticas do Tipo Selecionado */}
-              {evolucaoGeral && (
-                <div className="grid md:grid-cols-4 gap-4">
-                  {evolucaoGeral
-                    .filter((item) => item.tipo_elemento === tipoElemento)
-                    .map((item) => (
-                      <>
-                        <Card key={`${item.tipo_elemento}-total`}>
-                          <CardHeader className="pb-2">
-                            <CardDescription>Total</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-2xl font-bold">{item.total_elementos}</div>
-                          </CardContent>
-                        </Card>
+          {/* Sub-filtro de Tipo de Elemento */}
+          {grupoSelecionado !== "todos" && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Tipo:</span>
+              <Select value={tipoElemento} onValueChange={setTipoElemento}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {GRUPOS_ELEMENTOS[grupoSelecionado as keyof typeof GRUPOS_ELEMENTOS]?.map((tipo) => (
+                    <SelectItem key={tipo} value={tipo}>
+                      {TIPO_ELEMENTO_LABELS[tipo]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-                        <Card key={`${item.tipo_elemento}-originais`}>
-                          <CardHeader className="pb-2">
-                            <CardDescription>⚪ Originais</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-2xl font-bold">{item.originais}</div>
-                            <p className="text-xs text-muted-foreground">
-                              {((item.originais / item.total_elementos) * 100).toFixed(1)}%
-                            </p>
-                          </CardContent>
-                        </Card>
+          {/* Estatísticas do Grupo ou Tipo */}
+          <div className="grid md:grid-cols-4 gap-4">
+            {grupoSelecionado === "todos" ? (
+              <>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>Total</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{totaisGerais?.total || 0}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>⚪ Originais</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{totaisGerais?.originais || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {totaisGerais?.total
+                        ? ((totaisGerais.originais / totaisGerais.total) * 100).toFixed(1)
+                        : 0}%
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>🟡 Manutenção</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{totaisGerais?.manutencao || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {totaisGerais?.total
+                        ? ((totaisGerais.manutencao / totaisGerais.total) * 100).toFixed(1)
+                        : 0}%
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>🟢 Execução</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{totaisGerais?.execucao || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {totaisGerais?.total
+                        ? ((totaisGerais.execucao / totaisGerais.total) * 100).toFixed(1)
+                        : 0}%
+                    </p>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              evolucaoGeral
+                ?.filter((item) => item.tipo_elemento === tipoElemento)
+                .map((item) => (
+                  <>
+                    <Card key={`${item.tipo_elemento}-total`}>
+                      <CardHeader className="pb-2">
+                        <CardDescription>Total</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{item.total_elementos}</div>
+                      </CardContent>
+                    </Card>
+                    <Card key={`${item.tipo_elemento}-originais`}>
+                      <CardHeader className="pb-2">
+                        <CardDescription>⚪ Originais</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{item.originais}</div>
+                        <p className="text-xs text-muted-foreground">
+                          {((item.originais / item.total_elementos) * 100).toFixed(1)}%
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card key={`${item.tipo_elemento}-manutencao`}>
+                      <CardHeader className="pb-2">
+                        <CardDescription>🟡 Manutenção</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{item.manutencao_pre_projeto}</div>
+                        <p className="text-xs text-muted-foreground">
+                          {((item.manutencao_pre_projeto / item.total_elementos) * 100).toFixed(1)}%
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card key={`${item.tipo_elemento}-execucao`}>
+                      <CardHeader className="pb-2">
+                        <CardDescription>🟢 Execução</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{item.execucao_projeto}</div>
+                        <p className="text-xs text-muted-foreground">
+                          {((item.execucao_projeto / item.total_elementos) * 100).toFixed(1)}%
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </>
+                ))
+            )}
+          </div>
 
-                        <Card key={`${item.tipo_elemento}-manutencao`}>
-                          <CardHeader className="pb-2">
-                            <CardDescription>🟡 Manutenção</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-2xl font-bold">{item.manutencao_pre_projeto}</div>
-                            <p className="text-xs text-muted-foreground">
-                              {((item.manutencao_pre_projeto / item.total_elementos) * 100).toFixed(
-                                1
-                              )}
-                              %
-                            </p>
-                          </CardContent>
-                        </Card>
-
-                        <Card key={`${item.tipo_elemento}-execucao`}>
-                          <CardHeader className="pb-2">
-                            <CardDescription>🟢 Execução</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-2xl font-bold">{item.execucao_projeto}</div>
-                            <p className="text-xs text-muted-foreground">
-                              {((item.execucao_projeto / item.total_elementos) * 100).toFixed(1)}%
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </>
-                    ))}
-                </div>
-              )}
-
-              {/* Tabela de Evolução Detalhada */}
+          {/* Tabela de Evolução Detalhada */}
+          {grupoSelecionado !== "todos" && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -357,8 +448,7 @@ export default function InventarioDinamico() {
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
+          )}
         </CardContent>
       </Card>
 
