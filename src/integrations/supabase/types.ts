@@ -3237,6 +3237,7 @@ export type Database = {
           rodovia_id: string
           sincronizado_sharepoint: boolean | null
           situacao: string | null
+          snv: string | null
           tipo_nc: string | null
           tipo_obra: string | null
           updated_at: string | null
@@ -3275,6 +3276,7 @@ export type Database = {
           rodovia_id: string
           sincronizado_sharepoint?: boolean | null
           situacao?: string | null
+          snv?: string | null
           tipo_nc?: string | null
           tipo_obra?: string | null
           updated_at?: string | null
@@ -3313,6 +3315,7 @@ export type Database = {
           rodovia_id?: string
           sincronizado_sharepoint?: boolean | null
           situacao?: string | null
+          snv?: string | null
           tipo_nc?: string | null
           tipo_obra?: string | null
           updated_at?: string | null
