@@ -636,17 +636,20 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           try {
             const novoElemento: any = await criarElementoNoInventario(nec, tipo, user?.id, coordenadorData?.id);
             
-            if (novoElemento && novoElemento.id) {
-              await supabase
-                .from(tipoConfig.tabela_necessidade as any)
-                .update({ 
-                  match_cadastro_id: novoElemento.id,
-                  match_timestamp: new Date().toISOString(),
-                  divergencia_identificada: false
-                })
-                .eq('id', nec.id);
-              
-              resultados.elementosNovos++;
+            if (novoElemento) {
+              const elementoId = novoElemento.id;
+              if (elementoId) {
+                await supabase
+                  .from(tipoConfig.tabela_necessidade as any)
+                  .update({ 
+                    match_cadastro_id: elementoId,
+                    match_timestamp: new Date().toISOString(),
+                    divergencia_identificada: false
+                  })
+                  .eq('id', nec.id);
+                
+                resultados.elementosNovos++;
+              }
             }
           } catch (err: any) {
             // Silenciar erro de criação
