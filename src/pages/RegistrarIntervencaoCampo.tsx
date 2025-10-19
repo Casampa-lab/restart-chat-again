@@ -45,6 +45,17 @@ const CAMPOS_FK: Record<string, string> = {
   'placas': 'ficha_placa_id'
 };
 
+// Mapeamento de tipos para abas na página de Minhas Intervenções
+const TABS_MAP: Record<string, string> = {
+  'cilindros': 'cilindros',
+  'defensas': 'defensas',
+  'marcas_longitudinais': 'sh',
+  'placas': 'sv',
+  'inscricoes': 'inscricoes',
+  'tachas': 'tacha',
+  'porticos': 'porticos'
+};
+
 const TIPOS_ELEMENTOS = [
   { value: 'cilindros', label: '🔵 Cilindro', component: IntervencoesCilindrosForm },
   { value: 'defensas', label: '🛡️ Defensa', component: DefensasIntervencoesForm },
@@ -187,7 +198,8 @@ export default function RegistrarIntervencaoCampo() {
         : 'Não conformidade registrada!'
       );
       
-      navigate('/minhas-intervencoes');
+      const tabDestino = TABS_MAP[tipoSelecionado] || 'sh';
+      navigate(`/minhas-intervencoes?tab=${tabDestino}`);
     } catch (error) {
       console.error('Erro ao enviar:', error);
       toast.error('Erro ao registrar intervenção');
