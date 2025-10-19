@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeft, Edit, Trash2, Bell, Plus } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Send, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import NCEditDialog from "@/components/NCEditDialog";
 import { generateNCPDF } from "@/lib/pdfGenerator";
@@ -265,7 +265,7 @@ const MinhasNCs = () => {
                                     : "Enviar para Coordenador"
                               }
                             >
-                              <Bell className="h-4 w-4" />
+                              <Send className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
