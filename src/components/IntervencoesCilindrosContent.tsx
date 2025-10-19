@@ -160,28 +160,31 @@ const IntervencoesCilindrosContent = () => {
 
       toast.success("Intervenção excluída com sucesso!");
       
-      // Recarregar dados
-      const { data: userCilindros } = await supabase
-        .from("ficha_cilindros")
-        .select("id, lote_id, rodovia_id, km_inicial, km_final")
-        .eq("user_id", user!.id);
-
-      const cilindrosMap = new Map(
-        (userCilindros || []).map(c => [c.id, c])
-      );
-
-      const { data: intervencoesData } = await supabase
+      // Recarregar dados usando a mesma lógica do useEffect inicial
+      const { data: intervencoesData, error: reloadError } = await supabase
         .from("ficha_cilindros_intervencoes")
         .select("*")
-        .in("ficha_cilindros_id", Array.from(cilindrosMap.keys()))
+        .eq("user_id", user!.id)
         .order("data_intervencao", { ascending: false });
 
-      const intervencoesComDados = (intervencoesData || []).map(i => ({
-        ...i,
-        ficha_cilindros: cilindrosMap.get(i.ficha_cilindros_id)
-      }));
+      if (reloadError) throw reloadError;
 
-      setIntervencoes(intervencoesComDados as IntervencaoCilindro[]);
+      // Para cada intervenção com FK, buscar dados do cilindro
+      const intervencoesFull = await Promise.all(
+        (intervencoesData || []).map(async (int) => {
+          if (int.ficha_cilindros_id) {
+            const { data: cilindro } = await supabase
+              .from("ficha_cilindros")
+              .select("id, lote_id, rodovia_id, km_inicial, km_final")
+              .eq("id", int.ficha_cilindros_id)
+              .single();
+            return { ...int, ficha_cilindros: cilindro };
+          }
+          return { ...int, ficha_cilindros: null };
+        })
+      );
+
+      setIntervencoes(intervencoesFull as IntervencaoCilindro[]);
     } catch (error: any) {
       toast.error("Erro ao excluir intervenção: " + error.message);
     } finally {
@@ -212,28 +215,31 @@ const IntervencoesCilindrosContent = () => {
 
       toast.success("Intervenção atualizada com sucesso!");
       
-      // Recarregar dados
-      const { data: userCilindros } = await supabase
-        .from("ficha_cilindros")
-        .select("id, lote_id, rodovia_id, km_inicial, km_final")
-        .eq("user_id", user!.id);
-
-      const cilindrosMap = new Map(
-        (userCilindros || []).map(c => [c.id, c])
-      );
-
-      const { data: intervencoesData } = await supabase
+      // Recarregar dados usando a mesma lógica do useEffect inicial
+      const { data: intervencoesData, error: reloadError } = await supabase
         .from("ficha_cilindros_intervencoes")
         .select("*")
-        .in("ficha_cilindros_id", Array.from(cilindrosMap.keys()))
+        .eq("user_id", user!.id)
         .order("data_intervencao", { ascending: false });
 
-      const intervencoesComDados = (intervencoesData || []).map(i => ({
-        ...i,
-        ficha_cilindros: cilindrosMap.get(i.ficha_cilindros_id)
-      }));
+      if (reloadError) throw reloadError;
 
-      setIntervencoes(intervencoesComDados as IntervencaoCilindro[]);
+      // Para cada intervenção com FK, buscar dados do cilindro
+      const intervencoesFull = await Promise.all(
+        (intervencoesData || []).map(async (int) => {
+          if (int.ficha_cilindros_id) {
+            const { data: cilindro } = await supabase
+              .from("ficha_cilindros")
+              .select("id, lote_id, rodovia_id, km_inicial, km_final")
+              .eq("id", int.ficha_cilindros_id)
+              .single();
+            return { ...int, ficha_cilindros: cilindro };
+          }
+          return { ...int, ficha_cilindros: null };
+        })
+      );
+
+      setIntervencoes(intervencoesFull as IntervencaoCilindro[]);
     } catch (error: any) {
       toast.error("Erro ao atualizar intervenção: " + error.message);
     } finally {
