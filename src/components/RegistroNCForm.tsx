@@ -20,7 +20,6 @@ interface RegistroNCFormProps {
 }
 
 const formSchema = z.object({
-  numero_registro: z.string().min(1, "Número do registro é obrigatório"),
   data_registro: z.string().min(1, "Data é obrigatória"),
   natureza: z.enum(["S.H.", "S.V.", "D.S.", "Outra"]),
   natureza_outra: z.string().optional(),
@@ -56,7 +55,6 @@ export function RegistroNCForm({ loteId, rodoviaId }: RegistroNCFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      numero_registro: "",
       data_registro: new Date().toISOString().split('T')[0],
       km_inicial: "",
       km_final: "",
@@ -143,34 +141,27 @@ export function RegistroNCForm({ loteId, rodoviaId }: RegistroNCFormProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Generate NC number
-      const { data: ncNumber } = await supabase.rpc('generate_nc_number');
-      if (!ncNumber) throw new Error("Erro ao gerar número da NC");
-
-      // Insert main record
+      // Insert main record (numero_nc será gerado automaticamente pelo trigger)
       const { data: registro, error: registroError } = await supabase
-        .from("registro_nc")
-        .insert({
-          numero_registro: ncNumber,
+        .from("nao_conformidades")
+        .insert([{
+          numero_nc: '', // Será preenchido automaticamente pelo trigger
           user_id: user.id,
           lote_id: loteId,
           rodovia_id: rodoviaId,
-          data_registro: values.data_registro,
+          data_ocorrencia: values.data_registro,
+          tipo_nc: 'Outro',
           km_inicial: parseFloat(values.km_inicial),
           km_final: parseFloat(values.km_final),
           snv: values.snv || null,
-          supervisora: values.supervisora,
-          contrato_supervisora: values.contrato_supervisora || null,
-          construtora: values.construtora,
-          contrato_construtora: values.contrato_construtora || null,
+          empresa: values.construtora,
           tipo_obra: values.tipo_obra,
           natureza: values.natureza,
-          natureza_outra: values.natureza_outra || null,
           grau: values.grau,
           problema_identificado: values.problema_identificado,
           comentarios_supervisora: values.comentarios_supervisora || null,
-          comentarios_executora: values.comentarios_executora || null,
-        })
+          situacao: 'Não Atendida',
+        }])
         .select()
         .single();
 
@@ -194,14 +185,13 @@ export function RegistroNCForm({ loteId, rodoviaId }: RegistroNCFormProps) {
 
         // Insert photo record
         const { error: fotoError } = await supabase
-          .from("registro_nc_fotos")
+          .from("nao_conformidades_fotos")
           .insert({
-            registro_nc_id: registro.id,
+            nc_id: registro.id,
             ordem: i + 1,
             foto_url: publicUrl,
             snv: foto.snv || null,
             km: foto.km ? parseFloat(foto.km) : null,
-            sentido: foto.sentido || null,
             latitude: foto.latitude ? parseFloat(foto.latitude) : null,
             longitude: foto.longitude ? parseFloat(foto.longitude) : null,
             descricao: foto.descricao || null,
@@ -210,7 +200,7 @@ export function RegistroNCForm({ loteId, rodoviaId }: RegistroNCFormProps) {
         if (fotoError) throw fotoError;
       }
 
-      toast.success(`Registro NC ${ncNumber} criado com sucesso!`);
+      toast.success(`Registro NC ${registro.numero_nc} criado com sucesso!`);
       form.reset();
       fotos.forEach(f => URL.revokeObjectURL(f.preview));
       setFotos([]);

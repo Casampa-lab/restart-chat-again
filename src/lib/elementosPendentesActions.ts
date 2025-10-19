@@ -222,13 +222,6 @@ export async function rejeitarElemento(elementoId: string, observacao: string, g
     // 3. Criar NC automaticamente
     const tipoNC = mapTipoElementoParaTipoNC(elemento.tipo_elemento as TipoElemento);
     
-    // Gerar número de NC
-    const { data: ncNumber } = await supabase.rpc('generate_nc_number');
-    
-    if (!ncNumber) {
-      throw new Error('Erro ao gerar número da NC');
-    }
-    
     const dadosElemento = elemento.dados_elemento as any;
     
     const getTipoLabel = (tipo: string): string => {
@@ -261,8 +254,9 @@ export async function rejeitarElemento(elementoId: string, observacao: string, g
     // Determinar se é elemento linear (com extensão) ou pontual
     const isLinear = ['marcas_longitudinais', 'tachas', 'inscricoes', 'defensas'].includes(elemento.tipo_elemento);
     
+    // numero_nc será gerado automaticamente pelo trigger
     const ncData: any = {
-      numero_nc: ncNumber,
+      numero_nc: '', // Será preenchido automaticamente pelo trigger
       user_id: elemento.user_id,
       rodovia_id: elemento.rodovia_id,
       lote_id: elemento.lote_id,
@@ -338,7 +332,7 @@ export async function rejeitarElemento(elementoId: string, observacao: string, g
         user_id: elemento.user_id,
         tipo: 'elemento_rejeitado',
         titulo: '❌ Elemento Rejeitado',
-        mensagem: `Seu elemento ${getTipoLabel(elemento.tipo_elemento)} foi rejeitado. Uma NC foi criada automaticamente: ${ncNumber}. Motivo: ${observacao}`,
+        mensagem: `Seu elemento ${getTipoLabel(elemento.tipo_elemento)} foi rejeitado. Uma NC foi criada automaticamente: ${ncCreated.numero_nc}. Motivo: ${observacao}`,
         elemento_pendente_id: elementoId,
         nc_id: ncCreated.id
       });

@@ -3269,7 +3269,7 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           natureza?: string | null
-          numero_nc?: string
+          numero_nc: string
           observacao?: string | null
           prazo_atendimento?: number | null
           problema_identificado?: string | null
@@ -5335,10 +5335,6 @@ export type Database = {
         }[]
       }
       generate_codigo_convite: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_nc_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
