@@ -137,7 +137,12 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
       const photoDate = await extractDateFromPhotos(file);
       if (photoDate) {
         setDataVerificacao(photoDate);
-        toast.success(`📅 Data de verificação atualizada: ${photoDate}`);
+        console.log(`📅 Data capturada da foto: ${photoDate}`);
+      } else {
+        // Fallback: usar data atual se não conseguir extrair da foto
+        const hoje = new Date().toISOString().split('T')[0];
+        setDataVerificacao(hoje);
+        console.log(`📅 Data não encontrada na foto, usando data atual: ${hoje}`);
       }
     }
   };
@@ -189,6 +194,11 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!dataVerificacao) {
+      toast.error("Data de verificação não foi capturada. Adicione pelo menos uma foto.");
+      return;
+    }
 
     if (itens.length === 0) {
       toast.error("Adicione pelo menos 1 ponto de verificação");
@@ -357,20 +367,9 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
           <CardTitle>Informações Gerais - Sinalização Vertical</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>SNV</Label>
-              <Input value={snv} onChange={(e) => setSnv(e.target.value)} />
-            </div>
-            <div>
-              <Label>Data da Verificação</Label>
-              <Input
-                type="date"
-                value={dataVerificacao}
-                onChange={(e) => setDataVerificacao(e.target.value)}
-                required
-              />
-            </div>
+          <div>
+            <Label>SNV</Label>
+            <Input value={snv} onChange={(e) => setSnv(e.target.value)} />
           </div>
         </CardContent>
       </Card>
