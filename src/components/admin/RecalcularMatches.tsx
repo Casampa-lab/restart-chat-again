@@ -556,7 +556,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
 
       try {
         let matchesCandidatos: any[] = [];
-        let divergencia_identificada = false;
+        let divergenciaIdentificada = false;
 
         const usarMatchLinear = TIPOS_COM_MATCH_LINEAR.includes(tipo);
 
@@ -569,50 +569,35 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
         let servicoInferido = nec.servico || 'Pendente Revisão';
         
         if (servicoInferido === 'Remover') {
-          divergencia_identificada = false;
+          divergenciaIdentificada = false;
         } else if (matchesCandidatos.length === 0) {
           if (servicoInferido === 'Substituir' || servicoInferido === 'Manter') {
-            divergencia_identificada = true;
+            divergenciaIdentificada = true;
           } else if (servicoInferido === 'Implantar') {
-            divergencia_identificada = false;
+            divergenciaIdentificada = false;
           }
         } else {
           if (servicoInferido === 'Implantar') {
-            divergencia_identificada = true;
+            divergenciaIdentificada = true;
           } else {
-            divergencia_identificada = false;
+            divergenciaIdentificada = false;
           }
         }
 
         const matchData: any = {
-          status_reconciliacao: null,
-          observacao_reconciliacao: null,
-          match_cadastro_id: matchesCandidatos[0]?.cadastro_id || null,
-          match_tipo: usarMatchLinear
-            ? matchesCandidatos[0]?.tipo_match || null
+          cadastro_id: matchesCandidatos[0]?.cadastro_id || null,
+          distancia_match_metros: !usarMatchLinear 
+            ? matchesCandidatos[0]?.distancia_metros || null 
             : null,
-          match_overlap_km: usarMatchLinear
-            ? matchesCandidatos[0]?.overlap_km || null
-            : null,
-          match_overlap_porcentagem: usarMatchLinear
-            ? matchesCandidatos[0]?.overlap_porcentagem || null
-            : null,
-          match_distancia_metros: !usarMatchLinear
-            ? matchesCandidatos[0]?.distancia_metros || null
-            : null,
-          match_diferenca_km: !usarMatchLinear
-            ? matchesCandidatos[0]?.diferenca_km || null
-            : null,
-          match_timestamp: new Date().toISOString(),
           servico_inferido: servicoInferido,
-          divergencia_identificada
+          divergencia: divergenciaIdentificada
         };
 
         if (TIPOS_COM_STATUS_REVISAO.includes(tipo)) {
           const statusRevisaoAtual = nec.status_revisao;
           if (statusRevisaoAtual === 'aprovado_coordenador') {
             matchData.status_revisao = 'aprovado_coordenador';
-          } else if (divergencia_identificada || matchesCandidatos.length === 0) {
+          } else if (divergenciaIdentificada || matchesCandidatos.length === 0) {
             matchData.status_revisao = 'pendente_revisao';
           } else {
             matchData.status_revisao = 'match_automatico';
@@ -626,7 +611,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
 
         if (updateError) throw updateError;
 
-        if (divergencia_identificada) {
+        if (divergenciaIdentificada) {
           resultados.divergencias++;
         } else {
           resultados.matches++;
@@ -642,9 +627,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
                 await supabase
                   .from(tipoConfig.tabela_necessidade as any)
                   .update({ 
-                    match_cadastro_id: elementoId,
-                    match_timestamp: new Date().toISOString(),
-                    divergencia_identificada: false
+                    cadastro_id: elementoId,
+                    divergencia: false
                   })
                   .eq('id', nec.id);
                 
