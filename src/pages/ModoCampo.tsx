@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   Map, 
@@ -12,11 +11,12 @@ import {
 } from 'lucide-react';
 import { useWorkSession } from '@/hooks/useWorkSession';
 import { useAuth } from '@/hooks/useAuth';
+import { SessionManagerMobile } from '@/components/SessionManagerMobile';
 
 export default function ModoCampo() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { activeSession } = useWorkSession(user?.id);
+  const { activeSession, refreshSession } = useWorkSession(user?.id);
 
   const menuItems = [
     {
@@ -73,23 +73,21 @@ export default function ModoCampo() {
         </div>
 
         {/* Sessão Ativa */}
-        {activeSession && (
-          <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Sessão Ativa</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="outline" className="bg-background">
-                      📍 {activeSession.lote?.numero || 'Lote não identificado'}
-                    </Badge>
-                    <Badge variant="outline" className="bg-background">
-                      🛣️ {activeSession.rodovia?.codigo || 'Rodovia não identificada'}
-                    </Badge>
-                  </div>
-                </div>
-                <Badge className="bg-green-500 text-white">Ativa</Badge>
-              </div>
+        {activeSession ? (
+          <SessionManagerMobile
+            userId={user?.id!}
+            activeSession={activeSession}
+            onSessionChanged={refreshSession}
+          />
+        ) : (
+          <Card className="border-primary/20">
+            <CardContent className="pt-6 text-center">
+              <p className="text-muted-foreground mb-4">
+                Nenhuma sessão ativa. Inicie uma sessão para trabalhar.
+              </p>
+              <Button onClick={() => navigate('/')}>
+                Iniciar Sessão
+              </Button>
             </CardContent>
           </Card>
         )}
