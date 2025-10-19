@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeft, Edit, Trash2, Bell } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Bell, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import NCEditDialog from "@/components/NCEditDialog";
 import { generateNCPDF } from "@/lib/pdfGenerator";
@@ -147,13 +147,21 @@ const MinhasNCs = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <Button variant="navigation" onClick={() => navigate(-1)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar
           </Button>
           
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+            <Button 
+              onClick={() => navigate('/modo-campo/registrar-nc')}
+              className="w-full sm:w-auto"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Nova NC
+            </Button>
+            
             <div className="flex items-center gap-2">
               <label htmlFor="show-enviadas" className="text-sm cursor-pointer">
                 Mostrar NCs enviadas

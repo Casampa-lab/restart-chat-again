@@ -43,6 +43,7 @@ import DocumentacaoVABLE from "./pages/DocumentacaoVABLE";
 import AuditoriaInventario from "./pages/AuditoriaInventario";
 import InventarioDinamico from "./pages/InventarioDinamico";
 import ValidacaoFichasVerificacao from "./pages/ValidacaoFichasVerificacao";
+import RegistrarNC from "./pages/RegistrarNC";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,7 @@ const App = () => (
         <Route path="/minhas-necessidades-relatorios" element={<MinhasNecessidadesRelatorios />} />
         <Route path="/reconciliacao-pendente" element={<ReconciliacaoPendente />} />
         <Route path="/modo-campo/registrar-intervencao" element={<RegistrarIntervencaoCampo />} />
+        <Route path="/modo-campo/registrar-nc" element={<RegistrarNC />} />
         <Route path="/dashboard-necessidades" element={<DashboardNecessidades />} />
         <Route path="/auditoria-sinalizacoes" element={<AuditoriaSinalizacoes />} />
         <Route path="/auditoria-inventario" element={<AuditoriaInventario />} />
