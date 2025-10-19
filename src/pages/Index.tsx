@@ -36,6 +36,8 @@ import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
 import { IntervencoesCilindrosForm } from "@/components/IntervencoesCilindrosForm";
 import { IntervencoesPorticosForm } from "@/components/IntervencoesPorticosForm";
 import DefensasIntervencoesForm from "@/components/DefensasIntervencoesForm";
+import { useMarcoZeroRecente } from "@/hooks/useMarcoZeroRecente";
+import { ConsolidatedInventoryBadge } from "@/components/ConsolidatedInventoryBadge";
 const Index = () => {
   const navigate = useNavigate();
   const {
@@ -254,6 +256,42 @@ const Index = () => {
     enabled: !!activeSession,
   });
 
+  // Verificar Marco Zero
+  const { data: marcoZero } = useMarcoZeroRecente({
+    loteId: activeSession?.lote_id,
+    rodoviaId: activeSession?.rodovia_id,
+  });
+
+  // Se Marco Zero existe, buscar dados consolidados
+  const { data: consolidatedData } = useQuery({
+    queryKey: ["inventario-consolidado", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      if (!activeSession?.lote_id || !activeSession?.rodovia_id) return null;
+      
+      const { data, error } = await supabase
+        .from("vw_inventario_consolidado")
+        .select("*")
+        .eq("lote_id", activeSession.lote_id)
+        .eq("rodovia_id", activeSession.rodovia_id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      if (!data) return null;
+      
+      // Transformar dados da view em objeto para acesso fácil
+      return {
+        marcas_longitudinais: data.total_marcas_longitudinais || 0,
+        cilindros: data.total_cilindros || 0,
+        inscricoes: data.total_inscricoes || 0,
+        tachas: data.total_tachas || 0,
+        placas: data.total_placas || 0,
+        porticos: data.total_porticos || 0,
+        defensas: data.total_defensas || 0,
+      } as Record<string, number>;
+    },
+    enabled: !!activeSession?.lote_id && !!activeSession?.rodovia_id && !!marcoZero,
+  });
+
   // Contador de elementos pendentes (para coordenadores)
   const { data: countPendentes } = useQuery({
     queryKey: ["count-elementos-pendentes"],
@@ -333,6 +371,50 @@ const Index = () => {
     setElementoParaIntervencao(elemento);
     setTipoIntervencao(tipo);
     setIntervencaoDialogOpen(true);
+  };
+
+  // Função para renderizar badges (consolidado ou separado)
+  const renderInventoryBadge = (
+    tipoElemento: string,
+    countCadastro: number | undefined,
+    countNecessidades: number | undefined
+  ) => {
+    // Se existe Marco Zero, mostrar badge consolidado
+    if (marcoZero && consolidatedData?.[tipoElemento]) {
+      return (
+        <ConsolidatedInventoryBadge
+          total={consolidatedData[tipoElemento]}
+          dataMarcoZero={new Date(marcoZero.created_at)}
+        />
+      );
+    }
+
+    // Senão, mostrar badges separados (comportamento atual)
+    return (
+      <div className="flex items-center gap-1">
+        <Badge 
+          variant="secondary" 
+          className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate("/dashboard-necessidades");
+          }}
+          title="Cadastro - Clique para ver Necessidades"
+        >
+          {countCadastro || 0}
+        </Badge>
+        <Badge 
+          className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate("/dashboard-necessidades");
+          }}
+          title="Necessidades - Clique para acessar"
+        >
+          {countNecessidades || 0}
+        </Badge>
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -694,29 +776,7 @@ const Index = () => {
                       </TabsTrigger>
                       <TabsTrigger value="defensas-pront" className="flex items-center gap-2">
                         <span>Defensas</span>
-                        <div className="flex items-center gap-1">
-                          <Badge 
-                            variant="secondary" 
-                            className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate("/dashboard-necessidades");
-                            }}
-                            title="Cadastro - Clique para ver Necessidades"
-                          >
-                            {countDefensas || 0}
-                          </Badge>
-                          <Badge 
-                            className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate("/dashboard-necessidades");
-                            }}
-                            title="Necessidades - Clique para acessar"
-                          >
-                            {countNecDefensas || 0}
-                          </Badge>
-                        </div>
+                        {renderInventoryBadge("defensas", countDefensas, countNecDefensas)}
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="sh" className="mt-4">
@@ -724,107 +784,19 @@ const Index = () => {
                         <TabsList className="grid w-full grid-cols-4">
                           <TabsTrigger value="longitudinais" className="flex items-center gap-2">
                             <span>Marcas Longitudinais</span>
-                            <div className="flex items-center gap-1">
-                              <Badge 
-                                variant="secondary" 
-                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Cadastro - Clique para ver Necessidades"
-                              >
-                                {countMarcasLong || 0}
-                              </Badge>
-                              <Badge 
-                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Necessidades - Clique para acessar"
-                              >
-                                {countNecMarcasLong || 0}
-                              </Badge>
-                            </div>
+                            {renderInventoryBadge("marcas_longitudinais", countMarcasLong, countNecMarcasLong)}
                           </TabsTrigger>
                           <TabsTrigger value="transversais" className="flex items-center gap-2">
                             <span>Cilindros</span>
-                            <div className="flex items-center gap-1">
-                              <Badge 
-                                variant="secondary" 
-                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Cadastro - Clique para ver Necessidades"
-                              >
-                                {countCilindros || 0}
-                              </Badge>
-                              <Badge 
-                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Necessidades - Clique para acessar"
-                              >
-                                {countNecCilindros || 0}
-                              </Badge>
-                            </div>
+                            {renderInventoryBadge("cilindros", countCilindros, countNecCilindros)}
                           </TabsTrigger>
                           <TabsTrigger value="inscricoes" className="flex items-center gap-2">
                             <span>Zebrados, Setas, Símbolos e Legendas</span>
-                            <div className="flex items-center gap-1">
-                              <Badge 
-                                variant="secondary" 
-                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Cadastro - Clique para ver Necessidades"
-                              >
-                                {countInscricoes || 0}
-                              </Badge>
-                              <Badge 
-                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Necessidades - Clique para acessar"
-                              >
-                                {countNecInscricoes || 0}
-                              </Badge>
-                            </div>
+                            {renderInventoryBadge("inscricoes", countInscricoes, countNecInscricoes)}
                           </TabsTrigger>
                           <TabsTrigger value="tachas" className="flex items-center gap-2">
                             <span>Tachas</span>
-                            <div className="flex items-center gap-1">
-                              <Badge 
-                                variant="secondary" 
-                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Cadastro - Clique para ver Necessidades"
-                              >
-                                {countTachas || 0}
-                              </Badge>
-                              <Badge 
-                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Necessidades - Clique para acessar"
-                              >
-                                {countNecTachas || 0}
-                              </Badge>
-                            </div>
+                            {renderInventoryBadge("tachas", countTachas, countNecTachas)}
                           </TabsTrigger>
                         </TabsList>
                         <TabsContent value="longitudinais" className="mt-4">
@@ -862,55 +834,11 @@ const Index = () => {
                         <TabsList className="grid w-full grid-cols-2">
                           <TabsTrigger value="placas" className="flex items-center gap-2">
                             <span>Placas</span>
-                            <div className="flex items-center gap-1">
-                              <Badge 
-                                variant="secondary" 
-                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Cadastro - Clique para ver Necessidades"
-                              >
-                                {countPlacas || 0}
-                              </Badge>
-                              <Badge 
-                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Necessidades - Clique para acessar"
-                              >
-                                {countNecPlacas || 0}
-                              </Badge>
-                            </div>
+                            {renderInventoryBadge("placas", countPlacas, countNecPlacas)}
                           </TabsTrigger>
                           <TabsTrigger value="porticos" className="flex items-center gap-2">
                             <span>Pórticos (P/SM) e Braços Projetados</span>
-                            <div className="flex items-center gap-1">
-                              <Badge 
-                                variant="secondary" 
-                                className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Cadastro - Clique para ver Necessidades"
-                              >
-                                {countPorticos || 0}
-                              </Badge>
-                              <Badge 
-                                className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/dashboard-necessidades");
-                                }}
-                                title="Necessidades - Clique para acessar"
-                              >
-                                {countNecPorticos || 0}
-                              </Badge>
-                            </div>
+                            {renderInventoryBadge("porticos", countPorticos, countNecPorticos)}
                           </TabsTrigger>
                         </TabsList>
                         <TabsContent value="placas" className="mt-4">
