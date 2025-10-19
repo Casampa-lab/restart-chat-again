@@ -60,6 +60,7 @@ export default function RegistrarNC() {
         <NaoConformidadeSimples 
           loteId={activeSession.lote_id}
           rodoviaId={activeSession.rodovia_id}
+          onSuccess={() => navigate('/minhas-ncs')}
         />
       </div>
     </div>

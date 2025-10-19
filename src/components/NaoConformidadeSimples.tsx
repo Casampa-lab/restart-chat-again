@@ -22,9 +22,10 @@ interface FotoData {
 interface NaoConformidadeSimplesProps {
   loteId: string;
   rodoviaId: string;
+  onSuccess?: () => void;
 }
 
-const NaoConformidadeSimples = ({ loteId, rodoviaId }: NaoConformidadeSimplesProps) => {
+const NaoConformidadeSimples = ({ loteId, rodoviaId, onSuccess }: NaoConformidadeSimplesProps) => {
   const [loading, setLoading] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
   
@@ -230,6 +231,12 @@ const NaoConformidadeSimples = ({ loteId, rodoviaId }: NaoConformidadeSimplesPro
       if (insertError) throw insertError;
 
       toast.success("Não conformidade registrada com sucesso!");
+
+      // Chamar callback de sucesso se fornecido
+      if (onSuccess) {
+        onSuccess();
+        return;
+      }
 
       // Resetar formulário
       setFormData({
