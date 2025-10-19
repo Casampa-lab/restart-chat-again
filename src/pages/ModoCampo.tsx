@@ -6,8 +6,7 @@ import {
   Map, 
   Wrench, 
   AlertTriangle, 
-  Search, 
-  Construction,
+  Search,
   ChevronRight,
   ArrowLeft
 } from 'lucide-react';
@@ -51,14 +50,6 @@ export default function ModoCampo() {
       path: '/minhas-fichas-verificacao',
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
-    },
-    {
-      icon: Construction,
-      title: 'Frente de Serviço',
-      description: 'Gerenciar frentes liberadas',
-      path: '/minhas-frentes-liberadas',
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
     },
   ];
 
