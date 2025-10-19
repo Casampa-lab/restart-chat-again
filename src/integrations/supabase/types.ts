@@ -3467,6 +3467,7 @@ export type Database = {
           created_at: string | null
           data_importacao: string | null
           data_reconciliacao: string | null
+          distancia_match_metros: number | null
           divergencia: boolean | null
           espacamento_m: number | null
           extensao_km: number | null
@@ -3508,6 +3509,7 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
@@ -3549,6 +3551,7 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
@@ -3622,6 +3625,7 @@ export type Database = {
           data_reconciliacao: string | null
           distancia_bordo_pista_face_defensa_m: number | null
           distancia_face_defensa_obstaculo_m: number | null
+          distancia_match_metros: number | null
           distancia_pista_obstaculo_m: number | null
           divergencia: boolean | null
           espaco_trabalho: string | null
@@ -3688,6 +3692,7 @@ export type Database = {
           data_reconciliacao?: string | null
           distancia_bordo_pista_face_defensa_m?: number | null
           distancia_face_defensa_obstaculo_m?: number | null
+          distancia_match_metros?: number | null
           distancia_pista_obstaculo_m?: number | null
           divergencia?: boolean | null
           espaco_trabalho?: string | null
@@ -3754,6 +3759,7 @@ export type Database = {
           data_reconciliacao?: string | null
           distancia_bordo_pista_face_defensa_m?: number | null
           distancia_face_defensa_obstaculo_m?: number | null
+          distancia_match_metros?: number | null
           distancia_pista_obstaculo_m?: number | null
           divergencia?: boolean | null
           espaco_trabalho?: string | null
@@ -3839,6 +3845,7 @@ export type Database = {
           created_at: string | null
           data_importacao: string | null
           data_reconciliacao: string | null
+          distancia_match_metros: number | null
           divergencia: boolean | null
           espacamento_m: number | null
           espessura_cm: number | null
@@ -3885,6 +3892,7 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           espessura_cm?: number | null
@@ -3931,6 +3939,7 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           espessura_cm?: number | null
@@ -4003,6 +4012,7 @@ export type Database = {
           data_reconciliacao: string | null
           descricao: string | null
           dimensoes: string | null
+          distancia_match_metros: number | null
           divergencia: boolean | null
           espessura_mm: number | null
           estado_conservacao: string | null
@@ -4048,6 +4058,7 @@ export type Database = {
           data_reconciliacao?: string | null
           descricao?: string | null
           dimensoes?: string | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espessura_mm?: number | null
           estado_conservacao?: string | null
@@ -4093,6 +4104,7 @@ export type Database = {
           data_reconciliacao?: string | null
           descricao?: string | null
           dimensoes?: string | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espessura_mm?: number | null
           estado_conservacao?: string | null
@@ -4165,6 +4177,7 @@ export type Database = {
           data_reconciliacao: string | null
           dimensoes_mm: string | null
           distancia_m: number | null
+          distancia_match_metros: number | null
           divergencia: boolean | null
           id: string
           justificativa_reconciliacao: string | null
@@ -4214,6 +4227,7 @@ export type Database = {
           data_reconciliacao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
@@ -4263,6 +4277,7 @@ export type Database = {
           data_reconciliacao?: string | null
           dimensoes_mm?: string | null
           distancia_m?: number | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
@@ -4332,6 +4347,7 @@ export type Database = {
           created_at: string | null
           data_importacao: string | null
           data_reconciliacao: string | null
+          distancia_match_metros: number | null
           divergencia: boolean | null
           id: string
           justificativa_reconciliacao: string | null
@@ -4367,6 +4383,7 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
@@ -4402,6 +4419,7 @@ export type Database = {
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
@@ -4464,6 +4482,7 @@ export type Database = {
           data_importacao: string | null
           data_reconciliacao: string | null
           descricao: string | null
+          distancia_match_metros: number | null
           divergencia: boolean | null
           espacamento_m: number | null
           extensao_km: number | null
@@ -4507,6 +4526,7 @@ export type Database = {
           data_importacao?: string | null
           data_reconciliacao?: string | null
           descricao?: string | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
@@ -4550,6 +4570,7 @@ export type Database = {
           data_importacao?: string | null
           data_reconciliacao?: string | null
           descricao?: string | null
+          distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
           extensao_km?: number | null
