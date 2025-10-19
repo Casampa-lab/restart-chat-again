@@ -3205,10 +3205,12 @@ export type Database = {
       }
       nao_conformidades: {
         Row: {
+          aprovado_por: string | null
           comentarios_executora: string | null
           comentarios_supervisora: string | null
           contrato_supervisora: string | null
           created_at: string | null
+          data_aprovacao: string | null
           data_atendimento: string | null
           data_notificacao: string | null
           data_ocorrencia: string
@@ -3232,22 +3234,26 @@ export type Database = {
           natureza: string | null
           numero_nc: string
           observacao: string | null
+          observacao_coordenador: string | null
           prazo_atendimento: number | null
           problema_identificado: string | null
           rodovia_id: string
           sincronizado_sharepoint: boolean | null
           situacao: string | null
           snv: string | null
+          status_aprovacao: string | null
           tipo_nc: string | null
           tipo_obra: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          aprovado_por?: string | null
           comentarios_executora?: string | null
           comentarios_supervisora?: string | null
           contrato_supervisora?: string | null
           created_at?: string | null
+          data_aprovacao?: string | null
           data_atendimento?: string | null
           data_notificacao?: string | null
           data_ocorrencia: string
@@ -3271,22 +3277,26 @@ export type Database = {
           natureza?: string | null
           numero_nc: string
           observacao?: string | null
+          observacao_coordenador?: string | null
           prazo_atendimento?: number | null
           problema_identificado?: string | null
           rodovia_id: string
           sincronizado_sharepoint?: boolean | null
           situacao?: string | null
           snv?: string | null
+          status_aprovacao?: string | null
           tipo_nc?: string | null
           tipo_obra?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          aprovado_por?: string | null
           comentarios_executora?: string | null
           comentarios_supervisora?: string | null
           contrato_supervisora?: string | null
           created_at?: string | null
+          data_aprovacao?: string | null
           data_atendimento?: string | null
           data_notificacao?: string | null
           data_ocorrencia?: string
@@ -3310,18 +3320,27 @@ export type Database = {
           natureza?: string | null
           numero_nc?: string
           observacao?: string | null
+          observacao_coordenador?: string | null
           prazo_atendimento?: number | null
           problema_identificado?: string | null
           rodovia_id?: string
           sincronizado_sharepoint?: boolean | null
           situacao?: string | null
           snv?: string | null
+          status_aprovacao?: string | null
           tipo_nc?: string | null
           tipo_obra?: string | null
           updated_at?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "nao_conformidades_aprovado_por_fkey"
+            columns: ["aprovado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "nao_conformidades_lote_id_fkey"
             columns: ["lote_id"]

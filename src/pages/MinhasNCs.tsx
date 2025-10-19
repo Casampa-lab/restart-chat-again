@@ -30,6 +30,8 @@ interface NaoConformidade {
   empresa: string;
   enviado_coordenador: boolean;
   data_notificacao: string | null;
+  status_aprovacao: string;
+  observacao_coordenador: string | null;
   rodovias: {
     codigo: string;
   };
@@ -65,6 +67,8 @@ const MinhasNCs = () => {
           empresa,
           enviado_coordenador,
           data_notificacao,
+          status_aprovacao,
+          observacao_coordenador,
           rodovias(codigo),
           lotes(numero)
         `)
@@ -134,10 +138,20 @@ const MinhasNCs = () => {
     if (!nc.enviado_coordenador) {
       return <Badge variant="outline" className="bg-gray-100">Rascunho</Badge>;
     }
-    if (!nc.data_notificacao) {
-      return <Badge variant="outline" className="bg-yellow-100">Em Revisão</Badge>;
+    
+    if (nc.status_aprovacao === 'rejeitado') {
+      return <Badge variant="destructive">Rejeitada</Badge>;
     }
-    return <Badge variant="outline" className="bg-green-100">Notificada</Badge>;
+    
+    if (nc.status_aprovacao === 'aprovado' && nc.data_notificacao) {
+      return <Badge variant="outline" className="bg-green-100">Notificada</Badge>;
+    }
+    
+    if (nc.status_aprovacao === 'aprovado') {
+      return <Badge variant="outline" className="bg-blue-100">Aprovada</Badge>;
+    }
+    
+    return <Badge variant="outline" className="bg-yellow-100">Aguardando Aprovação</Badge>;
   };
 
   const filteredNCs = showEnviadas 
@@ -206,6 +220,7 @@ const MinhasNCs = () => {
                       <TableHead>Problema</TableHead>
                       <TableHead>Situação</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Observação Coord.</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -226,14 +241,29 @@ const MinhasNCs = () => {
                          <TableCell>
                           {getStatusBadge(nc)}
                         </TableCell>
+                        <TableCell>
+                          {nc.observacao_coordenador ? (
+                            <div className="max-w-xs truncate" title={nc.observacao_coordenador}>
+                              {nc.observacao_coordenador}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">-</span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEnviarParaCoordenador(nc.id)}
-                              disabled={nc.enviado_coordenador}
-                              title={nc.enviado_coordenador ? "NC já foi enviada ao coordenador" : "Enviar para Coordenador"}
+                              disabled={nc.enviado_coordenador || nc.status_aprovacao === 'rejeitado'}
+                              title={
+                                nc.status_aprovacao === 'rejeitado' 
+                                  ? "Corrija a NC primeiro antes de reenviar" 
+                                  : nc.enviado_coordenador 
+                                    ? "NC já foi enviada ao coordenador" 
+                                    : "Enviar para Coordenador"
+                              }
                             >
                               <Bell className="h-4 w-4" />
                             </Button>
@@ -244,8 +274,14 @@ const MinhasNCs = () => {
                                 setNcToEdit(nc.id);
                                 setEditDialogOpen(true);
                               }}
-                              disabled={nc.enviado_coordenador}
-                              title={nc.enviado_coordenador ? "Não é possível editar NCs já enviadas" : "Editar NC"}
+                              disabled={nc.enviado_coordenador && nc.status_aprovacao !== 'rejeitado'}
+                              title={
+                                nc.status_aprovacao === 'rejeitado'
+                                  ? "Editar NC rejeitada"
+                                  : nc.enviado_coordenador 
+                                    ? "Não é possível editar NCs em revisão" 
+                                    : "Editar NC"
+                              }
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -256,7 +292,8 @@ const MinhasNCs = () => {
                                 setNcToDelete(nc.id);
                                 setDeleteDialogOpen(true);
                               }}
-                              title="Excluir NC (não remove do banco)"
+                              disabled={nc.enviado_coordenador && nc.status_aprovacao !== 'rejeitado'}
+                              title="Excluir NC"
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>

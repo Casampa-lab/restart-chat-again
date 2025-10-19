@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeft, Send, Eye } from "lucide-react";
+import { ArrowLeft, Send, Eye, CheckCircle, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import AprovacaoNCDialog from "@/components/AprovacaoNCDialog";
 import { generateNCPDF } from "@/lib/pdfGenerator";
 import {
   Select,
@@ -32,6 +33,8 @@ interface NaoConformidade {
   natureza?: string;
   grau?: string;
   tipo_obra?: string;
+  status_aprovacao: string;
+  observacao_coordenador: string | null;
   rodovias: {
     codigo: string;
     nome: string;
@@ -55,6 +58,9 @@ const NCsCoordenador = () => {
   const [lotes, setLotes] = useState<Lote[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLote, setSelectedLote] = useState<string>("all");
+  const [aprovacaoDialogOpen, setAprovacaoDialogOpen] = useState(false);
+  const [ncToApprove, setNcToApprove] = useState<string | null>(null);
+  const [tipoAprovacao, setTipoAprovacao] = useState<'aprovar' | 'rejeitar'>('aprovar');
 
   useEffect(() => {
     checkRole();
@@ -116,7 +122,7 @@ const NCsCoordenador = () => {
     try {
       setLoading(true);
       
-      // Query principal sem o campo notificada que não existe
+      // Query principal: buscar NCs enviadas que ainda não foram notificadas
       const ncsQuery = (supabase as any)
         .from("nao_conformidades")
         .select("*")
@@ -186,6 +192,13 @@ const NCsCoordenador = () => {
   };
 
   const handleNotificarExecutora = async (ncId: string) => {
+    // Verificar se a NC foi aprovada
+    const nc = ncs.find(n => n.id === ncId);
+    if (nc?.status_aprovacao !== 'aprovado') {
+      toast.error("Apenas NCs aprovadas podem ser notificadas à executora");
+      return;
+    }
+
     console.log('🚀 Iniciando notificação para NC:', ncId);
     toast.info("Gerando PDF e enviando notificação...");
     
@@ -396,6 +409,17 @@ const NCsCoordenador = () => {
     }
   };
 
+  const getStatusAprovacaoBadge = (statusAprovacao: string) => {
+    switch (statusAprovacao) {
+      case 'aprovado':
+        return <Badge className="bg-green-100 text-green-800">Aprovada</Badge>;
+      case 'rejeitado':
+        return <Badge variant="destructive">Rejeitada</Badge>;
+      default:
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800">Pendente</Badge>;
+    }
+  };
+
   const filteredNCs = ncs;
 
   return (
@@ -465,7 +489,7 @@ const NCsCoordenador = () => {
                         <TableHead>km</TableHead>
                         <TableHead>Tipo</TableHead>
                         <TableHead>Grau</TableHead>
-                        <TableHead>Visualizar</TableHead>
+                        <TableHead>Status</TableHead>
                         <TableHead>Problema</TableHead>
                         <TableHead>Situação</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
@@ -486,16 +510,7 @@ const NCsCoordenador = () => {
                             <Badge variant="outline">{(nc as any).grau || "N/A"}</Badge>
                           </TableCell>
                           <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                // TODO: Implementar visualização de detalhes da NC
-                                toast.info("Funcionalidade de visualização em desenvolvimento");
-                              }}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
+                            {getStatusAprovacaoBadge(nc.status_aprovacao)}
                           </TableCell>
                           <TableCell className="max-w-xs truncate">
                             {(nc as any).comentarios_supervisora || nc.problema_identificado}
@@ -506,20 +521,54 @@ const NCsCoordenador = () => {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant={nc.data_notificacao ? "ghost" : "outline"}
-                              size="sm"
-                              onClick={() => {
-                                console.log('🖱️ Botão clicado para NC:', nc.id);
-                                console.log('📋 Dados da NC:', nc);
-                                handleNotificarExecutora(nc.id);
-                              }}
-                              disabled={!!nc.data_notificacao}
-                              className="gap-2"
-                            >
-                              <Send className="h-4 w-4" />
-                              {nc.data_notificacao ? "Enviada" : "Notificar"}
-                            </Button>
+                            <div className="flex justify-end gap-2">
+                              {nc.status_aprovacao === 'pendente' && (
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setNcToApprove(nc.id);
+                                      setTipoAprovacao('aprovar');
+                                      setAprovacaoDialogOpen(true);
+                                    }}
+                                    className="gap-1 text-green-600 hover:text-green-700"
+                                  >
+                                    <CheckCircle className="h-4 w-4" />
+                                    Aprovar
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setNcToApprove(nc.id);
+                                      setTipoAprovacao('rejeitar');
+                                      setAprovacaoDialogOpen(true);
+                                    }}
+                                    className="gap-1 text-red-600 hover:text-red-700"
+                                  >
+                                    <XCircle className="h-4 w-4" />
+                                    Rejeitar
+                                  </Button>
+                                </>
+                              )}
+                              {nc.status_aprovacao === 'aprovado' && (
+                                <Button
+                                  variant={nc.data_notificacao ? "ghost" : "outline"}
+                                  size="sm"
+                                  onClick={() => {
+                                    console.log('🖱️ Botão clicado para NC:', nc.id);
+                                    console.log('📋 Dados da NC:', nc);
+                                    handleNotificarExecutora(nc.id);
+                                  }}
+                                  disabled={!!nc.data_notificacao}
+                                  className="gap-2"
+                                >
+                                  <Send className="h-4 w-4" />
+                                  {nc.data_notificacao ? "Enviada" : "Notificar"}
+                                </Button>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -541,6 +590,14 @@ const NCsCoordenador = () => {
           </div>
         </div>
       </footer>
+
+      <AprovacaoNCDialog
+        ncId={ncToApprove}
+        open={aprovacaoDialogOpen}
+        onOpenChange={setAprovacaoDialogOpen}
+        onApproved={loadNCs}
+        tipo={tipoAprovacao}
+      />
     </div>
   );
 };
