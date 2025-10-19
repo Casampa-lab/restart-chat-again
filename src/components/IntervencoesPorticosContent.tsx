@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import { IntervencoesPorticosForm } from "@/components/IntervencoesPorticosForm";
 import {
   Table,
   TableBody,
@@ -63,68 +65,67 @@ const IntervencoesPorticosContent = () => {
   const [intervencaoToDelete, setIntervencaoToDelete] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [intervencaoToEdit, setIntervencaoToEdit] = useState<IntervencaoPortico | null>(null);
+  const [novaIntervencaoOpen, setNovaIntervencaoOpen] = useState(false);
+
+  const loadData = async () => {
+    if (!user) return;
+
+    try {
+      const { data: intervencoesData, error: intervencoesError } = await supabase
+        .from("ficha_porticos_intervencoes")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("data_intervencao", { ascending: false });
+
+      if (intervencoesError) throw intervencoesError;
+
+      const intervencoesFull = await Promise.all(
+        (intervencoesData || []).map(async (int) => {
+          if (int.ficha_porticos_id) {
+            const { data: portico } = await supabase
+              .from("ficha_porticos")
+              .select("id, lote_id, rodovia_id, km")
+              .eq("id", int.ficha_porticos_id)
+              .single();
+            return { ...int, ficha_porticos: portico };
+          }
+          return { ...int, ficha_porticos: null };
+        })
+      );
+
+      setIntervencoes(intervencoesFull as IntervencaoPortico[]);
+
+      const { data: lotesData } = await supabase
+        .from("lotes")
+        .select("id, numero");
+
+      if (lotesData) {
+        const lotesMap: Record<string, string> = {};
+        lotesData.forEach((lote) => {
+          lotesMap[lote.id] = lote.numero;
+        });
+        setLotes(lotesMap);
+      }
+
+      const { data: rodoviasData } = await supabase
+        .from("rodovias")
+        .select("id, codigo");
+
+      if (rodoviasData) {
+        const rodoviasMap: Record<string, string> = {};
+        rodoviasData.forEach((rodovia) => {
+          rodoviasMap[rodovia.id] = rodovia.codigo;
+        });
+        setRodovias(rodoviasMap);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      if (!user) return;
-
-      try {
-        // Buscar TODAS as intervenções do usuário
-        const { data: intervencoesData, error: intervencoesError } = await supabase
-          .from("ficha_porticos_intervencoes")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("data_intervencao", { ascending: false });
-
-        if (intervencoesError) throw intervencoesError;
-
-        // Para cada intervenção com FK, buscar dados do pórtico
-        const intervencoesFull = await Promise.all(
-          (intervencoesData || []).map(async (int) => {
-            if (int.ficha_porticos_id) {
-              const { data: portico } = await supabase
-                .from("ficha_porticos")
-                .select("id, lote_id, rodovia_id, km")
-                .eq("id", int.ficha_porticos_id)
-                .single();
-              return { ...int, ficha_porticos: portico };
-            }
-            return { ...int, ficha_porticos: null };
-          })
-        );
-
-        setIntervencoes(intervencoesFull as IntervencaoPortico[]);
-
-        const { data: lotesData } = await supabase
-          .from("lotes")
-          .select("id, numero");
-
-        if (lotesData) {
-          const lotesMap: Record<string, string> = {};
-          lotesData.forEach((lote) => {
-            lotesMap[lote.id] = lote.numero;
-          });
-          setLotes(lotesMap);
-        }
-
-        const { data: rodoviasData } = await supabase
-          .from("rodovias")
-          .select("id, codigo");
-
-        if (rodoviasData) {
-          const rodoviasMap: Record<string, string> = {};
-          rodoviasData.forEach((rodovia) => {
-            rodoviasMap[rodovia.id] = rodovia.codigo;
-          });
-          setRodovias(rodoviasMap);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadData();
   }, [user]);
 
@@ -235,10 +236,18 @@ const IntervencoesPorticosContent = () => {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Minhas Intervenções em Pórticos</CardTitle>
-          <CardDescription>
-            Histórico de intervenções em pórticos registradas
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Minhas Intervenções em Pórticos</CardTitle>
+              <CardDescription>
+                Histórico de intervenções em pórticos registradas
+              </CardDescription>
+            </div>
+            <Button onClick={() => setNovaIntervencaoOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Registrar Nova
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {intervencoes.length === 0 ? (
@@ -416,6 +425,20 @@ const IntervencoesPorticosContent = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={novaIntervencaoOpen} onOpenChange={setNovaIntervencaoOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Registrar Nova Intervenção em Pórticos</DialogTitle>
+          </DialogHeader>
+          <IntervencoesPorticosForm 
+            onIntervencaoRegistrada={() => {
+              setNovaIntervencaoOpen(false);
+              loadData();
+            }} 
+          />
         </DialogContent>
       </Dialog>
     </div>

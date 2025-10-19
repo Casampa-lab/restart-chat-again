@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Trash2, Send, Pencil } from "lucide-react";
+import { Loader2, Trash2, Send, Pencil, Plus } from "lucide-react";
+import { IntervencoesSVForm } from "@/components/IntervencoesSVForm";
 import {
   Dialog,
   DialogContent,
@@ -67,6 +68,7 @@ const IntervencoesSVContent = () => {
   const [rodovias, setRodovias] = useState<Record<string, string>>({});
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [intervencaoToEdit, setIntervencaoToEdit] = useState<IntervencaoSV | null>(null);
+  const [novaIntervencaoOpen, setNovaIntervencaoOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -228,7 +230,18 @@ const IntervencoesSVContent = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Intervenções Registradas em Sinalização Vertical</CardTitle>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Intervenções Registradas em Sinalização Vertical</CardTitle>
+              <CardDescription>
+                Histórico de intervenções em sinalização vertical registradas
+              </CardDescription>
+            </div>
+            <Button onClick={() => setNovaIntervencaoOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Registrar Nova
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {filteredIntervencoes.length === 0 ? (

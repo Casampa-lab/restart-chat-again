@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import DefensasIntervencoesForm from "@/components/DefensasIntervencoesForm";
 import {
   Table,
   TableBody,
@@ -67,6 +69,7 @@ const IntervencoesDefensasContent = () => {
   const [intervencaoToDelete, setIntervencaoToDelete] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [intervencaoToEdit, setIntervencaoToEdit] = useState<IntervencaoDefensa | null>(null);
+  const [novaIntervencaoOpen, setNovaIntervencaoOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -242,10 +245,18 @@ const IntervencoesDefensasContent = () => {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Minhas Intervenções em Defensas</CardTitle>
-          <CardDescription>
-            Histórico de intervenções em defensas metálicas registradas
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Minhas Intervenções em Defensas</CardTitle>
+              <CardDescription>
+                Histórico de intervenções em defensas metálicas registradas
+              </CardDescription>
+            </div>
+            <Button onClick={() => setNovaIntervencaoOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Registrar Nova
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {intervencoes.length === 0 ? (
@@ -432,6 +443,15 @@ const IntervencoesDefensasContent = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={novaIntervencaoOpen} onOpenChange={setNovaIntervencaoOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Registrar Nova Intervenção em Defensas</DialogTitle>
+          </DialogHeader>
+          <DefensasIntervencoesForm />
         </DialogContent>
       </Dialog>
     </div>

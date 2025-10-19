@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import IntervencoesSHForm from "@/components/IntervencoesSHForm";
 import {
   Table,
   TableBody,
@@ -65,6 +67,7 @@ const IntervencoesSHContent = () => {
   const [showEnviadas, setShowEnviadas] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [intervencaoToEdit, setIntervencaoToEdit] = useState<IntervencaoSH | null>(null);
+  const [novaIntervencaoOpen, setNovaIntervencaoOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -254,10 +257,18 @@ const IntervencoesSHContent = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>3.1.5 - Minhas Intervenções em Sinalização Horizontal</CardTitle>
-          <CardDescription>
-            Histórico de intervenções em sinalização horizontal registradas
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>3.1.5 - Minhas Intervenções em Sinalização Horizontal</CardTitle>
+              <CardDescription>
+                Histórico de intervenções em sinalização horizontal registradas
+              </CardDescription>
+            </div>
+            <Button onClick={() => setNovaIntervencaoOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Registrar Nova
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {filteredIntervencoes.length === 0 ? (

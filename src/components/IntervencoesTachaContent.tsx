@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Send, Trash2 } from "lucide-react";
+import { Send, Trash2, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
 
 interface IntervencaoTacha {
   id: string;
@@ -29,31 +31,33 @@ const IntervencoesTachaContent = () => {
   const [rodovias, setRodovias] = useState<Record<string, string>>({});
   const [selectedIntervencoes, setSelectedIntervencoes] = useState<Set<string>>(new Set());
   const [showEnviadas, setShowEnviadas] = useState(true);
+  const [novaIntervencaoOpen, setNovaIntervencaoOpen] = useState(false);
+
+  const loadData = async () => {
+    if (!user) return;
+    try {
+      const { data: intervencoesData } = await supabase.from("ficha_tachas_intervencoes").select("*").eq("user_id", user.id).order("data_intervencao", { ascending: false });
+      setIntervencoes(intervencoesData as any || []);
+      const { data: lotesData } = await supabase.from("lotes").select("id, numero");
+      if (lotesData) {
+        const lotesMap: Record<string, string> = {};
+        lotesData.forEach((lote) => { lotesMap[lote.id] = lote.numero; });
+        setLotes(lotesMap);
+      }
+      const { data: rodoviasData } = await supabase.from("rodovias").select("id, codigo");
+      if (rodoviasData) {
+        const rodoviasMap: Record<string, string> = {};
+        rodoviasData.forEach((rodovia) => { rodoviasMap[rodovia.id] = rodovia.codigo; });
+        setRodovias(rodoviasMap);
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      if (!user) return;
-      try {
-        const { data: intervencoesData } = await supabase.from("ficha_tachas_intervencoes").select("*").eq("user_id", user.id).order("data_intervencao", { ascending: false });
-        setIntervencoes(intervencoesData as any || []);
-        const { data: lotesData } = await supabase.from("lotes").select("id, numero");
-        if (lotesData) {
-          const lotesMap: Record<string, string> = {};
-          lotesData.forEach((lote) => { lotesMap[lote.id] = lote.numero; });
-          setLotes(lotesMap);
-        }
-        const { data: rodoviasData } = await supabase.from("rodovias").select("id, codigo");
-        if (rodoviasData) {
-          const rodoviasMap: Record<string, string> = {};
-          rodoviasData.forEach((rodovia) => { rodoviasMap[rodovia.id] = rodovia.codigo; });
-          setRodovias(rodoviasMap);
-        }
-      } catch (error) {
-        console.error("Erro:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadData();
   }, [user]);
 
@@ -94,8 +98,16 @@ const IntervencoesTachaContent = () => {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Minhas Intervenções em Tachas</CardTitle>
-          <CardDescription>Histórico de intervenções em tachas registradas</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Minhas Intervenções em Tachas</CardTitle>
+              <CardDescription>Histórico de intervenções em tachas registradas</CardDescription>
+            </div>
+            <Button onClick={() => setNovaIntervencaoOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Registrar Nova
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {filteredIntervencoes.length === 0 ? (
@@ -134,6 +146,20 @@ const IntervencoesTachaContent = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={novaIntervencaoOpen} onOpenChange={setNovaIntervencaoOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Registrar Nova Intervenção em Tachas</DialogTitle>
+          </DialogHeader>
+          <IntervencoesTachaForm 
+            onIntervencaoRegistrada={() => {
+              setNovaIntervencaoOpen(false);
+              loadData();
+            }} 
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

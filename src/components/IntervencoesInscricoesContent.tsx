@@ -3,6 +3,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Send, Trash2, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +50,7 @@ const IntervencoesInscricoesContent = () => {
   const [loading, setLoading] = useState(true);
   const [lotes, setLotes] = useState<Record<string, string>>({});
   const [rodovias, setRodovias] = useState<Record<string, string>>({});
+  const [novaIntervencaoOpen, setNovaIntervencaoOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {

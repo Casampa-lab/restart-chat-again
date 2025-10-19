@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import { IntervencoesCilindrosForm } from "@/components/IntervencoesCilindrosForm";
 import {
   Table,
   TableBody,
@@ -72,71 +74,70 @@ const IntervencoesCilindrosContent = () => {
   const [intervencaoToDelete, setIntervencaoToDelete] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [intervencaoToEdit, setIntervencaoToEdit] = useState<IntervencaoCilindro | null>(null);
+  const [novaIntervencaoOpen, setNovaIntervencaoOpen] = useState(false);
+
+  const loadData = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data: intervencoesData, error: intervencoesError } = await supabase
+        .from("ficha_cilindros_intervencoes")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("data_intervencao", { ascending: false });
+
+      if (intervencoesError) throw intervencoesError;
+
+      const intervencoesFull = await Promise.all(
+        (intervencoesData || []).map(async (int) => {
+          if (int.ficha_cilindros_id) {
+            const { data: cilindro } = await supabase
+              .from("ficha_cilindros")
+              .select("id, lote_id, rodovia_id, km_inicial, km_final")
+              .eq("id", int.ficha_cilindros_id)
+              .single();
+            return { ...int, ficha_cilindros: cilindro };
+          }
+          return { ...int, ficha_cilindros: null };
+        })
+      );
+
+      setIntervencoes(intervencoesFull as IntervencaoCilindro[]);
+
+      const { data: lotesData } = await supabase
+        .from("lotes")
+        .select("id, numero");
+
+      if (lotesData) {
+        const lotesMap: Record<string, string> = {};
+        lotesData.forEach((lote) => {
+          lotesMap[lote.id] = lote.numero;
+        });
+        setLotes(lotesMap);
+      }
+
+      const { data: rodoviasData } = await supabase
+        .from("rodovias")
+        .select("id, codigo");
+
+      if (rodoviasData) {
+        const rodoviasMap: Record<string, string> = {};
+        rodoviasData.forEach((rodovia) => {
+          rodoviasMap[rodovia.id] = rodovia.codigo;
+        });
+        setRodovias(rodoviasMap);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Buscar TODAS as intervenções do usuário
-        const { data: intervencoesData, error: intervencoesError } = await supabase
-          .from("ficha_cilindros_intervencoes")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("data_intervencao", { ascending: false });
-
-        if (intervencoesError) throw intervencoesError;
-
-        // Para cada intervenção com FK, buscar dados do cilindro
-        const intervencoesFull = await Promise.all(
-          (intervencoesData || []).map(async (int) => {
-            if (int.ficha_cilindros_id) {
-              const { data: cilindro } = await supabase
-                .from("ficha_cilindros")
-                .select("id, lote_id, rodovia_id, km_inicial, km_final")
-                .eq("id", int.ficha_cilindros_id)
-                .single();
-              return { ...int, ficha_cilindros: cilindro };
-            }
-            return { ...int, ficha_cilindros: null };
-          })
-        );
-
-        setIntervencoes(intervencoesFull as IntervencaoCilindro[]);
-
-        const { data: lotesData } = await supabase
-          .from("lotes")
-          .select("id, numero");
-
-        if (lotesData) {
-          const lotesMap: Record<string, string> = {};
-          lotesData.forEach((lote) => {
-            lotesMap[lote.id] = lote.numero;
-          });
-          setLotes(lotesMap);
-        }
-
-        const { data: rodoviasData } = await supabase
-          .from("rodovias")
-          .select("id, codigo");
-
-        if (rodoviasData) {
-          const rodoviasMap: Record<string, string> = {};
-          rodoviasData.forEach((rodovia) => {
-            rodoviasMap[rodovia.id] = rodovia.codigo;
-          });
-          setRodovias(rodoviasMap);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadData();
   }, [user]);
 
@@ -461,6 +462,20 @@ const IntervencoesCilindrosContent = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={novaIntervencaoOpen} onOpenChange={setNovaIntervencaoOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Registrar Nova Intervenção em Cilindros</DialogTitle>
+          </DialogHeader>
+          <IntervencoesCilindrosForm 
+            onIntervencaoRegistrada={() => {
+              setNovaIntervencaoOpen(false);
+              loadData();
+            }} 
+          />
         </DialogContent>
       </Dialog>
     </div>
