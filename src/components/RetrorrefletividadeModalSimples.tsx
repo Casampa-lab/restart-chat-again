@@ -14,6 +14,7 @@ interface RetrorrefletividadeModalSimplesProps {
   loteId: string;
   rodoviaId: string;
   kmReferencia?: string;
+  dataVerificacao?: string;
   onComplete: (resultado: { 
     media: number; 
     medicoes: number[];
@@ -43,6 +44,7 @@ export function RetrorrefletividadeModalSimples({
   loteId,
   rodoviaId,
   kmReferencia,
+  dataVerificacao,
   onComplete
 }: RetrorrefletividadeModalSimplesProps) {
   const numLeituras = tipo === 'SH' ? 10 : 5;
@@ -121,16 +123,7 @@ export function RetrorrefletividadeModalSimples({
           <CardTitle className="text-lg">{LABELS_CAMPO[campo]}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label>Data</Label>
-              <Input
-                type="date"
-                value={new Date().toISOString().split('T')[0]}
-                readOnly
-                className="bg-muted"
-              />
-            </div>
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>KM de Referência</Label>
               <Input

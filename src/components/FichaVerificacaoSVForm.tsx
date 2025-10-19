@@ -862,6 +862,7 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
               loteId={loteId}
               rodoviaId={rodoviaId}
               kmReferencia={itens[retroModalContext.itemIndex]?.km}
+              dataVerificacao={dataVerificacao}
               onComplete={(resultado) => {
                 const newItens = [...itens];
                 newItens[retroModalContext.itemIndex].retro_sv = resultado.media.toFixed(1);
