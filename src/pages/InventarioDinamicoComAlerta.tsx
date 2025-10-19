@@ -39,6 +39,7 @@ interface Necessidade {
   km_inicial?: number;
   km_final?: number;
   lado?: string;
+  posicao?: string;
   descricao_servico?: string;
   latitude_inicial?: number;
   longitude_inicial?: number;
@@ -136,6 +137,7 @@ export default function InventarioDinamicoComAlerta() {
             km_inicial: item.km_inicial || item.km,
             km_final: item.km_final,
             lado: item.lado,
+            posicao: item.posicao,
             descricao_servico: item.descricao_servico || item.servico,
             latitude_inicial: item.latitude_inicial || item.latitude,
             longitude_inicial: item.longitude_inicial || item.longitude,
@@ -444,7 +446,12 @@ export default function InventarioDinamicoComAlerta() {
                             km {nec.km_inicial?.toFixed(3) || '-'}
                             {nec.km_final && ` → ${nec.km_final.toFixed(3)}`}
                           </Badge>
-                          {nec.lado && (
+                          {nec.posicao && (
+                            <Badge variant="default" className="bg-blue-600">
+                              {nec.posicao}
+                            </Badge>
+                          )}
+                          {!nec.posicao && nec.lado && (
                             <Badge variant="outline">
                               {nec.lado}
                             </Badge>
@@ -576,7 +583,12 @@ export default function InventarioDinamicoComAlerta() {
                         km {nec.km_inicial?.toFixed(3) || '-'}
                         {nec.km_final && ` → ${nec.km_final.toFixed(3)}`}
                       </Badge>
-                      {nec.lado && (
+                      {nec.posicao && (
+                        <Badge variant="default" className="bg-blue-600">
+                          {nec.posicao}
+                        </Badge>
+                      )}
+                      {!nec.posicao && nec.lado && (
                         <Badge variant="outline">
                           {nec.lado}
                         </Badge>
