@@ -37,11 +37,22 @@ interface Necessidade {
   tipo_elemento: string;
   acao: string;
   km_inicial?: number;
+  km_final?: number;
   lado?: string;
   descricao_servico?: string;
   latitude_inicial?: number;
   longitude_inicial?: number;
   distance?: number;
+  snv?: string;
+  observacao?: string;
+  codigo?: string;
+  tipo?: string;
+  cor?: string;
+  dimensoes?: string;
+  quantidade?: number;
+  espacamento_m?: number;
+  extensao_metros?: number;
+  material?: string;
 }
 
 export default function InventarioDinamicoComAlerta() {
@@ -123,10 +134,21 @@ export default function InventarioDinamicoComAlerta() {
             tipo_elemento: tabela.tipo,
             acao: item.servico || item.acao || item.descricao_servico || 'N/A',
             km_inicial: item.km_inicial || item.km,
+            km_final: item.km_final,
             lado: item.lado,
             descricao_servico: item.descricao_servico || item.servico,
             latitude_inicial: item.latitude_inicial || item.latitude,
             longitude_inicial: item.longitude_inicial || item.longitude,
+            snv: item.snv,
+            observacao: item.observacao || item.observacoes,
+            codigo: item.codigo,
+            tipo: item.tipo || item.tipo_placa || item.tipo_demarcacao || item.tipo_defensa,
+            cor: item.cor,
+            dimensoes: item.dimensoes || item.dimensoes_mm,
+            quantidade: item.quantidade,
+            espacamento_m: item.espacamento_m,
+            extensao_metros: item.extensao_metros || item.extensao_m,
+            material: item.material,
           }));
           todasNecessidades.push(...necessidadesMapeadas);
         }
@@ -416,19 +438,53 @@ export default function InventarioDinamicoComAlerta() {
                 <Card key={nec.id} className="cursor-pointer hover:bg-accent/50 transition-colors">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <div className="flex gap-2 text-sm text-muted-foreground">
-                          <Badge variant="outline">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex flex-wrap gap-2 text-sm">
+                          <Badge variant="outline" className="font-semibold">
                             km {nec.km_inicial?.toFixed(3) || '-'}
+                            {nec.km_final && ` → ${nec.km_final.toFixed(3)}`}
                           </Badge>
                           {nec.lado && (
                             <Badge variant="outline">
                               {nec.lado}
                             </Badge>
                           )}
+                          {nec.snv && (
+                            <Badge variant="secondary" className="text-xs">
+                              SNV {nec.snv}
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {/* Características técnicas específicas */}
+                        <div className="flex flex-wrap gap-2 text-xs">
+                          {nec.codigo && (
+                            <span className="text-muted-foreground">📋 {nec.codigo}</span>
+                          )}
+                          {nec.tipo && (
+                            <span className="text-muted-foreground">🔧 {nec.tipo}</span>
+                          )}
+                          {nec.cor && (
+                            <span className="text-muted-foreground">🎨 {nec.cor}</span>
+                          )}
+                          {nec.dimensoes && (
+                            <span className="text-muted-foreground">📏 {nec.dimensoes}</span>
+                          )}
+                          {nec.quantidade && (
+                            <span className="text-muted-foreground">×{nec.quantidade}</span>
+                          )}
+                          {nec.espacamento_m && (
+                            <span className="text-muted-foreground">↔️ {nec.espacamento_m}m</span>
+                          )}
+                          {nec.extensao_metros && (
+                            <span className="text-muted-foreground">📐 {nec.extensao_metros.toFixed(0)}m</span>
+                          )}
+                          {nec.material && (
+                            <span className="text-muted-foreground">🧱 {nec.material}</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 items-end">
                       {nec.distance !== undefined && nec.latitude_inicial && nec.longitude_inicial && (
                         <Badge variant={nec.distance <= RAIO_ALERTA ? 'destructive' : 'secondary'}>
                           {nec.distance < 1000 
@@ -445,10 +501,28 @@ export default function InventarioDinamicoComAlerta() {
                   </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm mb-3">{nec.acao}</p>
-                    {nec.descricao_servico && (
-                      <p className="text-xs text-muted-foreground">{nec.descricao_servico}</p>
-                    )}
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm font-medium mb-1">{nec.acao}</p>
+                        {nec.descricao_servico && nec.descricao_servico !== nec.acao && (
+                          <p className="text-xs text-muted-foreground">{nec.descricao_servico}</p>
+                        )}
+                      </div>
+                      
+                      {nec.observacao && (
+                        <div className="bg-muted/50 p-2 rounded-md">
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-semibold">💬 Observação:</span> {nec.observacao}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {nec.latitude_inicial && nec.longitude_inicial && (
+                        <div className="text-xs text-muted-foreground font-mono">
+                          📍 {nec.latitude_inicial.toFixed(6)}, {nec.longitude_inicial.toFixed(6)}
+                        </div>
+                      )}
+                    </div>
                     <Button
                       size="sm"
                       className="w-full mt-3"
@@ -492,23 +566,57 @@ export default function InventarioDinamicoComAlerta() {
           {necessidadesFiltradas.map(nec => (
             <Card key={nec.id} className="cursor-pointer hover:bg-accent/50 transition-colors">
               <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="space-y-2 flex-1">
                     <CardTitle className="text-base">
                       {getTipoLabel(nec.tipo_elemento)}
                     </CardTitle>
-                    <div className="flex gap-2 text-sm text-muted-foreground">
-                      <Badge variant="outline">
+                    <div className="flex flex-wrap gap-2 text-sm">
+                      <Badge variant="outline" className="font-semibold">
                         km {nec.km_inicial?.toFixed(3) || '-'}
+                        {nec.km_final && ` → ${nec.km_final.toFixed(3)}`}
                       </Badge>
                       {nec.lado && (
                         <Badge variant="outline">
                           {nec.lado}
                         </Badge>
                       )}
+                      {nec.snv && (
+                        <Badge variant="secondary" className="text-xs">
+                          SNV {nec.snv}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    {/* Características técnicas específicas */}
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {nec.codigo && (
+                        <span className="text-muted-foreground">📋 {nec.codigo}</span>
+                      )}
+                      {nec.tipo && (
+                        <span className="text-muted-foreground">🔧 {nec.tipo}</span>
+                      )}
+                      {nec.cor && (
+                        <span className="text-muted-foreground">🎨 {nec.cor}</span>
+                      )}
+                      {nec.dimensoes && (
+                        <span className="text-muted-foreground">📏 {nec.dimensoes}</span>
+                      )}
+                      {nec.quantidade && (
+                        <span className="text-muted-foreground">×{nec.quantidade}</span>
+                      )}
+                      {nec.espacamento_m && (
+                        <span className="text-muted-foreground">↔️ {nec.espacamento_m}m</span>
+                      )}
+                      {nec.extensao_metros && (
+                        <span className="text-muted-foreground">📐 {nec.extensao_metros.toFixed(0)}m</span>
+                      )}
+                      {nec.material && (
+                        <span className="text-muted-foreground">🧱 {nec.material}</span>
+                      )}
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 items-end">
                     {nec.distance !== undefined && nec.latitude_inicial && nec.longitude_inicial && (
                       <Badge variant={nec.distance <= RAIO_ALERTA ? 'destructive' : 'secondary'}>
                         {nec.distance < 1000 
@@ -525,10 +633,28 @@ export default function InventarioDinamicoComAlerta() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm mb-3">{nec.acao}</p>
-                {nec.descricao_servico && (
-                  <p className="text-xs text-muted-foreground">{nec.descricao_servico}</p>
-                )}
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm font-medium mb-1">{nec.acao}</p>
+                    {nec.descricao_servico && nec.descricao_servico !== nec.acao && (
+                      <p className="text-xs text-muted-foreground">{nec.descricao_servico}</p>
+                    )}
+                  </div>
+                  
+                  {nec.observacao && (
+                    <div className="bg-muted/50 p-2 rounded-md">
+                      <p className="text-xs text-muted-foreground">
+                        <span className="font-semibold">💬 Observação:</span> {nec.observacao}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {nec.latitude_inicial && nec.longitude_inicial && (
+                    <div className="text-xs text-muted-foreground font-mono">
+                      📍 {nec.latitude_inicial.toFixed(6)}, {nec.longitude_inicial.toFixed(6)}
+                    </div>
+                  )}
+                </div>
                 <Button
                   size="sm"
                   className="w-full mt-3"
