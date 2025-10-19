@@ -171,6 +171,19 @@ const NaoConformidadeSimples = ({ loteId, rodoviaId }: NaoConformidadeSimplesPro
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      // Buscar empresa executora do lote
+      const { data: loteData, error: loteError } = await supabase
+        .from('lotes')
+        .select('empresa_id, empresas(nome)')
+        .eq('id', loteId)
+        .single();
+
+      if (loteError || !loteData?.empresas?.nome) {
+        toast.error("Erro ao buscar informações do lote");
+        setLoading(false);
+        return;
+      }
+
       // Upload de fotos (se houver)
       const fotosUrls: string[] = [];
       for (let i = 0; i < fotos.length; i++) {
@@ -207,6 +220,7 @@ const NaoConformidadeSimples = ({ loteId, rodoviaId }: NaoConformidadeSimplesPro
           situacao: "Rascunho",
           latitude: location.lat,
           longitude: location.lng,
+          empresa: loteData.empresas.nome,
           natureza: formData.natureza,
           grau: formData.grau,
           tipo_obra: formData.tipo_obra,
