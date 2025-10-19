@@ -145,8 +145,9 @@ const IntervencoesSHForm = ({
       return;
     }
     
-    if (!marcaSelecionada) {
-      toast.error("Selecione uma marca longitudinal do inventário primeiro");
+    // Validação: Manutenção Pré-Projeto exige marca existente
+    if (isManutencaoPreProjeto && !marcaSelecionada) {
+      toast.error("Para Manutenção Pré-Projeto, selecione uma marca longitudinal do inventário primeiro");
       return;
     }
 
@@ -154,7 +155,7 @@ const IntervencoesSHForm = ({
       const { error } = await supabase
         .from("ficha_marcas_longitudinais_intervencoes")
         .insert({
-          ficha_marcas_longitudinais_id: marcaSelecionada.id,
+          ficha_marcas_longitudinais_id: marcaSelecionada?.id || null,
           data_intervencao: data.data_intervencao,
           motivo: data.motivo,
           km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
@@ -487,7 +488,14 @@ const IntervencoesSHForm = ({
             </div>
 
             {!hideSubmitButton && (
-              <Button type="submit" className="w-full" disabled={!marcaSelecionada && modo !== 'controlado'}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={
+                  (isManutencaoPreProjeto && !marcaSelecionada) || 
+                  modo === 'controlado'
+                }
+              >
                 {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Salvar Intervenção
               </Button>
