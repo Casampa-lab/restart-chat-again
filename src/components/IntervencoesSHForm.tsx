@@ -379,16 +379,62 @@ const IntervencoesSHForm = ({
 
                 <FormField
                   control={form.control}
+                  name="posicao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        Posição
+                        {isCampoEstruturalBloqueado('posicao') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Ex: Eixo, Bordo Direito" 
+                          {...field}
+                          disabled={isCampoEstruturalBloqueado('posicao')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="codigo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        Código
+                        {isCampoEstruturalBloqueado('codigo') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Ex: LBO, LCO" 
+                          {...field}
+                          disabled={isCampoEstruturalBloqueado('codigo')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="largura_cm"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Largura (cm)</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        Largura (cm)
+                        {isCampoEstruturalBloqueado('largura_cm') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           step="0.1" 
                           placeholder="10" 
-                          {...field} 
+                          {...field}
+                          disabled={isCampoEstruturalBloqueado('largura_cm')}
                         />
                       </FormControl>
                       <FormMessage />
@@ -401,29 +447,38 @@ const IntervencoesSHForm = ({
                   name="espessura_cm"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Espessura (cm)</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        Espessura (cm)
+                        {isCampoEstruturalBloqueado('espessura_cm') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           step="0.1" 
                           placeholder="0.3" 
-                          {...field} 
+                          {...field}
+                          disabled={isCampoEstruturalBloqueado('espessura_cm')}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <div className="md:col-span-2">
                 <FormField
                   control={form.control}
                   name="material"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Material Utilizado</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel className="flex items-center gap-2">
+                        Material Utilizado
+                        {isCampoEstruturalBloqueado('material') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={isCampoEstruturalBloqueado('material')}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione o material" />
