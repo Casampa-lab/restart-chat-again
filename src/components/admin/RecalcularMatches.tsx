@@ -634,9 +634,9 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
 
         if (nec.tipo_origem === 'execucao' && matchesCandidatos.length === 0 && servicoInferido === 'Implantar') {
           try {
-            const novoElemento = await criarElementoNoInventario(nec, tipo, user?.id, coordenadorData?.id);
+            const novoElemento: any = await criarElementoNoInventario(nec, tipo, user?.id, coordenadorData?.id);
             
-            if (novoElemento) {
+            if (novoElemento && novoElemento.id) {
               await supabase
                 .from(tipoConfig.tabela_necessidade as any)
                 .update({ 
