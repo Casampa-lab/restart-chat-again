@@ -42,6 +42,7 @@ import AuditoriaSinalizacoes from "./pages/AuditoriaSinalizacoes";
 import DocumentacaoVABLE from "./pages/DocumentacaoVABLE";
 import AuditoriaInventario from "./pages/AuditoriaInventario";
 import InventarioDinamico from "./pages/InventarioDinamico";
+import ValidacaoFichasVerificacao from "./pages/ValidacaoFichasVerificacao";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,7 @@ const App = () => (
         <Route path="/modo-campo/inventario-dinamico" element={<InventarioDinamicoComAlerta />} />
         <Route path="/baseline-evolucao" element={<InventarioDinamico />} />
         <Route path="/coordenacao-fiscalizacao" element={<CoordenacaoFiscalizacao />} />
+        <Route path="/validacao-fichas-verificacao" element={<ValidacaoFichasVerificacao />} />
         <Route path="/ncs-coordenador" element={<NCsCoordenador />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/reset-admin-password" element={<ResetAdminPassword />} />

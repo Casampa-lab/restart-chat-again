@@ -103,6 +103,22 @@ const CoordenacaoFiscalizacao = () => {
     enabled: !!user,
     refetchInterval: 30000
   });
+
+  // Contador de fichas de verificação pendentes de aprovação
+  const {
+    data: countFichasVerificacaoPendentes = 0
+  } = useQuery({
+    queryKey: ["count-fichas-verificacao-pendentes"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('ficha_verificacao')
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pendente_aprovacao_coordenador");
+      return count || 0;
+    },
+    enabled: !!user,
+    refetchInterval: 30000
+  });
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
@@ -284,6 +300,32 @@ const CoordenacaoFiscalizacao = () => {
                   })}>
                         <GitCompareArrows className="mr-2 h-5 w-5" />
                         Acessar Reconciliação
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Card Validação de Fichas de Verificação */}
+                <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 shadow-lg">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <ClipboardCheck className="h-6 w-6 text-purple-600" />
+                          <h3 className="text-xl font-bold text-purple-900">Validação de Fichas de Verificação</h3>
+                        </div>
+                        <p className="text-sm text-purple-700">
+                          Aprovar ou rejeitar fichas SH enviadas pelos técnicos de campo com todas as leituras de retrorefletividade
+                        </p>
+                        {countFichasVerificacaoPendentes > 0 && <div className="mt-3 flex items-center gap-2">
+                            <Badge className="bg-purple-500 text-white text-base px-3 py-1">
+                              {countFichasVerificacaoPendentes} {countFichasVerificacaoPendentes === 1 ? 'ficha pendente' : 'fichas pendentes'}
+                            </Badge>
+                          </div>}
+                      </div>
+                      <Button size="lg" variant="default" className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-purple-600 hover:bg-purple-700 text-white" onClick={() => navigate("/validacao-fichas-verificacao")}>
+                        <ClipboardCheck className="mr-2 h-5 w-5" />
+                        Acessar Validação
                       </Button>
                     </div>
                   </CardContent>

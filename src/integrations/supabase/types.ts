@@ -2172,48 +2172,74 @@ export type Database = {
       }
       ficha_verificacao: {
         Row: {
+          aprovado_coordenador_em: string | null
           contrato: string | null
+          coordenador_id: string | null
           created_at: string
           data_verificacao: string
           empresa: string | null
           enviado_coordenador: boolean | null
+          enviado_coordenador_em: string | null
           id: string
           lote_id: string
+          observacao_coordenador: string | null
+          rejeitado_coordenador_em: string | null
           rodovia_id: string
           snv: string | null
+          status: string | null
           tipo: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          aprovado_coordenador_em?: string | null
           contrato?: string | null
+          coordenador_id?: string | null
           created_at?: string
           data_verificacao: string
           empresa?: string | null
           enviado_coordenador?: boolean | null
+          enviado_coordenador_em?: string | null
           id?: string
           lote_id: string
+          observacao_coordenador?: string | null
+          rejeitado_coordenador_em?: string | null
           rodovia_id: string
           snv?: string | null
+          status?: string | null
           tipo: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          aprovado_coordenador_em?: string | null
           contrato?: string | null
+          coordenador_id?: string | null
           created_at?: string
           data_verificacao?: string
           empresa?: string | null
           enviado_coordenador?: boolean | null
+          enviado_coordenador_em?: string | null
           id?: string
           lote_id?: string
+          observacao_coordenador?: string | null
+          rejeitado_coordenador_em?: string | null
           rodovia_id?: string
           snv?: string | null
+          status?: string | null
           tipo?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_verificacao_coordenador_id_fkey"
+            columns: ["coordenador_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_verificacao_itens: {
         Row: {
@@ -2260,12 +2286,15 @@ export type Database = {
           qtde_suporte_obs: string | null
           retro_bd: number | null
           retro_bd_conforme: boolean | null
+          retro_bd_medicoes: Json | null
           retro_bd_obs: string | null
           retro_be: number | null
           retro_be_conforme: boolean | null
+          retro_be_medicoes: Json | null
           retro_be_obs: string | null
           retro_e: number | null
           retro_e_conforme: boolean | null
+          retro_e_medicoes: Json | null
           retro_e_obs: string | null
           retro_sv: number | null
           retro_sv_conforme: boolean | null
@@ -2331,12 +2360,15 @@ export type Database = {
           qtde_suporte_obs?: string | null
           retro_bd?: number | null
           retro_bd_conforme?: boolean | null
+          retro_bd_medicoes?: Json | null
           retro_bd_obs?: string | null
           retro_be?: number | null
           retro_be_conforme?: boolean | null
+          retro_be_medicoes?: Json | null
           retro_be_obs?: string | null
           retro_e?: number | null
           retro_e_conforme?: boolean | null
+          retro_e_medicoes?: Json | null
           retro_e_obs?: string | null
           retro_sv?: number | null
           retro_sv_conforme?: boolean | null
@@ -2402,12 +2434,15 @@ export type Database = {
           qtde_suporte_obs?: string | null
           retro_bd?: number | null
           retro_bd_conforme?: boolean | null
+          retro_bd_medicoes?: Json | null
           retro_bd_obs?: string | null
           retro_be?: number | null
           retro_be_conforme?: boolean | null
+          retro_be_medicoes?: Json | null
           retro_be_obs?: string | null
           retro_e?: number | null
           retro_e_conforme?: boolean | null
+          retro_e_medicoes?: Json | null
           retro_e_obs?: string | null
           retro_sv?: number | null
           retro_sv_conforme?: boolean | null
