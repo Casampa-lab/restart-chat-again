@@ -834,6 +834,9 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       const flushBatch = async (tabelaNecessidade: string) => {
         console.log(`🚀 FLUSH-BATCH CHAMADO: batchInsert.length = ${batchInsert.length}, tabela = ${tabelaNecessidade}`);
         if (batchInsert.length > 0) {
+          if (tabelaNecessidade === 'necessidades_defensas') {
+            console.log(`🛡️ FLUSH DEFENSAS - Primeiros 2 registros completos:`, batchInsert.slice(0, 2));
+          }
           console.log(`📦 Dados que serão enviados (primeiros 2 registros):`, batchInsert.slice(0, 2));
           
           // Inserir necessidades e retornar os IDs
@@ -1140,6 +1143,19 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             linha_planilha: linhaExcel,
           };
 
+          // 🛡️ LOG ESPECÍFICO PARA DEFENSAS
+          if (tipo === "defensas") {
+            console.log(`🛡️ DEFENSAS DEBUG - Linha ${linhaExcel}: Dados após mapeamento:`, {
+              servico: dadosInsercao.servico,
+              extensao_metros: dadosInsercao.extensao_metros,
+              km_inicial: dadosInsercao.km_inicial,
+              km_final: dadosInsercao.km_final,
+              tramo: dadosInsercao.tramo,
+              lado: dadosInsercao.lado,
+              tipo_defensa: dadosInsercao.tipo_defensa
+            });
+          }
+
           // 🔍 VALIDAÇÃO PREVENTIVA ANTES DA INSERÇÃO
           const errosValidacao: string[] = [];
           
@@ -1203,6 +1219,18 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             }
           });
 
+          if (tipo === "defensas") {
+            console.log(`🛡️ DEFENSAS PRE-PUSH - Linha ${linhaExcel}:`, {
+              servico: dadosInsercao.servico,
+              extensao_metros: dadosInsercao.extensao_metros,
+              km_inicial: dadosInsercao.km_inicial,
+              km_final: dadosInsercao.km_final,
+              tramo: dadosInsercao.tramo,
+              lado: dadosInsercao.lado,
+              tipo_defensa: dadosInsercao.tipo_defensa
+            });
+          }
+          
           console.log(`🎯 PRE-PUSH - Linha ${linhaExcel}: Servico="${dadosInsercao.servico}", BatchSize=${batchInsert.length}`);
           
           // 🚀 OTIMIZAÇÃO: Adicionar ao batch ao invés de inserir individualmente
