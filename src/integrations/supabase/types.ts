@@ -3101,13 +3101,13 @@ export type Database = {
           created_at: string | null
           email_executora: string | null
           email_fiscal_execucao: string | null
-          empresa_id: string
+          empresa_id: string | null
           extensao_total_km: number | null
           id: string
           nome_fiscal_execucao: string | null
           numero: string
           responsavel_executora: string | null
-          supervisora_id: string
+          supervisora_id: string | null
           tolerancia_match_metros: number | null
           unidade_administrativa: string | null
         }
@@ -3116,13 +3116,13 @@ export type Database = {
           created_at?: string | null
           email_executora?: string | null
           email_fiscal_execucao?: string | null
-          empresa_id: string
+          empresa_id?: string | null
           extensao_total_km?: number | null
           id?: string
           nome_fiscal_execucao?: string | null
           numero: string
           responsavel_executora?: string | null
-          supervisora_id: string
+          supervisora_id?: string | null
           tolerancia_match_metros?: number | null
           unidade_administrativa?: string | null
         }
@@ -3131,13 +3131,13 @@ export type Database = {
           created_at?: string | null
           email_executora?: string | null
           email_fiscal_execucao?: string | null
-          empresa_id?: string
+          empresa_id?: string | null
           extensao_total_km?: number | null
           id?: string
           nome_fiscal_execucao?: string | null
           numero?: string
           responsavel_executora?: string | null
-          supervisora_id?: string
+          supervisora_id?: string | null
           tolerancia_match_metros?: number | null
           unidade_administrativa?: string | null
         }
