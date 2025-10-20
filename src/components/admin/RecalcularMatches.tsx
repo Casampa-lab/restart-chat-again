@@ -23,7 +23,7 @@ const TIPOS_ELEMENTOS = [
 ];
 
 const TIPOS_COM_STATUS_REVISAO = ['defensas', 'marcas_longitudinais', 'tachas'];
-const TIPOS_COM_MATCH_LINEAR = ['defensas', 'marcas_longitudinais', 'marcas_transversais', 'cilindros', 'tachas'];
+const TIPOS_COM_MATCH_LINEAR = ['defensas', 'marcas_longitudinais', 'cilindros', 'tachas'];
 
 interface LogEntry {
   tipo: "success" | "warning" | "error" | "info";
