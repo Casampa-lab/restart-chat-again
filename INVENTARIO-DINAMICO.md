@@ -1210,7 +1210,6 @@ interface PorticoIntervencao {
 
 **Características Alteradas**:
 
-- `tipo_defensa`: text
 - `extensao_metros`: numeric
 
 **Campos de Condição** ✅ (recebidos do inventário):
