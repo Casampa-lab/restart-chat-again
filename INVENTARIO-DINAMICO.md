@@ -1649,7 +1649,7 @@ FROM defensas def
 INNER JOIN defensas_intervencoes int ON int.defensa_id = def.id
 WHERE def.lote_id = '<lote_id>'
   AND def.rodovia_id = '<rodovia_id>'
-GROUP BY def.id, def.km_inicial, def.tipo_defensa
+GROUP BY def.id, def.km_inicial
 HAVING COUNT(int.id) > 0
 ORDER BY def.km_inicial;
 ```
