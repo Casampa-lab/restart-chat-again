@@ -54,6 +54,7 @@ O cadastro representa apenas as características físicas permanentes do element
 #### 📦 Inventário (`ficha_marcas_longitudinais`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK) - Identificador único
 - `user_id`: uuid (required) - Usuário que registrou
 - `lote_id`: uuid (required) - Lote da rodovia
@@ -62,6 +63,7 @@ O cadastro representa apenas as características físicas permanentes do element
 - `br`: text - Identificação da BR
 
 **Campos de Localização**:
+
 - `km_inicial`: numeric (required) - Quilômetro inicial
 - `km_final`: numeric - Quilômetro final
 - `latitude_inicial`: numeric - Latitude inicial
@@ -72,6 +74,7 @@ O cadastro representa apenas as características físicas permanentes do element
 - `extensao_metros`: numeric - Extensão em metros
 
 **Características Físicas**:
+
 - `tipo_demarcacao`: text - Tipo (Contínua, Tracejada, etc)
 - `codigo`: text - Código da demarcação (LBO, LBE, LFO, LFE, LEP)
 - `cor`: text - Cor da demarcação
@@ -83,12 +86,14 @@ O cadastro representa apenas as características físicas permanentes do element
 - `area_m2`: numeric - Área total em metros quadrados
 
 **Metadados**:
+
 - `data_vistoria`: date (required) - Data da vistoria
 - `created_at`: timestamp - Data de criação do registro
 - `updated_at`: timestamp - Data de última atualização
 - `enviado_coordenador`: boolean (default: false) - Status de envio
 
 **Campos Removidos** ❌ (migrados para intervenções):
+
 - `estado_conservacao`: text - Movido para `ficha_marcas_longitudinais_intervencoes`
 - `foto_url`: text - Movido para `ficha_marcas_longitudinais_intervencoes`
 - `observacao`: text - Movido para `ficha_marcas_longitudinais_intervencoes`
@@ -96,12 +101,14 @@ O cadastro representa apenas as características físicas permanentes do element
 #### 📋 Necessidades (`necessidades_marcas_longitudinais`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
 - `rodovia_id`: uuid (required)
 
 **Campos de Localização**:
+
 - `km_inicial`: numeric (required)
 - `km_final`: numeric (required)
 - `latitude_inicial`: numeric
@@ -111,6 +118,7 @@ O cadastro representa apenas as características físicas permanentes do element
 - `posicao`: text
 
 **Campos de Intervenção**:
+
 - `motivo`: text (required) - Remover / Substituir / Implantar / Manter
 - `tipo_marca`: text - Tipo da marca longitudinal
 - `cor`: text - Cor da marca
@@ -118,10 +126,12 @@ O cadastro representa apenas as características físicas permanentes do element
 - `extensao_metros`: numeric - Extensão em metros
 
 **Matching**:
+
 - `cadastro_matched_id`: uuid - ID do elemento no cadastro (match por GPS)
 - `distancia_metros`: numeric - Distância do match GPS
 
 **Metadados**:
+
 - `data_necessidade`: date (required)
 - `prioridade`: text (Alta/Média/Baixa)
 - `status`: text (Pendente/Em Execução/Concluída)
@@ -133,17 +143,20 @@ O cadastro representa apenas as características físicas permanentes do element
 #### ⚙️ Intervenções (`ficha_marcas_longitudinais_intervencoes`)
 
 **Campos de Vínculo**:
+
 - `id`: uuid (PK)
 - `ficha_marcas_longitudinais_id`: uuid (required) - FK para inventário
 - `created_at`: timestamp
 
 **Campos Específicos de Intervenção**:
+
 - `motivo`: text (required) - Motivo da intervenção
 - `data_intervencao`: date (required) - Data de execução
 - `fora_plano_manutencao`: boolean (default: false)
 - `justificativa_fora_plano`: text
 
 **Características Alteradas**:
+
 - `tipo_demarcacao`: text
 - `cor`: text
 - `material`: text
@@ -151,6 +164,7 @@ O cadastro representa apenas as características físicas permanentes do element
 - `espessura_cm`: numeric
 
 **Campos de Condição** ✅ (recebidos do inventário):
+
 - `estado_conservacao`: text - Estado de conservação
 - `observacao`: text - Observações
 - `foto_url`: text - URL da foto da intervenção
@@ -214,6 +228,7 @@ interface MarcaLongitudinalIntervencao {
 #### 📦 Inventário (`ficha_tachas`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
@@ -221,6 +236,7 @@ interface MarcaLongitudinalIntervencao {
 - `snv`: text
 
 **Campos de Localização**:
+
 - `km_inicial`: numeric (required)
 - `km_final`: numeric (required)
 - `latitude_inicial`: numeric
@@ -232,18 +248,21 @@ interface MarcaLongitudinalIntervencao {
 - `espacamento_m`: numeric
 
 **Características Físicas**:
+
 - `corpo`: text - Material do corpo
 - `refletivo`: text - Material refletivo
 - `cor_refletivo`: text - Cor do refletivo
 - `quantidade`: integer (required, default: 1)
 
 **Metadados**:
+
 - `data_vistoria`: date (required)
 - `created_at`: timestamp
 - `updated_at`: timestamp
 - `enviado_coordenador`: boolean (default: false)
 
 **Campos Removidos** ❌ (migrados para intervenções):
+
 - `descricao`: text - Movido para `ficha_tachas_intervencoes`
 - `observacao`: text - Movido para `ficha_tachas_intervencoes`
 - `foto_url`: text - Movido para `ficha_tachas_intervencoes`
@@ -251,12 +270,14 @@ interface MarcaLongitudinalIntervencao {
 #### 📋 Necessidades (`necessidades_tachas`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
 - `rodovia_id`: uuid (required)
 
 **Campos de Localização**:
+
 - `km_inicial`: numeric (required)
 - `km_final`: numeric (required)
 - `latitude_inicial`: numeric
@@ -265,16 +286,19 @@ interface MarcaLongitudinalIntervencao {
 - `longitude_final`: numeric
 
 **Campos de Intervenção**:
+
 - `motivo`: text (required) - Remover / Substituir / Implantar / Manter
 - `tipo_tacha`: text
 - `cor`: text
 - `quantidade`: integer
 
 **Matching**:
+
 - `cadastro_matched_id`: uuid
 - `distancia_metros`: numeric
 
 **Metadados**:
+
 - `data_necessidade`: date (required)
 - `prioridade`: text
 - `status`: text
@@ -285,17 +309,20 @@ interface MarcaLongitudinalIntervencao {
 #### ⚙️ Intervenções (`ficha_tachas_intervencoes`)
 
 **Campos de Vínculo**:
+
 - `id`: uuid (PK)
 - `ficha_tachas_id`: uuid (required) - FK para inventário
 - `created_at`: timestamp
 
 **Campos Específicos de Intervenção**:
+
 - `motivo`: text (required)
 - `data_intervencao`: date (required)
 - `fora_plano_manutencao`: boolean (default: false)
 - `justificativa_fora_plano`: text
 
 **Características Alteradas**:
+
 - `tipo_tacha`: text
 - `cor`: text
 - `material`: text
@@ -303,6 +330,7 @@ interface MarcaLongitudinalIntervencao {
 - `quantidade`: integer
 
 **Campos de Condição** ✅ (recebidos do inventário):
+
 - `descricao`: text - Descrição da tacha/condição
 - `observacao`: text - Observações
 - `foto_url`: text - URL da foto
@@ -361,12 +389,14 @@ interface TachaIntervencao {
 #### 📦 Inventário (`ficha_inscricoes`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
 - `rodovia_id`: uuid (required)
 
 **Campos de Localização**:
+
 - `km_inicial`: numeric
 - `km_final`: numeric
 - `latitude_inicial`: numeric
@@ -375,6 +405,7 @@ interface TachaIntervencao {
 - `longitude_final`: numeric
 
 **Características Físicas**:
+
 - `tipo_inscricao`: text (required) - Tipo (LF-1, LF-2, FX-1, FX-2, etc)
 - `cor`: text (required) - Cor da inscrição
 - `material_utilizado`: text - Material utilizado
@@ -382,12 +413,14 @@ interface TachaIntervencao {
 - `area_m2`: numeric - Área em metros quadrados
 
 **Metadados**:
+
 - `data_vistoria`: date (required)
 - `created_at`: timestamp
 - `updated_at`: timestamp
 - `enviado_coordenador`: boolean (default: false)
 
 **Campos Removidos** ❌ (migrados para intervenções):
+
 - `estado_conservacao`: text - Movido para `ficha_inscricoes_intervencoes`
 - `foto_url`: text - Movido para `ficha_inscricoes_intervencoes`
 - `observacao`: text (não estava no inventário, mas adicionado em intervenções)
@@ -395,12 +428,14 @@ interface TachaIntervencao {
 #### 📋 Necessidades (`necessidades_marcas_transversais`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
 - `rodovia_id`: uuid (required)
 
 **Campos de Localização**:
+
 - `km_inicial`: numeric (required)
 - `km_final`: numeric (required)
 - `latitude_inicial`: numeric
@@ -409,6 +444,7 @@ interface TachaIntervencao {
 - `longitude_final`: numeric
 
 **Campos de Intervenção**:
+
 - `motivo`: text (required)
 - `tipo_marca`: text
 - `cor`: text
@@ -416,10 +452,12 @@ interface TachaIntervencao {
 - `area_m2`: numeric
 
 **Matching**:
+
 - `cadastro_matched_id`: uuid
 - `distancia_metros`: numeric
 
 **Metadados**:
+
 - `data_necessidade`: date (required)
 - `prioridade`: text
 - `status`: text
@@ -430,17 +468,20 @@ interface TachaIntervencao {
 #### ⚙️ Intervenções (`ficha_inscricoes_intervencoes`)
 
 **Campos de Vínculo**:
+
 - `id`: uuid (PK)
 - `ficha_inscricoes_id`: uuid (required) - FK para inventário
 - `created_at`: timestamp
 
 **Campos Específicos de Intervenção**:
+
 - `motivo`: text (required)
 - `data_intervencao`: date (required)
 - `fora_plano_manutencao`: boolean (default: false)
 - `justificativa_fora_plano`: text
 
 **Características Alteradas**:
+
 - `tipo_inscricao`: text
 - `cor`: text
 - `material_utilizado`: text
@@ -448,6 +489,7 @@ interface TachaIntervencao {
 - `area_m2`: numeric
 
 **Campos de Condição** ✅ (recebidos do inventário):
+
 - `estado_conservacao`: text
 - `observacao`: text
 - `foto_url`: text
@@ -503,6 +545,7 @@ interface InscricaoIntervencao {
 #### 📦 Inventário (`ficha_cilindros`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
@@ -510,6 +553,7 @@ interface InscricaoIntervencao {
 - `snv`: text
 
 **Campos de Localização**:
+
 - `km_inicial`: numeric (required, default: 0)
 - `km_final`: numeric (required, default: 0)
 - `latitude_inicial`: numeric
@@ -521,30 +565,35 @@ interface InscricaoIntervencao {
 - `espacamento_m`: numeric
 
 **Características Físicas**:
+
 - `cor_corpo`: text (required) - Cor do corpo do cilindro
 - `cor_refletivo`: text - Cor do refletivo
 - `tipo_refletivo`: text - Tipo de refletivo
 - `quantidade`: integer
 
 **Metadados**:
+
 - `data_vistoria`: date (required, default: CURRENT_DATE)
 - `created_at`: timestamp
 - `updated_at`: timestamp
 - `enviado_coordenador`: boolean (default: false)
 
 **Campos Removidos** ❌ (migrados para intervenções):
+
 - `foto_url`: text - Movido para `ficha_cilindros_intervencoes`
 - `observacao`: text (não estava no inventário original)
 
 #### 📋 Necessidades (`necessidades_cilindros`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
 - `rodovia_id`: uuid (required)
 
 **Campos de Localização**:
+
 - `km_inicial`: numeric (required)
 - `km_final`: numeric (required)
 - `latitude_inicial`: numeric
@@ -553,16 +602,19 @@ interface InscricaoIntervencao {
 - `longitude_final`: numeric
 
 **Campos de Intervenção**:
+
 - `motivo`: text (required)
 - `cor_corpo`: text
 - `tipo_refletivo`: text
 - `quantidade`: integer
 
 **Matching**:
+
 - `cadastro_matched_id`: uuid
 - `distancia_metros`: numeric
 
 **Metadados**:
+
 - `data_necessidade`: date (required)
 - `prioridade`: text
 - `status`: text
@@ -573,23 +625,27 @@ interface InscricaoIntervencao {
 #### ⚙️ Intervenções (`ficha_cilindros_intervencoes`)
 
 **Campos de Vínculo**:
+
 - `id`: uuid (PK)
 - `ficha_cilindros_id`: uuid (required) - FK para inventário
 - `created_at`: timestamp
 
 **Campos Específicos de Intervenção**:
+
 - `motivo`: text (required)
 - `data_intervencao`: date (required)
 - `fora_plano_manutencao`: boolean (default: false)
 - `justificativa_fora_plano`: text
 
 **Características Alteradas**:
+
 - `cor_corpo`: text
 - `cor_refletivo`: text
 - `tipo_refletivo`: text
 - `quantidade`: integer
 
 **Campos de Condição** ✅ (recebidos do inventário):
+
 - `foto_url`: text
 
 #### 🔄 Interface TypeScript
@@ -643,6 +699,7 @@ interface CilindroIntervencao {
 #### 📦 Inventário (`ficha_placa`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
@@ -654,6 +711,7 @@ interface CilindroIntervencao {
 - `empresa`: text
 
 **Campos de Localização**:
+
 - `km`: numeric
 - `latitude`: numeric
 - `longitude`: numeric
@@ -663,6 +721,7 @@ interface CilindroIntervencao {
 - `afastamento_m`: numeric (em ficha_verificacao_itens)
 
 **Características da Placa**:
+
 - `tipo`: text - Tipo (Regulamentação/Advertência/Indicação)
 - `modelo`: text
 - `codigo`: text - Código da placa
@@ -672,10 +731,12 @@ interface CilindroIntervencao {
 - `velocidade`: text
 
 **Características do Substrato**:
+
 - `substrato`: text - Material do substrato
 - `si_sinal_impresso`: text
 
 **Características da Película**:
+
 - `cor_pelicula_fundo`: text
 - `tipo_pelicula_fundo`: text
 - `retro_pelicula_fundo`: numeric - Retrorrefletividade do fundo
@@ -684,6 +745,7 @@ interface CilindroIntervencao {
 - `retro_pelicula_legenda_orla`: numeric
 
 **Características do Suporte**:
+
 - `suporte`: text - Tipo de suporte
 - `qtde_suporte`: integer - Quantidade de suportes
 - `secao_suporte_mm`: text - Seção do suporte em mm
@@ -691,6 +753,7 @@ interface CilindroIntervencao {
 - `altura_m`: numeric - Altura em metros
 
 **Documentação (fotos mantidas no inventário)**:
+
 - `foto_url`: text
 - `foto_frontal_url`: text
 - `foto_identificacao_url`: text
@@ -700,6 +763,7 @@ interface CilindroIntervencao {
 - `link_fotografia`: text
 
 **Metadados**:
+
 - `data_vistoria`: date (required)
 - `data_implantacao`: date
 - `uf`: text
@@ -713,28 +777,33 @@ interface CilindroIntervencao {
 #### 📋 Necessidades (`necessidades_placas`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
 - `rodovia_id`: uuid (required)
 
 **Campos de Localização**:
+
 - `km`: numeric (required)
 - `latitude`: numeric
 - `longitude`: numeric
 - `lado`: text
 
 **Campos de Intervenção**:
+
 - `motivo`: text (required) - Remover / Substituir / Implantar / Manter
 - `codigo_placa`: text
 - `tipo_placa`: text
 - `dimensoes`: text
 
 **Matching**:
+
 - `cadastro_matched_id`: uuid
 - `distancia_metros`: numeric
 
 **Metadados**:
+
 - `data_necessidade`: date (required)
 - `prioridade`: text
 - `status`: text
@@ -745,11 +814,13 @@ interface CilindroIntervencao {
 #### ⚙️ Intervenções (`ficha_placa_intervencoes`)
 
 **Campos de Vínculo**:
+
 - `id`: uuid (PK)
 - `ficha_placa_id`: uuid (required) - FK para inventário
 - `created_at`: timestamp
 
 **Campos Específicos de Intervenção**:
+
 - `motivo`: text (required)
 - `data_intervencao`: date (required)
 - `fora_plano_manutencao`: boolean (default: false)
@@ -757,6 +828,7 @@ interface CilindroIntervencao {
 - `placa_recuperada`: boolean (default: false)
 
 **Características Alteradas**:
+
 - `substrato`: text
 - `suporte`: text
 - `tipo_pelicula_fundo_novo`: text
@@ -766,11 +838,13 @@ interface CilindroIntervencao {
 #### 📋 Tabela Auxiliar: Danos (`ficha_placa_danos`)
 
 **Campos de Vínculo**:
+
 - `id`: uuid (PK)
 - `ficha_placa_id`: uuid (required) - FK para inventário
 - `created_at`: timestamp
 
 **Campos de Dano**:
+
 - `problema`: text (required) - Tipo de dano/problema
 - `data_ocorrencia`: date (required)
 - `vandalismo`: boolean (default: false)
@@ -867,6 +941,7 @@ interface PlacaDano {
 #### 📦 Inventário (`ficha_porticos`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
@@ -874,20 +949,24 @@ interface PlacaDano {
 - `snv`: text
 
 **Campos de Localização**:
+
 - `km`: numeric
 - `latitude`: numeric
 - `longitude`: numeric
 - `lado`: text - Lado (quando aplicável)
 
 **Características Físicas**:
+
 - `tipo`: text (required) - Tipo (Pórtico/Semi-Pórtico/Braço Projetado)
 - `vao_horizontal_m`: numeric - Vão horizontal em metros
 - `altura_livre_m`: numeric - Altura livre em metros
 
 **Documentação**:
+
 - `foto_url`: text - URL da foto
 
 **Metadados**:
+
 - `data_vistoria`: date (required)
 - `created_at`: timestamp
 - `updated_at`: timestamp
@@ -898,27 +977,32 @@ interface PlacaDano {
 #### 📋 Necessidades (`necessidades_porticos`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
 - `rodovia_id`: uuid (required)
 
 **Campos de Localização**:
+
 - `km`: numeric (required)
 - `latitude`: numeric
 - `longitude`: numeric
 
 **Campos de Intervenção**:
+
 - `motivo`: text (required)
 - `tipo`: text
 - `vao_horizontal_m`: numeric
 - `altura_livre_m`: numeric
 
 **Matching**:
+
 - `cadastro_matched_id`: uuid
 - `distancia_metros`: numeric
 
 **Metadados**:
+
 - `data_necessidade`: date (required)
 - `prioridade`: text
 - `status`: text
@@ -929,17 +1013,20 @@ interface PlacaDano {
 #### ⚙️ Intervenções (`ficha_porticos_intervencoes`)
 
 **Campos de Vínculo**:
+
 - `id`: uuid (PK)
 - `ficha_porticos_id`: uuid (required) - FK para inventário
 - `created_at`: timestamp
 
 **Campos Específicos de Intervenção**:
+
 - `motivo`: text (required)
 - `data_intervencao`: date (required)
 - `fora_plano_manutencao`: boolean (default: false)
 - `justificativa_fora_plano`: text
 
 **Características Alteradas**:
+
 - `tipo`: text
 - `vao_horizontal_m`: numeric
 - `altura_livre_m`: numeric
@@ -990,6 +1077,7 @@ interface PorticoIntervencao {
 #### 📦 Inventário (`defensas`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
@@ -999,6 +1087,7 @@ interface PorticoIntervencao {
 - `id_defensa`: text
 
 **Campos de Localização**:
+
 - `km_inicial`: numeric (required)
 - `km_final`: numeric (required)
 - `latitude_inicial`: numeric
@@ -1009,7 +1098,7 @@ interface PorticoIntervencao {
 - `lado`: text (required) - Lado da defensa
 
 **Características da Defensa**:
-- `tipo_defensa`: text (required) - Tipo da defensa
+
 - `quantidade_laminas`: integer - Quantidade de lâminas
 - `comprimento_total_tramo_m`: numeric
 - `geometria`: text
@@ -1017,11 +1106,13 @@ interface PorticoIntervencao {
 - `tramo`: text
 
 **Características de Contenção**:
+
 - `nivel_contencao_nchrp350`: text
 - `nivel_contencao_en1317`: text
 - `classificacao_nivel_contencao`: text
 
 **Características dos Terminais**:
+
 - `terminal_entrada`: text
 - `terminal_saida`: text
 - `adequacao_funcionalidade_terminais`: text
@@ -1030,6 +1121,7 @@ interface PorticoIntervencao {
 - `adequacao_funcionalidade_laminas_inadequadas`: text
 
 **Características do Local**:
+
 - `distancia_pista_obstaculo_m`: numeric
 - `distancia_face_defensa_obstaculo_m`: numeric
 - `distancia_bordo_pista_face_defensa_m`: numeric
@@ -1038,20 +1130,24 @@ interface PorticoIntervencao {
 - `risco`: text
 
 **Características do Tráfego**:
+
 - `velocidade_kmh`: integer
 - `vmd_veic_dia`: integer - Volume Médio Diário
 - `percentual_veiculos_pesados`: numeric
 
 **Documentação**:
+
 - `link_fotografia`: text
 
 **Metadados**:
+
 - `data_inspecao`: date (required)
 - `created_at`: timestamp
 - `updated_at`: timestamp
 - `enviado_coordenador`: boolean (default: false)
 
 **Campos Removidos** ❌ (migrados para intervenções):
+
 - `estado_conservacao`: text - Movido para `defensas_intervencoes`
 - `tipo_avaria`: text - Movido para `defensas_intervencoes`
 - `necessita_intervencao`: boolean - Movido para `defensas_intervencoes`
@@ -1062,12 +1158,14 @@ interface PorticoIntervencao {
 #### 📋 Necessidades (`necessidades_defensas`)
 
 **Campos de Identificação**:
+
 - `id`: uuid (PK)
 - `user_id`: uuid (required)
 - `lote_id`: uuid (required)
 - `rodovia_id`: uuid (required)
 
 **Campos de Localização**:
+
 - `km_inicial`: numeric (required)
 - `km_final`: numeric (required)
 - `latitude_inicial`: numeric
@@ -1076,16 +1174,19 @@ interface PorticoIntervencao {
 - `longitude_final`: numeric
 
 **Campos de Intervenção**:
+
 - `motivo`: text (required)
 - `tipo_defensa`: text
 - `extensao_metros`: numeric
 - `quantidade_laminas`: integer
 
 **Matching**:
+
 - `cadastro_matched_id`: uuid
 - `distancia_metros`: numeric
 
 **Metadados**:
+
 - `data_necessidade`: date (required)
 - `prioridade`: text
 - `status`: text
@@ -1096,21 +1197,25 @@ interface PorticoIntervencao {
 #### ⚙️ Intervenções (`defensas_intervencoes`)
 
 **Campos de Vínculo**:
+
 - `id`: uuid (PK)
 - `defensa_id`: uuid (required) - FK para inventário
 - `created_at`: timestamp
 
 **Campos Específicos de Intervenção**:
+
 - `motivo`: text (required)
 - `data_intervencao`: date (required)
 - `fora_plano_manutencao`: boolean (default: false)
 - `justificativa_fora_plano`: text
 
 **Características Alteradas**:
+
 - `tipo_defensa`: text
 - `extensao_metros`: numeric
 
 **Campos de Condição** ✅ (recebidos do inventário):
+
 - `estado_conservacao`: text
 - `tipo_avaria`: text
 - `necessita_intervencao`: boolean
@@ -1191,32 +1296,32 @@ interface DefensaIntervencao {
 
 ## 📊 Tabela Comparativa de Unificação
 
-| # | Tipo de Serviço | Tabela Inventário | Tabela Intervenções | Campos Migrados | Status |
-|---|----------------|-------------------|---------------------|-----------------|--------|
-| 1 | **Marcas Longitudinais** | `ficha_marcas_longitudinais` | `ficha_marcas_longitudinais_intervencoes` | `estado_conservacao`, `foto_url`, `observacao` | ✅ Unificado |
-| 2 | **Tachas** | `ficha_tachas` | `ficha_tachas_intervencoes` | `descricao`, `observacao`, `foto_url` | ✅ Unificado |
-| 3 | **Inscrições/Zebrados** | `ficha_inscricoes` | `ficha_inscricoes_intervencoes` | `estado_conservacao`, `foto_url` (+ `observacao` adicionado) | ✅ Unificado |
-| 4 | **Cilindros** | `ficha_cilindros` | `ficha_cilindros_intervencoes` | `foto_url` | ✅ Unificado |
-| 5 | **Placas** | `ficha_placa` | `ficha_placa_intervencoes` | *(nenhum)* | ⚪ Estrutura Original |
-| 6 | **Pórticos** | `ficha_porticos` | `ficha_porticos_intervencoes` | *(nenhum)* | ⚪ Estrutura Original |
-| 7 | **Defensas** | `defensas` | `defensas_intervencoes` | `estado_conservacao`, `tipo_avaria`, `necessita_intervencao`, `nivel_risco`, `observacao`, `foto_url` | ✅ Unificado |
+| #   | Tipo de Serviço          | Tabela Inventário            | Tabela Intervenções                       | Campos Migrados                                                                                       | Status                |
+| --- | ------------------------ | ---------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------------------- |
+| 1   | **Marcas Longitudinais** | `ficha_marcas_longitudinais` | `ficha_marcas_longitudinais_intervencoes` | `estado_conservacao`, `foto_url`, `observacao`                                                        | ✅ Unificado          |
+| 2   | **Tachas**               | `ficha_tachas`               | `ficha_tachas_intervencoes`               | `descricao`, `observacao`, `foto_url`                                                                 | ✅ Unificado          |
+| 3   | **Inscrições/Zebrados**  | `ficha_inscricoes`           | `ficha_inscricoes_intervencoes`           | `estado_conservacao`, `foto_url` (+ `observacao` adicionado)                                          | ✅ Unificado          |
+| 4   | **Cilindros**            | `ficha_cilindros`            | `ficha_cilindros_intervencoes`            | `foto_url`                                                                                            | ✅ Unificado          |
+| 5   | **Placas**               | `ficha_placa`                | `ficha_placa_intervencoes`                | _(nenhum)_                                                                                            | ⚪ Estrutura Original |
+| 6   | **Pórticos**             | `ficha_porticos`             | `ficha_porticos_intervencoes`             | _(nenhum)_                                                                                            | ⚪ Estrutura Original |
+| 7   | **Defensas**             | `defensas`                   | `defensas_intervencoes`                   | `estado_conservacao`, `tipo_avaria`, `necessita_intervencao`, `nivel_risco`, `observacao`, `foto_url` | ✅ Unificado          |
 
 ### Legenda
+
 - ✅ **Unificado**: Campos de condição/estado migrados do inventário para intervenções
 - ⚪ **Estrutura Original**: Mantido sem alterações na unificação
 
 ### Resumo da Migração
 
 **Tipos Unificados (5)**:
+
 1. Marcas Longitudinais - 3 campos migrados
 2. Tachas - 3 campos migrados
 3. Inscrições/Zebrados - 2 campos migrados + 1 adicionado
 4. Cilindros - 1 campo migrado
 5. Defensas - 6 campos migrados
 
-**Tipos com Estrutura Original (2)**:
-6. Placas - Mantém fotos no inventário devido à complexidade (múltiplas fotos)
-7. Pórticos - Mantém estrutura simplificada
+**Tipos com Estrutura Original (2)**: 6. Placas - Mantém fotos no inventário devido à complexidade (múltiplas fotos) 7. Pórticos - Mantém estrutura simplificada
 
 **Total de Campos Migrados**: 15+ campos movidos de inventário → intervenções
 
@@ -1229,37 +1334,45 @@ interface DefensaIntervencao {
 #### Campos Esperados nos Arquivos Excel
 
 **Marcas Longitudinais**:
+
 - ❌ NÃO IMPORTAR: `estado_conservacao`, `foto_url`, `observacao`
 - ✅ IMPORTAR: Todos os outros campos (localização, características físicas, metadados)
 
 **Tachas**:
+
 - ❌ NÃO IMPORTAR: `descricao`, `observacao`, `foto_url`
 - ✅ IMPORTAR: Localização, características físicas
 
 **Inscrições**:
+
 - ❌ NÃO IMPORTAR: `estado_conservacao`, `foto_url`, `observacao`
 - ✅ IMPORTAR: Tipo, cor, material, dimensões, área
 
 **Cilindros**:
+
 - ❌ NÃO IMPORTAR: `foto_url`, `observacao`
 - ✅ IMPORTAR: Cor corpo, refletivos, localização
 
 **Defensas**:
+
 - ❌ NÃO IMPORTAR: `estado_conservacao`, `tipo_avaria`, `necessita_intervencao`, `nivel_risco`, `observacao`, `foto_url`
 - ✅ IMPORTAR: Características físicas, contenção, terminais
 
 **Placas e Pórticos**:
+
 - ✅ IMPORTAR: Todos os campos (estrutura original mantida)
 
 ### 2. **Formulários de Cadastro**
 
 **O que MOSTRAR ao usuário**:
+
 - Campos de identificação (lote, rodovia, SNV, BR)
 - Campos de localização (km, GPS, lado)
 - Campos de características físicas (tipo, cor, material, dimensões)
 - Data de vistoria
 
 **O que NÃO MOSTRAR**:
+
 - ❌ Estado de conservação (vai para intervenção)
 - ❌ Observações sobre condição (vai para intervenção)
 - ❌ Foto da condição atual (vai para intervenção)
@@ -1267,12 +1380,14 @@ interface DefensaIntervencao {
 ### 3. **Formulários de Intervenção**
 
 **Campos OBRIGATÓRIOS em toda intervenção**:
+
 - `motivo`: Remover / Substituir / Implantar / Manter
 - `data_intervencao`: Data de execução
 - `fora_plano_manutencao`: boolean
 - Se `fora_plano_manutencao = true` → `justificativa_fora_plano` (required)
 
 **Campos de CONDIÇÃO a preencher** (tipos unificados):
+
 - Marcas Longitudinais: `estado_conservacao`, `observacao`, `foto_url`
 - Tachas: `descricao`, `observacao`, `foto_url`
 - Inscrições: `estado_conservacao`, `observacao`, `foto_url`
@@ -1280,20 +1395,24 @@ interface DefensaIntervencao {
 - Defensas: `estado_conservacao`, `tipo_avaria`, `nivel_risco`, `observacao`, `foto_url`
 
 **Campos de ALTERAÇÃO** (características que mudaram):
+
 - Exemplo Marcas: novo `material`, nova `cor`, nova `largura_cm`
 - Exemplo Tachas: novo `tipo_tacha`, nova `cor`, nova `quantidade`
 
 ### 4. **Viewers (Visualizadores de Inventário)**
 
 **Aba "Dados Gerais"**:
+
 - Mostrar campos do inventário (características fixas)
 - **NÃO** mostrar estado de conservação, observações, fotos
 
 **Aba "Fotos"** (tipos unificados):
+
 - Mostrar mensagem: "As fotos estão disponíveis no histórico de intervenções"
 - Link para aba "Histórico"
 
 **Aba "Histórico"**:
+
 - Listar todas as intervenções
 - Para cada intervenção, mostrar:
   - Data da intervenção
@@ -1309,7 +1428,7 @@ interface DefensaIntervencao {
 
 ```sql
 -- Exemplo: Marcas Longitudinais
-SELECT 
+SELECT
   inv.*,
   int.data_intervencao,
   int.motivo,
@@ -1317,13 +1436,14 @@ SELECT
   int.observacao,
   int.foto_url
 FROM ficha_marcas_longitudinais inv
-LEFT JOIN ficha_marcas_longitudinais_intervencoes int 
+LEFT JOIN ficha_marcas_longitudinais_intervencoes int
   ON int.ficha_marcas_longitudinais_id = inv.id
 WHERE inv.id = '<element_id>'
 ORDER BY int.data_intervencao DESC;
 ```
 
 **Para calcular Inventário Dinâmico**:
+
 ```sql
 -- Elementos que foram REMOVIDOS (última intervenção = Remover)
 -- Elementos que foram SUBSTITUÍDOS (última intervenção = Substituir) → mostrar novas características
@@ -1334,6 +1454,7 @@ ORDER BY int.data_intervencao DESC;
 ### 6. **Match entre Necessidades e Cadastro**
 
 **Função SQL para matching**:
+
 ```sql
 SELECT * FROM match_cadastro_por_coordenadas(
   p_tipo := 'marcas_longitudinais',  -- ou 'tachas', 'cilindros', etc.
@@ -1345,6 +1466,7 @@ SELECT * FROM match_cadastro_por_coordenadas(
 ```
 
 **Tipos suportados**:
+
 - `marcas_longitudinais`
 - `tachas`
 - `marcas_transversais` (inscrições)
@@ -1358,6 +1480,7 @@ SELECT * FROM match_cadastro_por_coordenadas(
 **Componente**: `src/components/admin/DeleteInventarioSelecionado.tsx`
 
 **Tabelas que NÃO TÊM foto_url no inventário** (após unificação):
+
 - `ficha_marcas_longitudinais` ❌
 - `ficha_tachas` ❌
 - `ficha_inscricoes` ❌
@@ -1365,10 +1488,12 @@ SELECT * FROM match_cadastro_por_coordenadas(
 - `defensas` ❌
 
 **Tabelas que MANTÊM foto_url**:
+
 - `ficha_placa` ✅
 - `ficha_porticos` ✅
 
 **Buckets de fotos de intervenção**:
+
 - `marcas-longitudinais` (para intervenções)
 - `tachas` (para intervenções)
 - `inscricoes` (para intervenções)
@@ -1394,7 +1519,7 @@ WITH ultima_intervencao AS (
   FROM ficha_marcas_longitudinais_intervencoes
   ORDER BY ficha_marcas_longitudinais_id, data_intervencao DESC
 )
-SELECT 
+SELECT
   inv.*,
   ui.data_intervencao AS ultima_intervencao_data,
   ui.motivo AS ultima_intervencao_motivo,
@@ -1412,7 +1537,7 @@ ORDER BY inv.km_inicial;
 
 ```sql
 -- Necessidades de Tachas com match
-SELECT 
+SELECT
   nec.*,
   inv.id AS cadastro_id,
   inv.km_inicial AS cadastro_km,
@@ -1430,7 +1555,7 @@ ORDER BY nec.km_inicial;
 
 ```sql
 -- Histórico completo de uma defensa
-SELECT 
+SELECT
   'CADASTRO' AS tipo_registro,
   def.data_inspecao AS data,
   'Cadastro inicial' AS descricao,
@@ -1443,7 +1568,7 @@ WHERE def.id = '<defensa_id>'
 
 UNION ALL
 
-SELECT 
+SELECT
   'INTERVENCAO' AS tipo_registro,
   int.data_intervencao AS data,
   int.motivo AS descricao,
@@ -1472,16 +1597,16 @@ WITH ultima_intervencao AS (
   FROM ficha_cilindros_intervencoes
   ORDER BY ficha_cilindros_id, data_intervencao DESC
 )
-SELECT 
+SELECT
   inv.id,
   inv.km_inicial,
   inv.km_final,
-  CASE 
+  CASE
     WHEN ui.motivo = 'Remover' THEN NULL  -- Elemento foi removido
     WHEN ui.motivo = 'Substituir' THEN ui.cor_corpo  -- Usar nova característica
     ELSE inv.cor_corpo  -- Usar característica original
   END AS cor_corpo_atual,
-  CASE 
+  CASE
     WHEN ui.motivo = 'Remover' THEN NULL
     WHEN ui.motivo = 'Substituir' THEN ui.cor_refletivo
     ELSE inv.cor_refletivo
@@ -1499,13 +1624,13 @@ ORDER BY inv.km_inicial;
 
 ```sql
 -- Novos elementos implantados via intervenção
-SELECT 
+SELECT
   int.*,
   'IMPLANTADO' AS origem
 FROM ficha_tachas_intervencoes int
 WHERE int.motivo = 'Implantar'
   AND NOT EXISTS (
-    SELECT 1 FROM ficha_tachas inv 
+    SELECT 1 FROM ficha_tachas inv
     WHERE inv.id = int.ficha_tachas_id
   );
 ```
@@ -1514,7 +1639,7 @@ WHERE int.motivo = 'Implantar'
 
 ```sql
 -- Defensas que foram modificadas
-SELECT 
+SELECT
   def.id,
   def.km_inicial,
   def.tipo_defensa AS tipo_original,
@@ -1536,13 +1661,13 @@ ORDER BY def.km_inicial;
 
 ### Ordem Cronológica das Migrations de Unificação
 
-| Data | Migration ID | Tipo | Alterações |
-|------|-------------|------|-----------|
-| 2025-10-13 20:01:52 | `631149df-c5d0-4e2f-9e80-38dd57fdb7ca` | **Tachas** | Removidos `descricao`, `observacao`, `foto_url` do inventário; Adicionados em intervenções |
-| 2025-10-13 20:14:15 | `0655039d-13e5-4e31-976e-f74a84c1a0ab` | **Cilindros** | Removidos `foto_url`, `observacao` do inventário; Adicionados em intervenções |
-| 2025-10-13 20:18:51 | `5770d306-c9b5-4c34-a48e-a6cf07afacef` | **Inscrições** | Removidos `estado_conservacao`, `foto_url` do inventário; Adicionados em intervenções (+ `observacao`) |
-| 2025-10-13 20:35:17 | `d1e2815f-c0eb-4d8d-ac2d-1d93c02f8d19` | **Defensas** | Removidos `estado_conservacao`, `tipo_avaria`, `necessita_intervencao`, `nivel_risco`, `observacao`, `foto_url` do inventário; Adicionados em intervenções |
-| 2025-10-13 20:43:39 | `b0af324f-ac66-4243-a495-da2b8f1e5b0c` | **Marcas Longitudinais** | Removidos `estado_conservacao`, `foto_url`, `observacao` do inventário; Adicionados em intervenções |
+| Data                | Migration ID                           | Tipo                     | Alterações                                                                                                                                                 |
+| ------------------- | -------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2025-10-13 20:01:52 | `631149df-c5d0-4e2f-9e80-38dd57fdb7ca` | **Tachas**               | Removidos `descricao`, `observacao`, `foto_url` do inventário; Adicionados em intervenções                                                                 |
+| 2025-10-13 20:14:15 | `0655039d-13e5-4e31-976e-f74a84c1a0ab` | **Cilindros**            | Removidos `foto_url`, `observacao` do inventário; Adicionados em intervenções                                                                              |
+| 2025-10-13 20:18:51 | `5770d306-c9b5-4c34-a48e-a6cf07afacef` | **Inscrições**           | Removidos `estado_conservacao`, `foto_url` do inventário; Adicionados em intervenções (+ `observacao`)                                                     |
+| 2025-10-13 20:35:17 | `d1e2815f-c0eb-4d8d-ac2d-1d93c02f8d19` | **Defensas**             | Removidos `estado_conservacao`, `tipo_avaria`, `necessita_intervencao`, `nivel_risco`, `observacao`, `foto_url` do inventário; Adicionados em intervenções |
+| 2025-10-13 20:43:39 | `b0af324f-ac66-4243-a495-da2b8f1e5b0c` | **Marcas Longitudinais** | Removidos `estado_conservacao`, `foto_url`, `observacao` do inventário; Adicionados em intervenções                                                        |
 
 ### Padrão das Migrations
 
@@ -1550,11 +1675,11 @@ Todas as migrations seguiram o padrão:
 
 ```sql
 -- 1. Adicionar campos na tabela de intervenções
-ALTER TABLE <tabela_intervencoes> 
+ALTER TABLE <tabela_intervencoes>
 ADD COLUMN IF NOT EXISTS <campo> <tipo>;
 
 -- 2. Remover campos da tabela de inventário
-ALTER TABLE <tabela_inventario> 
+ALTER TABLE <tabela_inventario>
 DROP COLUMN IF EXISTS <campo>;
 ```
 
@@ -1598,6 +1723,7 @@ Para cada tipo unificado, verificar:
 Este documento é a **fonte da verdade** para a estrutura de dados do BR-LEGAL 2.
 
 **Mantenha este documento atualizado** sempre que:
+
 - Adicionar novos campos
 - Criar novos tipos de serviço
 - Modificar a estrutura de dados
