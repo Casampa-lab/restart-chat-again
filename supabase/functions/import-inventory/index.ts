@@ -627,7 +627,7 @@ serve(async (req) => {
         "km_final",
         "km_inicial",
         "lado",
-        // NOTA: tipo_defensa removido (não é estrutural segundo IN 3/2025)
+        // NOTA: tipo_defensa removido (não é estrutural)
         "br",
         "snv",
         "tramo",
