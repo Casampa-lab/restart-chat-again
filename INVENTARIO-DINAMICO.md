@@ -1277,7 +1277,6 @@ interface DefensaIntervencao {
   data_intervencao: string;
   fora_plano_manutencao: boolean;
   justificativa_fora_plano?: string;
-  tipo_defensa?: string;
   extensao_metros?: number;
   estado_conservacao?: string;
   tipo_avaria?: string;
