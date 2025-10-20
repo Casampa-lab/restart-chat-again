@@ -58,7 +58,6 @@ const fieldLabels: Record<string, string> = {
   vandalismo: 'Vandalismo',
   
   // Defensas
-  tipo_defensa: 'Tipo de Defensa',
   extensao_metros: 'Extensão (m)',
   quantidade_laminas: 'Qtd. Lâminas',
   comprimento_total_tramo_m: 'Comprimento Total (m)',

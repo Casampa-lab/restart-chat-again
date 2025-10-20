@@ -333,7 +333,6 @@ export default function DocumentacaoVABLE() {
                 <div className="space-y-1">
                   <p className="font-medium text-red-600">❌ Campos Bloqueados (Estruturais)</p>
                   <ul className="ml-4 space-y-1 text-muted-foreground">
-                    <li>• tipo_defensa</li>
                     <li>• classificacao_nivel_contencao</li>
                     <li>• nivel_contencao_en1317</li>
                     <li>• funcao</li>

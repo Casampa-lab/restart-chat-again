@@ -72,8 +72,8 @@ const COLUNAS_POR_TIPO: Record<string, { header: string[]; fields: string[] }> =
     fields: ["tipo", "altura_livre_m", "vao_horizontal_m"]
   },
   defensas: {
-    header: ["Tipo", "Nível", "Extensão (m)"],
-    fields: ["tipo_defensa", "nivel_contencao_nchrp350", "extensao_metros"]
+    header: ["Nível", "Extensão (m)", "Lado"],
+    fields: ["nivel_contencao_nchrp350", "extensao_metros", "lado"]
   }
 };
 

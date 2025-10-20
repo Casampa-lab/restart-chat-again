@@ -61,7 +61,6 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
 
 interface FichaDefensa {
   id: string;
-  tipo_defensa: string;
   lado: string;
   km_inicial: number;
   km_final: number;
@@ -76,7 +75,6 @@ interface IntervencaoDefensa {
   data_intervencao: string;
   motivo: string;
   extensao_metros?: number;
-  tipo_defensa?: string;
   estado_conservacao?: string;
   tipo_avaria?: string;
   necessita_intervencao?: boolean;
@@ -173,7 +171,7 @@ export const InventarioDefensasViewer = ({
         .range(0, 9999);
 
       if (searchTerm) {
-        query = query.or(`tipo_defensa.ilike.%${searchTerm}%,lado.ilike.%${searchTerm}%`);
+        query = query.or(`lado.ilike.%${searchTerm}%,funcao.ilike.%${searchTerm}%`);
       }
 
       const { data, error } = await query;
@@ -654,10 +652,6 @@ export const InventarioDefensasViewer = ({
                   <h3 className="font-semibold mb-3">Características</h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Tipo:</span>
-                      <p className="text-sm">{selectedDefensa.tipo_defensa}</p>
-                    </div>
-                    <div>
                       <span className="text-sm font-medium text-muted-foreground">Lado:</span>
                       <p className="text-sm">{selectedDefensa.lado}</p>
                     </div>
@@ -972,12 +966,6 @@ export const InventarioDefensasViewer = ({
                             <div>
                               <span className="text-sm font-medium text-muted-foreground">Extensão:</span>
                               <p className="text-sm">{intervencao.extensao_metros} metros</p>
-                            </div>
-                          )}
-                          {intervencao.tipo_defensa && (
-                            <div>
-                              <span className="text-sm font-medium text-muted-foreground">Tipo:</span>
-                              <p className="text-sm">{intervencao.tipo_defensa}</p>
                             </div>
                           )}
                           {intervencao.estado_conservacao && (

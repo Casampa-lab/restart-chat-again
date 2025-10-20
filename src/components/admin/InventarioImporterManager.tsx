@@ -629,7 +629,6 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           record.snv = getVal("SNV", "snv");
           record.tramo = getVal("Tramo", "tramo", "Tr") || "";
           record.lado = getVal("Lado", "lado") || "";
-          record.tipo_defensa = "Simples";
           
           // Localização
           const kmIni = getVal("Km Inicial", "Km inicial", "km_inicial", "km inicial");

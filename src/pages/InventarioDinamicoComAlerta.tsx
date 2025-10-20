@@ -144,7 +144,7 @@ export default function InventarioDinamicoComAlerta() {
             snv: item.snv,
             observacao: item.observacao || item.observacoes,
             codigo: item.codigo,
-            tipo: item.tipo || item.tipo_placa || item.tipo_demarcacao || item.tipo_defensa,
+            tipo: item.tipo || item.tipo_placa || item.tipo_demarcacao,
             cor: item.cor,
             dimensoes: item.dimensoes || item.dimensoes_mm,
             quantidade: item.quantidade,

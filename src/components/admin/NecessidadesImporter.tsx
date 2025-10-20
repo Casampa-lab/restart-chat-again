@@ -1164,8 +1164,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
               km_inicial: dadosInsercao.km_inicial,
               km_final: dadosInsercao.km_final,
               tramo: dadosInsercao.tramo,
-              lado: dadosInsercao.lado,
-              tipo_defensa: dadosInsercao.tipo_defensa
+              lado: dadosInsercao.lado
             });
           }
 
@@ -1239,8 +1238,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
               km_inicial: dadosInsercao.km_inicial,
               km_final: dadosInsercao.km_final,
               tramo: dadosInsercao.tramo,
-              lado: dadosInsercao.lado,
-              tipo_defensa: dadosInsercao.tipo_defensa
+              lado: dadosInsercao.lado
             });
           }
           

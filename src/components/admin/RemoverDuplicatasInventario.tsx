@@ -61,7 +61,7 @@ const TIPOS_ELEMENTOS = [
     tabela_cadastro: 'defensas',
     tabela_necessidade: 'necessidades_defensas',
     coluna_referencia: 'cadastro_id',
-    campos_chave: ['id_defensa', 'tipo_defensa', 'lado', 'funcao', 'especificacao_obstaculo_fixo', 'nivel_contencao_en1317', 'nivel_contencao_nchrp350', 'geometria', 'km_inicial', 'km_final', 'rodovia_id', 'lote_id'],
+    campos_chave: ['id_defensa', 'lado', 'funcao', 'especificacao_obstaculo_fixo', 'nivel_contencao_en1317', 'nivel_contencao_nchrp350', 'geometria', 'km_inicial', 'km_final', 'rodovia_id', 'lote_id'],
   },
   {
     value: 'porticos',

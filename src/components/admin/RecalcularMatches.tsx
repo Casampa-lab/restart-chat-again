@@ -408,7 +408,6 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           ...baseData,
           km_inicial: necessidade.km_inicial,
           km_final: necessidade.km_final,
-          tipo_defensa: necessidade.tipo_defensa,
           extensao_metros: necessidade.extensao_metros,
           lado: necessidade.lado,
           funcao: necessidade.funcao,
