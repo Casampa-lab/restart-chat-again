@@ -1240,7 +1240,6 @@ interface DefensaInventario {
   longitude_final?: number;
   extensao_metros: number;
   lado: string;
-  tipo_defensa: string;
   quantidade_laminas?: number;
   comprimento_total_tramo_m?: number;
   geometria?: string;
