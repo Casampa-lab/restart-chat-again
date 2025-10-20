@@ -1639,7 +1639,6 @@ WHERE int.motivo = 'Implantar'
 SELECT
   def.id,
   def.km_inicial,
-  def.tipo_defensa AS tipo_original,
   COUNT(int.id) AS qtde_intervencoes,
   MAX(int.data_intervencao) AS ultima_intervencao,
   ARRAY_AGG(int.motivo ORDER BY int.data_intervencao) AS historico_motivos
