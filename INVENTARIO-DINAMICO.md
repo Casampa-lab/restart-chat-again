@@ -1176,7 +1176,6 @@ interface PorticoIntervencao {
 **Campos de Intervenção**:
 
 - `motivo`: text (required)
-- `tipo_defensa`: text
 - `extensao_metros`: numeric
 - `quantidade_laminas`: integer
 
