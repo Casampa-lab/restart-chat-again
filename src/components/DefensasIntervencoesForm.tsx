@@ -320,26 +320,6 @@ const DefensasIntervencoesForm = ({
                 <FormControl>
                   <Input type="number" step="0.1" placeholder="0.0" {...field} />
                 </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="extensao_metros"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Extensão (metros)</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.1" {...field} />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

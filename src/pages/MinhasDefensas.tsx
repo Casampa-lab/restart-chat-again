@@ -203,7 +203,6 @@ const MinhasDefensas = () => {
           km_inicial: defensaToEdit.km_inicial,
           km_final: defensaToEdit.km_final,
           lado: defensaToEdit.lado,
-          tipo_defensa: defensaToEdit.tipo_defensa,
           extensao_metros: defensaToEdit.extensao_metros,
         })
         .eq("id", defensaToEdit.id);
