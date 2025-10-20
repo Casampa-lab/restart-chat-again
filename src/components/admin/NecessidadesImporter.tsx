@@ -1268,7 +1268,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
 
           // Log de sucesso com indicação de divergência
           const icon = servicoFinal === "Implantar" ? "🟢" : servicoFinal === "Substituir" ? "🟡" : servicoFinal === "Remover" ? "🔴" : "🔵";
-          const matchInfo = match ? ` (${distancia?.toFixed(0)}m)` : "";
+          const matchInfo = (match && distancia !== null) ? ` (${distancia.toFixed(0)}m)` : "";
           const divIcon = divergencia ? " ⚠️" : "";
           
           // 🚀 OTIMIZAÇÃO: Adicionar ao buffer ao invés de setLogs direto
