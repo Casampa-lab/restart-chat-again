@@ -121,7 +121,7 @@ const LOTES_DATA: LoteData[] = [
   },
   {
     numero: "07",
-    unidade_administrativa: "PATOS DE MINAS",
+    unidade_administrativa: "CARATINGA",
     extensao_total_km: 556.50,
     rodovias: [
       {
@@ -152,7 +152,7 @@ const LOTES_DATA: LoteData[] = [
   },
   {
     numero: "08",
-    unidade_administrativa: "UBERABA",
+    unidade_administrativa: "CONTAGEM",
     extensao_total_km: 406.10,
     rodovias: [
       {
@@ -183,7 +183,7 @@ const LOTES_DATA: LoteData[] = [
   },
   {
     numero: "09",
-    unidade_administrativa: "SÃO SEBASTIÃO DO PARAÍSO",
+    unidade_administrativa: "CAXAMBU",
     extensao_total_km: 385.20,
     rodovias: [
       {
@@ -214,7 +214,7 @@ const LOTES_DATA: LoteData[] = [
   },
   {
     numero: "10",
-    unidade_administrativa: "BARBACENA",
+    unidade_administrativa: "PATOS DE MINAS",
     extensao_total_km: 542.60,
     rodovias: [
       {
@@ -292,19 +292,22 @@ Deno.serve(async (req) => {
     for (const loteData of LOTES_DATA) {
       console.log(`\n=== Processando Lote ${loteData.numero} ===`);
       
-      // 1. Atualizar informações do lote
+      // 1. Upsert lote (cria se não existe, atualiza se existe)
       const { data: lote, error: loteError } = await supabaseClient
         .from('lotes')
-        .update({
+        .upsert({
+          numero: loteData.numero,
           unidade_administrativa: loteData.unidade_administrativa,
           extensao_total_km: loteData.extensao_total_km
+        }, {
+          onConflict: 'numero',
+          ignoreDuplicates: false
         })
-        .eq('numero', loteData.numero)
         .select('id, numero')
         .single();
 
       if (loteError) {
-        console.error(`Erro ao atualizar lote ${loteData.numero}:`, loteError);
+        console.error(`❌ Erro ao processar lote ${loteData.numero}:`, loteError);
         results.push({
           lote: loteData.numero,
           status: 'error',
@@ -313,7 +316,7 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      console.log(`Lote ${loteData.numero} atualizado com sucesso. ID: ${lote.id}`);
+      console.log(`✅ Lote ${loteData.numero} (${loteData.unidade_administrativa}) - ID: ${lote.id}`);
 
       // 2. Processar rodovias do lote
       let rodoviasInseridas = 0;
