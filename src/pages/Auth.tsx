@@ -23,6 +23,7 @@ const Auth = () => {
     const savedModo = localStorage.getItem('modoAcesso') as 'web' | 'campo';
     return savedModo || 'web';
   });
+  const [isSignupFlow, setIsSignupFlow] = useState(false);
   useEffect(() => {
     // Recuperar último email usado
     const lastEmail = localStorage.getItem("lastEmail");
@@ -68,12 +69,16 @@ const Auth = () => {
     } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('[Auth] Estado de autenticação mudou:', event);
       
-      // Só redirecionar quando há um SIGNED_IN explícito (login ativo)
-      if (event === 'SIGNED_IN' && session) {
+      // Só redirecionar quando há um SIGNED_IN explícito E não estamos em fluxo de signup
+      if (event === 'SIGNED_IN' && session && !isSignupFlow) {
         const savedModo = localStorage.getItem('modoAcesso') as 'web' | 'campo' || 'web';
         navigate(savedModo === 'campo' ? "/modo-campo" : "/", { replace: true });
       }
-      // SIGNED_OUT não precisa fazer nada - usuário já está em /auth
+      
+      // Resetar flag de signup após logout
+      if (event === 'SIGNED_OUT') {
+        setIsSignupFlow(false);
+      }
     });
 
     return () => {
@@ -118,6 +123,10 @@ const Auth = () => {
         navigate(modoAcesso === 'campo' ? "/modo-campo" : "/");
       } else {
         console.log('[Auth] Tentando cadastro...');
+        
+        // Marcar que estamos em fluxo de signup
+        setIsSignupFlow(true);
+        
         const signupPromise = supabase.auth.signUp({
           email,
           password,
@@ -134,13 +143,19 @@ const Auth = () => {
         
         if (error) {
           console.error('[Auth] Erro no cadastro:', error);
+          setIsSignupFlow(false);
           throw error;
         }
         
         console.log(`[Auth] Cadastro bem-sucedido em ${Date.now() - startTime}ms`);
+        
+        // FORÇAR LOGOUT após signup para evitar login automático
+        await supabase.auth.signOut();
+        
         localStorage.setItem("lastEmail", email);
         toast.success("Conta criada! Faça login para continuar.");
         setIsLogin(true);
+        setIsSignupFlow(false);
       }
     } catch (error: any) {
       console.error(`[Auth] Erro após ${Date.now() - startTime}ms:`, error);
