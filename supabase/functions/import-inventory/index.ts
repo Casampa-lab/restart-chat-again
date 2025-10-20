@@ -580,7 +580,6 @@ serve(async (req) => {
         record.km_final = 0;
       } else if (tableName === "defensas") {
         record.lado = "D";
-        record.tipo_defensa = "Metálica";
         record.extensao_metros = 0;
         record.necessita_intervencao = false;
         record.km_inicial = 0;
