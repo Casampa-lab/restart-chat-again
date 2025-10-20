@@ -931,7 +931,7 @@ const TABELAS_POR_TIPO: Record<string, {
   defensas: {
     necessidades: 'necessidades_defensas',
     cadastro: 'defensas',
-    campos_chave: [lado', 'km_inicial', 'km_final', 'latitude_inicial', 'longitude_inicial']
+    campos_chave: ['lado', 'km_inicial', 'km_final', 'latitude_inicial', 'longitude_inicial']
   }
 };
 
@@ -1071,7 +1071,7 @@ export const exportAuditoriaSinalizacoes = async (filtros?: {
       // Código/Tipo do elemento
       let codigo = dados?.codigo || dados?.sigla || '-';
       let tipoElemento = dados?.tipo || dados?.tipo_demarcacao || dados?.tipo_tacha || 
-                         dados?.tipo_inscricao || dados?.tipo_portico || dados?.tipo_defensa || '-';
+                         dados?.tipo_inscricao || dados?.tipo_portico || '-';
 
       // Lado
       let lado = dados?.lado || '-';
