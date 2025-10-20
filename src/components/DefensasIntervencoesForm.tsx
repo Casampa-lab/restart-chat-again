@@ -22,14 +22,6 @@ interface DefensasIntervencoesFormProps {
   rodoviaId?: string;
 }
 
-const TIPOS_DEFENSA = [
-  "Defensa Metálica Simples",
-  "Defensa Metálica Dupla",
-  "Defensa New Jersey",
-  "Defensa Tipo F",
-  "Outros"
-];
-
 const ESTADOS_CONSERVACAO = [
   "Excelente",
   "Bom",
@@ -68,7 +60,6 @@ const formSchema = z.object({
   km_final: z.string().min(1, "KM final é obrigatório"),
   lado: z.string().min(1, "Lado é obrigatório"),
   snv: z.string().optional(),
-  tipo_defensa: z.string().optional(),
   extensao_metros: z.string().optional(),
   tipo_avaria: z.string().optional(),
   estado_conservacao: z.string().optional(),
@@ -107,7 +98,6 @@ const DefensasIntervencoesForm = ({
       km_final: "",
       lado: "",
       snv: "",
-      tipo_defensa: "",
       extensao_metros: "",
       tipo_avaria: "",
       estado_conservacao: "",
@@ -131,7 +121,6 @@ const DefensasIntervencoesForm = ({
         km_final: (defensaSelecionada as any).km_final?.toString() || "",
         lado: (defensaSelecionada as any).lado || "",
         snv: (defensaSelecionada as any).snv || "",
-        tipo_defensa: (defensaSelecionada as any).tipo_defensa || "",
         extensao_metros: (defensaSelecionada as any).extensao_metros?.toString() || "",
         tipo_avaria: "",
         estado_conservacao: "",
@@ -178,7 +167,6 @@ const DefensasIntervencoesForm = ({
           km_final: data.km_final ? parseFloat(data.km_final) : null,
           lado: data.lado || null,
           snv: data.snv || null,
-          tipo_defensa: data.tipo_defensa || null,
           extensao_metros: data.extensao_metros ? parseFloat(data.extensao_metros) : null,
           tipo_avaria: data.tipo_avaria || null,
           estado_conservacao: data.estado_conservacao || null,
@@ -321,26 +309,21 @@ const DefensasIntervencoesForm = ({
           <h3 className="font-semibold text-primary text-lg">Características da Defensa</h3>
         </div>
         
-        {/* Grid - Tipo e Dimensões */}
+        {/* Grid - Dimensões */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="tipo_defensa"
+            name="extensao_metros"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Defensa</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {TIPOS_DEFENSA.map((tipo) => (
-                      <SelectItem key={tipo} value={tipo}>
-                        {tipo}
-                      </SelectItem>
-                    ))}
+                <FormLabel>Extensão (metros)</FormLabel>
+                <FormControl>
+                  <Input type="number" step="0.1" placeholder="0.0" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
                   </SelectContent>
                 </Select>
                 <FormMessage />

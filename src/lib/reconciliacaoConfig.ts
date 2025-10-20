@@ -39,7 +39,7 @@ export const RECONCILIACAO_CONFIG: Record<GrupoElemento, ReconciliacaoConfig> = 
     tabelaNecessidades: 'necessidades_defensas',
     tabelaCadastro: 'defensas',
     labelGrupo: 'Defensas Metálicas',
-    camposComparacao: ['tipo_defensa', 'lado', 'funcao', 'especificacao_obstaculo_fixo', 'nivel_contencao_en1317', 'nivel_contencao_nchrp350', 'geometria', 'extensao_metros', 'km_inicial', 'km_final'],
+    camposComparacao: ['lado', 'funcao', 'especificacao_obstaculo_fixo', 'nivel_contencao_en1317', 'nivel_contencao_nchrp350', 'geometria', 'extensao_metros', 'km_inicial', 'km_final'],
     iconeProjeto: '🛣️',
     iconeCadastro: '📷',
     tipoGeometria: 'linear',

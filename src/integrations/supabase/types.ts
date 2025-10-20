@@ -267,7 +267,6 @@ export type Database = {
           snv: string | null
           terminal_entrada: string | null
           terminal_saida: string | null
-          tipo_defensa: string
           tramo: string | null
           ultima_intervencao_id: string | null
           updated_at: string
@@ -318,7 +317,6 @@ export type Database = {
           snv?: string | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
-          tipo_defensa: string
           tramo?: string | null
           ultima_intervencao_id?: string | null
           updated_at?: string
@@ -369,7 +367,6 @@ export type Database = {
           snv?: string | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
-          tipo_defensa?: string
           tramo?: string | null
           ultima_intervencao_id?: string | null
           updated_at?: string
@@ -462,7 +459,6 @@ export type Database = {
           pendente_aprovacao_coordenador: boolean | null
           snv: string | null
           tipo_avaria: string | null
-          tipo_defensa: string | null
           tipo_origem: string | null
           user_id: string | null
         }
@@ -492,7 +488,6 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
           tipo_avaria?: string | null
-          tipo_defensa?: string | null
           tipo_origem?: string | null
           user_id?: string | null
         }
@@ -522,7 +517,6 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
           tipo_avaria?: string | null
-          tipo_defensa?: string | null
           tipo_origem?: string | null
           user_id?: string | null
         }
@@ -3729,7 +3723,6 @@ export type Database = {
           terminal_entrada: string | null
           terminal_saida: string | null
           tipo_avaria: string | null
-          tipo_defensa: string | null
           tipo_match: string | null
           tramo: string | null
           updated_at: string | null
@@ -3798,7 +3791,6 @@ export type Database = {
           terminal_entrada?: string | null
           terminal_saida?: string | null
           tipo_avaria?: string | null
-          tipo_defensa?: string | null
           tipo_match?: string | null
           tramo?: string | null
           updated_at?: string | null
@@ -3867,7 +3859,6 @@ export type Database = {
           terminal_entrada?: string | null
           terminal_saida?: string | null
           tipo_avaria?: string | null
-          tipo_defensa?: string | null
           tipo_match?: string | null
           tramo?: string | null
           updated_at?: string | null

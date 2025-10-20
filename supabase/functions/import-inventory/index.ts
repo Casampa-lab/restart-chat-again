@@ -506,7 +506,8 @@ serve(async (req) => {
       defensas: [
         "data_vistoria", "extensao_metros", "km_final",
         "km_inicial", "lado",
-        "tipo_defensa", "br", "snv", "tramo",
+        // NOTA: tipo_defensa removido (não é estrutural segundo IN 3/2025)
+        "br", "snv", "tramo",
         "funcao", "especificacao_obstaculo_fixo", "id_defensa",
         "distancia_pista_obstaculo_m", "risco", "velocidade_kmh",
         "vmd_veic_dia", "percentual_veiculos_pesados", "geometria",

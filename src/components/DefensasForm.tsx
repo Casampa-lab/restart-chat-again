@@ -14,13 +14,6 @@ interface DefensasFormProps {
 }
 
 const LADOS = ["Direito", "Esquerdo", "Ambos"];
-const TIPOS_DEFENSA = [
-  "Defensa Metálica Simples",
-  "Defensa Metálica Dupla",
-  "Defensa New Jersey",
-  "Defensa Tipo F",
-  "Outros"
-];
 
 const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -62,7 +55,6 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
     distancia_face_defensa_obstaculo_m: "",
     distancia_bordo_pista_face_defensa_m: "",
     link_fotografia: "",
-    tipo_defensa: "",
     extensao_metros: "",
   });
 
@@ -180,7 +172,6 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
           distancia_face_defensa_obstaculo_m: formData.distancia_face_defensa_obstaculo_m ? parseFloat(formData.distancia_face_defensa_obstaculo_m) : null,
           distancia_bordo_pista_face_defensa_m: formData.distancia_bordo_pista_face_defensa_m ? parseFloat(formData.distancia_bordo_pista_face_defensa_m) : null,
           link_fotografia: formData.link_fotografia || null,
-          tipo_defensa: formData.tipo_defensa || null,
           extensao_metros: formData.extensao_metros ? parseFloat(formData.extensao_metros) : null,
         } as any);
 
@@ -228,7 +219,6 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
         distancia_face_defensa_obstaculo_m: "",
         distancia_bordo_pista_face_defensa_m: "",
         link_fotografia: "",
-        tipo_defensa: "",
         extensao_metros: "",
       });
     } catch (error) {
@@ -696,27 +686,6 @@ const DefensasForm = ({ loteId, rodoviaId }: DefensasFormProps) => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="tipo_defensa">Tipo de Defensa</Label>
-              <Select
-                value={formData.tipo_defensa}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, tipo_defensa: value })
-                }
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIPOS_DEFENSA.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>
-                      {tipo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>

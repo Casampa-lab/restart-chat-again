@@ -345,7 +345,7 @@ export const exportDefensas = async () => {
     const wsData = [
       ['3.1.4 - INSPEÇÃO DE DEFENSAS'],
       [],
-      ['Data', 'Lote', 'Rodovia', 'km Inicial', 'km Final', 'Extensão (m)', 'Tipo', 'Lado'],
+      ['Data', 'Lote', 'Rodovia', 'km Inicial', 'km Final', 'Extensão (m)', 'Lado'],
       ...(data || []).map((item: any) => {
         const lote = lotesMap.get(item.lote_id);
         const rodovia = rodoviasMap.get(item.rodovia_id);
@@ -356,18 +356,16 @@ export const exportDefensas = async () => {
           formatNumber(item.km_inicial),
           formatNumber(item.km_final),
           formatNumber(item.extensao_metros),
-          item.tipo_defensa || '',
           item.lado || ''
         ];
       })
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }];
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }];
     ws['!cols'] = [
       { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 12 }, { wch: 12 },
-      { wch: 12 }, { wch: 20 }, { wch: 12 }, { wch: 15 }, { wch: 20 },
-      { wch: 15 }, { wch: 20 }, { wch: 40 }
+      { wch: 12 }, { wch: 12 }
     ];
 
     const wb = XLSX.utils.book_new();

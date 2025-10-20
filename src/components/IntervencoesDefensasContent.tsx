@@ -41,7 +41,6 @@ interface IntervencaoDefensa {
   id: string;
   data_intervencao: string;
   motivo: string;
-  tipo_defensa: string | null;
   extensao_metros: number | null;
   tipo_avaria: string | null;
   estado_conservacao: string | null;
@@ -187,7 +186,6 @@ const IntervencoesDefensasContent = () => {
         .update({
           data_intervencao: intervencaoToEdit.data_intervencao,
           motivo: intervencaoToEdit.motivo,
-          tipo_defensa: intervencaoToEdit.tipo_defensa,
           extensao_metros: intervencaoToEdit.extensao_metros,
           tipo_avaria: intervencaoToEdit.tipo_avaria,
           estado_conservacao: intervencaoToEdit.estado_conservacao,
@@ -298,7 +296,6 @@ const IntervencoesDefensasContent = () => {
                           : "-"}
                       </TableCell>
                       <TableCell>{intervencao.motivo}</TableCell>
-                      <TableCell>{intervencao.tipo_defensa || "-"}</TableCell>
                       <TableCell>{intervencao.extensao_metros?.toFixed(2) || "-"}</TableCell>
                       <TableCell>{intervencao.tipo_avaria || "-"}</TableCell>
                       <TableCell>{intervencao.nivel_risco || "-"}</TableCell>
@@ -377,13 +374,6 @@ const IntervencoesDefensasContent = () => {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Tipo de Defensa</Label>
-                  <Input
-                    value={intervencaoToEdit.tipo_defensa || ""}
-                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, tipo_defensa: e.target.value})}
-                  />
-                </div>
                 <div>
                   <Label>Extensão (metros)</Label>
                   <Input

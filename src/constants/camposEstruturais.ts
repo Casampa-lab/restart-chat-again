@@ -49,7 +49,6 @@ export const CAMPOS_ESTRUTURAIS = {
     'descricao',
   ],
   defensas: [
-    'tipo_defensa',
     'classificacao_nivel_contencao',
     'nivel_contencao_en1317',
     'nivel_contencao_nchrp350',

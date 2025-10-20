@@ -105,7 +105,7 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
 
     // Validar campos obrigatórios por tipo
     const camposObrigatorios: Record<string, string[]> = {
-      defensas: ['tipo_defensa', 'lado', 'km_inicial', 'km_final', 'extensao_metros'],
+      defensas: ['lado', 'km_inicial', 'km_final', 'extensao_metros'],
       placas: ['codigo'],
       tachas: ['km_inicial', 'km_final', 'quantidade'],
       marcas_longitudinais: ['km_inicial', 'km_final'],

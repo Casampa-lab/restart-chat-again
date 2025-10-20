@@ -218,7 +218,6 @@ const obterDadosDicionario = (tipo: string, camposSUPRA: any[]) => {
     dimensoes_mm: "Dimensões em milímetros",
     suporte: "Tipo de suporte utilizado",
     substrato: "Material do substrato",
-    tipo_defensa: "Tipo de defensa metálica",
     tipo_inscricao: "Tipo de inscrição viária",
     sigla: "Sigla ou abreviação da inscrição viária",
     descricao: "Descrição do dispositivo (Bidirecional/Monodirecional)",

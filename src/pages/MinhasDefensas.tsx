@@ -51,7 +51,6 @@ interface Defensa {
   km_inicial: number;
   km_final: number;
   lado: string;
-  tipo_defensa: string;
   extensao_metros: number;
   lote_id: string;
   rodovia_id: string;
@@ -329,7 +328,6 @@ const MinhasDefensas = () => {
                           {defensa.km_inicial.toFixed(3)} - {defensa.km_final.toFixed(3)}
                         </TableCell>
                         <TableCell>{defensa.lado}</TableCell>
-                        <TableCell className="max-w-xs truncate">{defensa.tipo_defensa}</TableCell>
                         <TableCell>{defensa.extensao_metros.toFixed(1)}m</TableCell>
                         <TableCell>
                           {defensa.enviado_coordenador ? (
@@ -444,13 +442,6 @@ const MinhasDefensas = () => {
                     onChange={(e) => setDefensaToEdit({...defensaToEdit, km_final: parseFloat(e.target.value)})}
                   />
                 </div>
-              </div>
-              <div>
-                <Label>Tipo de Defensa</Label>
-                <Input
-                  value={defensaToEdit.tipo_defensa}
-                  onChange={(e) => setDefensaToEdit({...defensaToEdit, tipo_defensa: e.target.value})}
-                />
               </div>
               <div>
                 <Label>Extensão (metros)</Label>
