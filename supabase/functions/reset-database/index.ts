@@ -62,8 +62,12 @@ serve(async (req) => {
 
     // 4. Deletar retrorefletividade
     console.log('Deletando dados de retrorefletividade...')
-    await supabaseAdmin.from('retrorefletividade_estatica').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabaseAdmin.from('retrorefletividade_dinamica').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    await supabaseAdmin.from('retrorrefletividade_estatica').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    await supabaseAdmin.from('retrorrefletividade_dinamica').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+
+    // 4.5. Deletar reconciliações
+    console.log('Deletando reconciliações...')
+    await supabaseAdmin.from('reconciliacoes').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
     // 5. Deletar elementos pendentes, NCs, notificações
     console.log('Deletando elementos pendentes, NCs e notificações...')
