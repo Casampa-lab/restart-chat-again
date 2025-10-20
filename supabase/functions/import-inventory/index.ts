@@ -579,6 +579,8 @@ serve(async (req) => {
         record.km_inicial = 0;
         record.km_final = 0;
       } else if (tableName === "defensas") {
+        // Conforme IN 3/2025, tipo_defensa não é mais usado (campo removido do schema)
+        // Campos obrigatórios com valores padrão para defensas metálicas
         record.lado = "D";
         record.extensao_metros = 0;
         record.necessita_intervencao = false;
