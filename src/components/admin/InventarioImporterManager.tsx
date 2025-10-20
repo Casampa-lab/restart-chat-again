@@ -1216,6 +1216,27 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
       
       toast.success(mensagemFinal);
 
+      // 🔄 DELETAR Marco Zero - importação invalida o snapshot consolidado
+      if (propLoteId && propRodoviaId) {
+        const { error: marcoError } = await supabase
+          .from("marcos_inventario")
+          .delete()
+          .eq("lote_id", propLoteId)
+          .eq("rodovia_id", propRodoviaId)
+          .eq("tipo", "marco_zero");
+
+        if (marcoError) {
+          console.warn("⚠️ Aviso ao deletar marco zero:", marcoError);
+        } else {
+          console.log("✅ Marco Zero deletado - inventário não está mais consolidado");
+        }
+
+        // Invalidar query do marco zero
+        queryClient.invalidateQueries({ 
+          queryKey: ["marco-zero-recente", propLoteId, propRodoviaId] 
+        });
+      }
+
       // Registrar no log de importações (upsert para atualizar se já existir)
       const { error: logError } = await supabase
         .from('importacoes_log')

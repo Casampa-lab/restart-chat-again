@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, CheckCircle2, XCircle, AlertCircle, Loader2, StopCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as XLSX from "xlsx";
 
 const TIPOS_NECESSIDADES = [
@@ -42,6 +42,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
   const [progressInfo, setProgressInfo] = useState<{ current: number; total: number } | null>(null);
   const [filtroLog, setFiltroLog] = useState<"todos" | "success" | "warning" | "error">("todos");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const cancelImportRef = useRef(false);
 
   // Função para converter coordenadas com vírgula para ponto
@@ -1380,6 +1381,27 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       const tabelaNecessidade = `necessidades_${tipo}` as any;
       await flushBatch(tabelaNecessidade);
       flushLogs();
+
+      // 🔄 DELETAR Marco Zero - importação invalida o snapshot consolidado
+      if (loteId && rodoviaId) {
+        const { error: marcoError } = await supabase
+          .from("marcos_inventario")
+          .delete()
+          .eq("lote_id", loteId)
+          .eq("rodovia_id", rodoviaId)
+          .eq("tipo", "marco_zero");
+
+        if (marcoError) {
+          console.warn("⚠️ Aviso ao deletar marco zero:", marcoError);
+        } else {
+          console.log("✅ Marco Zero deletado - inventário não está mais consolidado");
+        }
+
+        // Invalidar query do marco zero
+        queryClient.invalidateQueries({ 
+          queryKey: ["marco-zero-recente", loteId, rodoviaId] 
+        });
+      }
 
       // 📊 RESUMO FINAL DETALHADO
       const isLinear = ["marcas_longitudinais", "tachas", "defensas"].includes(tipo);
