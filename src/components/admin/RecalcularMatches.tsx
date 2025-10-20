@@ -363,7 +363,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
         novoElemento = {
           ...baseData,
           km_inicial: necessidade.km_inicial,
-          km_final: necessidade.km_final,
+          km_final: necessidade.km_final || necessidade.km_inicial, // Para tachas pontuais, km_final = km_inicial
           tipo_tacha: necessidade.tipo_tacha,
           cor: necessidade.cor,
           material: necessidade.material,
