@@ -931,7 +931,7 @@ const TABELAS_POR_TIPO: Record<string, {
   defensas: {
     necessidades: 'necessidades_defensas',
     cadastro: 'defensas',
-    campos_chave: ['tipo_defensa', 'lado', 'km_inicial', 'km_final', 'latitude_inicial', 'longitude_inicial']
+    campos_chave: [lado', 'km_inicial', 'km_final', 'latitude_inicial', 'longitude_inicial']
   }
 };
 
