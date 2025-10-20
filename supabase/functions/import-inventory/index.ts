@@ -25,10 +25,7 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
 
     // Obter usuário autenticado
     const authHeader = req.headers.get("Authorization");
@@ -36,9 +33,10 @@ serve(async (req) => {
       throw new Error("Não autenticado");
     }
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser(
-      authHeader.replace("Bearer ", "")
-    );
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
 
     if (userError || !user) {
       throw new Error("Usuário não autenticado");
@@ -72,20 +70,19 @@ serve(async (req) => {
     const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
     console.log(`Usando tolerância GPS de ${toleranciaMetros}m para matches`);
 
-
     // Processar Excel
     const arrayBuffer = await excelFile.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    
+
     // Converter letra da coluna para nome do campo
     let photoFieldName = photoColumnName;
     if (hasPhotos && photoColumnName) {
       // Se for uma letra de coluna (ex: AA, AB), pegar o header dessa coluna
-      const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+      const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1");
       const colIndex = XLSX.utils.decode_col(photoColumnName);
-      
+
       // Pegar o valor do header (primeira linha) dessa coluna
       const headerCell = worksheet[XLSX.utils.encode_cell({ r: range.s.r, c: colIndex })];
       if (headerCell && headerCell.v) {
@@ -93,12 +90,12 @@ serve(async (req) => {
         console.log(`Coluna ${photoColumnName} corresponde ao campo: ${photoFieldName}`);
       }
     }
-    
+
     // Converter para JSON, começando da linha correta
     // Detectar se a primeira linha é um título genérico
-    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+    const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1");
     const firstRowData: any = {};
-    
+
     // Ler primeira linha
     for (let col = range.s.c; col <= range.e.c; col++) {
       const cellAddress = XLSX.utils.encode_cell({ r: range.s.r, c: col });
@@ -107,22 +104,23 @@ serve(async (req) => {
         firstRowData[col] = cell.v.toString().toLowerCase();
       }
     }
-    
+
     // Verificar se primeira linha parece ser título (ex: tem "planilha", "cadastro", etc)
-    const firstRowValues = Object.values(firstRowData).join(' ');
-    const isTitleRow = firstRowValues.includes('planilha') || 
-                       firstRowValues.includes('cadastro') || 
-                       firstRowValues.includes('relatório');
-    
+    const firstRowValues = Object.values(firstRowData).join(" ");
+    const isTitleRow =
+      firstRowValues.includes("planilha") ||
+      firstRowValues.includes("cadastro") ||
+      firstRowValues.includes("relatório");
+
     let jsonData;
     if (isTitleRow) {
       console.log("Detectado título na primeira linha, pulando para linha 2");
       // Pular primeira linha e usar segunda como header
-      const dataRange = { 
-        ...range, 
-        s: { ...range.s, r: range.s.r + 1 } 
+      const dataRange = {
+        ...range,
+        s: { ...range.s, r: range.s.r + 1 },
       };
-      worksheet['!ref'] = XLSX.utils.encode_range(dataRange);
+      worksheet["!ref"] = XLSX.utils.encode_range(dataRange);
       jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     } else {
       jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
@@ -132,13 +130,10 @@ serve(async (req) => {
     jsonData = jsonData.filter((row: any) => {
       // Se a linha não existe ou é vazia, retornar false
       if (!row || !Array.isArray(row)) return false;
-      
+
       // Verificar se há pelo menos um valor não vazio na linha
       return row.some((cell: any) => {
-        return cell !== null && 
-               cell !== undefined && 
-               cell !== '' && 
-               String(cell).trim() !== '';
+        return cell !== null && cell !== undefined && cell !== "" && String(cell).trim() !== "";
       });
     });
 
@@ -149,7 +144,7 @@ serve(async (req) => {
       const normalizedRow: any = {};
       for (const [key, value] of Object.entries(row)) {
         // Normalizar a chave: remover espaços extras, trim
-        const normalizedKey = String(key).replace(/\s+/g, ' ').trim();
+        const normalizedKey = String(key).replace(/\s+/g, " ").trim();
         normalizedRow[normalizedKey] = value;
       }
       return normalizedRow;
@@ -159,29 +154,33 @@ serve(async (req) => {
     if (normalizedData.length > 0) {
       console.log("Colunas:", Object.keys(normalizedData[0]));
       console.log("Dados:", normalizedData[0]);
-      
+
       // Log específico para cilindros
       if (inventoryType === "cilindros") {
         console.log("=== CILINDROS - DADOS BRUTOS ===");
         for (const [key, value] of Object.entries(normalizedData[0])) {
-          if (key.toLowerCase().includes('espaçamento') || key.toLowerCase().includes('quantidade')) {
-            console.log(`[CILINDROS] Chave: "${key}", Valor: "${value}", Tipo: ${typeof value}, Vazio?: ${value === '' || value === null || value === undefined}`);
+          if (key.toLowerCase().includes("espaçamento") || key.toLowerCase().includes("quantidade")) {
+            console.log(
+              `[CILINDROS] Chave: "${key}", Valor: "${value}", Tipo: ${typeof value}, Vazio?: ${value === "" || value === null || value === undefined}`,
+            );
           }
         }
       }
-      
+
       // Log específico para Descrição em tachas
       if (inventoryType === "tachas") {
         for (const [key, value] of Object.entries(normalizedData[0])) {
-          if (key.toLowerCase().includes('descri')) {
-            console.log(`[TACHAS - DESCRICAO DETECTADA] Chave: "${key}", Valor: "${value}", Tipo: ${typeof value}, Vazio?: ${value === '' || value === null || value === undefined}`);
+          if (key.toLowerCase().includes("descri")) {
+            console.log(
+              `[TACHAS - DESCRICAO DETECTADA] Chave: "${key}", Valor: "${value}", Tipo: ${typeof value}, Vazio?: ${value === "" || value === null || value === undefined}`,
+            );
           }
         }
       }
-      
+
       // Log específico para campos que podem conter porcentagem
       for (const [key, value] of Object.entries(normalizedData[0])) {
-        if (typeof value === 'string' && value.includes('%')) {
+        if (typeof value === "string" && value.includes("%")) {
           console.log(`[PERCENT DETECTION] Campo: "${key}", Valor: "${value}", Tipo: ${typeof value}`);
         }
       }
@@ -189,10 +188,10 @@ serve(async (req) => {
 
     // Processar fotos se houver
     const photoMap: Record<string, string> = {};
-    
+
     if (hasPhotos && photoFieldName) {
       const photoFiles: File[] = [];
-      
+
       // Coletar todos os arquivos de foto do FormData
       for (const [key, value] of formData.entries()) {
         if (key.startsWith("photo_") && value instanceof File) {
@@ -210,20 +209,20 @@ serve(async (req) => {
         const storagePath = `${inventoryType}/${timestamp}_${fileName}`;
 
         const arrayBuffer = await photo.arrayBuffer();
-        
+
         // Determinar bucket correto baseado no tipo de inventário
         const bucketMap: Record<string, string> = {
-          "placas": "placa-photos",
-          "marcas_longitudinais": "marcas-longitudinais",
-          "cilindros": "cilindros",
-          "inscricoes": "inscricoes",
-          "tachas": "tachas",
-          "porticos": "porticos",
-          "defensas": "defensas",
+          placas: "placa-photos",
+          marcas_longitudinais: "marcas-longitudinais",
+          cilindros: "cilindros",
+          inscricoes: "inscricoes",
+          tachas: "tachas",
+          porticos: "porticos",
+          defensas: "defensas",
         };
-        
+
         const bucketName = bucketMap[inventoryType] || "verificacao-photos";
-        
+
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from(bucketName)
           .upload(storagePath, arrayBuffer, {
@@ -237,9 +236,7 @@ serve(async (req) => {
         }
 
         // Obter URL pública
-        const { data: urlData } = supabase.storage
-          .from(bucketName)
-          .getPublicUrl(storagePath);
+        const { data: urlData } = supabase.storage.from(bucketName).getPublicUrl(storagePath);
 
         photoMap[fileName] = urlData.publicUrl;
         console.log(`Foto ${fileName} uploaded para ${storagePath}`);
@@ -249,67 +246,67 @@ serve(async (req) => {
     // Mapeamento de campos do Excel para campos da tabela
     const FIELD_MAPPINGS: Record<string, Record<string, string>> = {
       necessidades_placas: {
-        "código_da_placa": "codigo",
-        "codigo_da_placa": "codigo",
-        "código": "codigo",
-        "tipo_da_placa": "tipo",
-        "tipo": "tipo",
+        código_da_placa: "codigo",
+        codigo_da_placa: "codigo",
+        código: "codigo",
+        tipo_da_placa: "tipo",
+        tipo: "tipo",
         "altura_(m)": "altura_m",
-        "altura_m": "altura_m",
-        "altura": "altura_m",
+        altura_m: "altura_m",
+        altura: "altura_m",
         "largura_(m)": "", // Ignorado - campo não existe na tabela
         "área_(m²)": "area_m2",
         "area_(m²)": "area_m2",
-        "area_m2": "area_m2",
-        "area": "area_m2",
-        "km": "km",
-        "lado": "lado",
-        "observação": "observacao",
-        "observacao": "observacao",
-        "snv": "snv",
-        "br": "br",
-        "uf": "uf",
-        "velocidade": "velocidade",
-        "substrato": "substrato",
-        "suporte": "suporte",
+        area_m2: "area_m2",
+        area: "area_m2",
+        km: "km",
+        lado: "lado",
+        observação: "observacao",
+        observacao: "observacao",
+        snv: "snv",
+        br: "br",
+        uf: "uf",
+        velocidade: "velocidade",
+        substrato: "substrato",
+        suporte: "suporte",
         "distância_(m)": "distancia_m",
-        "distancia_m": "distancia_m",
-        "serviço": "servico",
-        "servico": "servico",
-        "solução": "solucao_planilha",
-        "solucao": "solucao_planilha",
+        distancia_m: "distancia_m",
+        serviço: "servico",
+        servico: "servico",
+        solução: "solucao_planilha",
+        solucao: "solucao_planilha",
       },
       ficha_marcas_longitudinais: {
         "largura_da_faixa_(m)": "largura_cm",
         "extensão_(km)": "extensao_metros",
-        "código": "codigo",
-        "posição": "posicao",
+        código: "codigo",
+        posição: "posicao",
         "traço_(m)": "traco_m",
         "espaçamento_(m)": "espacamento_m",
         "área_(m²)": "area_m2",
         "espessura_(mm)": "espessura_cm",
-        "outros_materiais": "",
-        "br": "",
+        outros_materiais: "",
+        br: "",
       },
       ficha_inscricoes: {
-        "sigla": "sigla",
-        "descrição": "tipo_inscricao",
-        "tipo": "tipo_inscricao",
+        sigla: "sigla",
+        descrição: "tipo_inscricao",
+        tipo: "tipo_inscricao",
         "área_(m²)": "area_m2",
         "area_(m²)": "area_m2",
         "espessura_(mm)": "espessura_mm",
-        "outros_materiais": "espessura_mm",
-        "material": "material_utilizado",
-        "data_vistoria": "data_vistoria",
-        "data": "data_vistoria",
-        "br": "",
-        "snv": "snv",
-        "cor": "cor",
+        outros_materiais: "espessura_mm",
+        material: "material_utilizado",
+        data_vistoria: "data_vistoria",
+        data: "data_vistoria",
+        br: "",
+        snv: "snv",
+        cor: "cor",
       },
       ficha_placa: {
         "dimensões_(mm)": "dimensoes_mm",
         "área_(m²)": "area_m2",
-        "data": "data_vistoria",
+        data: "data_vistoria",
         "retrorrefletância_(película_fundo)_(cd.lux/m-2)": "retro_pelicula_fundo",
         "retrorrefletância_(película_legenda/orla)_(cd.lux/m-2)": "retro_pelicula_legenda_orla",
       },
@@ -344,86 +341,86 @@ serve(async (req) => {
         "longitude final": "longitude_final",
         // Variações com underscores
         "cor_(corpo)": "cor_corpo",
-        "cor_corpo": "cor_corpo",
+        cor_corpo: "cor_corpo",
         "cor_(refletivo)": "cor_refletivo",
-        "cor_refletivo": "cor_refletivo",
-        "tipo_refletivo": "tipo_refletivo",
+        cor_refletivo: "cor_refletivo",
+        tipo_refletivo: "tipo_refletivo",
         "extensão_(km)": "extensao_km",
         "extensao_(km)": "extensao_km",
         "espaçamento_(m)": "espacamento_m",
         "espacamento_(m)": "espacamento_m",
-        "local_de_implantação": "local_implantacao",
-        "local_implantacao": "local_implantacao",
+        local_de_implantação: "local_implantacao",
+        local_implantacao: "local_implantacao",
         "quantidade_(und)": "quantidade",
-        "quantidade": "quantidade",
-        "km_inicial": "km_inicial",
-        "km_final": "km_final",
-        "latitude_inicial": "latitude_inicial",
-        "longitude_inicial": "longitude_inicial",
-        "latitude_final": "latitude_final",
-        "longitude_final": "longitude_final",
-        "data": "data_vistoria",
-        "br": "",
-        "snv": "snv",
-        "SNV": "snv",
-        "BR": "",
+        quantidade: "quantidade",
+        km_inicial: "km_inicial",
+        km_final: "km_final",
+        latitude_inicial: "latitude_inicial",
+        longitude_inicial: "longitude_inicial",
+        latitude_final: "latitude_final",
+        longitude_final: "longitude_final",
+        data: "data_vistoria",
+        br: "",
+        snv: "snv",
+        SNV: "snv",
+        BR: "",
       },
-  ficha_tachas: {
-    "Descrição": "descricao",
-    "Descricao": "descricao",
-    "descrição": "descricao",
-    "descricao": "descricao",
-    "DESCRIÇÃO": "descricao",
-    "DESCRICAO": "descricao",
-    "Corpo": "corpo",
-    "corpo": "corpo",
-    "Refletivo": "tipo_refletivo",
-    "refletivo": "tipo_refletivo",
-    "tipo_refletivo": "tipo_refletivo",
-    "Extensão (km)": "extensao_km",
-    "extensao_(km)": "extensao_km",
-    "Espaçamento (m)": "espacamento_m",
-    "espacamento_(m)": "espacamento_m",
-    "Cor do Refletivo": "cor_refletivo",
-    "cor_refletivo": "cor_refletivo",
-    "Local de Implantação": "local_implantacao",
-    "local_implantacao": "local_implantacao",
-    "Quantidade (und)": "quantidade",
-    "quantidade": "quantidade",
-    "data": "data_vistoria",
-    "br": "",
-    "Km Inicial": "km_inicial",
-    "km inicial": "km_inicial",
-    "km_inicial": "km_inicial",
-    "Km Final": "km_final",
-    "km final": "km_final",
-    "km_final": "km_final",
-    "Latitude Inicial": "latitude_inicial",
-    "latitude inicial": "latitude_inicial",
-    "latitude_inicial": "latitude_inicial",
-    "Longitude Inicial": "longitude_inicial",
-    "longitude inicial": "longitude_inicial",
-    "longitude_inicial": "longitude_inicial",
-    "Latitude Final": "latitude_final",
-    "latitude final": "latitude_final",
-    "latitude_final": "latitude_final",
-    "Longitude Final": "longitude_final",
-    "longitude final": "longitude_final",
-    "longitude_final": "longitude_final",
-    "SNV": "snv",
-    "snv": "snv",
-    "Lado": "lado",
-    "lado": "lado",
-  },
+      ficha_tachas: {
+        Descrição: "descricao",
+        Descricao: "descricao",
+        descrição: "descricao",
+        descricao: "descricao",
+        DESCRIÇÃO: "descricao",
+        DESCRICAO: "descricao",
+        Corpo: "corpo",
+        corpo: "corpo",
+        Refletivo: "tipo_refletivo",
+        refletivo: "tipo_refletivo",
+        tipo_refletivo: "tipo_refletivo",
+        "Extensão (km)": "extensao_km",
+        "extensao_(km)": "extensao_km",
+        "Espaçamento (m)": "espacamento_m",
+        "espacamento_(m)": "espacamento_m",
+        "Cor do Refletivo": "cor_refletivo",
+        cor_refletivo: "cor_refletivo",
+        "Local de Implantação": "local_implantacao",
+        local_implantacao: "local_implantacao",
+        "Quantidade (und)": "quantidade",
+        quantidade: "quantidade",
+        data: "data_vistoria",
+        br: "",
+        "Km Inicial": "km_inicial",
+        "km inicial": "km_inicial",
+        km_inicial: "km_inicial",
+        "Km Final": "km_final",
+        "km final": "km_final",
+        km_final: "km_final",
+        "Latitude Inicial": "latitude_inicial",
+        "latitude inicial": "latitude_inicial",
+        latitude_inicial: "latitude_inicial",
+        "Longitude Inicial": "longitude_inicial",
+        "longitude inicial": "longitude_inicial",
+        longitude_inicial: "longitude_inicial",
+        "Latitude Final": "latitude_final",
+        "latitude final": "latitude_final",
+        latitude_final: "latitude_final",
+        "Longitude Final": "longitude_final",
+        "longitude final": "longitude_final",
+        longitude_final: "longitude_final",
+        SNV: "snv",
+        snv: "snv",
+        Lado: "lado",
+        lado: "lado",
+      },
       ficha_porticos: {
         "altura_livre_(m)": "altura_livre_m",
         "vão_horizontal_(m)": "vao_horizontal_m",
-        "Latitude": "latitude_inicial",
-        "Longitude": "longitude_inicial",
-        "latitude": "latitude_inicial",
-        "longitude": "longitude_inicial",
-        "data": "data_vistoria",
-        "br": "",
+        Latitude: "latitude_inicial",
+        Longitude: "longitude_inicial",
+        latitude: "latitude_inicial",
+        longitude: "longitude_inicial",
+        data: "data_vistoria",
+        br: "",
       },
       defensas: {
         "extensão_(m)": "extensao_metros",
@@ -434,95 +431,238 @@ serve(async (req) => {
         "vmd_(veíc./dia)": "vmd_veic_dia",
         "distância_da_face_da_defensa_ao_obstáculo(m)": "distancia_face_defensa_obstaculo_m",
         "distância_da_linha_de_bordo_da_pista_à_face_da_defensa_(m)": "distancia_bordo_pista_face_defensa_m",
-        "data": "data_inspecao",
-        "data_inspeção": "data_inspecao",
-        "br": "",
+        data: "data_inspecao",
+        data_inspeção: "data_inspecao",
+        br: "",
       },
     };
 
     // Campos válidos por tabela (baseado no schema)
     const VALID_FIELDS: Record<string, string[]> = {
       necessidades_placas: [
-        "codigo", "tipo", "dimensoes_mm", "km", "lado", "latitude_inicial", "longitude_inicial",
-        "observacao", "snv", "br", "uf", "velocidade", "substrato", "suporte",
-        "altura_m", "distancia_m", "area_m2", "servico", "solucao_planilha",
-        "estado_conservacao", "divergencia_identificada", "cadastro_id"
+        "codigo",
+        "tipo",
+        "dimensoes_mm",
+        "km",
+        "lado",
+        "latitude_inicial",
+        "longitude_inicial",
+        "observacao",
+        "snv",
+        "br",
+        "uf",
+        "velocidade",
+        "substrato",
+        "suporte",
+        "altura_m",
+        "distancia_m",
+        "area_m2",
+        "servico",
+        "solucao_planilha",
+        "estado_conservacao",
+        "divergencia_identificada",
+        "cadastro_id",
       ],
       ficha_marcas_longitudinais: [
-        "codigo", "posicao", "cor", "data_vistoria", "espessura_cm",
-        "extensao_metros", "foto_url", "km_final", "km_inicial",
-        "largura_cm", "latitude_final", "latitude_inicial",
-        "longitude_final", "longitude_inicial", "material",
-        "observacao", "tipo_demarcacao", "snv", "traco_m", "espacamento_m", "area_m2",
-        "origem", "modificado_por_intervencao", "ultima_intervencao_id",
-        "data_ultima_modificacao"
+        "codigo",
+        "posicao",
+        "cor",
+        "data_vistoria",
+        "espessura_cm",
+        "extensao_metros",
+        "foto_url",
+        "km_final",
+        "km_inicial",
+        "largura_cm",
+        "latitude_final",
+        "latitude_inicial",
+        "longitude_final",
+        "longitude_inicial",
+        "material",
+        "observacao",
+        "tipo_demarcacao",
+        "snv",
+        "traco_m",
+        "espacamento_m",
+        "area_m2",
+        "origem",
+        "modificado_por_intervencao",
+        "ultima_intervencao_id",
+        "data_ultima_modificacao",
       ],
       ficha_inscricoes: [
-        "sigla", "tipo_inscricao", "cor", "area_m2", "espessura_mm",
-        "dimensoes", "material_utilizado", "data_vistoria",
-        "km_inicial", "km_final", "latitude_inicial", "longitude_inicial",
-        "latitude_final", "longitude_final", "observacao", "foto_url",
-        "snv", "origem", "modificado_por_intervencao", "ultima_intervencao_id",
-        "data_ultima_modificacao"
+        "sigla",
+        "tipo_inscricao",
+        "cor",
+        "area_m2",
+        "espessura_mm",
+        "dimensoes",
+        "material_utilizado",
+        "data_vistoria",
+        "km_inicial",
+        "km_final",
+        "latitude_inicial",
+        "longitude_inicial",
+        "latitude_final",
+        "longitude_final",
+        "observacao",
+        "foto_url",
+        "snv",
+        "origem",
+        "modificado_por_intervencao",
+        "ultima_intervencao_id",
+        "data_ultima_modificacao",
       ],
       ficha_placa: [
-        "altura_m", "area_m2", "br", "codigo", "contrato", "data_implantacao",
-        "data_vistoria", "descricao", "dimensoes_mm", "distancia_m", "empresa",
-        "foto_base_url", "foto_frontal_url", "foto_identificacao_url",
-        "foto_lateral_url", "foto_posterior_url", "km", "lado", "latitude_inicial",
-        "longitude_inicial", "modelo", "numero_patrimonio", "qtde_suporte",
-        "retro_pelicula_fundo", "retro_pelicula_legenda_orla",
-        "snv", "substrato", "suporte", "tipo", "uf", "velocidade",
-        "tipo_pelicula_fundo", "cor_pelicula_fundo",
-        "tipo_pelicula_legenda_orla", "cor_pelicula_legenda_orla",
-        "posicao", "si_sinal_impresso", "tipo_secao_suporte", 
-        "secao_suporte_mm", "link_fotografia", "foto_url",
-        "origem", "modificado_por_intervencao", "ultima_intervencao_id",
-        "data_ultima_modificacao"
+        "altura_m",
+        "area_m2",
+        "br",
+        "codigo",
+        "contrato",
+        "data_implantacao",
+        "data_vistoria",
+        "descricao",
+        "dimensoes_mm",
+        "distancia_m",
+        "empresa",
+        "foto_base_url",
+        "foto_frontal_url",
+        "foto_identificacao_url",
+        "foto_lateral_url",
+        "foto_posterior_url",
+        "km",
+        "lado",
+        "latitude_inicial",
+        "longitude_inicial",
+        "modelo",
+        "numero_patrimonio",
+        "qtde_suporte",
+        "retro_pelicula_fundo",
+        "retro_pelicula_legenda_orla",
+        "snv",
+        "substrato",
+        "suporte",
+        "tipo",
+        "uf",
+        "velocidade",
+        "tipo_pelicula_fundo",
+        "cor_pelicula_fundo",
+        "tipo_pelicula_legenda_orla",
+        "cor_pelicula_legenda_orla",
+        "posicao",
+        "si_sinal_impresso",
+        "tipo_secao_suporte",
+        "secao_suporte_mm",
+        "link_fotografia",
+        "foto_url",
+        "origem",
+        "modificado_por_intervencao",
+        "ultima_intervencao_id",
+        "data_ultima_modificacao",
       ],
       ficha_cilindros: [
-        "cor_corpo", "cor_refletivo", "tipo_refletivo", "data_vistoria", 
-        "espacamento_m", "extensao_km", "km_final", "km_inicial", 
-        "latitude_final", "latitude_inicial", "local_implantacao", 
-        "longitude_final", "longitude_inicial", "observacao", "quantidade", 
-        "snv", "origem", "modificado_por_intervencao", "ultima_intervencao_id",
-        "data_ultima_modificacao"
+        "cor_corpo",
+        "cor_refletivo",
+        "tipo_refletivo",
+        "data_vistoria",
+        "espacamento_m",
+        "extensao_km",
+        "km_final",
+        "km_inicial",
+        "latitude_final",
+        "latitude_inicial",
+        "local_implantacao",
+        "longitude_final",
+        "longitude_inicial",
+        "observacao",
+        "quantidade",
+        "snv",
+        "origem",
+        "modificado_por_intervencao",
+        "ultima_intervencao_id",
+        "data_ultima_modificacao",
       ],
       ficha_tachas: [
-        "descricao", "corpo", "tipo_refletivo", "cor_refletivo", "data_vistoria", "espacamento_m",
-        "extensao_km", "foto_url", "km_final", "km_inicial", "latitude_final",
-        "latitude_inicial", "local_implantacao", "longitude_final", "longitude_inicial",
-        "quantidade", "snv",
-        "origem", "modificado_por_intervencao", "ultima_intervencao_id",
-        "data_ultima_modificacao"
+        "descricao",
+        "corpo",
+        "tipo_refletivo",
+        "cor_refletivo",
+        "data_vistoria",
+        "espacamento_m",
+        "extensao_km",
+        "foto_url",
+        "km_final",
+        "km_inicial",
+        "latitude_final",
+        "latitude_inicial",
+        "local_implantacao",
+        "longitude_final",
+        "longitude_inicial",
+        "quantidade",
+        "snv",
+        "origem",
+        "modificado_por_intervencao",
+        "ultima_intervencao_id",
+        "data_ultima_modificacao",
       ],
       ficha_porticos: [
-        "altura_livre_m", "data_vistoria", "foto_url",
-        "km", "lado", "latitude_inicial", "longitude_inicial", "snv", "tipo",
+        "altura_livre_m",
+        "data_vistoria",
+        "foto_url",
+        "km",
+        "lado",
+        "latitude_inicial",
+        "longitude_inicial",
+        "snv",
+        "tipo",
         "vao_horizontal_m",
-        "origem", "modificado_por_intervencao", "ultima_intervencao_id",
-        "data_ultima_modificacao"
+        "origem",
+        "modificado_por_intervencao",
+        "ultima_intervencao_id",
+        "data_ultima_modificacao",
       ],
       defensas: [
-        "data_vistoria", "extensao_metros", "km_final",
-        "km_inicial", "lado",
+        "data_vistoria",
+        "extensao_metros",
+        "km_final",
+        "km_inicial",
+        "lado",
         // NOTA: tipo_defensa removido (não é estrutural segundo IN 3/2025)
-        "br", "snv", "tramo",
-        "funcao", "especificacao_obstaculo_fixo", "id_defensa",
-        "distancia_pista_obstaculo_m", "risco", "velocidade_kmh",
-        "vmd_veic_dia", "percentual_veiculos_pesados", "geometria",
-        "classificacao_nivel_contencao", "nivel_contencao_en1317",
-        "nivel_contencao_nchrp350", "espaco_trabalho", "terminal_entrada",
-        "terminal_saida", "adequacao_funcionalidade_lamina",
+        "br",
+        "snv",
+        "tramo",
+        "funcao",
+        "especificacao_obstaculo_fixo",
+        "id_defensa",
+        "distancia_pista_obstaculo_m",
+        "risco",
+        "velocidade_kmh",
+        "vmd_veic_dia",
+        "percentual_veiculos_pesados",
+        "geometria",
+        "classificacao_nivel_contencao",
+        "nivel_contencao_en1317",
+        "nivel_contencao_nchrp350",
+        "espaco_trabalho",
+        "terminal_entrada",
+        "terminal_saida",
+        "adequacao_funcionalidade_lamina",
         "adequacao_funcionalidade_laminas_inadequadas",
         "adequacao_funcionalidade_terminais",
         "adequacao_funcionalidade_terminais_inadequados",
         "distancia_face_defensa_obstaculo_m",
-        "distancia_bordo_pista_face_defensa_m", "link_fotografia",
-        "quantidade_laminas", "comprimento_total_tramo_m",
-        "latitude_inicial", "longitude_inicial", "latitude_final", "longitude_final",
-        "origem", "modificado_por_intervencao", "ultima_intervencao_id",
-        "data_ultima_modificacao"
+        "distancia_bordo_pista_face_defensa_m",
+        "link_fotografia",
+        "quantidade_laminas",
+        "comprimento_total_tramo_m",
+        "latitude_inicial",
+        "longitude_inicial",
+        "latitude_final",
+        "longitude_final",
+        "origem",
+        "modificado_por_intervencao",
+        "ultima_intervencao_id",
+        "data_ultima_modificacao",
       ],
     };
 
@@ -535,7 +675,7 @@ serve(async (req) => {
       console.log("Mapeamentos disponíveis:", Object.keys(fieldMapping).slice(0, 10));
       for (const [key, value] of Object.entries(normalizedData[0])) {
         console.log(`Chave Excel: "${key}", Valor: "${value}"`);
-        const cleanKey = String(key).replace(/\s+/g, ' ').trim();
+        const cleanKey = String(key).replace(/\s+/g, " ").trim();
         if (fieldMapping[cleanKey]) {
           console.log(`  ✓ Mapeado para: "${fieldMapping[cleanKey]}"`);
         } else {
@@ -545,169 +685,195 @@ serve(async (req) => {
     }
 
     // Preparar dados para inserção
-    const recordsToInsert = normalizedData.map((row: any) => {
-      // Determinar campo de data padrão baseado na tabela
-      let dateField = "data_vistoria";
-      if (tableName === "intervencoes_cilindros" || tableName === "intervencoes_inscricoes") {
-        dateField = "data_intervencao";
-      } else if (tableName === "defensas") {
-        dateField = "data_inspecao";
-      }
-      
-      // Converter campos do Excel para o formato esperado pela tabela
-      const record: any = {
-        user_id: user.id,
-        lote_id: loteId,
-        rodovia_id: rodoviaId,
-        [dateField]: "2023-01-01", // Data padrão: 01/01/2023
-        // Campos de controle do Inventário Dinâmico
-        origem: "cadastro_inicial",
-        modificado_por_intervencao: false,
-        ultima_intervencao_id: null,
-        data_ultima_modificacao: null,
-      };
-      
-      // Adicionar campos obrigatórios com valores padrão específicos por tabela
-      if (tableName === "necessidades_placas") {
-        record.servico = record.servico || "Substituição de Placa";
-      } else if (tableName === "ficha_inscricoes") {
-        record.tipo_inscricao = "Outros";
-        record.cor = "Branca";
-      } else if (tableName === "intervencoes_cilindros") {
-        // Todos os campos obrigatórios com valores padrão
-        record.cor_corpo = "Branco";
-        record.km_inicial = 0;
-        record.km_final = 0;
-      } else if (tableName === "defensas") {
-        // Conforme IN 3/2025, tipo_defensa não é mais usado (campo removido do schema)
-        // Campos obrigatórios com valores padrão para defensas metálicas
-        record.lado = "D";
-        record.extensao_metros = 0;
-        record.necessita_intervencao = false;
-        record.km_inicial = 0;
-        record.km_final = 0;
-      } else if (tableName === "ficha_placa") {
-        // Campos obrigatórios para placas já são preenchidos pelo mapeamento
-      } else if (tableName === "ficha_tachas") {
-        record.km_inicial = 0;
-        record.km_final = 0;
-        // Não forçar quantidade = 1, deixar vir do Excel
-      } else if (tableName === "ficha_porticos") {
-        record.tipo = "Informativo";
-      } else if (tableName === "ficha_marcas_longitudinais") {
-        // Campos opcionais, não há obrigatórios além dos básicos
-      }
-
-      // Mapear campos do Excel para os campos da tabela
-      let hasValidData = false;
-      for (const [key, value] of Object.entries(row)) {
-        // Ignorar colunas vazias ou inválidas
-        if (!key || key.trim() === '' || key.startsWith('__') || key.includes('__empty')) {
-          continue;
+    const recordsToInsert = normalizedData
+      .map((row: any) => {
+        // Determinar campo de data padrão baseado na tabela
+        let dateField = "data_vistoria";
+        if (tableName === "intervencoes_cilindros" || tableName === "intervencoes_inscricoes") {
+          dateField = "data_intervencao";
+        } else if (tableName === "defensas") {
+          dateField = "data_inspecao";
         }
-        
-      // Normalizar chave removendo espaços extras entre palavras
-      const cleanKey = key.replace(/\s+/g, ' ').trim();
-      let normalizedKey = cleanKey.toLowerCase().replace(/\s+/g, "_");
-      
-      // Aplicar mapeamento específico se existir
-      const originalKey = cleanKey; // Guardar chave original limpa para verificações especiais
-      
-      if (fieldMapping[cleanKey]) {
-        normalizedKey = fieldMapping[cleanKey];
-      } else if (fieldMapping[normalizedKey]) {
-        normalizedKey = fieldMapping[normalizedKey];
-      }
-      
-      // Se o mapeamento retornou string vazia, pular este campo
-      if (normalizedKey === '') {
-        continue;
-      }
-        
-      // Ignorar se a normalização resultar em string vazia
-      if (!normalizedKey || normalizedKey === '_' || normalizedKey.includes('__empty')) {
-        continue;
-      }
-      
-      // Apenas adicionar se o campo for válido para esta tabela
-      if (validFields.length === 0 || validFields.includes(normalizedKey)) {
-          // Se é o campo de foto e temos fotos, substituir pelo URL
-          if (hasPhotos && photoFieldName && key === photoFieldName) {
-            const photoFileName = value as string;
-            if (photoFileName && photoMap[photoFileName]) {
-              record[normalizedKey] = photoMap[photoFileName];
-              hasValidData = true;
-            }
-        } else {
-          // Apenas adicionar se o valor não for undefined ou null ou vazio
-          if (value !== undefined && value !== null && value !== '' && value !== '-') {
-            hasValidData = true;
-              
-              // Limpar valores com porcentagem (ex: "55.10%" → 55.10)
-              // IMPORTANTE: Fazer isso ANTES de qualquer outra conversão
-              let cleanedValue: any = value;
-              if (typeof value === 'string' && value.trim().includes('%')) {
-                const originalValue = value;
-                // Remover % e converter para número
-                const numericString = value.replace('%', '').replace(',', '.').trim();
-                const numericValue = parseFloat(numericString);
-                console.log(`[PERCENT DEBUG] Campo: "${normalizedKey}" (original key: "${key}"), Valor original: "${originalValue}", Valor limpo: ${numericValue}, Tipo após conversão: ${typeof numericValue}`);
-                
-                // Se a conversão falhou (NaN), manter o valor original e logar erro
-                if (isNaN(numericValue)) {
-                  console.error(`[PERCENT ERROR] Falha ao converter "${originalValue}" para número no campo "${normalizedKey}"`);
-                  cleanedValue = originalValue;
+
+        // Converter campos do Excel para o formato esperado pela tabela
+        const record: any = {
+          user_id: user.id,
+          lote_id: loteId,
+          rodovia_id: rodoviaId,
+          [dateField]: "2023-01-01", // Data padrão: 01/01/2023
+          // Campos de controle do Inventário Dinâmico
+          origem: "cadastro_inicial",
+          modificado_por_intervencao: false,
+          ultima_intervencao_id: null,
+          data_ultima_modificacao: null,
+        };
+
+        // Adicionar campos obrigatórios com valores padrão específicos por tabela
+        if (tableName === "necessidades_placas") {
+          record.servico = record.servico || "Substituição de Placa";
+        } else if (tableName === "ficha_inscricoes") {
+          record.tipo_inscricao = "Outros";
+          record.cor = "Branca";
+        } else if (tableName === "intervencoes_cilindros") {
+          // Todos os campos obrigatórios com valores padrão
+          record.cor_corpo = "Branco";
+          record.km_inicial = 0;
+          record.km_final = 0;
+        } else if (tableName === "defensas") {
+          // tipo_defensa não é mais usado (campo removido do schema)
+          // Campos obrigatórios com valores padrão para defensas metálicas
+          record.lado = "D";
+          record.extensao_metros = 0;
+          record.necessita_intervencao = false;
+          record.km_inicial = 0;
+          record.km_final = 0;
+        } else if (tableName === "ficha_placa") {
+          // Campos obrigatórios para placas já são preenchidos pelo mapeamento
+        } else if (tableName === "ficha_tachas") {
+          record.km_inicial = 0;
+          record.km_final = 0;
+          // Não forçar quantidade = 1, deixar vir do Excel
+        } else if (tableName === "ficha_porticos") {
+          record.tipo = "Informativo";
+        } else if (tableName === "ficha_marcas_longitudinais") {
+          // Campos opcionais, não há obrigatórios além dos básicos
+        }
+
+        // Mapear campos do Excel para os campos da tabela
+        let hasValidData = false;
+        for (const [key, value] of Object.entries(row)) {
+          // Ignorar colunas vazias ou inválidas
+          if (!key || key.trim() === "" || key.startsWith("__") || key.includes("__empty")) {
+            continue;
+          }
+
+          // Normalizar chave removendo espaços extras entre palavras
+          const cleanKey = key.replace(/\s+/g, " ").trim();
+          let normalizedKey = cleanKey.toLowerCase().replace(/\s+/g, "_");
+
+          // Aplicar mapeamento específico se existir
+          const originalKey = cleanKey; // Guardar chave original limpa para verificações especiais
+
+          if (fieldMapping[cleanKey]) {
+            normalizedKey = fieldMapping[cleanKey];
+          } else if (fieldMapping[normalizedKey]) {
+            normalizedKey = fieldMapping[normalizedKey];
+          }
+
+          // Se o mapeamento retornou string vazia, pular este campo
+          if (normalizedKey === "") {
+            continue;
+          }
+
+          // Ignorar se a normalização resultar em string vazia
+          if (!normalizedKey || normalizedKey === "_" || normalizedKey.includes("__empty")) {
+            continue;
+          }
+
+          // Apenas adicionar se o campo for válido para esta tabela
+          if (validFields.length === 0 || validFields.includes(normalizedKey)) {
+            // Se é o campo de foto e temos fotos, substituir pelo URL
+            if (hasPhotos && photoFieldName && key === photoFieldName) {
+              const photoFileName = value as string;
+              if (photoFileName && photoMap[photoFileName]) {
+                record[normalizedKey] = photoMap[photoFileName];
+                hasValidData = true;
+              }
+            } else {
+              // Apenas adicionar se o valor não for undefined ou null ou vazio
+              if (value !== undefined && value !== null && value !== "" && value !== "-") {
+                hasValidData = true;
+
+                // Limpar valores com porcentagem (ex: "55.10%" → 55.10)
+                // IMPORTANTE: Fazer isso ANTES de qualquer outra conversão
+                let cleanedValue: any = value;
+                if (typeof value === "string" && value.trim().includes("%")) {
+                  const originalValue = value;
+                  // Remover % e converter para número
+                  const numericString = value.replace("%", "").replace(",", ".").trim();
+                  const numericValue = parseFloat(numericString);
+                  console.log(
+                    `[PERCENT DEBUG] Campo: "${normalizedKey}" (original key: "${key}"), Valor original: "${originalValue}", Valor limpo: ${numericValue}, Tipo após conversão: ${typeof numericValue}`,
+                  );
+
+                  // Se a conversão falhou (NaN), manter o valor original e logar erro
+                  if (isNaN(numericValue)) {
+                    console.error(
+                      `[PERCENT ERROR] Falha ao converter "${originalValue}" para número no campo "${normalizedKey}"`,
+                    );
+                    cleanedValue = originalValue;
+                  } else {
+                    cleanedValue = numericValue;
+                  }
+                }
+
+                // Log específico para valores de KM = 0
+                if (
+                  (normalizedKey.includes("km") || normalizedKey === "km_inicial" || normalizedKey === "km_final") &&
+                  (cleanedValue === 0 || cleanedValue === "0")
+                ) {
+                  console.log(
+                    `[KM ZERO DEBUG] Campo: "${normalizedKey}", Valor: ${cleanedValue}, Tipo: ${typeof cleanedValue}`,
+                  );
+                }
+
+                // Conversões especiais usando a chave original
+                // PRIORIDADE: Garantir que km=0 sempre seja mapeado PRIMEIRO
+                if (normalizedKey === "km" || normalizedKey === "km_inicial" || normalizedKey === "km_final") {
+                  const kmValue = Number(cleanedValue);
+                  if (!isNaN(kmValue)) {
+                    record[normalizedKey] = kmValue;
+                    console.log(`[KM MAPPING] ${normalizedKey} = ${kmValue}`);
+                  }
+                } else if (normalizedKey === "largura_cm" && originalKey.toLowerCase().includes("(m)")) {
+                  // Converter de metros para centímetros
+                  record[normalizedKey] = Number(cleanedValue) * 100;
+                } else if (normalizedKey === "extensao_metros" && originalKey.toLowerCase().includes("(km)")) {
+                  // Converter de km para metros
+                  record[normalizedKey] = Number(cleanedValue) * 1000;
+                } else if (normalizedKey === "espessura_cm" && originalKey.toLowerCase().includes("(mm)")) {
+                  // Converter de mm para cm
+                  record[normalizedKey] = Number(cleanedValue) / 10;
                 } else {
-                  cleanedValue = numericValue;
+                  record[normalizedKey] = cleanedValue;
                 }
-              }
-              
-              // Log específico para valores de KM = 0
-              if ((normalizedKey.includes('km') || normalizedKey === 'km_inicial' || normalizedKey === 'km_final') 
-                  && (cleanedValue === 0 || cleanedValue === '0')) {
-                console.log(`[KM ZERO DEBUG] Campo: "${normalizedKey}", Valor: ${cleanedValue}, Tipo: ${typeof cleanedValue}`);
-              }
-              
-              // Conversões especiais usando a chave original
-              // PRIORIDADE: Garantir que km=0 sempre seja mapeado PRIMEIRO
-              if (normalizedKey === 'km' || normalizedKey === 'km_inicial' || normalizedKey === 'km_final') {
-                const kmValue = Number(cleanedValue);
-                if (!isNaN(kmValue)) {
-                  record[normalizedKey] = kmValue;
-                  console.log(`[KM MAPPING] ${normalizedKey} = ${kmValue}`);
+
+                // Log específico para tachas
+                if (
+                  tableName === "ficha_tachas" &&
+                  (normalizedKey === "descricao" ||
+                    normalizedKey === "cor_refletivo" ||
+                    normalizedKey === "local_implantacao" ||
+                    normalizedKey === "espacamento_m")
+                ) {
+                  console.log(`[TACHA DEBUG] INSERIDO: ${normalizedKey} = ${value} (tipo: ${typeof value})`);
                 }
-              } else if (normalizedKey === "largura_cm" && originalKey.toLowerCase().includes("(m)")) {
-                // Converter de metros para centímetros
-                record[normalizedKey] = Number(cleanedValue) * 100;
-              } else if (normalizedKey === "extensao_metros" && originalKey.toLowerCase().includes("(km)")) {
-                // Converter de km para metros
-                record[normalizedKey] = Number(cleanedValue) * 1000;
-              } else if (normalizedKey === "espessura_cm" && originalKey.toLowerCase().includes("(mm)")) {
-                // Converter de mm para cm
-                record[normalizedKey] = Number(cleanedValue) / 10;
-            } else {
-              record[normalizedKey] = cleanedValue;
-            }
-            
-            // Log específico para tachas
-            if (tableName === "ficha_tachas" && (normalizedKey === "descricao" || normalizedKey === "cor_refletivo" || normalizedKey === "local_implantacao" || normalizedKey === "espacamento_m")) {
-                console.log(`[TACHA DEBUG] INSERIDO: ${normalizedKey} = ${value} (tipo: ${typeof value})`);
-              }
-            } else {
-              if (tableName === "ficha_tachas" && normalizedKey === "descricao") {
-                console.log(`[TACHA DESCRICAO - REJEITADO] Valor: "${value}", undefined?: ${value === undefined}, null?: ${value === null}, vazio?: ${value === ''}, traço?: ${value === '-'}`);
-              }
-              if (tableName === "ficha_tachas" && (normalizedKey === "descricao" || normalizedKey === "cor_refletivo" || normalizedKey === "local_implantacao" || normalizedKey === "espacamento_m")) {
-                console.log(`[TACHA DEBUG] REJEITADO (valor vazio/null/-): ${normalizedKey} = ${value} (tipo: ${typeof value})`);
+              } else {
+                if (tableName === "ficha_tachas" && normalizedKey === "descricao") {
+                  console.log(
+                    `[TACHA DESCRICAO - REJEITADO] Valor: "${value}", undefined?: ${value === undefined}, null?: ${value === null}, vazio?: ${value === ""}, traço?: ${value === "-"}`,
+                  );
+                }
+                if (
+                  tableName === "ficha_tachas" &&
+                  (normalizedKey === "descricao" ||
+                    normalizedKey === "cor_refletivo" ||
+                    normalizedKey === "local_implantacao" ||
+                    normalizedKey === "espacamento_m")
+                ) {
+                  console.log(
+                    `[TACHA DEBUG] REJEITADO (valor vazio/null/-): ${normalizedKey} = ${value} (tipo: ${typeof value})`,
+                  );
+                }
               }
             }
           }
         }
-      }
 
-      // Apenas retornar o registro se houver dados válidos do Excel
-      return hasValidData ? record : null;
-    }).filter(record => record !== null); // Filtrar registros nulos
+        // Apenas retornar o registro se houver dados válidos do Excel
+        return hasValidData ? record : null;
+      })
+      .filter((record) => record !== null); // Filtrar registros nulos
 
     // Se não houver registros para inserir, retornar sucesso com 0 importados
     if (recordsToInsert.length === 0) {
@@ -721,7 +887,7 @@ serve(async (req) => {
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
-        }
+        },
       );
     }
 
@@ -729,7 +895,7 @@ serve(async (req) => {
     if (recordsToInsert.length > 0) {
       console.log("Exemplo de registro a ser inserido:", JSON.stringify(recordsToInsert[0], null, 2));
       console.log("Campos do registro:", Object.keys(recordsToInsert[0]));
-      
+
       // Log específico para tachas com descrição
       if (inventoryType === "tachas") {
         console.log(`[TACHA - REGISTRO FINAL] Descricao no primeiro registro: "${recordsToInsert[0].descricao}"`);
@@ -745,9 +911,7 @@ serve(async (req) => {
       const batch = recordsToInsert.slice(i, i + BATCH_SIZE);
       console.log(`Inserindo lote ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} registros`);
 
-      const { data: insertData, error: insertError } = await supabase
-        .from(tableName)
-        .insert(batch);
+      const { data: insertData, error: insertError } = await supabase.from(tableName).insert(batch);
 
       if (insertError) {
         console.error("Erro ao inserir lote:", insertError);
@@ -769,7 +933,7 @@ serve(async (req) => {
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
-      }
+      },
     );
   } catch (error: any) {
     console.error("Erro na importação:", error);
@@ -781,7 +945,7 @@ serve(async (req) => {
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
-      }
+      },
     );
   }
 });
