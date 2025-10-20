@@ -5,7 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Pencil, Plus, Trash2, Building2, Upload, Copy, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -43,10 +51,7 @@ export const SupervisorasManager = () => {
 
   const loadSupervisoras = async () => {
     try {
-      const { data, error } = await supabase
-        .from("supervisoras")
-        .select("*")
-        .order("nome_empresa");
+      const { data, error } = await supabase.from("supervisoras").select("*").order("nome_empresa");
 
       if (error) throw error;
       setSupervisoras(data || []);
@@ -69,13 +74,10 @@ export const SupervisorasManager = () => {
 
     try {
       const { data, error } = await supabase.rpc("generate_codigo_convite");
-      
+
       if (error) throw error;
 
-      const { error: updateError } = await supabase
-        .from("supervisoras")
-        .update({ codigo_convite: data })
-        .eq("id", id);
+      const { error: updateError } = await supabase.from("supervisoras").update({ codigo_convite: data }).eq("id", id);
 
       if (updateError) throw updateError;
 
@@ -112,9 +114,9 @@ export const SupervisorasManager = () => {
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from("supervisora-logos")
-          .getPublicUrl(fileName);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("supervisora-logos").getPublicUrl(fileName);
 
         logoUrl = publicUrl;
       }
@@ -123,15 +125,13 @@ export const SupervisorasManager = () => {
       if (logoOrgaoFile) {
         const fileExt = logoOrgaoFile.name.split(".").pop();
         const fileName = `orgao-${Math.random()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from("supervisora-logos")
-          .upload(fileName, logoOrgaoFile);
+        const { error: uploadError } = await supabase.storage.from("supervisora-logos").upload(fileName, logoOrgaoFile);
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from("supervisora-logos")
-          .getPublicUrl(fileName);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("supervisora-logos").getPublicUrl(fileName);
 
         logoOrgaoUrl = publicUrl;
       }
@@ -140,29 +140,27 @@ export const SupervisorasManager = () => {
         // Atualizar
         const { error } = await supabase
           .from("supervisoras")
-        .update({
-          nome_empresa: formData.nome_empresa,
-          contrato: formData.contrato,
-          logo_url: logoUrl,
-          logo_orgao_fiscalizador_url: logoOrgaoUrl,
-          usar_logo_customizado: formData.usar_logo_customizado,
-          usar_logo_orgao_relatorios: formData.usar_logo_orgao_relatorios,
-        })
+          .update({
+            nome_empresa: formData.nome_empresa,
+            contrato: formData.contrato,
+            logo_url: logoUrl,
+            logo_orgao_fiscalizador_url: logoOrgaoUrl,
+            usar_logo_customizado: formData.usar_logo_customizado,
+            usar_logo_orgao_relatorios: formData.usar_logo_orgao_relatorios,
+          })
           .eq("id", editingSupervisora.id);
 
         if (error) throw error;
         toast.success("Supervisora atualizada!");
       } else {
         // Criar
-        const { error } = await supabase
-          .from("supervisoras")
-          .insert({
-            nome_empresa: formData.nome_empresa,
-            contrato: formData.contrato,
-            logo_url: logoUrl,
-            logo_orgao_fiscalizador_url: logoOrgaoUrl,
-            usar_logo_customizado: formData.usar_logo_customizado,
-          });
+        const { error } = await supabase.from("supervisoras").insert({
+          nome_empresa: formData.nome_empresa,
+          contrato: formData.contrato,
+          logo_url: logoUrl,
+          logo_orgao_fiscalizador_url: logoOrgaoUrl,
+          usar_logo_customizado: formData.usar_logo_customizado,
+        });
 
         if (error) throw error;
         toast.success("Supervisora criada!");
@@ -188,10 +186,10 @@ export const SupervisorasManager = () => {
       if (checkError) throw checkError;
 
       if (lotes && lotes.length > 0) {
-        const lotesNumeros = lotes.map(l => l.numero).join(", ");
+        const lotesNumeros = lotes.map((l) => l.numero).join(", ");
         toast.error(
           `Não é possível excluir "${nome}" pois existem ${lotes.length} lote(s) vinculado(s): ${lotesNumeros}. Desvincule ou exclua os lotes primeiro.`,
-          { duration: 6000 }
+          { duration: 6000 },
         );
         return;
       }
@@ -207,7 +205,7 @@ export const SupervisorasManager = () => {
       if (profiles && profiles.length > 0) {
         toast.error(
           `Não é possível excluir "${nome}" pois existem ${profiles.length} usuário(s) vinculado(s). Desvincule os usuários primeiro na aba "Usuários".`,
-          { duration: 6000 }
+          { duration: 6000 },
         );
         return;
       }
@@ -217,10 +215,7 @@ export const SupervisorasManager = () => {
         return;
       }
 
-      const { error } = await supabase
-        .from("supervisoras")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("supervisoras").delete().eq("id", id);
 
       if (error) throw error;
       toast.success("Supervisora excluída com sucesso!");
@@ -246,11 +241,11 @@ export const SupervisorasManager = () => {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingSupervisora(null);
-    setFormData({ 
-      nome_empresa: "", 
+    setFormData({
+      nome_empresa: "",
       contrato: "",
       usar_logo_customizado: false,
-      usar_logo_orgao_relatorios: true
+      usar_logo_orgao_relatorios: true,
     });
     setLogoFile(null);
     setLogoOrgaoFile(null);
@@ -265,35 +260,33 @@ export const SupervisorasManager = () => {
               <Building2 className="h-5 w-5" />
               Supervisoras
             </CardTitle>
-            <CardDescription>
-              Gerencie as empresas supervisoras do sistema (multi-tenant)
-            </CardDescription>
+            <CardDescription>Gerencie as empresas supervisoras do sistema (multi-tenant)</CardDescription>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => {
-                setEditingSupervisora(null);
-                setFormData({ 
-                  nome_empresa: "", 
-                  contrato: "",
-                  usar_logo_customizado: false,
-                  usar_logo_orgao_relatorios: true
-                });
-              }}>
+              <Button
+                onClick={() => {
+                  setEditingSupervisora(null);
+                  setFormData({
+                    nome_empresa: "",
+                    contrato: "",
+                    usar_logo_customizado: false,
+                    usar_logo_orgao_relatorios: true,
+                  });
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Nova Supervisora
               </Button>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] max-w-2xl flex flex-col overflow-hidden">
               <DialogHeader className="flex-shrink-0">
-                <DialogTitle>
-                  {editingSupervisora ? "Editar Supervisora" : "Nova Supervisora"}
-                </DialogTitle>
+                <DialogTitle>{editingSupervisora ? "Editar Supervisora" : "Nova Supervisora"}</DialogTitle>
                 <DialogDescription>
                   {editingSupervisora ? "Atualize" : "Adicione"} os dados da supervisora
                 </DialogDescription>
               </DialogHeader>
-              
+
               <div className="space-y-4 py-4 overflow-y-auto overflow-x-hidden flex-1 px-1 pb-20">
                 <div className="space-y-2">
                   <Label htmlFor="nome">Nome da Empresa *</Label>
@@ -301,7 +294,7 @@ export const SupervisorasManager = () => {
                     id="nome"
                     value={formData.nome_empresa}
                     onChange={(e) => setFormData({ ...formData, nome_empresa: e.target.value })}
-                    placeholder="Ex: DNIT Regional SP"
+                    placeholder="Ex: SUPERVISORA XYZ LTDA"
                   />
                 </div>
 
@@ -315,76 +308,69 @@ export const SupervisorasManager = () => {
                   />
                 </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="logo">Logo da Empresa</Label>
-              <Input
-                id="logo"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
-              />
-              {editingSupervisora?.logo_url && (
-                <div className="border rounded-lg p-3 bg-muted/30">
-                  <p className="text-sm text-muted-foreground mb-2">Logo atual:</p>
-                  <div className="flex items-center justify-between gap-4">
-                    <img 
-                      src={editingSupervisora.logo_url} 
-                      alt="Logo atual" 
-                      className="h-16 object-contain"
-                    />
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="usar-logo" className="text-sm font-normal cursor-pointer">
-                        Usar no sistema
-                      </Label>
-                      <Switch
-                        id="usar-logo"
-                        checked={formData.usar_logo_customizado}
-                        onCheckedChange={(checked) => 
-                          setFormData({ ...formData, usar_logo_customizado: checked })
-                        }
-                        disabled={!editingSupervisora?.logo_url && !logoFile}
-                      />
+                <div className="space-y-3">
+                  <Label htmlFor="logo">Logo da Empresa</Label>
+                  <Input
+                    id="logo"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                  />
+                  {editingSupervisora?.logo_url && (
+                    <div className="border rounded-lg p-3 bg-muted/30">
+                      <p className="text-sm text-muted-foreground mb-2">Logo atual:</p>
+                      <div className="flex items-center justify-between gap-4">
+                        <img src={editingSupervisora.logo_url} alt="Logo atual" className="h-16 object-contain" />
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="usar-logo" className="text-sm font-normal cursor-pointer">
+                            Usar no sistema
+                          </Label>
+                          <Switch
+                            id="usar-logo"
+                            checked={formData.usar_logo_customizado}
+                            onCheckedChange={(checked) => setFormData({ ...formData, usar_logo_customizado: checked })}
+                            disabled={!editingSupervisora?.logo_url && !logoFile}
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="logo-orgao">Logo do Órgão Fiscalizador</Label>
-              <Input
-                id="logo-orgao"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setLogoOrgaoFile(e.target.files?.[0] || null)}
-              />
-              {editingSupervisora?.logo_orgao_fiscalizador_url && (
-                <div className="border rounded-lg p-3 bg-muted/30">
-                  <p className="text-sm text-muted-foreground mb-2">Logo atual:</p>
-                  <div className="flex items-center justify-between gap-4">
-                    <img 
-                      src={editingSupervisora.logo_orgao_fiscalizador_url} 
-                      alt="Logo órgão fiscalizador" 
-                      className="h-16 object-contain"
-                    />
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="usar-logo-orgao" className="text-sm font-normal cursor-pointer">
-                        Incluir nos relatórios
-                      </Label>
-                      <Switch
-                        id="usar-logo-orgao"
-                        checked={formData.usar_logo_orgao_relatorios}
-                        onCheckedChange={(checked) => 
-                          setFormData({ ...formData, usar_logo_orgao_relatorios: checked })
-                        }
-                        disabled={!editingSupervisora?.logo_orgao_fiscalizador_url && !logoOrgaoFile}
-                      />
+                <div className="space-y-3">
+                  <Label htmlFor="logo-orgao">Logo do Órgão Fiscalizador</Label>
+                  <Input
+                    id="logo-orgao"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setLogoOrgaoFile(e.target.files?.[0] || null)}
+                  />
+                  {editingSupervisora?.logo_orgao_fiscalizador_url && (
+                    <div className="border rounded-lg p-3 bg-muted/30">
+                      <p className="text-sm text-muted-foreground mb-2">Logo atual:</p>
+                      <div className="flex items-center justify-between gap-4">
+                        <img
+                          src={editingSupervisora.logo_orgao_fiscalizador_url}
+                          alt="Logo órgão fiscalizador"
+                          className="h-16 object-contain"
+                        />
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="usar-logo-orgao" className="text-sm font-normal cursor-pointer">
+                            Incluir nos relatórios
+                          </Label>
+                          <Switch
+                            id="usar-logo-orgao"
+                            checked={formData.usar_logo_orgao_relatorios}
+                            onCheckedChange={(checked) =>
+                              setFormData({ ...formData, usar_logo_orgao_relatorios: checked })
+                            }
+                            disabled={!editingSupervisora?.logo_orgao_fiscalizador_url && !logoOrgaoFile}
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
-              )}
-            </div>
-
               </div>
 
               <DialogFooter className="flex-shrink-0 bg-background pt-4 border-t shadow-lg">
@@ -399,38 +385,32 @@ export const SupervisorasManager = () => {
           </Dialog>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         {loading ? (
           <div className="text-center py-8">Carregando...</div>
         ) : supervisoras.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhuma supervisora cadastrada
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Nenhuma supervisora cadastrada</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-            <TableHead>Nome da Empresa</TableHead>
-            <TableHead>Contrato</TableHead>
-            <TableHead className="text-center">Logo</TableHead>
-            <TableHead>Código Convite</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
+                <TableHead>Nome da Empresa</TableHead>
+                <TableHead>Contrato</TableHead>
+                <TableHead className="text-center">Logo</TableHead>
+                <TableHead>Código Convite</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {supervisoras.map((supervisora) => (
                 <TableRow key={supervisora.id}>
-                  <TableCell className="font-medium">
-                    {supervisora.nome_empresa}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {supervisora.contrato || "—"}
-                  </TableCell>
+                  <TableCell className="font-medium">{supervisora.nome_empresa}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{supervisora.contrato || "—"}</TableCell>
                   <TableCell className="text-center">
                     {supervisora.logo_url ? (
-                      <img 
-                        src={supervisora.logo_url} 
+                      <img
+                        src={supervisora.logo_url}
                         alt={supervisora.nome_empresa}
                         className="h-10 mx-auto object-contain"
                       />
@@ -475,11 +455,7 @@ export const SupervisorasManager = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(supervisora)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => handleEdit(supervisora)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
