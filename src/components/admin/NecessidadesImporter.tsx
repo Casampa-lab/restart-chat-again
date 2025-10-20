@@ -602,6 +602,19 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           distancia_face_defensa_obstaculo_m: sanitizarNumerico(row["Distância da face da defensa ao obstáculo(m)"] || row["Distancia face defensa obstaculo"] || row["distancia_face_defensa_obstaculo_m"]),
           distancia_bordo_pista_face_defensa_m: sanitizarNumerico(row["Distância da linha de bordo da pista à face da defensa (m)"] || row["Distancia bordo pista face defensa"] || row["distancia_bordo_pista_face_defensa_m"]),
           motivo: sanitizarTexto(motivoDefensa),
+          extensao_metros: (() => {
+            // Prioriza o campo "Comprimento Total do Tramo (m)" da planilha
+            const comprimentoTotal = sanitizarNumerico(row["Comprimento Total do Tramo (m)"] || row["Comprimento Total"] || row["comprimento_total_tramo_m"]);
+            if (comprimentoTotal !== null) return comprimentoTotal;
+            
+            // Fallback: calcular pela diferença de KM
+            const kmInicial = sanitizarNumerico(row["Km Inicial"] || row["km_inicial"]);
+            const kmFinal = sanitizarNumerico(row["Km Final"] || row["km_final"]);
+            if (kmInicial !== null && kmFinal !== null) {
+              return Math.abs(kmFinal - kmInicial) * 1000; // Converter km para metros
+            }
+            return null;
+          })(),
         };
 
       default:
