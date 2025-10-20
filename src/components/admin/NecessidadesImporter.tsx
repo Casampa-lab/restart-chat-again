@@ -832,6 +832,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
 
       // Função auxiliar para fazer flush do batch de inserts e criar reconciliações
       const flushBatch = async (tabelaNecessidade: string) => {
+        console.log(`🚀 FLUSH-BATCH CHAMADO: batchInsert.length = ${batchInsert.length}, tabela = ${tabelaNecessidade}`);
         if (batchInsert.length > 0) {
           // Inserir necessidades e retornar os IDs
           const { data: necessidadesInseridas, error } = await supabase
@@ -1193,8 +1194,12 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             }
           });
 
+          console.log(`🎯 PRE-PUSH - Linha ${linhaExcel}: Servico="${dadosInsercao.servico}", BatchSize=${batchInsert.length}`);
+          
           // 🚀 OTIMIZAÇÃO: Adicionar ao batch ao invés de inserir individualmente
           batchInsert.push(dadosInsercao);
+          
+          console.log(`✅ POST-PUSH - Linha ${linhaExcel}: BatchSize agora = ${batchInsert.length}`);
           
           // Guardar dados de match paralelos
           matchDataBatch.push({
