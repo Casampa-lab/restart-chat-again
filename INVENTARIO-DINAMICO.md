@@ -1571,7 +1571,6 @@ SELECT
   int.data_intervencao AS data,
   int.motivo AS descricao,
   int.extensao_metros,
-  int.tipo_defensa,
   int.foto_url,
   int.observacao
 FROM defensas_intervencoes int
