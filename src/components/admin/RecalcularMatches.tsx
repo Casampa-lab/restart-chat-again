@@ -569,22 +569,26 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           matchesCandidatos = buscarMatchPontual(nec, cadastros || [], tipo, toleranciaGPS / 1000);
         }
 
-        let servicoInferido = nec.servico || 'Pendente Revisão';
+        // Capturar valor da planilha
+        const solucaoPlanilha = nec.servico || nec.solucao_planilha || null;
         
-        if (servicoInferido === 'Remover') {
-          divergenciaIdentificada = false;
-        } else if (matchesCandidatos.length === 0) {
-          if (servicoInferido === 'Substituir' || servicoInferido === 'Manter') {
-            divergenciaIdentificada = true;
-          } else if (servicoInferido === 'Implantar') {
-            divergenciaIdentificada = false;
-          }
+        // INFERIR serviço baseado nos matches encontrados
+        let servicoInferido: string;
+        
+        if (solucaoPlanilha === 'Remover') {
+          // Remover sempre é Remover (independente de match)
+          servicoInferido = 'Remover';
+        } else if (matchesCandidatos.length > 0) {
+          // ENCONTROU match no cadastro → Elemento JÁ EXISTE
+          servicoInferido = 'Substituir';
         } else {
-          if (servicoInferido === 'Implantar') {
-            divergenciaIdentificada = true;
-          } else {
-            divergenciaIdentificada = false;
-          }
+          // NÃO encontrou match → Elemento NÃO EXISTE
+          servicoInferido = 'Implantar';
+        }
+        
+        // Detectar divergência comparando INFERÊNCIA vs PLANILHA
+        if (solucaoPlanilha && solucaoPlanilha !== servicoInferido) {
+          divergenciaIdentificada = true;
         }
 
         const matchData: any = {
