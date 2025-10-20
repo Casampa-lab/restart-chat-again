@@ -466,7 +466,11 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
         };
 
       case "cilindros":
-        const solucao = (row["Solução"] || row["Solucao"] || row["solucao"] || "").toLowerCase();
+        // 🔍 LOG: Debugar valor da coluna "Solução" antes de processar
+        const solucaoRaw = row["Solução"] || row["Solucao"] || row["solucao"] || null;
+        console.log(`🔍 CILINDROS DEBUG - Linha: Solução="${solucaoRaw}"`);
+        
+        const solucao = (solucaoRaw || "").toString().toLowerCase();
         let motivo = row["Motivo"] || row["motivo"] || "-";
         
         // Aplicar regras do campo Motivo
@@ -1049,6 +1053,11 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           let solucaoPlanilhaNormalizada: string | null = null;
           const solucaoPlanilha = dados.solucao_planilha?.toLowerCase();
           
+          // 🔍 DEBUG: Log do valor original de solucao_planilha (primeiras 5 linhas)
+          if (i < 5 || tipo === "cilindros") {
+            console.log(`🔍 Linha ${linhaExcel}: solucao_planilha="${dados.solucao_planilha}" (raw="${solucaoPlanilha}")`);
+          }
+          
           if (solucaoPlanilha) {
             // Normalizar valores da planilha
             if (solucaoPlanilha.includes("substitu")) {
@@ -1059,6 +1068,14 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
               solucaoPlanilhaNormalizada = "Remover";
             } else if (solucaoPlanilha.includes("mant") || solucaoPlanilha.includes("conserv") || solucaoPlanilha.includes("manut")) {
               solucaoPlanilhaNormalizada = "Manter";
+            } else {
+              // 🔍 DEBUG: Valor não reconhecido
+              console.warn(`⚠️ Linha ${linhaExcel}: Valor não reconhecido em solucao_planilha: "${solucaoPlanilha}"`);
+            }
+          } else {
+            // 🔍 DEBUG: Campo vazio ou nulo
+            if (tipo === "cilindros") {
+              console.warn(`⚠️ Linha ${linhaExcel}: solucao_planilha está VAZIO/NULL - Usando inferência automática`);
             }
           }
           
