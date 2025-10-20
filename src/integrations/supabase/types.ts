@@ -5343,36 +5343,6 @@ export type Database = {
           },
         ]
       }
-      supervisora: {
-        Row: {
-          contrato: string
-          created_at: string | null
-          id: string
-          logo_url: string | null
-          nome_empresa: string
-          updated_at: string | null
-          usar_logo_customizado: boolean | null
-        }
-        Insert: {
-          contrato: string
-          created_at?: string | null
-          id?: string
-          logo_url?: string | null
-          nome_empresa: string
-          updated_at?: string | null
-          usar_logo_customizado?: boolean | null
-        }
-        Update: {
-          contrato?: string
-          created_at?: string | null
-          id?: string
-          logo_url?: string | null
-          nome_empresa?: string
-          updated_at?: string | null
-          usar_logo_customizado?: boolean | null
-        }
-        Relationships: []
-      }
       supervisoras: {
         Row: {
           codigo_convite: string | null

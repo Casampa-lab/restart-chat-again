@@ -30,10 +30,10 @@ export const SupervisoraManager = () => {
   const [uploading, setUploading] = useState(false);
 
   const { data: supervisora, isLoading } = useQuery({
-    queryKey: ["supervisora"],
+    queryKey: ["supervisoras"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("supervisora")
+        .from("supervisoras")
         .select("*")
         .maybeSingle();
 
@@ -172,7 +172,7 @@ export const SupervisoraManager = () => {
       if (supervisora) {
         // Atualizar
         const { error } = await supabase
-          .from("supervisora")
+          .from("supervisoras")
           .update(payload)
           .eq("id", supervisora.id);
 
@@ -180,7 +180,7 @@ export const SupervisoraManager = () => {
       } else {
         // Inserir novo
         const { error } = await supabase
-          .from("supervisora")
+          .from("supervisoras")
           .insert(payload);
 
         if (error) throw error;
@@ -194,7 +194,7 @@ export const SupervisoraManager = () => {
       toast.success("Informações da supervisora salvas com sucesso!");
       
       // Invalidar queries para forçar atualização
-      queryClient.invalidateQueries({ queryKey: ["supervisora"] });
+      queryClient.invalidateQueries({ queryKey: ["supervisoras"] });
     },
     onError: (error: any) => {
       toast.error(error.message || "Erro ao salvar informações");
