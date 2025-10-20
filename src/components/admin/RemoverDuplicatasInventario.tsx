@@ -238,6 +238,29 @@ export function RemoverDuplicatasInventario({ loteId: propLoteId, rodoviaId: pro
       queryClient.invalidateQueries({ queryKey: ['inventario'] });
       queryClient.invalidateQueries({ queryKey: ['necessidades'] });
 
+      // 🔄 DELETAR Marco Zero - remover duplicatas altera matches
+      if (propLoteId && propRodoviaId) {
+        const { error: marcoError } = await supabase
+          .from("marcos_inventario")
+          .delete()
+          .eq("lote_id", propLoteId)
+          .eq("rodovia_id", propRodoviaId)
+          .eq("tipo", "marco_zero");
+
+        if (marcoError) {
+          console.warn("⚠️ Aviso ao deletar marco zero:", marcoError);
+          addLog("warning", "⚠️ Não foi possível invalidar Marco Zero");
+        } else {
+          console.log("✅ Marco Zero deletado - duplicatas removidas e necessidades reassociadas");
+          addLog("info", "🔄 Marco Zero invalidado - inventário não está mais consolidado");
+        }
+
+        // Invalidar query do marco zero
+        queryClient.invalidateQueries({ 
+          queryKey: ["marco-zero-recente", propLoteId, propRodoviaId] 
+        });
+      }
+
     } catch (error: any) {
       addLog('error', `❌ Erro: ${error.message}`);
       toast.error("Erro ao processar: " + error.message);

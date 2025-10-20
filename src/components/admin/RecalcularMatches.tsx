@@ -760,6 +760,29 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
     queryClient.invalidateQueries({ queryKey: ['necessidades'] });
     queryClient.invalidateQueries({ queryKey: ['diagnostico'] });
 
+    // 🔄 DELETAR Marco Zero - recalcular matches invalida o snapshot consolidado
+    if (loteId && rodoviaId) {
+      const { error: marcoError } = await supabase
+        .from("marcos_inventario")
+        .delete()
+        .eq("lote_id", loteId)
+        .eq("rodovia_id", rodoviaId)
+        .eq("tipo", "marco_zero");
+
+      if (marcoError) {
+        console.warn("⚠️ Aviso ao deletar marco zero:", marcoError);
+        addLog("warning", "⚠️ Não foi possível invalidar Marco Zero");
+      } else {
+        console.log("✅ Marco Zero deletado - matches foram recalculados");
+        addLog("info", "🔄 Marco Zero invalidado - inventário não está mais consolidado");
+      }
+
+      // Invalidar query do marco zero
+      queryClient.invalidateQueries({ 
+        queryKey: ["marco-zero-recente", loteId, rodoviaId] 
+      });
+    }
+
     toast({
       title: "Processamento Concluído",
       description: `${tiposArray.length} tipos processados com sucesso`,
