@@ -949,7 +949,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           let motivo_revisao = null;
 
           // ===== TIPO 1: ELEMENTOS LINEARES (Match por sobreposição de segmento KM) =====
-          if (["marcas_longitudinais", "tachas", "defensas"].includes(tipo)) {
+          if (["marcas_longitudinais", "tachas", "defensas", "cilindros"].includes(tipo)) {
             const temKmsValidos = dados.km_inicial && 
                                   dados.km_final && 
                                   !isNaN(parseFloat(dados.km_inicial)) && 
