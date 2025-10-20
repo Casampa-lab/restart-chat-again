@@ -1557,7 +1557,6 @@ SELECT
   def.data_inspecao AS data,
   'Cadastro inicial' AS descricao,
   def.extensao_metros,
-  def.tipo_defensa,
   NULL AS foto_url,
   NULL AS observacao
 FROM defensas def
