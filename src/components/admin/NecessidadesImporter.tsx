@@ -834,11 +834,20 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       const flushBatch = async (tabelaNecessidade: string) => {
         console.log(`🚀 FLUSH-BATCH CHAMADO: batchInsert.length = ${batchInsert.length}, tabela = ${tabelaNecessidade}`);
         if (batchInsert.length > 0) {
+          console.log(`📦 Dados que serão enviados (primeiros 2 registros):`, batchInsert.slice(0, 2));
+          
           // Inserir necessidades e retornar os IDs
           const { data: necessidadesInseridas, error } = await supabase
             .from(tabelaNecessidade as any)
             .insert(batchInsert)
             .select('id, cadastro_id');
+          
+          console.log(`📊 RESPOSTA SUPABASE:`, { 
+            temData: !!necessidadesInseridas, 
+            qtdData: necessidadesInseridas?.length,
+            temErro: !!error,
+            erro: error 
+          });
           
           if (error) throw error;
           
