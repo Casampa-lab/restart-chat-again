@@ -85,3 +85,54 @@ export function isMatchConclusivo(decision: MatchDecision): boolean {
 export function determinarEstadoNecessidade(decision: MatchDecision): 'ATIVO' | 'PROPOSTO' {
   return isMatchConclusivo(decision) ? 'ATIVO' : 'PROPOSTO';
 }
+
+/**
+ * Executa matching de elemento linear (MARCA_LONG, TACHAS, DEFENSA, CILINDRO)
+ * Considera overlap de segmento PostGIS + similaridade de atributos
+ * 
+ * @param tipo - Tipo do elemento (MARCA_LONG, TACHAS, DEFENSA, CILINDRO)
+ * @param geomWKT - Geometria LINESTRING em formato WKT
+ * @param rodoviaId - UUID da rodovia
+ * @param atributos - Objeto com atributos da necessidade
+ * @param servico - Tipo de serviço ('Inclusão', 'Substituição', 'Remoção')
+ * @returns MatchResult com decisão, score (=overlap ratio), reason code e divergências
+ */
+export async function matchLinear(
+  tipo: TipoElementoMatch,
+  geomWKT: string,
+  rodoviaId: string,
+  atributos: Record<string, any>,
+  servico: string
+): Promise<MatchResult> {
+  const { data, error } = await supabase.rpc('match_linear', {
+    p_tipo: tipo,
+    p_geom_necessidade: geomWKT,
+    p_rodovia_id: rodoviaId,
+    p_atributos: atributos,
+    p_servico: servico
+  });
+  
+  if (error) {
+    console.error('Erro ao executar match_linear:', error);
+    throw error;
+  }
+  
+  return data as MatchResult;
+}
+
+/**
+ * Helper para construir WKT LINESTRING a partir de coordenadas
+ * @param latIni - Latitude inicial
+ * @param lonIni - Longitude inicial
+ * @param latFim - Latitude final
+ * @param lonFim - Longitude final
+ * @returns String WKT no formato "LINESTRING(lon1 lat1, lon2 lat2)"
+ */
+export function buildLineStringWKT(
+  latIni: number,
+  lonIni: number,
+  latFim: number,
+  lonFim: number
+): string {
+  return `LINESTRING(${lonIni} ${latIni}, ${lonFim} ${latFim})`;
+}
