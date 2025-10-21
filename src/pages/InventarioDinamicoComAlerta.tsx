@@ -163,28 +163,31 @@ export default function InventarioDinamicoComAlerta() {
       ];
 
       for (const tabela of tabelas) {
-        // 1. Contar cadastro inicial (AZUL)
+        // 1. Contar cadastro inicial ATIVO (AZUL)
         const { count: countCadastro } = await supabase
           .from(tabela.cadastro as any)
           .select('*', { count: 'exact', head: true })
           .eq('lote_id', activeSession.lote_id)
           .eq('rodovia_id', activeSession.rodovia_id)
-          .eq('origem', 'cadastro_inicial');
+          .eq('origem', 'cadastro_inicial')
+          .eq('ativo', true);
 
-        // 2. Contar criados pelo match (ROXO)
+        // 2. Contar criados pelo match ATIVOS (ROXO)
         const { count: countCriados } = await supabase
           .from(tabela.cadastro as any)
           .select('*', { count: 'exact', head: true })
           .eq('lote_id', activeSession.lote_id)
           .eq('rodovia_id', activeSession.rodovia_id)
-          .eq('origem', 'necessidade');
+          .eq('origem', 'necessidade')
+          .eq('ativo', true);
 
-        // 3. Contar TOTAL no inventário (para pós-Marco Zero)
+        // 3. Contar TOTAL ATIVO no inventário (para pós-Marco Zero)
         const { count: countTotal } = await supabase
           .from(tabela.cadastro as any)
           .select('*', { count: 'exact', head: true })
           .eq('lote_id', activeSession.lote_id)
-          .eq('rodovia_id', activeSession.rodovia_id);
+          .eq('rodovia_id', activeSession.rodovia_id)
+          .eq('ativo', true);
 
         // 4. Buscar necessidades (para exibição e contagem)
         const { data: necessidadesData, count: countNecessidades } = await supabase
