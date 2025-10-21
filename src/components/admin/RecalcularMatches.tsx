@@ -409,8 +409,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           snv: necessidade.snv,
           latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
           longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
-          latitude_inicial: necessidade.latitude_final, // ✅ COORDENADA FINAL
-          longitude_inicial: necessidade.longitude_final, // ✅ COORDENADA FINAL
+          latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
+          longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
         break;
       case "tachas":
@@ -427,8 +427,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           snv: necessidade.snv,
           latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
           longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
-          latitude_inicial: necessidade.latitude_final, // ✅ COORDENADA FINAL
-          longitude_inicial: necessidade.longitude_final, // ✅ COORDENADA FINAL
+          latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
+          longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
         break;
       case "cilindros":
@@ -446,8 +446,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           snv: necessidade.snv,
           latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
           longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
-          latitude_inicial: necessidade.latitude_final, // ✅ COORDENADA FINAL
-          longitude_inicial: necessidade.longitude_final, // ✅ COORDENADA FINAL
+          latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
+          longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
         break;
       case "defensas":
@@ -466,8 +466,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           snv: necessidade.snv,
           latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
           longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
-          latitude_inicial: necessidade.latitude_final, // ✅ COORDENADA FINAL
-          longitude_inicial: necessidade.longitude_final, // ✅ COORDENADA FINAL
+          latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
+          longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
         break;
       case "marcas_transversais":
