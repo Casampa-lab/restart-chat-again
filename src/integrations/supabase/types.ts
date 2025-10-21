@@ -5722,6 +5722,17 @@ export type Database = {
           distancia_metros: number
         }[]
       }
+      match_pontual: {
+        Args: {
+          p_atributos: Json
+          p_lat: number
+          p_lon: number
+          p_rodovia_id: string
+          p_servico: string
+          p_tipo: Database["public"]["Enums"]["tipo_elemento_enum"]
+        }
+        Returns: Database["public"]["CompositeTypes"]["match_result"]
+      }
       remover_duplicatas_necessidades: {
         Args: { p_tabela: string }
         Returns: number
@@ -5742,6 +5753,11 @@ export type Database = {
     Enums: {
       app_role: "admin" | "coordenador" | "tecnico"
       classe_elemento_enum: "PONTUAL" | "LINEAR"
+      match_decision_enum:
+        | "MATCH_DIRECT"
+        | "SUBSTITUICAO"
+        | "AMBIGUOUS"
+        | "NO_MATCH"
       plan_tier: "basico" | "profissional" | "enterprise"
       status_reconciliacao_enum: "pendente_aprovacao" | "aprovado" | "rejeitado"
       subscription_status: "ativa" | "suspensa" | "cancelada" | "trial"
@@ -5763,7 +5779,14 @@ export type Database = {
         | "tachas"
     }
     CompositeTypes: {
-      [_ in never]: never
+      match_result: {
+        cadastro_id: string | null
+        decision: Database["public"]["Enums"]["match_decision_enum"] | null
+        match_score: number | null
+        reason_code: string | null
+        distancia_metros: number | null
+        atributos_divergentes: string[] | null
+      }
     }
   }
 }
@@ -5890,6 +5913,12 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "coordenador", "tecnico"],
       classe_elemento_enum: ["PONTUAL", "LINEAR"],
+      match_decision_enum: [
+        "MATCH_DIRECT",
+        "SUBSTITUICAO",
+        "AMBIGUOUS",
+        "NO_MATCH",
+      ],
       plan_tier: ["basico", "profissional", "enterprise"],
       status_reconciliacao_enum: [
         "pendente_aprovacao",
