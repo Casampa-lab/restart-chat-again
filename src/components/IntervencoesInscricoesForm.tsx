@@ -64,7 +64,6 @@ const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
-  km_final: z.string().min(1, "KM final é obrigatório"),
   snv: z.string().optional(),
   sigla: z.string().optional(),
   tipo_inscricao: z.string().optional(),
@@ -75,8 +74,8 @@ const formSchema = z.object({
   material_utilizado: z.string().optional(),
   estado_conservacao: z.string().optional(),
   observacao: z.string().optional(),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
+  latitude_inicial: z.string().optional(),
+  longitude_inicial: z.string().optional(),
 });
 
 const IntervencoesInscricoesForm = ({ 
@@ -94,8 +93,7 @@ const IntervencoesInscricoesForm = ({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       motivo: "",
-      km_inicial: "",
-      km_final: "",
+    km_inicial: "",
       sigla: "",
       tipo_inscricao: "",
       cor: "",
@@ -105,8 +103,8 @@ const IntervencoesInscricoesForm = ({
       material_utilizado: "Termoplástico",
       estado_conservacao: "",
       observacao: "",
-      latitude: "",
-      longitude: "",
+    latitude_inicial: "",
+    longitude_inicial: "",
     },
   });
 
@@ -125,8 +123,8 @@ const IntervencoesInscricoesForm = ({
         material_utilizado: (inscricaoSelecionada as any).material_utilizado || "Termoplástico",
         estado_conservacao: "",
         observacao: "",
-        latitude: "",
-        longitude: "",
+        latitude_inicial: "",
+        longitude_inicial: "",
       });
     }
   }, [inscricaoSelecionada, modo, form]);
@@ -159,8 +157,7 @@ const IntervencoesInscricoesForm = ({
           ficha_inscricoes_id: inscricaoSelecionada.id,
           data_intervencao: data.data_intervencao,
           motivo: data.motivo,
-          km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
-          km_final: data.km_final ? parseFloat(data.km_final) : null,
+        km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
           snv: data.snv || null,
           sigla: data.sigla || null,
           tipo_inscricao: data.tipo_inscricao || null,
@@ -170,8 +167,8 @@ const IntervencoesInscricoesForm = ({
           espessura_mm: data.espessura_mm ? parseFloat(data.espessura_mm) : null,
           material_utilizado: data.material_utilizado || null,
           estado_conservacao: data.estado_conservacao || null,
-          latitude: data.latitude ? parseFloat(data.latitude) : null,
-          longitude: data.longitude ? parseFloat(data.longitude) : null,
+        latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
+        longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
           observacao: data.observacao || null,
           tipo_origem: tipoOrigem,
         });
@@ -271,20 +268,6 @@ const IntervencoesInscricoesForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>KM Inicial *</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.001" placeholder="0.000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="km_final"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>KM Final *</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.001" placeholder="0.000" {...field} />
                     </FormControl>

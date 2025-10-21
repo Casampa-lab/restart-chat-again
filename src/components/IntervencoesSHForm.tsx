@@ -70,8 +70,8 @@ const formSchema = z.object({
   largura_cm: z.string().optional(),
   espessura_cm: z.string().optional(),
   material: z.string().optional(),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
+  latitude_inicial: z.string().optional(),
+  longitude_inicial: z.string().optional(),
 });
 
 const IntervencoesSHForm = ({ 
@@ -101,8 +101,8 @@ const IntervencoesSHForm = ({
       largura_cm: "",
       espessura_cm: "",
       material: "",
-      latitude: "",
-      longitude: "",
+    latitude_inicial: "",
+    longitude_inicial: "",
     },
   });
 
@@ -123,8 +123,8 @@ const IntervencoesSHForm = ({
         largura_cm: (marcaSelecionada as any).largura_cm?.toString() || "",
         espessura_cm: (marcaSelecionada as any).espessura_cm?.toString() || "",
         material: (marcaSelecionada as any).material || "",
-        latitude: "",
-        longitude: "",
+        latitude_inicial: "",
+        longitude_inicial: "",
       });
     }
   }, [marcaSelecionada, modo, form]);
@@ -168,8 +168,8 @@ const IntervencoesSHForm = ({
           largura_cm: data.largura_cm ? parseFloat(data.largura_cm) : null,
           espessura_cm: data.espessura_cm ? parseFloat(data.espessura_cm) : null,
           material: data.material || null,
-          latitude: data.latitude ? parseFloat(data.latitude) : null,
-          longitude: data.longitude ? parseFloat(data.longitude) : null,
+        latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
+        longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
           tipo_origem: tipoOrigem,
         });
 

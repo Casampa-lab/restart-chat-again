@@ -45,8 +45,8 @@ const formSchema = z.object({
   km_referencia: z.string().optional(),
   tipo_placa: z.string().optional(),
   codigo_placa: z.string().optional(),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
+  latitude_inicial: z.string().optional(),
+  longitude_inicial: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -93,8 +93,8 @@ export function IntervencoesSVForm({
       km_referencia: "",
       tipo_placa: "",
       codigo_placa: "",
-      latitude: "",
-      longitude: "",
+    latitude_inicial: "",
+    longitude_inicial: "",
     },
   });
 
@@ -112,8 +112,8 @@ export function IntervencoesSVForm({
       form.setValue("km_referencia", placaSelecionada.km?.toString() || "");
       form.setValue("tipo_placa", placaSelecionada.tipo || "");
       form.setValue("codigo_placa", placaSelecionada.codigo || "");
-      form.setValue("latitude", placaSelecionada.latitude_inicial?.toString() || "");
-      form.setValue("longitude", placaSelecionada.longitude_inicial?.toString() || "");
+      form.setValue("latitude_inicial", placaSelecionada.latitude_inicial?.toString() || "");
+      form.setValue("longitude_inicial", placaSelecionada.longitude_inicial?.toString() || "");
       
       if (placaSelecionada.latitude_inicial) {
         setCoordenadas({
@@ -199,8 +199,8 @@ export function IntervencoesSVForm({
             km: parseFloat(data.km_referencia),
             tipo: data.tipo_placa,
             codigo: data.codigo_placa,
-            latitude_inicial: data.latitude ? parseFloat(data.latitude) : null,
-            longitude_inicial: data.longitude ? parseFloat(data.longitude) : null,
+            latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
+            longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
             suporte: data.suporte || null,
             substrato: data.substrato || null,
             substrato_suporte: data.substrato_suporte || null,
@@ -232,8 +232,8 @@ export function IntervencoesSVForm({
         retro_orla_legenda: data.retro_pelicula_legenda_orla ? parseFloat(data.retro_pelicula_legenda_orla) : null,
         fora_plano_manutencao: data.fora_plano_manutencao,
         justificativa_fora_plano: data.justificativa_fora_plano || null,
-        latitude: data.latitude ? parseFloat(data.latitude) : null,
-        longitude: data.longitude ? parseFloat(data.longitude) : null,
+        latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
+        longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
       });
 
       toast.success("Intervenção registrada com sucesso!");

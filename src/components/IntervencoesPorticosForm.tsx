@@ -21,15 +21,15 @@ import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM } from "@/constants/camposEstruturais"
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
-  km: z.string().min(1, "KM é obrigatório"),
+  km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   snv: z.string().optional(),
   descricao: z.string().optional(),
   tipo: z.string().optional(),
   altura_livre_m: z.string().optional(),
   vao_horizontal_m: z.string().optional(),
   observacao: z.string().optional(),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
+  latitude_inicial: z.string().optional(),
+  longitude_inicial: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -37,7 +37,7 @@ type FormData = z.infer<typeof formSchema>;
 interface IntervencoesPorticosFormProps {
   porticoSelecionado?: {
     id: string;
-    km: number;
+    km_inicial: number;
     snv?: string;
     tipo: string;
   };
@@ -66,13 +66,13 @@ export function IntervencoesPorticosForm({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       motivo: "",
-      km: "",
+      km_inicial: "",
       tipo: "",
       altura_livre_m: "",
       vao_horizontal_m: "",
       observacao: "",
-      latitude: "",
-      longitude: "",
+    latitude_inicial: "",
+    longitude_inicial: "",
       descricao: "",
     },
   });
@@ -83,14 +83,14 @@ export function IntervencoesPorticosForm({
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
         motivo: "",
-        km: porticoSelecionado.km?.toString() || "",
+        km_inicial: porticoSelecionado.km_inicial?.toString() || "",
         tipo: porticoSelecionado.tipo || "",
         altura_livre_m: (porticoSelecionado as any).altura_livre_m?.toString() || "",
         vao_horizontal_m: (porticoSelecionado as any).vao_horizontal_m?.toString() || "",
         descricao: (porticoSelecionado as any).descricao || "",
         observacao: "",
-        latitude: "",
-        longitude: "",
+        latitude_inicial: "",
+        longitude_inicial: "",
       });
     }
   }, [porticoSelecionado, modo, form]);
@@ -128,14 +128,14 @@ export function IntervencoesPorticosForm({
           ficha_porticos_id: porticoSelecionado?.id || null,
           data_intervencao: data.data_intervencao,
           motivo: data.motivo,
-          km: data.km ? parseFloat(data.km) : null,
+          km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
           snv: data.snv || null,
           descricao: data.descricao || null,
           tipo: data.tipo || null,
           altura_livre_m: data.altura_livre_m ? parseFloat(data.altura_livre_m) : null,
           vao_horizontal_m: data.vao_horizontal_m ? parseFloat(data.vao_horizontal_m) : null,
-          latitude: data.latitude ? parseFloat(data.latitude) : null,
-          longitude: data.longitude ? parseFloat(data.longitude) : null,
+        latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
+        longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
           observacao: data.observacao || null,
           tipo_origem: tipoOrigem,
         });
@@ -159,7 +159,7 @@ export function IntervencoesPorticosForm({
         <CardTitle>Intervenção em Pórticos, Semipórticos e Braços</CardTitle>
         <CardDescription>
           {porticoSelecionado 
-            ? `Registrando intervenção para ${porticoSelecionado.tipo} no km ${porticoSelecionado.km}${porticoSelecionado.snv ? ` (SNV: ${porticoSelecionado.snv})` : ''}`
+            ? `Registrando intervenção para ${porticoSelecionado.tipo} no km ${porticoSelecionado.km_inicial}${porticoSelecionado.snv ? ` (SNV: ${porticoSelecionado.snv})` : ''}`
             : "Selecione um pórtico do inventário para registrar intervenção"
           }
         </CardDescription>
@@ -231,10 +231,10 @@ export function IntervencoesPorticosForm({
 
               <FormField
                 control={form.control}
-                name="km"
+                name="km_inicial"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>KM *</FormLabel>
+                    <FormLabel>KM Inicial *</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.001" placeholder="0.000" {...field} />
                     </FormControl>

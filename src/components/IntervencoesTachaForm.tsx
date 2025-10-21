@@ -47,8 +47,8 @@ const formSchema = z.object({
   quantidade: z.string().optional(),
   espacamento_m: z.string().optional(),
   observacao: z.string().optional(),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
+  latitude_inicial: z.string().optional(),
+  longitude_inicial: z.string().optional(),
 });
 
 export function IntervencoesTachaForm({ 
@@ -78,8 +78,8 @@ export function IntervencoesTachaForm({
       quantidade: "",
       espacamento_m: "",
       observacao: "",
-      latitude: "",
-      longitude: "",
+    latitude_inicial: "",
+    longitude_inicial: "",
     },
   });
 
@@ -100,8 +100,8 @@ export function IntervencoesTachaForm({
         quantidade: (tachaSelecionada as any).quantidade?.toString() || "",
         espacamento_m: (tachaSelecionada as any).espacamento_m?.toString() || "",
         observacao: "",
-        latitude: "",
-        longitude: "",
+        latitude_inicial: "",
+        longitude_inicial: "",
       });
     }
   }, [tachaSelecionada, modo, form]);
@@ -143,8 +143,8 @@ export function IntervencoesTachaForm({
         lado: values.lado || null,
         quantidade: values.quantidade ? parseInt(values.quantidade) : null,
         espacamento_m: values.espacamento_m ? parseFloat(values.espacamento_m) : null,
-        latitude: values.latitude ? parseFloat(values.latitude) : null,
-        longitude: values.longitude ? parseFloat(values.longitude) : null,
+        latitude_inicial: values.latitude_inicial ? parseFloat(values.latitude_inicial) : null,
+        longitude_inicial: values.longitude_inicial ? parseFloat(values.longitude_inicial) : null,
         observacao: values.observacao || null,
         tipo_origem: tipoOrigem,
       });

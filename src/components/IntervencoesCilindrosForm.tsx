@@ -30,8 +30,8 @@ const formSchema = z.object({
   cor_refletivo: z.string().optional(),
   tipo_refletivo: z.string().optional(),
   quantidade: z.string().optional(),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
+  latitude_inicial: z.string().optional(),
+  longitude_inicial: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -78,8 +78,8 @@ export function IntervencoesCilindrosForm({
       cor_refletivo: "",
       tipo_refletivo: "",
       quantidade: "",
-      latitude: "",
-      longitude: "",
+    latitude_inicial: "",
+    longitude_inicial: "",
     },
   });
 
@@ -99,8 +99,8 @@ export function IntervencoesCilindrosForm({
         cor_refletivo: (cilindroSelecionado as any).cor_refletivo || "",
         tipo_refletivo: (cilindroSelecionado as any).tipo_refletivo || "",
         quantidade: (cilindroSelecionado as any).quantidade?.toString() || "",
-        latitude: "",
-        longitude: "",
+        latitude_inicial: "",
+        longitude_inicial: "",
       });
     }
   }, [cilindroSelecionado, modo, form]);
@@ -145,8 +145,8 @@ export function IntervencoesCilindrosForm({
           cor_refletivo: data.cor_refletivo || null,
           tipo_refletivo: data.tipo_refletivo || null,
           quantidade: data.quantidade ? parseInt(data.quantidade) : null,
-          latitude: data.latitude ? parseFloat(data.latitude) : null,
-          longitude: data.longitude ? parseFloat(data.longitude) : null,
+        latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
+        longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
           tipo_origem: tipoOrigem,
         });
 
