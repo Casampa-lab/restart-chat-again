@@ -57,8 +57,8 @@ export function TipoOrigemBadge({
   // Se não mostrar label, retornar apenas o ícone sem Badge
   if (!showLabel) {
     return (
-      <div className={className}>
-        <Icon className={`h-4 w-4 ${config.color}`} />
+      <div className={`flex items-center justify-center ${className}`}>
+        <Icon className={`h-5 w-5 ${config.color}`} />
       </div>
     );
   }
