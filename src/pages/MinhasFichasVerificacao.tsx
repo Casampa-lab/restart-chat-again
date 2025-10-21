@@ -56,8 +56,8 @@ interface FichaComEstatisticas extends Ficha {
 interface Item {
   ordem: number;
   foto_url: string;
-  latitude: number | null;
-  longitude: number | null;
+  latitude_inicial?: number | null;
+  longitude_inicial?: number | null;
   sentido: string | null;
   km: number | null;
   [key: string]: any;
@@ -511,12 +511,12 @@ export default function MinhasFichasVerificacao() {
                         <CardContent className="space-y-2 text-sm">
                           {item.km && <p><strong>km:</strong> {item.km}</p>}
                           {item.sentido && <p><strong>Sentido:</strong> {item.sentido}</p>}
-                          {item.latitude && item.longitude && (
-                            <p><strong>Coordenadas:</strong> {item.latitude}, {item.longitude}</p>
+                          {item.latitude_inicial && item.longitude_inicial && (
+                            <p><strong>Coordenadas:</strong> {item.latitude_inicial}, {item.longitude_inicial}</p>
                           )}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
                             {Object.entries(item)
-                              .filter(([key]) => !['ordem', 'foto_url', 'latitude', 'longitude', 'sentido', 'km', 'ficha_id', 'id', 'created_at'].includes(key))
+                              .filter(([key]) => !['ordem', 'foto_url', 'latitude_inicial', 'longitude_inicial', 'sentido', 'km', 'ficha_id', 'id', 'created_at'].includes(key))
                               .filter(([key]) => !key.endsWith('_medicoes')) // Não exibir arrays de medições
                               .filter(([_, value]) => value !== null && value !== undefined && value !== '')
                               .map(([key, value]) => {

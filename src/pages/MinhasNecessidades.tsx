@@ -521,8 +521,8 @@ const MinhasNecessidades = () => {
                                 <div className="text-sm">
                                   {nec.km_inicial && nec.km_final ? (
                                     <>km {Number(nec.km_inicial).toFixed(3)} - {Number(nec.km_final).toFixed(3)}</>
-                                  ) : nec.km ? (
-                                    <>km {Number(nec.km).toFixed(3)}</>
+                                  ) : nec.km_inicial ? (
+                                    <>km {Number(nec.km_inicial).toFixed(3)}</>
                                   ) : (
                                     "-"
                                   )}
