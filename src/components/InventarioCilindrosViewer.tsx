@@ -18,6 +18,8 @@ import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastr
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useInventarioContadores } from "@/hooks/useInventarioContadores";
+import { ContadoresBadges } from "@/components/ContadoresBadges";
 
 // Component to show reconciliation status badge
 function StatusReconciliacaoBadge({ status }: { status: string | null }) {
@@ -112,6 +114,10 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
   const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
+
+  // Hook para contadores de inventário
+  const { contadores, marcoZeroExiste, loading: loadingContadores, refetch: refetchContadores } = 
+    useInventarioContadores('ficha_cilindros', loteId, rodoviaId);
 
   // Buscar tolerância GPS da rodovia
   const { data: rodoviaConfig } = useQuery({
@@ -349,10 +355,21 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Library className="h-5 w-5" />
-              Inventário de Cilindros Delineadores
-            </CardTitle>
+            <div className="flex flex-col gap-2">
+              <CardTitle className="flex items-center gap-2">
+                <Library className="h-5 w-5" />
+                Inventário de Cilindros Delineadores
+              </CardTitle>
+              <ContadoresBadges
+                cadastroInicialAtivo={contadores.cadastro_inicial_ativo}
+                criadosNecessidadeAtivo={contadores.criados_necessidade_ativo}
+                totalAtivo={contadores.total_ativo}
+                totalInativo={contadores.total_inativo}
+                marcoZeroExiste={marcoZeroExiste}
+                loading={loadingContadores}
+                onRefresh={refetchContadores}
+              />
+            </div>
             <div className="flex gap-2">
               <Button
                 variant="outline"

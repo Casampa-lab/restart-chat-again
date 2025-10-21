@@ -17,6 +17,8 @@ import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUn
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { useInventarioContadores } from "@/hooks/useInventarioContadores";
+import { ContadoresBadges } from "@/components/ContadoresBadges";
 
 // Component to show reconciliation status badge
 function StatusReconciliacaoBadge({ status }: { status: string | null }) {
@@ -107,6 +109,10 @@ export const InventarioDefensasViewer = ({
   const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
+
+  // Hook para contadores de inventário
+  const { contadores, marcoZeroExiste, loading: loadingContadores, refetch: refetchContadores } = 
+    useInventarioContadores('defensas', loteId, rodoviaId);
 
   // Buscar tolerância GPS da rodovia
   const { data: rodoviaConfig } = useQuery({
@@ -281,7 +287,20 @@ export const InventarioDefensasViewer = ({
 
   return (
     <div className="space-y-4">
-      {/* Botão Ver Necessidades */}
+      {/* Badges de Contadores */}
+      <div className="flex items-center justify-between">
+        <ContadoresBadges
+          cadastroInicialAtivo={contadores.cadastro_inicial_ativo}
+          criadosNecessidadeAtivo={contadores.criados_necessidade_ativo}
+          totalAtivo={contadores.total_ativo}
+          totalInativo={contadores.total_inativo}
+          marcoZeroExiste={marcoZeroExiste}
+          loading={loadingContadores}
+          onRefresh={refetchContadores}
+        />
+      </div>
+
+      {/* Botões Ver Necessidades */}
       <div className="flex justify-end gap-2">
         <Button
           variant="outline"
