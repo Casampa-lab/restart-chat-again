@@ -1,4 +1,30 @@
 // Configuração centralizada do sistema de reconciliação para todos os grupos
+// 
+// IMPORTANTE: Diferenciação entre Reconciliação e Intervenção
+// ============================================================
+// 
+// 1. RECONCILIAÇÃO (via ReconciliacaoDrawerUniversal):
+//    - Cria NOVO elemento no inventário com origem = 'necessidade' (contador ROXO)
+//    - Desativa elemento antigo se houver match (ativo = false)
+//    - Usado quando há match GPS entre necessidade e cadastro
+//    - Workflow: Técnico solicita → Coordenador aprova → Novo elemento criado
+// 
+// 2. INTERVENÇÃO ESTRUTURAL (via IntervençõesForm → aplicar_intervencao_*):
+//    - ATUALIZA elemento existente no inventário
+//    - Define modificado_por_intervencao = true
+//    - Define tipo_origem = 'execucao' ou 'manutencao_pre_projeto'
+//    - Usado para registrar modificações em campo (danos, manutenções)
+//    - Workflow: Técnico registra → Coordenador aprova → Histórico criado
+// 
+// Contadores do Inventário Dinâmico:
+// -----------------------------------
+// PRÉ-MARCO ZERO (3 bolas):
+//   - AZUL: cadastro_inicial + ativo=true (diminui quando substituído)
+//   - ROXO: origem='necessidade' + ativo=true (aumenta na reconciliação)
+//   - VERDE: necessidades não matcheadas (diminui na reconciliação)
+// 
+// PÓS-MARCO ZERO (1 bola):
+//   - CYAN: total ativo=true (todos os elementos ativos no inventário)
 
 export type GrupoElemento =
   | "placas"
@@ -206,4 +232,43 @@ export function formatarCampo(campo: string, valor: any): string {
   }
 
   return String(valor);
+}
+
+/**
+ * Retorna descrição legível da origem do elemento no inventário
+ */
+export function getOrigemDescricao(origem?: string, modificadoPorIntervencao?: boolean): string {
+  if (modificadoPorIntervencao) {
+    return "🔧 Modificado por Intervenção";
+  }
+  
+  switch (origem) {
+    case 'cadastro_inicial':
+      return "📋 Cadastro Inicial";
+    case 'necessidade':
+      return "🔄 Criado por Reconciliação";
+    case 'execucao':
+      return "⚙️ Execução de Projeto";
+    case 'manutencao_pre_projeto':
+      return "🛠️ Manutenção Pré-Projeto";
+    default:
+      return "❓ Origem Desconhecida";
+  }
+}
+
+/**
+ * Retorna cor do badge baseado na origem
+ */
+export function getOrigemBadgeVariant(origem?: string): "default" | "secondary" | "destructive" | "outline" {
+  switch (origem) {
+    case 'cadastro_inicial':
+      return "secondary";
+    case 'necessidade':
+      return "default";
+    case 'execucao':
+    case 'manutencao_pre_projeto':
+      return "outline";
+    default:
+      return "outline";
+  }
 }
