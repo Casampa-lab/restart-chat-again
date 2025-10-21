@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useWorkSession } from '@/hooks/useWorkSession';
 import { useGPSTracking } from '@/hooks/useGPSTracking';
+import { useMarcoZeroRecente } from '@/hooks/useMarcoZeroRecente';
 import { calculateDistance, sortByProximity } from '@/lib/gpsUtils';
 import { AlertaProximidade } from '@/components/AlertaProximidade';
 import { Button } from '@/components/ui/button';
@@ -61,6 +62,7 @@ interface ContagemElemento {
   criados_match: number;          // Roxo - criados pelo RecalcularMatches
   necessidades_totais: number;    // Total de necessidades importadas
   necessidades_pendentes: number; // Verde - necessidades não matcheadas
+  total_inventario?: number;      // Total no inventário (usado após Marco Zero)
 }
 
 interface Contadores {
@@ -77,6 +79,26 @@ export default function InventarioDinamicoComAlerta() {
   const { activeSession } = useWorkSession(user?.id);
   const { position, watching, startWatching, stopWatching } = useGPSTracking();
   
+  // Verificar se existe Marco Zero (sem limite de tempo)
+  const { data: marcoZero } = useQuery({
+    queryKey: ["marco-zero-existe", activeSession?.lote_id, activeSession?.rodovia_id],
+    queryFn: async () => {
+      if (!activeSession?.lote_id || !activeSession?.rodovia_id) return null;
+
+      const { data, error } = await supabase
+        .from("marcos_inventario")
+        .select("*")
+        .eq("lote_id", activeSession.lote_id)
+        .eq("rodovia_id", activeSession.rodovia_id)
+        .eq("tipo", "marco_zero")
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!activeSession?.lote_id && !!activeSession?.rodovia_id,
+  });
+  
   const [necessidades, setNecessidades] = useState<Necessidade[]>([]);
   const [necessidadesProximas, setNecessidadesProximas] = useState<Necessidade[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,10 +106,10 @@ export default function InventarioDinamicoComAlerta() {
   const [tipoSV, setTipoSV] = useState<'placas' | 'porticos'>('placas');
   const [tipoSH, setTipoSH] = useState<'marcas_longitudinais' | 'cilindros' | 'inscricoes' | 'tachas'>('marcas_longitudinais');
   const [contadores, setContadores] = useState<Contadores>({
-    todos: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
-    sh: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
-    sv: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
-    def: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
+    todos: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0, total_inventario: 0 },
+    sh: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0, total_inventario: 0 },
+    sv: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0, total_inventario: 0 },
+    def: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0, total_inventario: 0 },
     por_tipo: {},
   });
 
@@ -127,7 +149,7 @@ export default function InventarioDinamicoComAlerta() {
     try {
       setLoading(true);
       const todasNecessidades: Necessidade[] = [];
-      const contadoresAux: Record<string, { cadastro: number, criados: number, necessidades: number }> = {};
+      const contadoresAux: Record<string, { cadastro: number, criados: number, necessidades: number, total: number }> = {};
 
       // Mapear tabelas de inventário e necessidades
       const tabelas = [
@@ -157,7 +179,14 @@ export default function InventarioDinamicoComAlerta() {
           .eq('rodovia_id', activeSession.rodovia_id)
           .eq('origem', 'necessidade');
 
-        // 3. Buscar necessidades (para exibição e contagem)
+        // 3. Contar TOTAL no inventário (para pós-Marco Zero)
+        const { count: countTotal } = await supabase
+          .from(tabela.cadastro as any)
+          .select('*', { count: 'exact', head: true })
+          .eq('lote_id', activeSession.lote_id)
+          .eq('rodovia_id', activeSession.rodovia_id);
+
+        // 4. Buscar necessidades (para exibição e contagem)
         const { data: necessidadesData, count: countNecessidades } = await supabase
           .from(tabela.necessidade as any)
           .select('*', { count: 'exact' })
@@ -169,6 +198,7 @@ export default function InventarioDinamicoComAlerta() {
           cadastro: countCadastro || 0,
           criados: countCriados || 0,
           necessidades: countNecessidades || 0,
+          total: countTotal || 0,
         };
 
         // Mapear necessidades para exibição
@@ -208,12 +238,12 @@ export default function InventarioDinamicoComAlerta() {
     }
   };
 
-  const calcularContadores = (contadoresPorTipo: Record<string, { cadastro: number, criados: number, necessidades: number }>) => {
+  const calcularContadores = (contadoresPorTipo: Record<string, { cadastro: number, criados: number, necessidades: number, total: number }>) => {
     const resultado: Contadores = {
-      todos: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
-      sh: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
-      sv: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
-      def: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
+      todos: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0, total_inventario: 0 },
+      sh: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0, total_inventario: 0 },
+      sv: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0, total_inventario: 0 },
+      def: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0, total_inventario: 0 },
       por_tipo: {},
     };
 
@@ -227,6 +257,7 @@ export default function InventarioDinamicoComAlerta() {
         criados_match: contagem.criados,
         necessidades_totais: contagem.necessidades,
         necessidades_pendentes: contagem.necessidades - contagem.criados,
+        total_inventario: contagem.total,
       };
 
       // Por tipo
@@ -237,6 +268,7 @@ export default function InventarioDinamicoComAlerta() {
       resultado.todos.criados_match += contElemento.criados_match;
       resultado.todos.necessidades_totais += contElemento.necessidades_totais;
       resultado.todos.necessidades_pendentes += contElemento.necessidades_pendentes;
+      resultado.todos.total_inventario! += contElemento.total_inventario!;
 
       // SH
       if (tiposSH.includes(tipo)) {
@@ -244,6 +276,7 @@ export default function InventarioDinamicoComAlerta() {
         resultado.sh.criados_match += contElemento.criados_match;
         resultado.sh.necessidades_totais += contElemento.necessidades_totais;
         resultado.sh.necessidades_pendentes += contElemento.necessidades_pendentes;
+        resultado.sh.total_inventario! += contElemento.total_inventario!;
       }
 
       // SV
@@ -252,6 +285,7 @@ export default function InventarioDinamicoComAlerta() {
         resultado.sv.criados_match += contElemento.criados_match;
         resultado.sv.necessidades_totais += contElemento.necessidades_totais;
         resultado.sv.necessidades_pendentes += contElemento.necessidades_pendentes;
+        resultado.sv.total_inventario! += contElemento.total_inventario!;
       }
 
       // Defensas
@@ -260,6 +294,7 @@ export default function InventarioDinamicoComAlerta() {
         resultado.def.criados_match += contElemento.criados_match;
         resultado.def.necessidades_totais += contElemento.necessidades_totais;
         resultado.def.necessidades_pendentes += contElemento.necessidades_pendentes;
+        resultado.def.total_inventario! += contElemento.total_inventario!;
       }
     });
 
@@ -428,20 +463,32 @@ export default function InventarioDinamicoComAlerta() {
       {/* Legenda de Contadores */}
       <Card className="mb-4">
         <CardContent className="pt-4">
-          <div className="flex flex-wrap gap-3 text-xs">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-              <span>Cadastro Inicial</span>
+          {marcoZero ? (
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
+                <span className="font-semibold">Inventário Dinâmico (Pós-Marco Zero)</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Total de elementos cadastrados incluindo intervenções estruturais aprovadas
+              </p>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-              <span>Criados (Match)</span>
+          ) : (
+            <div className="flex flex-wrap gap-3 text-xs">
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <span>Cadastro Inicial</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                <span>Criados (Match)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <span>Necessidades Pendentes</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span>Necessidades Pendentes</span>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
@@ -451,65 +498,89 @@ export default function InventarioDinamicoComAlerta() {
           <TabsTrigger value="todos">
             <div className="flex flex-col items-center gap-1">
               <span className="text-xs">Todos</span>
-              <div className="flex gap-0.5">
-                <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.todos.cadastro_inicial}
+              {marcoZero ? (
+                <Badge variant="default" className="bg-cyan-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.todos.total_inventario}
                 </Badge>
-                <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.todos.criados_match}
-                </Badge>
-                <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.todos.necessidades_pendentes}
-                </Badge>
-              </div>
+              ) : (
+                <div className="flex gap-0.5">
+                  <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.todos.cadastro_inicial}
+                  </Badge>
+                  <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.todos.criados_match}
+                  </Badge>
+                  <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.todos.necessidades_pendentes}
+                  </Badge>
+                </div>
+              )}
             </div>
           </TabsTrigger>
           <TabsTrigger value="sh">
             <div className="flex flex-col items-center gap-1">
               <span className="text-xs">SH</span>
-              <div className="flex gap-0.5">
-                <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.sh.cadastro_inicial}
+              {marcoZero ? (
+                <Badge variant="default" className="bg-cyan-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.sh.total_inventario}
                 </Badge>
-                <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.sh.criados_match}
-                </Badge>
-                <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.sh.necessidades_pendentes}
-                </Badge>
-              </div>
+              ) : (
+                <div className="flex gap-0.5">
+                  <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.sh.cadastro_inicial}
+                  </Badge>
+                  <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.sh.criados_match}
+                  </Badge>
+                  <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.sh.necessidades_pendentes}
+                  </Badge>
+                </div>
+              )}
             </div>
           </TabsTrigger>
           <TabsTrigger value="sv">
             <div className="flex flex-col items-center gap-1">
               <span className="text-xs">SV</span>
-              <div className="flex gap-0.5">
-                <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.sv.cadastro_inicial}
+              {marcoZero ? (
+                <Badge variant="default" className="bg-cyan-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.sv.total_inventario}
                 </Badge>
-                <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.sv.criados_match}
-                </Badge>
-                <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.sv.necessidades_pendentes}
-                </Badge>
-              </div>
+              ) : (
+                <div className="flex gap-0.5">
+                  <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.sv.cadastro_inicial}
+                  </Badge>
+                  <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.sv.criados_match}
+                  </Badge>
+                  <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.sv.necessidades_pendentes}
+                  </Badge>
+                </div>
+              )}
             </div>
           </TabsTrigger>
           <TabsTrigger value="defensas">
             <div className="flex flex-col items-center gap-1">
               <span className="text-xs">Def</span>
-              <div className="flex gap-0.5">
-                <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.def.cadastro_inicial}
+              {marcoZero ? (
+                <Badge variant="default" className="bg-cyan-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.def.total_inventario}
                 </Badge>
-                <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.def.criados_match}
-                </Badge>
-                <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
-                  {contadores.def.necessidades_pendentes}
-                </Badge>
-              </div>
+              ) : (
+                <div className="flex gap-0.5">
+                  <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.def.cadastro_inicial}
+                  </Badge>
+                  <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.def.criados_match}
+                  </Badge>
+                  <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                    {contadores.def.necessidades_pendentes}
+                  </Badge>
+                </div>
+              )}
             </div>
           </TabsTrigger>
         </TabsList>
