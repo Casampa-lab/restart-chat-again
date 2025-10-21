@@ -407,8 +407,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           espessura_cm: necessidade.espessura_cm,
           material: necessidade.material,
           snv: necessidade.snv,
-          latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
-          longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
+          latitude_inicial: necessidade.latitude_inicial,
+          longitude_inicial: necessidade.longitude_inicial,
           latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
@@ -425,8 +425,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           lado: necessidade.lado,
           local_implantacao: necessidade.local_implantacao,
           snv: necessidade.snv,
-          latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
-          longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
+          latitude_inicial: necessidade.latitude_inicial,
+          longitude_inicial: necessidade.longitude_inicial,
           latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
@@ -444,8 +444,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           espacamento_m: necessidade.espacamento_m,
           extensao_km: necessidade.extensao_km,
           snv: necessidade.snv,
-          latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
-          longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
+          latitude_inicial: necessidade.latitude_inicial,
+          longitude_inicial: necessidade.longitude_inicial,
           latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
@@ -464,8 +464,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           especificacao_obstaculo_fixo: necessidade.especificacao_obstaculo_fixo,
           geometria: necessidade.geometria,
           snv: necessidade.snv,
-          latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
-          longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
+          latitude_inicial: necessidade.latitude_inicial,
+          longitude_inicial: necessidade.longitude_inicial,
           latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
