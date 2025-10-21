@@ -4191,15 +4191,12 @@ export type Database = {
           estado_conservacao: string | null
           id: string
           justificativa_reconciliacao: string | null
-          km: number | null
           km_final: number | null
           km_inicial: number | null
-          latitude: number | null
           latitude_final: number | null
           latitude_inicial: number | null
           linha_planilha: number | null
           localizado_em_campo: boolean | null
-          longitude: number | null
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
@@ -4239,15 +4236,12 @@ export type Database = {
           estado_conservacao?: string | null
           id?: string
           justificativa_reconciliacao?: string | null
-          km?: number | null
           km_final?: number | null
           km_inicial?: number | null
-          latitude?: number | null
           latitude_final?: number | null
           latitude_inicial?: number | null
           linha_planilha?: number | null
           localizado_em_campo?: boolean | null
-          longitude?: number | null
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
@@ -4287,15 +4281,12 @@ export type Database = {
           estado_conservacao?: string | null
           id?: string
           justificativa_reconciliacao?: string | null
-          km?: number | null
           km_final?: number | null
           km_inicial?: number | null
-          latitude?: number | null
           latitude_final?: number | null
           latitude_inicial?: number | null
           linha_planilha?: number | null
           localizado_em_campo?: boolean | null
-          longitude?: number | null
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
@@ -4360,12 +4351,12 @@ export type Database = {
           divergencia: boolean | null
           id: string
           justificativa_reconciliacao: string | null
-          km: number | null
+          km_inicial: number | null
           lado: string | null
-          latitude: number | null
+          latitude_inicial: number | null
           linha_planilha: number | null
           localizado_em_campo: boolean | null
-          longitude: number | null
+          longitude_inicial: number | null
           lote_id: string
           observacao: string | null
           observacao_reconciliacao: string | null
@@ -4410,12 +4401,12 @@ export type Database = {
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
-          km?: number | null
+          km_inicial?: number | null
           lado?: string | null
-          latitude?: number | null
+          latitude_inicial?: number | null
           linha_planilha?: number | null
           localizado_em_campo?: boolean | null
-          longitude?: number | null
+          longitude_inicial?: number | null
           lote_id: string
           observacao?: string | null
           observacao_reconciliacao?: string | null
@@ -4460,12 +4451,12 @@ export type Database = {
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
-          km?: number | null
+          km_inicial?: number | null
           lado?: string | null
-          latitude?: number | null
+          latitude_inicial?: number | null
           linha_planilha?: number | null
           localizado_em_campo?: boolean | null
-          longitude?: number | null
+          longitude_inicial?: number | null
           lote_id?: string
           observacao?: string | null
           observacao_reconciliacao?: string | null
@@ -4530,12 +4521,12 @@ export type Database = {
           divergencia: boolean | null
           id: string
           justificativa_reconciliacao: string | null
-          km: number | null
+          km_inicial: number | null
           lado: string | null
-          latitude: number | null
+          latitude_inicial: number | null
           linha_planilha: number | null
           localizado_em_campo: boolean | null
-          longitude: number | null
+          longitude_inicial: number | null
           lote_id: string
           motivo: string | null
           observacao_usuario: string | null
@@ -4566,12 +4557,12 @@ export type Database = {
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
-          km?: number | null
+          km_inicial?: number | null
           lado?: string | null
-          latitude?: number | null
+          latitude_inicial?: number | null
           linha_planilha?: number | null
           localizado_em_campo?: boolean | null
-          longitude?: number | null
+          longitude_inicial?: number | null
           lote_id: string
           motivo?: string | null
           observacao_usuario?: string | null
@@ -4602,12 +4593,12 @@ export type Database = {
           divergencia?: boolean | null
           id?: string
           justificativa_reconciliacao?: string | null
-          km?: number | null
+          km_inicial?: number | null
           lado?: string | null
-          latitude?: number | null
+          latitude_inicial?: number | null
           linha_planilha?: number | null
           localizado_em_campo?: boolean | null
-          longitude?: number | null
+          longitude_inicial?: number | null
           lote_id?: string
           motivo?: string | null
           observacao_usuario?: string | null
