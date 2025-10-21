@@ -450,7 +450,8 @@ export const InventarioDefensasViewer = ({
         <div>Carregando...</div>
       ) : (
         <div className="border rounded-lg overflow-hidden">
-          <Table>
+          <div className="max-h-[600px] overflow-y-auto">
+            <Table>
             <TableHeader className="sticky top-0 bg-muted z-10">
               <TableRow>
                 <TableHead
@@ -607,6 +608,7 @@ export const InventarioDefensasViewer = ({
               ))}
             </TableBody>
           </Table>
+          </div>
           
           {sortedDefensas && sortedDefensas.length > 0 && (
             <p className="text-sm text-muted-foreground text-center mt-4">
