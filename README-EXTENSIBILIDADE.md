@@ -22,6 +22,7 @@ src/
 ### Como Adicionar Uma Nova Planilha
 
 #### Passo 1: Definir a Planilha
+
 Adicione a configuração em `src/constants/planilhas.ts`:
 
 ```typescript
@@ -36,6 +37,7 @@ Adicione a configuração em `src/constants/planilhas.ts`:
 ```
 
 #### Passo 2: Criar a Tabela no Banco
+
 Execute migration no Supabase:
 
 ```sql
@@ -50,8 +52,8 @@ CREATE TABLE public.conservacao_pavimento (
   tipo_defeito TEXT NOT NULL,
   severidade TEXT NOT NULL,
   observacao TEXT,
-  latitude NUMERIC NOT NULL,
-  longitude NUMERIC NOT NULL,
+  latitude_inicial NUMERIC NOT NULL,
+  longitude_inicial NUMERIC NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
@@ -76,6 +78,7 @@ CREATE POLICY "Coordenador can view all"
 ```
 
 #### Passo 3: Criar Constantes Específicas
+
 Crie arquivo `src/constants/conservacaoPavimento.ts`:
 
 ```typescript
@@ -90,6 +93,7 @@ export const SEVERIDADES = ["Baixa", "Média", "Alta"] as const;
 ```
 
 #### Passo 4: Criar o Componente de Formulário
+
 Crie `src/components/ConservacaoPavimentoForm.tsx`:
 
 ```typescript
@@ -102,9 +106,11 @@ Crie `src/components/ConservacaoPavimentoForm.tsx`:
 ```
 
 #### Passo 5: Criar Página de Revisão
+
 Crie `src/pages/MinhasConservacoes.tsx` (similar a MinhasNCs.tsx)
 
 #### Passo 6: Adicionar Rota
+
 Em `src/App.tsx`:
 
 ```typescript
@@ -112,11 +118,13 @@ Em `src/App.tsx`:
 ```
 
 #### Passo 7: Adicionar ao Menu Principal
+
 Em `src/pages/Index.tsx`, adicionar botão condicional baseado em sessão ativa
 
 ### Padrões a Seguir
 
 #### ✅ Boas Práticas
+
 - **GPS obrigatório**: Todas as coletas devem ter localização GPS
 - **Vinculação a sessão**: Sempre vincular a `lote_id` e `rodovia_id`
 - **RLS Policies**: Técnicos veem só seus registros, coordenadores veem tudo
@@ -124,12 +132,14 @@ Em `src/pages/Index.tsx`, adicionar botão condicional baseado em sessão ativa
 - **Campos de auditoria**: `created_at`, `updated_at`, `user_id`
 
 #### 🔒 Segurança
+
 - Sempre habilitar RLS nas tabelas
 - Políticas separadas para INSERT, SELECT, UPDATE, DELETE
 - Usar função `has_role()` para verificar perfis
 - Não permitir edição após envio ao coordenador
 
 #### 📱 UX/UI
+
 - Formulários responsivos (mobile-first)
 - Captura de GPS automática ao abrir formulário
 - Validação client-side antes de enviar
@@ -144,27 +154,27 @@ Toda tabela de coleta deve ter no mínimo:
 CREATE TABLE public.nome_da_planilha (
   -- Identificação
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  
+
   -- Vínculos essenciais
   user_id UUID NOT NULL,        -- Quem registrou
   lote_id UUID NOT NULL,         -- Em qual lote
   rodovia_id UUID NOT NULL,      -- Em qual rodovia
-  
+
   -- Dados de localização (obrigatórios)
   latitude NUMERIC NOT NULL,
   longitude NUMERIC NOT NULL,
   km_referencia NUMERIC,         -- Opcional, complementar ao GPS
-  
+
   -- Dados temporais
   data_ocorrencia DATE NOT NULL, -- ou data_inspecao
-  
+
   -- Controle de fluxo
   enviado_coordenador BOOLEAN DEFAULT false,
-  
+
   -- Auditoria
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  
+
   -- ... campos específicos da planilha ...
 );
 ```
