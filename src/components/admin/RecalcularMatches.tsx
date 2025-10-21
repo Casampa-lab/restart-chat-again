@@ -385,8 +385,9 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
       lote_id: necessidade.lote_id,
       rodovia_id: necessidade.rodovia_id,
       data_vistoria: new Date().toISOString().split("T")[0],
-      origem: "necessidade_campo",
-      modificado_por_intervencao: true,
+      origem: "necessidade", // ✅ ROXO - Criado por reconciliação
+      ativo: true,
+      modificado_por_intervencao: false, // Reconciliação NÃO é intervenção
       data_ultima_modificacao: new Date().toISOString(),
     };
 
