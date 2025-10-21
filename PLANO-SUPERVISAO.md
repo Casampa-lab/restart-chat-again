@@ -1,4 +1,5 @@
 # PLANO DE SUPERVISÃO BR-LEGAL 2
+
 ## Baseado na IN 3/2025-DIR e Modelos de Relatórios DNIT
 
 ---
@@ -58,6 +59,7 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 ```
 
 **Legenda:**
+
 - ✅ = Já implementado
 - ⏳ = A implementar
 
@@ -68,9 +70,11 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 ### **FASE 1: INICIAL** (Relatório Inicial)
 
 #### 1.1 Inventário/Cadastro (✅ IMPLEMENTADO)
+
 **Objetivo**: Levantamento completo da condição atual da rodovia
 
 **Módulos Implementados:**
+
 - ✅ Marcas Longitudinais
 - ✅ Tachas
 - ✅ Inscrições (Marcas Transversais)
@@ -80,6 +84,7 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - ✅ Defensas (Dispositivos de Segurança)
 
 **Dados Coletados por Elemento:**
+
 - Localização (KM, latitude, longitude)
 - Características técnicas (material, dimensões, cores)
 - Estado de conservação
@@ -88,9 +93,11 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - Data da vistoria
 
 #### 1.2 Necessidades/Diagnóstico (✅ IMPLEMENTADO)
+
 **Objetivo**: Identificar o que precisa ser feito (implantar, substituir, remover, manter)
 
 **Funcionalidades:**
+
 - ✅ Importação de planilhas de necessidades
 - ✅ Matching com cadastro existente (por coordenadas)
 - ✅ Classificação de soluções:
@@ -102,11 +109,13 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - ✅ Geração de relatórios em Excel
 
 #### 1.3 Relatório Inicial (⏳ A IMPLEMENTAR)
+
 **Objetivo**: Documento formal entregue ao DNIT no início do contrato
 
 **Conteúdo Obrigatório (conforme modelo DNIT):**
 
 **1. SUPERVISÃO**
+
 - Dados contratuais da supervisora
 - Garantias e seguros
 - Relação das rodovias supervisionadas
@@ -121,6 +130,7 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - Atas de reunião
 
 **2. EXECUÇÃO**
+
 - Dados contratuais das empresas executoras
 - Planilha de necessidades inicial (✅ já temos)
 
@@ -129,9 +139,11 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 ### **FASE 2: EXECUÇÃO** (Mensal)
 
 #### 2.1 Medição Mensal da Executora (⏳ A IMPLEMENTAR)
+
 **Objetivo**: A empresa executora apresenta os serviços que alega ter executado no mês
 
 **Funcionalidades Necessárias:**
+
 - [ ] Cadastro de medições mensais por empresa executora
 - [ ] Vinculação com as necessidades planejadas
 - [ ] Quantitativos apresentados pela executora
@@ -140,9 +152,11 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - [ ] Planilha de serviços executados
 
 #### 2.2 Conferência em Campo (⏳ A IMPLEMENTAR)
+
 **Objetivo**: Técnico da supervisora vai a campo conferir se foi realmente executado
 
 **Atividades do Técnico:**
+
 - Verificar se o serviço foi executado
 - Conferir se a qualidade está conforme especificado
 - Validar quantidades
@@ -151,6 +165,7 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - Registrar não conformidades (se houver)
 
 **Funcionalidades Necessárias:**
+
 - [ ] App móvel/formulário para conferência
 - [ ] Checklist de verificação por tipo de elemento
 - [ ] Captura de fotos georreferenciadas
@@ -160,28 +175,33 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - [ ] Geração de relatório de conferência
 
 #### 2.3 Fiscalização Rotineira (⏳ A IMPLEMENTAR)
+
 **Objetivo**: Inspeções regulares além das medições mensais
 
 **Tipos de Fiscalização:**
 
 **A) Retrorrefletância:**
+
 - Análise contínua: 2 medições/ano na extensão total
 - Análise de decaimento: 1 segmento fixo de 1km por lote, leituras a cada 60 dias
 - Equipamento: Retrorefletômetro (manual ou dinâmico)
 
 **B) Sinalização Vertical:**
+
 - 1 inspeção por placa/ano (mínimo)
 - Verificação de conformidade com projeto
 - Medição de retrorrefletância
 - Ficha individual por placa
 
 **C) Dispositivos de Segurança:**
+
 - Inspeção visual
 - Verificação de certificação
 - Estado de conservação
 - Registro de recomposições
 
 **Funcionalidades Necessárias:**
+
 - [ ] Agendamento de fiscalizações
 - [ ] Formulários específicos por tipo
 - [ ] Histórico de medições de retrorrefletância
@@ -194,9 +214,11 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 ### **FASE 3: REGISTRO DE OCORRÊNCIAS**
 
 #### 3.1 Intervenções/Serviços Executados (✅ IMPLEMENTADO)
+
 **Objetivo**: Registrar os serviços efetivamente executados e aprovados
 
 **Módulos Implementados:**
+
 - ✅ Intervenções em Marcas Longitudinais
 - ✅ Intervenções em Tachas
 - ✅ Intervenções em Inscrições
@@ -206,6 +228,7 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - ✅ Intervenções em Defensas
 
 **Dados Registrados:**
+
 - Data da intervenção
 - Tipo de serviço (implantação, substituição, remoção, manutenção)
 - Motivo da intervenção
@@ -214,9 +237,11 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - Fotos (quando disponível)
 
 #### 3.2 Não Conformidades (✅ IMPLEMENTADO)
+
 **Objetivo**: Registrar problemas, falhas e não atendimentos
 
 **Funcionalidades:**
+
 - ✅ Registro de NC por tipo (SH, SV, Dispositivos)
 - ✅ Classificação por natureza e grau
 - ✅ Fotos georreferenciadas
@@ -227,9 +252,11 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - ✅ Filtros e busca avançada
 
 #### 3.3 Manutenção/Reposição (✅ PARCIALMENTE IMPLEMENTADO)
+
 **Objetivo**: Controlar intervenções de manutenção corretiva
 
 **Status Atual:**
+
 - ✅ Registrado como "intervenção" com motivo específico
 - ⏳ Falta: Dashboard de controle de reposições
 - ⏳ Falta: Indicadores de frequência de manutenção
@@ -240,9 +267,11 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 ### **FASE 4: RELATÓRIOS PARA BRASÍLIA**
 
 #### 4.1 Relatório Mensal (⏳ A IMPLEMENTAR)
+
 **Objetivo**: Informar mensalmente o andamento da supervisão
 
 **Conteúdo:**
+
 - Resumo executivo do período
 - Medições conferidas e aprovadas
 - Serviços executados (Intervenções ✅)
@@ -254,18 +283,21 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - Cronograma atualizado
 
 #### 4.2 Relatório Permanente (⏳ A IMPLEMENTAR)
+
 **Objetivo**: Visão consolidada do estado atual vs. necessidades
 
 **Estrutura do Relatório:**
 
 **1. CONDIÇÃO ATUAL**
+
 - Estado da sinalização horizontal
-- Estado da sinalização vertical  
+- Estado da sinalização vertical
 - Estado dos dispositivos de segurança
 - Retrorrefletância atual
 - Conformidade com normas
 
 **2. NECESSIDADES vs. EXECUTADO**
+
 - Necessidades planejadas (do diagnóstico ✅)
 - Serviços executados (Intervenções ✅)
 - Percentual de conclusão
@@ -273,41 +305,48 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 - Serviços com problemas (NCs ✅)
 
 **3. ANÁLISES**
+
 - Evolução da retrorrefletância
 - Indicadores de desempenho
 - Locais críticos
 - Recomendações
 
 **4. ANEXOS**
+
 - Planilhas consolidadas
 - Relatório fotográfico
 - Gráficos e mapas
 - Atas de reunião
 
 #### 4.3 Indicadores de Desempenho (⏳ A IMPLEMENTAR)
+
 **Objetivo**: KPIs para gestão da supervisão
 
 **Indicadores Necessários:**
 
 **Execução:**
+
 - % Necessidades atendidas
 - % Medições aprovadas
 - Prazo médio de conferência
 - Taxa de rejeição de medições
 
 **Qualidade:**
+
 - % Retrorrefletância em conformidade
 - % Placas em bom estado
 - % Defensas em bom estado
 - Taxa de reposição/manutenção
 
 **Não Conformidades:**
+
 - Quantidade de NCs abertas
 - % NCs atendidas
 - Tempo médio de resolução
 - NCs por tipo/natureza
 
 **Fiscalização:**
+
 - Quantidade de fiscalizações realizadas
 - Cobertura da malha fiscalizada
 - Leituras de retrorrefletância realizadas
@@ -317,6 +356,7 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 ## 🔧 MÓDULOS TÉCNICOS A DESENVOLVER
 
 ### 1. Módulo de Medição Mensal
+
 **Prioridade: ALTA**
 
 ```
@@ -361,6 +401,7 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 ```
 
 **Tabelas Necessárias:**
+
 ```sql
 -- Medições mensais da executora
 CREATE TABLE medicoes_mensais (
@@ -406,14 +447,17 @@ CREATE TABLE conferencias_campo (
 ```
 
 ### 2. Módulo de Fiscalização Rotineira
+
 **Prioridade: ALTA**
 
 **Subtipos:**
+
 - Fiscalização de Retrorrefletância
 - Fiscalização de Estado de Conservação
 - Fiscalização de Conformidade com Projeto
 
 **Tabelas Necessárias:**
+
 ```sql
 -- Agendamento de fiscalizações
 CREATE TABLE fiscalizacoes (
@@ -437,9 +481,9 @@ CREATE TABLE leituras_retrorrefletancia (
   fiscalizacao_id UUID REFERENCES fiscalizacoes(id),
   elemento_tipo TEXT, -- 'marca_longitudinal', 'placa', etc
   elemento_id UUID,
-  km NUMERIC,
-  latitude NUMERIC,
-  longitude NUMERIC,
+  km_inicial NUMERIC,
+  latitude_inicial NUMERIC,
+  longitude_inicial NUMERIC,
   valor_medido NUMERIC,
   valor_minimo NUMERIC,
   conforme BOOLEAN,
@@ -464,15 +508,18 @@ CREATE TABLE historico_desempenho (
 ```
 
 ### 3. Dashboard de Relatórios
+
 **Prioridade: MÉDIA**
 
 **Páginas:**
+
 - Relatório Inicial (geração única)
 - Relatório Mensal (geração mensal)
 - Relatório Permanente (geração sob demanda)
 - Indicadores de Desempenho (tempo real)
 
 **Funcionalidades:**
+
 - Filtros por período, lote, rodovia
 - Exportação para PDF e Excel
 - Gráficos interativos
@@ -480,9 +527,11 @@ CREATE TABLE historico_desempenho (
 - Comparativos temporais
 
 ### 4. Módulo de Indicadores
+
 **Prioridade: BAIXA**
 
 **KPIs Calculados Automaticamente:**
+
 - Taxa de execução de necessidades
 - Taxa de aprovação de medições
 - Taxa de conformidade de retrorrefletância
@@ -546,6 +595,7 @@ src/
 ## 🎯 ROADMAP DE IMPLEMENTAÇÃO
 
 ### **Sprint 1: Medição Mensal** (3-4 semanas)
+
 1. Criar tabelas de medições no banco
 2. Formulário de submissão de medição (executora)
 3. Painel de medições pendentes (supervisora)
@@ -554,6 +604,7 @@ src/
 6. Aprovação/rejeição de medições
 
 ### **Sprint 2: Fiscalização** (2-3 semanas)
+
 1. Criar tabelas de fiscalização
 2. Agendamento de fiscalizações
 3. Formulário de leitura de retrorrefletância
@@ -562,6 +613,7 @@ src/
 6. Relatório de fiscalização
 
 ### **Sprint 3: Relatórios** (3-4 semanas)
+
 1. Estrutura do Relatório Inicial
 2. Estrutura do Relatório Permanente
 3. Estrutura do Relatório Mensal
@@ -570,6 +622,7 @@ src/
 6. Templates editáveis
 
 ### **Sprint 4: Indicadores** (2 semanas)
+
 1. Cálculo automático de KPIs
 2. Dashboard de indicadores
 3. Gráficos interativos
@@ -577,6 +630,7 @@ src/
 5. Exportação de dados
 
 ### **Sprint 5: Integração e Refinamento** (2 semanas)
+
 1. Integrar todos os módulos
 2. Testes de fluxo completo
 3. Ajustes de UX
@@ -613,17 +667,20 @@ src/
 ### Perfis e Permissões:
 
 **ADMINISTRADOR**
+
 - Acesso total a todos os módulos
 - Configuração de usuários e empresas
 - Visualização de todos os lotes
 
 **COORDENADOR (DNIT)**
+
 - Visualização de todos os lotes sob sua coordenação
 - Aprovação final de medições
 - Acesso a relatórios consolidados
 - Gestão de não conformidades
 
 **TÉCNICO SUPERVISORA**
+
 - Registro de inventário (✅)
 - Conferência de medições (⏳)
 - Fiscalizações rotineiras (⏳)
@@ -631,6 +688,7 @@ src/
 - Registro de intervenções (✅)
 
 **EMPRESA EXECUTORA**
+
 - Submissão de medições mensais (⏳)
 - Visualização de suas medições
 - Resposta a NCs (✅)
@@ -641,6 +699,7 @@ src/
 ## 📱 CONSIDERAÇÕES MOBILE
 
 ### Funcionalidades Prioritárias para Mobile:
+
 1. ✅ Captura de fotos georreferenciadas (já implementado)
 2. ⏳ Conferência de medições em campo
 3. ⏳ Leitura de retrorrefletância
@@ -648,6 +707,7 @@ src/
 5. ⏳ Registro rápido de NC
 
 ### Funcionalidades Desktop:
+
 1. Análise de medições
 2. Aprovação de medições
 3. Geração de relatórios
@@ -659,18 +719,21 @@ src/
 ## 📝 OBSERVAÇÕES IMPORTANTES
 
 ### Sobre Retrorrefletância:
+
 - **Normas aplicáveis**: ABNT NBR 14.723, 16.307, 16.410, DNIT 409/2017-PRO
 - **Frequência SH**: 2 medições/ano em toda extensão + 1 segmento fixo a cada 60 dias
 - **Frequência SV**: Mínimo 1 medição/ano por placa
 - **Equipamentos**: Retrorefletômetro manual ou dinâmico calibrado
 
 ### Sobre Medições:
+
 - Conferência em **100% das frentes de serviço**
 - Prazo para conferência: conforme IS CONJ/DG/DIREX/DNIT 01/2014
 - Georreferenciamento: Datum SIRGAS 2000, 6 casas decimais
 - Todas as medições devem ter evidências fotográficas
 
 ### Sobre Relatórios:
+
 - **Relatório Inicial**: Único, no início do contrato
 - **Relatório Mensal**: Todo mês durante vigência
 - **Relatório Permanente**: Sob demanda ou trimestral
@@ -681,6 +744,7 @@ src/
 ## ✅ STATUS ATUAL DO SISTEMA
 
 ### O QUE JÁ FUNCIONA (100%):
+
 - ✅ Inventário completo de todos os elementos
 - ✅ Importação e matching de necessidades
 - ✅ Registro de intervenções executadas
@@ -690,6 +754,7 @@ src/
 - ✅ Exportação para Excel
 
 ### O QUE PRECISA SER DESENVOLVIDO:
+
 - ⏳ Módulo de medição mensal (executora + supervisora)
 - ⏳ Conferência de campo sistematizada
 - ⏳ Fiscalização rotineira com histórico
@@ -698,6 +763,7 @@ src/
 - ⏳ Dashboard de indicadores
 
 ### PRIORIDADE DE DESENVOLVIMENTO:
+
 1. **ALTA**: Medição Mensal (core da supervisão)
 2. **ALTA**: Conferência em Campo (validação da medição)
 3. **MÉDIA**: Fiscalização Rotineira (controle de qualidade)
