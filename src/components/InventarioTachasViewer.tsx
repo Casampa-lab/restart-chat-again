@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
+import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { useInventarioContadores } from "@/hooks/useInventarioContadores";
@@ -141,6 +142,21 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   });
 
   const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
+
+  // Buscar reconciliações pendentes para marcar com bolinha amarela
+  const { data: reconciliacoesPendentesSet } = useQuery({
+    queryKey: ['reconciliacoes-pendentes-tachas', loteId, rodoviaId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('reconciliacoes')
+        .select('cadastro_id')
+        .eq('tipo_elemento', 'tachas')
+        .eq('reconciliado', false)
+        .eq('status', 'pendente_aprovacao');
+      return new Set(data?.map(r => r.cadastro_id) || []);
+    },
+    enabled: !!loteId && !!rodoviaId,
+  });
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -536,6 +552,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="quantidade" />
                         </div>
                       </TableHead>
+                      <TableHead className="text-center">Origem</TableHead>
                       <TableHead>Projeto</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -580,6 +597,17 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           )}
                         </TableCell>
                         <TableCell className="text-center">{tacha.quantidade}</TableCell>
+                        <TableCell className="text-center">
+                          <TipoOrigemBadge 
+                            tipoOrigem={
+                              (tacha as any).origem === 'cadastro_inicial' && reconciliacoesPendentesSet?.has(tacha.id)
+                                ? 'aguardando_reconciliacao'
+                                : (tacha as any).origem || 'cadastro_inicial'
+                            }
+                            modificadoPorIntervencao={(tacha as any).modificado_por_intervencao}
+                            showLabel={false}
+                          />
+                        </TableCell>
                         <TableCell className="text-center">
                           {(() => {
                             const necessidade = necessidadesMap?.get(tacha.id);

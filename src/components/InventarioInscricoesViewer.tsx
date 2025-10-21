@@ -32,6 +32,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
+import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
 import { toast } from "sonner";
 import { useInventarioContadores } from "@/hooks/useInventarioContadores";
 import { ContadoresBadges } from "@/components/ContadoresBadges";
@@ -175,6 +176,21 @@ export function InventarioInscricoesViewer({
   });
 
   const toleranciaMetros = rodovia?.tolerancia_match_metros || 50;
+
+  // Buscar reconciliações pendentes para marcar com bolinha amarela
+  const { data: reconciliacoesPendentesSet } = useQuery({
+    queryKey: ['reconciliacoes-pendentes-inscricoes', loteId, rodoviaId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('reconciliacoes')
+        .select('cadastro_id')
+        .eq('tipo_elemento', 'inscricoes')
+        .eq('reconciliado', false)
+        .eq('status', 'pendente_aprovacao');
+      return new Set(data?.map(r => r.cadastro_id) || []);
+    },
+    enabled: !!loteId && !!rodoviaId,
+  });
 
   // Query de necessidades relacionadas (retorna Map indexado por cadastro_id)
   const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
@@ -511,6 +527,7 @@ export function InventarioInscricoesViewer({
                           <SortIcon column="material_utilizado" />
                         </div>
                       </TableHead>
+                      <TableHead className="text-center">Origem</TableHead>
                       <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("area_m2")}
@@ -545,6 +562,17 @@ export function InventarioInscricoesViewer({
                           <TableCell>{inscricao.km_inicial?.toFixed(2) || "-"}</TableCell>
                           <TableCell>{inscricao.material_utilizado || "-"}</TableCell>
                           <TableCell>{inscricao.area_m2?.toFixed(2) || "-"}</TableCell>
+                          <TableCell className="text-center">
+                            <TipoOrigemBadge 
+                              tipoOrigem={
+                                (inscricao as any).origem === 'cadastro_inicial' && reconciliacoesPendentesSet?.has(inscricao.id)
+                                  ? 'aguardando_reconciliacao'
+                                  : (inscricao as any).origem || 'cadastro_inicial'
+                              }
+                              modificadoPorIntervencao={(inscricao as any).modificado_por_intervencao}
+                              showLabel={false}
+                            />
+                          </TableCell>
                           <TableCell className="text-center">
                             {(() => {
                               const necessidade = necessidadesMap?.get(inscricao.id);

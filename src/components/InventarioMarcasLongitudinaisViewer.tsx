@@ -30,6 +30,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "./ReconciliacaoDrawerUniversal";
+import { TipoOrigemBadge } from "./TipoOrigemBadge";
 import { toast } from "sonner";
 import { useInventarioContadores } from "@/hooks/useInventarioContadores";
 import { ContadoresBadges } from "./ContadoresBadges";
@@ -108,6 +109,21 @@ export function InventarioMarcasLongitudinaisViewer({
   });
 
   const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
+
+  // Buscar reconciliações pendentes para marcar com bolinha amarela
+  const { data: reconciliacoesPendentesSet } = useQuery({
+    queryKey: ['reconciliacoes-pendentes-marcas', loteId, rodoviaId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('reconciliacoes')
+        .select('cadastro_id')
+        .eq('tipo_elemento', 'marcas_longitudinais')
+        .eq('reconciliado', false)
+        .eq('status', 'pendente_aprovacao');
+      return new Set(data?.map(r => r.cadastro_id) || []);
+    },
+    enabled: !!loteId && !!rodoviaId,
+  });
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -489,6 +505,7 @@ export function InventarioMarcasLongitudinaisViewer({
                           <SortIcon column="extensao_metros" />
                         </div>
                       </TableHead>
+                      <TableHead className="text-center">Origem</TableHead>
                       <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("servico")}
@@ -550,6 +567,17 @@ export function InventarioMarcasLongitudinaisViewer({
                             <Badge variant="outline" className="text-xs">
                               {marca.extensao_metros ? (marca.extensao_metros / 1000).toFixed(2) : "-"} km
                             </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <TipoOrigemBadge 
+                              tipoOrigem={
+                                (marca as any).origem === 'cadastro_inicial' && reconciliacoesPendentesSet?.has(marca.id)
+                                  ? 'aguardando_reconciliacao'
+                                  : (marca as any).origem || 'cadastro_inicial'
+                              }
+                              modificadoPorIntervencao={(marca as any).modificado_por_intervencao}
+                              showLabel={false}
+                            />
                           </TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (

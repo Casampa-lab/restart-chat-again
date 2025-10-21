@@ -29,6 +29,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
+import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -145,6 +146,21 @@ export function InventarioPorticosViewer({ loteId, rodoviaId, onRegistrarInterve
   });
 
   const toleranciaRodovia = rodoviaConfig?.tolerancia_match_metros || 50;
+
+  // Buscar reconciliações pendentes para marcar com bolinha amarela
+  const { data: reconciliacoesPendentesSet } = useQuery({
+    queryKey: ['reconciliacoes-pendentes-porticos', loteId, rodoviaId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('reconciliacoes')
+        .select('cadastro_id')
+        .eq('tipo_elemento', 'porticos')
+        .eq('reconciliado', false)
+        .eq('status', 'pendente_aprovacao');
+      return new Set(data?.map(r => r.cadastro_id) || []);
+    },
+    enabled: !!loteId && !!rodoviaId,
+  });
 
   const { data: porticos, isLoading } = useQuery({
     queryKey: ["inventario-porticos", loteId, rodoviaId, searchTerm, searchLat, searchLng, toleranciaRodovia],
@@ -566,6 +582,7 @@ export function InventarioPorticosViewer({ loteId, rodoviaId, onRegistrarInterve
                         <SortIcon column="vao_horizontal_m" />
                       </div>
                     </TableHead>
+                    <TableHead className="text-center">Origem</TableHead>
                     <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50 text-center"
                       onClick={() => handleSort("servico")}
@@ -623,6 +640,17 @@ export function InventarioPorticosViewer({ loteId, rodoviaId, onRegistrarInterve
                         <Badge variant="outline" className="text-xs">
                           {portico.vao_horizontal_m?.toFixed(2) || "-"}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <TipoOrigemBadge 
+                          tipoOrigem={
+                            (portico as any).origem === 'cadastro_inicial' && reconciliacoesPendentesSet?.has(portico.id)
+                              ? 'aguardando_reconciliacao'
+                              : (portico as any).origem || 'cadastro_inicial'
+                          }
+                          modificadoPorIntervencao={(portico as any).modificado_por_intervencao}
+                          showLabel={false}
+                        />
                       </TableCell>
                       <TableCell className="text-center">
                         {(() => {

@@ -148,6 +148,21 @@ export const InventarioDefensasViewer = ({
 
   const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
 
+  // Buscar reconciliações pendentes para marcar com bolinha amarela
+  const { data: reconciliacoesPendentesSet } = useQuery({
+    queryKey: ['reconciliacoes-pendentes-defensas', loteId, rodoviaId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('reconciliacoes')
+        .select('cadastro_id')
+        .eq('tipo_elemento', 'defensas')
+        .eq('reconciliado', false)
+        .eq('status', 'pendente_aprovacao');
+      return new Set(data?.map(r => r.cadastro_id) || []);
+    },
+    enabled: !!loteId && !!rodoviaId,
+  });
+
   const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
     queryKey: ["necessidades-match-defensas", loteId, rodoviaId],
     queryFn: async () => {
@@ -546,7 +561,12 @@ export const InventarioDefensasViewer = ({
                   <TableCell className="text-center">{(defensa as any).nivel_contencao_en1317 || "-"}</TableCell>
                   <TableCell className="text-center">
                     <TipoOrigemBadge 
-                      tipoOrigem={(defensa as any).origem || 'cadastro_inicial'}
+                      tipoOrigem={
+                        (defensa as any).origem === 'cadastro_inicial' && reconciliacoesPendentesSet?.has(defensa.id)
+                          ? 'aguardando_reconciliacao'
+                          : (defensa as any).origem || 'cadastro_inicial'
+                      }
+                      modificadoPorIntervencao={(defensa as any).modificado_por_intervencao}
                       showLabel={false}
                     />
                   </TableCell>

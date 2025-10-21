@@ -55,6 +55,16 @@ export function TipoOrigemBadge({
       variant: "secondary" as const,
       color: "fill-blue-600",
     },
+    necessidade: {
+      label: "Criado por Match",
+      variant: "secondary" as const,
+      color: "fill-purple-600",
+    },
+    aguardando_reconciliacao: {
+      label: "Aguardando Reconciliação",
+      variant: "outline" as const,
+      color: "fill-yellow-500",
+    },
   };
 
   const config = configs[tipoOrigem as keyof typeof configs] || configs.cadastro_inicial;

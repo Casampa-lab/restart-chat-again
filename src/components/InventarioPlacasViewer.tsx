@@ -32,6 +32,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
 import { NecessidadeBadge } from "./NecessidadeBadge";
 import { ReconciliacaoDrawer } from "./ReconciliacaoDrawer";
+import { TipoOrigemBadge } from "./TipoOrigemBadge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -211,6 +212,21 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   });
 
   const toleranciaRodovia = rodoviaConfig?.tolerancia_match_metros || 50;
+
+  // Buscar reconciliações pendentes para marcar com bolinha amarela
+  const { data: reconciliacoesPendentesSet } = useQuery({
+    queryKey: ['reconciliacoes-pendentes-placas', loteId, rodoviaId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('reconciliacoes')
+        .select('cadastro_id')
+        .eq('tipo_elemento', 'placas')
+        .eq('reconciliado', false)
+        .eq('status', 'pendente_aprovacao');
+      return new Set(data?.map(r => r.cadastro_id) || []);
+    },
+    enabled: !!loteId && !!rodoviaId,
+  });
 
   const {
     data: placas,
@@ -640,6 +656,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="tipo_pelicula_legenda_orla" />
                         </div>
                       </TableHead>
+                      <TableHead className="text-center">Origem</TableHead>
                       <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("servico")}
@@ -695,6 +712,17 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                             <Badge variant="outline" className="text-xs">
                               {placa.tipo_pelicula_legenda_orla || "-"}
                             </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <TipoOrigemBadge 
+                              tipoOrigem={
+                                (placa as any).origem === 'cadastro_inicial' && reconciliacoesPendentesSet?.has(placa.id)
+                                  ? 'aguardando_reconciliacao'
+                                  : (placa as any).origem || 'cadastro_inicial'
+                              }
+                              modificadoPorIntervencao={(placa as any).modificado_por_intervencao}
+                              showLabel={false}
+                            />
                           </TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (

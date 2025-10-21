@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
+import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useInventarioContadores } from "@/hooks/useInventarioContadores";
 import { ContadoresBadges } from "@/components/ContadoresBadges";
@@ -159,6 +160,21 @@ export function InventarioCilindrosViewer({
   });
 
   const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
+
+  // Buscar reconciliações pendentes para marcar com bolinha amarela
+  const { data: reconciliacoesPendentesSet } = useQuery({
+    queryKey: ['reconciliacoes-pendentes-cilindros', loteId, rodoviaId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('reconciliacoes')
+        .select('cadastro_id')
+        .eq('tipo_elemento', 'cilindros')
+        .eq('reconciliado', false)
+        .eq('status', 'pendente_aprovacao');
+      return new Set(data?.map(r => r.cadastro_id) || []);
+    },
+    enabled: !!loteId && !!rodoviaId,
+  });
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371e3; // Earth radius in meters
@@ -599,6 +615,7 @@ export function InventarioCilindrosViewer({
                         <SortIcon column="data_vistoria" />
                       </div>
                     </TableHead>
+                    <TableHead className="text-center">Origem</TableHead>
                     <TableHead className="text-center">Projeto</TableHead>
                     <TableHead className="text-center">Status</TableHead>
                     <TableHead className="text-center">Ações</TableHead>
@@ -623,6 +640,17 @@ export function InventarioCilindrosViewer({
                         <TableCell>{cilindro.quantidade || "-"}</TableCell>
                         <TableCell>{cilindro.espacamento_m || "-"}</TableCell>
                         <TableCell>{new Date(cilindro.data_vistoria).toLocaleDateString("pt-BR")}</TableCell>
+                        <TableCell className="text-center">
+                          <TipoOrigemBadge 
+                            tipoOrigem={
+                              cilindro.origem === 'cadastro_inicial' && reconciliacoesPendentesSet?.has(cilindro.id)
+                                ? 'aguardando_reconciliacao'
+                                : cilindro.origem || 'cadastro_inicial'
+                            }
+                            modificadoPorIntervencao={cilindro.modificado_por_intervencao}
+                            showLabel={false}
+                          />
+                        </TableCell>
                         <TableCell className="text-center">
                           {(() => {
                             const necessidade = necessidadesMap?.get(cilindro.id);
