@@ -20,7 +20,7 @@ Este documento consolida a análise de todas as planilhas CADASTRO, NECESSIDADES
 
 ### Características
 
-- **Tipo de Coordenadas**: Point (Km_inicial, Latitude_inicial, Longitude_inicial)
+- **Tipo de Coordenadas**: Point (Km, Latitude, Longitude)
 - **Tabela**: `ficha_placa`
 - **Campos Especiais**: Retrorefletância de fundo e orla/legenda separados
 
@@ -33,9 +33,9 @@ Este documento consolida a análise de todas as planilhas CADASTRO, NECESSIDADES
 5. Velocidade (km/h)
 6. Lado
 7. Posição
-8. Km
+8. Km_inicial
 9. Latitude_inicial
-10. Longitude_inicial
+10. Longitude
 11. Tipo de Suporte
 12. Quantidade de Suporte
 13. Tipo de Substrato
@@ -61,10 +61,10 @@ Este documento consolida a análise de todas as planilhas CADASTRO, NECESSIDADES
 5. Altura (m)
 6. Largura (m)
 7. Área (m²)
-8. Km_inicial
+8. Km
 9. Lado
 10. Latitude_inicial
-11. Longitude_inicial
+11. Longitude
 12. Velocidade
 13. Substrato
 14. Suporte
@@ -111,8 +111,8 @@ Este documento consolida a análise de todas as planilhas CADASTRO, NECESSIDADES
 6. Posição
 7. Largura da faixa (m)
 8. Espessura (cm)
-9. Trecho inicial - Km_inicial
-10. Trecho final - Km_final
+9. Trecho inicial - Km
+10. Trecho final - Km
 11. Extensão (km)
 12. Material
 13. **Falta**: Solução, Motivo
@@ -168,9 +168,9 @@ Idênticos ao CADASTRO
 1. BR
 2. SNV
 3. Tipo
-4. Km_inicial
+4. Km
 5. Latitude_inicial
-6. Longitude_inicial
+6. Longitude
 7. Vão horizontal (m)
 8. Altura livre (m)
 9. Fotografia
@@ -302,7 +302,7 @@ Idênticos ao CADASTRO
 3. **Sigla** (ZPA, MOF, PEM, LEGENDA)
 4. **Descrição** (texto longo)
 5. Cor
-6. Km_inicial
+6. Km
 7. Latitude_inicial
 8. Longitude_inicial
 9. Material
@@ -316,7 +316,7 @@ Idênticos ao CADASTRO
 3. **Sigla** (ZPA, MOF, PEM, LEGENDA)
 4. **Descrição** (texto longo)
 5. Cor
-6. Km_inicial
+6. Km
 7. Latitude_inicial
 8. Longitude_inicial
 9. Material
@@ -352,16 +352,16 @@ Todos os grupos de NECESSIDADES **NÃO** contêm:
 
 ### 2. Tipos de Coordenadas
 
-- **Point** (3 grupos): Placas, Pórticos, Zebrados/Inscrições
+- **Point** (4 grupos): Placas, Pórticos, Zebrados/Inscrições
   - Campos: Km_inicial, Latitude_inicial, Longitude_inicial
-- **Extension** (4 grupos): Marcas Longitudinais, Cilindros, Tachas, Defensas
+- **Extension** (3 grupos): Marcas Longitudinais, Cilindros, Tachas, Defensas
   - Campos: Km Inicial/Final, Latitude Inicial/Final, Longitude Inicial/Final, Extensão
 
 ### 3. Campos Comuns a Todos
 
 - BR (Rodovia)
 - SNV (Segmento)
-- Km Inicial/Final
+- Km ou Km Inicial/Final
 - Coordenadas GPS
 
 ### 4. Retrorefletância (Placas)
