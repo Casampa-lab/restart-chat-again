@@ -26,7 +26,7 @@ const fichaPlacaSchema = z.object({
   uf: z.string().optional(),
   br: z.string().optional(),
   snv: z.string().optional(),
-  km: z.string().optional(),
+  km_inicial: z.string().optional(),
   lado: z.string().optional(),
   latitude_inicial: z.string().optional(),
   longitude_inicial: z.string().optional(),
@@ -189,7 +189,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
           uf: values.uf || null,
           br: values.br || null,
           snv: values.snv || null,
-          km: values.km ? parseFloat(values.km) : null,
+          km_inicial: values.km_inicial ? parseFloat(values.km_inicial) : null,
           lado: values.lado || null,
           latitude_inicial: values.latitude_inicial ? parseFloat(values.latitude_inicial) : null,
           longitude_inicial: values.longitude_inicial ? parseFloat(values.longitude_inicial) : null,
@@ -430,7 +430,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                   />
                   <FormField
                     control={form.control}
-                    name="km"
+                    name="km_inicial"
                     render={({ field }) => (
                     <FormItem>
                       <FormControl>

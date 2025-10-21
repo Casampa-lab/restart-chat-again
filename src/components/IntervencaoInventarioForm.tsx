@@ -40,7 +40,7 @@ interface IntervencaoInventarioFormProps {
   placaInfo: {
     codigo: string | null;
     snv: string | null;
-    km: number | null;
+    km_inicial: number | null;
     lado: string | null;
     rodoviaId: string;
     loteId: string;
@@ -85,7 +85,7 @@ export function IntervencaoInventarioForm({
         lote_id: placaInfo.loteId,
         rodovia_id: placaInfo.rodoviaId,
         data_intervencao: values.data_intervencao,
-        km_referencia: placaInfo.km || 0,
+        km_referencia: placaInfo.km_inicial || 0,
         lado: placaInfo.lado || "Direito",
         tipo_intervencao: "Manutenção",
         tipo_placa: "Regulamentação",
@@ -158,7 +158,7 @@ export function IntervencaoInventarioForm({
             </div>
             <div>
               <span className="text-muted-foreground">km:</span>{" "}
-              <span className="font-medium">{placaInfo.km?.toFixed(2) || "-"}</span>
+              <span className="font-medium">{placaInfo.km_inicial?.toFixed(2) || "-"}</span>
             </div>
             <div>
               <span className="text-muted-foreground">Lado:</span>{" "}

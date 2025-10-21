@@ -15,9 +15,9 @@ interface PlacaRow {
   velocidade: string;
   lado: string;
   posicao: string;
-  km: number;
-  latitude: number;
-  longitude: number;
+  km_inicial: number;
+  latitude_inicial: number;
+  longitude_inicial: number;
   tipo_suporte: string;
   qtde_suporte: number;
   tipo_substrato: string;
@@ -84,9 +84,9 @@ serve(async (req) => {
       codigo: row.codigo,
       velocidade: row.velocidade !== "-" ? row.velocidade : null,
       lado: row.lado,
-      km: row.km,
-      latitude: row.latitude,
-      longitude: row.longitude,
+      km_inicial: row.km_inicial,
+      latitude_inicial: row.latitude_inicial,
+      longitude_inicial: row.longitude_inicial,
       suporte: row.tipo_suporte,
       qtde_suporte: row.qtde_suporte || null,
       substrato: row.tipo_substrato,
