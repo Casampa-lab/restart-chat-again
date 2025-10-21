@@ -706,6 +706,7 @@ serve(async (req) => {
           modificado_por_intervencao: false,
           ultima_intervencao_id: null,
           data_ultima_modificacao: null,
+          ativo: true,
         };
 
         // Adicionar campos obrigatórios com valores padrão específicos por tabela
