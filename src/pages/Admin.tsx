@@ -390,23 +390,6 @@ const Admin = () => {
           {isAdmin && (
             <TabsContent value="sistema">
               <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>🧪 Ferramentas de Teste</CardTitle>
-                    <CardDescription>
-                      Ferramentas para validação e testes do sistema
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      variant="outline"
-                      onClick={() => navigate('/testar-contadores')}
-                      className="w-full"
-                    >
-                      🧪 Testar Contadores de Inventário
-                    </Button>
-                  </CardContent>
-                </Card>
                 <LimparReconciliacoesInconsistentes />
                 <RemoverDuplicatasInventario />
                 <ResetDatabaseButton />

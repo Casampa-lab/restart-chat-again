@@ -77,8 +77,8 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
     queryFn: async () => {
       const configAtual = getConfig(grupoAtivo);
       
-      // ✅ CLÁUSULA PÉTREA: TODOS usam km_inicial (ninguém usa km sozinho)
-      const colunaOrdenacao = 'km_inicial';
+      // Determinar coluna de ordenação baseado no tipo de geometria
+      const colunaOrdenacao = configAtual.tipoGeometria === 'pontual' ? 'km' : 'km_inicial';
       
       const { data, error } = await supabase
         .from(configAtual.tabelaNecessidades as any)

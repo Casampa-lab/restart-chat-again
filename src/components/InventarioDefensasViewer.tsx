@@ -7,21 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  Search,
-  MapPin,
-  Eye,
-  FileText,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Plus,
-  ClipboardList,
-  AlertCircle,
-  Filter,
-  CheckCircle,
-  RefreshCw,
-} from "lucide-react";
+import { Search, MapPin, Eye, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,11 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
-import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { useInventarioContadores } from "@/hooks/useInventarioContadores";
-import { ContadoresBadges } from "@/components/ContadoresBadges";
 
 // Component to show reconciliation status badge
 function StatusReconciliacaoBadge({ status }: { status: string | null }) {
@@ -43,18 +26,18 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
     pendente_aprovacao: {
       color: "bg-yellow-100 text-yellow-800 border-yellow-300",
       icon: "🟡",
-      label: "Aguardando Coordenação",
+      label: "Aguardando Coordenação"
     },
     aprovado: {
       color: "bg-green-100 text-green-800 border-green-300",
       icon: "🟢",
-      label: "Substituição Aprovada",
+      label: "Substituição Aprovada"
     },
     rejeitado: {
       color: "bg-red-100 text-red-800 border-red-300",
       icon: "🔴",
-      label: "Mantido como Implantação",
-    },
+      label: "Mantido como Implantação"
+    }
   };
 
   const item = config[status as keyof typeof config];
@@ -64,7 +47,9 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          <Badge className={`${item.color} text-xs border`}>{item.icon}</Badge>
+          <Badge className={`${item.color} text-xs border`}>
+            {item.icon}
+          </Badge>
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-xs">{item.label}</p>
@@ -123,14 +108,6 @@ export const InventarioDefensasViewer = ({
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
 
-  // Hook para contadores de inventário
-  const {
-    contadores,
-    marcoZeroExiste,
-    loading: loadingContadores,
-    refetch: refetchContadores,
-  } = useInventarioContadores("defensas", loteId, rodoviaId);
-
   // Buscar tolerância GPS da rodovia
   const { data: rodoviaConfig } = useQuery({
     queryKey: ["rodovia-tolerancia", rodoviaId],
@@ -148,21 +125,6 @@ export const InventarioDefensasViewer = ({
 
   const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
 
-  // Buscar reconciliações pendentes para marcar com bolinha amarela
-  const { data: reconciliacoesPendentesSet } = useQuery({
-    queryKey: ['reconciliacoes-pendentes-defensas', loteId, rodoviaId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('reconciliacoes')
-        .select('cadastro_id')
-        .eq('tipo_elemento', 'defensas')
-        .eq('reconciliado', false)
-        .eq('status', 'pendente_aprovacao');
-      return new Set(data?.map(r => r.cadastro_id) || []);
-    },
-    enabled: !!loteId && !!rodoviaId,
-  });
-
   const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
     queryKey: ["necessidades-match-defensas", loteId, rodoviaId],
     queryFn: async () => {
@@ -172,24 +134,17 @@ export const InventarioDefensasViewer = ({
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null);
-
+      
       if (error) throw error;
-
+      
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
         const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
-        if (
-          reconciliacao?.status === "pendente_aprovacao" &&
-          reconciliacao?.distancia_match_metros <= toleranciaMetros
-        ) {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-            distancia_match_metros: reconciliacao.distancia_match_metros,
-          });
+        if (reconciliacao?.status === 'pendente_aprovacao' && reconciliacao?.distancia_match_metros <= toleranciaMetros) {
+          map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
         }
       });
-
+      
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
@@ -198,7 +153,9 @@ export const InventarioDefensasViewer = ({
   });
 
   // Contar matches pendentes de reconciliação
-  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter((nec) => !nec.reconciliado).length;
+  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter(
+    nec => !nec.reconciliado
+  ).length;
 
   // Contar TODAS as necessidades com match (não apenas divergências)
   const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
@@ -231,7 +188,8 @@ export const InventarioDefensasViewer = ({
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
     const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
@@ -239,7 +197,7 @@ export const InventarioDefensasViewer = ({
 
   const openDefensaDetail = async (defensa: FichaDefensa) => {
     setSelectedDefensa(defensa);
-
+    
     // Buscar intervenções da defensa
     const { data: intervencoesData, error: intervencoesError } = await supabase
       .from("defensas_intervencoes")
@@ -255,26 +213,24 @@ export const InventarioDefensasViewer = ({
     }
   };
 
-  const filteredByGps =
-    gpsLat && gpsLong && defensas
-      ? defensas
-          .filter((defensa) => {
-            const kmMedio = (defensa.km_inicial + defensa.km_final) / 2;
-            return true;
-          })
-          .sort((a, b) => {
-            const kmA = (a.km_inicial + a.km_final) / 2;
-            const kmB = (b.km_inicial + b.km_final) / 2;
-            return kmA - kmB;
-          })
-      : defensas;
+  const filteredByGps = gpsLat && gpsLong && defensas
+    ? defensas
+        .filter((defensa) => {
+          const kmMedio = (defensa.km_inicial + defensa.km_final) / 2;
+          return true;
+        })
+        .sort((a, b) => {
+          const kmA = (a.km_inicial + a.km_final) / 2;
+          const kmB = (b.km_inicial + b.km_final) / 2;
+          return kmA - kmB;
+        })
+    : defensas;
 
-  const filteredDefensas =
-    filteredByGps?.filter((defensa) => {
-      if (!showOnlyPendentes) return true;
-      const nec = necessidadesMap?.get(defensa.id);
-      return nec && !nec.reconciliado;
-    }) || [];
+  const filteredDefensas = filteredByGps?.filter(defensa => {
+    if (!showOnlyPendentes) return true;
+    const nec = necessidadesMap?.get(defensa.id);
+    return nec && !nec.reconciliado;
+  }) || [];
 
   const handleReconciliar = async () => {
     await refetchNecessidades();
@@ -285,27 +241,27 @@ export const InventarioDefensasViewer = ({
   };
 
   // Função para ordenar dados
-  const sortedDefensas = filteredDefensas
-    ? [...filteredDefensas].sort((a, b) => {
-        if (!sortColumn) return 0;
-
-        let aVal: any = a[sortColumn as keyof FichaDefensa];
-        let bVal: any = b[sortColumn as keyof FichaDefensa];
-
-        if (aVal == null) aVal = "";
-        if (bVal == null) bVal = "";
-
-        if (typeof aVal === "string" && typeof bVal === "string") {
-          return sortDirection === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-        }
-
-        if (typeof aVal === "number" && typeof bVal === "number") {
-          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
-        }
-
-        return 0;
-      })
-    : [];
+  const sortedDefensas = filteredDefensas ? [...filteredDefensas].sort((a, b) => {
+    if (!sortColumn) return 0;
+    
+    let aVal: any = a[sortColumn as keyof FichaDefensa];
+    let bVal: any = b[sortColumn as keyof FichaDefensa];
+    
+    if (aVal == null) aVal = "";
+    if (bVal == null) bVal = "";
+    
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return sortDirection === "asc" 
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+    }
+    
+    return 0;
+  }) : [];
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -318,26 +274,14 @@ export const InventarioDefensasViewer = ({
 
   const SortIcon = ({ column }: { column: string }) => {
     if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3 ml-1" />;
-    return sortDirection === "asc" ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />;
+    return sortDirection === "asc" 
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
   };
 
   return (
     <div className="space-y-4">
-      {/* Badges de Contadores */}
-      <div className="flex items-center justify-between">
-        <ContadoresBadges
-          cadastroInicialAtivo={contadores.cadastro_inicial_ativo}
-          criadosNecessidadeAtivo={contadores.criados_necessidade_ativo}
-          totalAtivo={contadores.total_ativo}
-          cadastroInicialInativo={contadores.cadastro_inicial_inativo}
-          totalInativo={contadores.total_inativo}
-          marcoZeroExiste={marcoZeroExiste}
-          loading={loadingContadores}
-          onRefresh={refetchContadores}
-        />
-      </div>
-
-      {/* Botões Ver Necessidades */}
+      {/* Botão Ver Necessidades */}
       <div className="flex justify-end gap-2">
         <Button
           variant="outline"
@@ -357,14 +301,19 @@ export const InventarioDefensasViewer = ({
           <ClipboardList className="h-4 w-4" />
           Ver Intervenções
         </Button>
-        <Button variant="default" size="sm" onClick={() => setShowRegistrarNaoCadastrado(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Item Novo
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => setShowRegistrarNaoCadastrado(true)}
+          className="gap-2"
+        >
+              <Plus className="h-4 w-4" />
+              Item Novo
         </Button>
       </div>
 
-      {totalMatchesProcessados > 0 &&
-        (matchesPendentes === 0 ? (
+      {totalMatchesProcessados > 0 && (
+        matchesPendentes === 0 ? (
           // Estado OK - Sem divergências
           <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
             <div className="flex items-center gap-4">
@@ -374,7 +323,7 @@ export const InventarioDefensasViewer = ({
               <div>
                 <div className="font-bold text-base flex items-center gap-2">
                   <span className="text-2xl font-extrabold text-green-600">{totalMatchesProcessados}</span>
-                  <span>{totalMatchesProcessados === 1 ? "item verificado" : "itens verificados"}</span>
+                  <span>{totalMatchesProcessados === 1 ? 'item verificado' : 'itens verificados'}</span>
                 </div>
                 <div className="text-sm text-muted-foreground mt-0.5">
                   ✅ Inventário OK - Projeto e Sistema em conformidade
@@ -416,7 +365,7 @@ export const InventarioDefensasViewer = ({
               <div>
                 <div className="font-bold text-base flex items-center gap-2">
                   <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
-                  <span>{matchesPendentes === 1 ? "match a reconciliar" : "matches a reconciliar"}</span>
+                  <span>{matchesPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
                 </div>
                 <div className="text-sm text-muted-foreground mt-0.5">
                   🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
@@ -435,7 +384,8 @@ export const InventarioDefensasViewer = ({
               </Label>
             </div>
           </div>
-        ))}
+        )
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="relative">
@@ -449,7 +399,12 @@ export const InventarioDefensasViewer = ({
         </div>
         <div className="relative">
           <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Latitude" value={gpsLat} onChange={(e) => setGpsLat(e.target.value)} className="pl-10" />
+          <Input
+            placeholder="Latitude"
+            value={gpsLat}
+            onChange={(e) => setGpsLat(e.target.value)}
+            className="pl-10"
+          />
         </div>
         <div className="relative">
           <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -466,11 +421,10 @@ export const InventarioDefensasViewer = ({
         <div>Carregando...</div>
       ) : (
         <div className="border rounded-lg overflow-hidden">
-          <div className="max-h-[600px] overflow-y-auto">
-            <Table>
+          <Table>
             <TableHeader className="sticky top-0 bg-muted z-10">
               <TableRow>
-                <TableHead
+                <TableHead 
                   className="cursor-pointer select-none hover:bg-muted/50 text-center"
                   onClick={() => handleSort("tramo")}
                 >
@@ -479,7 +433,7 @@ export const InventarioDefensasViewer = ({
                     <SortIcon column="tramo" />
                   </div>
                 </TableHead>
-                <TableHead
+                <TableHead 
                   className="cursor-pointer select-none hover:bg-muted/50 text-center"
                   onClick={() => handleSort("lado")}
                 >
@@ -488,55 +442,38 @@ export const InventarioDefensasViewer = ({
                     <SortIcon column="lado" />
                   </div>
                 </TableHead>
-                <TableHead
+                <TableHead 
                   className="cursor-pointer select-none hover:bg-muted/50 text-center"
                   onClick={() => handleSort("km_inicial")}
                 >
                   <div className="whitespace-normal leading-tight flex items-center justify-center">
-                    km
-                    <br />
-                    Inicial
+                    km<br/>Inicial
                     <SortIcon column="km_inicial" />
                   </div>
                 </TableHead>
-                <TableHead
+                <TableHead 
                   className="cursor-pointer select-none hover:bg-muted/50 text-center"
                   onClick={() => handleSort("km_final")}
                 >
                   <div className="whitespace-normal leading-tight flex items-center justify-center">
-                    km
-                    <br />
-                    Final
+                    km<br/>Final
                     <SortIcon column="km_final" />
                   </div>
                 </TableHead>
-                <TableHead
+                <TableHead 
                   className="cursor-pointer select-none hover:bg-muted/50 text-center"
                   onClick={() => handleSort("extensao_metros")}
                 >
                   <div className="whitespace-normal leading-tight flex items-center justify-center">
-                    Comprimento
-                    <br />
-                    Total (m)
+                    Comprimento<br/>Total (m)
                     <SortIcon column="extensao_metros" />
                   </div>
                 </TableHead>
                 <TableHead className="text-center">
-                  <div className="whitespace-normal leading-tight">
-                    Qtde
-                    <br />
-                    Lâminas
-                  </div>
+                  <div className="whitespace-normal leading-tight">Qtde<br/>Lâminas</div>
                 </TableHead>
                 <TableHead className="text-center">
-                  <div className="whitespace-normal leading-tight">
-                    Nível de
-                    <br />
-                    Contenção
-                  </div>
-                </TableHead>
-                <TableHead className="text-center w-[80px]">
-                  <div className="whitespace-normal leading-tight">Origem</div>
+                  <div className="whitespace-normal leading-tight">Nível de<br/>Contenção</div>
                 </TableHead>
                 <TableHead className="text-center">
                   <div className="whitespace-normal leading-tight">Projeto</div>
@@ -560,21 +497,10 @@ export const InventarioDefensasViewer = ({
                   <TableCell className="text-center">{(defensa as any).quantidade_laminas || "-"}</TableCell>
                   <TableCell className="text-center">{(defensa as any).nivel_contencao_en1317 || "-"}</TableCell>
                   <TableCell className="text-center">
-                    <TipoOrigemBadge 
-                      tipoOrigem={
-                        (defensa as any).origem === 'cadastro_inicial' && reconciliacoesPendentesSet?.has(defensa.id)
-                          ? 'aguardando_reconciliacao'
-                          : (defensa as any).origem || 'cadastro_inicial'
-                      }
-                      modificadoPorIntervencao={(defensa as any).modificado_por_intervencao}
-                      showLabel={false}
-                    />
-                  </TableCell>
-                  <TableCell className="text-center">
                     {(() => {
                       const necessidade = necessidadesMap?.get(defensa.id);
                       return necessidade ? (
-                        <NecessidadeBadge
+                        <NecessidadeBadge 
                           necessidade={{
                             id: necessidade.id,
                             servico: necessidade.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
@@ -585,11 +511,11 @@ export const InventarioDefensasViewer = ({
                             solucao_planilha: necessidade.solucao_planilha,
                             servico_inferido: necessidade.servico_inferido,
                           }}
-                          tipo="defensas"
+                          tipo="defensas" 
                         />
                       ) : (
                         <Badge variant="outline" className="text-muted-foreground text-xs">
-                          Sem match automático
+                          Sem previsão
                         </Badge>
                       );
                     })()}
@@ -599,10 +525,12 @@ export const InventarioDefensasViewer = ({
                       {(() => {
                         const necessidade = necessidadesMap?.get(defensa.id);
                         if (!necessidade) return null;
-
+                        
                         return (
                           <>
-                            <StatusReconciliacaoBadge status={necessidade.status_reconciliacao} />
+                            <StatusReconciliacaoBadge 
+                              status={necessidade.status_reconciliacao} 
+                            />
                             {necessidade?.divergencia && !necessidade.reconciliado && (
                               <Button
                                 variant="outline"
@@ -638,13 +566,6 @@ export const InventarioDefensasViewer = ({
               ))}
             </TableBody>
           </Table>
-          </div>
-          
-          {sortedDefensas && sortedDefensas.length > 0 && (
-            <p className="text-sm text-muted-foreground text-center mt-4">
-              {sortedDefensas.length} {sortedDefensas.length === 1 ? "defensa encontrada" : "defensas encontradas"}
-            </p>
-          )}
         </div>
       )}
 
@@ -672,8 +593,8 @@ export const InventarioDefensasViewer = ({
               <span>Ficha de Visualização - Defensa</span>
               <div className="flex gap-2">
                 {onRegistrarIntervencao && (
-                  <Button
-                    variant="default"
+                  <Button 
+                    variant="default" 
                     size="sm"
                     onClick={() => {
                       onRegistrarIntervencao(selectedDefensa);
@@ -683,7 +604,11 @@ export const InventarioDefensasViewer = ({
                     Registrar Intervenção
                   </Button>
                 )}
-                <Button variant="ghost" size="sm" onClick={() => setSelectedDefensa(null)}>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setSelectedDefensa(null)}
+                >
                   Voltar
                 </Button>
               </div>
@@ -757,16 +682,16 @@ export const InventarioDefensasViewer = ({
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Latitude Inicial:</span>
                       <p className="text-sm">
-                        {(selectedDefensa as any).latitude_inicial
-                          ? (selectedDefensa as any).latitude_inicial.toFixed(6)
+                        {(selectedDefensa as any).latitude_inicial 
+                          ? (selectedDefensa as any).latitude_inicial.toFixed(6) 
                           : "-"}
                       </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Longitude Inicial:</span>
                       <p className="text-sm">
-                        {(selectedDefensa as any).longitude_inicial
-                          ? (selectedDefensa as any).longitude_inicial.toFixed(6)
+                        {(selectedDefensa as any).longitude_inicial 
+                          ? (selectedDefensa as any).longitude_inicial.toFixed(6) 
                           : "-"}
                       </p>
                     </div>
@@ -787,16 +712,16 @@ export const InventarioDefensasViewer = ({
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Latitude Final:</span>
                       <p className="text-sm">
-                        {(selectedDefensa as any).latitude_final
-                          ? (selectedDefensa as any).latitude_final.toFixed(6)
+                        {(selectedDefensa as any).latitude_final 
+                          ? (selectedDefensa as any).latitude_final.toFixed(6) 
                           : "-"}
                       </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Longitude Final:</span>
                       <p className="text-sm">
-                        {(selectedDefensa as any).longitude_final
-                          ? (selectedDefensa as any).longitude_final.toFixed(6)
+                        {(selectedDefensa as any).longitude_final 
+                          ? (selectedDefensa as any).longitude_final.toFixed(6) 
                           : "-"}
                       </p>
                     </div>
@@ -833,8 +758,7 @@ export const InventarioDefensasViewer = ({
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Nível Contenção EN1317:</span>
                       <p className="text-sm">
-                        {(selectedDefensa as any).nivel_contencao_en1317 &&
-                        (selectedDefensa as any).nivel_contencao_en1317 !== "Não se Aplica" ? (
+                        {(selectedDefensa as any).nivel_contencao_en1317 && (selectedDefensa as any).nivel_contencao_en1317 !== "Não se Aplica" ? (
                           (selectedDefensa as any).nivel_contencao_en1317
                         ) : (
                           <span className="text-muted-foreground italic">Não especificado no cadastro</span>
@@ -844,8 +768,7 @@ export const InventarioDefensasViewer = ({
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Nível Contenção NCHRP350:</span>
                       <p className="text-sm">
-                        {(selectedDefensa as any).nivel_contencao_nchrp350 &&
-                        (selectedDefensa as any).nivel_contencao_nchrp350 !== "Não se Aplica" ? (
+                        {(selectedDefensa as any).nivel_contencao_nchrp350 && (selectedDefensa as any).nivel_contencao_nchrp350 !== "Não se Aplica" ? (
                           (selectedDefensa as any).nivel_contencao_nchrp350
                         ) : (
                           <span className="text-muted-foreground italic">Não especificado no cadastro</span>
@@ -878,8 +801,7 @@ export const InventarioDefensasViewer = ({
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Geometria:</span>
                       <p className="text-sm">
-                        {(selectedDefensa as any).geometria &&
-                        (selectedDefensa as any).geometria !== "Não se Aplica" ? (
+                        {(selectedDefensa as any).geometria && (selectedDefensa as any).geometria !== "Não se Aplica" ? (
                           (selectedDefensa as any).geometria
                         ) : (
                           <span className="text-muted-foreground italic">Não especificado no cadastro</span>
@@ -917,9 +839,7 @@ export const InventarioDefensasViewer = ({
                       <p className="text-sm">{(selectedDefensa as any).distancia_pista_obstaculo_m || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">
-                        Dist. Face Defensa-Obstáculo (m):
-                      </span>
+                      <span className="text-sm font-medium text-muted-foreground">Dist. Face Defensa-Obstáculo (m):</span>
                       <p className="text-sm">{(selectedDefensa as any).distancia_face_defensa_obstaculo_m || "-"}</p>
                     </div>
                     <div>
@@ -939,9 +859,7 @@ export const InventarioDefensasViewer = ({
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Lâminas Inadequadas:</span>
-                      <p className="text-sm">
-                        {(selectedDefensa as any).adequacao_funcionalidade_laminas_inadequadas || "-"}
-                      </p>
+                      <p className="text-sm">{(selectedDefensa as any).adequacao_funcionalidade_laminas_inadequadas || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Adequação Terminais:</span>
@@ -949,9 +867,7 @@ export const InventarioDefensasViewer = ({
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Terminais Inadequados:</span>
-                      <p className="text-sm">
-                        {(selectedDefensa as any).adequacao_funcionalidade_terminais_inadequados || "-"}
-                      </p>
+                      <p className="text-sm">{(selectedDefensa as any).adequacao_funcionalidade_terminais_inadequados || "-"}</p>
                     </div>
                   </div>
                 </div>
@@ -972,7 +888,7 @@ export const InventarioDefensasViewer = ({
                   <h3 className="font-semibold mb-3">Data</h3>
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Data da Foto:</span>
-                    <p className="text-sm">{new Date(selectedDefensa.data_vistoria).toLocaleDateString("pt-BR")}</p>
+                    <p className="text-sm">{new Date(selectedDefensa.data_vistoria).toLocaleDateString('pt-BR')}</p>
                   </div>
                 </div>
               </TabsContent>
@@ -982,25 +898,29 @@ export const InventarioDefensasViewer = ({
                   {(() => {
                     const fotoUrl = (selectedDefensa as any).foto_url;
                     const linkFotografia = (selectedDefensa as any).link_fotografia;
-
+                    
                     // Se tem URL da foto no Supabase
                     if (fotoUrl && fotoUrl !== "HIPERLINK") {
                       return (
                         <>
                           <p className="text-muted-foreground mb-4">Foto da defensa:</p>
-                          <img src={fotoUrl} alt="Foto da defensa" className="mx-auto max-w-full rounded-lg" />
+                          <img 
+                            src={fotoUrl} 
+                            alt="Foto da defensa" 
+                            className="mx-auto max-w-full rounded-lg"
+                          />
                         </>
                       );
                     }
-
+                    
                     // Se tem link externo
-                    if (linkFotografia && linkFotografia !== "HIPERLINK" && linkFotografia.startsWith("http")) {
+                    if (linkFotografia && linkFotografia !== "HIPERLINK" && linkFotografia.startsWith('http')) {
                       return (
                         <>
                           <p className="text-muted-foreground mb-4">Foto disponível via link externo:</p>
-                          <a
-                            href={linkFotografia}
-                            target="_blank"
+                          <a 
+                            href={linkFotografia} 
+                            target="_blank" 
                             rel="noopener noreferrer"
                             className="text-primary underline hover:text-primary/80"
                           >
@@ -1009,14 +929,13 @@ export const InventarioDefensasViewer = ({
                         </>
                       );
                     }
-
+                    
                     // Nenhuma foto disponível
                     return (
                       <div className="text-center">
                         <p className="text-muted-foreground mb-2">Nenhuma foto disponível</p>
                         <p className="text-sm text-muted-foreground/70">
-                          As fotos devem ser importadas junto com a planilha ou os links devem estar preenchidos
-                          corretamente no Excel
+                          As fotos devem ser importadas junto com a planilha ou os links devem estar preenchidos corretamente no Excel
                         </p>
                       </div>
                     );
@@ -1037,9 +956,7 @@ export const InventarioDefensasViewer = ({
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <span className="text-sm font-medium text-muted-foreground">Data:</span>
-                            <p className="text-sm">
-                              {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
-                            </p>
+                            <p className="text-sm">{new Date(intervencao.data_intervencao).toLocaleDateString('pt-BR')}</p>
                           </div>
                           <div>
                             <span className="text-sm font-medium text-muted-foreground">Motivo:</span>
@@ -1066,7 +983,7 @@ export const InventarioDefensasViewer = ({
                           {intervencao.necessita_intervencao !== undefined && (
                             <div>
                               <span className="text-sm font-medium text-muted-foreground">Necessita Intervenção:</span>
-                              <p className="text-sm">{intervencao.necessita_intervencao ? "Sim" : "Não"}</p>
+                              <p className="text-sm">{intervencao.necessita_intervencao ? 'Sim' : 'Não'}</p>
                             </div>
                           )}
                           {intervencao.nivel_risco && (

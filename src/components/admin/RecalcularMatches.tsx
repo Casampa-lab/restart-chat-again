@@ -385,9 +385,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
       lote_id: necessidade.lote_id,
       rodovia_id: necessidade.rodovia_id,
       data_vistoria: new Date().toISOString().split("T")[0],
-      origem: "necessidade", // ✅ ROXO - Criado por reconciliação
-      ativo: true,
-      modificado_por_intervencao: false, // Reconciliação NÃO é intervenção
+      origem: "necessidade_campo",
+      modificado_por_intervencao: true,
       data_ultima_modificacao: new Date().toISOString(),
     };
 
@@ -408,8 +407,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           espessura_cm: necessidade.espessura_cm,
           material: necessidade.material,
           snv: necessidade.snv,
-          latitude_inicial: necessidade.latitude_inicial,
-          longitude_inicial: necessidade.longitude_inicial,
+          latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
+          longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
           latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
@@ -426,8 +425,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           lado: necessidade.lado,
           local_implantacao: necessidade.local_implantacao,
           snv: necessidade.snv,
-          latitude_inicial: necessidade.latitude_inicial,
-          longitude_inicial: necessidade.longitude_inicial,
+          latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
+          longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
           latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
@@ -445,8 +444,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           espacamento_m: necessidade.espacamento_m,
           extensao_km: necessidade.extensao_km,
           snv: necessidade.snv,
-          latitude_inicial: necessidade.latitude_inicial,
-          longitude_inicial: necessidade.longitude_inicial,
+          latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
+          longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
           latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
@@ -465,8 +464,8 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           especificacao_obstaculo_fixo: necessidade.especificacao_obstaculo_fixo,
           geometria: necessidade.geometria,
           snv: necessidade.snv,
-          latitude_inicial: necessidade.latitude_inicial,
-          longitude_inicial: necessidade.longitude_inicial,
+          latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
+          longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
           latitude_final: necessidade.latitude_final, // ✅ COORDENADA FINAL
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
@@ -475,6 +474,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
         novoElemento = {
           ...baseData,
           km_inicial: necessidade.km_inicial,
+          km_final: necessidade.km_final,
           sigla: necessidade.sigla,
           tipo_inscricao: necessidade.tipo_inscricao,
           cor: necessidade.cor,
@@ -483,14 +483,14 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           espessura_mm: necessidade.espessura_mm,
           material_utilizado: necessidade.material_utilizado,
           snv: necessidade.snv,
-          latitude_inicial: necessidade.latitude,
-          longitude_inicial: necessidade.longitude,
+          latitude: necessidade.latitude, // ✅ COORDENADA
+          longitude: necessidade.longitude, // ✅ COORDENADA
         };
         break;
       case "placas": // ELEMENTO PONTUAL
         novoElemento = {
           ...baseData,
-          km_inicial: necessidade.km,
+          km: necessidade.km,
           codigo: necessidade.codigo,
           tipo: necessidade.tipo_placa,
           modelo: necessidade.codigo,
@@ -500,20 +500,20 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           dimensoes_mm: necessidade.dimensoes_mm,
           posicao: necessidade.posicao,
           snv: necessidade.snv,
-          latitude_inicial: necessidade.latitude,
-          longitude_inicial: necessidade.longitude,
+          latitude: necessidade.latitude, // ✅ COORDENADA INICIAL
+          longitude: necessidade.longitude, // ✅ COORDENADA INICIAL
         };
         break;
       case "porticos": // ELEMENTO PONTUAL
         novoElemento = {
           ...baseData,
-          km_inicial: necessidade.km,
+          km: necessidade.km,
           tipo: necessidade.tipo,
           vao_horizontal_m: necessidade.vao_horizontal_m,
           altura_livre_m: necessidade.altura_livre_m,
           snv: necessidade.snv,
-          latitude_inicial: necessidade.latitude,
-          longitude_inicial: necessidade.longitude,
+          latitude: necessidade.latitude, // ✅ COORDENADA INICIAL
+          longitude: necessidade.longitude, // ✅ COORDENADA INICIAL
         };
         break;
     }

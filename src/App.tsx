@@ -44,7 +44,6 @@ import AuditoriaInventario from "./pages/AuditoriaInventario";
 import InventarioDinamico from "./pages/InventarioDinamico";
 import ValidacaoFichasVerificacao from "./pages/ValidacaoFichasVerificacao";
 import RegistrarNC from "./pages/RegistrarNC";
-import TestarContadores from "./pages/TestarContadores";
 
 const queryClient = new QueryClient();
 
@@ -93,7 +92,6 @@ const App = () => (
         <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
         <Route path="/relatorio-medicao" element={<RelatorioMedicao />} />
         <Route path="/teste-pdf" element={<TestePDF />} />
-        <Route path="/testar-contadores" element={<TestarContadores />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ChatAssistant />

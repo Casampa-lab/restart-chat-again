@@ -9,33 +9,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import {
-  Search,
-  MapPin,
-  Eye,
-  Calendar,
-  Library,
-  FileText,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Plus,
-  ClipboardList,
-  AlertCircle,
-  Filter,
-  CheckCircle,
-  RefreshCw,
-} from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
-import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { useInventarioContadores } from "@/hooks/useInventarioContadores";
-import { ContadoresBadges } from "@/components/ContadoresBadges";
 
 // Component to show reconciliation status badge
 function StatusReconciliacaoBadge({ status }: { status: string | null }) {
@@ -45,18 +26,18 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
     pendente_aprovacao: {
       color: "bg-yellow-100 text-yellow-800 border-yellow-300",
       icon: "🟡",
-      label: "Aguardando Coordenação",
+      label: "Aguardando Coordenação"
     },
     aprovado: {
       color: "bg-green-100 text-green-800 border-green-300",
       icon: "🟢",
-      label: "Substituição Aprovada",
+      label: "Substituição Aprovada"
     },
     rejeitado: {
       color: "bg-red-100 text-red-800 border-red-300",
       icon: "🔴",
-      label: "Mantido como Implantação",
-    },
+      label: "Mantido como Implantação"
+    }
   };
 
   const item = config[status as keyof typeof config];
@@ -66,7 +47,9 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          <Badge className={`${item.color} text-xs border`}>{item.icon}</Badge>
+          <Badge className={`${item.color} text-xs border`}>
+            {item.icon}
+          </Badge>
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-xs">{item.label}</p>
@@ -103,7 +86,11 @@ interface InventarioTachasViewerProps {
   onRegistrarIntervencao?: (tachaData: any) => void;
 }
 
-export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervencao }: InventarioTachasViewerProps) {
+export function InventarioTachasViewer({ 
+  loteId, 
+  rodoviaId,
+  onRegistrarIntervencao 
+}: InventarioTachasViewerProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchLat, setSearchLat] = useState("");
@@ -117,14 +104,6 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
-
-  // Hook para contadores de inventário
-  const {
-    contadores,
-    marcoZeroExiste,
-    loading: loadingContadores,
-    refetch: refetchContadores,
-  } = useInventarioContadores("ficha_tachas", loteId, rodoviaId);
 
   // Buscar tolerância GPS da rodovia
   const { data: rodoviaConfig } = useQuery({
@@ -143,21 +122,6 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
 
   const toleranciaMetros = rodoviaConfig?.tolerancia_match_metros || 50;
 
-  // Buscar reconciliações pendentes para marcar com bolinha amarela
-  const { data: reconciliacoesPendentesSet } = useQuery({
-    queryKey: ['reconciliacoes-pendentes-tachas', loteId, rodoviaId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('reconciliacoes')
-        .select('cadastro_id')
-        .eq('tipo_elemento', 'tachas')
-        .eq('reconciliado', false)
-        .eq('status', 'pendente_aprovacao');
-      return new Set(data?.map(r => r.cadastro_id) || []);
-    },
-    enabled: !!loteId && !!rodoviaId,
-  });
-
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
     const φ1 = (lat1 * Math.PI) / 180;
@@ -165,7 +129,9 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
     const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
@@ -180,21 +146,17 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null);
-
+      
       if (error) throw error;
-
+      
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
         const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
-        if (reconciliacao?.status === "pendente_aprovacao") {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-            distancia_match_metros: reconciliacao.distancia_match_metros,
-          });
+        if (reconciliacao?.status === 'pendente_aprovacao') {
+          map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
         }
       });
-
+      
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
@@ -203,19 +165,21 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   });
 
   // Contar matches pendentes de reconciliação
-  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter((nec) => !nec.reconciliado).length;
+  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter(
+    nec => !nec.reconciliado
+  ).length;
 
   // Contar TODAS as necessidades com match (não apenas divergências)
   const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
   // Debug: Log dos contadores
-  console.log("🔍 [TACHAS] Debug Banner:", {
+  console.log('🔍 [TACHAS] Debug Banner:', {
     loteId,
     rodoviaId,
     necessidadesMapSize: necessidadesMap?.size,
     totalMatchesProcessados,
     matchesPendentes,
-    necesssidadesArray: Array.from(necessidadesMap?.values() || []),
+    necesssidadesArray: Array.from(necessidadesMap?.values() || [])
   });
 
   const { data: tachas, isLoading } = useQuery({
@@ -230,27 +194,26 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
 
       if (searchTerm) {
         query = query.or(
-          `snv.ilike.%${searchTerm}%,corpo.ilike.%${searchTerm}%,cor_refletivo.ilike.%${searchTerm}%,local_implantacao.ilike.%${searchTerm}%,descricao.ilike.%${searchTerm}%`,
+          `snv.ilike.%${searchTerm}%,corpo.ilike.%${searchTerm}%,cor_refletivo.ilike.%${searchTerm}%,local_implantacao.ilike.%${searchTerm}%,descricao.ilike.%${searchTerm}%`
         );
       }
 
       const { data, error } = await query;
       if (error) throw error;
-
+      
       let filteredData = data as FichaTacha[];
 
       if (searchLat && searchLng) {
         const lat = parseFloat(searchLat);
         const lng = parseFloat(searchLng);
-
+        
         if (!isNaN(lat) && !isNaN(lng)) {
           filteredData = filteredData
             .map((tacha) => ({
               ...tacha,
-              distance:
-                tacha.latitude_inicial && tacha.longitude_inicial
-                  ? calculateDistance(lat, lng, tacha.latitude_inicial, tacha.longitude_inicial)
-                  : Infinity,
+              distance: tacha.latitude_inicial && tacha.longitude_inicial
+                ? calculateDistance(lat, lng, tacha.latitude_inicial, tacha.longitude_inicial)
+                : Infinity,
             }))
             .filter((tacha) => tacha.distance <= toleranciaMetros)
             .sort((a, b) => a.distance - b.distance);
@@ -263,12 +226,11 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     },
   });
 
-  const filteredTachas =
-    tachas?.filter((tacha) => {
-      if (!showOnlyPendentes) return true;
-      const nec = necessidadesMap?.get(tacha.id);
-      return nec && !nec.reconciliado;
-    }) || [];
+  const filteredTachas = tachas?.filter(tacha => {
+    if (!showOnlyPendentes) return true;
+    const nec = necessidadesMap?.get(tacha.id);
+    return nec && !nec.reconciliado;
+  }) || [];
 
   const handleReconciliar = async () => {
     await refetchNecessidades();
@@ -279,27 +241,27 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   };
 
   // Função para ordenar dados
-  const sortedTachas = filteredTachas
-    ? [...filteredTachas].sort((a, b) => {
-        if (!sortColumn) return 0;
-
-        let aVal: any = a[sortColumn as keyof FichaTacha];
-        let bVal: any = b[sortColumn as keyof FichaTacha];
-
-        if (aVal == null) aVal = "";
-        if (bVal == null) bVal = "";
-
-        if (typeof aVal === "string" && typeof bVal === "string") {
-          return sortDirection === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-        }
-
-        if (typeof aVal === "number" && typeof bVal === "number") {
-          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
-        }
-
-        return 0;
-      })
-    : [];
+  const sortedTachas = filteredTachas ? [...filteredTachas].sort((a, b) => {
+    if (!sortColumn) return 0;
+    
+    let aVal: any = a[sortColumn as keyof FichaTacha];
+    let bVal: any = b[sortColumn as keyof FichaTacha];
+    
+    if (aVal == null) aVal = "";
+    if (bVal == null) bVal = "";
+    
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return sortDirection === "asc" 
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+    }
+    
+    return 0;
+  }) : [];
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -312,7 +274,9 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
 
   const SortIcon = ({ column }: { column: string }) => {
     if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3 ml-1" />;
-    return sortDirection === "asc" ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />;
+    return sortDirection === "asc" 
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
   };
 
   return (
@@ -320,22 +284,10 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-2">
-              <CardTitle className="flex items-center gap-2">
-                <Library className="h-5 w-5" />
-                Inventário de Tachas
-              </CardTitle>
-              <ContadoresBadges
-                cadastroInicialAtivo={contadores.cadastro_inicial_ativo}
-                criadosNecessidadeAtivo={contadores.criados_necessidade_ativo}
-                totalAtivo={contadores.total_ativo}
-                cadastroInicialInativo={contadores.cadastro_inicial_inativo}
-                totalInativo={contadores.total_inativo}
-                marcoZeroExiste={marcoZeroExiste}
-                loading={loadingContadores}
-                onRefresh={refetchContadores}
-              />
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <Library className="h-5 w-5" />
+              Inventário de Tachas
+            </CardTitle>
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -355,16 +307,21 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                 <ClipboardList className="h-4 w-4" />
                 Ver Intervenções
               </Button>
-              <Button variant="default" size="sm" onClick={() => setShowRegistrarNaoCadastrado(true)} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Item Novo
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setShowRegistrarNaoCadastrado(true)}
+                className="gap-2"
+              >
+              <Plus className="h-4 w-4" />
+              Item Novo
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {totalMatchesProcessados > 0 &&
-            (matchesPendentes === 0 ? (
+          {totalMatchesProcessados > 0 && (
+            matchesPendentes === 0 ? (
               // Estado OK - Sem divergências
               <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
                 <div className="flex items-center gap-4">
@@ -374,7 +331,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <div>
                     <div className="font-bold text-base flex items-center gap-2">
                       <span className="text-2xl font-extrabold text-green-600">{totalMatchesProcessados}</span>
-                      <span>{totalMatchesProcessados === 1 ? "item verificado" : "itens verificados"}</span>
+                      <span>{totalMatchesProcessados === 1 ? 'item verificado' : 'itens verificados'}</span>
                     </div>
                     <div className="text-sm text-muted-foreground mt-0.5">
                       ✅ Inventário OK - Projeto e Sistema em conformidade
@@ -414,10 +371,10 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     <AlertCircle className="h-6 w-6 text-warning" />
                   </div>
                   <div>
-                    <div className="font-bold text-base flex items-center gap-2">
-                      <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
-                      <span>{matchesPendentes === 1 ? "match a reconciliar" : "matches a reconciliar"}</span>
-                    </div>
+                  <div className="font-bold text-base flex items-center gap-2">
+                    <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
+                    <span>{matchesPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
+                  </div>
                     <div className="text-sm text-muted-foreground mt-0.5">
                       🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
                     </div>
@@ -435,7 +392,8 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   </Label>
                 </div>
               </div>
-            ))}
+            )
+          )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -463,7 +421,9 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
           </div>
 
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Carregando inventário...</div>
+            <div className="text-center py-8 text-muted-foreground">
+              Carregando inventário...
+            </div>
           ) : sortedTachas && sortedTachas.length > 0 ? (
             <div className="border rounded-lg overflow-hidden">
               <div className="max-h-[600px] overflow-y-auto">
@@ -471,7 +431,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
                       {searchLat && searchLng && <TableHead className="text-center">Distância</TableHead>}
-                      <TableHead
+                      <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("snv")}
                       >
@@ -480,7 +440,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="snv" />
                         </div>
                       </TableHead>
-                      <TableHead
+                      <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("descricao")}
                       >
@@ -489,7 +449,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="descricao" />
                         </div>
                       </TableHead>
-                      <TableHead
+                      <TableHead 
                         className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("corpo")}
                       >
@@ -498,7 +458,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="corpo" />
                         </div>
                       </TableHead>
-                      <TableHead
+                      <TableHead 
                         className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("refletivo")}
                       >
@@ -507,7 +467,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="refletivo" />
                         </div>
                       </TableHead>
-                      <TableHead
+                      <TableHead 
                         className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("cor_refletivo")}
                       >
@@ -516,7 +476,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="cor_refletivo" />
                         </div>
                       </TableHead>
-                      <TableHead
+                      <TableHead 
                         className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("km_inicial")}
                       >
@@ -525,7 +485,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="km_inicial" />
                         </div>
                       </TableHead>
-                      <TableHead
+                      <TableHead 
                         className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("extensao_km")}
                       >
@@ -534,7 +494,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="extensao_km" />
                         </div>
                       </TableHead>
-                      <TableHead
+                      <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("local_implantacao")}
                       >
@@ -543,7 +503,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="local_implantacao" />
                         </div>
                       </TableHead>
-                      <TableHead
+                      <TableHead 
                         className="text-center cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("quantidade")}
                       >
@@ -552,7 +512,6 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="quantidade" />
                         </div>
                       </TableHead>
-                      <TableHead className="text-center">Origem</TableHead>
                       <TableHead>Projeto</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -563,29 +522,23 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       <TableRow key={tacha.id} className="hover:bg-muted/50">
                         {searchLat && searchLng && (
                           <TableCell className="text-center">
-                            <Badge variant="secondary">{(tacha as any).distance?.toFixed(1)}m</Badge>
+                            <Badge variant="secondary">
+                              {(tacha as any).distance?.toFixed(1)}m
+                            </Badge>
                           </TableCell>
                         )}
                         <TableCell className="font-mono text-sm">{tacha.snv || "-"}</TableCell>
                         <TableCell>
-                          {tacha.descricao || (
-                            <span className="text-muted-foreground italic text-xs">Não informado</span>
-                          )}
+                          {tacha.descricao || <span className="text-muted-foreground italic text-xs">Não informado</span>}
                         </TableCell>
                         <TableCell className="text-center">
-                          {tacha.corpo || (
-                            <span className="text-muted-foreground italic text-xs">Não especificado</span>
-                          )}
+                          {tacha.corpo || <span className="text-muted-foreground italic text-xs">Não especificado</span>}
                         </TableCell>
                         <TableCell className="text-center">
-                          {tacha.refletivo || (
-                            <span className="text-muted-foreground italic text-xs">Não especificado</span>
-                          )}
+                          {tacha.refletivo || <span className="text-muted-foreground italic text-xs">Não especificado</span>}
                         </TableCell>
                         <TableCell className="text-center">
-                          {tacha.cor_refletivo || (
-                            <span className="text-muted-foreground italic text-xs">Não especificado</span>
-                          )}
+                          {tacha.cor_refletivo || <span className="text-muted-foreground italic text-xs">Não especificado</span>}
                         </TableCell>
                         <TableCell className="text-center">{tacha.km_inicial.toFixed(2)}</TableCell>
                         <TableCell className="text-center">{tacha.extensao_km?.toFixed(2) || "-"}</TableCell>
@@ -598,21 +551,10 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                         </TableCell>
                         <TableCell className="text-center">{tacha.quantidade}</TableCell>
                         <TableCell className="text-center">
-                          <TipoOrigemBadge 
-                            tipoOrigem={
-                              (tacha as any).origem === 'cadastro_inicial' && reconciliacoesPendentesSet?.has(tacha.id)
-                                ? 'aguardando_reconciliacao'
-                                : (tacha as any).origem || 'cadastro_inicial'
-                            }
-                            modificadoPorIntervencao={(tacha as any).modificado_por_intervencao}
-                            showLabel={false}
-                          />
-                        </TableCell>
-                        <TableCell className="text-center">
                           {(() => {
                             const necessidade = necessidadesMap?.get(tacha.id);
                             return necessidade ? (
-                              <NecessidadeBadge
+                              <NecessidadeBadge 
                                 necessidade={{
                                   id: necessidade.id,
                                   servico: necessidade.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
@@ -623,11 +565,11 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                   solucao_planilha: necessidade.solucao_planilha,
                                   servico_inferido: necessidade.servico_inferido,
                                 }}
-                                tipo="tachas"
+                                tipo="tachas" 
                               />
                             ) : (
                               <Badge variant="outline" className="text-muted-foreground text-xs">
-                                Sem match automático
+                                Sem previsão
                               </Badge>
                             );
                           })()}
@@ -637,10 +579,12 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                             {(() => {
                               const necessidade = necessidadesMap?.get(tacha.id);
                               if (!necessidade) return null;
-
+                              
                               return (
                                 <>
-                                  <StatusReconciliacaoBadge status={necessidade.status_reconciliacao} />
+                                  <StatusReconciliacaoBadge 
+                                    status={necessidade.status_reconciliacao} 
+                                  />
                                   {necessidade && !necessidade.reconciliado && (
                                     <Button
                                       variant="outline"
@@ -725,8 +669,8 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
               <span>Detalhes da Tacha</span>
               <div className="flex gap-2">
                 {onRegistrarIntervencao && (
-                  <Button
-                    variant="default"
+                  <Button 
+                    variant="default" 
                     size="sm"
                     onClick={() => {
                       onRegistrarIntervencao(selectedTacha);
@@ -736,7 +680,11 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     Registrar Intervenção
                   </Button>
                 )}
-                <Button variant="ghost" size="sm" onClick={() => setSelectedTacha(null)}>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setSelectedTacha(null)}
+                >
                   Voltar
                 </Button>
               </div>
@@ -758,7 +706,9 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <div className="grid grid-cols-4 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">BR:</span>
-                      <p className="text-sm">{selectedTacha.snv ? `BR-${selectedTacha.snv.split("BMG")[0]}` : "-"}</p>
+                      <p className="text-sm">
+                        {selectedTacha.snv ? `BR-${selectedTacha.snv.split('BMG')[0]}` : "-"}
+                      </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">SNV:</span>
@@ -788,7 +738,7 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       <p className="text-sm">{selectedTacha.cor_refletivo || "Não informado"}</p>
                     </div>
                   </div>
-
+                  
                   {selectedTacha.descricao && (
                     <div className="mt-4 pt-4 border-t">
                       <span className="text-sm font-medium text-muted-foreground">Descrição:</span>
@@ -878,7 +828,9 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     <Calendar className="h-4 w-4" />
                     Data da Vistoria
                   </h3>
-                  <p className="text-sm">{new Date(selectedTacha.data_vistoria).toLocaleDateString("pt-BR")}</p>
+                  <p className="text-sm">
+                    {new Date(selectedTacha.data_vistoria).toLocaleDateString("pt-BR")}
+                  </p>
                 </div>
               </TabsContent>
 
@@ -896,57 +848,37 @@ export function InventarioTachasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <div className="space-y-4">
                     {intervencoes.map((intervencao) => (
                       <div key={intervencao.id} className="border rounded-lg p-4 space-y-2">
-                        <p>
-                          <strong>Data:</strong> {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
-                        </p>
-                        <p>
-                          <strong>Motivo:</strong> {intervencao.motivo}
-                        </p>
+                        <p><strong>Data:</strong> {new Date(intervencao.data_intervencao).toLocaleDateString('pt-BR')}</p>
+                        <p><strong>Motivo:</strong> {intervencao.motivo}</p>
                         {intervencao.quantidade && (
-                          <p>
-                            <strong>Quantidade:</strong> {intervencao.quantidade}
-                          </p>
+                          <p><strong>Quantidade:</strong> {intervencao.quantidade}</p>
                         )}
                         {intervencao.corpo && (
-                          <p>
-                            <strong>Corpo:</strong> {intervencao.corpo}
-                          </p>
+                          <p><strong>Corpo:</strong> {intervencao.corpo}</p>
                         )}
                         {intervencao.refletivo && (
-                          <p>
-                            <strong>Descrição:</strong> {intervencao.refletivo}
-                          </p>
+                          <p><strong>Descrição:</strong> {intervencao.refletivo}</p>
                         )}
                         {intervencao.tipo_refletivo && (
-                          <p>
-                            <strong>Tipo do Refletivo:</strong> {intervencao.tipo_refletivo}
-                          </p>
+                          <p><strong>Tipo do Refletivo:</strong> {intervencao.tipo_refletivo}</p>
                         )}
                         {intervencao.cor_refletivo && (
-                          <p>
-                            <strong>Cor do Refletivo:</strong> {intervencao.cor_refletivo}
-                          </p>
+                          <p><strong>Cor do Refletivo:</strong> {intervencao.cor_refletivo}</p>
                         )}
                         {intervencao.local_implantacao && (
-                          <p>
-                            <strong>Local de Implantação:</strong> {intervencao.local_implantacao}
-                          </p>
+                          <p><strong>Local de Implantação:</strong> {intervencao.local_implantacao}</p>
                         )}
                         {intervencao.descricao && (
-                          <p>
-                            <strong>Descrição:</strong> {intervencao.descricao}
-                          </p>
+                          <p><strong>Descrição:</strong> {intervencao.descricao}</p>
                         )}
                         {intervencao.observacao && (
-                          <p>
-                            <strong>Observações:</strong> {intervencao.observacao}
-                          </p>
+                          <p><strong>Observações:</strong> {intervencao.observacao}</p>
                         )}
                         {intervencao.foto_url && (
                           <div className="mt-2">
                             <strong>Foto:</strong>
                             <img
-                              src={supabase.storage.from("tachas").getPublicUrl(intervencao.foto_url).data.publicUrl}
+                              src={supabase.storage.from('tachas').getPublicUrl(intervencao.foto_url).data.publicUrl}
                               alt="Intervenção"
                               className="rounded-lg mt-2 max-w-sm"
                             />
