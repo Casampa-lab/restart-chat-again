@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
+import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { useInventarioContadores } from "@/hooks/useInventarioContadores";
@@ -519,6 +520,9 @@ export const InventarioDefensasViewer = ({
                     Contenção
                   </div>
                 </TableHead>
+                <TableHead className="text-center w-[140px]">
+                  <div className="whitespace-normal leading-tight">Origem</div>
+                </TableHead>
                 <TableHead className="text-center">
                   <div className="whitespace-normal leading-tight">Projeto</div>
                 </TableHead>
@@ -540,6 +544,12 @@ export const InventarioDefensasViewer = ({
                   <TableCell className="text-center">{defensa.extensao_metros}</TableCell>
                   <TableCell className="text-center">{(defensa as any).quantidade_laminas || "-"}</TableCell>
                   <TableCell className="text-center">{(defensa as any).nivel_contencao_en1317 || "-"}</TableCell>
+                  <TableCell className="text-center">
+                    <TipoOrigemBadge 
+                      tipoOrigem={(defensa as any).origem || 'cadastro_inicial'}
+                      showLabel={true}
+                    />
+                  </TableCell>
                   <TableCell className="text-center">
                     {(() => {
                       const necessidade = necessidadesMap?.get(defensa.id);
