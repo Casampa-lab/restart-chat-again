@@ -26,7 +26,6 @@ interface IntervencaoInscricao {
   id: string;
   data_intervencao: string;
   km_inicial: number | null;
-  km_final: number | null;
   motivo: string;
   tipo_inscricao: string | null;
   cor: string | null;
@@ -40,7 +39,6 @@ interface IntervencaoInscricao {
     lote_id: string;
     rodovia_id: string;
     km_inicial: number;
-    km_final: number;
   } | null;
 }
 
@@ -70,7 +68,7 @@ const IntervencoesInscricoesContent = () => {
           if (int.ficha_inscricoes_id) {
             const { data: inscricao } = await supabase
               .from("ficha_inscricoes")
-              .select("id, lote_id, rodovia_id, km_inicial, km_final")
+              .select("id, lote_id, rodovia_id, km_inicial")
               .eq("id", int.ficha_inscricoes_id)
               .single();
             return { ...int, ficha_inscricoes: inscricao };
@@ -194,7 +192,7 @@ const IntervencoesInscricoesContent = () => {
                     <TableHead>Data</TableHead>
                     <TableHead>Lote</TableHead>
                     <TableHead>Rodovia</TableHead>
-                    <TableHead>Trecho (km)</TableHead>
+                    <TableHead>KM</TableHead>
                     <TableHead>Motivo</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead>Cor</TableHead>
@@ -206,8 +204,7 @@ const IntervencoesInscricoesContent = () => {
                   {filteredIntervencoes.map((int) => {
                     const loteId = int.ficha_inscricoes?.lote_id || "";
                     const rodoviaid = int.ficha_inscricoes?.rodovia_id || "";
-                    const kmInicial = int.km_inicial || int.ficha_inscricoes?.km_inicial || 0;
-                    const kmFinal = int.km_final || int.ficha_inscricoes?.km_final || 0;
+                    const km = int.km_inicial || int.ficha_inscricoes?.km_inicial || 0;
                     return (
                       <TableRow key={int.id}>
                         <TableCell>
@@ -222,7 +219,7 @@ const IntervencoesInscricoesContent = () => {
                         <TableCell>{format(new Date(int.data_intervencao), "dd/MM/yyyy")}</TableCell>
                         <TableCell>{lotes[loteId] || "-"}</TableCell>
                         <TableCell>{rodovias[rodoviaid] || "-"}</TableCell>
-                        <TableCell>{kmInicial.toFixed(3)} - {kmFinal.toFixed(3)}</TableCell>
+                        <TableCell>{km.toFixed(3)}</TableCell>
                         <TableCell>{int.motivo}</TableCell>
                         <TableCell>{int.tipo_inscricao || "-"}</TableCell>
                         <TableCell>{int.cor || "-"}</TableCell>

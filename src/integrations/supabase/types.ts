@@ -920,11 +920,8 @@ export type Database = {
           espessura_mm: number | null
           fotos_urls: string[] | null
           id: string
-          km_final: number | null
           km_inicial: number | null
-          latitude_final: number | null
           latitude_inicial: number | null
-          longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
           material_utilizado: string | null
@@ -954,11 +951,8 @@ export type Database = {
           espessura_mm?: number | null
           fotos_urls?: string[] | null
           id?: string
-          km_final?: number | null
           km_inicial?: number | null
-          latitude_final?: number | null
           latitude_inicial?: number | null
-          longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
           material_utilizado?: string | null
@@ -988,11 +982,8 @@ export type Database = {
           espessura_mm?: number | null
           fotos_urls?: string[] | null
           id?: string
-          km_final?: number | null
           km_inicial?: number | null
-          latitude_final?: number | null
           latitude_inicial?: number | null
-          longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
           material_utilizado?: string | null
@@ -1092,7 +1083,6 @@ export type Database = {
           fotos_urls: string[] | null
           id: string
           justificativa_fora_plano: string | null
-          km_final: number | null
           km_inicial: number | null
           latitude: number | null
           longitude: number | null
@@ -1123,7 +1113,6 @@ export type Database = {
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
-          km_final?: number | null
           km_inicial?: number | null
           latitude?: number | null
           longitude?: number | null
@@ -1154,7 +1143,6 @@ export type Database = {
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
-          km_final?: number | null
           km_inicial?: number | null
           latitude?: number | null
           longitude?: number | null

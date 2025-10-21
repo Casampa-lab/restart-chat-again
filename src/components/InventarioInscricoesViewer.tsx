@@ -63,11 +63,8 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
 interface FichaInscricao {
   id: string;
   km_inicial: number | null;
-  km_final: number | null;
   latitude_inicial: number | null;
   longitude_inicial: number | null;
-  latitude_final: number | null;
-  longitude_final: number | null;
   data_vistoria: string;
   tipo_inscricao: string;
   cor: string;
@@ -726,32 +723,6 @@ export function InventarioInscricoesViewer({
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">Longitude:</span>
                           <p className="text-sm font-mono text-xs">{selectedInscricao.longitude_inicial.toFixed(6)}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Localização Final */}
-                  <div className="border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3 flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Localização Final
-                    </h3>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">km Final:</span>
-                        <p className="text-sm">{selectedInscricao.km_final?.toFixed(2) || "-"}</p>
-                      </div>
-                      {selectedInscricao.latitude_final && (
-                        <div>
-                          <span className="text-sm font-medium text-muted-foreground">Latitude:</span>
-                          <p className="text-sm font-mono text-xs">{selectedInscricao.latitude_final.toFixed(6)}</p>
-                        </div>
-                      )}
-                      {selectedInscricao.longitude_final && (
-                        <div>
-                          <span className="text-sm font-medium text-muted-foreground">Longitude:</span>
-                          <p className="text-sm font-mono text-xs">{selectedInscricao.longitude_final.toFixed(6)}</p>
                         </div>
                       )}
                     </div>
