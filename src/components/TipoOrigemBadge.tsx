@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import { Wrench, HardHat, Package, Cpu, Pencil } from "lucide-react";
 
 interface TipoOrigemBadgeProps {
   tipoOrigem?: string;
@@ -16,57 +15,67 @@ export function TipoOrigemBadge({
 }: TipoOrigemBadgeProps) {
   // Se foi modificado por intervenção, mostrar badge específico
   if (modificadoPorIntervencao) {
+    if (!showLabel) {
+      return (
+        <div className={`flex items-center justify-center ${className}`}>
+          <svg width="12" height="12" viewBox="0 0 12 12">
+            <circle cx="6" cy="6" r="5" className="fill-orange-600" />
+          </svg>
+        </div>
+      );
+    }
     return (
       <Badge variant="outline" className={`border-orange-500 text-orange-700 ${className}`}>
-        <Pencil className="h-3 w-3 mr-1" />
-        {showLabel && "Modificado"}
+        <svg width="12" height="12" viewBox="0 0 12 12" className="mr-1">
+          <circle cx="6" cy="6" r="5" className="fill-orange-600" />
+        </svg>
+        Modificado
       </Badge>
     );
   }
 
   const configs = {
     cadastro_inicial: {
-      icon: Package,
       label: "Cadastro Inicial",
       variant: "secondary" as const,
-      color: "text-muted-foreground",
+      color: "fill-muted-foreground",
     },
     execucao: {
-      icon: HardHat,
       label: "Execução",
       variant: "default" as const,
-      color: "text-green-600",
+      color: "fill-green-600",
     },
     manutencao_pre_projeto: {
-      icon: Wrench,
       label: "Manutenção",
       variant: "outline" as const,
-      color: "text-yellow-600",
+      color: "fill-yellow-600",
     },
     sistema_match: {
-      icon: Cpu,
       label: "Sistema/Match",
       variant: "secondary" as const,
-      color: "text-blue-600",
+      color: "fill-blue-600",
     },
   };
 
   const config = configs[tipoOrigem as keyof typeof configs] || configs.cadastro_inicial;
-  const Icon = config.icon;
 
-  // Se não mostrar label, retornar apenas o ícone sem Badge
+  // Se não mostrar label, retornar apenas a bolinha
   if (!showLabel) {
     return (
       <div className={`flex items-center justify-center ${className}`}>
-        <Icon className={`h-5 w-5 ${config.color}`} />
+        <svg width="12" height="12" viewBox="0 0 12 12">
+          <circle cx="6" cy="6" r="5" className={config.color} />
+        </svg>
       </div>
     );
   }
 
-  // Com label, usar Badge normal
+  // Com label, usar Badge com bolinha
   return (
     <Badge variant={config.variant} className={className}>
-      <Icon className={`h-3 w-3 mr-1 ${config.color}`} />
+      <svg width="12" height="12" viewBox="0 0 12 12" className="mr-1">
+        <circle cx="6" cy="6" r="5" className={config.color} />
+      </svg>
       {config.label}
     </Badge>
   );
