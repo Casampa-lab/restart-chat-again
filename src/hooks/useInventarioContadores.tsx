@@ -5,6 +5,7 @@ interface Contadores {
   cadastro_inicial_ativo: number;
   criados_necessidade_ativo: number;
   total_ativo: number;
+  cadastro_inicial_inativo: number;
   total_inativo: number;
   total_geral: number;
 }
@@ -18,6 +19,7 @@ export function useInventarioContadores(
     cadastro_inicial_ativo: 0,
     criados_necessidade_ativo: 0,
     total_ativo: 0,
+    cadastro_inicial_inativo: 0,
     total_inativo: 0,
     total_geral: 0,
   });
@@ -72,6 +74,15 @@ export function useInventarioContadores(
         .eq('rodovia_id', rodoviaId)
         .eq('ativo', true);
 
+      // Cadastro inicial inativo (substituídos)
+      const { count: cadastroInativo } = await supabase
+        .from(tabela as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('lote_id', loteId)
+        .eq('rodovia_id', rodoviaId)
+        .eq('origem', 'cadastro_inicial')
+        .eq('ativo', false);
+
       // Total inativo
       const { count: totalInativo } = await supabase
         .from(tabela as any)
@@ -91,6 +102,7 @@ export function useInventarioContadores(
         cadastro_inicial_ativo: cadastroAtivo || 0,
         criados_necessidade_ativo: necessidadeAtivo || 0,
         total_ativo: totalAtivo || 0,
+        cadastro_inicial_inativo: cadastroInativo || 0,
         total_inativo: totalInativo || 0,
         total_geral: totalGeral || 0,
       });

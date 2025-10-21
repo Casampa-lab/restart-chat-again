@@ -6,6 +6,7 @@ interface ContadoresBadgesProps {
   cadastroInicialAtivo: number;
   criadosNecessidadeAtivo: number;
   totalAtivo: number;
+  cadastroInicialInativo: number;
   totalInativo: number;
   marcoZeroExiste: boolean;
   loading?: boolean;
@@ -16,6 +17,7 @@ export function ContadoresBadges({
   cadastroInicialAtivo,
   criadosNecessidadeAtivo,
   totalAtivo,
+  cadastroInicialInativo,
   totalInativo,
   marcoZeroExiste,
   loading = false,
@@ -45,10 +47,17 @@ export function ContadoresBadges({
         </Badge>
       )}
 
-      {/* Badge de inativos (sempre visível quando há inativos) */}
-      {totalInativo > 0 && (
+      {/* Badge de substituídos (cadastro inicial inativo) */}
+      {cadastroInicialInativo > 0 && (
         <Badge className="bg-gray-400 text-white px-3 py-1 hover:bg-gray-500">
-          ⚫ Inativos: {totalInativo}
+          ⚫ Substituídos: {cadastroInicialInativo}
+        </Badge>
+      )}
+
+      {/* Badge de inativos criados (origem='necessidade' + ativo=false) */}
+      {totalInativo > cadastroInicialInativo && (
+        <Badge className="bg-gray-500 text-white px-3 py-1 hover:bg-gray-600">
+          ⚫ Outros Inativos: {totalInativo - cadastroInicialInativo}
         </Badge>
       )}
 

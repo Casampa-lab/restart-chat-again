@@ -364,6 +364,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                 cadastroInicialAtivo={contadores.cadastro_inicial_ativo}
                 criadosNecessidadeAtivo={contadores.criados_necessidade_ativo}
                 totalAtivo={contadores.total_ativo}
+                cadastroInicialInativo={contadores.cadastro_inicial_inativo}
                 totalInativo={contadores.total_inativo}
                 marcoZeroExiste={marcoZeroExiste}
                 loading={loadingContadores}

@@ -269,13 +269,26 @@ export default function TestarContadores() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded-full bg-gray-400"></div>
-                  <strong>CINZA - Cadastro Inicial Inativo</strong>
+                  <strong>CINZA - Substituídos (Cadastro Inicial Inativo)</strong>
                 </div>
                 <p className="text-xs text-muted-foreground pl-6">
                   origem='cadastro_inicial' + ativo=false
                 </p>
                 <p className="text-xs text-muted-foreground pl-6">
-                  Elementos substituídos (não aparecem nos contadores principais)
+                  Elementos do cadastro inicial que foram substituídos por reconciliação
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-gray-500"></div>
+                  <strong>CINZA ESCURO - Outros Inativos</strong>
+                </div>
+                <p className="text-xs text-muted-foreground pl-6">
+                  origem='necessidade' + ativo=false
+                </p>
+                <p className="text-xs text-muted-foreground pl-6">
+                  Elementos criados por necessidade que foram desativados
                 </p>
               </div>
             </div>
