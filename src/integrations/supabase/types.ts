@@ -4844,6 +4844,54 @@ export type Database = {
           },
         ]
       }
+      param_tolerancias_match: {
+        Row: {
+          ativo: boolean | null
+          atributos_match: Json | null
+          classe: Database["public"]["Enums"]["classe_elemento_enum"]
+          created_at: string | null
+          descricao: string | null
+          id: string
+          tipo: Database["public"]["Enums"]["tipo_elemento_enum"]
+          tol_dist_m: number | null
+          tol_dist_substituicao_m: number | null
+          tol_overlap_amb_high: number | null
+          tol_overlap_amb_low: number | null
+          tol_overlap_match: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          atributos_match?: Json | null
+          classe: Database["public"]["Enums"]["classe_elemento_enum"]
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          tipo: Database["public"]["Enums"]["tipo_elemento_enum"]
+          tol_dist_m?: number | null
+          tol_dist_substituicao_m?: number | null
+          tol_overlap_amb_high?: number | null
+          tol_overlap_amb_low?: number | null
+          tol_overlap_match?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          atributos_match?: Json | null
+          classe?: Database["public"]["Enums"]["classe_elemento_enum"]
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          tipo?: Database["public"]["Enums"]["tipo_elemento_enum"]
+          tol_dist_m?: number | null
+          tol_dist_substituicao_m?: number | null
+          tol_overlap_amb_high?: number | null
+          tol_overlap_amb_low?: number | null
+          tol_overlap_match?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       planos: {
         Row: {
           ativo: boolean | null
@@ -5693,9 +5741,18 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "coordenador" | "tecnico"
+      classe_elemento_enum: "PONTUAL" | "LINEAR"
       plan_tier: "basico" | "profissional" | "enterprise"
       status_reconciliacao_enum: "pendente_aprovacao" | "aprovado" | "rejeitado"
       subscription_status: "ativa" | "suspensa" | "cancelada" | "trial"
+      tipo_elemento_enum:
+        | "PLACA"
+        | "PORTICO"
+        | "INSCRICAO"
+        | "MARCA_LONG"
+        | "TACHAS"
+        | "DEFENSA"
+        | "CILINDRO"
       tipo_elemento_reconciliacao:
         | "placas"
         | "defensas"
@@ -5832,6 +5889,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "coordenador", "tecnico"],
+      classe_elemento_enum: ["PONTUAL", "LINEAR"],
       plan_tier: ["basico", "profissional", "enterprise"],
       status_reconciliacao_enum: [
         "pendente_aprovacao",
@@ -5839,6 +5897,15 @@ export const Constants = {
         "rejeitado",
       ],
       subscription_status: ["ativa", "suspensa", "cancelada", "trial"],
+      tipo_elemento_enum: [
+        "PLACA",
+        "PORTICO",
+        "INSCRICAO",
+        "MARCA_LONG",
+        "TACHAS",
+        "DEFENSA",
+        "CILINDRO",
+      ],
       tipo_elemento_reconciliacao: [
         "placas",
         "defensas",
