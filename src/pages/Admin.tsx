@@ -32,6 +32,8 @@ import { DiagnosticoMatch } from "@/components/admin/DiagnosticoMatch";
 import { LimparFotosOrfas } from "@/components/admin/LimparFotosOrfas";
 import { SnvShapefileUploader } from "@/components/admin/SnvShapefileUploader";
 import { ResetDatabaseButton } from "@/components/admin/ResetDatabaseButton";
+import { ParametrosMatchManager } from "@/components/admin/ParametrosMatchManager";
+import { RelatorioMatching } from "@/components/admin/RelatorioMatching";
 
 import logoOperaVia from "@/assets/logo-operavia.png";
 
@@ -173,7 +175,7 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="supervisoras" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-7'}`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-10' : 'grid-cols-8'}`}>
             <TabsTrigger value="supervisoras">Supervisoras</TabsTrigger>
             <TabsTrigger value="usuarios">Usuários</TabsTrigger>
             <TabsTrigger value="empresas">Executoras</TabsTrigger>
@@ -181,6 +183,7 @@ const Admin = () => {
             <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
             <TabsTrigger value="inventario">Cadastro</TabsTrigger>
             <TabsTrigger value="necessidades">Projeto</TabsTrigger>
+            <TabsTrigger value="matching">Matching</TabsTrigger>
             {isAdmin && <TabsTrigger value="auditoria">Auditoria GPS</TabsTrigger>}
             {isAdmin && <TabsTrigger value="sistema" className="text-destructive">Sistema</TabsTrigger>}
           </TabsList>
@@ -356,6 +359,13 @@ const Admin = () => {
               <RemoverDuplicatasNecessidades />
               <RecalcularMatches loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
               <DeleteNecessidades loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="matching">
+            <div className="space-y-6">
+              <ParametrosMatchManager />
+              <RelatorioMatching rodoviaId={selectedRodoviaId} loteId={selectedLoteId} />
             </div>
           </TabsContent>
 
