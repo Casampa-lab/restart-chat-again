@@ -17,7 +17,7 @@ export function TipoOrigemBadge({
   if (modificadoPorIntervencao) {
     if (!showLabel) {
       return (
-        <div className={`flex items-center justify-center ${className}`}>
+        <div className={`inline-flex items-center justify-center ${className}`}>
           <svg width="12" height="12" viewBox="0 0 12 12">
             <circle cx="6" cy="6" r="5" className="fill-orange-600" />
           </svg>
@@ -72,7 +72,7 @@ export function TipoOrigemBadge({
   // Se não mostrar label, retornar apenas a bolinha
   if (!showLabel) {
     return (
-      <div className={`flex items-center justify-center ${className}`}>
+      <div className={`inline-flex items-center justify-center ${className}`}>
         <svg width="12" height="12" viewBox="0 0 12 12">
           <circle cx="6" cy="6" r="5" className={config.color} />
         </svg>

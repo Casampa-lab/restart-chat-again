@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
+import { OrigemReconciliacaoBadges } from "@/components/OrigemReconciliacaoBadges";
 import { ConsolidatedInventoryBadge } from "@/components/ConsolidatedInventoryBadge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GitCompare, TrendingUp, Database, FileText, ArrowLeft, Home, CheckCircle2 } from "lucide-react";
@@ -449,8 +450,8 @@ export default function InventarioDinamico() {
                             .map((item: any) => (
                               <TableRow key={item.id}>
                                 <TableCell>
-                                  <TipoOrigemBadge
-                                    tipoOrigem={item.tipo_origem}
+                                  <OrigemReconciliacaoBadges
+                                    origem={item.tipo_origem}
                                     modificadoPorIntervencao={item.modificado_por_intervencao}
                                     showLabel={false}
                                   />
