@@ -12,7 +12,25 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw } from "lucide-react";
+import {
+  Loader2,
+  Search,
+  Library,
+  Eye,
+  MapPin,
+  Calendar,
+  X,
+  FileText,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Plus,
+  ClipboardList,
+  AlertCircle,
+  Filter,
+  CheckCircle,
+  RefreshCw,
+} from "lucide-react";
 import { toast } from "sonner";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
@@ -29,18 +47,18 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
     pendente_aprovacao: {
       color: "bg-yellow-100 text-yellow-800 border-yellow-300",
       icon: "🟡",
-      label: "Aguardando Coordenação"
+      label: "Aguardando Coordenação",
     },
     aprovado: {
       color: "bg-green-100 text-green-800 border-green-300",
       icon: "🟢",
-      label: "Substituição Aprovada"
+      label: "Substituição Aprovada",
     },
     rejeitado: {
       color: "bg-red-100 text-red-800 border-red-300",
       icon: "🔴",
-      label: "Mantido como Implantação"
-    }
+      label: "Mantido como Implantação",
+    },
   };
 
   const item = config[status as keyof typeof config];
@@ -50,9 +68,7 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          <Badge className={`${item.color} text-xs border`}>
-            {item.icon}
-          </Badge>
+          <Badge className={`${item.color} text-xs border`}>{item.icon}</Badge>
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-xs">{item.label}</p>
@@ -98,7 +114,11 @@ interface InventarioCilindrosViewerProps {
   onRegistrarIntervencao?: (cilindroData: any) => void;
 }
 
-export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarIntervencao }: InventarioCilindrosViewerProps) {
+export function InventarioCilindrosViewer({
+  loteId,
+  rodoviaId,
+  onRegistrarIntervencao,
+}: InventarioCilindrosViewerProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
@@ -116,8 +136,12 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
 
   // Hook para contadores de inventário
-  const { contadores, marcoZeroExiste, loading: loadingContadores, refetch: refetchContadores } = 
-    useInventarioContadores('ficha_cilindros', loteId, rodoviaId);
+  const {
+    contadores,
+    marcoZeroExiste,
+    loading: loadingContadores,
+    refetch: refetchContadores,
+  } = useInventarioContadores("ficha_cilindros", loteId, rodoviaId);
 
   // Buscar tolerância GPS da rodovia
   const { data: rodoviaConfig } = useQuery({
@@ -143,9 +167,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
     const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) *
-      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c; // Distance in meters
@@ -155,11 +177,10 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
   useQuery({
     queryKey: ["rodovia", rodoviaId],
     queryFn: async () => {
-      const result = (await supabase
-        .from("rodovias")
-        .select("codigo")
-        .eq("id", rodoviaId)
-        .single()) as unknown as { data: any; error: any };
+      const result = (await supabase.from("rodovias").select("codigo").eq("id", rodoviaId).single()) as unknown as {
+        data: any;
+        error: any;
+      };
       setRodovia(result.data);
       return result.data;
     },
@@ -171,7 +192,8 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_cilindros")
-        .select(`
+        .select(
+          `
           *,
           reconciliacao:reconciliacoes(
             id,
@@ -180,21 +202,26 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
             overlap_porcentagem,
             tipo_match
           )
-        `)
+        `,
+        )
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null);
-      
+
       if (error) throw error;
-      
+
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
         const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
-        if (reconciliacao?.status === 'pendente_aprovacao') {
-          map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
+        if (reconciliacao?.status === "pendente_aprovacao") {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+            distancia_match_metros: reconciliacao.distancia_match_metros,
+          });
         }
       });
-      
+
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
@@ -203,23 +230,21 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
   });
 
   // Contar matches pendentes de reconciliação
-  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter(
-    nec => {
-      const rec = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
-      return rec?.status === 'pendente_aprovacao';
-    }
-  ).length;
+  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter((nec) => {
+    const rec = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
+    return rec?.status === "pendente_aprovacao";
+  }).length;
 
   // Contar TODAS as necessidades com match (não apenas divergências)
   const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
   // Debug: Log dos contadores
-  console.log('🔍 [CILINDROS] Debug Banner:', {
+  console.log("🔍 [CILINDROS] Debug Banner:", {
     loteId,
     rodoviaId,
     necessidadesMapSize: necessidadesMap?.size,
     totalMatchesProcessados,
-    matchesPendentes
+    matchesPendentes,
   });
 
   // Buscar cilindros do inventário
@@ -235,7 +260,9 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
         .order("km_inicial", { ascending: true });
 
       if (searchTerm) {
-        query = query.or(`snv.ilike.%${searchTerm}%,cor_corpo.ilike.%${searchTerm}%,local_implantacao.ilike.%${searchTerm}%`);
+        query = query.or(
+          `snv.ilike.%${searchTerm}%,cor_corpo.ilike.%${searchTerm}%,local_implantacao.ilike.%${searchTerm}%`,
+        );
       }
 
       const { data, error } = await query;
@@ -249,7 +276,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
       if (searchLat && searchLon && data) {
         const targetLat = parseFloat(searchLat);
         const targetLon = parseFloat(searchLon);
-        
+
         const filtered = data
           .filter((cilindro: Cilindro) => {
             if (!cilindro.latitude_inicial || !cilindro.longitude_inicial) return false;
@@ -257,21 +284,16 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
               targetLat,
               targetLon,
               cilindro.latitude_inicial,
-              cilindro.longitude_inicial
+              cilindro.longitude_inicial,
             );
             return distance <= toleranciaMetros;
           })
           .map((cilindro: Cilindro) => ({
             ...cilindro,
-            distance: calculateDistance(
-              targetLat,
-              targetLon,
-              cilindro.latitude_inicial!,
-              cilindro.longitude_inicial!
-            ),
+            distance: calculateDistance(targetLat, targetLon, cilindro.latitude_inicial!, cilindro.longitude_inicial!),
           }))
           .sort((a, b) => a.distance - b.distance);
-        
+
         return filtered;
       }
 
@@ -287,34 +309,35 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
     toast.success("Reconciliação processada");
   };
 
-  const filteredCilindros = cilindros?.filter(cilindro => {
-    if (!showOnlyDivergencias) return true;
-    const nec = necessidadesMap?.get(cilindro.id);
-    return nec && !nec.reconciliado;
-  }) || [];
+  const filteredCilindros =
+    cilindros?.filter((cilindro) => {
+      if (!showOnlyDivergencias) return true;
+      const nec = necessidadesMap?.get(cilindro.id);
+      return nec && !nec.reconciliado;
+    }) || [];
 
   // Função para ordenar dados
-  const sortedCilindros = filteredCilindros ? [...filteredCilindros].sort((a: any, b: any) => {
-    if (!sortColumn) return 0;
-    
-    let aVal: any = a[sortColumn];
-    let bVal: any = b[sortColumn];
-    
-    if (aVal == null) aVal = "";
-    if (bVal == null) bVal = "";
-    
-    if (typeof aVal === "string" && typeof bVal === "string") {
-      return sortDirection === "asc" 
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    }
-    
-    if (typeof aVal === "number" && typeof bVal === "number") {
-      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
-    }
-    
-    return 0;
-  }) : [];
+  const sortedCilindros = filteredCilindros
+    ? [...filteredCilindros].sort((a: any, b: any) => {
+        if (!sortColumn) return 0;
+
+        let aVal: any = a[sortColumn];
+        let bVal: any = b[sortColumn];
+
+        if (aVal == null) aVal = "";
+        if (bVal == null) bVal = "";
+
+        if (typeof aVal === "string" && typeof bVal === "string") {
+          return sortDirection === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        }
+
+        if (typeof aVal === "number" && typeof bVal === "number") {
+          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+        }
+
+        return 0;
+      })
+    : [];
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -327,9 +350,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
 
   const SortIcon = ({ column }: { column: string }) => {
     if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3 ml-1" />;
-    return sortDirection === "asc" 
-      ? <ArrowUp className="h-3 w-3 ml-1" />
-      : <ArrowDown className="h-3 w-3 ml-1" />;
+    return sortDirection === "asc" ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />;
   };
 
   const handleViewDetails = async (cilindro: Cilindro) => {
@@ -390,22 +411,17 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                 <ClipboardList className="h-4 w-4" />
                 Ver Intervenções
               </Button>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => setShowRegistrarNaoCadastrado(true)}
-                className="gap-2"
-              >
-              <Plus className="h-4 w-4" />
-              Item Novo
+              <Button variant="default" size="sm" onClick={() => setShowRegistrarNaoCadastrado(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Item Novo
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Contador de Matches a Reconciliar */}
-          {totalMatchesProcessados > 0 && (
-            matchesPendentes === 0 ? (
+          {totalMatchesProcessados > 0 &&
+            (matchesPendentes === 0 ? (
               // Estado OK - Sem divergências
               <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
                 <div className="flex items-center gap-4">
@@ -415,7 +431,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                   <div>
                     <div className="font-bold text-base flex items-center gap-2">
                       <span className="text-2xl font-extrabold text-green-600">{totalMatchesProcessados}</span>
-                      <span>{totalMatchesProcessados === 1 ? 'item verificado' : 'itens verificados'}</span>
+                      <span>{totalMatchesProcessados === 1 ? "item verificado" : "itens verificados"}</span>
                     </div>
                     <div className="text-sm text-muted-foreground mt-0.5">
                       ✅ Inventário OK - Projeto e Sistema em conformidade
@@ -455,10 +471,10 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                     <AlertCircle className="h-6 w-6 text-warning" />
                   </div>
                   <div>
-                  <div className="font-bold text-base flex items-center gap-2">
-                    <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
-                    <span>{matchesPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
-                  </div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
+                      <span>{matchesPendentes === 1 ? "match a reconciliar" : "matches a reconciliar"}</span>
+                    </div>
                     <div className="text-sm text-muted-foreground mt-0.5">
                       🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
                     </div>
@@ -476,8 +492,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                   </Label>
                 </div>
               </div>
-            )
-          )}
+            ))}
 
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -511,7 +526,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                 <TableHeader className="sticky top-0 bg-muted z-10">
                   <TableRow>
                     {searchLat && searchLon && <TableHead>Distância</TableHead>}
-                    <TableHead 
+                    <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("snv")}
                     >
@@ -520,7 +535,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <SortIcon column="snv" />
                       </div>
                     </TableHead>
-                    <TableHead 
+                    <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("km_inicial")}
                     >
@@ -529,7 +544,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <SortIcon column="km_inicial" />
                       </div>
                     </TableHead>
-                    <TableHead 
+                    <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("km_final")}
                     >
@@ -538,7 +553,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <SortIcon column="km_final" />
                       </div>
                     </TableHead>
-                    <TableHead 
+                    <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("cor_corpo")}
                     >
@@ -547,7 +562,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <SortIcon column="cor_corpo" />
                       </div>
                     </TableHead>
-                    <TableHead 
+                    <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("cor_refletivo")}
                     >
@@ -556,7 +571,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <SortIcon column="cor_refletivo" />
                       </div>
                     </TableHead>
-                    <TableHead 
+                    <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("quantidade")}
                     >
@@ -565,7 +580,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <SortIcon column="quantidade" />
                       </div>
                     </TableHead>
-                    <TableHead 
+                    <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("espacamento_m")}
                     >
@@ -574,7 +589,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <SortIcon column="espacamento_m" />
                       </div>
                     </TableHead>
-                    <TableHead 
+                    <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("data_vistoria")}
                     >
@@ -611,7 +626,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                           {(() => {
                             const necessidade = necessidadesMap?.get(cilindro.id);
                             return necessidade ? (
-                              <NecessidadeBadge 
+                              <NecessidadeBadge
                                 necessidade={{
                                   id: necessidade.id,
                                   servico: necessidade.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
@@ -622,11 +637,11 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                                   solucao_planilha: necessidade.solucao_planilha,
                                   servico_inferido: necessidade.servico_inferido,
                                 }}
-                                tipo="cilindros" 
+                                tipo="cilindros"
                               />
                             ) : (
                               <Badge variant="outline" className="text-muted-foreground text-xs">
-                                Sem previsão
+                                Sem match automático
                               </Badge>
                             );
                           })()}
@@ -636,12 +651,10 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                             {(() => {
                               const necessidade = necessidadesMap?.get(cilindro.id);
                               if (!necessidade) return null;
-                              
+
                               return (
                                 <>
-                                  <StatusReconciliacaoBadge 
-                                    status={necessidade.status_reconciliacao} 
-                                  />
+                                  <StatusReconciliacaoBadge status={necessidade.status_reconciliacao} />
                                   {necessidade?.divergencia && !necessidade.reconciliado && (
                                     <Button
                                       variant="outline"
@@ -677,7 +690,10 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={searchLat && searchLon ? 11 : 10} className="text-center text-muted-foreground py-8">
+                      <TableCell
+                        colSpan={searchLat && searchLon ? 11 : 10}
+                        className="text-center text-muted-foreground py-8"
+                      >
                         {showOnlyDivergencias ? "Nenhuma divergência encontrada" : "Nenhum cilindro cadastrado"}
                       </TableCell>
                     </TableRow>
@@ -712,8 +728,8 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
             <DialogTitle className="flex items-center justify-between">
               <span>Ficha de Visualização - Cilindro Delineador</span>
               <div className="flex gap-2">
-                <Button 
-                  variant="default" 
+                <Button
+                  variant="default"
                   size="sm"
                   onClick={() => {
                     if (onRegistrarIntervencao) {
@@ -726,17 +742,13 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                 >
                   Implementar Intervenção
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setSelectedCilindro(null)}
-                >
+                <Button variant="ghost" size="sm" onClick={() => setSelectedCilindro(null)}>
                   Voltar
                 </Button>
               </div>
             </DialogTitle>
           </DialogHeader>
-          
+
           {selectedCilindro && (
             <Tabs defaultValue="dados" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
@@ -804,17 +816,13 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Latitude Inicial:</span>
                       <p className="text-sm">
-                        {selectedCilindro.latitude_inicial 
-                          ? selectedCilindro.latitude_inicial.toFixed(6) 
-                          : "-"}
+                        {selectedCilindro.latitude_inicial ? selectedCilindro.latitude_inicial.toFixed(6) : "-"}
                       </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Longitude Inicial:</span>
                       <p className="text-sm">
-                        {selectedCilindro.longitude_inicial 
-                          ? selectedCilindro.longitude_inicial.toFixed(6) 
-                          : "-"}
+                        {selectedCilindro.longitude_inicial ? selectedCilindro.longitude_inicial.toFixed(6) : "-"}
                       </p>
                     </div>
                   </div>
@@ -834,17 +842,13 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Latitude Final:</span>
                       <p className="text-sm">
-                        {selectedCilindro.latitude_final 
-                          ? selectedCilindro.latitude_final.toFixed(6) 
-                          : "-"}
+                        {selectedCilindro.latitude_final ? selectedCilindro.latitude_final.toFixed(6) : "-"}
                       </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Longitude Final:</span>
                       <p className="text-sm">
-                        {selectedCilindro.longitude_final 
-                          ? selectedCilindro.longitude_final.toFixed(6) 
-                          : "-"}
+                        {selectedCilindro.longitude_final ? selectedCilindro.longitude_final.toFixed(6) : "-"}
                       </p>
                     </div>
                   </div>
@@ -887,16 +891,12 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
               <TabsContent value="historico" className="mt-4">
                 {intervencoes && intervencoes.length > 0 ? (
                   <div className="space-y-4">
-                    <h3 className="font-semibold text-sm">
-                      Histórico de Intervenções ({intervencoes.length})
-                    </h3>
+                    <h3 className="font-semibold text-sm">Histórico de Intervenções ({intervencoes.length})</h3>
                     <div className="space-y-4">
                       {intervencoes.map((intervencao, index) => (
                         <div key={intervencao.id} className="border rounded-lg p-4 space-y-2">
                           <div className="flex items-center justify-between">
-                            <div className="font-medium">
-                              Intervenção #{intervencoes.length - index}
-                            </div>
+                            <div className="font-medium">Intervenção #{intervencoes.length - index}</div>
                             <span className="text-sm text-muted-foreground">
                               {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
                             </span>
@@ -936,9 +936,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                     </div>
                   </div>
                 ) : (
-                  <p className="text-center py-8 text-muted-foreground">
-                    Nenhuma intervenção registrada
-                  </p>
+                  <p className="text-center py-8 text-muted-foreground">Nenhuma intervenção registrada</p>
                 )}
               </TabsContent>
             </Tabs>
