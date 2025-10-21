@@ -51,7 +51,7 @@ interface IntervencaoPortico {
   ficha_porticos?: {
     lote_id: string;
     rodovia_id: string;
-    km: number;
+    km_inicial: number;
   };
 }
 
@@ -84,7 +84,7 @@ const IntervencoesPorticosContent = () => {
           if (int.ficha_porticos_id) {
             const { data: portico } = await supabase
               .from("ficha_porticos")
-              .select("id, lote_id, rodovia_id, km")
+              .select("id, lote_id, rodovia_id, km_inicial")
               .eq("id", int.ficha_porticos_id)
               .single();
             return { ...int, ficha_porticos: portico };
@@ -145,7 +145,7 @@ const IntervencoesPorticosContent = () => {
       // Recarregar dados
       const { data: userPorticos } = await supabase
         .from("ficha_porticos")
-        .select("id, lote_id, rodovia_id, km")
+        .select("id, lote_id, rodovia_id, km_inicial")
         .eq("user_id", user!.id);
 
       const porticosMap = new Map(
@@ -197,7 +197,7 @@ const IntervencoesPorticosContent = () => {
       // Recarregar dados
       const { data: userPorticos } = await supabase
         .from("ficha_porticos")
-        .select("id, lote_id, rodovia_id, km")
+        .select("id, lote_id, rodovia_id, km_inicial")
         .eq("user_id", user!.id);
 
       const porticosMap = new Map(
@@ -283,7 +283,7 @@ const IntervencoesPorticosContent = () => {
                         {intervencao.ficha_porticos && rodovias[intervencao.ficha_porticos.rodovia_id] || "-"}
                       </TableCell>
                       <TableCell>
-                        {intervencao.ficha_porticos?.km.toFixed(3) || "-"}
+                        {intervencao.ficha_porticos?.km_inicial.toFixed(3) || "-"}
                       </TableCell>
                       <TableCell>{intervencao.motivo}</TableCell>
                       <TableCell>{intervencao.tipo || "-"}</TableCell>

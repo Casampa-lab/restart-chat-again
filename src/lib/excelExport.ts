@@ -705,7 +705,7 @@ export const exportFichasPlaca = async () => {
           formatDate(item.data_vistoria),
           lote?.numero || '',
           rodovia?.codigo || '',
-          formatNumber(item.km),
+          formatNumber(item.km_inicial),
           item.tipo || '',
           item.codigo || '',
           item.lado || '',

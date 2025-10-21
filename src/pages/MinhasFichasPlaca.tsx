@@ -13,7 +13,7 @@ interface FichaPlaca {
   codigo: string | null;
   modelo: string | null;
   tipo: string | null;
-  km: number | null;
+  km_inicial: number | null;
   lado: string | null;
   foto_url: string | null;
   foto_frontal_url: string | null;
@@ -177,7 +177,7 @@ export default function MinhasFichasPlaca() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">km</p>
-                <p className="font-semibold">{selectedFicha.km || '-'} {selectedFicha.lado && `(${selectedFicha.lado})`}</p>
+                <p className="font-semibold">{selectedFicha.km_inicial || '-'} {selectedFicha.lado && `(${selectedFicha.lado})`}</p>
               </div>
             </div>
 
@@ -308,7 +308,7 @@ export default function MinhasFichasPlaca() {
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <MapPin className="mr-2 h-4 w-4" />
-                  km {ficha.km || '-'}
+                  km {ficha.km_inicial || '-'}
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="mr-2 h-4 w-4" />
