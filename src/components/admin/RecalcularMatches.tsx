@@ -393,7 +393,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
     let novoElemento: any = {};
 
     switch (tipo) {
-      case "marcas_longitudinais":
+      case "marcas_longitudinais": // ELEMENTO LINEAR
         novoElemento = {
           ...baseData,
           km_inicial: necessidade.km_inicial,
@@ -413,7 +413,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
         break;
-      case "tachas":
+      case "tachas": // ELEMENTO LINEAR
         novoElemento = {
           ...baseData,
           km_inicial: necessidade.km_inicial,
@@ -431,7 +431,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
         break;
-      case "cilindros":
+      case "cilindros": // ELEMENTO LINEAR
         novoElemento = {
           ...baseData,
           km_inicial: necessidade.km_inicial,
@@ -450,7 +450,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
         break;
-      case "defensas":
+      case "defensas": // ELEMENTO LINEAR
         novoElemento = {
           ...baseData,
           km_inicial: necessidade.km_inicial,
@@ -470,7 +470,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           longitude_final: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
         break;
-      case "marcas_transversais":
+      case "marcas_transversais": // ELEMENTO PONTUAL
         novoElemento = {
           ...baseData,
           km_inicial: necessidade.km_inicial,
@@ -487,7 +487,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           longitude_inicial: necessidade.longitude, // ✅ COORDENADA
         };
         break;
-      case "placas":
+      case "placas": // ELEMENTO PONTUAL
         novoElemento = {
           ...baseData,
           km: necessidade.km,
@@ -504,7 +504,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
         };
         break;
-      case "porticos":
+      case "porticos": // ELEMENTO PONTUAL
         novoElemento = {
           ...baseData,
           km: necessidade.km,
@@ -514,8 +514,6 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           snv: necessidade.snv,
           latitude_inicial: necessidade.latitude, // ✅ COORDENADA INICIAL
           longitude_inicial: necessidade.longitude, // ✅ COORDENADA INICIAL
-          latitude_inicial: necessidade.latitude_final, // ✅ COORDENADA FINAL
-          longitude_inicial: necessidade.longitude_final, // ✅ COORDENADA FINAL
         };
         break;
     }
