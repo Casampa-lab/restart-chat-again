@@ -499,7 +499,8 @@ export function InventarioPorticosViewer({ loteId, rodoviaId, onRegistrarInterve
             </div>
           ) : (
             <div className="border rounded-lg overflow-hidden">
-              <Table>
+              <div className="max-h-[600px] overflow-y-auto">
+                <Table>
                 <TableHeader className="sticky top-0 bg-muted z-10">
                   <TableRow>
                     <TableHead
@@ -672,6 +673,7 @@ export function InventarioPorticosViewer({ loteId, rodoviaId, onRegistrarInterve
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </div>
           )}
           
