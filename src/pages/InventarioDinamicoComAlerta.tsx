@@ -56,6 +56,21 @@ interface Necessidade {
   material?: string;
 }
 
+interface ContagemElemento {
+  cadastro_inicial: number;      // Azul - elementos originais
+  criados_match: number;          // Roxo - criados pelo RecalcularMatches
+  necessidades_totais: number;    // Total de necessidades importadas
+  necessidades_pendentes: number; // Verde - necessidades não matcheadas
+}
+
+interface Contadores {
+  todos: ContagemElemento;
+  sh: ContagemElemento;
+  sv: ContagemElemento;
+  def: ContagemElemento;
+  por_tipo: Record<string, ContagemElemento>;
+}
+
 export default function InventarioDinamicoComAlerta() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -68,6 +83,13 @@ export default function InventarioDinamicoComAlerta() {
   const [grupoSelecionado, setGrupoSelecionado] = useState<'todos' | 'sv' | 'sh' | 'defensas'>('todos');
   const [tipoSV, setTipoSV] = useState<'placas' | 'porticos'>('placas');
   const [tipoSH, setTipoSH] = useState<'marcas_longitudinais' | 'cilindros' | 'inscricoes' | 'tachas'>('marcas_longitudinais');
+  const [contadores, setContadores] = useState<Contadores>({
+    todos: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
+    sh: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
+    sv: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
+    def: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
+    por_tipo: {},
+  });
 
   const RAIO_ALERTA = 100; // metros
 
@@ -105,32 +127,53 @@ export default function InventarioDinamicoComAlerta() {
     try {
       setLoading(true);
       const todasNecessidades: Necessidade[] = [];
+      const contadoresAux: Record<string, { cadastro: number, criados: number, necessidades: number }> = {};
 
-      // Buscar de todas as tabelas de necessidades
+      // Mapear tabelas de inventário e necessidades
       const tabelas = [
-        { nome: 'necessidades_placas', tipo: 'placas' },
-        { nome: 'necessidades_marcas_longitudinais', tipo: 'marcas_longitudinais' },
-        { nome: 'necessidades_tachas', tipo: 'tachas' },
-        { nome: 'necessidades_defensas', tipo: 'defensas' },
-        { nome: 'necessidades_cilindros', tipo: 'cilindros' },
-        { nome: 'necessidades_porticos', tipo: 'porticos' },
-        { nome: 'necessidades_marcas_transversais', tipo: 'inscricoes' },
+        { tipo: 'placas', cadastro: 'ficha_placa', necessidade: 'necessidades_placas' },
+        { tipo: 'marcas_longitudinais', cadastro: 'ficha_marcas_longitudinais', necessidade: 'necessidades_marcas_longitudinais' },
+        { tipo: 'tachas', cadastro: 'ficha_tachas', necessidade: 'necessidades_tachas' },
+        { tipo: 'defensas', cadastro: 'defensas', necessidade: 'necessidades_defensas' },
+        { tipo: 'cilindros', cadastro: 'ficha_cilindros', necessidade: 'necessidades_cilindros' },
+        { tipo: 'porticos', cadastro: 'ficha_porticos', necessidade: 'necessidades_porticos' },
+        { tipo: 'inscricoes', cadastro: 'ficha_inscricoes', necessidade: 'necessidades_marcas_transversais' },
       ];
 
       for (const tabela of tabelas) {
-        const { data, error } = await supabase
-          .from(tabela.nome as any)
-          .select('*')
+        // 1. Contar cadastro inicial (AZUL)
+        const { count: countCadastro } = await supabase
+          .from(tabela.cadastro as any)
+          .select('*', { count: 'exact', head: true })
+          .eq('lote_id', activeSession.lote_id)
+          .eq('rodovia_id', activeSession.rodovia_id)
+          .eq('origem', 'cadastro_inicial');
+
+        // 2. Contar criados pelo match (ROXO)
+        const { count: countCriados } = await supabase
+          .from(tabela.cadastro as any)
+          .select('*', { count: 'exact', head: true })
+          .eq('lote_id', activeSession.lote_id)
+          .eq('rodovia_id', activeSession.rodovia_id)
+          .eq('origem', 'necessidade');
+
+        // 3. Buscar necessidades (para exibição e contagem)
+        const { data: necessidadesData, count: countNecessidades } = await supabase
+          .from(tabela.necessidade as any)
+          .select('*', { count: 'exact' })
           .eq('lote_id', activeSession.lote_id)
           .eq('rodovia_id', activeSession.rodovia_id);
 
-        if (error) {
-          console.error(`Erro ao carregar ${tabela.nome}:`, error);
-          continue;
-        }
+        // Armazenar contadores
+        contadoresAux[tabela.tipo] = {
+          cadastro: countCadastro || 0,
+          criados: countCriados || 0,
+          necessidades: countNecessidades || 0,
+        };
 
-        if (data && Array.isArray(data)) {
-          const necessidadesMapeadas = data.map((item: any) => ({
+        // Mapear necessidades para exibição
+        if (necessidadesData && Array.isArray(necessidadesData)) {
+          const necessidadesMapeadas = necessidadesData.map((item: any) => ({
             id: item.id,
             tipo_elemento: tabela.tipo,
             acao: item.servico || item.acao || item.descricao_servico || 'N/A',
@@ -157,11 +200,70 @@ export default function InventarioDinamicoComAlerta() {
       }
 
       setNecessidades(todasNecessidades);
+      calcularContadores(contadoresAux);
     } catch (error) {
       console.error('Erro ao carregar necessidades:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const calcularContadores = (contadoresPorTipo: Record<string, { cadastro: number, criados: number, necessidades: number }>) => {
+    const resultado: Contadores = {
+      todos: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
+      sh: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
+      sv: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
+      def: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0 },
+      por_tipo: {},
+    };
+
+    const tiposSH = ['marcas_longitudinais', 'cilindros', 'inscricoes', 'tachas'];
+    const tiposSV = ['placas', 'porticos'];
+    const tiposDef = ['defensas'];
+
+    Object.entries(contadoresPorTipo).forEach(([tipo, contagem]) => {
+      const contElemento: ContagemElemento = {
+        cadastro_inicial: contagem.cadastro,
+        criados_match: contagem.criados,
+        necessidades_totais: contagem.necessidades,
+        necessidades_pendentes: contagem.necessidades - contagem.criados,
+      };
+
+      // Por tipo
+      resultado.por_tipo[tipo] = contElemento;
+
+      // Todos
+      resultado.todos.cadastro_inicial += contElemento.cadastro_inicial;
+      resultado.todos.criados_match += contElemento.criados_match;
+      resultado.todos.necessidades_totais += contElemento.necessidades_totais;
+      resultado.todos.necessidades_pendentes += contElemento.necessidades_pendentes;
+
+      // SH
+      if (tiposSH.includes(tipo)) {
+        resultado.sh.cadastro_inicial += contElemento.cadastro_inicial;
+        resultado.sh.criados_match += contElemento.criados_match;
+        resultado.sh.necessidades_totais += contElemento.necessidades_totais;
+        resultado.sh.necessidades_pendentes += contElemento.necessidades_pendentes;
+      }
+
+      // SV
+      if (tiposSV.includes(tipo)) {
+        resultado.sv.cadastro_inicial += contElemento.cadastro_inicial;
+        resultado.sv.criados_match += contElemento.criados_match;
+        resultado.sv.necessidades_totais += contElemento.necessidades_totais;
+        resultado.sv.necessidades_pendentes += contElemento.necessidades_pendentes;
+      }
+
+      // Defensas
+      if (tiposDef.includes(tipo)) {
+        resultado.def.cadastro_inicial += contElemento.cadastro_inicial;
+        resultado.def.criados_match += contElemento.criados_match;
+        resultado.def.necessidades_totais += contElemento.necessidades_totais;
+        resultado.def.necessidades_pendentes += contElemento.necessidades_pendentes;
+      }
+    });
+
+    setContadores(resultado);
   };
 
   const verificarProximidade = async () => {
@@ -221,17 +323,6 @@ export default function InventarioDinamicoComAlerta() {
   };
 
   const tipoAtivo = getTipoElementoAtivo();
-
-  // Calcular contadores por grupo
-  const getContadores = () => {
-    const todos = necessidades.length;
-    const sh = necessidades.filter(n => ['marcas_longitudinais', 'cilindros', 'inscricoes', 'tachas'].includes(n.tipo_elemento)).length;
-    const sv = necessidades.filter(n => ['placas', 'porticos'].includes(n.tipo_elemento)).length;
-    const def = necessidades.filter(n => n.tipo_elemento === 'defensas').length;
-    return { todos, sh, sv, def };
-  };
-
-  const contadores = getContadores();
 
   const necessidadesFiltradas = (() => {
     const filtradas = tipoAtivo === null 
@@ -334,13 +425,93 @@ export default function InventarioDinamicoComAlerta() {
         </div>
       )}
 
+      {/* Legenda de Contadores */}
+      <Card className="mb-4">
+        <CardContent className="pt-4">
+          <div className="flex flex-wrap gap-3 text-xs">
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+              <span>Cadastro Inicial</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+              <span>Criados (Match)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <span>Necessidades Pendentes</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Filtros - Tabs aninhadas igual ao desktop */}
       <Tabs value={grupoSelecionado} onValueChange={(v) => setGrupoSelecionado(v as any)} className="mb-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="todos">Todos ({contadores.todos})</TabsTrigger>
-          <TabsTrigger value="sh">SH ({contadores.sh})</TabsTrigger>
-          <TabsTrigger value="sv">SV ({contadores.sv})</TabsTrigger>
-          <TabsTrigger value="defensas">Def ({contadores.def})</TabsTrigger>
+          <TabsTrigger value="todos">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-xs">Todos</span>
+              <div className="flex gap-0.5">
+                <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.todos.cadastro_inicial}
+                </Badge>
+                <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.todos.criados_match}
+                </Badge>
+                <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.todos.necessidades_pendentes}
+                </Badge>
+              </div>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="sh">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-xs">SH</span>
+              <div className="flex gap-0.5">
+                <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.sh.cadastro_inicial}
+                </Badge>
+                <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.sh.criados_match}
+                </Badge>
+                <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.sh.necessidades_pendentes}
+                </Badge>
+              </div>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="sv">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-xs">SV</span>
+              <div className="flex gap-0.5">
+                <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.sv.cadastro_inicial}
+                </Badge>
+                <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.sv.criados_match}
+                </Badge>
+                <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.sv.necessidades_pendentes}
+                </Badge>
+              </div>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="defensas">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-xs">Def</span>
+              <div className="flex gap-0.5">
+                <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.def.cadastro_inicial}
+                </Badge>
+                <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.def.criados_match}
+                </Badge>
+                <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  {contadores.def.necessidades_pendentes}
+                </Badge>
+              </div>
+            </div>
+          </TabsTrigger>
         </TabsList>
 
         {/* Conteúdo Todos - agrupado */}
