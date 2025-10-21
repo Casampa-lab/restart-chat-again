@@ -55,7 +55,130 @@ export function ReconciliacaoDrawerUniversal({
       if (!user) throw new Error("Usuário não autenticado");
 
       if (isCoordenador) {
-        // Coordenador aprova diretamente - atualiza reconciliacao e necessidade
+        // Coordenador aprova diretamente - CRIA NOVO ELEMENTO NO INVENTÁRIO
+        
+        // 1. Preparar dados para o novo elemento (mapear necessidade -> inventário)
+        const dadosNovoElemento: any = {
+          user_id: user.id,
+          lote_id: necessidade.lote_id,
+          rodovia_id: necessidade.rodovia_id,
+          origem: 'necessidade', // ROXO - criado pelo match
+          ativo: true,
+          data_vistoria: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString(),
+        };
+
+        // Mapear campos específicos por tipo
+        if (tipoElemento === 'placas') {
+          dadosNovoElemento.codigo = necessidade.codigo;
+          dadosNovoElemento.tipo = necessidade.tipo || necessidade.tipo_placa;
+          dadosNovoElemento.lado = necessidade.lado;
+          dadosNovoElemento.suporte = necessidade.suporte;
+          dadosNovoElemento.substrato = necessidade.substrato;
+          dadosNovoElemento.km = necessidade.km;
+          dadosNovoElemento.latitude_inicial = necessidade.latitude || necessidade.latitude_inicial;
+          dadosNovoElemento.longitude_inicial = necessidade.longitude || necessidade.longitude_inicial;
+          dadosNovoElemento.snv = necessidade.snv;
+        } else if (tipoElemento === 'marcas_longitudinais') {
+          dadosNovoElemento.tipo_demarcacao = necessidade.tipo_demarcacao;
+          dadosNovoElemento.cor = necessidade.cor;
+          dadosNovoElemento.largura_cm = necessidade.largura_cm;
+          dadosNovoElemento.km_inicial = necessidade.km_inicial;
+          dadosNovoElemento.km_final = necessidade.km_final;
+          dadosNovoElemento.extensao_metros = necessidade.extensao_metros;
+          dadosNovoElemento.material = necessidade.material;
+          dadosNovoElemento.latitude_inicial = necessidade.latitude_inicial;
+          dadosNovoElemento.longitude_inicial = necessidade.longitude_inicial;
+          dadosNovoElemento.snv = necessidade.snv;
+          dadosNovoElemento.posicao = necessidade.posicao;
+        } else if (tipoElemento === 'tachas') {
+          dadosNovoElemento.tipo_tacha = necessidade.tipo_tacha;
+          dadosNovoElemento.cor = necessidade.cor;
+          dadosNovoElemento.quantidade = necessidade.quantidade;
+          dadosNovoElemento.km_inicial = necessidade.km_inicial;
+          dadosNovoElemento.km_final = necessidade.km_final;
+          dadosNovoElemento.latitude_inicial = necessidade.latitude_inicial;
+          dadosNovoElemento.longitude_inicial = necessidade.longitude_inicial;
+          dadosNovoElemento.snv = necessidade.snv;
+          dadosNovoElemento.local_implantacao = necessidade.local_implantacao;
+        } else if (tipoElemento === 'cilindros') {
+          dadosNovoElemento.cor_corpo = necessidade.cor_corpo;
+          dadosNovoElemento.cor_refletivo = necessidade.cor_refletivo;
+          dadosNovoElemento.tipo_refletivo = necessidade.tipo_refletivo;
+          dadosNovoElemento.quantidade = necessidade.quantidade;
+          dadosNovoElemento.km_inicial = necessidade.km_inicial;
+          dadosNovoElemento.km_final = necessidade.km_final;
+          dadosNovoElemento.latitude_inicial = necessidade.latitude_inicial;
+          dadosNovoElemento.longitude_inicial = necessidade.longitude_inicial;
+          dadosNovoElemento.snv = necessidade.snv;
+          dadosNovoElemento.local_implantacao = necessidade.local_implantacao;
+        } else if (tipoElemento === 'inscricoes') {
+          dadosNovoElemento.sigla = necessidade.sigla;
+          dadosNovoElemento.tipo_inscricao = necessidade.tipo_inscricao;
+          dadosNovoElemento.cor = necessidade.cor;
+          dadosNovoElemento.dimensoes = necessidade.dimensoes;
+          dadosNovoElemento.area_m2 = necessidade.area_m2;
+          dadosNovoElemento.km_inicial = necessidade.km_inicial;
+          dadosNovoElemento.latitude_inicial = necessidade.latitude_inicial;
+          dadosNovoElemento.longitude_inicial = necessidade.longitude_inicial;
+          dadosNovoElemento.snv = necessidade.snv;
+        } else if (tipoElemento === 'porticos') {
+          dadosNovoElemento.tipo = necessidade.tipo;
+          dadosNovoElemento.vao_horizontal_m = necessidade.vao_horizontal_m;
+          dadosNovoElemento.altura_livre_m = necessidade.altura_livre_m;
+          dadosNovoElemento.km = necessidade.km;
+          dadosNovoElemento.latitude_inicial = necessidade.latitude || necessidade.latitude_inicial;
+          dadosNovoElemento.longitude_inicial = necessidade.longitude || necessidade.longitude_inicial;
+          dadosNovoElemento.snv = necessidade.snv;
+        } else if (tipoElemento === 'defensas') {
+          dadosNovoElemento.lado = necessidade.lado;
+          dadosNovoElemento.funcao = necessidade.funcao;
+          dadosNovoElemento.geometria = necessidade.geometria;
+          dadosNovoElemento.extensao_metros = necessidade.extensao_metros;
+          dadosNovoElemento.km_inicial = necessidade.km_inicial;
+          dadosNovoElemento.km_final = necessidade.km_final;
+          dadosNovoElemento.latitude_inicial = necessidade.latitude_inicial;
+          dadosNovoElemento.longitude_inicial = necessidade.longitude_inicial;
+          dadosNovoElemento.snv = necessidade.snv;
+          dadosNovoElemento.nivel_contencao_en1317 = necessidade.nivel_contencao_en1317;
+          dadosNovoElemento.nivel_contencao_nchrp350 = necessidade.nivel_contencao_nchrp350;
+        }
+
+        // 2. Inserir novo elemento no inventário
+        const { data: novoElemento, error: insertError } = await supabase
+          .from(config.tabelaCadastro as any)
+          .insert([dadosNovoElemento])
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+        if (!novoElemento) {
+          throw new Error("Falha ao criar elemento no inventário");
+        }
+        
+        // Type guard: validar que tem id
+        const elementoCriado: any = novoElemento;
+        if (!elementoCriado.id) {
+          throw new Error("Elemento criado sem ID");
+        }
+
+        const novoElementoId: string = elementoCriado.id;
+
+        // 3. Se existe cadastro_id (match), desativar o elemento antigo
+        if (necessidade.cadastro_id) {
+          const { error: desativarError } = await supabase
+            .from(config.tabelaCadastro as any)
+            .update({
+              ativo: false,
+              substituido_por: novoElementoId,
+              substituido_em: new Date().toISOString(),
+            })
+            .eq("id", necessidade.cadastro_id);
+
+          if (desativarError) throw desativarError;
+        }
+
+        // 4. Atualizar reconciliação para apontar para o novo elemento
         const { error: reconciliacaoError } = await supabase
           .from('reconciliacoes')
           .update({
@@ -64,12 +187,14 @@ export function ReconciliacaoDrawerUniversal({
             aprovado_por: user.id,
             aprovado_em: new Date().toISOString(),
             observacao_coordenador: observacao,
+            cadastro_id: novoElementoId, // Vincular ao novo elemento
           })
           .eq("necessidade_id", necessidade.id)
           .eq("tipo_elemento", tipoElemento);
 
         if (reconciliacaoError) throw reconciliacaoError;
 
+        // 5. Atualizar necessidade
         const { error: necessidadeError } = await supabase
           .from(config.tabelaNecessidades as any)
           .update({
@@ -81,7 +206,7 @@ export function ReconciliacaoDrawerUniversal({
           .eq("id", necessidade.id);
 
         if (necessidadeError) throw necessidadeError;
-        toast.success("✓ Substituição aprovada com sucesso!");
+        toast.success("✓ Substituição aprovada! Novo elemento criado no inventário.");
       } else {
         // Técnico envia para aprovação - apenas atualiza reconciliacao
         const { error: reconciliacaoError } = await supabase
