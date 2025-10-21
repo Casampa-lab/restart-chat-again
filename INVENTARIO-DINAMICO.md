@@ -713,8 +713,8 @@ interface CilindroIntervencao {
 **Campos de Localização**:
 
 - `km`: numeric
-- `latitude`: numeric
-- `longitude`: numeric
+- `latitude_inicial`: numeric
+- `longitude_inicial`: numeric
 - `lado`: text - Lado (Direito/Esquerdo)
 - `posicao`: text
 - `distancia_m`: numeric - Distância do bordo da pista
@@ -786,8 +786,8 @@ interface CilindroIntervencao {
 **Campos de Localização**:
 
 - `km`: numeric (required)
-- `latitude`: numeric
-- `longitude`: numeric
+- `latitude_inicial`: numeric
+- `longitude_inicial`: numeric
 - `lado`: text
 
 **Campos de Intervenção**:
@@ -1042,8 +1042,8 @@ interface PorticoInventario {
   rodovia_id: string;
   snv?: string;
   km?: number;
-  latitude?: number;
-  longitude?: number;
+  latitude_inicial?: number;
+  longitudeinicial?: number;
   lado?: string;
   tipo: string;
   vao_horizontal_m?: number;
