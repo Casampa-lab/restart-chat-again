@@ -54,10 +54,20 @@ export function TipoOrigemBadge({
   const config = configs[tipoOrigem as keyof typeof configs] || configs.cadastro_inicial;
   const Icon = config.icon;
 
+  // Se não mostrar label, retornar apenas o ícone sem Badge
+  if (!showLabel) {
+    return (
+      <div className={className}>
+        <Icon className={`h-4 w-4 ${config.color}`} />
+      </div>
+    );
+  }
+
+  // Com label, usar Badge normal
   return (
     <Badge variant={config.variant} className={className}>
       <Icon className={`h-3 w-3 mr-1 ${config.color}`} />
-      {showLabel && config.label}
+      {config.label}
     </Badge>
   );
 }
