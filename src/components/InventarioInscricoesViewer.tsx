@@ -12,7 +12,22 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Eye,
+  Calendar,
+  Library,
+  FileText,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Plus,
+  ClipboardList,
+  AlertCircle,
+  Filter,
+  CheckCircle,
+} from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
@@ -29,18 +44,18 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
     pendente_aprovacao: {
       color: "bg-yellow-100 text-yellow-800 border-yellow-300",
       icon: "🟡",
-      label: "Aguardando Coordenação"
+      label: "Aguardando Coordenação",
     },
     aprovado: {
       color: "bg-green-100 text-green-800 border-green-300",
       icon: "🟢",
-      label: "Substituição Aprovada"
+      label: "Substituição Aprovada",
     },
     rejeitado: {
       color: "bg-red-100 text-red-800 border-red-300",
       icon: "🔴",
-      label: "Mantido como Implantação"
-    }
+      label: "Mantido como Implantação",
+    },
   };
 
   const item = config[status as keyof typeof config];
@@ -50,9 +65,7 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          <Badge className={`${item.color} text-xs border`}>
-            {item.icon}
-          </Badge>
+          <Badge className={`${item.color} text-xs border`}>{item.icon}</Badge>
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-xs">{item.label}</p>
@@ -79,36 +92,36 @@ interface FichaInscricao {
 
 // Mapeamento de siglas para descrições completas (apenas quando não há separador)
 const INSCRICAO_SIGLAS: Record<string, string> = {
-  'LRV': 'Linha de estímulo a redução de velocidade',
-  'PEM': 'Seta indicativa de posicionamento na pista',
-  'LDP': 'Linha Dê a preferência',
-  'SIP': 'Símbolo indicativo de interseção',
-  'LRE': 'Linha de retenção',
-  'ZPA': 'Zebrado de área não utilizável',
-  'FX': 'Faixa de pedestre',
-  'LBO': 'Linha de bordo',
-  'LMS': 'Linha de divisão de fluxos opostos',
-  'LMC': 'Linha de divisão de fluxos de mesmo sentido',
+  LRV: "Linha de estímulo a redução de velocidade",
+  PEM: "Seta indicativa de posicionamento na pista",
+  LDP: "Linha Dê a preferência",
+  SIP: "Símbolo indicativo de interseção",
+  LRE: "Linha de retenção",
+  ZPA: "Zebrado de área não utilizável",
+  FX: "Faixa de pedestre",
+  LBO: "Linha de bordo",
+  LMS: "Linha de divisão de fluxos opostos",
+  LMC: "Linha de divisão de fluxos de mesmo sentido",
 };
 
 // Função para extrair sigla e descrição do tipo_inscricao
 const parseTipoInscricao = (tipoInscricao: string): { sigla: string; descricao: string } => {
   // Primeiro tenta separar por hífen ou espaço
   const parts = tipoInscricao.split(/\s*[-–]\s*/);
-  
+
   // Se conseguiu separar (ex: "LEGENDA - LOMBADA")
   if (parts.length >= 2) {
     const sigla = parts[0].trim();
-    const descricao = parts.slice(1).join(' - ').trim();
+    const descricao = parts.slice(1).join(" - ").trim();
     return { sigla, descricao };
   }
-  
+
   // Se não tem separador, tenta usar o mapeamento de siglas conhecidas
   const siglaUpper = tipoInscricao.toUpperCase().trim();
   if (INSCRICAO_SIGLAS[siglaUpper]) {
     return { sigla: siglaUpper, descricao: INSCRICAO_SIGLAS[siglaUpper] };
   }
-  
+
   // Caso padrão: retorna o tipo completo como sigla e descrição
   return { sigla: tipoInscricao, descricao: tipoInscricao };
 };
@@ -119,10 +132,10 @@ interface InventarioInscricoesViewerProps {
   onRegistrarIntervencao?: (inscricaoData: any) => void;
 }
 
-export function InventarioInscricoesViewer({ 
-  loteId, 
+export function InventarioInscricoesViewer({
+  loteId,
   rodoviaId,
-  onRegistrarIntervencao 
+  onRegistrarIntervencao,
 }: InventarioInscricoesViewerProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -140,8 +153,12 @@ export function InventarioInscricoesViewer({
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
 
   // Hook para contadores de inventário
-  const { contadores, marcoZeroExiste, loading: loadingContadores, refetch: refetchContadores } = 
-    useInventarioContadores('ficha_inscricoes', loteId, rodoviaId);
+  const {
+    contadores,
+    marcoZeroExiste,
+    loading: loadingContadores,
+    refetch: refetchContadores,
+  } = useInventarioContadores("ficha_inscricoes", loteId, rodoviaId);
 
   // Buscar informações e tolerância da rodovia
   const { data: rodovia } = useQuery({
@@ -165,21 +182,30 @@ export function InventarioInscricoesViewer({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_marcas_transversais")
-        .select(`id, servico, servico_final, cadastro_id, km_inicial, divergencia, solucao_planilha, servico_inferido, solucao_confirmada, latitude_inicial, longitude_inicial, reconciliacao:reconciliacoes(id, status, distancia_match_metros)`)
+        .select(
+          `id, servico, servico_final, cadastro_id, km_inicial, divergencia, solucao_planilha, servico_inferido, solucao_confirmada, latitude_inicial, longitude_inicial, reconciliacao:reconciliacoes(id, status, distancia_match_metros)`,
+        )
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null);
-      
+
       if (error) throw error;
-      
+
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
         const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
-        if (reconciliacao?.status === 'pendente_aprovacao' && reconciliacao?.distancia_match_metros <= toleranciaMetros) {
-          map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
+        if (
+          reconciliacao?.status === "pendente_aprovacao" &&
+          reconciliacao?.distancia_match_metros <= toleranciaMetros
+        ) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+            distancia_match_metros: reconciliacao.distancia_match_metros,
+          });
         }
       });
-      
+
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
@@ -189,16 +215,16 @@ export function InventarioInscricoesViewer({
   const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
   const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter(
-    (nec: any) => !nec.solucao_confirmada
+    (nec: any) => !nec.solucao_confirmada,
   ).length;
 
-  // Debug: Log dos contadores  
-  console.log('🔍 [INSCRIÇÕES] Debug Banner:', {
+  // Debug: Log dos contadores
+  console.log("🔍 [INSCRIÇÕES] Debug Banner:", {
     loteId,
     rodoviaId,
     necessidadesMapSize: necessidadesMap?.size,
     totalMatchesProcessados,
-    matchesPendentes
+    matchesPendentes,
   });
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -208,9 +234,7 @@ export function InventarioInscricoesViewer({
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
     const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a =
-      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
@@ -236,26 +260,27 @@ export function InventarioInscricoesViewer({
 
       if (searchTerm) {
         query = query.or(
-          `tipo_inscricao.ilike.%${searchTerm}%,cor.ilike.%${searchTerm}%,material_utilizado.ilike.%${searchTerm}%`
+          `tipo_inscricao.ilike.%${searchTerm}%,cor.ilike.%${searchTerm}%,material_utilizado.ilike.%${searchTerm}%`,
         );
       }
 
       const { data, error } = await query;
       if (error) throw error;
-      
+
       let filteredData = data as FichaInscricao[];
 
       if (searchLat && searchLng) {
         const lat = parseFloat(searchLat);
         const lng = parseFloat(searchLng);
-        
+
         if (!isNaN(lat) && !isNaN(lng)) {
           filteredData = filteredData
             .map((inscricao) => ({
               ...inscricao,
-              distance: inscricao.latitude_inicial && inscricao.longitude_inicial
-                ? calculateDistance(lat, lng, inscricao.latitude_inicial, inscricao.longitude_inicial)
-                : Infinity,
+              distance:
+                inscricao.latitude_inicial && inscricao.longitude_inicial
+                  ? calculateDistance(lat, lng, inscricao.latitude_inicial, inscricao.longitude_inicial)
+                  : Infinity,
             }))
             .filter((inscricao) => inscricao.distance <= toleranciaMetros)
             .sort((a, b) => a.distance - b.distance);
@@ -268,34 +293,35 @@ export function InventarioInscricoesViewer({
     },
   });
 
-  const filteredInscricoes = inscricoes?.filter(inscricao => {
-    if (!showOnlyDivergencias) return true;
-    const nec = necessidadesMap?.get(inscricao.id);
-    return nec && !nec.solucao_confirmada;
-  }) || [];
+  const filteredInscricoes =
+    inscricoes?.filter((inscricao) => {
+      if (!showOnlyDivergencias) return true;
+      const nec = necessidadesMap?.get(inscricao.id);
+      return nec && !nec.solucao_confirmada;
+    }) || [];
 
   // Função para ordenar dados
-  const sortedInscricoes = filteredInscricoes ? [...filteredInscricoes].sort((a, b) => {
-    if (!sortColumn) return 0;
-    
-    let aVal: any = a[sortColumn as keyof FichaInscricao];
-    let bVal: any = b[sortColumn as keyof FichaInscricao];
-    
-    if (aVal == null) aVal = "";
-    if (bVal == null) bVal = "";
-    
-    if (typeof aVal === "string" && typeof bVal === "string") {
-      return sortDirection === "asc" 
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    }
-    
-    if (typeof aVal === "number" && typeof bVal === "number") {
-      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
-    }
-    
-    return 0;
-  }) : [];
+  const sortedInscricoes = filteredInscricoes
+    ? [...filteredInscricoes].sort((a, b) => {
+        if (!sortColumn) return 0;
+
+        let aVal: any = a[sortColumn as keyof FichaInscricao];
+        let bVal: any = b[sortColumn as keyof FichaInscricao];
+
+        if (aVal == null) aVal = "";
+        if (bVal == null) bVal = "";
+
+        if (typeof aVal === "string" && typeof bVal === "string") {
+          return sortDirection === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        }
+
+        if (typeof aVal === "number" && typeof bVal === "number") {
+          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+        }
+
+        return 0;
+      })
+    : [];
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -308,9 +334,7 @@ export function InventarioInscricoesViewer({
 
   const SortIcon = ({ column }: { column: string }) => {
     if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3 ml-1" />;
-    return sortDirection === "asc" 
-      ? <ArrowUp className="h-3 w-3 ml-1" />
-      : <ArrowDown className="h-3 w-3 ml-1" />;
+    return sortDirection === "asc" ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />;
   };
 
   return (
@@ -353,81 +377,75 @@ export function InventarioInscricoesViewer({
                 <ClipboardList className="h-4 w-4" />
                 Ver Intervenções
               </Button>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => setShowRegistrarNaoCadastrado(true)}
-                className="gap-2"
-              >
-              <Plus className="h-4 w-4" />
-              Item Novo
+              <Button variant="default" size="sm" onClick={() => setShowRegistrarNaoCadastrado(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Item Novo
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-        {/* Banner de Status de Reconciliação */}
-        {totalMatchesProcessados > 0 && (
-          matchesPendentes === 0 ? (
-            // Banner VERDE - Tudo OK
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500/20 border border-green-500/40">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
-                </div>
-                <div>
-                  <div className="font-bold text-base flex items-center gap-2">
-                    <span className="text-2xl font-extrabold text-green-600">{totalMatchesProcessados}</span>
-                    <span>{totalMatchesProcessados === 1 ? 'item verificado' : 'itens verificados'}</span>
+          {/* Banner de Status de Reconciliação */}
+          {totalMatchesProcessados > 0 &&
+            (matchesPendentes === 0 ? (
+              // Banner VERDE - Tudo OK
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500/20 border border-green-500/40">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
                   </div>
-                  <div className="text-sm text-muted-foreground mt-0.5">
-                    ✅ Inventário OK - Projeto e Sistema em conformidade
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={showOnlyDivergencias}
-                  onCheckedChange={setShowOnlyDivergencias}
-                  id="filtro-divergencias-inscricoes"
-                />
-                <Label htmlFor="filtro-divergencias-inscricoes" className="cursor-pointer text-sm font-medium">
-                  <Filter className="h-4 w-4 inline mr-1" />
-                  Apenas divergências
-                </Label>
-              </div>
-            </div>
-          ) : (
-            // Banner AMARELO - Com divergências
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
-                  <AlertCircle className="h-6 w-6 text-warning" />
-                </div>
-                <div>
-                <div className="font-bold text-base flex items-center gap-2">
-                  <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
-                  <span>{matchesPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
-                </div>
-                  <div className="text-sm text-muted-foreground mt-0.5">
-                    🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-green-600">{totalMatchesProcessados}</span>
+                      <span>{totalMatchesProcessados === 1 ? "item verificado" : "itens verificados"}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      ✅ Inventário OK - Projeto e Sistema em conformidade
+                    </div>
                   </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={showOnlyDivergencias}
+                    onCheckedChange={setShowOnlyDivergencias}
+                    id="filtro-divergencias-inscricoes"
+                  />
+                  <Label htmlFor="filtro-divergencias-inscricoes" className="cursor-pointer text-sm font-medium">
+                    <Filter className="h-4 w-4 inline mr-1" />
+                    Apenas divergências
+                  </Label>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={showOnlyDivergencias}
-                  onCheckedChange={setShowOnlyDivergencias}
-                  id="filtro-divergencias-inscricoes"
-                />
-                <Label htmlFor="filtro-divergencias-inscricoes" className="cursor-pointer text-sm font-medium">
-                  <Filter className="h-4 w-4 inline mr-1" />
-                  Apenas divergências
-                </Label>
+            ) : (
+              // Banner AMARELO - Com divergências
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
+                    <AlertCircle className="h-6 w-6 text-warning" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
+                      <span>{matchesPendentes === 1 ? "match a reconciliar" : "matches a reconciliar"}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={showOnlyDivergencias}
+                    onCheckedChange={setShowOnlyDivergencias}
+                    id="filtro-divergencias-inscricoes"
+                  />
+                  <Label htmlFor="filtro-divergencias-inscricoes" className="cursor-pointer text-sm font-medium">
+                    <Filter className="h-4 w-4 inline mr-1" />
+                    Apenas divergências
+                  </Label>
+                </div>
               </div>
-            </div>
-          )
-        )}
+            ))}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
@@ -456,9 +474,7 @@ export function InventarioInscricoesViewer({
           </div>
 
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Carregando inventário...
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Carregando inventário...</div>
           ) : filteredInscricoes && filteredInscricoes.length > 0 ? (
             <div className="border rounded-lg overflow-hidden">
               <div className="max-h-[600px] overflow-y-auto">
@@ -468,7 +484,7 @@ export function InventarioInscricoesViewer({
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
                       <TableHead>Sigla</TableHead>
                       <TableHead>Descrição</TableHead>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("cor")}
                       >
@@ -477,7 +493,7 @@ export function InventarioInscricoesViewer({
                           <SortIcon column="cor" />
                         </div>
                       </TableHead>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("km_inicial")}
                       >
@@ -486,7 +502,7 @@ export function InventarioInscricoesViewer({
                           <SortIcon column="km_inicial" />
                         </div>
                       </TableHead>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("material_utilizado")}
                       >
@@ -495,7 +511,7 @@ export function InventarioInscricoesViewer({
                           <SortIcon column="material_utilizado" />
                         </div>
                       </TableHead>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("area_m2")}
                       >
@@ -516,9 +532,7 @@ export function InventarioInscricoesViewer({
                         <TableRow key={inscricao.id} className="hover:bg-muted/50">
                           {searchLat && searchLng && (
                             <TableCell>
-                              <Badge variant="secondary">
-                                {(inscricao as any).distance?.toFixed(1)}m
-                              </Badge>
+                              <Badge variant="secondary">{(inscricao as any).distance?.toFixed(1)}m</Badge>
                             </TableCell>
                           )}
                           <TableCell>
@@ -535,7 +549,7 @@ export function InventarioInscricoesViewer({
                             {(() => {
                               const necessidade = necessidadesMap?.get(inscricao.id);
                               return necessidade ? (
-                                <NecessidadeBadge 
+                                <NecessidadeBadge
                                   necessidade={{
                                     id: necessidade.id,
                                     servico: necessidade.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
@@ -546,11 +560,11 @@ export function InventarioInscricoesViewer({
                                     solucao_planilha: necessidade.solucao_planilha,
                                     servico_inferido: necessidade.servico_inferido,
                                   }}
-                                  tipo="marcas_transversais" 
+                                  tipo="marcas_transversais"
                                 />
                               ) : (
                                 <Badge variant="outline" className="text-muted-foreground text-xs">
-                                  Sem previsão
+                                  Sem match automático
                                 </Badge>
                               );
                             })()}
@@ -560,12 +574,10 @@ export function InventarioInscricoesViewer({
                               {(() => {
                                 const necessidade = necessidadesMap?.get(inscricao.id);
                                 if (!necessidade) return null;
-                                
+
                                 return (
                                   <>
-                                    <StatusReconciliacaoBadge 
-                                      status={necessidade.status_reconciliacao} 
-                                    />
+                                    <StatusReconciliacaoBadge status={necessidade.status_reconciliacao} />
                                     {necessidade?.divergencia && !necessidade.solucao_confirmada && (
                                       <Button
                                         variant="outline"
@@ -616,14 +628,15 @@ export function InventarioInscricoesViewer({
               {showOnlyDivergencias
                 ? "Nenhuma divergência encontrada"
                 : searchTerm || (searchLat && searchLng)
-                ? "Nenhuma inscrição encontrada com esse critério"
-                : "Nenhuma inscrição cadastrada neste inventário"}
+                  ? "Nenhuma inscrição encontrada com esse critério"
+                  : "Nenhuma inscrição cadastrada neste inventário"}
             </div>
           )}
 
           {filteredInscricoes && filteredInscricoes.length > 0 && (
             <p className="text-sm text-muted-foreground text-center">
-              {filteredInscricoes.length} {filteredInscricoes.length === 1 ? "inscrição encontrada" : "inscrições encontradas"}
+              {filteredInscricoes.length}{" "}
+              {filteredInscricoes.length === 1 ? "inscrição encontrada" : "inscrições encontradas"}
             </p>
           )}
         </CardContent>
@@ -653,8 +666,8 @@ export function InventarioInscricoesViewer({
               <span>Detalhes da Inscrição</span>
               <div className="flex gap-2">
                 {onRegistrarIntervencao && (
-                  <Button 
-                    variant="default" 
+                  <Button
+                    variant="default"
                     size="sm"
                     onClick={() => {
                       onRegistrarIntervencao(selectedInscricao);
@@ -664,195 +677,186 @@ export function InventarioInscricoesViewer({
                     Registrar Intervenção
                   </Button>
                 )}
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setSelectedInscricao(null)}
-                >
+                <Button variant="ghost" size="sm" onClick={() => setSelectedInscricao(null)}>
                   Voltar
                 </Button>
               </div>
             </DialogTitle>
           </DialogHeader>
 
-          {selectedInscricao && (() => {
-            const { sigla, descricao } = parseTipoInscricao(selectedInscricao.tipo_inscricao);
-            return (
-              <Tabs defaultValue="dados" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="dados">Dados</TabsTrigger>
-                  <TabsTrigger value="foto">Foto</TabsTrigger>
-                  <TabsTrigger value="historico">Histórico</TabsTrigger>
-                </TabsList>
+          {selectedInscricao &&
+            (() => {
+              const { sigla, descricao } = parseTipoInscricao(selectedInscricao.tipo_inscricao);
+              return (
+                <Tabs defaultValue="dados" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="dados">Dados</TabsTrigger>
+                    <TabsTrigger value="foto">Foto</TabsTrigger>
+                    <TabsTrigger value="historico">Histórico</TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value="dados" className="space-y-4 mt-4">
-                  {/* Identificação */}
-                  <div className="border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3">Identificação</h3>
-                    <div className="grid grid-cols-4 gap-4">
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">BR:</span>
-                        <p className="text-sm">{rodovia?.codigo || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Sigla:</span>
-                        <p className="text-sm font-semibold">{sigla}</p>
-                      </div>
-                      <div className="col-span-2">
-                        <span className="text-sm font-medium text-muted-foreground">Descrição:</span>
-                        <p className="text-sm">{descricao}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Características */}
-                  <div className="border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3">Características</h3>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Cor:</span>
-                        <p className="text-sm">{selectedInscricao.cor}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Material:</span>
-                        <p className="text-sm">{selectedInscricao.material_utilizado || "-"}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Localização Inicial */}
-                  <div className="border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3 flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Localização Inicial
-                    </h3>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">km Inicial:</span>
-                        <p className="text-sm">{selectedInscricao.km_inicial?.toFixed(2) || "-"}</p>
-                      </div>
-                      {selectedInscricao.latitude_inicial && (
-                        <div>
-                          <span className="text-sm font-medium text-muted-foreground">Latitude:</span>
-                          <p className="text-sm font-mono text-xs">{selectedInscricao.latitude_inicial.toFixed(6)}</p>
-                        </div>
-                      )}
-                      {selectedInscricao.longitude_inicial && (
-                        <div>
-                          <span className="text-sm font-medium text-muted-foreground">Longitude:</span>
-                          <p className="text-sm font-mono text-xs">{selectedInscricao.longitude_inicial.toFixed(6)}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Dimensões e Área */}
-                  <div className="border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3">Dimensões e Área</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Dimensões:</span>
-                        <p className="text-sm">{selectedInscricao.dimensoes || "-"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Área:</span>
-                        <p className="text-sm">{selectedInscricao.area_m2?.toFixed(2) || "-"} m²</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Data */}
-                  <div className="border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3 flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Data da Vistoria
-                    </h3>
-                    <p className="text-sm">
-                      {new Date(selectedInscricao.data_vistoria).toLocaleDateString("pt-BR")}
-                    </p>
-                  </div>
-
-                  {/* Observações */}
-                  {selectedInscricao.observacao && (
+                  <TabsContent value="dados" className="space-y-4 mt-4">
+                    {/* Identificação */}
                     <div className="border rounded-lg p-4">
-                      <h3 className="font-semibold mb-3">Observações</h3>
-                      <p className="text-sm whitespace-pre-wrap">{selectedInscricao.observacao}</p>
-                    </div>
-                  )}
-                </TabsContent>
-
-              <TabsContent value="foto" className="mt-4">
-                <p className="text-center py-8 text-muted-foreground">
-                  Fotos de intervenções estão disponíveis no histórico
-                </p>
-              </TabsContent>
-
-              <TabsContent value="historico" className="mt-4">
-                {intervencoes && intervencoes.length > 0 ? (
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-sm">
-                      Histórico de Intervenções ({intervencoes.length})
-                    </h3>
-                    <div className="space-y-4">
-                      {intervencoes.map((intervencao, index) => (
-                        <div key={intervencao.id} className="border rounded-lg p-4 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <Badge variant="default">
-                              Intervenção #{intervencoes.length - index}
-                            </Badge>
-                            <span className="text-sm text-muted-foreground">
-                              {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
-                            </span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-4 mt-2">
-                            <div>
-                              <span className="text-sm font-medium">Motivo:</span>
-                              <p className="text-sm">{intervencao.motivo}</p>
-                            </div>
-                            {intervencao.tipo_inscricao && (
-                              <div>
-                                <span className="text-sm font-medium">Tipo:</span>
-                                <p className="text-sm">{intervencao.tipo_inscricao}</p>
-                              </div>
-                            )}
-                            {intervencao.cor && (
-                              <div>
-                                <span className="text-sm font-medium">Cor:</span>
-                                <p className="text-sm">{intervencao.cor}</p>
-                              </div>
-                            )}
-                            {intervencao.dimensoes && (
-                              <div>
-                                <span className="text-sm font-medium">Dimensões:</span>
-                                <p className="text-sm">{intervencao.dimensoes}</p>
-                              </div>
-                            )}
-                            {intervencao.area_m2 && (
-                              <div>
-                                <span className="text-sm font-medium">Área:</span>
-                                <p className="text-sm">{intervencao.area_m2} m²</p>
-                              </div>
-                            )}
-                            {intervencao.material_utilizado && (
-                              <div>
-                                <span className="text-sm font-medium">Material:</span>
-                                <p className="text-sm">{intervencao.material_utilizado}</p>
-                              </div>
-                            )}
-                          </div>
+                      <h3 className="font-semibold mb-3">Identificação</h3>
+                      <div className="grid grid-cols-4 gap-4">
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">BR:</span>
+                          <p className="text-sm">{rodovia?.codigo || "-"}</p>
                         </div>
-                      ))}
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Sigla:</span>
+                          <p className="text-sm font-semibold">{sigla}</p>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-sm font-medium text-muted-foreground">Descrição:</span>
+                          <p className="text-sm">{descricao}</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <p className="text-center py-8 text-muted-foreground">
-                    Nenhuma intervenção registrada
-                  </p>
-                )}
-              </TabsContent>
-            </Tabs>
-          );
-        })()}
+
+                    {/* Características */}
+                    <div className="border rounded-lg p-4">
+                      <h3 className="font-semibold mb-3">Características</h3>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Cor:</span>
+                          <p className="text-sm">{selectedInscricao.cor}</p>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Material:</span>
+                          <p className="text-sm">{selectedInscricao.material_utilizado || "-"}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Localização Inicial */}
+                    <div className="border rounded-lg p-4">
+                      <h3 className="font-semibold mb-3 flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        Localização Inicial
+                      </h3>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">km Inicial:</span>
+                          <p className="text-sm">{selectedInscricao.km_inicial?.toFixed(2) || "-"}</p>
+                        </div>
+                        {selectedInscricao.latitude_inicial && (
+                          <div>
+                            <span className="text-sm font-medium text-muted-foreground">Latitude:</span>
+                            <p className="text-sm font-mono text-xs">{selectedInscricao.latitude_inicial.toFixed(6)}</p>
+                          </div>
+                        )}
+                        {selectedInscricao.longitude_inicial && (
+                          <div>
+                            <span className="text-sm font-medium text-muted-foreground">Longitude:</span>
+                            <p className="text-sm font-mono text-xs">
+                              {selectedInscricao.longitude_inicial.toFixed(6)}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Dimensões e Área */}
+                    <div className="border rounded-lg p-4">
+                      <h3 className="font-semibold mb-3">Dimensões e Área</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Dimensões:</span>
+                          <p className="text-sm">{selectedInscricao.dimensoes || "-"}</p>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Área:</span>
+                          <p className="text-sm">{selectedInscricao.area_m2?.toFixed(2) || "-"} m²</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Data */}
+                    <div className="border rounded-lg p-4">
+                      <h3 className="font-semibold mb-3 flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        Data da Vistoria
+                      </h3>
+                      <p className="text-sm">{new Date(selectedInscricao.data_vistoria).toLocaleDateString("pt-BR")}</p>
+                    </div>
+
+                    {/* Observações */}
+                    {selectedInscricao.observacao && (
+                      <div className="border rounded-lg p-4">
+                        <h3 className="font-semibold mb-3">Observações</h3>
+                        <p className="text-sm whitespace-pre-wrap">{selectedInscricao.observacao}</p>
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="foto" className="mt-4">
+                    <p className="text-center py-8 text-muted-foreground">
+                      Fotos de intervenções estão disponíveis no histórico
+                    </p>
+                  </TabsContent>
+
+                  <TabsContent value="historico" className="mt-4">
+                    {intervencoes && intervencoes.length > 0 ? (
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-sm">Histórico de Intervenções ({intervencoes.length})</h3>
+                        <div className="space-y-4">
+                          {intervencoes.map((intervencao, index) => (
+                            <div key={intervencao.id} className="border rounded-lg p-4 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <Badge variant="default">Intervenção #{intervencoes.length - index}</Badge>
+                                <span className="text-sm text-muted-foreground">
+                                  {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4 mt-2">
+                                <div>
+                                  <span className="text-sm font-medium">Motivo:</span>
+                                  <p className="text-sm">{intervencao.motivo}</p>
+                                </div>
+                                {intervencao.tipo_inscricao && (
+                                  <div>
+                                    <span className="text-sm font-medium">Tipo:</span>
+                                    <p className="text-sm">{intervencao.tipo_inscricao}</p>
+                                  </div>
+                                )}
+                                {intervencao.cor && (
+                                  <div>
+                                    <span className="text-sm font-medium">Cor:</span>
+                                    <p className="text-sm">{intervencao.cor}</p>
+                                  </div>
+                                )}
+                                {intervencao.dimensoes && (
+                                  <div>
+                                    <span className="text-sm font-medium">Dimensões:</span>
+                                    <p className="text-sm">{intervencao.dimensoes}</p>
+                                  </div>
+                                )}
+                                {intervencao.area_m2 && (
+                                  <div>
+                                    <span className="text-sm font-medium">Área:</span>
+                                    <p className="text-sm">{intervencao.area_m2} m²</p>
+                                  </div>
+                                )}
+                                {intervencao.material_utilizado && (
+                                  <div>
+                                    <span className="text-sm font-medium">Material:</span>
+                                    <p className="text-sm">{intervencao.material_utilizado}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-center py-8 text-muted-foreground">Nenhuma intervenção registrada</p>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              );
+            })()}
         </DialogContent>
       </Dialog>
 

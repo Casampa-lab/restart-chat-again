@@ -9,7 +9,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Eye,
+  Calendar,
+  Library,
+  FileText,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Plus,
+  ClipboardList,
+  AlertCircle,
+  Filter,
+  CheckCircle,
+  RefreshCw,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
@@ -50,10 +66,10 @@ interface InventarioMarcasLongitudinaisViewerProps {
   onRegistrarIntervencao?: (marcaData: any) => void;
 }
 
-export function InventarioMarcasLongitudinaisViewer({ 
-  loteId, 
+export function InventarioMarcasLongitudinaisViewer({
+  loteId,
   rodoviaId,
-  onRegistrarIntervencao 
+  onRegistrarIntervencao,
 }: InventarioMarcasLongitudinaisViewerProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,8 +85,12 @@ export function InventarioMarcasLongitudinaisViewer({
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
 
   // Hook para contadores de inventário
-  const { contadores, marcoZeroExiste, loading: loadingContadores, refetch: refetchContadores } = 
-    useInventarioContadores('ficha_marcas_longitudinais', loteId, rodoviaId);
+  const {
+    contadores,
+    marcoZeroExiste,
+    loading: loadingContadores,
+    refetch: refetchContadores,
+  } = useInventarioContadores("ficha_marcas_longitudinais", loteId, rodoviaId);
 
   // Buscar tolerância GPS da rodovia
   const { data: rodoviaConfig } = useQuery({
@@ -96,9 +116,7 @@ export function InventarioMarcasLongitudinaisViewer({
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
     const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a =
-      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
@@ -124,17 +142,24 @@ export function InventarioMarcasLongitudinaisViewer({
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
         .not("cadastro_id", "is", null);
-      
+
       if (error) throw error;
-      
+
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
         const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
-        if (reconciliacao?.status === 'pendente_aprovacao' && reconciliacao?.distancia_match_metros <= toleranciaMetros) {
-          map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
+        if (
+          reconciliacao?.status === "pendente_aprovacao" &&
+          reconciliacao?.distancia_match_metros <= toleranciaMetros
+        ) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+            distancia_match_metros: reconciliacao.distancia_match_metros,
+          });
         }
       });
-      
+
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
@@ -143,14 +168,16 @@ export function InventarioMarcasLongitudinaisViewer({
   });
 
   // Contar matches pendentes de reconciliação
-  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter(
-    nec => !nec.reconciliado
-  ).length;
+  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter((nec) => !nec.reconciliado).length;
 
   // Contar TODAS as necessidades com match (não apenas divergências)
   const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
-  const { data: marcas, isLoading, refetch } = useQuery({
+  const {
+    data: marcas,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["inventario-marcas-longitudinais", loteId, rodoviaId, searchTerm, searchLat, searchLng],
     queryFn: async () => {
       let query = supabase
@@ -162,29 +189,30 @@ export function InventarioMarcasLongitudinaisViewer({
 
       if (searchTerm) {
         query = query.or(
-          `tipo_demarcacao.ilike.%${searchTerm}%,cor.ilike.%${searchTerm}%,material.ilike.%${searchTerm}%`
+          `tipo_demarcacao.ilike.%${searchTerm}%,cor.ilike.%${searchTerm}%,material.ilike.%${searchTerm}%`,
         );
       }
 
       const { data, error } = await query;
       if (error) throw error;
-      
+
       let filteredData = data as FichaMarcaLongitudinal[];
 
       if (searchLat && searchLng) {
         const lat = parseFloat(searchLat);
         const lng = parseFloat(searchLng);
-        
+
         if (!isNaN(lat) && !isNaN(lng)) {
           filteredData = filteredData
             .map((marca) => ({
               ...marca,
-            distance: marca.latitude_inicial && marca.longitude_inicial
-              ? calculateDistance(lat, lng, marca.latitude_inicial, marca.longitude_inicial)
-              : Infinity,
-          }))
-          .filter((marca) => marca.distance <= toleranciaMetros)
-          .sort((a, b) => a.distance - b.distance);
+              distance:
+                marca.latitude_inicial && marca.longitude_inicial
+                  ? calculateDistance(lat, lng, marca.latitude_inicial, marca.longitude_inicial)
+                  : Infinity,
+            }))
+            .filter((marca) => marca.distance <= toleranciaMetros)
+            .sort((a, b) => a.distance - b.distance);
         }
       } else {
         filteredData = filteredData.sort((a, b) => (a.km_inicial || 0) - (b.km_inicial || 0));
@@ -195,34 +223,35 @@ export function InventarioMarcasLongitudinaisViewer({
   });
 
   // Filtrar marcas com matches pendentes se necessário
-  const filteredMarcas = marcas?.filter(marca => {
-    if (!showOnlyPendentes) return true;
-    const nec = necessidadesMap?.get(marca.id);
-    return nec && !nec.reconciliado;
-  }) || [];
+  const filteredMarcas =
+    marcas?.filter((marca) => {
+      if (!showOnlyPendentes) return true;
+      const nec = necessidadesMap?.get(marca.id);
+      return nec && !nec.reconciliado;
+    }) || [];
 
   // Função para ordenar dados
-  const sortedMarcas = filteredMarcas ? [...filteredMarcas].sort((a, b) => {
-    if (!sortColumn) return 0;
-    
-    let aVal: any = a[sortColumn as keyof FichaMarcaLongitudinal];
-    let bVal: any = b[sortColumn as keyof FichaMarcaLongitudinal];
-    
-    if (aVal == null) aVal = "";
-    if (bVal == null) bVal = "";
-    
-    if (typeof aVal === "string" && typeof bVal === "string") {
-      return sortDirection === "asc" 
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    }
-    
-    if (typeof aVal === "number" && typeof bVal === "number") {
-      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
-    }
-    
-    return 0;
-  }) : [];
+  const sortedMarcas = filteredMarcas
+    ? [...filteredMarcas].sort((a, b) => {
+        if (!sortColumn) return 0;
+
+        let aVal: any = a[sortColumn as keyof FichaMarcaLongitudinal];
+        let bVal: any = b[sortColumn as keyof FichaMarcaLongitudinal];
+
+        if (aVal == null) aVal = "";
+        if (bVal == null) bVal = "";
+
+        if (typeof aVal === "string" && typeof bVal === "string") {
+          return sortDirection === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        }
+
+        if (typeof aVal === "number" && typeof bVal === "number") {
+          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+        }
+
+        return 0;
+      })
+    : [];
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -235,16 +264,14 @@ export function InventarioMarcasLongitudinaisViewer({
 
   const SortIcon = ({ column }: { column: string }) => {
     if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3 ml-1" />;
-    return sortDirection === "asc" 
-      ? <ArrowUp className="h-3 w-3 ml-1" />
-      : <ArrowDown className="h-3 w-3 ml-1" />;
+    return sortDirection === "asc" ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />;
   };
 
   return (
     <>
       <Card>
         <CardHeader>
-            <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex flex-col gap-2">
               <CardTitle className="flex items-center gap-2">
                 <Library className="h-5 w-5" />
@@ -280,22 +307,17 @@ export function InventarioMarcasLongitudinaisViewer({
                 <ClipboardList className="h-4 w-4" />
                 Ver Intervenções
               </Button>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => setShowRegistrarNaoCadastrado(true)}
-                className="gap-2"
-              >
-              <Plus className="h-4 w-4" />
-              Item Novo
+              <Button variant="default" size="sm" onClick={() => setShowRegistrarNaoCadastrado(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Item Novo
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Contador de Matches a Reconciliar */}
-          {totalMatchesProcessados > 0 && (
-            matchesPendentes === 0 ? (
+          {totalMatchesProcessados > 0 &&
+            (matchesPendentes === 0 ? (
               // Estado OK - Sem divergências
               <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/20 to-green-500/10 border-2 border-green-500/40 rounded-lg shadow-sm">
                 <div className="flex items-center gap-4">
@@ -305,7 +327,7 @@ export function InventarioMarcasLongitudinaisViewer({
                   <div>
                     <div className="font-bold text-base flex items-center gap-2">
                       <span className="text-2xl font-extrabold text-green-600">{totalMatchesProcessados}</span>
-                      <span>{totalMatchesProcessados === 1 ? 'item verificado' : 'itens verificados'}</span>
+                      <span>{totalMatchesProcessados === 1 ? "item verificado" : "itens verificados"}</span>
                     </div>
                     <div className="text-sm text-muted-foreground mt-0.5">
                       ✅ Inventário OK - Projeto e Sistema em conformidade
@@ -345,10 +367,10 @@ export function InventarioMarcasLongitudinaisViewer({
                     <AlertCircle className="h-6 w-6 text-warning" />
                   </div>
                   <div>
-                  <div className="font-bold text-base flex items-center gap-2">
-                    <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
-                    <span>{matchesPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
-                  </div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
+                      <span>{matchesPendentes === 1 ? "match a reconciliar" : "matches a reconciliar"}</span>
+                    </div>
                     <div className="text-sm text-muted-foreground mt-0.5">
                       🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
                     </div>
@@ -366,8 +388,7 @@ export function InventarioMarcasLongitudinaisViewer({
                   </Label>
                 </div>
               </div>
-            )
-          )}
+            ))}
 
           {/* Campos de Pesquisa */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -397,16 +418,14 @@ export function InventarioMarcasLongitudinaisViewer({
           </div>
 
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Carregando inventário...
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Carregando inventário...</div>
           ) : sortedMarcas && sortedMarcas.length > 0 ? (
             <div className="border rounded-lg overflow-hidden">
               <div className="max-h-[600px] overflow-y-auto">
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("snv")}
                       >
@@ -415,7 +434,7 @@ export function InventarioMarcasLongitudinaisViewer({
                           <SortIcon column="snv" />
                         </div>
                       </TableHead>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("tipo_demarcacao")}
                       >
@@ -424,7 +443,7 @@ export function InventarioMarcasLongitudinaisViewer({
                           <SortIcon column="tipo_demarcacao" />
                         </div>
                       </TableHead>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("posicao")}
                       >
@@ -433,7 +452,7 @@ export function InventarioMarcasLongitudinaisViewer({
                           <SortIcon column="posicao" />
                         </div>
                       </TableHead>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("cor")}
                       >
@@ -442,7 +461,7 @@ export function InventarioMarcasLongitudinaisViewer({
                           <SortIcon column="cor" />
                         </div>
                       </TableHead>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("km_inicial")}
                       >
@@ -452,7 +471,7 @@ export function InventarioMarcasLongitudinaisViewer({
                         </div>
                       </TableHead>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("material")}
                       >
@@ -461,7 +480,7 @@ export function InventarioMarcasLongitudinaisViewer({
                           <SortIcon column="material" />
                         </div>
                       </TableHead>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("extensao_metros")}
                       >
@@ -470,7 +489,7 @@ export function InventarioMarcasLongitudinaisViewer({
                           <SortIcon column="extensao_metros" />
                         </div>
                       </TableHead>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("servico")}
                       >
@@ -479,7 +498,7 @@ export function InventarioMarcasLongitudinaisViewer({
                           <SortIcon column="servico" />
                         </div>
                       </TableHead>
-                      <TableHead 
+                      <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("status_revisao")}
                       >
@@ -494,14 +513,12 @@ export function InventarioMarcasLongitudinaisViewer({
                   <TableBody>
                     {sortedMarcas.map((marca) => {
                       const necessidade = necessidadesMap?.get(marca.id);
-                      
+
                       return (
                         <TableRow key={marca.id} className="hover:bg-muted/50">
                           <TableCell className="font-medium">{marca.snv || "-"}</TableCell>
                           <TableCell>
-                            <Badge variant="outline">
-                              {marca.tipo_demarcacao || "-"}
-                            </Badge>
+                            <Badge variant="outline">{marca.tipo_demarcacao || "-"}</Badge>
                           </TableCell>
                           <TableCell>
                             <Badge variant="secondary" className="text-xs">
@@ -510,8 +527,10 @@ export function InventarioMarcasLongitudinaisViewer({
                           </TableCell>
                           <TableCell>{marca.cor || "-"}</TableCell>
                           <TableCell className="text-center">
-                            {marca.km_inicial !== null && marca.km_inicial !== undefined && 
-                             marca.km_final !== null && marca.km_final !== undefined
+                            {marca.km_inicial !== null &&
+                            marca.km_inicial !== undefined &&
+                            marca.km_final !== null &&
+                            marca.km_final !== undefined
                               ? `${marca.km_inicial.toFixed(2)} - ${marca.km_final.toFixed(2)}`
                               : marca.km_inicial !== null && marca.km_inicial !== undefined
                                 ? marca.km_inicial.toFixed(2)
@@ -519,9 +538,7 @@ export function InventarioMarcasLongitudinaisViewer({
                           </TableCell>
                           {searchLat && searchLng && (
                             <TableCell>
-                              <Badge variant="secondary">
-                                {(marca as any).distance?.toFixed(1)}m
-                              </Badge>
+                              <Badge variant="secondary">{(marca as any).distance?.toFixed(1)}m</Badge>
                             </TableCell>
                           )}
                           <TableCell className="text-center">
@@ -536,20 +553,17 @@ export function InventarioMarcasLongitudinaisViewer({
                           </TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (
-                              <Badge 
-                                variant="outline"
-                                className="text-xs"
-                              >
+                              <Badge variant="outline" className="text-xs">
                                 {necessidade.servico_final || necessidade.servico || "N/A"}
                               </Badge>
                             ) : (
                               <Badge variant="outline" className="text-muted-foreground text-xs">
-                                Sem previsão
+                                Sem match automático
                               </Badge>
                             )}
                           </TableCell>
                           <TableCell className="text-center">
-                            {necessidade?.status_revisao === 'pendente_coordenador' ? (
+                            {necessidade?.status_revisao === "pendente_coordenador" ? (
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -631,8 +645,8 @@ export function InventarioMarcasLongitudinaisViewer({
               <span>Ficha de Visualização - Marca Longitudinal</span>
               <div className="flex gap-2">
                 {onRegistrarIntervencao && (
-                  <Button 
-                    variant="default" 
+                  <Button
+                    variant="default"
                     size="sm"
                     onClick={() => {
                       onRegistrarIntervencao(selectedMarca);
@@ -642,11 +656,7 @@ export function InventarioMarcasLongitudinaisViewer({
                     Registrar Intervenção
                   </Button>
                 )}
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setSelectedMarca(null)}
-                >
+                <Button variant="ghost" size="sm" onClick={() => setSelectedMarca(null)}>
                   Voltar
                 </Button>
               </div>
@@ -691,9 +701,7 @@ export function InventarioMarcasLongitudinaisViewer({
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Largura da Faixa (m):</span>
                     <p className="text-sm">
-                      {selectedMarca.largura_cm 
-                        ? (selectedMarca.largura_cm / 100).toFixed(2) 
-                        : "-"}
+                      {selectedMarca.largura_cm ? (selectedMarca.largura_cm / 100).toFixed(2) : "-"}
                     </p>
                   </div>
                 </div>
@@ -712,17 +720,13 @@ export function InventarioMarcasLongitudinaisViewer({
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Latitude Inicial:</span>
                       <p className="text-sm">
-                        {selectedMarca.latitude_inicial 
-                          ? selectedMarca.latitude_inicial.toFixed(6) 
-                          : "-"}
+                        {selectedMarca.latitude_inicial ? selectedMarca.latitude_inicial.toFixed(6) : "-"}
                       </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Longitude Inicial:</span>
                       <p className="text-sm">
-                        {selectedMarca.longitude_inicial 
-                          ? selectedMarca.longitude_inicial.toFixed(6) 
-                          : "-"}
+                        {selectedMarca.longitude_inicial ? selectedMarca.longitude_inicial.toFixed(6) : "-"}
                       </p>
                     </div>
                   </div>
@@ -742,17 +746,13 @@ export function InventarioMarcasLongitudinaisViewer({
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Latitude Final:</span>
                       <p className="text-sm">
-                        {selectedMarca.latitude_final 
-                          ? selectedMarca.latitude_final.toFixed(6) 
-                          : "-"}
+                        {selectedMarca.latitude_final ? selectedMarca.latitude_final.toFixed(6) : "-"}
                       </p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Longitude Final:</span>
                       <p className="text-sm">
-                        {selectedMarca.longitude_final 
-                          ? selectedMarca.longitude_final.toFixed(6) 
-                          : "-"}
+                        {selectedMarca.longitude_final ? selectedMarca.longitude_final.toFixed(6) : "-"}
                       </p>
                     </div>
                   </div>
@@ -794,9 +794,7 @@ export function InventarioMarcasLongitudinaisViewer({
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Extensão (km):</span>
                     <p className="text-sm">
-                      {selectedMarca.extensao_metros 
-                        ? (selectedMarca.extensao_metros / 1000).toFixed(2) 
-                        : "-"}
+                      {selectedMarca.extensao_metros ? (selectedMarca.extensao_metros / 1000).toFixed(2) : "-"}
                     </p>
                   </div>
                 </div>
@@ -818,9 +816,7 @@ export function InventarioMarcasLongitudinaisViewer({
                   </h3>
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Data da Vistoria:</span>
-                    <p className="text-sm">
-                      {new Date(selectedMarca.data_vistoria).toLocaleDateString("pt-BR")}
-                    </p>
+                    <p className="text-sm">{new Date(selectedMarca.data_vistoria).toLocaleDateString("pt-BR")}</p>
                   </div>
                 </div>
               </TabsContent>
@@ -834,16 +830,12 @@ export function InventarioMarcasLongitudinaisViewer({
               <TabsContent value="historico" className="mt-4">
                 {intervencoes && intervencoes.length > 0 ? (
                   <div className="space-y-4">
-                    <h3 className="font-semibold text-sm">
-                      Histórico de Intervenções ({intervencoes.length})
-                    </h3>
+                    <h3 className="font-semibold text-sm">Histórico de Intervenções ({intervencoes.length})</h3>
                     <div className="space-y-4">
                       {intervencoes.map((intervencao, index) => (
                         <div key={intervencao.id} className="border rounded-lg p-4 space-y-2">
                           <div className="flex items-center justify-between">
-                            <Badge variant="default">
-                              Intervenção #{intervencoes.length - index}
-                            </Badge>
+                            <Badge variant="default">Intervenção #{intervencoes.length - index}</Badge>
                             <span className="text-sm text-muted-foreground">
                               {new Date(intervencao.data_intervencao).toLocaleDateString("pt-BR")}
                             </span>
@@ -899,7 +891,10 @@ export function InventarioMarcasLongitudinaisViewer({
                               <div className="col-span-2">
                                 <span className="text-sm font-medium">Foto:</span>
                                 <img
-                                  src={supabase.storage.from('marcas-longitudinais').getPublicUrl(intervencao.foto_url).data.publicUrl}
+                                  src={
+                                    supabase.storage.from("marcas-longitudinais").getPublicUrl(intervencao.foto_url)
+                                      .data.publicUrl
+                                  }
                                   alt="Intervenção"
                                   className="mt-2 rounded-lg max-w-full h-auto"
                                 />
@@ -911,9 +906,7 @@ export function InventarioMarcasLongitudinaisViewer({
                     </div>
                   </div>
                 ) : (
-                  <p className="text-center py-8 text-muted-foreground">
-                    Nenhuma intervenção registrada
-                  </p>
+                  <p className="text-center py-8 text-muted-foreground">Nenhuma intervenção registrada</p>
                 )}
               </TabsContent>
             </Tabs>
@@ -936,7 +929,7 @@ export function InventarioMarcasLongitudinaisViewer({
         cadastro={selectedMarca}
         tipoElemento="marcas_longitudinais"
         onReconciliar={async () => {
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 300));
           refetchNecessidades();
           refetch();
           setReconciliacaoOpen(false);
