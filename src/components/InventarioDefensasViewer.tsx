@@ -607,6 +607,12 @@ export const InventarioDefensasViewer = ({
               ))}
             </TableBody>
           </Table>
+          
+          {sortedDefensas && sortedDefensas.length > 0 && (
+            <p className="text-sm text-muted-foreground text-center mt-4">
+              {sortedDefensas.length} {sortedDefensas.length === 1 ? "defensa encontrada" : "defensas encontradas"}
+            </p>
+          )}
         </div>
       )}
 

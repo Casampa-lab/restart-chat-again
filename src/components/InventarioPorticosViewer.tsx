@@ -674,6 +674,12 @@ export function InventarioPorticosViewer({ loteId, rodoviaId, onRegistrarInterve
               </Table>
             </div>
           )}
+          
+          {sortedPorticos && sortedPorticos.length > 0 && (
+            <p className="text-sm text-muted-foreground text-center mt-4">
+              {sortedPorticos.length} {sortedPorticos.length === 1 ? "pórtico encontrado" : "pórticos encontrados"}
+            </p>
+          )}
         </CardContent>
       </Card>
 

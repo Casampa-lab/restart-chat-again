@@ -702,6 +702,12 @@ export function InventarioCilindrosViewer({
               </Table>
             </div>
           </div>
+          
+          {sortedCilindros && sortedCilindros.length > 0 && (
+            <p className="text-sm text-muted-foreground text-center mt-4">
+              {sortedCilindros.length} {sortedCilindros.length === 1 ? "cilindro encontrado" : "cilindros encontrados"}
+            </p>
+          )}
         </CardContent>
       </Card>
 
