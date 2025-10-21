@@ -389,32 +389,8 @@ const Index = () => {
       );
     }
 
-    // Senão, mostrar badges separados (comportamento atual)
-    return (
-      <div className="flex items-center gap-1">
-        <Badge 
-          variant="secondary" 
-          className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate("/dashboard-necessidades");
-          }}
-          title="Cadastro - Clique para ver Necessidades"
-        >
-          {countCadastro || 0}
-        </Badge>
-        <Badge 
-          className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate("/dashboard-necessidades");
-          }}
-          title="Necessidades - Clique para acessar"
-        >
-          {countNecessidades || 0}
-        </Badge>
-      </div>
-    );
+    // Antes do Marco Zero: não mostrar badges
+    return null;
   };
 
   useEffect(() => {
