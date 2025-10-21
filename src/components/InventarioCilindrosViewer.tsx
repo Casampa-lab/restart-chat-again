@@ -521,8 +521,9 @@ export function InventarioCilindrosViewer({
               />
             </div>
 
-            <div className="rounded-md border overflow-x-auto">
-              <Table>
+            <div className="border rounded-lg overflow-hidden">
+              <div className="max-h-[600px] overflow-y-auto">
+                <Table>
                 <TableHeader className="sticky top-0 bg-muted z-10">
                   <TableRow>
                     {searchLat && searchLon && <TableHead>Distância</TableHead>}
@@ -700,6 +701,7 @@ export function InventarioCilindrosViewer({
                   )}
                 </TableBody>
               </Table>
+              </div>
             </div>
           </div>
           
