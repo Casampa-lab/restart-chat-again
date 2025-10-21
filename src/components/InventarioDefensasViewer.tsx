@@ -520,7 +520,7 @@ export const InventarioDefensasViewer = ({
                     Contenção
                   </div>
                 </TableHead>
-                <TableHead className="text-center w-[140px]">
+                <TableHead className="text-center w-[80px]">
                   <div className="whitespace-normal leading-tight">Origem</div>
                 </TableHead>
                 <TableHead className="text-center">
@@ -547,7 +547,7 @@ export const InventarioDefensasViewer = ({
                   <TableCell className="text-center">
                     <TipoOrigemBadge 
                       tipoOrigem={(defensa as any).origem || 'cadastro_inicial'}
-                      showLabel={true}
+                      showLabel={false}
                     />
                   </TableCell>
                   <TableCell className="text-center">
