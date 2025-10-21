@@ -474,7 +474,6 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
         novoElemento = {
           ...baseData,
           km_inicial: necessidade.km_inicial,
-          km_final: necessidade.km_final,
           sigla: necessidade.sigla,
           tipo_inscricao: necessidade.tipo_inscricao,
           cor: necessidade.cor,
@@ -483,14 +482,14 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           espessura_mm: necessidade.espessura_mm,
           material_utilizado: necessidade.material_utilizado,
           snv: necessidade.snv,
-          latitude: necessidade.latitude, // ✅ COORDENADA
-          longitude: necessidade.longitude, // ✅ COORDENADA
+          latitude_inicial: necessidade.latitude,
+          longitude_inicial: necessidade.longitude,
         };
         break;
       case "placas": // ELEMENTO PONTUAL
         novoElemento = {
           ...baseData,
-          km: necessidade.km,
+          km_inicial: necessidade.km,
           codigo: necessidade.codigo,
           tipo: necessidade.tipo_placa,
           modelo: necessidade.codigo,
@@ -500,20 +499,20 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
           dimensoes_mm: necessidade.dimensoes_mm,
           posicao: necessidade.posicao,
           snv: necessidade.snv,
-          latitude: necessidade.latitude, // ✅ COORDENADA INICIAL
-          longitude: necessidade.longitude, // ✅ COORDENADA INICIAL
+          latitude_inicial: necessidade.latitude,
+          longitude_inicial: necessidade.longitude,
         };
         break;
       case "porticos": // ELEMENTO PONTUAL
         novoElemento = {
           ...baseData,
-          km: necessidade.km,
+          km_inicial: necessidade.km,
           tipo: necessidade.tipo,
           vao_horizontal_m: necessidade.vao_horizontal_m,
           altura_livre_m: necessidade.altura_livre_m,
           snv: necessidade.snv,
-          latitude: necessidade.latitude, // ✅ COORDENADA INICIAL
-          longitude: necessidade.longitude, // ✅ COORDENADA INICIAL
+          latitude_inicial: necessidade.latitude,
+          longitude_inicial: necessidade.longitude,
         };
         break;
     }
