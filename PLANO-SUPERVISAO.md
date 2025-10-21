@@ -85,7 +85,7 @@ Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de *
 
 **Dados Coletados por Elemento:**
 
-- Localização (KM, latitude, longitude)
+- Localização (KM_inicial, latitude_inicial, longitude_inicial)
 - Características técnicas (material, dimensões, cores)
 - Estado de conservação
 - Retrorrefletância (quando aplicável)
@@ -481,9 +481,9 @@ CREATE TABLE leituras_retrorrefletancia (
   fiscalizacao_id UUID REFERENCES fiscalizacoes(id),
   elemento_tipo TEXT, -- 'marca_longitudinal', 'placa', etc
   elemento_id UUID,
-  km_inicial NUMERIC,
-  latitude_inicial NUMERIC,
-  longitude_inicial NUMERIC,
+  km NUMERIC,
+  latitude NUMERIC,
+  longitude NUMERIC,
   valor_medido NUMERIC,
   valor_minimo NUMERIC,
   conforme BOOLEAN,
