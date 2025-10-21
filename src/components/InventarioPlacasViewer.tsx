@@ -88,7 +88,7 @@ interface FichaPlaca {
   velocidade: string | null;
   lado: string | null;
   posicao: string | null;
-  km: number | null;
+  km_inicial: number | null;
   latitude_inicial: number | null;
   longitude_inicial: number | null;
   detalhamento_pagina: number | null;
@@ -227,7 +227,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
         }
       } else {
         // Se não houver busca por coordenadas, ordena por km por padrão
-        filteredData = filteredData.sort((a, b) => (a.km || 0) - (b.km || 0));
+        filteredData = filteredData.sort((a, b) => (a.km_inicial || 0) - (b.km_inicial || 0));
       }
 
       return filteredData;
@@ -241,9 +241,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
       const { data, error } = await supabase
         .from("necessidades_placas")
         .select(`
-          id, servico, servico_final, cadastro_id, codigo, tipo, km, divergencia, 
+          id, servico, servico_final, cadastro_id, codigo, tipo, km_inicial, divergencia, 
           solucao_planilha, servico_inferido, revisao_solicitada, localizado_em_campo, 
-          lado, suporte, substrato, latitude, longitude,
+          lado, suporte, substrato, latitude_inicial, longitude_inicial,
           reconciliacao:reconciliacoes(
             id,
             status,
@@ -637,7 +637,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <TableCell>
                             <Badge variant="secondary">{placa.suporte || "-"}</Badge>
                           </TableCell>
-                          <TableCell className="text-center">{placa.km?.toFixed(2) || "-"}</TableCell>
+                          <TableCell className="text-center">{placa.km_inicial?.toFixed(2) || "-"}</TableCell>
                           <TableCell>{placa.lado || "-"}</TableCell>
                           {searchLat && searchLng && (
                             <TableCell>
@@ -831,7 +831,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <div className="grid grid-cols-4 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">km:</span>
-                      <p className="text-sm">{selectedPlaca.km?.toFixed(2) || "-"}</p>
+                      <p className="text-sm">{selectedPlaca.km_inicial?.toFixed(2) || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Latitude:</span>

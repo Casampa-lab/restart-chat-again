@@ -61,7 +61,7 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
 
 interface FichaPortico {
   id: string;
-  km: number | null;
+  km_inicial: number | null;
   latitude_inicial: number | null;
   longitude_inicial: number | null;
   data_vistoria: string;
@@ -167,8 +167,8 @@ export function InventarioPorticosViewer({
         }
       } else {
         filteredData = filteredData.sort((a, b) => {
-          const kmA = a.km || 0;
-          const kmB = b.km || 0;
+          const kmA = a.km_inicial || 0;
+          const kmB = b.km_inicial || 0;
           return kmA - kmB;
         });
       }
@@ -184,8 +184,8 @@ export function InventarioPorticosViewer({
       const { data, error } = await supabase
         .from("necessidades_porticos")
         .select(`
-          id, servico, servico_final, cadastro_id, tipo, km, divergencia, 
-          latitude, longitude,
+          id, servico, servico_final, cadastro_id, tipo, km_inicial, divergencia, 
+          latitude_inicial, longitude_inicial,
           reconciliacao:reconciliacoes(
             id,
             status,
@@ -569,7 +569,7 @@ export function InventarioPorticosViewer({
                         <div className="flex items-center justify-center gap-1">
                           <MapPin className="h-3 w-3 text-muted-foreground" />
                           <span className="font-mono text-sm">
-                            {portico.km?.toFixed(3) || "-"}
+                            {portico.km_inicial?.toFixed(3) || "-"}
                           </span>
                         </div>
                       </TableCell>
@@ -763,7 +763,7 @@ export function InventarioPorticosViewer({
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">km:</span>
-                      <p className="text-sm font-mono">{selectedPortico.km?.toFixed(3) || "-"}</p>
+                      <p className="text-sm font-mono">{selectedPortico.km_inicial?.toFixed(3) || "-"}</p>
                     </div>
                     {selectedPortico.latitude_inicial && (
                       <div>
