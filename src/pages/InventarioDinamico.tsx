@@ -100,13 +100,39 @@ export default function InventarioDinamico() {
   const { data: evolucaoDetalhada, isLoading } = useQuery({
     queryKey: ["evolucao-detalhada", tipoElemento],
     queryFn: async () => {
-      const viewName = `vw_${tipoElemento}_evolucao`;
+      // Mapear tipo de elemento para tabela de ficha correspondente
+      const tabelaMap: Record<string, string> = {
+        placas: "ficha_placa",
+        marcas_longitudinais: "ficha_marcas_longitudinais",
+        inscricoes: "ficha_inscricoes",
+        tachas: "ficha_tachas",
+        cilindros: "ficha_cilindros",
+        porticos: "ficha_porticos",
+        defensas: "defensas",
+      };
+      
+      const tabela = tabelaMap[tipoElemento];
+      if (!tabela) return [];
+      
+      // Buscar elementos com dados de reconciliação
       const { data, error } = await supabase
-        .from(viewName as any)
-        .select("*")
-        .order("data_ultima_modificacao", { ascending: false, nullsFirst: false })
+        .from(tabela as any)
+        .select(`
+          *,
+          reconciliacoes!left(
+            reconciliado,
+            tipo_match
+          )
+        `)
+        .eq("modificado_por_intervencao", true)
+        .order("updated_at", { ascending: false, nullsFirst: false })
         .limit(100);
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Erro ao buscar evolução:", error);
+        return [];
+      }
+      
       return data;
     },
   });
@@ -445,13 +471,20 @@ export default function InventarioDinamico() {
                         </TableHeader>
                         <TableBody>
                           {evolucaoDetalhada
-                            .filter((item: any) => item.modificado_por_intervencao)
                             .slice(0, 50)
-                            .map((item: any) => (
+                            .map((item: any) => {
+                              // Extrair dados de reconciliação se existirem
+                              const reconciliacaoInfo = item.reconciliacoes?.[0] ? {
+                                reconciliado: item.reconciliacoes[0].reconciliado,
+                                tipo_match: item.reconciliacoes[0].tipo_match
+                              } : undefined;
+                              
+                              return (
                               <TableRow key={item.id}>
                                 <TableCell>
                                   <OrigemReconciliacaoBadges
-                                    origem={item.tipo_origem}
+                                    origem={item.origem || item.tipo_origem || 'cadastro_inicial'}
+                                    reconciliacaoInfo={reconciliacaoInfo}
                                     modificadoPorIntervencao={item.modificado_por_intervencao}
                                     showLabel={false}
                                   />
@@ -502,7 +535,8 @@ export default function InventarioDinamico() {
                                   </Badge>
                                 </TableCell>
                               </TableRow>
-                            ))}
+                            );
+                            })}
                         </TableBody>
                       </Table>
                     </div>

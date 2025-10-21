@@ -38,7 +38,7 @@ export function TipoOrigemBadge({
     cadastro_inicial: {
       label: "Cadastro Inicial",
       variant: "secondary" as const,
-      color: "fill-muted-foreground",
+      color: "fill-gray-400",
     },
     execucao: {
       label: "Execução",
