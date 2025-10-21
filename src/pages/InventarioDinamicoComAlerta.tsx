@@ -223,11 +223,42 @@ export default function InventarioDinamicoComAlerta() {
   const tipoAtivo = getTipoElementoAtivo();
 
   // Calcular contadores por grupo
+  // PONTUAIS: contam itens | LINEARES: somam extensão em metros
   const getContadores = () => {
-    const todos = necessidades.length;
-    const sh = necessidades.filter(n => ['marcas_longitudinais', 'cilindros', 'inscricoes', 'tachas'].includes(n.tipo_elemento)).length;
-    const sv = necessidades.filter(n => ['placas', 'porticos'].includes(n.tipo_elemento)).length;
-    const def = necessidades.filter(n => n.tipo_elemento === 'defensas').length;
+    // Elementos pontuais (contam itens)
+    const placas = necessidades.filter(n => n.tipo_elemento === 'placas').length;
+    const porticos = necessidades.filter(n => n.tipo_elemento === 'porticos').length;
+    const inscricoes = necessidades.filter(n => n.tipo_elemento === 'inscricoes').length;
+    
+    // Elementos lineares (somam extensão)
+    const marcasLong = necessidades
+      .filter(n => n.tipo_elemento === 'marcas_longitudinais')
+      .reduce((acc, n) => acc + ((n.km_final || n.km_inicial || 0) - (n.km_inicial || 0)) * 1000, 0);
+    
+    const tachas = necessidades
+      .filter(n => n.tipo_elemento === 'tachas')
+      .reduce((acc, n) => acc + ((n.km_final || n.km_inicial || 0) - (n.km_inicial || 0)) * 1000, 0);
+    
+    const cilindros = necessidades
+      .filter(n => n.tipo_elemento === 'cilindros')
+      .reduce((acc, n) => acc + ((n.km_final || n.km_inicial || 0) - (n.km_inicial || 0)) * 1000, 0);
+    
+    const defensas = necessidades
+      .filter(n => n.tipo_elemento === 'defensas')
+      .reduce((acc, n) => acc + ((n.km_final || n.km_inicial || 0) - (n.km_inicial || 0)) * 1000, 0);
+    
+    // SH: soma de lineares (m) + inscrições (itens)
+    const sh = Math.round(marcasLong + tachas + cilindros) + inscricoes;
+    
+    // SV: soma de pontuais (itens)
+    const sv = placas + porticos;
+    
+    // Defensas: extensão (m)
+    const def = Math.round(defensas);
+    
+    // Todos: total de itens pontuais + total metros lineares
+    const todos = (placas + porticos + inscricoes) + Math.round(marcasLong + tachas + cilindros + defensas);
+    
     return { todos, sh, sv, def };
   };
 
