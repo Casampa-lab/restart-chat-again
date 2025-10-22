@@ -926,8 +926,8 @@ serve(async (req) => {
                 }
 
                 // Conversões especiais usando a chave original
-                // PRIORIDADE: Garantir que km=0 sempre seja mapeado PRIMEIRO
-                if (normalizedKey === "km" || normalizedKey === "km_inicial" || normalizedKey === "km_final") {
+                // IMPORTANTE: Apenas processar campos que já foram mapeados corretamente
+                if (normalizedKey === "km_inicial" || normalizedKey === "km_final") {
                   const kmValue = Number(cleanedValue);
                   if (!isNaN(kmValue)) {
                     record[normalizedKey] = kmValue;
