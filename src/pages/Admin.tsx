@@ -34,6 +34,7 @@ import { SnvShapefileUploader } from "@/components/admin/SnvShapefileUploader";
 import { ResetDatabaseButton } from "@/components/admin/ResetDatabaseButton";
 import { ParametrosMatchManager } from "@/components/admin/ParametrosMatchManager";
 import { RelatorioMatching } from "@/components/admin/RelatorioMatching";
+import { ExecutarMatching } from "@/components/admin/ExecutarMatching";
 
 import logoOperaVia from "@/assets/logo-operavia.png";
 
@@ -364,6 +365,7 @@ const Admin = () => {
 
           <TabsContent value="matching">
             <div className="space-y-6">
+              <ExecutarMatching />
               <ParametrosMatchManager />
               <RelatorioMatching rodoviaId={selectedRodoviaId} loteId={selectedLoteId} />
             </div>
