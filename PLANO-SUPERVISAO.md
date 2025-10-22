@@ -11,6 +11,43 @@
 
 ---
 
+## 🧩 PADRÃO DEFINITIVO DE CAMPOS DE LOCALIZAÇÃO (OBRIGATÓRIO)
+
+### ✅ 1. Padrão único para todos os datasets (Cadastro e Necessidades)
+
+Os campos de localização devem **sempre** ter sufixo:
+
+**Elementos Pontuais:**
+- `km_inicial`
+- `latitude_inicial`
+- `longitude_inicial`
+
+**Elementos Lineares:**
+- `km_inicial`, `km_final`
+- `latitude_inicial`, `longitude_inicial`
+- `latitude_final`, `longitude_final`
+
+**❌ PROIBIDO:** Campos sem sufixo (`km`, `latitude`, `longitude`)
+
+**✅ OBRIGATÓRIO:** O sufixo `_inicial` e `_final` é padronizado em todas as planilhas.
+
+### ✅ 2. Regras de escrita
+
+- **Nunca usar** `KM` ou `Km` — o correto é `km` (minúsculo)
+- Nomes de colunas devem ser usados **exatamente** como definidos
+- O sistema deve converter `"KM"` ou `"Km"` em `km` na importação, alertando o usuário
+
+### ✅ 3. Aplicação da regra
+
+- Essa regra vale para **Cadastro** e **Necessidades** (Projeto) igualmente
+- Todos os cálculos, matches e validações de posição utilizam esses campos como base
+- Campos como `lado`, `codigo`, `tipo`, `trecho_id` **não** possuem sufixo
+- O parser deve apenas interpretar equivalentes (ex.: `Latitude_Inicial`, `Longitude inicial`) sem renomear
+
+**📌 Nota:** Este padrão está documentado em todos os PLANOs do sistema para garantir consistência.
+
+---
+
 ## 🎯 OBJETIVO DA SUPERVISÃO
 
 Supervisionar e apoiar a fiscalização do DNIT na execução dos serviços de **sinalização horizontal, sinalização vertical e dispositivos de segurança** executados pelas empresas contratadas através do Programa BR-LEGAL 2.
