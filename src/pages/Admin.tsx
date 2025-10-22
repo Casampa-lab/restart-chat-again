@@ -369,24 +369,42 @@ const Admin = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    🗺️ Mapa de Necessidades - Placas
+                    🗺️ Mapas de Necessidades - Elementos Pontuais
                   </CardTitle>
                   <CardDescription>
-                    Visualize necessidades de placas no mapa, ordenadas por KM (sem filtros de distância)
+                    Visualize necessidades no mapa, ordenadas por KM (sem filtros de distância)
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-2">
                   <Button
                     onClick={() => navigate(`/mapa-necessidades-placas?rodovia=${selectedRodoviaId}&lote=${selectedLoteId}`)}
                     disabled={!selectedRodoviaId || !selectedLoteId}
                     className="w-full"
                   >
                     <MapPin className="mr-2 h-4 w-4" />
-                    Abrir Mapa de Necessidades
+                    🚏 Mapa de Placas
+                  </Button>
+                  <Button
+                    onClick={() => navigate(`/mapa-necessidades-porticos?rodovia=${selectedRodoviaId}&lote=${selectedLoteId}`)}
+                    disabled={!selectedRodoviaId || !selectedLoteId}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    🌉 Mapa de Pórticos
+                  </Button>
+                  <Button
+                    onClick={() => navigate(`/mapa-necessidades-inscricoes?rodovia=${selectedRodoviaId}&lote=${selectedLoteId}`)}
+                    disabled={!selectedRodoviaId || !selectedLoteId}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    ➡️ Mapa de Inscrições
                   </Button>
                   {(!selectedRodoviaId || !selectedLoteId) && (
                     <p className="text-sm text-muted-foreground mt-2">
-                      Selecione uma rodovia e lote para visualizar o mapa
+                      Selecione uma rodovia e lote para visualizar os mapas
                     </p>
                   )}
                 </CardContent>
