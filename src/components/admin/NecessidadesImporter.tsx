@@ -519,8 +519,8 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           tipo_inscricao: row["Sigla"] || row["sigla"],
           cor: row["Cor"] || row["cor"],
           km_inicial: sanitizarNumerico(getFirstValid("Km inicial", "Km", "KM", "km")),
-          latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
-          longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
+          latitude_inicial: converterCoordenada(row["Latitude"] || row["latitude"]),
+          longitude_inicial: converterCoordenada(row["Longitude"] || row["longitude"]),
           material_utilizado: row["Material"] || row["material"],
           espessura_mm: sanitizarNumerico(row["Espessura (mm)"] || row["Espessura"] || row["espessura_mm"]),
           area_m2: sanitizarNumerico(row["Área (m²)"] || row["Área"] || row["area_m2"]),
@@ -543,8 +543,8 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
         
         return {
           km_inicial: sanitizarNumerico(getFirstValid("Km inicial", "Km", "KM", "km")),
-          latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
-          longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
+          latitude_inicial: converterCoordenada(row["Latitude"] || row["latitude"]),
+          longitude_inicial: converterCoordenada(row["Longitude"] || row["longitude"]),
           tipo: row["Tipo"] || row["tipo"],
           lado: row["Lado"] || row["lado"],
           altura_livre_m: sanitizarNumerico(row["Altura Livre (m)"] || row["Altura Livre"] || row["altura_livre_m"]),
