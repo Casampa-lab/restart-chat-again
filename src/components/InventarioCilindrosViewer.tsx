@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
+import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Component to show reconciliation status badge
@@ -62,6 +63,10 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
 
 interface Cilindro {
   id: string;
+  origem: string;
+  tipo_origem: string;
+  necessidade_id?: string;
+  match_decision?: string;
   snv: string | null;
   cor_corpo: string;
   cor_refletivo: string | null;
@@ -77,7 +82,9 @@ interface Cilindro {
   espacamento_m: number | null;
   quantidade: number | null;
   observacao: string | null;
-  data_vistoria: string;
+  data_vistoria?: string;
+  data_registro?: string;
+  modificado_por_intervencao?: boolean;
 }
 
 interface IntervencaoCilindro {
@@ -216,12 +223,12 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
     matchesPendentes
   });
 
-  // Buscar cilindros do inventário
+  // Buscar cilindros do inventário dinâmico (cadastro + necessidades "Implantar")
   const { data: cilindros, isLoading } = useQuery({
-    queryKey: ["cilindros", loteId, rodoviaId, searchTerm, searchLat, searchLon],
+    queryKey: ["inventario-dinamico-cilindros", loteId, rodoviaId, searchTerm, searchLat, searchLon],
     queryFn: async () => {
       let query = supabase
-        .from("ficha_cilindros")
+        .from("inventario_dinamico_cilindros")
         .select("*", { count: "exact" })
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
@@ -502,6 +509,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <SortIcon column="snv" />
                       </div>
                     </TableHead>
+                    <TableHead className="text-center">Origem</TableHead>
                     <TableHead 
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("km_inicial")}
@@ -582,13 +590,27 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                           </TableCell>
                         )}
                         <TableCell>{cilindro.snv || "-"}</TableCell>
+                        <TableCell className="text-center">
+                          <TipoOrigemBadge 
+                            tipoOrigem={cilindro.tipo_origem}
+                            modificadoPorIntervencao={cilindro.modificado_por_intervencao}
+                            showLabel={false}
+                          />
+                        </TableCell>
                         <TableCell>{cilindro.km_inicial?.toFixed(3)}</TableCell>
                         <TableCell>{cilindro.km_final?.toFixed(3)}</TableCell>
                         <TableCell>{cilindro.cor_corpo}</TableCell>
                         <TableCell>{cilindro.cor_refletivo || "-"}</TableCell>
                         <TableCell>{cilindro.quantidade || "-"}</TableCell>
                         <TableCell>{cilindro.espacamento_m || "-"}</TableCell>
-                        <TableCell>{new Date(cilindro.data_vistoria).toLocaleDateString("pt-BR")}</TableCell>
+                        <TableCell>
+                          {cilindro.data_vistoria 
+                            ? new Date(cilindro.data_vistoria).toLocaleDateString("pt-BR")
+                            : cilindro.data_registro 
+                              ? new Date(cilindro.data_registro).toLocaleDateString("pt-BR")
+                              : "-"
+                          }
+                        </TableCell>
                         <TableCell className="text-center">
                           {(() => {
                             const necessidade = necessidadesMap?.get(cilindro.id);

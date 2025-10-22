@@ -5763,6 +5763,43 @@ export type Database = {
         }
         Relationships: []
       }
+      inventario_dinamico_cilindros: {
+        Row: {
+          ativo: boolean | null
+          cor_corpo: string | null
+          cor_refletivo: string | null
+          created_at: string | null
+          data_registro: string | null
+          espacamento_m: number | null
+          extensao_km: number | null
+          fotos_urls: string[] | null
+          id: string | null
+          km_final: number | null
+          km_inicial: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          local_implantacao: string | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          match_decision:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          modificado_por_intervencao: boolean | null
+          necessidade_id: string | null
+          observacao: string | null
+          origem: string | null
+          quantidade: number | null
+          rodovia_id: string | null
+          snv: string | null
+          tipo_origem: string | null
+          tipo_refletivo: string | null
+          ultima_intervencao_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       v_auditoria_inventario: {
         Row: {
           aprovado_por: string | null
