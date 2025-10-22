@@ -4,7 +4,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { TipoElementoMatch } from './matchingParams';
 
-export type MatchDecision = 'MATCH_DIRECT' | 'SUBSTITUICAO' | 'AMBIGUOUS' | 'NO_MATCH';
+export type MatchDecision = 'MATCH_DIRECT' | 'SUBSTITUICAO' | 'AMBIGUOUS' | 'NO_MATCH' | 'MULTIPLE_CANDIDATES' | 'GRAY_ZONE';
 
 export interface MatchResult {
   cadastro_id: string | null;
@@ -19,22 +19,39 @@ export interface MatchResult {
  * Executa matching de elemento pontual (PLACA, PORTICO, INSCRICAO)
  * Considera distância GPS + similaridade de atributos obrigatórios
  * 
+ * Se GPS não estiver disponível (lat/lon null), usa fallback por km_inicial.
+ * 
  * @param tipo - Tipo do elemento (PLACA, PORTICO, INSCRICAO)
- * @param lat - Latitude da necessidade
- * @param lon - Longitude da necessidade
+ * @param lat - Latitude da necessidade (null = usar fallback por KM)
+ * @param lon - Longitude da necessidade (null = usar fallback por KM)
  * @param rodoviaId - UUID da rodovia
- * @param atributos - Objeto com atributos da necessidade (ex: {codigo, lado, tipo})
+ * @param atributos - Objeto com atributos da necessidade (ex: {codigo, lado, tipo, km_inicial})
  * @param servico - Tipo de serviço ('Inclusão', 'Substituição', 'Remoção')
  * @returns MatchResult com decisão, score, reason code e divergências
  */
 export async function matchPontual(
   tipo: TipoElementoMatch,
-  lat: number,
-  lon: number,
+  lat: number | null,
+  lon: number | null,
   rodoviaId: string,
   atributos: Record<string, any>,
   servico: string
 ): Promise<MatchResult> {
+  // Se GPS não estiver disponível, garantir que km_inicial está presente
+  if ((lat === null || lon === null) && atributos.km_inicial !== undefined) {
+    // Converter km_inicial para número se necessário
+    atributos.km_inicial = Number(atributos.km_inicial);
+    
+    if (isNaN(atributos.km_inicial)) {
+      throw new Error('km_inicial inválido: não é um número válido');
+    }
+  }
+  
+  // Validar que temos GPS OU km_inicial
+  if ((lat === null || lon === null) && (atributos.km_inicial === undefined || atributos.km_inicial === null)) {
+    throw new Error('Necessário fornecer coordenadas GPS (lat/lon) ou km_inicial para matching');
+  }
+  
   const { data, error } = await supabase.rpc('match_pontual', {
     p_tipo: tipo,
     p_lat: lat,
@@ -63,6 +80,10 @@ export function formatMatchResult(result: MatchResult): string {
       return `✅ Match Direto (${score}%) - ${result.reason_code}`;
     case 'SUBSTITUICAO':
       return `🔄 Substituição (${score}%) - Atributos divergentes: ${result.atributos_divergentes.join(', ')}`;
+    case 'MULTIPLE_CANDIDATES':
+      return `⚠️ Múltiplos Candidatos (${score}%) - ${result.reason_code}`;
+    case 'GRAY_ZONE':
+      return `⚠️ Faixa Cinza (${score}%) - ${result.reason_code}`;
     case 'AMBIGUOUS':
       return `⚠️ Duvidoso (${score}%) - ${result.reason_code}`;
     case 'NO_MATCH':
@@ -74,6 +95,8 @@ export function formatMatchResult(result: MatchResult): string {
 
 /**
  * Determina se o match é conclusivo (pode consolidar automaticamente)
+ * MATCH_DIRECT e SUBSTITUICAO são conclusivos
+ * AMBIGUOUS, MULTIPLE_CANDIDATES, GRAY_ZONE e NO_MATCH não são
  */
 export function isMatchConclusivo(decision: MatchDecision): boolean {
   return decision === 'MATCH_DIRECT' || decision === 'SUBSTITUICAO';
