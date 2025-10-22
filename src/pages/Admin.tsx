@@ -35,6 +35,7 @@ import { ResetDatabaseButton } from "@/components/admin/ResetDatabaseButton";
 import { ParametrosMatchManager } from "@/components/admin/ParametrosMatchManager";
 import { RelatorioMatching } from "@/components/admin/RelatorioMatching";
 import { ExecutarMatching } from "@/components/admin/ExecutarMatching";
+import { LimparResultadosMatching } from "@/components/admin/LimparResultadosMatching";
 
 import logoOperaVia from "@/assets/logo-operavia.png";
 
@@ -368,6 +369,7 @@ const Admin = () => {
               <ExecutarMatching />
               <ParametrosMatchManager />
               <RelatorioMatching rodoviaId={selectedRodoviaId} loteId={selectedLoteId} />
+              <LimparResultadosMatching />
             </div>
           </TabsContent>
 
