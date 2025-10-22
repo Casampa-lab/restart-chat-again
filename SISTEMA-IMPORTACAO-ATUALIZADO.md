@@ -162,6 +162,42 @@ Todos os campos de controle do Inventário Dinâmico foram adicionados aos array
 
 ---
 
+### 4. **Alteração de Constraint: Coluna `servico` NULLABLE**
+
+Para suportar o processo de importação em 2 etapas, a coluna `servico` nas tabelas de necessidades foi alterada:
+
+#### Antes:
+```sql
+servico TEXT NOT NULL
+```
+
+#### Depois:
+```sql
+servico TEXT NULL  -- Permitir NULL durante importação pura
+```
+
+#### Justificativa:
+- **Etapa 1 (Importação)**: Registros são inseridos **sem** matching automático
+- Campo `servico` permanece `NULL` até o matching dedicado
+- **Etapa 2 (Matching)**: Algoritmos preenchem `servico` baseado em análise GPS/atributos
+
+#### Tabelas Afetadas:
+- ✅ `necessidades_cilindros`
+- ✅ `necessidades_defensas`
+- ✅ `necessidades_marcas_longitudinais`
+- ✅ `necessidades_marcas_transversais`
+- ✅ `necessidades_placas`
+- ✅ `necessidades_porticos`
+- ✅ `necessidades_tachas`
+
+#### Comentários no Banco:
+```sql
+COMMENT ON COLUMN necessidades_*.servico IS 
+  'Tipo de serviço (Remover/Substituir/Implantar/Manter). NULL até matching na aba dedicada';
+```
+
+---
+
 ## 📊 Como Funciona a Importação Agora
 
 ### 1. **Upload do Excel (Etapa 1 - Importação Pura)**

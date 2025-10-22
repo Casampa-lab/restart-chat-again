@@ -3650,7 +3650,7 @@ export type Database = {
           reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
-          servico: string
+          servico: string | null
           servico_final: string | null
           servico_inferido: string | null
           snv: string | null
@@ -3695,7 +3695,7 @@ export type Database = {
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
-          servico: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
@@ -3740,7 +3740,7 @@ export type Database = {
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
-          servico?: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
@@ -3828,7 +3828,7 @@ export type Database = {
           reconciliado_por: string | null
           risco: string | null
           rodovia_id: string
-          servico: string
+          servico: string | null
           servico_final: string | null
           servico_inferido: string | null
           snv: string | null
@@ -3897,7 +3897,7 @@ export type Database = {
           reconciliado_por?: string | null
           risco?: string | null
           rodovia_id: string
-          servico: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
@@ -3966,7 +3966,7 @@ export type Database = {
           reconciliado_por?: string | null
           risco?: string | null
           rodovia_id?: string
-          servico?: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
@@ -4045,7 +4045,7 @@ export type Database = {
           reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
-          servico: string
+          servico: string | null
           servico_final: string | null
           servico_inferido: string | null
           snv: string | null
@@ -4095,7 +4095,7 @@ export type Database = {
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
-          servico: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
@@ -4145,7 +4145,7 @@ export type Database = {
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
-          servico?: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
@@ -4216,7 +4216,7 @@ export type Database = {
           reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
-          servico: string
+          servico: string | null
           servico_final: string | null
           servico_inferido: string | null
           sigla: string | null
@@ -4261,7 +4261,7 @@ export type Database = {
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
-          servico: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           sigla?: string | null
@@ -4306,7 +4306,7 @@ export type Database = {
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
-          servico?: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           sigla?: string | null
@@ -4379,7 +4379,7 @@ export type Database = {
           revisao_solicitada: boolean | null
           revisao_solicitada_por: string | null
           rodovia_id: string
-          servico: string
+          servico: string | null
           servico_final: string | null
           servico_inferido: string | null
           snv: string | null
@@ -4429,7 +4429,7 @@ export type Database = {
           revisao_solicitada?: boolean | null
           revisao_solicitada_por?: string | null
           rodovia_id: string
-          servico: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
@@ -4479,7 +4479,7 @@ export type Database = {
           revisao_solicitada?: boolean | null
           revisao_solicitada_por?: string | null
           rodovia_id?: string
-          servico?: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
@@ -4543,7 +4543,7 @@ export type Database = {
           reconciliado_por: string | null
           revisao_solicitada: boolean | null
           rodovia_id: string
-          servico: string
+          servico: string | null
           servico_final: string | null
           servico_inferido: string | null
           snv: string | null
@@ -4579,7 +4579,7 @@ export type Database = {
           reconciliado_por?: string | null
           revisao_solicitada?: boolean | null
           rodovia_id: string
-          servico: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
@@ -4615,7 +4615,7 @@ export type Database = {
           reconciliado_por?: string | null
           revisao_solicitada?: boolean | null
           rodovia_id?: string
-          servico?: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
@@ -4686,7 +4686,7 @@ export type Database = {
           reconciliado_por: string | null
           refletivo: string | null
           rodovia_id: string
-          servico: string
+          servico: string | null
           servico_final: string | null
           servico_inferido: string | null
           snv: string | null
@@ -4733,7 +4733,7 @@ export type Database = {
           reconciliado_por?: string | null
           refletivo?: string | null
           rodovia_id: string
-          servico: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
@@ -4780,7 +4780,7 @@ export type Database = {
           reconciliado_por?: string | null
           refletivo?: string | null
           rodovia_id?: string
-          servico?: string
+          servico?: string | null
           servico_final?: string | null
           servico_inferido?: string | null
           snv?: string | null
