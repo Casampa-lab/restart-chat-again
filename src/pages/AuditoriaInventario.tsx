@@ -189,10 +189,10 @@ export default function AuditoriaInventario() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-wrap gap-4 items-center">
-            <span className="text-sm font-medium">Legenda:</span>
-            <TipoOrigemBadge tipoOrigem="execucao" modificadoPorIntervencao={true} />
-            <TipoOrigemBadge tipoOrigem="manutencao_pre_projeto" modificadoPorIntervencao={true} />
-            <TipoOrigemBadge modificadoPorIntervencao={false} />
+      <span className="text-sm font-medium">Legenda:</span>
+      <TipoOrigemBadge tipoOrigem="execucao" />
+      <TipoOrigemBadge tipoOrigem="manutencao_pre_projeto" />
+      <TipoOrigemBadge tipoOrigem="cadastro_inicial" />
           </div>
         </CardContent>
       </Card>
