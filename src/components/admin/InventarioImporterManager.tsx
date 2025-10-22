@@ -806,7 +806,8 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           record.velocidade = getVal("Velocidade", "velocidade") ? String(getVal("Velocidade", "velocidade")) : null;
           record.lado = getVal("Lado", "lado");
           record.posicao = getVal("Posição", "Posicao", "posição", "posicao");
-          record.km = getVal("Km", "km") ? Number(getVal("Km", "km")) : null;
+          const kmValue = getVal("Km", "km");
+          record.km_inicial = kmValue ? Number(kmValue) : null;
           record.latitude_inicial = getVal("Latitude", "latitude");
           record.longitude_inicial = getVal("Longitude", "longitude");
           record.detalhamento_pagina = getVal("Detalhamento (página)", "Detalhamento pagina", "detalhamento") ? Number(getVal("Detalhamento (página)", "Detalhamento pagina", "detalhamento")) : null;
@@ -1088,7 +1089,7 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           record.lado = getVal("Lado", "lado");
           
           const km = getVal("Km", "km");
-          record.km = km ? Number(km) : null;
+          record.km_inicial = km ? Number(km) : null;
           
           record.latitude_inicial = getVal("Latitude", "latitude");
           record.longitude_inicial = getVal("Longitude", "longitude");
