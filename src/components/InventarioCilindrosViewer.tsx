@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw } from "lucide-react";
+import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
@@ -637,13 +637,8 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                               tipoOrigem={cilindro.tipo_origem}
                             />
                             
-                            {cilindro.erro_projeto_detectado && cilindro.decisao_usuario === 'PENDENTE_REVISAO' && (
-                              <Badge variant="destructive" className="animate-pulse text-xs">
-                                ⚠️ Revisar
-                              </Badge>
-                            )}
-                            
-                            {cilindro.origem === 'NECESSIDADE_CONSOLIDADA' && (
+                            {/* Badge Match: aparece para consolidados E erros pendentes */}
+                            {(cilindro.cadastro_match_id || cilindro.origem === 'NECESSIDADE_CONSOLIDADA') && (
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger>
@@ -653,8 +648,37 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p className="text-xs">
-                                      Elemento consolidado (substituiu cadastro)<br/>
-                                      Score: {Math.round((cilindro.match_score || 0) * 100)}%
+                                      Vinculado a registro de cadastro{' '}
+                                      {cilindro.distancia_match_metros 
+                                        ? `(${cilindro.distancia_match_metros.toFixed(2)}m)` 
+                                        : ''}
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                            
+                            {/* Badge Revisar: APENAS para erros de projeto */}
+                            {cilindro.erro_projeto_detectado && cilindro.decisao_usuario === 'PENDENTE_REVISAO' && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <Badge 
+                                      variant="destructive" 
+                                      className="animate-pulse text-xs flex items-center gap-1"
+                                    >
+                                      <AlertTriangle className="h-3 w-3" />
+                                      Revisar
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs">
+                                    <p className="text-xs font-semibold mb-1">⚠️ Erro de Projeto Detectado</p>
+                                    <p className="text-xs">
+                                      Necessidade marcada como "Implantar", mas existe elemento similar 
+                                      no cadastro a {cilindro.distancia_match_metros?.toFixed(2)}m.
+                                    </p>
+                                    <p className="text-xs mt-1 text-yellow-200">
+                                      Clique em "Ver Antes/Depois" para revisar.
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>

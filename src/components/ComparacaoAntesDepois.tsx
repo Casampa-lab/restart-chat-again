@@ -126,12 +126,26 @@ export function ComparacaoAntesDepois({
           </CardHeader>
           <CardContent className="space-y-3 pt-4">
             <div className="grid grid-cols-2 gap-3 text-sm">
-              {renderCampoComparacao('KM', `${cadastro.km_inicial} - ${cadastro.km_final}`, `${necessidade.km_inicial} - ${necessidade.km_final}`, false)}
+              {renderCampoComparacao('km inicial', cadastro.km_inicial?.toFixed(3), necessidade.km_inicial?.toFixed(3), false)}
+              {renderCampoComparacao('km final', cadastro.km_final?.toFixed(3), necessidade.km_final?.toFixed(3), false)}
+              {renderCampoComparacao('Coordenadas', 
+                cadastro.latitude_inicial && cadastro.longitude_inicial 
+                  ? `${cadastro.latitude_inicial.toFixed(6)}, ${cadastro.longitude_inicial.toFixed(6)}`
+                  : 'N/A',
+                necessidade.latitude_inicial && necessidade.longitude_inicial
+                  ? `${necessidade.latitude_inicial.toFixed(6)}, ${necessidade.longitude_inicial.toFixed(6)}`
+                  : 'N/A',
+                false
+              )}
               {renderCampoComparacao('Cor Corpo', cadastro.cor_corpo, necessidade.cor_corpo, divergencias.corCorpo)}
               {renderCampoComparacao('Cor Refletivo', cadastro.cor_refletivo, necessidade.cor_refletivo, divergencias.corRefletivo)}
               {renderCampoComparacao('Tipo Refletivo', cadastro.tipo_refletivo, necessidade.tipo_refletivo, divergencias.tipoRefletivo)}
               {renderCampoComparacao('Quantidade', cadastro.quantidade, necessidade.quantidade, divergencias.quantidade)}
-              {renderCampoComparacao('Espaçamento', `${cadastro.espacamento_m}m`, `${necessidade.espacamento_m}m`, divergencias.espacamento)}
+              {renderCampoComparacao('Espaçamento', 
+                cadastro.espacamento_m ? `${cadastro.espacamento_m}m` : 'N/A', 
+                necessidade.espacamento_m ? `${necessidade.espacamento_m}m` : 'N/A', 
+                divergencias.espacamento
+              )}
               {renderCampoComparacao('Local', cadastro.local_implantacao, necessidade.local_implantacao, false)}
             </div>
             

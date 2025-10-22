@@ -50,14 +50,23 @@ export function AlertaErroProjeto({
       </AlertTitle>
       <AlertDescription>
         <div className="space-y-3 mt-2">
+          <p className="text-sm font-semibold text-orange-800">
+            📊 Dados exibidos: <span className="text-blue-600">NECESSIDADE (Projeto)</span>
+          </p>
+          
           <p className="text-sm text-orange-800">
             Esta necessidade está marcada como <strong>"Implantar"</strong>, mas {getDescricaoErro()}
           </p>
           
           {distanciaMetros !== undefined && (
-            <p className="text-xs text-orange-700 bg-orange-100 px-2 py-1 rounded inline-block">
-              📍 Distância: {distanciaMetros.toFixed(2)}m
-            </p>
+            <div className="bg-orange-100 px-3 py-2 rounded text-xs space-y-1">
+              <p>📍 <strong>Distância do cadastro:</strong> {distanciaMetros.toFixed(2)}m</p>
+              <p className="text-muted-foreground">
+                ℹ️ Os valores de <code>km_inicial</code>, <code>km_final</code>, 
+                <code>latitude_inicial</code> e <code>longitude_inicial</code> 
+                exibidos são da <strong>necessidade</strong> (não do cadastro)
+              </p>
+            </div>
           )}
           
           <div className="flex flex-wrap gap-2 mt-3">
@@ -68,7 +77,7 @@ export function AlertaErroProjeto({
               className="border-orange-300 hover:bg-orange-100"
             >
               <Eye className="h-4 w-4 mr-1" />
-              Ver Comparação
+              Ver Comparação Antes/Depois
             </Button>
             
             <Button 

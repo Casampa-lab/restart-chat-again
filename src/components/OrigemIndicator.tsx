@@ -6,16 +6,19 @@ interface OrigemIndicatorProps {
 }
 
 export function OrigemIndicator({ origem, tipoOrigem }: OrigemIndicatorProps) {
+  const isConsolidado = origem === 'NECESSIDADE_CONSOLIDADA' || 
+                        tipoOrigem === 'MATCH_CONFIRMADO';
+
+  const isErroProjetoPendente = origem === 'NECESSIDADE_COM_ERRO' ||
+                                tipoOrigem === 'ERRO_PROJETO_PENDENTE';
+
   const isCadastro = origem === 'CADASTRO_ORIGINAL' || 
                      origem === 'CADASTRO' || 
                      tipoOrigem === 'LEVANTAMENTO_INICIAL' ||
                      tipoOrigem === 'cadastro_inicial';
 
-  const isNecessidade = origem === 'NECESSIDADE_CONSOLIDADA' || 
-                        origem === 'NECESSIDADE_NOVA' ||
-                        origem === 'NECESSIDADE' ||
-                        tipoOrigem === 'SUBSTITUICAO' ||
-                        tipoOrigem === 'INTERVENCAO_PLANEJADA';
+  const isNecessidadeNova = origem === 'NECESSIDADE_NOVA' ||
+                            tipoOrigem === 'INTERVENCAO_PLANEJADA';
 
   return (
     <TooltipProvider>
@@ -23,16 +26,20 @@ export function OrigemIndicator({ origem, tipoOrigem }: OrigemIndicatorProps) {
         <TooltipTrigger asChild>
           <div 
             className={`w-3 h-3 rounded-full ${
+              isConsolidado ? 'bg-green-500 border-2 border-green-600' :
+              isErroProjetoPendente ? 'bg-blue-500 border-2 border-blue-600' :
               isCadastro ? 'bg-gray-300 border-2 border-gray-400' : 
-              isNecessidade ? 'bg-blue-500 border-2 border-blue-600' :
+              isNecessidadeNova ? 'bg-blue-500 border-2 border-blue-600' :
               'bg-gray-200 border-2 border-gray-300'
             }`} 
           />
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-xs">
-            {isCadastro ? '⚪ Cadastro Original' : 
-             isNecessidade ? '🔵 Necessidade/Intervenção' : 
+            {isConsolidado ? '🟢 Match Consolidado (Cadastro + Necessidade)' :
+             isErroProjetoPendente ? '🔵 Necessidade com Erro de Projeto (Aguardando Revisão)' :
+             isCadastro ? '⚪ Cadastro Original (Sem Intervenção)' : 
+             isNecessidadeNova ? '🔵 Necessidade Nova (Implantar)' :
              'Origem desconhecida'}
           </p>
         </TooltipContent>
