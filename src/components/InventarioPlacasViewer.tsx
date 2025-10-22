@@ -660,15 +660,10 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       return (
                         <TableRow key={placa.id} className="hover:bg-muted/50">
                           <TableCell className="text-center">
-                            <div className="flex items-center gap-1 justify-center">
+                            <div className="flex items-center justify-center">
                               <OrigemIndicator 
                                 origem={placa.origem} 
                                 tipoOrigem={placa.tipo_origem} 
-                              />
-                              <TipoOrigemBadge 
-                                tipoOrigem={placa.tipo_origem}
-                                modificadoPorIntervencao={placa.modificado_por_intervencao}
-                                showLabel={false}
                               />
                             </div>
                           </TableCell>
