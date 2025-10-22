@@ -147,11 +147,10 @@ export function ExecutarMatching() {
                 nec.servico || "Substituição",
               );
             } else {
-         /** -------- Lineares (com fallback por KM) -------- */
-else {
-  const hasGPSLine =
-    nec.latitude_inicial != null && nec.longitude_inicial != null &&
-    nec.latitude_final   != null && nec.longitude_final   != null;
+              /** -------- Lineares (com fallback por KM) -------- */
+              const hasGPSLine =
+                nec.latitude_inicial != null && nec.longitude_inicial != null &&
+                nec.latitude_final   != null && nec.longitude_final   != null;
 
   const hasKMLine =
     nec.km_inicial != null && nec.km_final != null &&
@@ -188,27 +187,23 @@ else {
     atributos.local_implantacao = norm(nec.local_implantacao);
   }
 
+  if (!hasGPSLine) {
+    // Elementos lineares requerem GPS completo - não há fallback por KM implementado
+    console.error(`⚠️ ${tipo} ${nec.id}: requer GPS completo para matching linear`);
+    stats.erros++;
+    processados++;
+    setProgresso((processados / totalNecessidades) * 100);
+    continue;
+  }
+
   try {
-    if (hasGPSLine) {
-      // GPS disponível → usa geometria (como já fazia Cilindros quando havia coords)
-      const wkt = buildLineStringWKT(
-        Number(nec.latitude_inicial),  Number(nec.longitude_inicial),
-        Number(nec.latitude_final),    Number(nec.longitude_final)
-      );
-      result = await matchLinear(
-        tipo, wkt, nec.rodovia_id, atributos, nec.servico || 'Substituição'
-      );
-    } else {
-      // Fallback por KM → overlap por km_inicial/km_final (padrão que já funcionava para Cilindros)
-      result = await matchLinearKm(
-        tipo,
-        Number(nec.km_inicial),
-        Number(nec.km_final),
-        nec.rodovia_id,
-        atributos,
-        nec.servico || 'Substituição'
-      );
-    }
+    const wkt = buildLineStringWKT(
+      Number(nec.latitude_inicial),  Number(nec.longitude_inicial),
+      Number(nec.latitude_final),    Number(nec.longitude_final)
+    );
+    result = await matchLinear(
+      tipo, wkt, nec.rodovia_id, atributos, nec.servico || 'Substituição'
+    );
   } catch (e) {
     console.error(`❌ ERRO MATCH LINEAR — ${tipo} ${nec.id}`, { atributos, e });
     stats.erros++; processados++;
