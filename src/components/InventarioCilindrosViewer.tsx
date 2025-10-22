@@ -19,6 +19,8 @@ import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUn
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { AlertaErroProjeto } from "@/components/AlertaErroProjeto";
+import { ComparacaoAntesDepois } from "@/components/ComparacaoAntesDepois";
 
 // Component to show reconciliation status badge
 function StatusReconciliacaoBadge({ status }: { status: string | null }) {
@@ -85,6 +87,13 @@ interface Cilindro {
   data_vistoria?: string;
   data_registro?: string;
   modificado_por_intervencao?: boolean;
+  cadastro_match_id?: string;
+  match_score?: number;
+  reason_code?: string;
+  erro_projeto_detectado?: boolean;
+  tipo_erro_projeto?: string;
+  decisao_usuario?: string;
+  distancia_match_metros?: number;
 }
 
 interface IntervencaoCilindro {
@@ -119,6 +128,9 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
   const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
+  const [showComparacao, setShowComparacao] = useState(false);
+  const [comparacaoNecessidadeId, setComparacaoNecessidadeId] = useState<string | null>(null);
+  const [comparacaoCadastroId, setComparacaoCadastroId] = useState<string | null>(null);
 
   // Buscar tolerância GPS da rodovia
   const { data: rodoviaConfig } = useQuery({
@@ -341,6 +353,33 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
       .eq("ficha_cilindros_id", cilindro.id)
       .order("data_intervencao", { ascending: false });
     setIntervencoes(data || []);
+  };
+
+  const handleDecisaoErroProjeto = async (necessidadeId: string, decisao: 'MANTER_IMPLANTAR' | 'CORRIGIR_PARA_SUBSTITUIR') => {
+    try {
+      const { error } = await supabase
+        .from('necessidades_cilindros')
+        .update({ decisao_usuario: decisao } as any)
+        .eq('id', necessidadeId);
+
+      if (error) throw error;
+
+      toast.success(
+        decisao === 'CORRIGIR_PARA_SUBSTITUIR' 
+          ? 'Marcado como Substituição - Inventário será consolidado'
+          : 'Mantido como Implantação - Será considerado elemento novo'
+      );
+
+      queryClient.invalidateQueries({ queryKey: ["inventario-dinamico-cilindros"] });
+    } catch (error: any) {
+      toast.error('Erro ao salvar decisão', { description: error.message });
+    }
+  };
+
+  const handleAbrirComparacao = (necessidadeId: string, cadastroId: string) => {
+    setComparacaoNecessidadeId(necessidadeId);
+    setComparacaoCadastroId(cadastroId);
+    setShowComparacao(true);
   };
 
   if (isLoading) {
@@ -591,11 +630,35 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         )}
                         <TableCell>{cilindro.snv || "-"}</TableCell>
                         <TableCell className="text-center">
-                          <TipoOrigemBadge 
-                            tipoOrigem={cilindro.tipo_origem}
-                            modificadoPorIntervencao={cilindro.modificado_por_intervencao}
-                            showLabel={false}
-                          />
+                          <div className="flex items-center gap-2 justify-center">
+                            <TipoOrigemBadge 
+                              tipoOrigem={cilindro.tipo_origem}
+                              modificadoPorIntervencao={cilindro.modificado_por_intervencao}
+                              showLabel={false}
+                            />
+                            {cilindro.erro_projeto_detectado && cilindro.decisao_usuario === 'PENDENTE_REVISAO' && (
+                              <Badge variant="destructive" className="animate-pulse">
+                                ⚠️ Revisar
+                              </Badge>
+                            )}
+                            {cilindro.origem === 'NECESSIDADE_CONSOLIDADA' && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+                                      🔗 Match
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs">
+                                      Elemento consolidado (substituiu cadastro)<br/>
+                                      Score: {Math.round((cilindro.match_score || 0) * 100)}%
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>{cilindro.km_inicial?.toFixed(3)}</TableCell>
                         <TableCell>{cilindro.km_final?.toFixed(3)}</TableCell>
@@ -962,6 +1025,15 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
         necessidade={selectedNecessidade}
         cadastro={selectedCadastroForReconciliacao}
         onReconciliar={handleReconciliar}
+        tipoElemento="cilindros"
+      />
+
+      {/* Dialog de Comparação Antes/Depois */}
+      <ComparacaoAntesDepois
+        open={showComparacao}
+        onOpenChange={setShowComparacao}
+        necessidadeId={comparacaoNecessidadeId || ''}
+        cadastroId={comparacaoCadastroId || ''}
         tipoElemento="cilindros"
       />
     </>
