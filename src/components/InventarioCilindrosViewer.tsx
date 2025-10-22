@@ -540,6 +540,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                 <TableHeader className="sticky top-0 bg-muted z-10">
                   <TableRow>
                     {searchLat && searchLon && <TableHead>Distância</TableHead>}
+                    <TableHead className="text-center">Origem</TableHead>
                     <TableHead 
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("snv")}
@@ -549,8 +550,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                         <SortIcon column="snv" />
                       </div>
                     </TableHead>
-                    <TableHead className="text-center">Origem</TableHead>
-                    <TableHead 
+                    <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("km_inicial")}
                     >
@@ -629,7 +629,6 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                             </Badge>
                           </TableCell>
                         )}
-                        <TableCell>{cilindro.snv || "-"}</TableCell>
                         <TableCell className="text-center">
                           <div className="flex items-center gap-2 justify-center">
                             <OrigemIndicator 
@@ -686,6 +685,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                             )}
                           </div>
                         </TableCell>
+                        <TableCell>{cilindro.snv || "-"}</TableCell>
                         <TableCell>{cilindro.km_inicial?.toFixed(3)}</TableCell>
                         <TableCell>{cilindro.km_final?.toFixed(3)}</TableCell>
                         <TableCell>{cilindro.cor_corpo}</TableCell>
