@@ -19,6 +19,43 @@ src/
 │   └── Index.tsx               # Página principal com sessões
 ```
 
+---
+
+## 🔧 Cards Técnicos / Padrões de Backend
+
+### 📍 Padrão de Campos de Localização (OBRIGATÓRIO)
+
+**Todos os campos de localização devem ter sufixo:**
+- ✅ `km_inicial`, `km_final`
+- ✅ `latitude_inicial`, `longitude_inicial`
+- ✅ `latitude_final`, `longitude_final`
+
+**Regras:**
+- ❌ Nunca usar `"KM"` ou `"Km"` — use `km` (minúsculo)
+- ❌ Campos sem sufixo (`km`, `latitude`, `longitude`) são **inválidos**
+- ✅ Padrão único para **Cadastro** e **Necessidades**
+- ✅ Parser converte variações (`Latitude_Inicial`, `Longitude inicial`)
+
+**Exemplo de tabela:**
+```sql
+CREATE TABLE exemplo_elemento (
+  -- ✅ CORRETO
+  km_inicial NUMERIC NOT NULL,
+  km_final NUMERIC,
+  latitude_inicial NUMERIC NOT NULL,
+  longitude_inicial NUMERIC NOT NULL,
+  latitude_final NUMERIC,
+  longitude_final NUMERIC,
+  
+  -- ❌ ERRADO (não fazer)
+  -- km NUMERIC,
+  -- latitude NUMERIC,
+  -- longitude NUMERIC
+);
+```
+
+---
+
 ### Como Adicionar Uma Nova Planilha
 
 #### Passo 1: Definir a Planilha
