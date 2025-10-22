@@ -33,9 +33,9 @@ Este documento consolida a análise de todas as planilhas CADASTRO, NECESSIDADES
 5. Velocidade (km/h)
 6. Lado
 7. Posição
-8. Km
-9. Latitude
-10. Longitude
+8. Km inicial
+9. Latitude inicial
+10. Longitude inicial
 11. Tipo de Suporte
 12. Quantidade de Suporte
 13. Tipo de Substrato
@@ -61,10 +61,10 @@ Este documento consolida a análise de todas as planilhas CADASTRO, NECESSIDADES
 5. Altura (m)
 6. Largura (m)
 7. Área (m²)
-8. Km
+8. Km inicial
 9. Lado
-10. Latitude
-11. Longitude
+10. Latitude inicial
+11. Longitude inicial
 12. Velocidade
 13. Substrato
 14. Suporte
