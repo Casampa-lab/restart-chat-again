@@ -57,6 +57,17 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Cores customizadas para badges de inventário
+        gray: {
+          200: "hsl(0 0% 85%)",
+          500: "hsl(0 0% 50%)",
+        },
+        purple: {
+          500: "hsl(270 70% 50%)",
+        },
+        green: {
+          500: "hsl(142 71% 45%)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
