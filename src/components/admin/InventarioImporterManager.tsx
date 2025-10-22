@@ -878,13 +878,15 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           };
           
           // Helper para converter valores numéricos de forma segura
-          const toNumber = (value: any): number | null => {
-            if (value === null || value === undefined || value === "" || value === "-") return null;
-            const str = String(value).trim().toLowerCase();
-            if (str === "não se aplica" || str === "nao se aplica" || str === "n/a") return null;
-            const num = Number(value);
-            return isNaN(num) ? null : num;
-          };
+        const toNumber = (value: any): number | null => {
+          if (value === null || value === undefined || value === "" || value === "-") return null;
+          const str = String(value).trim().toLowerCase();
+          if (str === "não se aplica" || str === "nao se aplica" || str === "n/a") return null;
+          // Normalizar vírgulas decimais brasileiras para pontos
+          const normalized = String(value).replace(',', '.');
+          const num = Number(normalized);
+          return isNaN(num) ? null : num;
+        };
           
           record.descricao = getVal("Descrição", "Descricao", "descrição", "descricao", "DESCRIÇÃO", "DESCRICAO");
           record.snv = getVal("SNV", "snv");
@@ -1009,13 +1011,15 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           };
           
           // Helper para converter valores numéricos de forma segura
-          const toNumber = (value: any): number | null => {
-            if (value === null || value === undefined || value === "" || value === "-") return null;
-            const str = String(value).trim().toLowerCase();
-            if (str === "não se aplica" || str === "nao se aplica" || str === "n/a") return null;
-            const num = Number(value);
-            return isNaN(num) ? null : num;
-          };
+        const toNumber = (value: any): number | null => {
+          if (value === null || value === undefined || value === "" || value === "-") return null;
+          const str = String(value).trim().toLowerCase();
+          if (str === "não se aplica" || str === "nao se aplica" || str === "n/a") return null;
+          // Normalizar vírgulas decimais brasileiras para pontos
+          const normalized = String(value).replace(',', '.');
+          const num = Number(normalized);
+          return isNaN(num) ? null : num;
+        };
           
           record.snv = getVal("SNV", "snv");
           record.local_implantacao = getVal("Local de Implantação", "Local de Implantacao", "Local de implantação", "local_implantacao");
