@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,10 @@ import { ReconciliacaoDrawer } from "./ReconciliacaoDrawer";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
+import { OrigemIndicator } from "@/components/OrigemIndicator";
+import { AlertaErroProjeto } from "@/components/AlertaErroProjeto";
+import { ComparacaoAntesDepois } from "@/components/ComparacaoAntesDepois";
 
 // Helper function to determine badge color based on placa type
 const getPlacaBadgeVariant = (tipo: string | null): { className: string } => {
@@ -81,45 +85,39 @@ function StatusReconciliacaoBadge({ status }: { status: string | null }) {
 
 interface FichaPlaca {
   id: string;
-  br: string | null;
+  // Campos do inventário dinâmico
+  origem: string;
+  tipo_origem: string;
+  necessidade_id?: string;
+  match_decision?: string;
+  match_score?: number;
+  modificado_por_intervencao?: boolean;
+  cadastro_match_id?: string;
+  // Campos da view
   snv: string | null;
   tipo: string | null;
   codigo: string | null;
-  velocidade: string | null;
   lado: string | null;
-  posicao: string | null;
   km_inicial: number | null;
   latitude_inicial: number | null;
   longitude_inicial: number | null;
-  detalhamento_pagina: number | null;
-  suporte: string | null;
-  qtde_suporte: number | null;
-  tipo_secao_suporte: string | null;
-  secao_suporte_mm: string | null;
+  tipo_suporte: string | null;
   substrato: string | null;
-  si_sinal_impresso: string | null;
+  dimensoes_mm: string | null;
   tipo_pelicula_fundo: string | null;
   cor_pelicula_fundo: string | null;
-  retro_pelicula_fundo: number | null;
   tipo_pelicula_legenda_orla: string | null;
   cor_pelicula_legenda_orla: string | null;
-  retro_pelicula_legenda_orla: number | null;
-  dimensoes_mm: string | null;
-  area_m2: number | null;
-  altura_m: number | null;
-  largura_m: number | null;
-  link_fotografia: string | null;
-  foto_url: string | null;
-  foto_frontal_url: string | null;
-  foto_lateral_url: string | null;
-  foto_posterior_url: string | null;
-  foto_base_url: string | null;
-  foto_identificacao_url: string | null;
-  data_vistoria: string;
-  data_implantacao: string | null;
-  // Campos do dicionário adicionais
+  observacao: string | null;
+  data_registro: string | null;
+  fotos_urls: string[] | null;
+  ultima_intervencao_id: string | null;
+  ativo: boolean;
+  created_at: string;
+  updated_at: string;
   rodovia_id: string;
   lote_id: string;
+  user_id: string;
 }
 
 interface Intervencao {
@@ -143,6 +141,7 @@ interface InventarioPlacasViewerProps {
 
 export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervencao }: InventarioPlacasViewerProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchLat, setSearchLat] = useState("");
   const [searchLng, setSearchLng] = useState("");
@@ -154,6 +153,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   const [showOnlyDivergencias, setShowOnlyDivergencias] = useState(false);
   const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
+  const [showComparacao, setShowComparacao] = useState(false);
+  const [comparacaoNecessidadeId, setComparacaoNecessidadeId] = useState<string | null>(null);
+  const [comparacaoCadastroId, setComparacaoCadastroId] = useState<string | null>(null);
 
   // Função para calcular distância entre dois pontos (Haversine)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -192,7 +194,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     queryKey: ["inventario-placas", loteId, rodoviaId, searchTerm, searchLat, searchLng, toleranciaRodovia],
     queryFn: async () => {
       let query = supabase
-        .from("ficha_placa")
+        .from("inventario_dinamico_placas")
         .select("*", { count: "exact" })
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
@@ -381,15 +383,38 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     refetch();
   };
 
-  const fotos = selectedPlaca
-    ? [
-        { label: "Principal", url: selectedPlaca.foto_url },
-        { label: "Frontal", url: selectedPlaca.foto_frontal_url },
-        { label: "Lateral", url: selectedPlaca.foto_lateral_url },
-        { label: "Posterior", url: selectedPlaca.foto_posterior_url },
-        { label: "Base", url: selectedPlaca.foto_base_url },
-        { label: "Identificação", url: selectedPlaca.foto_identificacao_url },
-      ].filter((f) => f.url)
+  const handleDecisaoErroProjeto = async (necessidadeId: string, decisao: 'MANTER_IMPLANTAR' | 'CORRIGIR_PARA_SUBSTITUIR') => {
+    try {
+      const { error } = await supabase
+        .from('necessidades_placas')
+        .update({ decisao_usuario: decisao } as any)
+        .eq('id', necessidadeId);
+
+      if (error) throw error;
+
+      toast.success(
+        decisao === 'CORRIGIR_PARA_SUBSTITUIR' 
+          ? 'Marcado como Substituição - Inventário será consolidado'
+          : 'Mantido como Implantação - Será considerado elemento novo'
+      );
+
+      queryClient.invalidateQueries({ queryKey: ["inventario-placas"] });
+    } catch (error: any) {
+      toast.error('Erro ao salvar decisão', { description: error.message });
+    }
+  };
+
+  const handleAbrirComparacao = (necessidadeId: string, cadastroId: string) => {
+    setComparacaoNecessidadeId(necessidadeId);
+    setComparacaoCadastroId(cadastroId);
+    setShowComparacao(true);
+  };
+
+  const fotos = selectedPlaca?.fotos_urls
+    ? selectedPlaca.fotos_urls.map((url, index) => ({
+        label: `Foto ${index + 1}`,
+        url,
+      }))
     : [];
 
   return (
@@ -600,6 +625,15 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       </TableHead>
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("origem")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Origem
+                          <SortIcon column="origem" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("servico")}
                       >
                         <div className="flex items-center justify-center">
@@ -635,7 +669,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary">{placa.suporte || "-"}</Badge>
+                            <Badge variant="secondary">{placa.tipo_suporte || "-"}</Badge>
                           </TableCell>
                           <TableCell className="text-center">{placa.km_inicial?.toFixed(2) || "-"}</TableCell>
                           <TableCell>{placa.lado || "-"}</TableCell>
@@ -655,6 +689,19 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                             <Badge variant="outline" className="text-xs">
                               {placa.tipo_pelicula_legenda_orla || "-"}
                             </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex items-center gap-1 justify-center">
+                              <OrigemIndicator 
+                                origem={placa.origem} 
+                                tipoOrigem={placa.tipo_origem} 
+                              />
+                              <TipoOrigemBadge 
+                                tipoOrigem={placa.tipo_origem}
+                                modificadoPorIntervencao={placa.modificado_por_intervencao}
+                                showLabel={false}
+                              />
+                            </div>
                           </TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (
@@ -788,11 +835,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                 {/* Identificação */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3">Identificação</h3>
-                  <div className="grid grid-cols-4 gap-4">
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">BR:</span>
-                      <p className="text-sm">{selectedPlaca.br || "-"}</p>
-                    </div>
+                  <div className="grid grid-cols-3 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">SNV:</span>
                       <p className="text-sm">{selectedPlaca.snv || "-"}</p>
@@ -806,18 +849,23 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       <p className="text-sm">{selectedPlaca.codigo || "-"}</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4 mt-3">
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Velocidade:</span>
-                      <p className="text-sm">{selectedPlaca.velocidade || "-"}</p>
-                    </div>
+                  <div className="grid grid-cols-2 gap-4 mt-3">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Lado:</span>
                       <p className="text-sm">{selectedPlaca.lado || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Posição:</span>
-                      <p className="text-sm">{selectedPlaca.posicao || "-"}</p>
+                      <span className="text-sm font-medium text-muted-foreground">Origem:</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <OrigemIndicator 
+                          origem={selectedPlaca.origem} 
+                          tipoOrigem={selectedPlaca.tipo_origem} 
+                        />
+                        <TipoOrigemBadge 
+                          tipoOrigem={selectedPlaca.tipo_origem}
+                          modificadoPorIntervencao={selectedPlaca.modificado_por_intervencao}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -828,7 +876,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     <MapPin className="h-4 w-4" />
                     Localização
                   </h3>
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">km:</span>
                       <p className="text-sm">{selectedPlaca.km_inicial?.toFixed(2) || "-"}</p>
@@ -845,55 +893,32 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                         {selectedPlaca.longitude_inicial ? selectedPlaca.longitude_inicial.toFixed(6) : "-"}
                       </p>
                     </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Detalhamento (página):</span>
-                      <p className="text-sm">{selectedPlaca.detalhamento_pagina || "-"}</p>
-                    </div>
                   </div>
                 </div>
 
-                {/* Suporte */}
+                {/* Suporte e Substrato */}
                 <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-3">Suporte</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <h3 className="font-semibold mb-3">Suporte e Substrato</h3>
+                  <div className="grid grid-cols-3 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Tipo de Suporte:</span>
-                      <p className="text-sm">{selectedPlaca.suporte || "-"}</p>
+                      <p className="text-sm">{selectedPlaca.tipo_suporte || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Quantidade de Suporte:</span>
-                      <p className="text-sm">{selectedPlaca.qtde_suporte || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Tipo de Seção de Suporte:</span>
-                      <p className="text-sm">{selectedPlaca.tipo_secao_suporte || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Seção do Suporte (mm):</span>
-                      <p className="text-sm">{selectedPlaca.secao_suporte_mm || "-"}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Substrato e Sinal Impresso */}
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-3">Substrato</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Tipo de Substrato:</span>
+                      <span className="text-sm font-medium text-muted-foreground">Substrato:</span>
                       <p className="text-sm">{selectedPlaca.substrato || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">SI (Sinal Impresso):</span>
-                      <p className="text-sm">{selectedPlaca.si_sinal_impresso || "-"}</p>
+                      <span className="text-sm font-medium text-muted-foreground">Dimensões (mm):</span>
+                      <p className="text-sm">{selectedPlaca.dimensoes_mm || "-"}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Película Fundo */}
+                {/* Película */}
                 <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-3">Película Fundo</h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <h3 className="font-semibold mb-3">Película</h3>
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Tipo (película fundo):</span>
                       <p className="text-sm">{selectedPlaca.tipo_pelicula_fundo || "-"}</p>
@@ -903,80 +928,37 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       <p className="text-sm">{selectedPlaca.cor_pelicula_fundo || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Retro Fundo (cd.lux/m²):</span>
-                      <p className="text-sm">{selectedPlaca.retro_pelicula_fundo || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Retro Orla/Legenda (cd.lux/m²):</span>
-                      <p className="text-sm">{selectedPlaca.retro_pelicula_legenda_orla || "-"}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Película Legenda/Orla */}
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-3">Película Legenda/Orla</h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Tipo (película legenda/orla):</span>
+                      <span className="text-sm font-medium text-muted-foreground">Tipo (legenda/orla):</span>
                       <p className="text-sm">{selectedPlaca.tipo_pelicula_legenda_orla || "-"}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Cor (película legenda/orla):</span>
+                      <span className="text-sm font-medium text-muted-foreground">Cor (legenda/orla):</span>
                       <p className="text-sm">{selectedPlaca.cor_pelicula_legenda_orla || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Retrorrefletância (película legenda/orla) cd.lux/m²:</span>
-                      <p className="text-sm">{selectedPlaca.retro_pelicula_legenda_orla || "-"}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Dimensões da Placa */}
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <Ruler className="h-4 w-4" />
-                    Dimensões da Placa
-                  </h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">
-                        {selectedPlaca.altura_m ? "Largura (m):" : "Diâmetro (m):"}
-                      </span>
-                      <p className="text-sm">{selectedPlaca.largura_m?.toFixed(2) || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Altura (m):</span>
-                      <p className="text-sm">{selectedPlaca.altura_m?.toFixed(2) || "-"}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Área (m²):</span>
-                      <p className="text-sm">{selectedPlaca.area_m2?.toFixed(2) || "-"}</p>
-                    </div>
+                {/* Observação */}
+                {selectedPlaca.observacao && (
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3">Observação</h3>
+                    <p className="text-sm text-muted-foreground">{selectedPlaca.observacao}</p>
                   </div>
-                </div>
+                )}
 
                 {/* Data */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    Data
+                    Data de Registro
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-muted-foreground">Data da Vistoria:</span>
+                      <span className="text-sm font-medium text-muted-foreground">Data:</span>
                       <p className="text-sm">
-                        {new Date(selectedPlaca.data_vistoria).toLocaleDateString("pt-BR")}
+                        {selectedPlaca.data_registro ? new Date(selectedPlaca.data_registro).toLocaleDateString("pt-BR") : "-"}
                       </p>
                     </div>
-                    {selectedPlaca.data_implantacao && (
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Data de Implantação:</span>
-                        <p className="text-sm">
-                          {new Date(selectedPlaca.data_implantacao).toLocaleDateString("pt-BR")}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -985,15 +967,27 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
               <TabsContent value="fotos" className="mt-4">
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3">Fotografia</h3>
-                  {(selectedPlaca.foto_url || selectedPlaca.foto_identificacao_url || selectedPlaca.foto_frontal_url) ? (
+                  {selectedPlaca.fotos_urls && selectedPlaca.fotos_urls.length > 0 ? (
                     <div className="space-y-2">
                       <div className="relative w-full h-[400px] bg-muted rounded-lg overflow-hidden">
                         <img
-                          src={selectedPlaca.foto_url || selectedPlaca.foto_identificacao_url || selectedPlaca.foto_frontal_url}
+                          src={selectedPlaca.fotos_urls[0]}
                           alt="Foto da Placa"
                           className="w-full h-full object-contain"
                         />
                       </div>
+                      {selectedPlaca.fotos_urls.length > 1 && (
+                        <div className="grid grid-cols-4 gap-2 mt-4">
+                          {selectedPlaca.fotos_urls.slice(1).map((url, index) => (
+                            <img
+                              key={index}
+                              src={url}
+                              alt={`Foto ${index + 2}`}
+                              className="w-full h-24 object-cover rounded border"
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">Nenhuma foto disponível</p>
@@ -1089,6 +1083,18 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
         cadastro={selectedPlaca}
         onReconciliar={handleReconciliar}
       />
+
+      {/* Modal de Comparação Antes/Depois */}
+      {comparacaoNecessidadeId && comparacaoCadastroId && (
+        <ComparacaoAntesDepois
+          open={showComparacao}
+          onOpenChange={setShowComparacao}
+          necessidadeId={comparacaoNecessidadeId}
+          cadastroId={comparacaoCadastroId}
+          tipoElemento="placas"
+        />
+      )}
+
     </>
   );
 }
