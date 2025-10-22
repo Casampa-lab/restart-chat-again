@@ -28,26 +28,26 @@ export function TipoOrigemBadge({
     cadastro_inicial: {
       icon: Package,
       label: "Cadastro Inicial",
-      variant: "secondary" as const,
-      color: "text-muted-foreground",
+      bgColor: "bg-gray-200",
+      textColor: "text-black",
     },
     execucao: {
       icon: HardHat,
       label: "Execução",
-      variant: "default" as const,
-      color: "text-green-600",
+      bgColor: "bg-green-500",
+      textColor: "text-black",
     },
     manutencao_pre_projeto: {
       icon: Wrench,
       label: "Manutenção",
-      variant: "outline" as const,
-      color: "text-yellow-600",
+      bgColor: "bg-yellow-400",
+      textColor: "text-black",
     },
     sistema_match: {
       icon: Cpu,
       label: "Sistema/Match",
-      variant: "secondary" as const,
-      color: "text-blue-600",
+      bgColor: "bg-blue-500",
+      textColor: "text-black",
     },
   };
 
@@ -55,8 +55,11 @@ export function TipoOrigemBadge({
   const Icon = config.icon;
 
   return (
-    <Badge variant={config.variant} className={className}>
-      <Icon className={`h-3 w-3 mr-1 ${config.color}`} />
+    <Badge 
+      variant="outline" 
+      className={`${config.bgColor} ${config.textColor} border-0 ${className}`}
+    >
+      <Icon className="h-3 w-3 mr-1" />
       {showLabel && config.label}
     </Badge>
   );
