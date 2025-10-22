@@ -236,8 +236,65 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     },
   });
 
-  // Filtrar placas (sem necessidade de map separado)
-  const filteredPlacas = placas || [];
+  // Query de necessidades relacionadas com reconciliacao
+  const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
+    queryKey: ["necessidades-match-placas", loteId, rodoviaId, toleranciaRodovia],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("necessidades_placas")
+        .select(`
+          id, servico, servico_final, cadastro_id, codigo, tipo, km_inicial, divergencia, 
+          solucao_planilha, servico_inferido, revisao_solicitada, localizado_em_campo, 
+          lado, suporte, substrato, latitude_inicial, longitude_inicial,
+          reconciliacao:reconciliacoes(
+            id,
+            status,
+            distancia_match_metros,
+            overlap_porcentagem,
+            tipo_match
+          )
+        `)
+        .eq("lote_id", loteId)
+        .eq("rodovia_id", rodoviaId)
+        .not("cadastro_id", "is", null);
+      
+      if (error) throw error;
+      
+      // Indexar por cadastro_id para busca O(1)
+      const map = new Map<string, any>();
+      data?.forEach((nec: any) => {
+        const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
+        
+        // Filtrar apenas pendentes e dentro da tolerância
+        if (reconciliacao?.status === 'pendente_aprovacao' && 
+            reconciliacao?.distancia_match_metros <= toleranciaRodovia) {
+          map.set(nec.cadastro_id, {
+            ...nec,
+            servico: nec.servico_final || nec.servico,
+            distancia_match_metros: reconciliacao.distancia_match_metros,
+          });
+        }
+      });
+      
+      return map;
+    },
+    enabled: !!loteId && !!rodoviaId,
+  });
+
+  // Contar TODAS as necessidades com match processados (não apenas divergências)
+  const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
+
+  // Contar matches pendentes de reconciliação
+  const matchesPendentes = Array.from(necessidadesMap?.values() || []).filter(
+    nec => !nec.reconciliado
+  ).length;
+
+  // Filtrar placas com matches pendentes se necessário
+  const filteredPlacas = placas?.filter(placa => {
+    if (!showOnlyDivergencias) return true;
+    const nec = necessidadesMap?.get(placa.id);
+    return nec && !nec.reconciliado;
+  }) || [];
 
   // Função para ordenar dados
   const sortedPlacas = filteredPlacas ? [...filteredPlacas].sort((a, b) => {
@@ -301,12 +358,28 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   };
 
   const handleOpenReconciliacao = (placa: FichaPlaca) => {
-    toast.info("Reconciliação não disponível no inventário dinâmico");
+    const nec = necessidadesMap?.get(placa.id);
+    console.log("🔍 handleOpenReconciliacao chamado:", {
+      placaId: placa.id,
+      necessidadeEncontrada: !!nec,
+      necessidade: nec
+    });
+    
+    if (nec) {
+      setSelectedNecessidade(nec);
+      setSelectedPlaca(placa); // Importante: setar a placa para exibir no drawer
+      setReconciliacaoOpen(true);
+      console.log("✅ Drawer aberto com sucesso");
+    } else {
+      console.error("❌ Necessidade não encontrada no mapa para placa:", placa.id);
+      toast.error("Erro: Necessidade não encontrada");
+    }
   };
 
   const handleReconciliar = async () => {
     // Aguardar commit do Supabase antes de buscar dados atualizados
     await new Promise(resolve => setTimeout(resolve, 300));
+    refetchNecessidades();
     refetch();
   };
 
@@ -385,6 +458,69 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Banner de Status de Reconciliação */}
+          {totalMatchesProcessados > 0 && (
+            matchesPendentes === 0 ? (
+              // Banner VERDE - Tudo OK
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-success/20 to-success/10 border-2 border-success/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-success/20 border border-success/40">
+                    <CheckCircle className="h-6 w-6 text-success" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-success">{totalMatchesProcessados}</span>
+                      <span>{totalMatchesProcessados === 1 ? 'item verificado' : 'itens verificados'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      ✅ Inventário OK - Projeto e Sistema em conformidade
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={showOnlyDivergencias}
+                    onCheckedChange={setShowOnlyDivergencias}
+                    id="filtro-divergencias"
+                  />
+                  <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
+                    <Filter className="h-4 w-4 inline mr-1" />
+                    Apenas divergências
+                  </Label>
+                </div>
+              </div>
+            ) : (
+              // Banner AMARELO - Com divergências
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-warning/20 to-warning/10 border-2 border-warning/40 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-warning/20 border border-warning/40">
+                    <AlertCircle className="h-6 w-6 text-warning" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-base flex items-center gap-2">
+                      <span className="text-2xl font-extrabold text-warning">{matchesPendentes}</span>
+                      <span>{matchesPendentes === 1 ? 'match a reconciliar' : 'matches a reconciliar'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      🎨 Projeto ≠ 🤖 Sistema GPS - Verificação no local necessária
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={showOnlyDivergencias}
+                    onCheckedChange={setShowOnlyDivergencias}
+                    id="filtro-divergencias"
+                  />
+                  <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
+                    <Filter className="h-4 w-4 inline mr-1" />
+                    Apenas divergências
+                  </Label>
+                </div>
+              </div>
+            )
+          )}
+
           {/* Campos de Pesquisa */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
@@ -496,11 +632,31 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="origem" />
                         </div>
                       </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("servico")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Projeto
+                          <SortIcon column="servico" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("status_reconciliacao")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Status
+                          <SortIcon column="status_reconciliacao" />
+                        </div>
+                      </TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {sortedPlacas.map((placa) => {
+                      const necessidade = necessidadesMap?.get(placa.id);
+                      
                       return (
                         <TableRow key={placa.id} className="hover:bg-muted/50">
                           <TableCell className="font-medium">{placa.snv || "-"}</TableCell>
@@ -545,6 +701,46 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                 modificadoPorIntervencao={placa.modificado_por_intervencao}
                                 showLabel={false}
                               />
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {necessidade ? (
+                              <NecessidadeBadge 
+                                necessidade={necessidade} 
+                                tipo="placas"
+                              />
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground text-xs">
+                                Sem previsão
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex items-center gap-2 justify-center">
+                              {necessidade && (
+                                <StatusReconciliacaoBadge 
+                                  status={necessidade.status_reconciliacao} 
+                                />
+                              )}
+                              {necessidade?.divergencia && !necessidade.reconciliado && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log("🔍 Abrindo reconciliação para:", {
+                                      placa: placa.id,
+                                      necessidade: necessidade.id,
+                                      codigo: placa.codigo
+                                    });
+                                    handleOpenReconciliacao(placa);
+                                  }}
+                                  className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
+                                >
+                                  <AlertCircle className="h-4 w-4 mr-1" />
+                                  Verificar Match
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
