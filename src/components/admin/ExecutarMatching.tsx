@@ -65,10 +65,10 @@ export function ExecutarMatching() {
     setEstatisticas({ total: 0, processados: 0, matches: 0, substituicoes: 0, ambiguos: 0, semMatch: 0, erros: 0 });
 
     try {
-      const tipos: TipoElemento[] =
+      const tipos: Exclude<TipoElemento, "TODOS">[] =
         tipoSelecionado === "TODOS"
           ? ["PLACA", "PORTICO", "INSCRICAO", "MARCA_LONG", "TACHAS", "DEFENSA", "CILINDRO"]
-          : [tipoSelecionado];
+          : [tipoSelecionado as Exclude<TipoElemento, "TODOS">];
 
       let totalNecessidades = 0;
       let processados = 0;
