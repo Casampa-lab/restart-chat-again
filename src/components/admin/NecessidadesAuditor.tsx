@@ -557,9 +557,9 @@ export function NecessidadesAuditor() {
                         </>
                       ) : (
                         <>
-                          <TableCell>
-                            {item.km?.toFixed(2)}
-                            {item.km_cad && (
+                            <TableCell>
+                              {item.km_inicial?.toFixed(2)}
+                              {item.km_cad && (
                               <div className="text-xs text-muted-foreground">
                                 Cad: {item.km_cad?.toFixed(2)}
                               </div>

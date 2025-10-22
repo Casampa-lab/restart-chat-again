@@ -40,9 +40,9 @@ interface ItemDetalhado {
   id: string;
   ordem: number;
   foto_url: string;
-  latitude: number;
-  longitude: number;
-  km: string;
+  latitude_inicial: number;
+  longitude_inicial: number;
+  km_inicial: string;
   sentido: string;
   largura_cm: number;
   largura_conforme: boolean;
@@ -398,11 +398,11 @@ export default function ValidacaoFichasVerificacao() {
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
                         <p className="font-semibold">📍 Coordenadas:</p>
-                        <p>{item.latitude}, {item.longitude}</p>
+                        <p>{item.latitude_inicial}, {item.longitude_inicial}</p>
                       </div>
                       <div>
                         <p className="font-semibold">📏 KM:</p>
-                        <p>{item.km}</p>
+                        <p>{item.km_inicial}</p>
                       </div>
                       <div>
                         <p className="font-semibold">➡️ Sentido:</p>

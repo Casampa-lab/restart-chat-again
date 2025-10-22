@@ -459,10 +459,8 @@ export default function InventarioDinamico() {
                                   {item.id.substring(0, 8)}...
                                 </TableCell>
                                 <TableCell>
-                                  {item.km_inicial
+                                   {item.km_inicial
                                     ? `KM ${item.km_inicial?.toFixed(3)} - ${item.km_final?.toFixed(3)}`
-                                    : item.km
-                                    ? `KM ${item.km?.toFixed(3)}`
                                     : "—"}
                                 </TableCell>
                                 <TableCell>

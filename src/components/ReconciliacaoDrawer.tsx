@@ -157,7 +157,7 @@ export function ReconciliacaoDrawer({
           {/* Localização */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4" />
-            <span>km {necessidade.km} | Distância do match: {necessidade.distancia_match_metros}m</span>
+            <span>KM {necessidade.km_inicial} | Distância do match: {necessidade.distancia_match_metros}m</span>
           </div>
 
           {/* Comparação: Inventário (Esquerda) vs Projeto (Direita) */}
@@ -177,12 +177,12 @@ export function ReconciliacaoDrawer({
               <div className="space-y-2 text-sm">
                 <div><strong>Código:</strong> {cadastro.codigo || "N/A"}</div>
                 <div><strong>Tipo:</strong> {cadastro.tipo || "N/A"}</div>
-                <div><strong>km:</strong> {cadastro.km?.toFixed(3) || "N/A"}</div>
+                <div><strong>KM:</strong> {cadastro.km_inicial?.toFixed(3) || "N/A"}</div>
                 <div><strong>Lado:</strong> {cadastro.lado || "N/A"}</div>
                 <div><strong>Suporte:</strong> {cadastro.suporte || "N/A"}</div>
                 <div><strong>Substrato:</strong> {cadastro.substrato || "N/A"}</div>
                 <div className="text-xs text-muted-foreground">
-                  GPS: {cadastro.latitude?.toFixed(6)}, {cadastro.longitude?.toFixed(6)}
+                  GPS: {cadastro.latitude_inicial?.toFixed(6)}, {cadastro.longitude_inicial?.toFixed(6)}
                 </div>
               </div>
 
@@ -225,12 +225,12 @@ export function ReconciliacaoDrawer({
               <div className="space-y-2 text-sm">
                 <div><strong>Código:</strong> {necessidade.codigo || "N/A"}</div>
                 <div><strong>Tipo:</strong> {necessidade.tipo || "N/A"}</div>
-                <div><strong>km projeto:</strong> {necessidade.km?.toFixed(3) || "N/A"}</div>
+                <div><strong>KM projeto:</strong> {necessidade.km_inicial?.toFixed(3) || "N/A"}</div>
                 <div><strong>Lado:</strong> {necessidade.lado || "N/A"}</div>
                 <div><strong>Suporte:</strong> {necessidade.suporte || "N/A"}</div>
                 <div><strong>Substrato:</strong> {necessidade.substrato || "N/A"}</div>
                 <div className="text-xs text-muted-foreground">
-                  GPS projeto: {necessidade.latitude?.toFixed(6)}, {necessidade.longitude?.toFixed(6)}
+                  GPS projeto: {necessidade.latitude_inicial?.toFixed(6)}, {necessidade.longitude_inicial?.toFixed(6)}
                 </div>
               </div>
               

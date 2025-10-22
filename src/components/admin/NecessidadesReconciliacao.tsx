@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 
 interface Divergencia {
   id: string;
-  km: number;
+  km_inicial: number;
   codigo: string;
   tipo: string;
   solucao_planilha: string;
@@ -40,8 +40,8 @@ export function NecessidadesReconciliacao() {
         .from("necessidades_placas")
         .select(`
           id, 
-          km, 
-          codigo, 
+          km_inicial, 
+          codigo,
           tipo, 
           solucao_planilha, 
           servico_inferido, 
@@ -230,7 +230,7 @@ export function NecessidadesReconciliacao() {
               <TableBody>
                 {divergencias?.map((div) => (
                   <TableRow key={div.id}>
-                    <TableCell>{div.km?.toFixed(2)}</TableCell>
+                    <TableCell>{div.km_inicial?.toFixed(2)}</TableCell>
                     <TableCell className="font-mono text-sm">{div.codigo}</TableCell>
                     <TableCell>{div.tipo}</TableCell>
                     <TableCell className="text-center">
@@ -289,7 +289,7 @@ export function NecessidadesReconciliacao() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-sm text-muted-foreground">KM:</span>
-                    <span className="ml-2 font-semibold">{selectedNecessidade.km?.toFixed(2)}</span>
+                    <span className="ml-2 font-semibold">{selectedNecessidade.km_inicial?.toFixed(2)}</span>
                   </div>
                   <div>
                     <span className="text-sm text-muted-foreground">Código:</span>

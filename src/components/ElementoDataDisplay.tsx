@@ -16,11 +16,12 @@ const fieldLabels: Record<string, string> = {
   data_vistoria: 'Data da Vistoria',
   
   // Localização
-  latitude: 'Latitude',
-  longitude: 'Longitude',
-  km: 'KM',
   km_inicial: 'KM Inicial',
   km_final: 'KM Final',
+  latitude_inicial: 'Latitude Inicial',
+  longitude_inicial: 'Longitude Inicial',
+  latitude_final: 'Latitude Final',
+  longitude_final: 'Longitude Final',
   km_referencia: 'KM de Referência',
   lado: 'Lado',
   posicao: 'Posição',
@@ -126,14 +127,14 @@ export function ElementoDataDisplay({ dados_elemento, tipo_elemento }: ElementoD
 
   // Agrupar campos por categoria
   const localizacao = camposVisiveis.filter(([key]) => 
-    ['latitude', 'longitude', 'latitude_inicial', 'longitude_inicial', 
-     'latitude_final', 'longitude_final', 'km', 'km_inicial', 'km_final', 
+    ['latitude_inicial', 'longitude_inicial', 
+     'latitude_final', 'longitude_final', 'km_inicial', 'km_final', 
      'km_referencia', 'lado', 'posicao', 'snv', 'br'].includes(key)
   );
   
   const caracteristicas = camposVisiveis.filter(([key]) => 
-    !['latitude', 'longitude', 'latitude_inicial', 'longitude_inicial',
-      'latitude_final', 'longitude_final', 'km', 'km_inicial', 'km_final',
+    !['latitude_inicial', 'longitude_inicial',
+      'latitude_final', 'longitude_final', 'km_inicial', 'km_final',
       'km_referencia', 'lado', 'posicao', 'snv', 'br'].includes(key)
   );
 

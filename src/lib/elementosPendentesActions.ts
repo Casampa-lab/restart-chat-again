@@ -95,7 +95,7 @@ export async function aprovarElemento(elementoId: string, observacao?: string) {
       
       // Mapeamentos específicos de placas
       ...(elemento.tipo_elemento === 'placas' && codigo_placa ? { codigo: codigo_placa } : {}),
-      ...(elemento.tipo_elemento === 'placas' && km_referencia ? { km: parseFloat(km_referencia) } : {}),
+      ...(elemento.tipo_elemento === 'placas' && km_referencia ? { km_inicial: parseFloat(km_referencia) } : {}),
       // Mapear nomes antigos para os corretos (suporte a dados antigos)
       ...(elemento.tipo_elemento === 'placas' && pelicula ? { tipo_pelicula_fundo: pelicula } : {}),
       ...(elemento.tipo_elemento === 'placas' && retro_fundo ? { retro_pelicula_fundo: parseFloat(String(retro_fundo)) } : {}),
@@ -278,14 +278,14 @@ export async function rejeitarElemento(elementoId: string, observacao: string, g
       ...(isLinear ? {
         km_inicial: dadosElemento?.km_inicial || null,
         km_final: dadosElemento?.km_final || null,
-        latitude_inicial: dadosElemento?.latitude_inicial || dadosElemento?.latitude || null,
-        longitude_inicial: dadosElemento?.longitude_inicial || dadosElemento?.longitude || null,
+        latitude_inicial: dadosElemento?.latitude_inicial || null,
+        longitude_inicial: dadosElemento?.longitude_inicial || null,
         latitude_final: dadosElemento?.latitude_final || null,
         longitude_final: dadosElemento?.longitude_final || null,
       } : {
-        km_referencia: dadosElemento?.km || dadosElemento?.km_inicial || null,
-        latitude: dadosElemento?.latitude || dadosElemento?.latitude_inicial || null,
-        longitude: dadosElemento?.longitude || dadosElemento?.longitude_inicial || null,
+        km_referencia: dadosElemento?.km_inicial || null,
+        latitude: dadosElemento?.latitude_inicial || null,
+        longitude: dadosElemento?.longitude_inicial || null,
       }),
       
       observacao: `Rejeitado em ${new Date().toLocaleDateString('pt-BR')} - Coordenador`,
@@ -311,8 +311,8 @@ export async function rejeitarElemento(elementoId: string, observacao: string, g
         foto_url: url,
         ordem: index + 1,
         descricao: `Foto ${index + 1}`,
-        latitude: dadosElemento?.latitude || dadosElemento?.latitude_inicial || null,
-        longitude: dadosElemento?.longitude || dadosElemento?.longitude_inicial || null
+        latitude: dadosElemento?.latitude_inicial || null,
+        longitude: dadosElemento?.longitude_inicial || null
       }));
 
       const { error: fotosError } = await supabase

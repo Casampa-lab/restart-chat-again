@@ -440,7 +440,7 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
                               />
                             </TableCell>
                             <TableCell className="font-mono">
-                              {div.km?.toFixed(3) || div.km_inicial?.toFixed(3) || 'N/A'}
+                              {div.km_inicial?.toFixed(3) || 'N/A'}
                             </TableCell>
                             <TableCell>
                               <div className="text-sm">
@@ -510,7 +510,7 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
               {/* Localização */}
               <div className="flex items-center gap-2 text-sm bg-muted p-3 rounded-lg">
                 <MapPin className="h-4 w-4" />
-                <span>KM {selectedNecessidade.km?.toFixed(3) || selectedNecessidade.km_inicial?.toFixed(3)}</span>
+                <span>KM {selectedNecessidade.km_inicial?.toFixed(3)}</span>
                 {selectedNecessidade.cadastro_id && selectedNecessidade.distancia_match_metros && (
                   <Badge variant="outline" className="ml-auto">
                     Match: {selectedNecessidade.distancia_match_metros.toFixed(0)}m
@@ -791,7 +791,7 @@ export function ReconciliacaoUniversal({ grupo, activeSession }: ReconciliacaoUn
                   
                   const configAtual = getConfig(grupoAtivo);
                   const identificacao = configAtual.tipoGeometria === 'pontual'
-                    ? `KM ${div.km?.toFixed(3)} - ${div.codigo || div.tipo}`
+                    ? `KM ${div.km_inicial?.toFixed(3)} - ${div.codigo || div.tipo}`
                     : `KM ${div.km_inicial?.toFixed(3)} a ${div.km_final?.toFixed(3)} - ${div.codigo || div.tipo}`;
                   
                   return (

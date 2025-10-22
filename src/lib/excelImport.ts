@@ -33,9 +33,9 @@ export interface PlacaData {
   velocidade: string | null;
   lado: string;
   posicao: string;
-  km: number;
-  latitude: number | null;
-  longitude: number | null;
+  km_inicial: number;
+  latitude_inicial: number | null;
+  longitude_inicial: number | null;
   tipo_suporte: string;
   qtde_suporte: number | null;
   substrato: string;
@@ -103,9 +103,9 @@ export async function parseExcelFile(file: File): Promise<PlacaData[]> {
               velocidade,
               lado: String(row[5] || ''),
               posicao: String(row[6] || ''),
-              km: parseFloat(row[7]) || 0,
-              latitude: row[8] ? parseFloat(row[8]) : null,
-              longitude: row[9] ? parseFloat(row[9]) : null,
+              km_inicial: parseFloat(row[7]) || 0,
+              latitude_inicial: row[8] ? parseFloat(row[8]) : null,
+              longitude_inicial: row[9] ? parseFloat(row[9]) : null,
               tipo_suporte: String(row[11] || ''),
               qtde_suporte: row[12] ? parseInt(row[12]) : null,
               substrato: String(row[15] || ''),

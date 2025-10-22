@@ -319,8 +319,11 @@ export function ReconciliacaoDrawerUniversal({
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4" />
             <span>
-              {necessidade.km !== undefined && `km ${necessidade.km?.toFixed(3)}`}
-              {necessidade.km_inicial !== undefined && ` ${necessidade.km_inicial?.toFixed(3)} - ${necessidade.km_final?.toFixed(3)}`}
+              {necessidade.km_inicial !== undefined && necessidade.km_final !== undefined 
+                ? `KM ${necessidade.km_inicial?.toFixed(3)} - ${necessidade.km_final?.toFixed(3)}`
+                : necessidade.km_inicial !== undefined 
+                  ? `KM ${necessidade.km_inicial?.toFixed(3)}`
+                  : ''}
               {necessidade.distancia_match_metros && ` | Distância do match: ${necessidade.distancia_match_metros}m`}
             </span>
           </div>
@@ -346,7 +349,7 @@ export function ReconciliacaoDrawerUniversal({
                   </div>
                 ))}
                 <div className="text-xs text-muted-foreground pt-2 border-t">
-                  GPS: {cadastro.latitude?.toFixed(6) || cadastro.latitude_inicial?.toFixed(6) || "N/A"}, {cadastro.longitude?.toFixed(6) || cadastro.longitude_inicial?.toFixed(6) || "N/A"}
+                  GPS: {cadastro.latitude_inicial?.toFixed(6) || "N/A"}, {cadastro.longitude_inicial?.toFixed(6) || "N/A"}
                 </div>
               </div>
 
@@ -403,7 +406,7 @@ export function ReconciliacaoDrawerUniversal({
                   </div>
                 ))}
                 <div className="text-xs text-muted-foreground pt-2 border-t">
-                  GPS projeto: {necessidade.latitude?.toFixed(6) || necessidade.latitude_inicial?.toFixed(6) || "N/A"}, {necessidade.longitude?.toFixed(6) || necessidade.longitude_inicial?.toFixed(6) || "N/A"}
+                  GPS projeto: {necessidade.latitude_inicial?.toFixed(6) || "N/A"}, {necessidade.longitude_inicial?.toFixed(6) || "N/A"}
                 </div>
               </div>
               
