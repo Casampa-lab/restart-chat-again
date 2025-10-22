@@ -965,14 +965,11 @@ export function InventarioImporterManager({ loteId: propLoteId, rodoviaId: propR
           
           const km = getVal("Km", "km");
           record.km_inicial = km ? Number(km) : null;
-          record.km_final = km ? Number(km) : null;
           
           const lat = getVal("Latitude", "latitude");
           const lng = getVal("Longitude", "longitude");
           record.latitude_inicial = lat;
           record.longitude_inicial = lng;
-          record.latitude_final = lat;
-          record.longitude_final = lng;
           
           record.material_utilizado = getVal("Material", "material");
           record.dimensoes = getVal("Dimensões", "Dimensoes", "dimensões", "dimensoes");
