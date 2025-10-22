@@ -75,9 +75,9 @@ export function ReconciliacaoDrawerUniversal({
           dadosNovoElemento.lado = necessidade.lado;
           dadosNovoElemento.suporte = necessidade.suporte;
           dadosNovoElemento.substrato = necessidade.substrato;
-          dadosNovoElemento.km = necessidade.km;
-          dadosNovoElemento.latitude_inicial = necessidade.latitude || necessidade.latitude_inicial;
-          dadosNovoElemento.longitude_inicial = necessidade.longitude || necessidade.longitude_inicial;
+          dadosNovoElemento.km_inicial = necessidade.km_inicial;
+          dadosNovoElemento.latitude_inicial = necessidade.latitude_inicial;
+          dadosNovoElemento.longitude_inicial = necessidade.longitude_inicial;
           dadosNovoElemento.snv = necessidade.snv;
         } else if (tipoElemento === 'marcas_longitudinais') {
           dadosNovoElemento.tipo_demarcacao = necessidade.tipo_demarcacao;
@@ -126,9 +126,9 @@ export function ReconciliacaoDrawerUniversal({
           dadosNovoElemento.tipo = necessidade.tipo;
           dadosNovoElemento.vao_horizontal_m = necessidade.vao_horizontal_m;
           dadosNovoElemento.altura_livre_m = necessidade.altura_livre_m;
-          dadosNovoElemento.km = necessidade.km;
-          dadosNovoElemento.latitude_inicial = necessidade.latitude || necessidade.latitude_inicial;
-          dadosNovoElemento.longitude_inicial = necessidade.longitude || necessidade.longitude_inicial;
+          dadosNovoElemento.km_inicial = necessidade.km_inicial;
+          dadosNovoElemento.latitude_inicial = necessidade.latitude_inicial;
+          dadosNovoElemento.longitude_inicial = necessidade.longitude_inicial;
           dadosNovoElemento.snv = necessidade.snv;
         } else if (tipoElemento === 'defensas') {
           dadosNovoElemento.lado = necessidade.lado;

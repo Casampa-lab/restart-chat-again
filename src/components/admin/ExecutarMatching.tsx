@@ -88,8 +88,8 @@ export function ExecutarMatching() {
 
               matchResult = await matchPontual(
                 tipo as any,
-                nec.latitude,
-                nec.longitude,
+                nec.latitude_inicial,
+                nec.longitude_inicial,
                 nec.rodovia_id,
                 atributos,
                 nec.servico || 'Substituição'
@@ -110,10 +110,10 @@ export function ExecutarMatching() {
               }
 
               const wkt = buildLineStringWKT(
-                nec.latitude_ini,
-                nec.longitude_ini,
-                nec.latitude_fim,
-                nec.longitude_fim
+                nec.latitude_inicial,
+                nec.longitude_inicial,
+                nec.latitude_final,
+                nec.longitude_final
               );
 
               matchResult = await matchLinear(

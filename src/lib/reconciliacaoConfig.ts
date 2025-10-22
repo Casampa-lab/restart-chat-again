@@ -171,7 +171,6 @@ export const CAMPO_LABELS: Record<string, string> = {
   lado: "Lado",
   suporte: "Suporte",
   substrato: "Substrato",
-  km: "KM",
   km_inicial: "KM Inicial",
   km_final: "KM Final",
   extensao_metros: "Extensão (m)",
