@@ -31,6 +31,7 @@ import { LimparReconciliacoesOrfas } from "@/components/admin/LimparReconciliaco
 import { DiagnosticoMatch } from "@/components/admin/DiagnosticoMatch";
 import { LimparFotosOrfas } from "@/components/admin/LimparFotosOrfas";
 import { SnvShapefileUploader } from "@/components/admin/SnvShapefileUploader";
+import { DetectarErrosProjeto } from "@/components/admin/DetectarErrosProjeto";
 import { ResetDatabaseButton } from "@/components/admin/ResetDatabaseButton";
 import { ParametrosMatchManager } from "@/components/admin/ParametrosMatchManager";
 import { RelatorioMatching } from "@/components/admin/RelatorioMatching";
@@ -357,6 +358,7 @@ const Admin = () => {
 
               {/* Componentes com props compartilhadas */}
               <NecessidadesImporter loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
+              <DetectarErrosProjeto />
               <DeleteTodasNecessidades loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
               <RemoverDuplicatasNecessidades />
               <RecalcularMatches loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
