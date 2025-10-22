@@ -479,7 +479,7 @@ export default function InventarioDinamicoComAlerta() {
           ) : (
             <div className="flex flex-wrap gap-3 text-xs">
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <div className="w-3 h-3 rounded-full bg-gray-200"></div>
                 <span>Cadastro Inicial</span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -502,7 +502,7 @@ export default function InventarioDinamicoComAlerta() {
             <div className="flex flex-col items-center gap-1">
               <span className="text-xs">Todos</span>
               {marcoZero ? (
-                <Badge variant="default" className="bg-cyan-500 text-[10px] px-1 py-0 h-4 leading-4">
+                <Badge className="bg-muted text-foreground text-[10px] px-1 py-0 h-4 leading-4 border-0">
                   {contadores.todos.total_inventario}
                 </Badge>
               ) : (
@@ -524,7 +524,7 @@ export default function InventarioDinamicoComAlerta() {
             <div className="flex flex-col items-center gap-1">
               <span className="text-xs">SH</span>
               {marcoZero ? (
-                <Badge variant="default" className="bg-cyan-500 text-[10px] px-1 py-0 h-4 leading-4">
+                <Badge className="bg-muted text-foreground text-[10px] px-1 py-0 h-4 leading-4 border-0">
                   {contadores.sh.total_inventario}
                 </Badge>
               ) : (
@@ -546,7 +546,7 @@ export default function InventarioDinamicoComAlerta() {
             <div className="flex flex-col items-center gap-1">
               <span className="text-xs">SV</span>
               {marcoZero ? (
-                <Badge variant="default" className="bg-cyan-500 text-[10px] px-1 py-0 h-4 leading-4">
+                <Badge className="bg-muted text-foreground text-[10px] px-1 py-0 h-4 leading-4 border-0">
                   {contadores.sv.total_inventario}
                 </Badge>
               ) : (
@@ -568,7 +568,7 @@ export default function InventarioDinamicoComAlerta() {
             <div className="flex flex-col items-center gap-1">
               <span className="text-xs">Def</span>
               {marcoZero ? (
-                <Badge variant="default" className="bg-cyan-500 text-[10px] px-1 py-0 h-4 leading-4">
+                <Badge className="bg-muted text-foreground text-[10px] px-1 py-0 h-4 leading-4 border-0">
                   {contadores.def.total_inventario}
                 </Badge>
               ) : (
