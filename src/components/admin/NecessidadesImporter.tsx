@@ -136,40 +136,6 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
     return valorStr;
   };
 
-  const identificarServico = (row: any, match: any): string => {
-    // SEM match = nova instalação
-    if (!match) {
-      return "Implantar";
-    }
-
-    // COM match - verificar sinais de remoção
-    const sinaisRemocao = [
-      row.quantidade === 0 || row.quantidade === "0",
-      row.extensao_metros === 0 || row.extensao_metros === "0",
-      row.acao?.toLowerCase().includes("remov"),
-      row.acao?.toLowerCase().includes("desativ"),
-    ];
-
-    if (sinaisRemocao.some(Boolean)) {
-      return "Remover";
-    }
-    
-    // COM match + sem sinais de remoção = pode ser Manter ou Substituir
-    // Se tem indicação explícita de manutenção, usar Manter
-    const sinaisManutencao = [
-      row.acao?.toLowerCase().includes("manter"),
-      row.acao?.toLowerCase().includes("conservar"),
-      row.acao?.toLowerCase().includes("manutencao"),
-      row.acao?.toLowerCase().includes("manutenção"),
-    ];
-    
-    if (sinaisManutencao.some(Boolean)) {
-      return "Manter";
-    }
-
-    // Caso contrário = substituição
-    return "Substituir";
-  };
 
   // ============= FUNÇÕES DE MATCH POR SOBREPOSIÇÃO (ELEMENTOS LINEARES) =============
 
@@ -762,7 +728,6 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       }]);
       let sucessos = 0;
       let falhas = 0;
-      let divergenciasPendentes = 0;
       
       // 🚀 OTIMIZAÇÃO: Batch de logs e inserts
       const logsBuffer: LogEntry[] = [];
@@ -842,67 +807,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           
           // Log de progresso
           if (i % 50 === 0) {
-            console.log(`⚙️ Processando linha ${linhaExcel}: Importando sem match [${i+1}/${total}]`);
-          }
-
-          // SISTEMA DE RECONCILIAÇÃO
-          // 1. Calcular servico_inferido (análise automática sem match)
-          const servicoInferido = identificarServico(dados, null);
-          
-          // 2. Preservar solucao_planilha (decisão do projetista)
-          let solucaoPlanilhaNormalizada: string | null = null;
-          const solucaoPlanilha = dados.solucao_planilha?.toLowerCase();
-          
-          // 🔍 DEBUG: Log do valor original de solucao_planilha (primeiras 5 linhas)
-          if (i < 5 || tipo === "cilindros") {
-            console.log(`🔍 Linha ${linhaExcel}: solucao_planilha="${dados.solucao_planilha}" (raw="${solucaoPlanilha}")`);
-          }
-          
-          if (solucaoPlanilha) {
-            // Normalizar valores da planilha
-            if (solucaoPlanilha.includes("substitu")) {
-              solucaoPlanilhaNormalizada = "Substituir";
-            } else if (solucaoPlanilha.includes("implant") || solucaoPlanilha.includes("instala")) {
-              solucaoPlanilhaNormalizada = "Implantar";
-            } else if (solucaoPlanilha.includes("remov") || solucaoPlanilha.includes("desativ")) {
-              solucaoPlanilhaNormalizada = "Remover";
-            } else if (solucaoPlanilha.includes("mant") || solucaoPlanilha.includes("conserv") || solucaoPlanilha.includes("manut")) {
-              solucaoPlanilhaNormalizada = "Manter";
-            } else {
-              // 🔍 DEBUG: Valor não reconhecido
-              console.warn(`⚠️ Linha ${linhaExcel}: Valor não reconhecido em solucao_planilha: "${solucaoPlanilha}"`);
-            }
-          } else {
-            // 🔍 DEBUG: Campo vazio ou nulo
-            if (tipo === "cilindros") {
-              console.warn(`⚠️ Linha ${linhaExcel}: solucao_planilha está VAZIO/NULL - Usando inferência automática`);
-            }
-          }
-          
-          // 3. Definir servico_final (prioridade ao projetista)
-          const servicoFinal = solucaoPlanilhaNormalizada || servicoInferido;
-          
-          // 4. Detectar divergência
-          const divergencia = solucaoPlanilhaNormalizada 
-            ? solucaoPlanilhaNormalizada !== servicoInferido
-            : false;
-          
-          if (divergencia) {
-            divergenciasPendentes++;
-          }
-          
-          // 5. Validar servico antes de usar
-          const servicosValidos = ["Implantar", "Substituir", "Remover", "Manter"];
-          let servico = servicoFinal;
-
-          if (!servicosValidos.includes(servico)) {
-            console.warn(`⚠️ Linha ${linhaExcel}: Serviço inválido "${servico}". Usando "Implantar" como fallback.`);
-            logsBuffer.push({
-              tipo: "warning",
-              linha: linhaExcel,
-              mensagem: `⚠️ Serviço inválido "${servico}" normalizado para "Implantar"`
-            });
-            servico = "Implantar";
+            console.log(`⚙️ Processando linha ${linhaExcel}: Importação pura (matching na aba Matching) [${i+1}/${total}]`);
           }
 
           // Inserir necessidade
@@ -915,17 +820,17 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             | "necessidades_porticos"
             | "necessidades_defensas";
 
-          // Preparar dados para inserção SEM match (cadastro_id será preenchido pelo matching posterior)
+          // Preparar dados para inserção SEM inferências (matching preencherá os campos de decisão)
           dadosInsercao = {
             user_id: user.id,
             lote_id: loteId,
             rodovia_id: rodoviaId,
-            cadastro_id: null, // Será preenchido pelo matching na aba "Matching"
-            servico,
-            servico_inferido: servicoInferido,
-            servico_final: servicoFinal,
-            divergencia,
-            ...dados,
+            cadastro_id: null,        // Preenchido pelo matching
+            servico: null,            // Preenchido pelo matching
+            servico_inferido: null,   // Preenchido pelo matching
+            servico_final: null,      // Preenchido pelo matching
+            divergencia: null,        // Preenchido pelo matching
+            ...dados,                 // Inclui solucao_planilha (preservado)
             arquivo_origem: file.name,
             linha_planilha: linhaExcel,
           };
@@ -944,11 +849,6 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
 
           // 🔍 VALIDAÇÃO PREVENTIVA ANTES DA INSERÇÃO
           const errosValidacao: string[] = [];
-          
-          // Validar serviço
-          if (!dadosInsercao.servico || !['Implantar', 'Substituir', 'Remover', 'Manter'].includes(dadosInsercao.servico)) {
-            errosValidacao.push(`Serviço inválido: "${dadosInsercao.servico}"`);
-          }
           
           // Validar extensão (tachas, marcas, defensas)
           if (['tachas', 'marcas_longitudinais', 'defensas'].includes(tipo)) {
@@ -1016,7 +916,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             });
           }
           
-          console.log(`🎯 PRE-PUSH - Linha ${linhaExcel}: Servico="${dadosInsercao.servico}", BatchSize=${batchInsert.length}`);
+          console.log(`🎯 PRE-PUSH - Linha ${linhaExcel}: Importação pura, BatchSize=${batchInsert.length}`);
           
           // 🚀 OTIMIZAÇÃO: Adicionar ao batch ao invés de inserir individualmente
           batchInsert.push(dadosInsercao);
@@ -1028,15 +928,11 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             await flushBatch(tabelaNecessidade);
           }
 
-          // Log de sucesso com indicação de divergência
-          const icon = servicoFinal === "Implantar" ? "🟢" : servicoFinal === "Substituir" ? "🟡" : servicoFinal === "Remover" ? "🔴" : "🔵";
-          const divIcon = divergencia ? " ⚠️" : "";
-          
-          // 🚀 OTIMIZAÇÃO: Adicionar ao buffer ao invés de setLogs direto
+          // Log de sucesso simplificado (sem inferências)
           logsBuffer.push({
-            tipo: divergencia ? "warning" : "success",
+            tipo: "success",
             linha: linhaExcel,
-            mensagem: `${icon} ${servicoFinal}${divIcon}${divergencia ? ` Projeto: ${solucaoPlanilhaNormalizada} vs Sistema: ${servicoInferido}` : ""}`
+            mensagem: `✅ Importado (matching pendente)`
           });
           
           // Flush imediato nas primeiras 10 linhas para garantir visibilidade inicial
@@ -1173,7 +1069,6 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
    📂 Total processado: ${total} linhas
    ✅ Sucessos: ${sucessos}
    ❌ Falhas: ${falhas}
-   ⚠️ Divergências detectadas: ${divergenciasPendentes}
    🔧 Valores convertidos para NULL automaticamente
 ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Verifique os logs acima para detalhes` : ''}
    
@@ -1184,12 +1079,11 @@ ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Verifique os logs acima par
       const mensagemResultado = [
         `📂 ${total} linhas lidas`,
         `✅ ${sucessos} importadas`,
-        `❌ ${falhas} falhas`,
-        divergenciasPendentes > 0 ? `⚠️ ${divergenciasPendentes} divergências` : null
+        `❌ ${falhas} falhas`
       ].filter(Boolean).join(' • ');
 
       setLogs(prev => [...prev, {
-        tipo: falhas > 0 ? "error" : divergenciasPendentes > 0 ? "warning" : "success",
+        tipo: falhas > 0 ? "error" : "success",
         linha: null,
         mensagem: `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 RESUMO DA IMPORTAÇÃO
