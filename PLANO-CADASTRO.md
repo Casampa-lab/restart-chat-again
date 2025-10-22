@@ -1,6 +1,7 @@
 # 📋 PLANO: Sistema de CADASTRO (Inventário)
 
 ## 🎯 Objetivo
+
 Sistema de gerenciamento de inventário de sinalização viária para rodovias, permitindo cadastro, visualização e importação em massa de diversos tipos de elementos viários.
 
 ---
@@ -10,35 +11,45 @@ Sistema de gerenciamento de inventário de sinalização viária para rodovias, 
 ### 7 Tipos de Inventário
 
 #### 1. **Marcas Longitudinais** (`ficha_marcas_longitudinais`)
+
 Demarcação viária longitudinal (faixas contínuas, tracejadas, etc)
+
 - Localização: km inicial/final, coordenadas GPS
 - Características: tipo demarcação, cor, material, largura, espessura, extensão
 - Estado: conservação, observações, SNV
 - Fotos: foto_url
 
 #### 2. **Tachas** (`ficha_tachas`)
+
 Tachas refletivas para demarcação
+
 - Localização: km inicial/final, coordenadas GPS, espaçamento
 - Características: corpo, refletivo, cor, quantidade, local implantação
 - Estado: observações, SNV
 - Fotos: foto_url
 
 #### 3. **Inscrições** (`ficha_inscricoes`)
+
 Setas, símbolos, legendas pintadas no pavimento
+
 - Localização: km inicial/final, coordenadas GPS
 - Características: tipo inscrição, cor, dimensões, área, material
 - Estado: conservação, observações
 - Fotos: foto_url
 
 #### 4. **Cilindros Delimitadores** (`ficha_cilindros`)
+
 Cilindros/balizadores para delimitação
+
 - Localização: km inicial/final, coordenadas GPS, extensão
 - Características: cor corpo, tipo/cor refletivo, quantidade, espaçamento, local implantação
 - Estado: observações, SNV
 - Fotos: foto_url
 
 #### 5. **Placas** (`ficha_placa`)
+
 Sinalização vertical (placas de trânsito)
+
 - Localização: km, coordenadas GPS, lado, sentido
 - Características: código, modelo, tipo, velocidade, descrição
 - Dimensões: largura, altura, distância, área
@@ -51,14 +62,18 @@ Sinalização vertical (placas de trânsito)
   - `ficha_placa_intervencoes`: histórico de intervenções
 
 #### 6. **Pórticos** (`ficha_porticos`)
+
 Estruturas suspensas sobre a pista
+
 - Localização: km, coordenadas GPS, lado
 - Características: tipo, vão horizontal, altura livre
 - Estado: conservação, observações, SNV
 - Fotos: foto_url
 
 #### 7. **Defensas** (`defensas`)
+
 Dispositivos de contenção lateral
+
 - Localização: km inicial/final, coordenadas GPS, lado, extensão
 - Classificação: tipo, nível contenção (NCHRP350, EN1317), geometria, função
 - Características técnicas: quantidade lâminas, comprimento tramo, distâncias, velocidade, VMD, percentual pesados
@@ -77,6 +92,7 @@ Dispositivos de contenção lateral
 ### Componente: `InventarioImporterManager.tsx`
 
 **Funcionalidades**:
+
 - Upload de planilhas Excel (.xlsx, .xlsm)
 - Seleção do tipo de inventário
 - Parse automático via `excelImport.ts`
@@ -84,6 +100,7 @@ Dispositivos de contenção lateral
 - Inserção em lote no banco
 
 **Fluxo**:
+
 1. Usuário seleciona arquivo Excel
 2. Sistema identifica colunas automaticamente
 3. Para cada linha:
@@ -93,6 +110,7 @@ Dispositivos de contenção lateral
 4. Feedback de progresso e erros
 
 **Buckets de Storage**:
+
 - `marcas-longitudinais`
 - `tachas`
 - `inscricoes`
@@ -103,11 +121,29 @@ Dispositivos de contenção lateral
 
 ---
 
+🧩 PADRÃO DEFINITIVO DE CAMPOS DE LOCALIZAÇÃO (OBRIGATÓRIO)
+✅ 1. Padrão único para todos os datasets (Cadastro e Necessidades)
+Os campos de localização devem sempre ter sufixo:
+Pontuais: km_inicial, latitude_inicial, longitude_inicial
+Lineares: km_inicial, km_final
+Não existem campos sem sufixo (km, latitude, longitude → proibidos).
+O sufixo \_inicial e \_final é obrigatório e padronizado em todas as planilhas.
+✅ 2. Regras de escrita
+Nunca usar KM ou Km — o correto é km minúsculo.
+Nomes de colunas devem ser usados exatamente como definidos (sem alteração de maiúsculas, sem renomear cabeçalhos).
+O sistema deve converter "KM" ou "Km" em km na importação, alertando com uma mensagem ao usuário
+✅ 3. Aplicação da regra
+Essa regra vale para Cadastro e Necessidades (Projeto) igualmente.
+Todos os cálculos, matches e validações de posição utilizam esses campos como base.
+Campos como lado, codigo, tipo, trecho_id não possuem sufixo.
+O parser deve apenas interpretar equivalentes (ex.: Latitude_Inicial, Longitude inicial) sem renomear.
+
 ## 🎨 Interface de Visualização
 
 ### Viewers por Tipo
 
 Cada tipo de inventário tem seu viewer dedicado:
+
 - `InventarioMarcasLongitudinaisViewer.tsx`
 - `InventarioTachasViewer.tsx`
 - `InventarioInscricoesViewer.tsx`
@@ -117,6 +153,7 @@ Cada tipo de inventário tem seu viewer dedicado:
 - `InventarioDefensasViewer.tsx`
 
 **Funcionalidades comuns**:
+
 - Tabela com dados principais
 - Filtros por rodovia, lote
 - Busca textual
@@ -145,6 +182,7 @@ Supervisora
 ```
 
 **Tabelas de suporte**:
+
 - `supervisoras`: empresas supervisoras (multi-tenant)
 - `lotes`: agrupamentos de rodovias
 - `rodovias`: rodovias individuais (BR-xxx)
@@ -156,14 +194,17 @@ Supervisora
 ### Regras implementadas:
 
 **Usuários comuns**:
+
 - ✅ Visualizam apenas dados que criaram (`user_id = auth.uid()`)
 - ✅ Criam, editam e excluem apenas próprios registros
 
 **Coordenadores**:
+
 - ✅ Visualizam todos os dados
 - ✅ Acesso via `has_role(auth.uid(), 'coordenador')`
 
 **Administradores**:
+
 - ✅ Acesso total
 - ✅ Acesso via `has_role(auth.uid(), 'admin')`
 
@@ -172,6 +213,7 @@ Supervisora
 ## 📱 Páginas de Usuário
 
 Cada usuário acessa suas próprias fichas:
+
 - `/minhas-fichas-placa` - Placas cadastradas
 - `/minhas-fichas-verificacao` - Fichas de verificação
 - `/minhas-defensas` - Defensas cadastradas
@@ -183,6 +225,7 @@ Cada usuário acessa suas próprias fichas:
 ## 🔐 Sistema de Autenticação
 
 **Implementado**:
+
 - Login/Signup via Supabase Auth
 - Profiles em `public.profiles`
 - Trigger automático (`handle_new_user`) ao criar usuário
@@ -226,12 +269,14 @@ src/
 ## 📊 Banco de Dados
 
 ### Funções auxiliares:
+
 - `has_role(_user_id, _role)` - Verificação de role
 - `user_has_module_access(_user_id, _modulo_codigo)` - Controle de acesso a módulos
 - `get_user_supervisora_id(_user_id)` - ID da supervisora do usuário
 - `generate_codigo_convite()` - Geração de código único
 
 ### Tabelas principais:
+
 - 7 tabelas de inventário (listadas acima)
 - `profiles` - Dados dos usuários
 - `user_roles` - Atribuição de roles
@@ -244,6 +289,7 @@ src/
 ## ✅ Status Atual
 
 **Implementado e funcionando**:
+
 - ✅ Cadastro manual via formulários
 - ✅ Importação em massa via Excel
 - ✅ Visualização por tipo

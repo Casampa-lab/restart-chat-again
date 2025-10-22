@@ -1,6 +1,7 @@
 # 📋 PLANO: Sistema de NECESSIDADES
 
 ## 🎯 Objetivo
+
 Implementar sistema completo para gerenciar necessidades de serviços nas rodovias, com match automático ao CADASTRO e identificação do tipo de serviço (Inclusão, Substituição, Remoção).
 
 ---
@@ -18,6 +19,23 @@ NC (quando necessidade ≠ intervenção)
 ```
 
 ---
+
+🧩 PADRÃO DEFINITIVO DE CAMPOS DE LOCALIZAÇÃO (OBRIGATÓRIO)
+✅ 1. Padrão único para todos os datasets (Cadastro e Necessidades)
+Os campos de localização devem sempre ter sufixo:
+Pontuais: km_inicial, latitude_inicial, longitude_inicial
+Lineares: km_inicial, km_final
+Não existem campos sem sufixo (km, latitude, longitude → proibidos).
+O sufixo \_inicial e \_final é obrigatório e padronizado em todas as planilhas.
+✅ 2. Regras de escrita
+Nunca usar KM ou Km — o correto é km minúsculo.
+Nomes de colunas devem ser usados exatamente como definidos (sem alteração de maiúsculas, sem renomear cabeçalhos).
+O sistema deve converter "KM" ou "Km" em km na importação, alertando com uma mensagem ao usuário
+✅ 3. Aplicação da regra
+Essa regra vale para Cadastro e Necessidades (Projeto) igualmente.
+Todos os cálculos, matches e validações de posição utilizam esses campos como base.
+Campos como lado, codigo, tipo, trecho_id não possuem sufixo.
+O parser deve apenas interpretar equivalentes (ex.: Latitude_Inicial, Longitude inicial) sem renomear.
 
 ## 📊 FASE 1: Estrutura de Dados (Migrations)
 
@@ -40,13 +58,13 @@ CREATE TABLE necessidades_marcas_longitudinais (
   user_id UUID NOT NULL REFERENCES auth.users,
   lote_id UUID NOT NULL,
   rodovia_id UUID NOT NULL,
-  
+
   -- LINK AO CADASTRO (nullable - pode ser nova instalação)
   cadastro_id UUID REFERENCES ficha_marcas_longitudinais(id),
-  
+
   -- SERVIÇO (auto-identificado na importação)
   servico TEXT NOT NULL CHECK (servico IN ('Inclusão', 'Substituição', 'Remoção')),
-  
+
   -- Dados da planilha (colunas conforme .xlsm fornecido)
   km_inicial NUMERIC,
   km_final NUMERIC,
@@ -62,13 +80,13 @@ CREATE TABLE necessidades_marcas_longitudinais (
   extensao_metros NUMERIC,
   estado_conservacao TEXT,
   observacao TEXT,
-  
+
   -- Metadados da importação
   data_importacao TIMESTAMP DEFAULT NOW(),
   arquivo_origem TEXT,
   linha_planilha INTEGER,
   distancia_match_metros NUMERIC,  -- distância até cadastro (se houver match)
-  
+
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -103,6 +121,7 @@ CREATE POLICY "Coordenadores view all"
 ```
 
 **Repetir estrutura similar para os 7 tipos**, adaptando:
+
 - Colunas específicas de cada tipo
 - Foreign key para tabela de cadastro correspondente
 - Mesmo padrão de RLS
@@ -137,11 +156,11 @@ BEGIN
     WHEN 'porticos' THEN 'ficha_porticos'
     WHEN 'defensas' THEN 'defensas'
   END;
-  
+
   -- Fórmula de Haversine para calcular distância
   -- Retorna registro mais próximo dentro da tolerância
   RETURN QUERY EXECUTE format('
-    SELECT 
+    SELECT
       id AS cadastro_id,
       (
         6371000 * acos(
@@ -169,12 +188,12 @@ function identificarServico(
   row: any,
   cadastroMatch: { cadastro_id: string; distancia_metros: number } | null
 ): 'Inclusão' | 'Substituição' | 'Remoção' {
-  
+
   // SEM match = nova instalação
   if (!cadastroMatch) {
     return 'Inclusão';
   }
-  
+
   // COM match - verificar se é remoção
   const sinaisRemocao = [
     row.quantidade === 0,
@@ -182,11 +201,11 @@ function identificarServico(
     row.acao?.toLowerCase().includes('remov'),
     row.acao?.toLowerCase().includes('desativ'),
   ];
-  
+
   if (sinaisRemocao.some(Boolean)) {
     return 'Remoção';
   }
-  
+
   // Caso contrário = substituição
   return 'Substituição';
 }
@@ -201,6 +220,7 @@ function identificarServico(
 **Localização**: `src/components/admin/NecessidadesImporter.tsx`
 
 **UI**:
+
 ```tsx
 - Select: Tipo de necessidade (7 opções)
 - File input: Upload .xlsm
@@ -212,11 +232,12 @@ function identificarServico(
 ```
 
 **Fluxo**:
+
 ```typescript
 async function importarNecessidades(file: File, tipo: string) {
   // 1. Parse do Excel
   const data = await parseExcel(file);
-  
+
   // 2. Para cada linha
   for (const [index, row] of data.entries()) {
     try {
@@ -228,10 +249,10 @@ async function importarNecessidades(file: File, tipo: string) {
         p_rodovia_id: row.rodovia_id,
         p_tolerancia_metros: 50
       });
-      
+
       // 4. Identificar tipo de serviço
       const servico = identificarServico(row, match.data?.[0]);
-      
+
       // 5. Inserir na tabela de necessidades
       await supabase
         .from(`necessidades_${tipo}`)
@@ -243,10 +264,10 @@ async function importarNecessidades(file: File, tipo: string) {
           arquivo_origem: file.name,
           linha_planilha: index + 2, // +2 pois Excel começa em 1 e tem header
         });
-      
+
       // 6. Feedback
       console.log(`Linha ${index + 2}: ${servico}`, match.data?.[0]);
-      
+
     } catch (error) {
       console.error(`Erro linha ${index + 2}:`, error);
     }
@@ -263,6 +284,7 @@ async function importarNecessidades(file: File, tipo: string) {
 **Localização**: `src/pages/MinhasNecessidades.tsx`
 
 **Layout**:
+
 ```tsx
 <Tabs>
   <TabsList>
@@ -274,7 +296,7 @@ async function importarNecessidades(file: File, tipo: string) {
     <TabsTrigger>Pórticos</TabsTrigger>
     <TabsTrigger>Defensas</TabsTrigger>
   </TabsList>
-  
+
   <TabsContent value="marcas_longitudinais">
     <NecessidadesTable tipo="marcas_longitudinais" />
   </TabsContent>
@@ -285,6 +307,7 @@ async function importarNecessidades(file: File, tipo: string) {
 ### Componente: `NecessidadesTable.tsx`
 
 **Funcionalidades**:
+
 - Tabela com colunas principais do tipo
 - **Coluna SERVIÇO** com badge colorido:
   - 🟢 **Inclusão** (green)
@@ -303,8 +326,9 @@ async function importarNecessidades(file: File, tipo: string) {
   - Excluir
 
 **Exemplo de Badge**:
+
 ```tsx
-<Badge 
+<Badge
   variant={
     servico === 'Inclusão' ? 'default' :
     servico === 'Substituição' ? 'secondary' :
@@ -333,11 +357,13 @@ async function importarNecessidades(file: File, tipo: string) {
 ### Configuração de Logos ✅
 
 **Tabela `supervisoras`** - Novos campos:
+
 - `logo_url`: Logo da empresa supervisora (BR-LEGAL, etc.)
 - `logo_orgao_fiscalizador_url`: Logo do órgão fiscalizador (DNIT, DER, etc.) - **NOVO**
 - `usar_logo_customizado`: Switch para usar logo customizado
 
 **Componente**: `src/components/admin/SupervisoraManager.tsx`
+
 - Upload de logo da supervisora
 - Upload de logo do órgão fiscalizador
 - Pré-visualização de ambos os logos
@@ -346,17 +372,18 @@ async function importarNecessidades(file: File, tipo: string) {
 **💡 Estratégia Comercial**: Sistema preparado para venda em esfera federal (DNIT) e estadual (DER) através de logos configuráveis.
 
 **Layout**: ✅ Implementado
+
 ```tsx
 <Tabs>
   <TabsList>
     <TabsTrigger>Relatório Inicial</TabsTrigger>
     <TabsTrigger>Relatório Permanente</TabsTrigger>
   </TabsList>
-  
+
   <TabsContent value="inicial">
     <RelatorioInicialExporter />
   </TabsContent>
-  
+
   <TabsContent value="permanente">
     <RelatorioPermanenteExporter />
   </TabsContent>
@@ -370,6 +397,7 @@ async function importarNecessidades(file: File, tipo: string) {
 **Status**: Implementado em `src/pages/MinhasNecessidadesRelatorios.tsx`
 
 **Funcionalidade**:
+
 ```typescript
 async function gerarRelatorioInicial(tipo: string) {
   // 1. Buscar dados do CADASTRO
@@ -377,33 +405,33 @@ async function gerarRelatorioInicial(tipo: string) {
     .from(getTabelaCadastro(tipo))
     .select('*')
     .order('km_inicial');
-  
+
   // 2. Adicionar coluna SERVIÇO vazia
   const dadosComServico = cadastro.map(item => ({
     ...item,
     servico: '', // VAZIO no relatório inicial
   }));
-  
+
   // 3. Gerar .xlsx
   const workbook = XLSX.utils.book_new();
-  
+
   // Sheet principal com dados
   const worksheet = XLSX.utils.json_to_sheet(dadosComServico);
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Dados');
-  
+
   // Sheet DIC (dicionário de campos)
   const dicSheet = criarSheetDIC(tipo);
   XLSX.utils.book_append_sheet(workbook, dicSheet, 'DIC');
-  
+
   // Sheets auxiliares (se existirem)
   const sheetsAux = criarSheetsAuxiliares(tipo);
   sheetsAux.forEach(sheet => {
     XLSX.utils.book_append_sheet(workbook, sheet.data, sheet.name);
   });
-  
+
   // 4. Adicionar logos no header
   adicionarLogosHeader(workbook);
-  
+
   // 5. Download
   XLSX.writeFile(workbook, `1.8.X_CONDICAO_INICIAL_${tipo}.xlsx`);
 }
@@ -416,6 +444,7 @@ async function gerarRelatorioInicial(tipo: string) {
 **Status**: Implementado em `src/pages/MinhasNecessidadesRelatorios.tsx`
 
 **Funcionalidade**:
+
 ```typescript
 async function gerarRelatorioPermanente(tipo: string) {
   // 1. Buscar CADASTRO com JOIN em NECESSIDADES
@@ -426,14 +455,14 @@ async function gerarRelatorioPermanente(tipo: string) {
       necessidade:necessidades_${tipo}(servico, observacao)
     `)
     .order('km_inicial');
-  
+
   // 2. Mesclar dados
   const dadosComServico = data.map(item => ({
     ...item,
     servico: item.necessidade?.servico || '', // Preenchido se houver necessidade
     observacao_necessidade: item.necessidade?.observacao || '',
   }));
-  
+
   // 3. Gerar .xlsx (mesmo processo do Inicial)
   // ...
 }
@@ -448,6 +477,7 @@ async function gerarRelatorioPermanente(tipo: string) {
 **Nota**: Será implementado quando houver definição clara do formato e conteúdo esperado.
 
 **Funcionalidade**:
+
 ```typescript
 async function gerarRelatorioFinal(tipo: string) {
   // 1. Buscar CADASTRO + INTERVENÇÕES
@@ -458,20 +488,20 @@ async function gerarRelatorioFinal(tipo: string) {
       intervencoes:${getTabelaIntervencoes(tipo)}(*)
     `)
     .order('km_inicial');
-  
+
   // 2. Aplicar lógica de estado final
   const estadoFinal = data.map(item => {
     // Se houver intervenção, usar dados da intervenção
     // Senão, manter dados do cadastro
     const ultimaIntervencao = item.intervencoes?.[0];
-    
+
     return {
       ...item,
       ...ultimaIntervencao, // Override com dados da intervenção
       servico_executado: ultimaIntervencao ? 'Sim' : 'Não',
     };
   });
-  
+
   // 3. Gerar .xlsx
   // ...
 }
@@ -514,6 +544,7 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 **Status**: ✅ Implementado
 
 **Funcionalidades**:
+
 - ✅ Mapa interativo Mapbox
 - ✅ Pins coloridos por tipo de serviço:
   - 🟢 Verde = Inclusão
@@ -536,6 +567,7 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 ## 📋 Ordem de Implementação
 
 ### Sprint 1: Estrutura Base ✅ **CONCLUÍDO**
+
 - ✅ **FASE 1 COMPLETA** - Criar 7 tabelas de necessidades (migrations)
 - ✅ Implementar RLS policies
 - ✅ Criar índices para performance
@@ -545,6 +577,7 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 **📌 CHECKPOINT: Migration 20251011-232318** - Pode retroceder até aqui se necessário
 
 ### Sprint 2: Importação ✅ **CONCLUÍDO**
+
 - ✅ Componente `NecessidadesImporter.tsx` criado
 - ✅ Lógica de parse de .xlsm implementada
 - ✅ Integração com função de match
@@ -555,6 +588,7 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 **📌 CHECKPOINT ATUAL** - Sistema de importação funcionando!
 
 ### Sprint 3: Visualização ✅ **CONCLUÍDO**
+
 - ✅ Página `MinhasNecessidades.tsx` criada
 - ✅ Componente com 7 abas (uma por tipo)
 - ✅ Badges coloridos por serviço (🟢🟡🔴)
@@ -566,6 +600,7 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 **📌 CHECKPOINT ATUAL** - Sistema de visualização funcionando!
 
 ### Sprint 4: Relatórios ✅ **CONCLUÍDO**
+
 - [x] Exportação Excel das necessidades (por tipo)
 - [x] Seção Relatórios no Admin
 - [x] Relatório Inicial (CADASTRO + SERVIÇO vazio)
@@ -574,11 +609,13 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 - [x] Função de adicionar logos no header dos relatórios Excel
 
 **📌 CHECKPOINT: Sprint 4 finalizada!**
+
 - Sistema preparado para venda em esfera estadual e federal - logo do órgão fiscalizador é configurável
 - Relatórios Excel incluem logos da supervisora e órgão fiscalizador no cabeçalho
 - Biblioteca ExcelJS implementada para suporte avançado a imagens
 
 ### Sprint 5: Refinamentos ✅ **CONCLUÍDO**
+
 - ⏸️ **PAUSADO** - Relatório Final (aguardando modelo/especificação do cliente - previsão 2028)
 - ✅ Implementar logos nos relatórios Excel (header)
 - ✅ Visualização em mapa (FASE 6)
@@ -619,6 +656,7 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
    - Barra de progresso visual
 
 **Acessos**:
+
 - Botão "Dashboard" na página de Necessidades
 - Rota: `/dashboard-necessidades`
 
@@ -627,11 +665,13 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 ## 🔐 Segurança e Validações
 
 ### RLS (Row Level Security)
+
 - Usuários veem apenas próprias necessidades
 - Coordenadores veem todas
 - Admins acesso total
 
 ### Validações
+
 - Coordenadas válidas (lat/long)
 - Tipo de serviço (Inclusão/Substituição/Remoção)
 - Rodovia e lote existentes
@@ -642,6 +682,7 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 ## 📊 Métricas e Monitoramento
 
 ### Dados para acompanhamento:
+
 - Total de necessidades por tipo de serviço
 - Taxa de match (quantas encontraram cadastro)
 - Distribuição por rodovia/lote
@@ -673,9 +714,11 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 6. ✅ **FASE 6**: Visualização em mapa
 
 **⏸️ Pausado para o futuro:**
+
 - Relatório Final (aguardando especificação - previsão 2028)
 
 **🔜 Próximas evoluções opcionais:**
+
 - Analytics e dashboards
 - Clusters no mapa
 - Exportação KML/GeoJSON
