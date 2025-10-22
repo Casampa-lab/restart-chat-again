@@ -58,7 +58,7 @@ interface Necessidade {
 }
 
 interface ContagemElemento {
-  cadastro_inicial: number;      // Azul - elementos originais
+  cadastro_inicial: number;      // Cinza - elementos originais
   criados_match: number;          // Roxo - criados pelo RecalcularMatches
   necessidades_totais: number;    // Total de necessidades importadas
   necessidades_pendentes: number; // Verde - necessidades não matcheadas
@@ -507,13 +507,13 @@ export default function InventarioDinamicoComAlerta() {
                 </Badge>
               ) : (
                 <div className="flex gap-0.5">
-                  <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-gray-200 text-black text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.todos.cadastro_inicial}
                   </Badge>
-                  <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-purple-500 text-white text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.todos.criados_match}
                   </Badge>
-                  <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-green-500 text-white text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.todos.necessidades_pendentes}
                   </Badge>
                 </div>
@@ -529,13 +529,13 @@ export default function InventarioDinamicoComAlerta() {
                 </Badge>
               ) : (
                 <div className="flex gap-0.5">
-                  <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-gray-200 text-black text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.sh.cadastro_inicial}
                   </Badge>
-                  <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-purple-500 text-white text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.sh.criados_match}
                   </Badge>
-                  <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-green-500 text-white text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.sh.necessidades_pendentes}
                   </Badge>
                 </div>
@@ -551,13 +551,13 @@ export default function InventarioDinamicoComAlerta() {
                 </Badge>
               ) : (
                 <div className="flex gap-0.5">
-                  <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-gray-200 text-black text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.sv.cadastro_inicial}
                   </Badge>
-                  <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-purple-500 text-white text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.sv.criados_match}
                   </Badge>
-                  <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-green-500 text-white text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.sv.necessidades_pendentes}
                   </Badge>
                 </div>
@@ -573,13 +573,13 @@ export default function InventarioDinamicoComAlerta() {
                 </Badge>
               ) : (
                 <div className="flex gap-0.5">
-                  <Badge variant="default" className="bg-blue-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-gray-200 text-black text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.def.cadastro_inicial}
                   </Badge>
-                  <Badge variant="default" className="bg-purple-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-purple-500 text-white text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.def.criados_match}
                   </Badge>
-                  <Badge variant="default" className="bg-green-500 text-[10px] px-1 py-0 h-4 leading-4">
+                  <Badge variant="default" className="bg-green-500 text-white text-[10px] px-1 py-0 h-4 leading-4">
                     {contadores.def.necessidades_pendentes}
                   </Badge>
                 </div>
