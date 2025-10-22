@@ -147,72 +147,75 @@ export function ExecutarMatching() {
                 nec.servico || "Substituição",
               );
             } else {
-            /** -------- Lineares -------- */
-              // Validar coordenadas antes de construir WKT
-              const ok =
-                nec.latitude_inicial != null &&
-                nec.longitude_inicial != null &&
-                nec.latitude_final != null &&
-                nec.longitude_final != null;
+         /** -------- Lineares (com fallback por KM) -------- */
+else {
+  const hasGPSLine =
+    nec.latitude_inicial != null && nec.longitude_inicial != null &&
+    nec.latitude_final   != null && nec.longitude_final   != null;
 
-              if (!ok) {
-                console.error(`⚠️ ${tipo} ${nec.id}: coordenadas incompletas`, {
-                  lat_ini: nec.latitude_inicial,
-                  lon_ini: nec.longitude_inicial,
-                  lat_fim: nec.latitude_final,
-                  lon_fim: nec.longitude_final,
-                });
-                stats.erros++;
-                processados++;
-                setProgresso((processados / totalNecessidades) * 100);
-                continue;
-              }
+  const hasKMLine =
+    nec.km_inicial != null && nec.km_final != null &&
+    Number(nec.km_final) >= Number(nec.km_inicial);
 
-              // Atributos normalizados por tipo (apenas os que influenciam no filtro de candidatos)
-              const atributos: Record<string, any> = {};
-              if (tipo === "MARCA_LONG") {
-                atributos.tipo_demarcacao = norm(nec.tipo_demarcacao);
-                atributos.cor = norm(nec.cor);
-                atributos.lado = normLado(nec.lado);
-              }
-              if (tipo === "TACHAS") {
-                atributos.corpo = norm(nec.corpo);
-                atributos.cor_refletivo = norm(nec.cor_refletivo);
-              }
-              if (tipo === "DEFENSA") {
-                atributos.funcao = norm(nec.funcao);
-                atributos.lado = normLado(nec.lado);
-              }
-              if (tipo === "CILINDRO") {
-                atributos.cor_corpo = norm(nec.cor_corpo);
-                atributos.local_implantacao = norm(nec.local_implantacao);
-              }
+  if (!hasGPSLine && !hasKMLine) {
+    console.error(`⚠️ ${tipo} ${nec.id}: sem dados suficientes (nem GPS nem KM).`, {
+      km_ini: nec.km_inicial, km_fim: nec.km_final,
+      lat_ini: nec.latitude_inicial, lon_ini: nec.longitude_inicial,
+      lat_fim: nec.latitude_final,   lon_fim: nec.longitude_final,
+    });
+    stats.erros++; processados++;
+    setProgresso((processados / totalNecessidades) * 100);
+    continue;
+  }
 
-              const wkt = buildLineStringWKT(
-                Number(nec.latitude_inicial),
-                Number(nec.longitude_inicial),
-                Number(nec.latitude_final),
-                Number(nec.longitude_final),
-              );
+  // Atributos normalizados por tipo (apenas os que influenciam no filtro de candidatos)
+  const atributos: Record<string, any> = {};
+  if (tipo === 'MARCA_LONG') {
+    atributos.tipo_demarcacao = norm(nec.tipo_demarcacao);
+    atributos.cor             = norm(nec.cor);
+    atributos.lado            = normLado(nec.lado);
+  }
+  if (tipo === 'TACHAS') {
+    atributos.corpo         = norm(nec.corpo);
+    atributos.cor_refletivo = norm(nec.cor_refletivo);
+  }
+  if (tipo === 'DEFENSA') {
+    atributos.funcao = norm(nec.funcao);
+    atributos.lado   = normLado(nec.lado);
+  }
+  if (tipo === 'CILINDRO') {
+    atributos.cor_corpo         = norm(nec.cor_corpo);
+    atributos.local_implantacao = norm(nec.local_implantacao);
+  }
 
-              try {
-                result = await matchLinear(tipo, wkt, nec.rodovia_id, atributos, nec.servico || "Substituição");
-              } catch (e) {
-                console.error(`❌ ERRO MATCH LINEAR — ${tipo} ${nec.id}`, { wkt, atributos, e });
-                stats.erros++;
-                processados++;
-                setProgresso((processados / totalNecessidades) * 100);
-                continue;
-              }
-            }
-
-            if (!result) {
-              stats.erros++;
-              processados++;
-              setProgresso((processados / totalNecessidades) * 100);
-              continue;
-            }
-
+  try {
+    if (hasGPSLine) {
+      // GPS disponível → usa geometria (como já fazia Cilindros quando havia coords)
+      const wkt = buildLineStringWKT(
+        Number(nec.latitude_inicial),  Number(nec.longitude_inicial),
+        Number(nec.latitude_final),    Number(nec.longitude_final)
+      );
+      result = await matchLinear(
+        tipo, wkt, nec.rodovia_id, atributos, nec.servico || 'Substituição'
+      );
+    } else {
+      // Fallback por KM → overlap por km_inicial/km_final (padrão que já funcionava para Cilindros)
+      result = await matchLinearKm(
+        tipo,
+        Number(nec.km_inicial),
+        Number(nec.km_final),
+        nec.rodovia_id,
+        atributos,
+        nec.servico || 'Substituição'
+      );
+    }
+  } catch (e) {
+    console.error(`❌ ERRO MATCH LINEAR — ${tipo} ${nec.id}`, { atributos, e });
+    stats.erros++; processados++;
+    setProgresso((processados / totalNecessidades) * 100);
+    continue;
+  }
+}
             // 3) Persistir decisão na necessidade
             const { error: upErr } = await supabase
               .from(TIPO_TO_TABLE_MAP[tipo] as any)
