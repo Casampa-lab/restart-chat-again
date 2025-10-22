@@ -409,6 +409,48 @@ const Admin = () => {
                   )}
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    📋 Listas de Necessidades - Elementos Lineares
+                  </CardTitle>
+                  <CardDescription>
+                    Visualize necessidades lineares ordenadas por KM, com indicador de overlap
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button
+                    onClick={() => navigate(`/lista-necessidades-marcas?rodovia=${selectedRodoviaId}&lote=${selectedLoteId}`)}
+                    disabled={!selectedRodoviaId || !selectedLoteId}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    ➖ Lista de Marcas Longitudinais
+                  </Button>
+                  <Button
+                    onClick={() => navigate(`/lista-necessidades-tachas?rodovia=${selectedRodoviaId}&lote=${selectedLoteId}`)}
+                    disabled={!selectedRodoviaId || !selectedLoteId}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    💎 Lista de Tachas Refletivas
+                  </Button>
+                  <Button
+                    onClick={() => navigate(`/lista-necessidades-defensas?rodovia=${selectedRodoviaId}&lote=${selectedLoteId}`)}
+                    disabled={!selectedRodoviaId || !selectedLoteId}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    🛣️ Lista de Defensas Metálicas
+                  </Button>
+                  {(!selectedRodoviaId || !selectedLoteId) && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Selecione uma rodovia e lote para visualizar as listas
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
               
               <ExecutarMatching />
               <ParametrosMatchManager />

@@ -47,6 +47,9 @@ import RegistrarNC from "./pages/RegistrarNC";
 import MapaNecessidadesPlacas from "./pages/MapaNecessidadesPlacas";
 import MapaNecessidadesPorticos from "./pages/MapaNecessidadesPorticos";
 import MapaNecessidadesInscricoes from "./pages/MapaNecessidadesInscricoes";
+import ListaNecessidadesMarcas from "./pages/ListaNecessidadesMarcas";
+import ListaNecessidadesTachas from "./pages/ListaNecessidadesTachas";
+import ListaNecessidadesDefensas from "./pages/ListaNecessidadesDefensas";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +101,9 @@ const App = () => (
         <Route path="/mapa-necessidades-placas" element={<MapaNecessidadesPlacas />} />
         <Route path="/mapa-necessidades-porticos" element={<MapaNecessidadesPorticos />} />
         <Route path="/mapa-necessidades-inscricoes" element={<MapaNecessidadesInscricoes />} />
+        <Route path="/lista-necessidades-marcas" element={<ListaNecessidadesMarcas />} />
+        <Route path="/lista-necessidades-tachas" element={<ListaNecessidadesTachas />} />
+        <Route path="/lista-necessidades-defensas" element={<ListaNecessidadesDefensas />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ChatAssistant />
