@@ -1,4 +1,4 @@
-# Sistema de Importação - Atualização para Inventário Dinâmico
+# Sistema de Importação - Processo em 2 Etapas (Importação + Matching)
 
 ## 🎯 Objetivo da Atualização
 
@@ -127,15 +127,15 @@ Todos os campos de controle do Inventário Dinâmico foram adicionados aos array
 
 ## 📊 Como Funciona a Importação Agora
 
-### 1. **Upload do Excel**
+### 1. **Upload do Excel (Etapa 1 - Importação Pura)**
 ```
-Usuário → Seleciona Excel CADASTRO
+Usuário → Seleciona Excel de NECESSIDADES
      ↓
-     Sistema lê planilha
+Sistema lê e valida planilha
      ↓
-     Normaliza nomes de campos
+Insere registros SEM matching (campos NULL)
      ↓
-     Aplica mapeamentos
+Feedback: "X registros importados, aguardando matching"
 ```
 
 ### 2. **Processamento dos Dados**
@@ -168,6 +168,17 @@ Validação de campos
      Upload de fotos (se houver)
      ↓
      Associação foto ↔ registro
+```
+
+### 4. **Matching Dedicado (Etapa 2 - Aba "Matching")**
+```
+Usuário → Acessa aba "Matching"
+     ↓
+Sistema executa algoritmos de matching
+     ↓
+Preenche: cadastro_id, servico, distancia, divergencia
+     ↓
+Feedback: "X de Y necessidades matched"
 ```
 
 ---
@@ -210,7 +221,23 @@ BR | SNV | Tramo | ID | Geometria | Km Inicial | Latitude Inicial | ... | Extens
 
 ## 🚨 Pontos de Atenção
 
-### 1. **Campos Obrigatórios vs Opcionais**
+### 1. **Separação de Responsabilidades**
+
+**Importação**:
+- ✅ Valida estrutura da planilha
+- ✅ Converte tipos de dados
+- ✅ Insere no banco
+- ❌ NÃO faz matching
+- ❌ NÃO identifica tipo de serviço
+
+**Matching (Aba Dedicada)**:
+- ✅ Algoritmos GPS/overlap
+- ✅ Cálculo de distância
+- ✅ Comparação de atributos
+- ✅ Identificação de serviço
+- ✅ Cálculo de divergências
+
+### 2. **Campos Obrigatórios vs Opcionais**
 
 Todos os campos de controle do Inventário Dinâmico são **opcionais** (nullable) para permitir importação de dados antigos:
 
@@ -221,7 +248,7 @@ ultima_intervencao_id UUID NULL
 data_ultima_modificacao TIMESTAMP NULL
 ```
 
-### 2. **Valores Default Aplicados**
+### 3. **Valores Default Aplicados**
 
 Durante a importação, o sistema garante:
 
@@ -232,7 +259,7 @@ ultima_intervencao_id: null             // Até primeira intervenção
 data_ultima_modificacao: null           // Até primeira intervenção
 ```
 
-### 3. **Diferença: Espessura em CADASTRO vs NECESSIDADES**
+### 4. **Diferença: Espessura em CADASTRO vs NECESSIDADES**
 
 **CADASTRO:**
 - Campo: `Outros materiais`

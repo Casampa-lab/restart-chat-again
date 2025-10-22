@@ -2,7 +2,7 @@
 
 ## 🎯 Objetivo
 
-Implementar sistema completo para gerenciar necessidades de serviços nas rodovias, com match automático ao CADASTRO e identificação do tipo de serviço (Inclusão, Substituição, Remoção).
+Implementar sistema completo para gerenciar necessidades de serviços nas rodovias, com importação de dados das planilhas e posterior matching manual na aba dedicada.
 
 ---
 
@@ -130,86 +130,16 @@ CREATE POLICY "Coordenadores view all"
 
 ## 🔍 FASE 2: Algoritmo de Match por Coordenadas
 
-### Função SQL: `match_cadastro_por_coordenadas`
+⚠️ **IMPORTANTE**: O matching de necessidades é realizado APÓS a importação, em uma aba dedicada "Matching".
 
-```sql
-CREATE OR REPLACE FUNCTION match_cadastro_por_coordenadas(
-  p_tipo TEXT,              -- 'marcas_longitudinais', 'placas', 'tachas', etc
-  p_lat NUMERIC,
-  p_long NUMERIC,
-  p_rodovia_id UUID,
-  p_tolerancia_metros INTEGER DEFAULT 50
-) RETURNS TABLE (
-  cadastro_id UUID,
-  distancia_metros NUMERIC
-) AS $$
-DECLARE
-  v_tabela TEXT;
-BEGIN
-  -- Determinar tabela de cadastro
-  v_tabela := CASE p_tipo
-    WHEN 'marcas_longitudinais' THEN 'ficha_marcas_longitudinais'
-    WHEN 'tachas' THEN 'ficha_tachas'
-    WHEN 'marcas_transversais' THEN 'ficha_inscricoes'  -- zebrados
-    WHEN 'cilindros' THEN 'ficha_cilindros'
-    WHEN 'placas' THEN 'ficha_placa'
-    WHEN 'porticos' THEN 'ficha_porticos'
-    WHEN 'defensas' THEN 'defensas'
-  END;
+Durante a **importação**, os campos relacionados a matching são definidos como `NULL`:
+- `cadastro_id`: NULL (preenchido na aba Matching)
+- `servico`: NULL (preenchido na aba Matching)
+- `servico_inferido`: NULL (preenchido na aba Matching)
+- `servico_final`: NULL (preenchido na aba Matching)
+- `divergencia`: NULL (preenchido na aba Matching)
 
-  -- Fórmula de Haversine para calcular distância
-  -- Retorna registro mais próximo dentro da tolerância
-  RETURN QUERY EXECUTE format('
-    SELECT
-      id AS cadastro_id,
-      (
-        6371000 * acos(
-          cos(radians(%L)) * cos(radians(latitude_inicial)) *
-          cos(radians(longitude_inicial) - radians(%L)) +
-          sin(radians(%L)) * sin(radians(latitude_inicial))
-        )
-      ) AS distancia_metros
-    FROM %I
-    WHERE rodovia_id = %L
-      AND latitude_inicial IS NOT NULL
-      AND longitude_inicial IS NOT NULL
-    HAVING distancia_metros <= %L
-    ORDER BY distancia_metros ASC
-    LIMIT 1
-  ', p_lat, p_long, p_lat, v_tabela, p_rodovia_id, p_tolerancia_metros);
-END;
-$$ LANGUAGE plpgsql STABLE;
-```
-
-### Lógica de Identificação de Serviço:
-
-```typescript
-function identificarServico(
-  row: any,
-  cadastroMatch: { cadastro_id: string; distancia_metros: number } | null
-): 'Inclusão' | 'Substituição' | 'Remoção' {
-
-  // SEM match = nova instalação
-  if (!cadastroMatch) {
-    return 'Inclusão';
-  }
-
-  // COM match - verificar se é remoção
-  const sinaisRemocao = [
-    row.quantidade === 0,
-    row.extensao_metros === 0,
-    row.acao?.toLowerCase().includes('remov'),
-    row.acao?.toLowerCase().includes('desativ'),
-  ];
-
-  if (sinaisRemocao.some(Boolean)) {
-    return 'Remoção';
-  }
-
-  // Caso contrário = substituição
-  return 'Substituição';
-}
-```
+**Ver documentação específica de Matching para detalhes sobre algoritmos GPS/overlap.**
 
 ---
 
@@ -226,9 +156,9 @@ function identificarServico(
 - File input: Upload .xlsm
 - Progress bar: Progresso da importação
 - Log: Mensagens de feedback
-  - ✅ Linha X: Match encontrado (15m) → Substituição
-  - 🆕 Linha Y: Sem match → Inclusão
-  - 🗑️ Linha Z: Match encontrado (8m) → Remoção
+  - ✅ Linha X: Importado com sucesso
+  - ⚠️ Linha Y: Aviso - campo faltante
+  - ❌ Linha Z: Erro - coordenadas inválidas
 ```
 
 **Fluxo**:
@@ -241,32 +171,22 @@ async function importarNecessidades(file: File, tipo: string) {
   // 2. Para cada linha
   for (const [index, row] of data.entries()) {
     try {
-      // 3. Buscar match no cadastro
-      const match = await supabase.rpc('match_cadastro_por_coordenadas', {
-        p_tipo: tipo,
-        p_lat: row.latitude_inicial,
-        p_long: row.longitude_inicial,
-        p_rodovia_id: row.rodovia_id,
-        p_tolerancia_metros: 50
-      });
-
-      // 4. Identificar tipo de serviço
-      const servico = identificarServico(row, match.data?.[0]);
-
-      // 5. Inserir na tabela de necessidades
+      // 3. Inserir na tabela de necessidades (SEM MATCHING)
       await supabase
         .from(`necessidades_${tipo}`)
         .insert({
           ...row,
-          cadastro_id: match.data?.[0]?.cadastro_id,
-          servico,
-          distancia_match_metros: match.data?.[0]?.distancia_metros,
+          cadastro_id: null,              // Preenchido na aba Matching
+          servico: null,                  // Preenchido na aba Matching
+          servico_inferido: null,         // Preenchido na aba Matching
+          servico_final: null,            // Preenchido na aba Matching
+          divergencia: null,              // Preenchido na aba Matching
           arquivo_origem: file.name,
-          linha_planilha: index + 2, // +2 pois Excel começa em 1 e tem header
+          linha_planilha: index + 2,
         });
 
-      // 6. Feedback
-      console.log(`Linha ${index + 2}: ${servico}`, match.data?.[0]);
+      // 4. Feedback
+      console.log(`Linha ${index + 2}: Importado (matching pendente)`);
 
     } catch (error) {
       console.error(`Erro linha ${index + 2}:`, error);
@@ -580,8 +500,9 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
 
 - ✅ Componente `NecessidadesImporter.tsx` criado
 - ✅ Lógica de parse de .xlsm implementada
-- ✅ Integração com função de match
-- ✅ Identificação automática de serviço (Inclusão/Substituição/Remoção)
+- ✅ Importação pura de dados da planilha
+- ✅ Campos de matching definidos como NULL
+- ✅ Matching realizado posteriormente na aba dedicada "Matching"
 - ✅ Interface com logs coloridos e progresso
 - ✅ Nova aba "Necessidades" no painel Admin
 
@@ -650,10 +571,10 @@ function criarSheetsAuxiliares(tipo: string): Array<{name: string, data: XLSX.Wo
    - 🗺️ Gráfico de barras horizontal - Top rodovias
    - 📊 Gráfico de barras - Distribuição por lote
 
-5. **Aba Performance**:
-   - 🎯 Taxa de sucesso do match automático
-   - Contador de necessidades com/sem match no cadastro
-   - Barra de progresso visual
+5. **Aba Matching**:
+   - 📊 Necessidades pendentes de matching
+   - 🎯 Taxa de matching realizado
+   - ⏳ Fila de processamento
 
 **Acessos**:
 

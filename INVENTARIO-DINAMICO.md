@@ -1449,6 +1449,10 @@ ORDER BY int.data_intervencao DESC;
 
 ### 6. **Match entre Necessidades e Cadastro**
 
+⚠️ **IMPORTANTE**: O matching de necessidades NÃO ocorre durante a importação.
+Este processo é executado APÓS a importação, em uma aba dedicada "Matching",
+onde os algoritmos GPS e overlap são aplicados às necessidades já importadas.
+
 **Função SQL para matching**:
 
 ```sql

@@ -394,10 +394,15 @@ Todos os grupos de NECESSIDADES **NÃO** contêm:
    - ✅ TACHAS - implementado
    - ✅ ZEBRADOS - atualizado com sigla e espessura_mm
 
-3. **Reconciliação Cadastro ↔ Necessidades**
-   - Algoritmo de matching por coordenadas GPS
-   - Tolerância configurável (padrão: 50 metros)
-   - Comparação de atributos-chave
+3. **Processo de Matching**
+   - ⚠️ Matching NÃO ocorre durante importação
+   - ✅ Aba dedicada "Matching" processa após importação
+   - ✅ Algoritmos configuráveis por tipo de elemento
+   - ✅ Parâmetros de tolerância ajustáveis
+   - 📊 Dashboard de status do matching
+   - ✅ Algoritmo de matching por coordenadas GPS
+   - ✅ Tolerância configurável (padrão: 50 metros)
+   - ✅ Comparação de atributos-chave
 
 4. **Inventário Dinâmico**
    - Estado real = Cadastro Inicial + Intervenções Executadas
