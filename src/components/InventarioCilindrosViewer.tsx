@@ -689,6 +689,11 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                 </TableBody>
               </Table>
             </div>
+            {sortedCilindros && sortedCilindros.length > 0 && (
+              <p className="text-sm text-muted-foreground text-center mt-4">
+                {sortedCilindros.length} {sortedCilindros.length === 1 ? "cilindro encontrado" : "cilindros encontrados"}
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>

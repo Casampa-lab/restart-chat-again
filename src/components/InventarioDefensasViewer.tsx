@@ -569,6 +569,12 @@ export const InventarioDefensasViewer = ({
         </div>
       )}
 
+      {sortedDefensas && sortedDefensas.length > 0 && (
+        <p className="text-sm text-muted-foreground text-center mt-4">
+          {sortedDefensas.length} {sortedDefensas.length === 1 ? "defensa encontrada" : "defensas encontradas"}
+        </p>
+      )}
+
       <Dialog open={showRegistrarNaoCadastrado} onOpenChange={setShowRegistrarNaoCadastrado}>
         <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
           <div className="overflow-y-auto flex-1">
