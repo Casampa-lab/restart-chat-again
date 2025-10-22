@@ -542,24 +542,6 @@ export function InventarioPorticosViewer({
                         <SortIcon column="vao_horizontal_m" />
                       </div>
                     </TableHead>
-                    <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                      onClick={() => handleSort("servico")}
-                    >
-                      <div className="flex items-center justify-center">
-                        Projeto
-                        <SortIcon column="servico" />
-                      </div>
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                      onClick={() => handleSort("status_reconciliacao")}
-                    >
-                      <div className="flex items-center justify-center">
-                        Status
-                        <SortIcon column="status_reconciliacao" />
-                      </div>
-                    </TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -614,51 +596,6 @@ export function InventarioPorticosViewer({
                         <Badge variant="outline" className="text-xs">
                           {portico.vao_horizontal_m?.toFixed(2) || "-"}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {(() => {
-                          const necessidade = necessidadesMap?.get(portico.id);
-                          return necessidade ? (
-                            <NecessidadeBadge 
-                              necessidade={necessidade} 
-                              tipo="porticos"
-                            />
-                          ) : (
-                            <Badge variant="outline" className="text-muted-foreground text-xs">
-                              Sem previsão
-                            </Badge>
-                          );
-                        })()}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center gap-2 justify-center">
-                          {(() => {
-                            const necessidade = necessidadesMap?.get(portico.id);
-                            if (!necessidade) return null;
-                            
-                            return (
-                              <>
-                                <StatusReconciliacaoBadge 
-                                  status={necessidade.status_reconciliacao} 
-                                />
-                                {necessidade?.divergencia && !necessidade.reconciliado && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOpenReconciliacao(portico);
-                                    }}
-                                    className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
-                                  >
-                                    <AlertCircle className="h-4 w-4 mr-1" />
-                                    Verificar Match
-                                  </Button>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button

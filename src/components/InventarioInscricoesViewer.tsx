@@ -491,8 +491,6 @@ export function InventarioInscricoesViewer({
                           <SortIcon column="area_m2" />
                         </div>
                       </TableHead>
-                      <TableHead className="text-center">Projeto</TableHead>
-                      <TableHead className="text-center">Status</TableHead>
                       <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -524,62 +522,6 @@ export function InventarioInscricoesViewer({
                           <TableCell>{inscricao.km_inicial?.toFixed(2) || "-"}</TableCell>
                           <TableCell>{inscricao.material_utilizado || "-"}</TableCell>
                           <TableCell>{inscricao.area_m2?.toFixed(2) || "-"}</TableCell>
-                          <TableCell className="text-center">
-                            {(() => {
-                              const necessidade = necessidadesMap?.get(inscricao.id);
-                              return necessidade ? (
-                                <NecessidadeBadge 
-                                  necessidade={{
-                                    id: necessidade.id,
-                                    servico: necessidade.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
-                                    distancia_match_metros: necessidade.distancia_match_metros || 0,
-                                    km_inicial: necessidade.km_inicial,
-                                    divergencia: necessidade.divergencia,
-                                    reconciliado: necessidade.solucao_confirmada,
-                                    solucao_planilha: necessidade.solucao_planilha,
-                                    servico_inferido: necessidade.servico_inferido,
-                                  }}
-                                  tipo="marcas_transversais" 
-                                />
-                              ) : (
-                                <Badge variant="outline" className="text-muted-foreground text-xs">
-                                  Sem previsão
-                                </Badge>
-                              );
-                            })()}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex items-center gap-2 justify-center">
-                              {(() => {
-                                const necessidade = necessidadesMap?.get(inscricao.id);
-                                if (!necessidade) return null;
-                                
-                                return (
-                                  <>
-                                    <StatusReconciliacaoBadge 
-                                      status={necessidade.status_reconciliacao} 
-                                    />
-                                    {necessidade?.divergencia && !necessidade.solucao_confirmada && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setSelectedNecessidade(necessidade);
-                                          setSelectedCadastroForReconciliacao(inscricao);
-                                          setReconciliacaoOpen(true);
-                                        }}
-                                        className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
-                                      >
-                                        <AlertCircle className="h-4 w-4 mr-1" />
-                                        Verificar Match
-                                      </Button>
-                                    )}
-                                  </>
-                                );
-                              })()}
-                            </div>
-                          </TableCell>
                           <TableCell className="text-right">
                             <Button
                               variant="ghost"

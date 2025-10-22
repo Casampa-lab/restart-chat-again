@@ -516,8 +516,6 @@ export function InventarioTachasViewer({
                           <SortIcon column="quantidade" />
                         </div>
                       </TableHead>
-                      <TableHead>Projeto</TableHead>
-                      <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -560,62 +558,6 @@ export function InventarioTachasViewer({
                           )}
                         </TableCell>
                         <TableCell className="text-center">{tacha.quantidade}</TableCell>
-                        <TableCell className="text-center">
-                          {(() => {
-                            const necessidade = necessidadesMap?.get(tacha.id);
-                            return necessidade ? (
-                              <NecessidadeBadge 
-                                necessidade={{
-                                  id: necessidade.id,
-                                  servico: necessidade.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
-                                  distancia_match_metros: necessidade.distancia_match_metros || 0,
-                                  km_inicial: necessidade.km_inicial,
-                                  divergencia: necessidade.divergencia,
-                                  reconciliado: necessidade.reconciliado,
-                                  solucao_planilha: necessidade.solucao_planilha,
-                                  servico_inferido: necessidade.servico_inferido,
-                                }}
-                                tipo="tachas" 
-                              />
-                            ) : (
-                              <Badge variant="outline" className="text-muted-foreground text-xs">
-                                Sem previsão
-                              </Badge>
-                            );
-                          })()}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex items-center gap-2 justify-center">
-                            {(() => {
-                              const necessidade = necessidadesMap?.get(tacha.id);
-                              if (!necessidade) return null;
-                              
-                              return (
-                                <>
-                                  <StatusReconciliacaoBadge 
-                                    status={necessidade.status_reconciliacao} 
-                                  />
-                                  {necessidade && !necessidade.reconciliado && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedNecessidade(necessidade);
-                                        setSelectedCadastroForReconciliacao(tacha);
-                                        setReconciliacaoOpen(true);
-                                      }}
-                                      className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
-                                    >
-                                      <AlertCircle className="h-4 w-4 mr-1" />
-                                      Verificar Match
-                                    </Button>
-                                  )}
-                                </>
-                              );
-                            })()}
-                          </div>
-                        </TableCell>
                         <TableCell className="text-right">
                           <Button
                             variant="ghost"

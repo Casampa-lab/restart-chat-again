@@ -631,24 +631,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="tipo_pelicula_legenda_orla" />
                         </div>
                       </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("servico")}
-                      >
-                        <div className="flex items-center justify-center">
-                          Projeto
-                          <SortIcon column="servico" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("status_reconciliacao")}
-                      >
-                        <div className="flex items-center justify-center">
-                          Status
-                          <SortIcon column="status_reconciliacao" />
-                        </div>
-                      </TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -696,46 +678,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                             <Badge variant="outline" className="text-xs">
                               {placa.tipo_pelicula_legenda_orla || "-"}
                             </Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {necessidade ? (
-                              <NecessidadeBadge 
-                                necessidade={necessidade} 
-                                tipo="placas"
-                              />
-                            ) : (
-                              <Badge variant="outline" className="text-muted-foreground text-xs">
-                                Sem previsão
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex items-center gap-2 justify-center">
-                              {necessidade && (
-                                <StatusReconciliacaoBadge 
-                                  status={necessidade.status_reconciliacao} 
-                                />
-                              )}
-                              {necessidade?.divergencia && !necessidade.reconciliado && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    console.log("🔍 Abrindo reconciliação para:", {
-                                      placa: placa.id,
-                                      necessidade: necessidade.id,
-                                      codigo: placa.codigo
-                                    });
-                                    handleOpenReconciliacao(placa);
-                                  }}
-                                  className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
-                                >
-                                  <AlertCircle className="h-4 w-4 mr-1" />
-                                  Verificar Match
-                                </Button>
-                              )}
-                            </div>
                           </TableCell>
                           <TableCell className="text-right">
                           <Button

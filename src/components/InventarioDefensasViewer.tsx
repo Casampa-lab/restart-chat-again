@@ -480,12 +480,6 @@ export const InventarioDefensasViewer = ({
                 <TableHead className="text-center">
                   <div className="whitespace-normal leading-tight">Nível de<br/>Contenção</div>
                 </TableHead>
-                <TableHead className="text-center">
-                  <div className="whitespace-normal leading-tight">Projeto</div>
-                </TableHead>
-                <TableHead className="text-center">
-                  <div className="whitespace-normal leading-tight">Status</div>
-                </TableHead>
                 <TableHead className="text-center w-[80px]">
                   <div className="whitespace-normal leading-tight">Ações</div>
                 </TableHead>
@@ -507,62 +501,6 @@ export const InventarioDefensasViewer = ({
                   <TableCell className="text-center">{defensa.extensao_metros}</TableCell>
                   <TableCell className="text-center">{(defensa as any).quantidade_laminas || "-"}</TableCell>
                   <TableCell className="text-center">{(defensa as any).nivel_contencao_en1317 || "-"}</TableCell>
-                  <TableCell className="text-center">
-                    {(() => {
-                      const necessidade = necessidadesMap?.get(defensa.id);
-                      return necessidade ? (
-                        <NecessidadeBadge 
-                          necessidade={{
-                            id: necessidade.id,
-                            servico: necessidade.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
-                            distancia_match_metros: necessidade.distancia_match_metros || 0,
-                            km_inicial: necessidade.km_inicial,
-                            divergencia: necessidade.divergencia,
-                            reconciliado: necessidade.reconciliado,
-                            solucao_planilha: necessidade.solucao_planilha,
-                            servico_inferido: necessidade.servico_inferido,
-                          }}
-                          tipo="defensas" 
-                        />
-                      ) : (
-                        <Badge variant="outline" className="text-muted-foreground text-xs">
-                          Sem previsão
-                        </Badge>
-                      );
-                    })()}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex items-center gap-2 justify-center">
-                      {(() => {
-                        const necessidade = necessidadesMap?.get(defensa.id);
-                        if (!necessidade) return null;
-                        
-                        return (
-                          <>
-                            <StatusReconciliacaoBadge 
-                              status={necessidade.status_reconciliacao} 
-                            />
-                            {necessidade?.divergencia && !necessidade.reconciliado && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedNecessidade(necessidade);
-                                  setSelectedCadastroForReconciliacao(defensa);
-                                  setReconciliacaoOpen(true);
-                                }}
-                                className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
-                              >
-                                <AlertCircle className="h-4 w-4 mr-1" />
-                                Verificar Match
-                              </Button>
-                            )}
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </TableCell>
                   <TableCell className="text-center">
                     <Button
                       variant="ghost"

@@ -457,24 +457,6 @@ export function InventarioMarcasLongitudinaisViewer({
                           <SortIcon column="extensao_metros" />
                         </div>
                       </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("servico")}
-                      >
-                        <div className="flex items-center justify-center">
-                          Projeto
-                          <SortIcon column="servico" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("status_revisao")}
-                      >
-                        <div className="flex items-center justify-center">
-                          Status
-                          <SortIcon column="status_revisao" />
-                        </div>
-                      </TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -526,38 +508,6 @@ export function InventarioMarcasLongitudinaisViewer({
                             <Badge variant="outline" className="text-xs">
                               {marca.extensao_metros ? (marca.extensao_metros / 1000).toFixed(2) : "-"} km
                             </Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {necessidade ? (
-                              <Badge 
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                {necessidade.servico_final || necessidade.servico || "N/A"}
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-muted-foreground text-xs">
-                                Sem previsão
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {necessidade?.status_revisao === 'pendente_coordenador' ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenReconciliacao(marca);
-                                }}
-                                className="bg-warning/10 hover:bg-warning/20 border-warning text-warning-foreground font-medium shadow-sm transition-all hover:shadow-md"
-                              >
-                                <AlertCircle className="h-4 w-4 mr-1" />
-                                Verificar Match
-                              </Button>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">-</span>
-                            )}
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
