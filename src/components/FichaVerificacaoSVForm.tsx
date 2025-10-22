@@ -24,10 +24,10 @@ interface FichaVerificacaoSVFormProps {
 interface ItemSV {
   file: File;
   preview: string;
-  latitude: string;
-  longitude: string;
+  latitude_inicial: string;
+  longitude_inicial: string;
   sentido: string;
-  km: string;
+  km_inicial: string;
   altura_m: string;
   altura_conforme: boolean;
   altura_obs: string;
@@ -71,7 +71,7 @@ interface ItemSV {
 }
 
 const createEmptyItem = (): Omit<ItemSV, 'file' | 'preview'> => ({
-  latitude: "", longitude: "", sentido: "", km: "",
+  latitude_inicial: "", longitude_inicial: "", sentido: "", km_inicial: "",
   altura_m: "", altura_conforme: true, altura_obs: "",
   afastamento_m: "", afastamento_conforme: true, afastamento_obs: "",
   dimensoes_m: "", dimensoes_conforme: true, dimensoes_obs: "",
@@ -124,8 +124,8 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
     }
     
     if (gpsData) {
-      novoItem.latitude = gpsData.latitude.toFixed(6);
-      novoItem.longitude = gpsData.longitude.toFixed(6);
+      novoItem.latitude_inicial = gpsData.latitude.toFixed(6);
+      novoItem.longitude_inicial = gpsData.longitude.toFixed(6);
       toast.success(`✅ GPS capturado: ${gpsData.latitude.toFixed(6)}, ${gpsData.longitude.toFixed(6)}`);
     } else {
       toast.warning("⚠️ Não foi possível capturar GPS automaticamente. Preencha manualmente se necessário.");
@@ -176,8 +176,8 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const newItens = [...itens];
-        newItens[index].latitude = position.coords.latitude.toFixed(6);
-        newItens[index].longitude = position.coords.longitude.toFixed(6);
+        newItens[index].latitude_inicial = position.coords.latitude.toFixed(6);
+        newItens[index].longitude_inicial = position.coords.longitude.toFixed(6);
         setItens(newItens);
         toast.dismiss();
         toast.success(`Localização capturada: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
@@ -208,12 +208,12 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
 
     // Validação obrigatória de coordenadas GPS
     const itensSemGPS = itens.filter((item, index) => 
-      !item.latitude || !item.longitude || item.latitude === "" || item.longitude === ""
+      !item.latitude_inicial || !item.longitude_inicial || item.latitude_inicial === "" || item.longitude_inicial === ""
     );
     
     if (itensSemGPS.length > 0) {
       const indices = itens
-        .map((item, idx) => (!item.latitude || !item.longitude || item.latitude === "" || item.longitude === "") ? idx + 1 : null)
+        .map((item, idx) => (!item.latitude_inicial || !item.longitude_inicial || item.latitude_inicial === "" || item.longitude_inicial === "") ? idx + 1 : null)
         .filter(idx => idx !== null);
       
       toast.error(
@@ -275,10 +275,10 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
             ficha_id: ficha.id,
             ordem: i + 1,
             foto_url: publicUrl,
-            latitude: item.latitude ? parseFloat(item.latitude) : null,
-            longitude: item.longitude ? parseFloat(item.longitude) : null,
+            latitude_inicial: item.latitude_inicial ? parseFloat(item.latitude_inicial) : null,
+            longitude_inicial: item.longitude_inicial ? parseFloat(item.longitude_inicial) : null,
             sentido: item.sentido || null,
-            km: item.km ? parseFloat(item.km) : null,
+            km_inicial: item.km_inicial ? parseFloat(item.km_inicial) : null,
             altura_m: item.altura_m ? parseFloat(item.altura_m) : null,
             altura_conforme: item.altura_conforme,
             altura_obs: item.altura_obs || null,
@@ -487,8 +487,8 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
                       <Input
                         type="number"
                         step="0.000001"
-                        value={item.latitude}
-                        onChange={(e) => handleUpdateItem(index, 'latitude', e.target.value)}
+                        value={item.latitude_inicial}
+                        onChange={(e) => handleUpdateItem(index, 'latitude_inicial', e.target.value)}
                       />
                     </div>
                     <div>
@@ -496,8 +496,8 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
                       <Input
                         type="number"
                         step="0.000001"
-                        value={item.longitude}
-                        onChange={(e) => handleUpdateItem(index, 'longitude', e.target.value)}
+                        value={item.longitude_inicial}
+                        onChange={(e) => handleUpdateItem(index, 'longitude_inicial', e.target.value)}
                       />
                     </div>
                     <div>
@@ -516,12 +516,12 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
                       </Select>
                     </div>
                     <div>
-                      <Label>km</Label>
+                      <Label>KM</Label>
                       <Input
                         type="number"
                         step="0.001"
-                        value={item.km}
-                        onChange={(e) => handleUpdateItem(index, 'km', e.target.value)}
+                        value={item.km_inicial}
+                        onChange={(e) => handleUpdateItem(index, 'km_inicial', e.target.value)}
                       />
                     </div>
                   </div>
@@ -906,7 +906,7 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
               campo="retro_sv"
               loteId={loteId}
               rodoviaId={rodoviaId}
-              kmReferencia={itens[retroModalContext.itemIndex]?.km}
+              kmReferencia={itens[retroModalContext.itemIndex]?.km_inicial}
               dataVerificacao={dataVerificacao}
               onComplete={(resultado) => {
                 const newItens = [...itens];

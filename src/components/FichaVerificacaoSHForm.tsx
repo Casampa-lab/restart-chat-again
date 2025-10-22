@@ -30,10 +30,10 @@ interface FichaVerificacaoSHFormProps {
 interface ItemSH {
   file: File;
   preview: string;
-  latitude: string;
-  longitude: string;
+  latitude_inicial: string;
+  longitude_inicial: string;
   sentido: string;
-  km: string;
+  km_inicial: string;
   largura_cm: string;
   largura_conforme: boolean;
   largura_obs: string;
@@ -76,7 +76,7 @@ interface ItemSH {
 }
 
 const createEmptyItem = (): Omit<ItemSH, 'file' | 'preview'> => ({
-  latitude: "", longitude: "", sentido: "", km: "",
+  latitude_inicial: "", longitude_inicial: "", sentido: "", km_inicial: "",
   largura_cm: "", largura_conforme: true, largura_obs: "",
   retro_bd: "", retro_bd_medias: [], retro_bd_conforme: true, retro_bd_obs: "",
   retro_e: "", retro_e_medias: [], retro_e_conforme: true, retro_e_obs: "",
@@ -126,8 +126,8 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
     }
     
     if (gpsData) {
-      novoItem.latitude = gpsData.latitude.toFixed(6);
-      novoItem.longitude = gpsData.longitude.toFixed(6);
+      novoItem.latitude_inicial = gpsData.latitude.toFixed(6);
+      novoItem.longitude_inicial = gpsData.longitude.toFixed(6);
       toast.success(`✅ GPS capturado: ${gpsData.latitude.toFixed(6)}, ${gpsData.longitude.toFixed(6)}`);
     } else {
       toast.warning("⚠️ Não foi possível capturar GPS automaticamente. Preencha manualmente se necessário.");
@@ -178,8 +178,8 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const newItens = [...itens];
-        newItens[index].latitude = position.coords.latitude.toFixed(6);
-        newItens[index].longitude = position.coords.longitude.toFixed(6);
+        newItens[index].latitude_inicial = position.coords.latitude.toFixed(6);
+        newItens[index].longitude_inicial = position.coords.longitude.toFixed(6);
         setItens(newItens);
         toast.dismiss();
         toast.success(`Localização capturada: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
@@ -210,12 +210,12 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
 
     // Validação obrigatória de coordenadas GPS
     const itensSemGPS = itens.filter((item, index) => 
-      !item.latitude || !item.longitude || item.latitude === "" || item.longitude === ""
+      !item.latitude_inicial || !item.longitude_inicial || item.latitude_inicial === "" || item.longitude_inicial === ""
     );
     
     if (itensSemGPS.length > 0) {
       const indices = itens
-        .map((item, idx) => (!item.latitude || !item.longitude || item.latitude === "" || item.longitude === "") ? idx + 1 : null)
+        .map((item, idx) => (!item.latitude_inicial || !item.longitude_inicial || item.latitude_inicial === "" || item.longitude_inicial === "") ? idx + 1 : null)
         .filter(idx => idx !== null);
       
       toast.error(
@@ -279,10 +279,10 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
             ficha_id: ficha.id,
             ordem: i + 1,
             foto_url: publicUrl,
-            latitude: item.latitude ? parseFloat(item.latitude) : null,
-            longitude: item.longitude ? parseFloat(item.longitude) : null,
+            latitude_inicial: item.latitude_inicial ? parseFloat(item.latitude_inicial) : null,
+            longitude_inicial: item.longitude_inicial ? parseFloat(item.longitude_inicial) : null,
             sentido: item.sentido || null,
-            km: item.km ? parseFloat(item.km) : null,
+            km_inicial: item.km_inicial ? parseFloat(item.km_inicial) : null,
             largura_cm: item.largura_cm ? parseFloat(item.largura_cm) : null,
             largura_conforme: item.largura_conforme,
             largura_obs: item.largura_obs || null,
@@ -490,8 +490,8 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                       <Input
                         type="number"
                         step="0.000001"
-                        value={item.latitude}
-                        onChange={(e) => handleUpdateItem(index, 'latitude', e.target.value)}
+                        value={item.latitude_inicial}
+                        onChange={(e) => handleUpdateItem(index, 'latitude_inicial', e.target.value)}
                         placeholder="Lat"
                       />
                     </div>
@@ -500,8 +500,8 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                       <Input
                         type="number"
                         step="0.000001"
-                        value={item.longitude}
-                        onChange={(e) => handleUpdateItem(index, 'longitude', e.target.value)}
+                        value={item.longitude_inicial}
+                        onChange={(e) => handleUpdateItem(index, 'longitude_inicial', e.target.value)}
                         placeholder="Long"
                       />
                     </div>
@@ -521,13 +521,13 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
                       </Select>
                     </div>
                     <div>
-                      <Label>km</Label>
+                      <Label>KM</Label>
                       <Input
                         type="number"
                         step="0.001"
-                        value={item.km}
-                        onChange={(e) => handleUpdateItem(index, 'km', e.target.value)}
-                        placeholder="km"
+                        value={item.km_inicial}
+                        onChange={(e) => handleUpdateItem(index, 'km_inicial', e.target.value)}
+                        placeholder="KM"
                       />
                     </div>
                   </div>
@@ -910,7 +910,7 @@ export function FichaVerificacaoSHForm({ loteId, rodoviaId, onSuccess }: FichaVe
               campo={retroModalContext.campo}
               loteId={loteId}
               rodoviaId={rodoviaId}
-              kmReferencia={itens[retroModalContext.itemIndex]?.km}
+              kmReferencia={itens[retroModalContext.itemIndex]?.km_inicial}
               dataVerificacao={dataVerificacao}
               onComplete={(resultado) => {
                 const newItens = [...itens];

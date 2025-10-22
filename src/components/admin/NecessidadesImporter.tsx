@@ -399,9 +399,9 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
     // Para placas, não usar campos do baseMap (não tem inicial/final)
     if (tipo === "placas") {
       return {
-        km: getFirstValid("Km", "KM", "km"),
-        latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
-        longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
+        km_inicial: sanitizarNumerico(getFirstValid("Km", "KM", "km")),
+        latitude_inicial: converterCoordenada(row["Latitude"] || row["latitude"]),
+        longitude_inicial: converterCoordenada(row["Longitude"] || row["longitude"]),
         codigo: row["Código da Placa"] || row["Código da placa"] || row["Codigo da Placa"] || row["Codigo da placa"] || row["Código"] || row["Codigo"] || row["codigo"],
         tipo: row["Tipo de Placa"] || row["Tipo de placa"] || row["Tipo da Placa"] || row["Tipo da placa"] || row["Tipo Placa"] || row["Tipo"] || row["tipo"],
         lado: row["Lado"] || row["lado"],

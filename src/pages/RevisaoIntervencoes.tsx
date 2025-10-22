@@ -124,7 +124,7 @@ export default function RevisaoIntervencoes() {
               tipo_label: tipo.label,
               data_intervencao: item.data_intervencao,
               motivo: item.motivo || "Intervenção",
-              km: item.km_inicial || item.km || 0,
+              km: item.km_inicial || 0,
               detalhes: item,
               foto_url: item.foto_url,
               observacao: item.observacao,
@@ -272,7 +272,7 @@ export default function RevisaoIntervencoes() {
         if (data) {
           const intervencoesTipo = data.map((item: any) => {
             let descricao = "";
-            let km = item.km_inicial || item.km || 0;
+            let km = item.km_inicial || 0;
 
             if (tipo.value === "intervencoes_sh") {
               descricao = `${item.tipo_demarcacao || ""} - ${item.cor || ""} - ${item.extensao_metros || 0}m`;

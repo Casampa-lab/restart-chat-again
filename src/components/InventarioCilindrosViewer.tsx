@@ -598,7 +598,7 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                                   id: necessidade.id,
                                   servico: necessidade.servico as "Implantar" | "Substituir" | "Remover" | "Manter",
                                   distancia_match_metros: necessidade.distancia_match_metros || 0,
-                                  km: necessidade.km_inicial,
+                                  km_inicial: necessidade.km_inicial,
                                   divergencia: necessidade.divergencia,
                                   reconciliado: necessidade.reconciliado,
                                   solucao_planilha: necessidade.solucao_planilha,

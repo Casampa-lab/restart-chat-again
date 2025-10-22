@@ -109,7 +109,7 @@ export function IntervencoesSVForm({
 
   useEffect(() => {
     if (placaSelecionada) {
-      form.setValue("km_referencia", placaSelecionada.km?.toString() || "");
+      form.setValue("km_referencia", placaSelecionada.km_inicial?.toString() || "");
       form.setValue("tipo_placa", placaSelecionada.tipo || "");
       form.setValue("codigo_placa", placaSelecionada.codigo || "");
       form.setValue("latitude_inicial", placaSelecionada.latitude_inicial?.toString() || "");
@@ -196,7 +196,7 @@ export function IntervencoesSVForm({
             user_id: user.id,
             lote_id: loteId,
             rodovia_id: rodoviaId,
-            km: parseFloat(data.km_referencia),
+            km_inicial: parseFloat(data.km_referencia),
             tipo: data.tipo_placa,
             codigo: data.codigo_placa,
             latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
