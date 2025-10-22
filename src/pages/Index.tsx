@@ -403,7 +403,7 @@ const Index = () => {
           {countCadastro || 0}
         </Badge>
         <Badge 
-          className="h-5 px-1.5 text-xs cursor-pointer bg-green-500 text-white hover:bg-green-600 transition-colors border-0"
+          className="h-5 px-1.5 text-xs cursor-pointer bg-blue-500 text-white hover:bg-blue-600 transition-colors border-0"
           onClick={(e) => {
             e.stopPropagation();
             navigate("/dashboard-necessidades");
