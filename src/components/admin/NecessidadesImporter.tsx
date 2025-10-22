@@ -454,15 +454,16 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
         }
         
         // Mapear solução da planilha para campo servico
+        // Valores válidos: 'Implantar', 'Substituir', 'Remover', 'Manter'
         let servico: string | null = null;
         if (solucao.includes("implantar") || solucao.includes("implant")) {
-          servico = "Inclusão";
+          servico = "Implantar";
         } else if (solucao.includes("remov")) {
-          servico = "Remoção";
+          servico = "Remover";
         } else if (solucao.includes("substitu")) {
-          servico = "Substituição";
+          servico = "Substituir";
         } else if (solucao.includes("manter") || solucao.includes("manut")) {
-          servico = "Manutenção";
+          servico = "Manter";
         }
         
         return {
