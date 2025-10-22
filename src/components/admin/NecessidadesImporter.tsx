@@ -399,7 +399,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
     // Para placas, não usar campos do baseMap (não tem inicial/final)
     if (tipo === "placas") {
       return {
-        km_inicial: sanitizarNumerico(getFirstValid("Km", "KM", "km")),
+        km_inicial: sanitizarNumerico(getFirstValid("Km inicial", "Km", "KM", "km")),
         latitude_inicial: converterCoordenada(row["Latitude"] || row["latitude"]),
         longitude_inicial: converterCoordenada(row["Longitude"] || row["longitude"]),
         codigo: row["Código da Placa"] || row["Código da placa"] || row["Codigo da Placa"] || row["Codigo da placa"] || row["Código"] || row["Codigo"] || row["codigo"],
@@ -518,7 +518,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           descricao: row["Descrição"] || row["Descricao"] || row["descricao"],
           tipo_inscricao: row["Sigla"] || row["sigla"],
           cor: row["Cor"] || row["cor"],
-          km: sanitizarNumerico(getFirstValid("Km", "KM", "km")),
+          km_inicial: sanitizarNumerico(getFirstValid("Km inicial", "Km", "KM", "km")),
           latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
           longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
           material_utilizado: row["Material"] || row["material"],
@@ -542,7 +542,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
         }
         
         return {
-          km: sanitizarNumerico(getFirstValid("Km", "KM", "km")),
+          km_inicial: sanitizarNumerico(getFirstValid("Km inicial", "Km", "KM", "km")),
           latitude: converterCoordenada(row["Latitude"] || row["latitude"]),
           longitude: converterCoordenada(row["Longitude"] || row["longitude"]),
           tipo: row["Tipo"] || row["tipo"],

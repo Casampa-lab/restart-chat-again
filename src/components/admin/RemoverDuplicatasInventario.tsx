@@ -69,7 +69,7 @@ const TIPOS_ELEMENTOS = [
     tabela_cadastro: 'ficha_porticos',
     tabela_necessidade: 'necessidades_porticos',
     coluna_referencia: 'cadastro_id',
-    campos_chave: ['snv', 'tipo', 'lado', 'vao_horizontal_m', 'altura_livre_m', 'km', 'rodovia_id', 'lote_id'],
+    campos_chave: ['snv', 'tipo', 'lado', 'vao_horizontal_m', 'altura_livre_m', 'km_inicial', 'rodovia_id', 'lote_id'],
   },
   {
     value: 'placas',
@@ -77,7 +77,7 @@ const TIPOS_ELEMENTOS = [
     tabela_cadastro: 'ficha_placa',
     tabela_necessidade: 'necessidades_placas',
     coluna_referencia: 'cadastro_id',
-    campos_chave: ['snv', 'codigo', 'km', 'rodovia_id', 'lote_id'],
+    campos_chave: ['snv', 'codigo', 'km_inicial', 'rodovia_id', 'lote_id'],
   },
 ];
 
