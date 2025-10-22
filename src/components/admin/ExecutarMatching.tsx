@@ -93,11 +93,48 @@ export function ExecutarMatching() {
             
             // Elementos pontuais
             if (['PLACA', 'PORTICO', 'INSCRICAO'].includes(tipo)) {
-              // Extrair atributos relevantes
+              // Validar se tem dados para matching
+              const temGPS = nec.latitude_inicial != null && nec.longitude_inicial != null;
+              const temKM = nec.km_inicial != null;
+              
+              if (!temGPS && !temKM) {
+                const errorMsg = `Coordenadas GPS e KM ausentes - ${tipo} ID ${nec.id}`;
+                console.error(`⚠️ ${errorMsg}`, {
+                  lat: nec.latitude_inicial,
+                  lon: nec.longitude_inicial,
+                  km: nec.km_inicial
+                });
+                stats.erros++;
+                processados++;
+                continue;
+              }
+              
+              if (!temGPS && temKM) {
+                console.warn(`⚠️ GPS ausente, usando fallback por KM - ${tipo} ID ${nec.id}, KM ${nec.km_inicial}`);
+              }
+              
+              // Extrair e normalizar atributos relevantes
               const atributos: Record<string, any> = {};
               if (tipo === 'PLACA') {
-                atributos.codigo = nec.codigo;
-                atributos.lado = nec.lado;
+                // Normalizar código: uppercase, trim, remover espaços extras
+                atributos.codigo = (nec.codigo ?? '')
+                  .toString()
+                  .trim()
+                  .toUpperCase()
+                  .replace(/\s+/g, '');
+                
+                // Mapear lado para padrão BD/BE/EIXO
+                const ladoRaw = (nec.lado ?? '').toString().trim().toUpperCase();
+                atributos.lado = ladoRaw
+                  .replace(/^DIREITA$/i, 'BD')
+                  .replace(/^ESQUERDA$/i, 'BE')
+                  .replace(/^D$/i, 'BD')
+                  .replace(/^E$/i, 'BE');
+                
+                // Adicionar km_inicial como fallback
+                if (nec.km_inicial != null) {
+                  atributos.km_inicial = Number(nec.km_inicial);
+                }
               } else if (tipo === 'PORTICO') {
                 atributos.tipo = nec.tipo;
               } else if (tipo === 'INSCRICAO') {
@@ -113,7 +150,7 @@ export function ExecutarMatching() {
                 atributos,
                 nec.servico || 'Substituição'
               );
-            } 
+            }
             // Elementos lineares
             else {
               // Validar coordenadas antes de construir WKT

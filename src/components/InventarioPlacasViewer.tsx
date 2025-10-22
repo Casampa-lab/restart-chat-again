@@ -265,13 +265,12 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
       data?.forEach((nec: any) => {
         const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
         
-        // Filtrar apenas pendentes e dentro da tolerância
-        if (reconciliacao?.status === 'pendente_aprovacao' && 
-            reconciliacao?.distancia_match_metros <= toleranciaRodovia) {
+        // Filtrar apenas pendentes (sem restrição de distância)
+        if (reconciliacao?.status === 'pendente_aprovacao') {
           map.set(nec.cadastro_id, {
             ...nec,
             servico: nec.servico_final || nec.servico,
-            distancia_match_metros: reconciliacao.distancia_match_metros,
+            distancia_match_metros: reconciliacao?.distancia_match_metros ?? null,
           });
         }
       });
@@ -597,11 +596,11 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       </TableHead>
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("km")}
+                        onClick={() => handleSort("km_inicial")}
                       >
                         <div className="flex items-center justify-center">
                           km
-                          <SortIcon column="km" />
+                          <SortIcon column="km_inicial" />
                         </div>
                       </TableHead>
                       <TableHead 
