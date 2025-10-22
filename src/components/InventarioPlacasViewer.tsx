@@ -560,6 +560,15 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
                       <TableHead 
+                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
+                        onClick={() => handleSort("origem")}
+                      >
+                        <div className="flex items-center justify-center">
+                          Origem
+                          <SortIcon column="origem" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("snv")}
                       >
@@ -625,15 +634,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       </TableHead>
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50 text-center"
-                        onClick={() => handleSort("origem")}
-                      >
-                        <div className="flex items-center justify-center">
-                          Origem
-                          <SortIcon column="origem" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer select-none hover:bg-muted/50 text-center"
                         onClick={() => handleSort("servico")}
                       >
                         <div className="flex items-center justify-center">
@@ -659,6 +659,19 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       
                       return (
                         <TableRow key={placa.id} className="hover:bg-muted/50">
+                          <TableCell className="text-center">
+                            <div className="flex items-center gap-1 justify-center">
+                              <OrigemIndicator 
+                                origem={placa.origem} 
+                                tipoOrigem={placa.tipo_origem} 
+                              />
+                              <TipoOrigemBadge 
+                                tipoOrigem={placa.tipo_origem}
+                                modificadoPorIntervencao={placa.modificado_por_intervencao}
+                                showLabel={false}
+                              />
+                            </div>
+                          </TableCell>
                           <TableCell className="font-medium">{placa.snv || "-"}</TableCell>
                           <TableCell>
                             <Badge 
@@ -689,19 +702,6 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                             <Badge variant="outline" className="text-xs">
                               {placa.tipo_pelicula_legenda_orla || "-"}
                             </Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex items-center gap-1 justify-center">
-                              <OrigemIndicator 
-                                origem={placa.origem} 
-                                tipoOrigem={placa.tipo_origem} 
-                              />
-                              <TipoOrigemBadge 
-                                tipoOrigem={placa.tipo_origem}
-                                modificadoPorIntervencao={placa.modificado_por_intervencao}
-                                showLabel={false}
-                              />
-                            </div>
                           </TableCell>
                           <TableCell className="text-center">
                             {necessidade ? (
