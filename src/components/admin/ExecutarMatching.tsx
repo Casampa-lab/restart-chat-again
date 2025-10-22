@@ -116,6 +116,21 @@ export function ExecutarMatching() {
             } 
             // Elementos lineares
             else {
+              // Validar coordenadas antes de construir WKT
+              if (!nec.latitude_inicial || !nec.longitude_inicial || !nec.latitude_final || !nec.longitude_final) {
+                const errorMsg = `Coordenadas incompletas - ${tipo} ID ${nec.id}`;
+                console.error(`⚠️ ${errorMsg}`, {
+                  lat_ini: nec.latitude_inicial,
+                  lon_ini: nec.longitude_inicial,
+                  lat_fim: nec.latitude_final,
+                  lon_fim: nec.longitude_final
+                });
+                
+                stats.erros++;
+                processados++;
+                continue;
+              }
+
               const atributos: Record<string, any> = {};
               if (tipo === 'MARCA_LONG') {
                 atributos.cor = nec.cor;
@@ -135,13 +150,28 @@ export function ExecutarMatching() {
                 nec.longitude_final
               );
 
-              matchResult = await matchLinear(
-                tipo as any,
-                wkt,
-                nec.rodovia_id,
-                atributos,
-                nec.servico || 'Substituição'
-              );
+              try {
+                matchResult = await matchLinear(
+                  tipo as any,
+                  wkt,
+                  nec.rodovia_id,
+                  atributos,
+                  nec.servico || 'Substituição'
+                );
+              } catch (err) {
+                const errorMsg = err instanceof Error ? err.message : String(err);
+                
+                console.error(`❌ ERRO MATCH LINEAR - Tipo: ${tipo}, ID: ${nec.id}`, {
+                  wkt,
+                  rodovia_id: nec.rodovia_id,
+                  atributos,
+                  error: errorMsg
+                });
+                
+                stats.erros++;
+                processados++;
+                continue;
+              }
             }
 
             // Atualizar necessidade com resultado do match

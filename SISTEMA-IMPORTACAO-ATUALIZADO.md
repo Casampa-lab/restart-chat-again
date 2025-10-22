@@ -442,6 +442,133 @@ data_ultima_modificacao: NULL → receberá timestamp
 
 ---
 
+## 🧩 Classificação dos Tipos de Match
+
+O processo de matching compara registros do **Cadastro (situação existente)** com os do **Projeto (Necessidades)**.
+Cada comparação gera um tipo de correspondência (match type), conforme o nível de compatibilidade posicional e de atributos.
+
+### 1️⃣ MATCH DIRETO (`MATCH_DIRECT`)
+
+**Descrição:**
+O sistema encontrou **um único elemento** no cadastro que coincide com o elemento do projeto **dentro da tolerância espacial definida**, com **mesmo código e tipo**.
+
+**Critérios típicos:**
+- **Pontuais:** distância ≤ tolerância (ex.: ≤ 15 m para placas, ≤ 80 m para pórticos)
+- **Lineares:** sobreposição ≥ limiar (ex.: ≥ 30% do comprimento)
+- **Código e tipo idênticos**
+
+**Exemplo:**
+Placa `R-1A` prevista em `km_inicial = 10,008` casa com `R-1A` existente em `km_inicial = 10,000` → ✅ **MATCH DIRETO**
+
+**Uso:**
+Não requer intervenção. É o caso ideal — associação automática confirmada.
+
+---
+
+### 2️⃣ MATCH DE SUBSTITUIÇÃO (`SUBSTITUICAO`)
+
+**Descrição:**
+O sistema encontrou um elemento **na mesma posição**, mas o **código ou tipo** não são idênticos.
+Interpreta-se como uma **substituição física ou atualização de sinal**.
+
+**Critérios típicos:**
+- Distância ou sobreposição dentro da tolerância
+- Divergência de código (`R-1A` ↔ `R-2`) ou de tipo (`PLACA` ↔ `PORTICO`)
+
+**Exemplo:**
+No cadastro há `R-1A`; no projeto, `R-2` no mesmo local → 🔄 **MATCH DE SUBSTITUIÇÃO**
+
+**Uso:**
+Indicador de **mudança de elemento**. Permite atualizar inventário mantendo vínculo histórico.
+
+---
+
+### 3️⃣ MATCH AMBÍGUO (`AMBIGUOUS`)
+
+**Descrição:**
+Mais de um elemento do cadastro cumpre simultaneamente os critérios de correspondência.
+O sistema **não consegue decidir automaticamente** qual é o correto.
+
+**Critérios típicos:**
+- Duas ou mais ocorrências dentro da mesma tolerância de distância ou sobreposição
+- Atributos semelhantes (lado, código, tipo)
+
+**Exemplo:**
+Placa do projeto em `km = 10,000` encontra duas placas `R-1A` próximas (9,995 e 10,006).
+➡️ ⚠️ **MATCH AMBÍGUO** – requer escolha manual
+
+**Uso:**
+Listada para **revisão humana**. A decisão manual atualiza o vínculo definitivo.
+
+---
+
+### 4️⃣ MATCH INCERTO (OU LIMÍTROFE)
+
+**Descrição:**
+A correspondência existe, mas **no limite da tolerância**, gerando dúvida se o elemento é o mesmo ou apenas próximo.
+
+**Critérios típicos:**
+- Distância próxima do limite (ex.: 14–16 m)
+- Sobreposição parcial < limiar definido (ex.: 20–25%)
+
+**Exemplo:**
+Faixa projetada de `50,000–50,300` sobrepõe apenas 22% da faixa cadastrada `49,950–50,250`.
+➡️ ⚠️ **MATCH INCERTO** — próximo demais do limite para decisão automática
+
+**Uso:**
+Pode exigir revisão fiscal ou ajuste fino da tolerância.
+
+**Nota:** Este tipo ainda não está implementado no sistema atual, que retorna `AMBIGUOUS` ou `NO_MATCH` para casos limítrofes.
+
+---
+
+### 5️⃣ SEM MATCH (`NO_MATCH`)
+
+**Descrição:**
+Nenhum elemento do cadastro atende aos critérios de distância ou sobreposição.
+
+**Critérios típicos:**
+- Distância > tolerância (pontual)
+- Sobreposição < mínimo aceitável (linear)
+
+**Exemplo:**
+Pórtico previsto em `km_inicial = 7,000`, sem nada próximo no cadastro.
+➡️ ❌ **SEM MATCH** — indica **novo elemento**
+
+**Uso:**
+Registra-se como **implantação nova**. Importante para estimar acréscimos de sinalização/dispositivos.
+
+---
+
+### 6️⃣ MATCH DUPLICADO (caso especial)
+
+**Descrição:**
+Mais de um elemento do projeto corresponde ao **mesmo** elemento do cadastro.
+Pode indicar erro de duplicidade no projeto.
+
+**Critérios típicos:**
+- Vários registros do projeto dentro da mesma tolerância de um único cadastro
+
+**Uso:**
+Requer análise: o sistema deve **alertar** para evitar dupla contagem.
+
+**Nota:** Este tipo ainda não está implementado no sistema atual. Registros duplicados são processados independentemente.
+
+---
+
+## ⚙️ Resumo Técnico dos Tipos de Match
+
+| Código | Tipo de Match          | Critério base                                            | Ação recomendada       | Status Implementação |
+|--------|------------------------|----------------------------------------------------------|------------------------|---------------------|
+| 1      | `MATCH_DIRECT`         | Único par válido (distância/sobreposição + código igual) | Confirma automático    | ✅ Implementado |
+| 2      | `SUBSTITUICAO`         | Único par válido, código/tipo diferente                  | Registrar substituição | ✅ Implementado |
+| 3      | `AMBIGUOUS`            | Mais de um par válido                                    | Revisão manual         | ✅ Implementado |
+| 4      | `MATCH_INCERTO`        | Dentro do limite de tolerância                           | Revisão fiscal         | ⚠️ Não implementado |
+| 5      | `NO_MATCH`             | Nenhum par válido                                        | Novo elemento          | ✅ Implementado |
+| 6      | `MATCH_DUPLICADO`      | Mesmo cadastro com múltiplas associações                 | Revisar projeto        | ⚠️ Não implementado |
+
+---
+
 ## 🔧 Manutenção Futura
 
 ### Quando Adicionar Novos Campos
