@@ -366,6 +366,32 @@ const Admin = () => {
 
           <TabsContent value="matching">
             <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    🗺️ Mapa de Necessidades - Placas
+                  </CardTitle>
+                  <CardDescription>
+                    Visualize necessidades de placas no mapa, ordenadas por KM (sem filtros de distância)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    onClick={() => navigate(`/mapa-necessidades-placas?rodovia=${selectedRodoviaId}&lote=${selectedLoteId}`)}
+                    disabled={!selectedRodoviaId || !selectedLoteId}
+                    className="w-full"
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Abrir Mapa de Necessidades
+                  </Button>
+                  {(!selectedRodoviaId || !selectedLoteId) && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Selecione uma rodovia e lote para visualizar o mapa
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+              
               <ExecutarMatching />
               <ParametrosMatchManager />
               <RelatorioMatching rodoviaId={selectedRodoviaId} loteId={selectedLoteId} />
