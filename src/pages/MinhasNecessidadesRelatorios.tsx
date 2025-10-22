@@ -21,7 +21,7 @@ const TIPOS_RELATORIO = [
   { value: "dados_rodovias", label: "Dados das Rodovias", tabelaCadastro: "dados_rodovias", tabelaIntervencoes: null, templatePath: null, abaOriginal: null },
   { value: "marcas_longitudinais", label: "Marcas Longitudinais", tabelaCadastro: "ficha_marcas_longitudinais", tabelaIntervencoes: "ficha_marcas_longitudinais_intervencoes", templatePath: "/templates/supra/inicial/SH1.xlsm", abaOriginal: "SH1(cadastro)" },
   { value: "tachas", label: "Tachas", tabelaCadastro: "ficha_tachas", tabelaIntervencoes: "ficha_tachas_intervencoes", templatePath: "/templates/supra/inicial/SH2.xlsm", abaOriginal: "SH2(cadastro)" },
-  { value: "marcas_transversais", label: "Zebrados", tabelaCadastro: "ficha_inscricoes", tabelaIntervencoes: "ficha_inscricoes_intervencoes", templatePath: "/templates/supra/inicial/SH3.xlsm", abaOriginal: "SH3(cadastro)" },
+  { value: "marcas_transversais", label: "Inscrições", tabelaCadastro: "ficha_inscricoes", tabelaIntervencoes: "ficha_inscricoes_intervencoes", templatePath: "/templates/supra/inicial/SH3.xlsm", abaOriginal: "SH3(cadastro)" },
   { value: "cilindros", label: "Cilindros", tabelaCadastro: "ficha_cilindros", tabelaIntervencoes: "ficha_cilindros_intervencoes", templatePath: "/templates/supra/inicial/SH4.xlsm", abaOriginal: "SH4(cadastro)" },
   { value: "placas", label: "Placas", tabelaCadastro: "ficha_placa", tabelaIntervencoes: "ficha_placa_intervencoes", templatePath: "/templates/supra/inicial/SV1.xlsm", abaOriginal: "SV1(cadastro)" },
   { value: "porticos", label: "Pórticos", tabelaCadastro: "ficha_porticos", tabelaIntervencoes: "ficha_porticos_intervencoes", templatePath: "/templates/supra/inicial/SV2.xlsm", abaOriginal: "SV2(cadastro)" },
@@ -31,7 +31,7 @@ const TIPOS_RELATORIO = [
 const TITULOS_SUPRA: Record<string, string> = {
   marcas_longitudinais: "1.8.1 - CONDIÇÃO INICIAL DO TRECHO - SH1 - Sinalização Horizontal Longitudinal",
   tachas: "1.8.2 - CONDIÇÃO INICIAL DO TRECHO - SH2 - Sinalização Horizontal - Tachas",
-  marcas_transversais: "1.8.3 - CONDIÇÃO INICIAL DO TRECHO - SH3 - Sinalização Horizontal - Transversal, Zebrados e Legendas",
+  marcas_transversais: "1.8.3 - CONDIÇÃO INICIAL DO TRECHO - SH3 - Sinalização Horizontal - Inscrições",
   cilindros: "1.8.4 - CONDIÇÃO INICIAL DO TRECHO - SH4 - Dispositivos Auxiliares - Cilindros",
   placas: "1.8.5 - CONDIÇÃO INICIAL DO TRECHO - SV1 - Sinalização Vertical - Placas",
   porticos: "1.8.6 - CONDIÇÃO INICIAL DO TRECHO - SV2 - Sinalização Vertical - Pórticos, Bandeiras e Semipórticos",

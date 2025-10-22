@@ -43,7 +43,7 @@ const TIPOS_NECESSIDADES = [
   { value: "porticos", label: "Pórticos", table: "necessidades_porticos" },
   { value: "placas", label: "Placas de Sinalização Vertical", table: "necessidades_placas" },
   { value: "tachas", label: "Tachas Refletivas", table: "necessidades_tachas" },
-  { value: "marcas_transversais", label: "Zebrados (Marcas Transversais)", table: "necessidades_marcas_transversais" },
+  { value: "marcas_transversais", label: "Inscrições", table: "necessidades_marcas_transversais" },
 ];
 
 const COLUNAS_POR_TIPO: Record<string, { header: string[]; fields: string[] }> = {

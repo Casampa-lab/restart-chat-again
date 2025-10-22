@@ -19,7 +19,7 @@ const TIPOS_NECESSIDADES = [
   { value: "porticos", label: "Pórticos" },
   { value: "placas", label: "Placas de Sinalização Vertical" },
   { value: "tachas", label: "Tachas Refletivas" },
-  { value: "marcas_transversais", label: "Zebrados (Marcas Transversais)" },
+  { value: "marcas_transversais", label: "Inscrições" },
 ];
 
 interface LogEntry {

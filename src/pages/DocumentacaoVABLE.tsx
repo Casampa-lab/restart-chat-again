@@ -209,7 +209,7 @@ export default function DocumentacaoVABLE() {
             <div className="space-y-2">
               <h4 className="font-semibold flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-500" />
-                Inscrições/Zebrados
+                Inscrições
               </h4>
               <div className="grid md:grid-cols-2 gap-4 text-sm">
                 <div className="space-y-1">

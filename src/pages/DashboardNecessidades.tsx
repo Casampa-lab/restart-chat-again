@@ -18,7 +18,7 @@ const TIPOS_NECESSIDADES = [
   { value: "porticos", label: "Pórticos" },
   { value: "placas", label: "Placas de Sinalização Vertical" },
   { value: "tachas", label: "Tachas Refletivas" },
-  { value: "marcas_transversais", label: "Zebrados (Marcas Transversais)" },
+  { value: "marcas_transversais", label: "Inscrições" },
 ];
 
 const COLORS = {
@@ -32,7 +32,7 @@ const CORES_GRUPOS: Record<string, string> = {
   "Placas de Sinalização Vertical": "#3b82f6",
   "Marcas Longitudinais": "#10b981",
   "Tachas Refletivas": "#f59e0b",
-  "Zebrados (Marcas Transversais)": "#8b5cf6",
+  "Inscrições": "#8b5cf6",
   "Cilindros Delimitadores": "#ec4899",
   "Pórticos": "#06b6d4",
   "Defensas": "#ef4444",

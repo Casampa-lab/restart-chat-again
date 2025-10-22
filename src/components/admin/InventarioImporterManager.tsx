@@ -20,7 +20,7 @@ const INVENTORY_TYPES = [
   { value: "placas", label: "Placas de Sinalização Vertical", table: "ficha_placa" },
   { value: "porticos", label: "Pórticos e Braços Projetados", table: "ficha_porticos" },
   { value: "tachas", label: "Tachas Refletivas", table: "ficha_tachas" },
-  { value: "inscricoes", label: "Zebrados, Setas, Símbolos e Legendas", table: "ficha_inscricoes" },
+  { value: "inscricoes", label: "Inscrições", table: "ficha_inscricoes" },
 ];
 
 // Constantes de otimização para batching

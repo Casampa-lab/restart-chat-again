@@ -791,7 +791,7 @@ const Index = () => {
                             {renderInventoryBadge("cilindros", countCilindros, countNecCilindros)}
                           </TabsTrigger>
                           <TabsTrigger value="inscricoes" className="flex items-center gap-2">
-                            <span>Zebrados, Setas, Símbolos e Legendas</span>
+                            <span>Inscrições</span>
                             {renderInventoryBadge("inscricoes", countInscricoes, countNecInscricoes)}
                           </TabsTrigger>
                           <TabsTrigger value="tachas" className="flex items-center gap-2">

@@ -15,7 +15,7 @@ const TABELAS_INVENTARIO = [
   { value: "ficha_placa", label: "Placas de Sinalização Vertical" },
   { value: "ficha_porticos", label: "Pórticos e Braços Projetados" },
   { value: "ficha_tachas", label: "Tachas Refletivas" },
-  { value: "ficha_inscricoes", label: "Zebrados, Setas, Símbolos e Legendas" },
+  { value: "ficha_inscricoes", label: "Inscrições" },
 ];
 
 interface DeleteInventarioSelecionadoProps {

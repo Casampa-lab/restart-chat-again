@@ -21,7 +21,7 @@ const INVENTORY_TYPES = [
   { value: "defensas", label: "Defensas Metálicas", table: "defensas" },
   { value: "porticos", label: "Pórticos", table: "ficha_porticos" },
   { value: "tachas", label: "Tachas Refletivas", table: "ficha_tachas" },
-  { value: "inscricoes", label: "Inscrições/Zebrados", table: "ficha_inscricoes" },
+  { value: "inscricoes", label: "Inscrições", table: "ficha_inscricoes" },
 ];
 
 export function useInventoryStatus(

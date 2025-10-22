@@ -49,7 +49,7 @@ const TIPOS_ELEMENTOS = [
   },
   {
     value: 'inscricoes',
-    label: 'Inscrições (Marcas Transversais)',
+    label: 'Inscrições',
     tabela_cadastro: 'ficha_inscricoes',
     tabela_necessidade: 'necessidades_marcas_transversais',
     coluna_referencia: 'cadastro_id',

@@ -20,7 +20,7 @@ export function RemoverDuplicatasNecessidades() {
     try {
       const tabelas = [
         { nome: 'necessidades_marcas_longitudinais', label: 'Marcas Longitudinais' },
-        { nome: 'necessidades_marcas_transversais', label: 'Marcas Transversais' },
+        { nome: 'necessidades_marcas_transversais', label: 'Inscrições' },
         { nome: 'necessidades_tachas', label: 'Tachas' },
         { nome: 'necessidades_cilindros', label: 'Cilindros' },
         { nome: 'necessidades_placas', label: 'Placas' },

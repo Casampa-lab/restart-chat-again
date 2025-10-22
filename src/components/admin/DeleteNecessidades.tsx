@@ -16,7 +16,7 @@ const TABELAS_NECESSIDADES = [
   { value: "necessidades_porticos", label: "Pórticos" },
   { value: "necessidades_placas", label: "Placas de Sinalização Vertical" },
   { value: "necessidades_tachas", label: "Tachas Refletivas" },
-  { value: "necessidades_marcas_transversais", label: "Zebrados (Marcas Transversais)" },
+  { value: "necessidades_marcas_transversais", label: "Inscrições" },
 ];
 
 interface DeleteNecessidadesProps {

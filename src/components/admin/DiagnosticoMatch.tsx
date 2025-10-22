@@ -17,7 +17,7 @@ const TIPOS_NECESSIDADES = [
   { value: "porticos", label: "Pórticos", tabela_nec: "necessidades_porticos", tabela_cad: "ficha_porticos" },
   { value: "placas", label: "Placas de Sinalização Vertical", tabela_nec: "necessidades_placas", tabela_cad: "ficha_placa" },
   { value: "tachas", label: "Tachas Refletivas", tabela_nec: "necessidades_tachas", tabela_cad: "ficha_tachas" },
-  { value: "marcas_transversais", label: "Zebrados (Marcas Transversais)", tabela_nec: "necessidades_marcas_transversais", tabela_cad: "ficha_inscricoes" },
+  { value: "marcas_transversais", label: "Inscrições", tabela_nec: "necessidades_marcas_transversais", tabela_cad: "ficha_inscricoes" },
 ];
 
 interface ResultadoDiagnostico {

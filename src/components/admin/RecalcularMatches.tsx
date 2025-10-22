@@ -22,7 +22,7 @@ const TIPOS_ELEMENTOS = [
   { value: "defensas", label: "Defensas", tabela_cadastro: "defensas", tabela_necessidade: "necessidades_defensas" },
   {
     value: "marcas_transversais",
-    label: "Inscrições/Marcas Transversais",
+    label: "Inscrições",
     tabela_cadastro: "ficha_inscricoes",
     tabela_necessidade: "necessidades_marcas_transversais",
   },

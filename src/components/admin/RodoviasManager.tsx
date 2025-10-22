@@ -312,7 +312,7 @@ const RodoviasManager = () => {
                         </Label>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p className="text-xs max-w-xs">Setas e zebrados, áreas pintadas visíveis</p>
+                        <p className="text-xs max-w-xs">Inscrições, setas e símbolos no pavimento</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>

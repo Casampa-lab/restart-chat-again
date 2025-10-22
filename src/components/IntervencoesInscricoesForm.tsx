@@ -188,7 +188,7 @@ const IntervencoesInscricoesForm = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Intervenção em Zebrados, Setas, Símbolos e Legendas</CardTitle>
+        <CardTitle>Intervenção em Inscrições</CardTitle>
         <CardDescription>
           {inscricaoSelecionada 
             ? `Registrando intervenção para ${inscricaoSelecionada.tipo_inscricao} entre km ${inscricaoSelecionada.km_inicial} - ${inscricaoSelecionada.km_final}`

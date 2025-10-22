@@ -14,7 +14,7 @@ const TABELAS_NECESSIDADES = [
   { value: "necessidades_porticos", label: "Pórticos" },
   { value: "necessidades_placas", label: "Placas" },
   { value: "necessidades_tachas", label: "Tachas" },
-  { value: "necessidades_marcas_transversais", label: "Marcas Transversais" },
+  { value: "necessidades_marcas_transversais", label: "Inscrições" },
 ];
 
 interface DeleteTodasNecessidadesProps {
@@ -60,7 +60,7 @@ export function DeleteTodasNecessidades({ loteId, rodoviaId }: DeleteTodasNecess
       `• Cilindros\n` +
       `• Defensas\n` +
       `• Marcas Longitudinais\n` +
-      `• Marcas Transversais\n` +
+      `• Inscrições\n` +
       `• Placas\n` +
       `• Pórticos\n` +
       `• Tachas\n\n` +
@@ -181,10 +181,10 @@ export function DeleteTodasNecessidades({ loteId, rodoviaId }: DeleteTodasNecess
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Alert variant="destructive">
+            <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            <strong>⚠️ ZONA DE PERIGO:</strong> Esta ação vai deletar permanentemente TODAS as necessidades (Cilindros, Defensas, Marcas Longitudinais, Marcas Transversais, Placas, Pórticos e Tachas) do lote e rodovia selecionados. Esta ação NÃO PODE SER DESFEITA!
+            <strong>⚠️ ZONA DE PERIGO:</strong> Esta ação vai deletar permanentemente TODAS as necessidades (Cilindros, Defensas, Marcas Longitudinais, Inscrições, Placas, Pórticos e Tachas) do lote e rodovia selecionados. Esta ação NÃO PODE SER DESFEITA!
           </AlertDescription>
         </Alert>
 
@@ -256,7 +256,7 @@ export function DeleteTodasNecessidades({ loteId, rodoviaId }: DeleteTodasNecess
             <li>✓ Cilindros Delimitadores</li>
             <li>✓ Defensas</li>
             <li>✓ Marcas Longitudinais</li>
-            <li>✓ Marcas Transversais (Zebrados)</li>
+            <li>✓ Inscrições</li>
             <li>✓ Placas de Sinalização Vertical</li>
             <li>✓ Pórticos</li>
             <li>✓ Tachas Refletivas</li>
