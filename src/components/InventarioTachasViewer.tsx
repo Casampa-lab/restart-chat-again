@@ -218,7 +218,7 @@ export function InventarioTachasViewer({
                 ? calculateDistance(lat, lng, tacha.latitude_inicial, tacha.longitude_inicial)
                 : Infinity,
             }))
-            .filter((tacha) => tacha.distance <= toleranciaMetros)
+            // Não filtrar por distância - apenas ordenar
             .sort((a, b) => a.distance - b.distance);
         }
       } else {

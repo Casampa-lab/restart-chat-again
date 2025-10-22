@@ -127,7 +127,8 @@ export function InventarioMarcasLongitudinaisViewer({
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
         const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
-        if (reconciliacao?.status === 'pendente_aprovacao' && reconciliacao?.distancia_match_metros <= toleranciaMetros) {
+        // Não filtrar por distância - mostrar todas as necessidades vinculadas
+        if (reconciliacao?.status === 'pendente_aprovacao') {
           map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
         }
       });
@@ -180,7 +181,7 @@ export function InventarioMarcasLongitudinaisViewer({
               ? calculateDistance(lat, lng, marca.latitude_inicial, marca.longitude_inicial)
               : Infinity,
           }))
-          .filter((marca) => marca.distance <= toleranciaMetros)
+          // Não filtrar por distância - apenas ordenar
           .sort((a, b) => a.distance - b.distance);
         }
       } else {

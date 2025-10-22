@@ -143,7 +143,8 @@ export const InventarioDefensasViewer = ({
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
         const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
-        if (reconciliacao?.status === 'pendente_aprovacao' && reconciliacao?.distancia_match_metros <= toleranciaMetros) {
+        // Não filtrar por distância - mostrar todas as necessidades vinculadas
+        if (reconciliacao?.status === 'pendente_aprovacao') {
           map.set(nec.cadastro_id, { ...nec, servico: nec.servico_final || nec.servico, distancia_match_metros: reconciliacao.distancia_match_metros });
         }
       });

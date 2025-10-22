@@ -165,10 +165,11 @@ export function InventarioPorticosViewer({
                 ? calculateDistance(lat, lng, portico.latitude_inicial, portico.longitude_inicial)
                 : Infinity,
             }))
-            .filter((portico) => portico.distance <= toleranciaRodovia)
+            // Não filtrar por distância - apenas ordenar
             .sort((a, b) => a.distance - b.distance);
         }
       } else {
+        // Ordenar por km_inicial quando não há busca GPS
         filteredData = filteredData.sort((a, b) => {
           const kmA = a.km_inicial || 0;
           const kmB = b.km_inicial || 0;
@@ -206,9 +207,8 @@ export function InventarioPorticosViewer({
       data?.forEach((nec: any) => {
         const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
         
-        // Filtrar apenas pendentes e dentro da tolerância
-        if (reconciliacao?.status === 'pendente_aprovacao' && 
-            reconciliacao?.distancia_match_metros <= toleranciaRodovia) {
+        // Não filtrar por distância - mostrar todas as necessidades vinculadas
+        if (reconciliacao?.status === 'pendente_aprovacao') {
           map.set(nec.cadastro_id, {
             ...nec,
             servico: nec.servico_final || nec.servico,
