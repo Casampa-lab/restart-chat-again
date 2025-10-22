@@ -4441,6 +4441,7 @@ export type Database = {
           arquivo_origem: string | null
           br: string | null
           cadastro_id: string | null
+          cadastro_match_id: string | null
           codigo: string | null
           created_at: string | null
           data_importacao: string | null
@@ -4497,6 +4498,7 @@ export type Database = {
           arquivo_origem?: string | null
           br?: string | null
           cadastro_id?: string | null
+          cadastro_match_id?: string | null
           codigo?: string | null
           created_at?: string | null
           data_importacao?: string | null
@@ -4553,6 +4555,7 @@ export type Database = {
           arquivo_origem?: string | null
           br?: string | null
           cadastro_id?: string | null
+          cadastro_match_id?: string | null
           codigo?: string | null
           created_at?: string | null
           data_importacao?: string | null
@@ -5822,6 +5825,45 @@ export type Database = {
           tipo_origem: string | null
           tipo_refletivo: string | null
           ultima_intervencao_id: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      inventario_dinamico_placas: {
+        Row: {
+          ativo: boolean | null
+          cadastro_match_id: string | null
+          codigo: string | null
+          cor_pelicula_fundo: string | null
+          cor_pelicula_legenda_orla: string | null
+          created_at: string | null
+          data_registro: string | null
+          dimensoes_mm: string | null
+          fotos_urls: string[] | null
+          id: string | null
+          km_inicial: number | null
+          lado: string | null
+          latitude_inicial: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          match_decision:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score: number | null
+          modificado_por_intervencao: boolean | null
+          necessidade_id: string | null
+          observacao: string | null
+          origem: string | null
+          rodovia_id: string | null
+          snv: string | null
+          substrato: string | null
+          tipo: string | null
+          tipo_origem: string | null
+          tipo_pelicula_fundo: string | null
+          tipo_pelicula_legenda_orla: string | null
+          tipo_suporte: string | null
+          ultima_intervencao_id: string | null
+          updated_at: string | null
           user_id: string | null
         }
         Relationships: []
