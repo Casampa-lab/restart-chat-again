@@ -51,6 +51,21 @@ export async function getAllParams(): Promise<ParamToleranciasMatch[]> {
 }
 
 // Mapeamento de GrupoElemento → TipoElementoMatch
+// Tolerâncias padronizadas (mutatis mutandis)
+// Pontuais (metros): distância GPS
+// Lineares (fração 0-1): overlap do projeto sobre cadastro
+export const TOL = {
+  // Pontuais (metros)
+  PLACA: 15,
+  PORTICO: 80,
+  INSCRICAO: 12,
+  // Lineares (fração de cobertura do projeto)
+  MARCA_LONG: 0.30,
+  TACHA: 0.30,
+  DEFENSA: 0.25,
+  CILINDRO: 0.25,
+} as const;
+
 export const GRUPO_TO_TIPO_MAP: Record<string, TipoElementoMatch> = {
   'placas': 'PLACA',
   'porticos': 'PORTICO',

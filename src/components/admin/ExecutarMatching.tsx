@@ -136,10 +136,22 @@ export function ExecutarMatching() {
                   atributos.km_inicial = Number(nec.km_inicial);
                 }
               } else if (tipo === 'PORTICO') {
-                atributos.tipo = nec.tipo;
+                // Normalizar tipo
+                atributos.tipo = (nec.tipo ?? '').toString().trim().toUpperCase();
+                
+                // Adicionar km_inicial como fallback
+                if (nec.km_inicial != null) {
+                  atributos.km_inicial = Number(nec.km_inicial);
+                }
               } else if (tipo === 'INSCRICAO') {
-                atributos.tipo = nec.tipo;
-                atributos.cor = nec.cor;
+                // Normalizar sigla e tipo
+                atributos.sigla = (nec.sigla ?? '').toString().trim().toUpperCase();
+                atributos.tipo_inscricao = (nec.tipo_inscricao ?? '').toString().trim().toUpperCase();
+                
+                // Adicionar km_inicial como fallback
+                if (nec.km_inicial != null) {
+                  atributos.km_inicial = Number(nec.km_inicial);
+                }
               }
 
               matchResult = await matchPontual(
@@ -170,14 +182,32 @@ export function ExecutarMatching() {
 
               const atributos: Record<string, any> = {};
               if (tipo === 'MARCA_LONG') {
-                atributos.cor = nec.cor;
-                atributos.tipo = nec.tipo;
+                atributos.tipo_demarcacao = (nec.tipo_demarcacao ?? '').toString().trim().toUpperCase();
+                atributos.cor = (nec.cor ?? '').toString().trim().toUpperCase();
+                
+                // Normalizar lado
+                const ladoRaw = (nec.lado ?? '').toString().trim().toUpperCase();
+                atributos.lado = ladoRaw
+                  .replace(/^DIREITA$/i, 'BD')
+                  .replace(/^ESQUERDA$/i, 'BE')
+                  .replace(/^D$/i, 'BD')
+                  .replace(/^E$/i, 'BE');
               } else if (tipo === 'TACHAS') {
-                atributos.cor = nec.cor;
+                atributos.corpo = (nec.corpo ?? '').toString().trim().toUpperCase();
+                atributos.cor_refletivo = (nec.cor_refletivo ?? '').toString().trim().toUpperCase();
               } else if (tipo === 'DEFENSA') {
-                atributos.tipo = nec.tipo;
+                atributos.funcao = (nec.funcao ?? '').toString().trim().toUpperCase();
+                
+                // Normalizar lado
+                const ladoRaw = (nec.lado ?? '').toString().trim().toUpperCase();
+                atributos.lado = ladoRaw
+                  .replace(/^DIREITA$/i, 'BD')
+                  .replace(/^ESQUERDA$/i, 'BE')
+                  .replace(/^D$/i, 'BD')
+                  .replace(/^E$/i, 'BE');
               } else if (tipo === 'CILINDRO') {
-                atributos.tipo = nec.tipo;
+                atributos.cor_corpo = (nec.cor_corpo ?? '').toString().trim().toUpperCase();
+                atributos.local_implantacao = (nec.local_implantacao ?? '').toString().trim().toUpperCase();
               }
 
               const wkt = buildLineStringWKT(
