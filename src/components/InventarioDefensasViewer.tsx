@@ -16,6 +16,7 @@ import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastr
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { OrigemIndicator } from "@/components/OrigemIndicator";
 import { toast } from "sonner";
 
 // Component to show reconciliation status badge
@@ -68,6 +69,8 @@ interface FichaDefensa {
   data_vistoria: string;
   rodovia_id: string;
   lote_id: string;
+  origem?: string;
+  tipo_origem?: string;
 }
 
 interface IntervencaoDefensa {
@@ -424,6 +427,7 @@ export const InventarioDefensasViewer = ({
           <Table>
             <TableHeader className="sticky top-0 bg-muted z-10">
               <TableRow>
+                <TableHead className="text-center">Origem</TableHead>
                 <TableHead 
                   className="cursor-pointer select-none hover:bg-muted/50 text-center"
                   onClick={() => handleSort("tramo")}
@@ -489,6 +493,12 @@ export const InventarioDefensasViewer = ({
             <TableBody>
               {sortedDefensas?.map((defensa) => (
                 <TableRow key={defensa.id}>
+                  <TableCell className="text-center">
+                    <OrigemIndicator 
+                      origem={defensa.origem}
+                      tipoOrigem={defensa.tipo_origem}
+                    />
+                  </TableCell>
                   <TableCell className="text-center">{(defensa as any).tramo || "-"}</TableCell>
                   <TableCell className="text-center">{defensa.lado}</TableCell>
                   <TableCell className="text-center">{defensa.km_inicial}</TableCell>

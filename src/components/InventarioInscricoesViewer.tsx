@@ -17,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
+import { OrigemIndicator } from "@/components/OrigemIndicator";
 import { toast } from "sonner";
 
 // Component to show reconciliation status badge
@@ -73,6 +74,8 @@ interface FichaInscricao {
   material_utilizado: string | null;
   observacao: string | null;
   rodovia_id: string;
+  origem?: string;
+  tipo_origem?: string;
 }
 
 // Mapeamento de siglas para descrições completas (apenas quando não há separador)
@@ -448,6 +451,7 @@ export function InventarioInscricoesViewer({
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
                       {searchLat && searchLng && <TableHead>Distância</TableHead>}
+                      <TableHead className="text-center">Origem</TableHead>
                       <TableHead>Sigla</TableHead>
                       <TableHead>Descrição</TableHead>
                       <TableHead 
@@ -503,6 +507,12 @@ export function InventarioInscricoesViewer({
                               </Badge>
                             </TableCell>
                           )}
+                          <TableCell className="text-center">
+                            <OrigemIndicator 
+                              origem={inscricao.origem}
+                              tipoOrigem={inscricao.tipo_origem}
+                            />
+                          </TableCell>
                           <TableCell>
                             <Badge variant="outline">{sigla}</Badge>
                           </TableCell>

@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "./ReconciliacaoDrawerUniversal";
+import { OrigemIndicator } from "@/components/OrigemIndicator";
 import { toast } from "sonner";
 
 interface FichaMarcaLongitudinal {
@@ -40,6 +41,8 @@ interface FichaMarcaLongitudinal {
   area_m2: number | null;
   codigo: string | null;
   posicao: string | null;
+  origem?: string;
+  tipo_origem?: string;
 }
 
 interface InventarioMarcasLongitudinaisViewerProps {
@@ -388,6 +391,7 @@ export function InventarioMarcasLongitudinaisViewer({
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
+                      <TableHead className="text-center">Origem</TableHead>
                       <TableHead 
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("snv")}
@@ -479,6 +483,12 @@ export function InventarioMarcasLongitudinaisViewer({
                       
                       return (
                         <TableRow key={marca.id} className="hover:bg-muted/50">
+                          <TableCell className="text-center">
+                            <OrigemIndicator 
+                              origem={marca.origem}
+                              tipoOrigem={marca.tipo_origem}
+                            />
+                          </TableCell>
                           <TableCell className="font-medium">{marca.snv || "-"}</TableCell>
                           <TableCell>
                             <Badge variant="outline">

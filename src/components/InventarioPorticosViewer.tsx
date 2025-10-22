@@ -16,6 +16,7 @@ import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { OrigemIndicator } from "@/components/OrigemIndicator";
 import { toast } from "sonner";
 
 // Component to show reconciliation status badge
@@ -71,6 +72,8 @@ interface FichaPortico {
   vao_horizontal_m: number | null;
   lado: string | null;
   foto_url: string | null;
+  origem?: string;
+  tipo_origem?: string;
 }
 
 interface InventarioPorticosViewerProps {
@@ -477,6 +480,7 @@ export function InventarioPorticosViewer({
               <Table>
                 <TableHeader className="sticky top-0 bg-muted z-10">
                   <TableRow>
+                    <TableHead className="text-center">Origem</TableHead>
                     <TableHead 
                       className="cursor-pointer select-none hover:bg-muted/50 text-center"
                       onClick={() => handleSort("snv")}
@@ -562,6 +566,12 @@ export function InventarioPorticosViewer({
                 <TableBody>
                   {sortedPorticos.map((portico) => (
                     <TableRow key={portico.id}>
+                      <TableCell className="text-center">
+                        <OrigemIndicator 
+                          origem={portico.origem}
+                          tipoOrigem={portico.tipo_origem}
+                        />
+                      </TableCell>
                       <TableCell className="font-mono text-sm text-center">
                         {portico.snv || "-"}
                       </TableCell>
