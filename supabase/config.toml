@@ -20,6 +20,3 @@ verify_jwt = false
 
 [functions.upload-placa-svg]
 verify_jwt = true
-
-[functions.detectar-erros-projeto]
-verify_jwt = true
