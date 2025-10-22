@@ -20,7 +20,7 @@ Este documento consolida a análise de todas as planilhas CADASTRO, NECESSIDADES
 
 ### Características
 
-- **Tipo de Coordenadas**: Point (Km, Latitude, Longitude)
+- **Tipo de Coordenadas**: Point (Km inicial/final, Latitude inicial/final, Longitude inicial/final)
 - **Tabela**: `ficha_placa`
 - **Campos Especiais**: Retrorefletância de fundo e orla/legenda separados
 
@@ -94,8 +94,8 @@ Este documento consolida a análise de todas as planilhas CADASTRO, NECESSIDADES
 6. Posição
 7. Largura da faixa (m)
 8. Espessura (cm)
-9. Trecho inicial - Km
-10. Trecho final - Km
+9. Trecho inicial - Km inicial
+10. Trecho final - Km inicial
 11. Extensão (km)
 12. Material
 13. Espaçamento (m)
@@ -111,8 +111,8 @@ Este documento consolida a análise de todas as planilhas CADASTRO, NECESSIDADES
 6. Posição
 7. Largura da faixa (m)
 8. Espessura (cm)
-9. Trecho inicial - Km
-10. Trecho final - Km
+9. Trecho inicial - Km inicial
+10. Trecho final - Km inicial
 11. Extensão (km)
 12. Material
 13. **Falta**: Solução, Motivo
@@ -160,7 +160,7 @@ Idênticos ao CADASTRO
 
 ### Características
 
-- **Tipo de Coordenadas**: Point (Km, Latitude, Longitude)
+- **Tipo de Coordenadas**: Point (Km inicial/final, Latitude inicial/final, Longitude inicial/final)
 - **Tabela**: `ficha_porticos`
 
 ### Campos CADASTRO (9 campos)
@@ -168,9 +168,9 @@ Idênticos ao CADASTRO
 1. BR
 2. SNV
 3. Tipo
-4. Km
-5. Latitude
-6. Longitude
+4. Km inicial
+5. Latitude inicial
+6. Longitude inicial
 7. Vão horizontal (m)
 8. Altura livre (m)
 9. Fotografia
@@ -291,7 +291,7 @@ Idênticos ao CADASTRO
 
 ### Características
 
-- **Tipo de Coordenadas**: Point (Km, Latitude, Longitude)
+- **Tipo de Coordenadas**: Point (Km inicial/final, Latitude inicial/final, Longitude inicial/final)
 - **Tabela**: `ficha_inscricoes`
 - **Campos Novos Adicionados**: `sigla`, `espessura_mm`
 
@@ -302,9 +302,9 @@ Idênticos ao CADASTRO
 3. **Sigla** (ZPA, MOF, PEM, LEGENDA)
 4. **Descrição** (texto longo)
 5. Cor
-6. Km
-7. Latitude
-8. Longitude
+6. Km inicial
+7. Latitude inicial
+8. Longitude inicial
 9. Material
 10. **Outros materiais** (espessura em CADASTRO)
 11. Área (m²)
@@ -353,7 +353,7 @@ Todos os grupos de NECESSIDADES **NÃO** contêm:
 ### 2. Tipos de Coordenadas
 
 - **Point** (4 grupos): Placas, Pórticos, Zebrados/Inscrições
-  - Campos: Km, Latitude, Longitude
+  - Campos: Km inicial, Latitude inicial, Longitude inicial
 - **Extension** (3 grupos): Marcas Longitudinais, Cilindros, Tachas, Defensas
   - Campos: Km Inicial/Final, Latitude Inicial/Final, Longitude Inicial/Final, Extensão
 
@@ -361,7 +361,7 @@ Todos os grupos de NECESSIDADES **NÃO** contêm:
 
 - BR (Rodovia)
 - SNV (Segmento)
-- Km ou Km Inicial/Final
+- Km Inicial/Final
 - Coordenadas GPS
 
 ### 4. Retrorefletância (Placas)
