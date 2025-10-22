@@ -190,6 +190,58 @@ servico TEXT NULL  -- Permitir NULL durante importação pura
 - ✅ `necessidades_porticos`
 - ✅ `necessidades_tachas`
 
+---
+
+### 5. **Colunas de Matching Adicionadas**
+
+Para armazenar os resultados do processo de matching manual, foram adicionadas 4 novas colunas em todas as tabelas de necessidades:
+
+#### Novas Colunas:
+```sql
+-- Tipo ENUM para decisão de matching
+CREATE TYPE match_decision_enum AS ENUM ('MATCH_DIRECT', 'SUBSTITUICAO', 'AMBIGUOUS', 'NO_MATCH');
+
+-- Colunas adicionadas
+match_decision match_decision_enum,        -- Decisão do algoritmo de matching
+match_score NUMERIC(4,3),                  -- Score de similaridade (0-1)
+reason_code TEXT,                          -- Código explicativo do motivo
+estado TEXT DEFAULT 'PROPOSTO'             -- ATIVO | PROPOSTO | REJEITADO
+```
+
+#### Descrição das Colunas:
+- **`match_decision`**: Resultado da análise automática de matching
+  - `MATCH_DIRECT`: Match direto encontrado (alta confiança)
+  - `SUBSTITUICAO`: Necessidade substitui item existente
+  - `AMBIGUOUS`: Múltiplos matches possíveis (requer triagem manual)
+  - `NO_MATCH`: Nenhum match encontrado no inventário
+- **`match_score`**: Score numérico de 0 a 1 indicando grau de similaridade
+- **`reason_code`**: Código explicativo (ex: "MULTIPLE_CANDIDATES", "ATTR_MISMATCH")
+- **`estado`**: Estado da necessidade no fluxo de aprovação
+  - `PROPOSTO`: Aguardando aprovação/triagem
+  - `ATIVO`: Aprovado e conclusivo
+  - `REJEITADO`: Rejeitado pelo coordenador
+
+#### Valores Default:
+- Após importação (Etapa 1): Todos `NULL`
+- Após matching (Etapa 2): Populados pelos algoritmos RPC
+- Estado inicial: `'PROPOSTO'`
+
+#### Tabelas Afetadas:
+- ✅ `necessidades_cilindros`
+- ✅ `necessidades_defensas`
+- ✅ `necessidades_marcas_longitudinais`
+- ✅ `necessidades_marcas_transversais`
+- ✅ `necessidades_placas`
+- ✅ `necessidades_porticos`
+- ✅ `necessidades_tachas`
+
+#### Índices Criados:
+Para melhorar performance de queries por matching:
+```sql
+CREATE INDEX idx_necessidades_*_match_decision ON necessidades_*(match_decision);
+CREATE INDEX idx_necessidades_*_estado ON necessidades_*(estado);
+```
+
 #### Comentários no Banco:
 ```sql
 COMMENT ON COLUMN necessidades_*.servico IS 

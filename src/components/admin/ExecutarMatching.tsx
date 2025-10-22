@@ -11,6 +11,17 @@ import { Badge } from '@/components/ui/badge';
 
 type TipoElemento = 'PLACA' | 'PORTICO' | 'INSCRICAO' | 'MARCA_LONG' | 'TACHAS' | 'DEFENSA' | 'CILINDRO' | 'TODOS';
 
+// Mapeamento correto de tipos para nomes de tabelas
+const TIPO_TO_TABLE_MAP: Record<string, string> = {
+  'PLACA': 'necessidades_placas',
+  'PORTICO': 'necessidades_porticos',
+  'INSCRICAO': 'necessidades_marcas_transversais',
+  'MARCA_LONG': 'necessidades_marcas_longitudinais',
+  'TACHAS': 'necessidades_tachas',
+  'DEFENSA': 'necessidades_defensas',
+  'CILINDRO': 'necessidades_cilindros'
+};
+
 export function ExecutarMatching() {
   const { toast } = useToast();
   const [tipoSelecionado, setTipoSelecionado] = useState<TipoElemento>('TODOS');
@@ -51,8 +62,11 @@ export function ExecutarMatching() {
 
       for (const tipo of tipos) {
         // Buscar necessidades do tipo específico que não foram matchadas ainda
+        const tabelaNecessidades = TIPO_TO_TABLE_MAP[tipo];
+        console.log(`🔍 Buscando necessidades em ${tabelaNecessidades} sem matching...`);
+        
         const { data: necessidades, error } = await supabase
-          .from(`necessidades_${tipo.toLowerCase()}` as any)
+          .from(tabelaNecessidades as any)
           .select('*')
           .is('match_decision', null)
           .limit(1000);
@@ -62,7 +76,12 @@ export function ExecutarMatching() {
           continue;
         }
 
-        if (!necessidades || necessidades.length === 0) continue;
+      if (!necessidades || necessidades.length === 0) {
+        console.log(`ℹ️ Tipo ${tipo}: Nenhuma necessidade encontrada sem matching`);
+        continue;
+      }
+      
+      console.log(`🔄 Tipo ${tipo}: ${necessidades.length} necessidades para processar`);
 
         totalNecessidades += necessidades.length;
         setEstatisticas(prev => ({ ...prev, total: totalNecessidades }));
@@ -127,7 +146,7 @@ export function ExecutarMatching() {
 
             // Atualizar necessidade com resultado do match
             const { error: updateError } = await supabase
-              .from(`necessidades_${tipo.toLowerCase()}` as any)
+              .from(tabelaNecessidades as any)
               .update({
                 cadastro_id: matchResult.cadastro_id,
                 match_decision: matchResult.decision,

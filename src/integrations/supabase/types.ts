@@ -3628,6 +3628,7 @@ export type Database = {
           distancia_match_metros: number | null
           divergencia: boolean | null
           espacamento_m: number | null
+          estado: string | null
           extensao_km: number | null
           geom_line: unknown
           id: string
@@ -3642,11 +3643,16 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          match_decision:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score: number | null
           motivo: string | null
           observacao: string | null
           observacao_usuario: string | null
           overlap_porcentagem: number | null
           quantidade: number | null
+          reason_code: string | null
           reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
@@ -3673,6 +3679,7 @@ export type Database = {
           distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
+          estado?: string | null
           extensao_km?: number | null
           geom_line?: unknown
           id?: string
@@ -3687,11 +3694,16 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           motivo?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           quantidade?: number | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
@@ -3718,6 +3730,7 @@ export type Database = {
           distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
+          estado?: string | null
           extensao_km?: number | null
           geom_line?: unknown
           id?: string
@@ -3732,11 +3745,16 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           motivo?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           quantidade?: number | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
@@ -3797,6 +3815,7 @@ export type Database = {
           divergencia: boolean | null
           espaco_trabalho: string | null
           especificacao_obstaculo_fixo: string | null
+          estado: string | null
           estado_conservacao: string | null
           extensao_metros: number | null
           funcao: string | null
@@ -3815,6 +3834,10 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          match_decision:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score: number | null
           motivo: string | null
           nivel_contencao_en1317: string | null
           nivel_contencao_nchrp350: string | null
@@ -3824,6 +3847,7 @@ export type Database = {
           overlap_porcentagem: number | null
           percentual_veiculos_pesados: number | null
           quantidade_laminas: number | null
+          reason_code: string | null
           reconciliado: boolean | null
           reconciliado_por: string | null
           risco: string | null
@@ -3866,6 +3890,7 @@ export type Database = {
           divergencia?: boolean | null
           espaco_trabalho?: string | null
           especificacao_obstaculo_fixo?: string | null
+          estado?: string | null
           estado_conservacao?: string | null
           extensao_metros?: number | null
           funcao?: string | null
@@ -3884,6 +3909,10 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           motivo?: string | null
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
@@ -3893,6 +3922,7 @@ export type Database = {
           overlap_porcentagem?: number | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           risco?: string | null
@@ -3935,6 +3965,7 @@ export type Database = {
           divergencia?: boolean | null
           espaco_trabalho?: string | null
           especificacao_obstaculo_fixo?: string | null
+          estado?: string | null
           estado_conservacao?: string | null
           extensao_metros?: number | null
           funcao?: string | null
@@ -3953,6 +3984,10 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           motivo?: string | null
           nivel_contencao_en1317?: string | null
           nivel_contencao_nchrp350?: string | null
@@ -3962,6 +3997,7 @@ export type Database = {
           overlap_porcentagem?: number | null
           percentual_veiculos_pesados?: number | null
           quantidade_laminas?: number | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           risco?: string | null
@@ -4022,6 +4058,7 @@ export type Database = {
           divergencia: boolean | null
           espacamento_m: number | null
           espessura_cm: number | null
+          estado: string | null
           estado_conservacao: string | null
           extensao_metros: number | null
           geom_line: unknown
@@ -4037,11 +4074,16 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          match_decision:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score: number | null
           material: string | null
           observacao: string | null
           observacao_usuario: string | null
           overlap_porcentagem: number | null
           posicao: string | null
+          reason_code: string | null
           reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
@@ -4072,6 +4114,7 @@ export type Database = {
           divergencia?: boolean | null
           espacamento_m?: number | null
           espessura_cm?: number | null
+          estado?: string | null
           estado_conservacao?: string | null
           extensao_metros?: number | null
           geom_line?: unknown
@@ -4087,11 +4130,16 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           material?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           posicao?: string | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
@@ -4122,6 +4170,7 @@ export type Database = {
           divergencia?: boolean | null
           espacamento_m?: number | null
           espessura_cm?: number | null
+          estado?: string | null
           estado_conservacao?: string | null
           extensao_metros?: number | null
           geom_line?: unknown
@@ -4137,11 +4186,16 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           material?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           posicao?: string | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
@@ -4197,6 +4251,7 @@ export type Database = {
           distancia_match_metros: number | null
           divergencia: boolean | null
           espessura_mm: number | null
+          estado: string | null
           estado_conservacao: string | null
           id: string
           justificativa_reconciliacao: string | null
@@ -4209,10 +4264,15 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          match_decision:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score: number | null
           material_utilizado: string | null
           observacao: string | null
           observacao_usuario: string | null
           overlap_porcentagem: number | null
+          reason_code: string | null
           reconciliado: boolean | null
           reconciliado_por: string | null
           rodovia_id: string
@@ -4242,6 +4302,7 @@ export type Database = {
           distancia_match_metros?: number | null
           divergencia?: boolean | null
           espessura_mm?: number | null
+          estado?: string | null
           estado_conservacao?: string | null
           id?: string
           justificativa_reconciliacao?: string | null
@@ -4254,10 +4315,15 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           material_utilizado?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id: string
@@ -4287,6 +4353,7 @@ export type Database = {
           distancia_match_metros?: number | null
           divergencia?: boolean | null
           espessura_mm?: number | null
+          estado?: string | null
           estado_conservacao?: string | null
           id?: string
           justificativa_reconciliacao?: string | null
@@ -4299,10 +4366,15 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           material_utilizado?: string | null
           observacao?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           rodovia_id?: string
@@ -4358,6 +4430,7 @@ export type Database = {
           distancia_m: number | null
           distancia_match_metros: number | null
           divergencia: boolean | null
+          estado: string | null
           id: string
           justificativa_reconciliacao: string | null
           km_inicial: number | null
@@ -4367,9 +4440,14 @@ export type Database = {
           localizado_em_campo: boolean | null
           longitude_inicial: number | null
           lote_id: string
+          match_decision:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score: number | null
           observacao: string | null
           observacao_reconciliacao: string | null
           observacao_usuario: string | null
+          reason_code: string | null
           reconciliado: boolean | null
           reconciliado_em: string | null
           reconciliado_por: string | null
@@ -4408,6 +4486,7 @@ export type Database = {
           distancia_m?: number | null
           distancia_match_metros?: number | null
           divergencia?: boolean | null
+          estado?: string | null
           id?: string
           justificativa_reconciliacao?: string | null
           km_inicial?: number | null
@@ -4417,9 +4496,14 @@ export type Database = {
           localizado_em_campo?: boolean | null
           longitude_inicial?: number | null
           lote_id: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           observacao?: string | null
           observacao_reconciliacao?: string | null
           observacao_usuario?: string | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_em?: string | null
           reconciliado_por?: string | null
@@ -4458,6 +4542,7 @@ export type Database = {
           distancia_m?: number | null
           distancia_match_metros?: number | null
           divergencia?: boolean | null
+          estado?: string | null
           id?: string
           justificativa_reconciliacao?: string | null
           km_inicial?: number | null
@@ -4467,9 +4552,14 @@ export type Database = {
           localizado_em_campo?: boolean | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           observacao?: string | null
           observacao_reconciliacao?: string | null
           observacao_usuario?: string | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_em?: string | null
           reconciliado_por?: string | null
@@ -4528,6 +4618,7 @@ export type Database = {
           data_reconciliacao: string | null
           distancia_match_metros: number | null
           divergencia: boolean | null
+          estado: string | null
           id: string
           justificativa_reconciliacao: string | null
           km_inicial: number | null
@@ -4537,8 +4628,13 @@ export type Database = {
           localizado_em_campo: boolean | null
           longitude_inicial: number | null
           lote_id: string
+          match_decision:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score: number | null
           motivo: string | null
           observacao_usuario: string | null
+          reason_code: string | null
           reconciliado: boolean | null
           reconciliado_por: string | null
           revisao_solicitada: boolean | null
@@ -4564,6 +4660,7 @@ export type Database = {
           data_reconciliacao?: string | null
           distancia_match_metros?: number | null
           divergencia?: boolean | null
+          estado?: string | null
           id?: string
           justificativa_reconciliacao?: string | null
           km_inicial?: number | null
@@ -4573,8 +4670,13 @@ export type Database = {
           localizado_em_campo?: boolean | null
           longitude_inicial?: number | null
           lote_id: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           motivo?: string | null
           observacao_usuario?: string | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           revisao_solicitada?: boolean | null
@@ -4600,6 +4702,7 @@ export type Database = {
           data_reconciliacao?: string | null
           distancia_match_metros?: number | null
           divergencia?: boolean | null
+          estado?: string | null
           id?: string
           justificativa_reconciliacao?: string | null
           km_inicial?: number | null
@@ -4609,8 +4712,13 @@ export type Database = {
           localizado_em_campo?: boolean | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           motivo?: string | null
           observacao_usuario?: string | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           revisao_solicitada?: boolean | null
@@ -4664,6 +4772,7 @@ export type Database = {
           distancia_match_metros: number | null
           divergencia: boolean | null
           espacamento_m: number | null
+          estado: string | null
           extensao_km: number | null
           geom_line: unknown
           id: string
@@ -4678,10 +4787,15 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          match_decision:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score: number | null
           observacao: string | null
           observacao_usuario: string | null
           overlap_porcentagem: number | null
           quantidade: number | null
+          reason_code: string | null
           reconciliado: boolean | null
           reconciliado_por: string | null
           refletivo: string | null
@@ -4711,6 +4825,7 @@ export type Database = {
           distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
+          estado?: string | null
           extensao_km?: number | null
           geom_line?: unknown
           id?: string
@@ -4725,10 +4840,15 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           observacao?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           quantidade?: number | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           refletivo?: string | null
@@ -4758,6 +4878,7 @@ export type Database = {
           distancia_match_metros?: number | null
           divergencia?: boolean | null
           espacamento_m?: number | null
+          estado?: string | null
           extensao_km?: number | null
           geom_line?: unknown
           id?: string
@@ -4772,10 +4893,15 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_decision?:
+            | Database["public"]["Enums"]["match_decision_enum"]
+            | null
+          match_score?: number | null
           observacao?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           quantidade?: number | null
+          reason_code?: string | null
           reconciliado?: boolean | null
           reconciliado_por?: string | null
           refletivo?: string | null
