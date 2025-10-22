@@ -6339,6 +6339,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      normalize_codigo: { Args: { codigo_value: string }; Returns: string }
+      normalize_lado: { Args: { lado_value: string }; Returns: string }
       populate_geometry_columns:
         | { Args: { use_typmod?: boolean }; Returns: string }
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
@@ -6996,6 +6998,8 @@ export type Database = {
         | "SUBSTITUICAO"
         | "AMBIGUOUS"
         | "NO_MATCH"
+        | "MULTIPLE_CANDIDATES"
+        | "GRAY_ZONE"
       plan_tier: "basico" | "profissional" | "enterprise"
       status_reconciliacao_enum: "pendente_aprovacao" | "aprovado" | "rejeitado"
       subscription_status: "ativa" | "suspensa" | "cancelada" | "trial"
@@ -7165,6 +7169,8 @@ export const Constants = {
         "SUBSTITUICAO",
         "AMBIGUOUS",
         "NO_MATCH",
+        "MULTIPLE_CANDIDATES",
+        "GRAY_ZONE",
       ],
       plan_tier: ["basico", "profissional", "enterprise"],
       status_reconciliacao_enum: [
