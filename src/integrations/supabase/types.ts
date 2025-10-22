@@ -3620,13 +3620,16 @@ export type Database = {
         Row: {
           arquivo_origem: string | null
           cadastro_id: string | null
+          cadastro_match_id: string | null
           cor_corpo: string | null
           cor_refletivo: string | null
           created_at: string | null
           data_importacao: string | null
           data_reconciliacao: string | null
+          decisao_usuario: string | null
           distancia_match_metros: number | null
           divergencia: boolean | null
+          erro_projeto_detectado: boolean
           espacamento_m: number | null
           estado: string | null
           extensao_km: number | null
@@ -3663,6 +3666,7 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
+          tipo_erro_projeto: string | null
           tipo_match: string | null
           tipo_refletivo: string | null
           updated_at: string | null
@@ -3671,13 +3675,16 @@ export type Database = {
         Insert: {
           arquivo_origem?: string | null
           cadastro_id?: string | null
+          cadastro_match_id?: string | null
           cor_corpo?: string | null
           cor_refletivo?: string | null
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
+          decisao_usuario?: string | null
           distancia_match_metros?: number | null
           divergencia?: boolean | null
+          erro_projeto_detectado?: boolean
           espacamento_m?: number | null
           estado?: string | null
           extensao_km?: number | null
@@ -3714,6 +3721,7 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
+          tipo_erro_projeto?: string | null
           tipo_match?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
@@ -3722,13 +3730,16 @@ export type Database = {
         Update: {
           arquivo_origem?: string | null
           cadastro_id?: string | null
+          cadastro_match_id?: string | null
           cor_corpo?: string | null
           cor_refletivo?: string | null
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
+          decisao_usuario?: string | null
           distancia_match_metros?: number | null
           divergencia?: boolean | null
+          erro_projeto_detectado?: boolean
           espacamento_m?: number | null
           estado?: string | null
           extensao_km?: number | null
@@ -3765,6 +3776,7 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
+          tipo_erro_projeto?: string | null
           tipo_match?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
@@ -3774,6 +3786,13 @@ export type Database = {
           {
             foreignKeyName: "necessidades_cilindros_cadastro_id_fkey"
             columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_cilindros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_cilindros_cadastro_match_id_fkey"
+            columns: ["cadastro_match_id"]
             isOneToOne: false
             referencedRelation: "ficha_cilindros"
             referencedColumns: ["id"]
@@ -5766,13 +5785,16 @@ export type Database = {
       inventario_dinamico_cilindros: {
         Row: {
           ativo: boolean | null
+          cadastro_match_id: string | null
           cor_corpo: string | null
           cor_refletivo: string | null
-          created_at: string | null
           data_registro: string | null
+          data_ultima_modificacao: string | null
+          decisao_usuario: string | null
+          distancia_match_metros: number | null
+          erro_projeto_detectado: boolean | null
           espacamento_m: number | null
           extensao_km: number | null
-          fotos_urls: string[] | null
           id: string | null
           km_final: number | null
           km_inicial: number | null
@@ -5785,17 +5807,21 @@ export type Database = {
           match_decision:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
+          match_score: number | null
           modificado_por_intervencao: boolean | null
           necessidade_id: string | null
           observacao: string | null
           origem: string | null
           quantidade: number | null
+          reason_code: string | null
           rodovia_id: string | null
           snv: string | null
+          substituido_em: string | null
+          substituido_por: string | null
+          tipo_erro_projeto: string | null
           tipo_origem: string | null
           tipo_refletivo: string | null
           ultima_intervencao_id: string | null
-          updated_at: string | null
           user_id: string | null
         }
         Relationships: []
