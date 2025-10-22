@@ -453,8 +453,21 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           motivo = "-";
         }
         
+        // Mapear solução da planilha para campo servico
+        let servico: string | null = null;
+        if (solucao.includes("implantar") || solucao.includes("implant")) {
+          servico = "Inclusão";
+        } else if (solucao.includes("remov")) {
+          servico = "Remoção";
+        } else if (solucao.includes("substitu")) {
+          servico = "Substituição";
+        } else if (solucao.includes("manter") || solucao.includes("manut")) {
+          servico = "Manutenção";
+        }
+        
         return {
           ...baseMap,
+          servico,  // ✅ CORRIGIDO: Agora salva o servico lido da planilha
           cor_corpo: row["Cor (Corpo)"] || row["Cor Corpo"] || row["cor_corpo"],
           cor_refletivo: row["Cor (Refletivo)"] || row["Cor Refletivo"] || row["cor_refletivo"],
           tipo_refletivo: row["Tipo Refletivo"] || row["tipo_refletivo"],
