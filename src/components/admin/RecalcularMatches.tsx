@@ -69,6 +69,7 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
   const [toleranciasPadrao, setToleranciasPadrao] = useState<Record<string, number>>({});
   const [toleranciasCustomizadas, setToleranciasCustomizadas] = useState<Record<string, number>>({});
   const [forcarReprocessamento, setForcarReprocessamento] = useState(false);
+  const [mostrarAlerta, setMostrarAlerta] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -880,6 +881,28 @@ export function RecalcularMatches({ loteId, rodoviaId }: RecalcularMatchesProps 
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Alerta de Descontinuação */}
+        {mostrarAlerta && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <div>
+                <strong>⚠️ Ferramenta em Descontinuação</strong>
+                <p className="text-sm mt-1">
+                  Esta ferramenta utiliza algoritmo antigo (Haversine/KM). Use a aba <strong>"Matching"</strong> para algoritmos atualizados baseados em PostGIS com maior precisão.
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMostrarAlerta(false)}
+              >
+                Fechar
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium">Selecione os elementos para processar:</Label>

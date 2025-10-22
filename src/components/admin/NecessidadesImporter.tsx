@@ -816,9 +816,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       const total = dadosFiltrados.length;
       let sucessos = 0;
       let falhas = 0;
-      let matchesEncontrados = 0;
       let divergenciasPendentes = 0;
-      let pendentesRevisao = 0; // Contador para matches parciais
       
       // 🚀 OTIMIZAÇÃO: Batch de logs e inserts
       const logsBuffer: LogEntry[] = [];
@@ -844,7 +842,8 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
         cadastro_id: string | null;
       }> = [];
 
-      // Função auxiliar para fazer flush do batch de inserts e criar reconciliações
+      // Função auxiliar para fazer flush do batch de inserts SEM criar reconciliações
+      // O matching será feito posteriormente na aba "Matching"
       const flushBatch = async (tabelaNecessidade: string) => {
         console.log(`🚀 FLUSH-BATCH CHAMADO: batchInsert.length = ${batchInsert.length}, tabela = ${tabelaNecessidade}`);
         if (batchInsert.length > 0) {
@@ -853,57 +852,20 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           }
           console.log(`📦 Dados que serão enviados (primeiros 2 registros):`, batchInsert.slice(0, 2));
           
-          // Inserir necessidades e retornar os IDs
-          const { data: necessidadesInseridas, error } = await supabase
+          // Inserir necessidades sem retornar IDs (não criaremos reconciliações)
+          const { error } = await supabase
             .from(tabelaNecessidade as any)
-            .insert(batchInsert)
-            .select('id, cadastro_id');
+            .insert(batchInsert);
           
           console.log(`📊 RESPOSTA SUPABASE:`, { 
-            temData: !!necessidadesInseridas, 
-            qtdData: necessidadesInseridas?.length,
             temErro: !!error,
             erro: error 
           });
           
           if (error) throw error;
           
-          // Criar reconciliações para necessidades com match
-          if (necessidadesInseridas && necessidadesInseridas.length > 0) {
-            const reconciliacoesParaInserir = [];
-            
-            for (let index = 0; index < necessidadesInseridas.length; index++) {
-              const nec = necessidadesInseridas[index] as any;
-              const matchData = matchDataBatch[index];
-              
-              if (nec.cadastro_id && matchData) {
-                reconciliacoesParaInserir.push({
-                  tipo_elemento: tipo === 'marcas_transversais' ? 'inscricoes' : tipo,
-                  necessidade_id: nec.id,
-                  cadastro_id: nec.cadastro_id,
-                  distancia_match_metros: matchData.distancia_match_metros,
-                  overlap_porcentagem: matchData.overlap_porcentagem,
-                  tipo_match: matchData.tipo_match,
-                  status: matchData.status,
-                  reconciliado: matchData.status === 'aprovado',
-                  motivo_revisao: matchData.motivo_revisao,
-                });
-              }
-            }
-            
-            if (reconciliacoesParaInserir.length > 0) {
-              const { error: reconciliacaoError } = await supabase
-                .from('reconciliacoes')
-                .insert(reconciliacoesParaInserir);
-              
-              if (reconciliacaoError) {
-                console.error('Erro ao criar reconciliações:', reconciliacaoError);
-              }
-            }
-          }
-          
           batchInsert.length = 0; // Limpar batch
-          matchDataBatch.length = 0; // Limpar dados de match
+          matchDataBatch.length = 0; // Limpar dados de match (não usado mais)
         }
       };
       
@@ -940,7 +902,9 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           // Mapear colunas
           dados = mapearColunas(row, tipo);
 
-          // ========== BIFURCAÇÃO: MATCH POR GPS (PLACAS) vs MATCH POR SOBREPOSIÇÃO (LINEARES) ==========
+          // ========== MATCHING DESATIVADO ==========
+          // O matching automático foi desativado nesta versão.
+          // Execute o matching posteriormente na aba "Matching" para vincular ao cadastro.
           
           let match = null;
           let distancia = null;
@@ -948,129 +912,11 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           let tipo_match_resultado = null;
           let status_reconciliacao = "aprovado";
           let motivo_revisao = null;
-
-          // ===== TIPO 1: ELEMENTOS LINEARES (Match por sobreposição de segmento KM) =====
-          if (["marcas_longitudinais", "tachas", "defensas", "cilindros"].includes(tipo)) {
-            const temKmsValidos = dados.km_inicial && 
-                                  dados.km_final && 
-                                  !isNaN(parseFloat(dados.km_inicial)) && 
-                                  !isNaN(parseFloat(dados.km_final));
-            
-            if (temKmsValidos && cadastros && cadastros.length > 0) {
-              // Buscar todos os matches possíveis (threshold 50%)
-              const matches = buscarMatchSegmento(
-                {
-                  km_inicial: parseFloat(dados.km_inicial),
-                  km_final: parseFloat(dados.km_final),
-                  lado: dados.lado
-                },
-                cadastros,
-                tipo,
-                50 // Threshold de 50%
-              );
-              
-              // Identificar serviço baseado nos matches
-              const resultado = identificarServicoSegmento(dados, matches);
-              
-              // Atribuir valores do resultado
-              match = resultado.match_usado?.cadastro_id || null;
-              overlap_porcentagem = resultado.match_usado?.overlap_porcentagem || null;
-              tipo_match_resultado = resultado.match_usado?.tipo_match || null;
-              status_reconciliacao = resultado.status_reconciliacao;
-              motivo_revisao = resultado.motivo_revisao || null;
-              
-              // Contabilizar matches e pendências
-              if (match) {
-                matchesEncontrados++;
-              }
-              
-              if (status_reconciliacao === "pendente_aprovacao") {
-                pendentesRevisao++;
-              }
-              
-              // Log de múltiplos matches
-              if (matches.length > 1 && i % 50 === 0) {
-                console.log(`⚠️ Linha ${linhaExcel}: Múltiplos matches (${matches.length}). Usando melhor: ${overlap_porcentagem}% overlap`);
-              }
-              
-              // Log de progresso
-              if (i % 50 === 0) {
-                if (resultado.match_usado) {
-                  console.log(`✅ Processando linha ${linhaExcel}: Match encontrado! overlap=${overlap_porcentagem}% (${tipo_match_resultado}) [${i+1}/${total}]`);
-                } else {
-                  console.log(`⚠️ Processando linha ${linhaExcel}: Sem match - nova instalação [${i+1}/${total}]`);
-                }
-              }
-            } else if (i % 50 === 0) {
-              console.log(`⚠️ Processando linha ${linhaExcel}: Sem KMs válidos - importado como Implantar [${i+1}/${total}]`);
-            }
-          }
           
-          // ===== TIPO 2: PLACAS (Match por GPS - ponto único) =====
-          else if (tipo === "placas") {
-            const lat = converterCoordenada(dados.latitude);
-            const long = converterCoordenada(dados.longitude);
-
-            if (lat && long && cadastros && cadastros.length > 0) {
-            // Buscar o cadastro mais próximo localmente
-            let menorDistancia = Infinity;
-            let cadastroMaisProximo = null;
-
-            for (const cad of (cadastros as any[])) {
-              const cadLat = converterCoordenada(cad[cadastroLatField]);
-              const cadLong = converterCoordenada(cad[cadastroLongField]);
-              
-              if (cadLat !== null && cadLong !== null) {
-                const dist = calcularDistancia(lat, long, cadLat, cadLong);
-                
-                // Para placas, validar também o lado da rodovia
-                let ladoValido = true;
-                if (tipo === "placas" && dados.lado && cad.lado) {
-                  const ladoNecessidade = String(dados.lado).toUpperCase().trim();
-                  const ladoCadastro = String(cad.lado).toUpperCase().trim();
-                  // Normalizar variações: D/Direito, E/Esquerdo, C/Centro, etc.
-                  const normalizarLado = (l: string) => {
-                    if (l.startsWith('D')) return 'D';
-                    if (l.startsWith('E')) return 'E';
-                    if (l.startsWith('C')) return 'C';
-                    return l;
-                  };
-                  ladoValido = normalizarLado(ladoNecessidade) === normalizarLado(ladoCadastro);
-                }
-                
-                if (dist < menorDistancia && dist <= tolerancia && ladoValido) {
-                  menorDistancia = dist;
-                  cadastroMaisProximo = cad;
-                }
-              }
-            }
-
-              if (cadastroMaisProximo) {
-                match = cadastroMaisProximo.id;
-                distancia = Math.round(menorDistancia);
-                matchesEncontrados++;
-                if (i % 50 === 0) { // Log a cada 50 linhas para não sobrecarregar
-                  const ladoInfo = dados.lado && cadastroMaisProximo.lado 
-                    ? ` lado=${dados.lado}/${cadastroMaisProximo.lado}`
-                    : '';
-                  console.log(`✅ Processando linha ${linhaExcel}: Match GPS encontrado! distancia=${distancia}m${ladoInfo} [${i+1}/${total}]`);
-                }
-              } else if (i % 50 === 0) {
-                const ladoInfo = dados.lado ? ` (lado=${dados.lado})` : '';
-                console.log(`⚠️ Processando linha ${linhaExcel}: Sem match dentro de ${tolerancia}m${ladoInfo} [${i+1}/${total}]`);
-              }
-            } else if (!lat || !long) {
-              if (i % 50 === 0) {
-                console.log(`⚠️ Processando linha ${linhaExcel}: Sem coordenadas válidas [${i+1}/${total}]`);
-              }
-            }
+          // Log de progresso sem matching
+          if (i % 50 === 0) {
+            console.log(`⚙️ Processando linha ${linhaExcel}: Importando sem match [${i+1}/${total}]`);
           }
-          
-          // ===== TIPO 3: OUTROS (Marcas Transversais, Cilindros, Pórticos) =====
-          // Para estes tipos, não fazemos match por sobreposição
-          // Mantém lógica existente ou importação simples
-
-          // ========== FIM DA BIFURCAÇÃO DE MATCH ==========
 
           // SISTEMA DE RECONCILIAÇÃO
           // 1. Calcular servico_inferido (análise automática GPS)
@@ -1142,12 +988,12 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             | "necessidades_porticos"
             | "necessidades_defensas";
 
-          // Preparar dados para inserção (apenas cadastro_id, sem dados de reconciliação)
+          // Preparar dados para inserção SEM match (cadastro_id será preenchido pelo matching posterior)
           dadosInsercao = {
             user_id: user.id,
             lote_id: loteId,
             rodovia_id: rodoviaId,
-            cadastro_id: match,
+            cadastro_id: null, // Será preenchido pelo matching na aba "Matching"
             servico,
             servico_inferido: servicoInferido,
             servico_final: servicoFinal,
@@ -1404,8 +1250,6 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       }
 
       // 📊 RESUMO FINAL DETALHADO
-      const isLinear = ["marcas_longitudinais", "tachas", "defensas"].includes(tipo);
-      
       console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 RESUMO DA IMPORTAÇÃO
@@ -1413,11 +1257,11 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
    📂 Total processado: ${total} linhas
    ✅ Sucessos: ${sucessos}
    ❌ Falhas: ${falhas}
-   🔗 Matches encontrados: ${matchesEncontrados}
-   ${isLinear ? `🟡 Matches parciais: ${pendentesRevisao}` : ''}
    ⚠️ Divergências detectadas: ${divergenciasPendentes}
    🔧 Valores convertidos para NULL automaticamente
 ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Verifique os logs acima para detalhes` : ''}
+   
+   ℹ️ PRÓXIMO PASSO: Execute o matching na aba "Matching"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       `);
       
@@ -1425,10 +1269,6 @@ ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Verifique os logs acima par
         `📂 ${total} linhas lidas`,
         `✅ ${sucessos} importadas`,
         `❌ ${falhas} falhas`,
-        isLinear 
-          ? `🔗 ${matchesEncontrados} matches por sobreposição` 
-          : `🔗 ${matchesEncontrados} matches GPS`,
-        pendentesRevisao > 0 ? `🟡 ${pendentesRevisao} pendentes revisão` : null,
         divergenciasPendentes > 0 ? `⚠️ ${divergenciasPendentes} divergências` : null
       ].filter(Boolean).join(' • ');
 
@@ -1440,6 +1280,8 @@ ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Verifique os logs acima par
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${mensagemResultado}
 ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Veja logs de erro acima para identificar o problema` : ''}
+
+ℹ️ PRÓXIMO PASSO: Acesse a aba "Matching" para vincular ao cadastro
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
       }]);
 
@@ -1469,7 +1311,7 @@ ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Veja logs de erro acima par
           Importar Projeto
         </CardTitle>
         <CardDescription>
-          Importar planilhas do projeto com match automático ao cadastro
+          Importar planilhas do projeto. Execute o matching na aba "Matching" após a importação.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -1489,15 +1331,13 @@ ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Veja logs de erro acima par
           </Select>
         </div>
 
-        {/* Alert informativo sobre tolerância */}
-        {rodoviaId && (
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Esta importação usará a tolerância de match GPS configurada na rodovia selecionada (padrão: 50m se não configurada).
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Alert informativo sobre processo de 2 passos */}
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            ℹ️ A importação agora funciona em 2 passos: primeiro importe as necessidades, depois execute o matching na aba "Matching" para vincular ao cadastro.
+          </AlertDescription>
+        </Alert>
 
         {/* Upload de arquivo */}
         <div className="space-y-2">
