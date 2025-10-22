@@ -393,8 +393,7 @@ const Index = () => {
     return (
       <div className="flex items-center gap-1">
         <Badge 
-          variant="secondary" 
-          className="h-5 px-1.5 text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+          className="h-5 px-1.5 text-xs cursor-pointer bg-gray-200 text-black hover:bg-gray-300 transition-colors border-0"
           onClick={(e) => {
             e.stopPropagation();
             navigate("/dashboard-necessidades");
@@ -404,7 +403,7 @@ const Index = () => {
           {countCadastro || 0}
         </Badge>
         <Badge 
-          className="h-5 px-1.5 text-xs cursor-pointer bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+          className="h-5 px-1.5 text-xs cursor-pointer bg-green-500 text-white hover:bg-green-600 transition-colors border-0"
           onClick={(e) => {
             e.stopPropagation();
             navigate("/dashboard-necessidades");
