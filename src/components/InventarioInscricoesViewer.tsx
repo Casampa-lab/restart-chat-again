@@ -513,11 +513,13 @@ export function InventarioInscricoesViewer({
                             </TableCell>
                           )}
                           <TableCell className="text-center">
-                            <div className="flex items-center gap-2 justify-center">
-                              <OrigemIndicator 
-                                origem={inscricao.origem}
-                                tipoOrigem={inscricao.tipo_origem}
-                              />
+                            <div className="flex items-center gap-2 justify-center min-h-[28px]">
+                              <div className="flex items-center">
+                                <OrigemIndicator 
+                                  origem={inscricao.origem}
+                                  tipoOrigem={inscricao.tipo_origem}
+                                />
+                              </div>
                               
                               {inscricao.match_decision === 'AMBIGUOUS' && (
                                 <TooltipProvider>

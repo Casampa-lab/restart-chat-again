@@ -524,11 +524,13 @@ export function InventarioTachasViewer({
                           </TableCell>
                         )}
                         <TableCell className="text-center">
-                          <div className="flex items-center gap-2 justify-center">
-                            <OrigemIndicator 
-                              origem={tacha.origem}
-                              tipoOrigem={tacha.tipo_origem}
-                            />
+                          <div className="flex items-center gap-2 justify-center min-h-[28px]">
+                            <div className="flex items-center">
+                              <OrigemIndicator 
+                                origem={tacha.origem}
+                                tipoOrigem={tacha.tipo_origem}
+                              />
+                            </div>
                             
                             {tacha.match_decision === 'AMBIGUOUS' && (
                               <TooltipProvider>
