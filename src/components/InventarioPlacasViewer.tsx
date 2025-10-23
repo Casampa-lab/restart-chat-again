@@ -800,7 +800,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <TableCell>
                             <Badge variant="secondary">{placa.tipo_suporte || "-"}</Badge>
                           </TableCell>
-                          <TableCell className="text-center">{placa.km_inicial?.toFixed(2) || "-"}</TableCell>
+                          <TableCell className="text-center">{placa.km_inicial?.toFixed(3) || "-"}</TableCell>
                           <TableCell>{placa.lado || "-"}</TableCell>
                           {searchLat && searchLng && (
                             <TableCell>
@@ -984,7 +984,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">km:</span>
-                      <p className="text-sm">{selectedPlaca.km_inicial?.toFixed(2) || "-"}</p>
+                      <p className="text-sm">{selectedPlaca.km_inicial?.toFixed(3) || "-"}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Latitude:</span>
