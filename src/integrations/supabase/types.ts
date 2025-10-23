@@ -6560,35 +6560,23 @@ export type Database = {
         }
         Returns: Json
       }
-      match_pontual:
-        | {
-            Args: {
-              p_atributos: Json
-              p_lat: number
-              p_lon: number
-              p_rodovia_id: string
-              p_servico: string
-              p_tipo: Database["public"]["Enums"]["tipo_elemento_enum"]
-            }
-            Returns: Database["public"]["CompositeTypes"]["match_result"]
-            SetofOptions: {
-              from: "*"
-              to: "match_result"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
-        | {
-            Args: {
-              p_atributos: Json
-              p_lat: number
-              p_lon: number
-              p_rodovia_id: string
-              p_servico: string
-              p_tipo: string
-            }
-            Returns: Json
-          }
+      match_pontual: {
+        Args: {
+          p_atributos: Json
+          p_lat: number
+          p_lon: number
+          p_rodovia_id: string
+          p_servico: string
+          p_tipo: Database["public"]["Enums"]["tipo_elemento_enum"]
+        }
+        Returns: Database["public"]["CompositeTypes"]["match_result"]
+        SetofOptions: {
+          from: "*"
+          to: "match_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       normalize_codigo: { Args: { codigo_value: string }; Returns: string }
       normalize_lado: { Args: { lado_value: string }; Returns: string }
       populate_geometry_columns:
