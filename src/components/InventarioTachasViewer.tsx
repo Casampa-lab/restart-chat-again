@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw, AlertTriangle, CheckCircle2, Link } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
@@ -524,7 +524,7 @@ export function InventarioTachasViewer({
                           </TableCell>
                         )}
                         <TableCell className="text-center">
-                          <div className="flex items-center gap-2 justify-start min-h-[28px]">
+                          <div className="flex items-center gap-1 justify-start min-h-[28px]">
                             <div className="flex items-center">
                               <OrigemIndicator 
                                 origem={tacha.origem}
@@ -536,9 +536,7 @@ export function InventarioTachasViewer({
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger>
-                                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 text-xs">
-                                      <AlertTriangle className="h-4 w-4" />
-                                    </Badge>
+                                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p className="text-xs">Match ambíguo - precisa revisão manual</p>
@@ -551,10 +549,7 @@ export function InventarioTachasViewer({
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger>
-                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 text-xs gap-1">
-                                      <CheckCircle2 className="h-3 w-3" />
-                                      Match Confirmado
-                                    </Badge>
+                                    <CheckCircle2 className="h-5 w-5 text-green-600" />
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p className="text-xs">Match direto confirmado automaticamente</p>
@@ -567,9 +562,7 @@ export function InventarioTachasViewer({
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger>
-                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
-                                      Substituição
-                                    </Badge>
+                                    <RefreshCw className="h-5 w-5 text-blue-600" />
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p className="text-xs">Elemento será substituído</p>
@@ -583,9 +576,7 @@ export function InventarioTachasViewer({
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger>
-                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
-                                      🔗 Match
-                                    </Badge>
+                                    <Link className="h-5 w-5 text-blue-600" />
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p className="text-xs">
