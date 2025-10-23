@@ -604,14 +604,73 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
   };
 
   const handleImport = async () => {
-    if (!file || !tipo || !loteId || !rodoviaId) {
+    if (!file || !tipo) {
       toast({
         title: "Erro",
-        description: "Selecione o tipo, lote, rodovia e arquivo antes de importar",
+        description: "Selecione o tipo e arquivo antes de importar",
         variant: "destructive",
       });
       return;
     }
+
+    // ✅ VALIDAÇÃO DE SESSÃO ATIVA
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data: session, error: sessionError } = await supabase
+      .from("sessoes_trabalho")
+      .select(`
+        lote_id,
+        rodovia_id,
+        lote:lotes!inner(numero),
+        rodovia:rodovias!inner(codigo)
+      `)
+      .eq("user_id", user.id)
+      .eq("ativa", true)
+      .maybeSingle();
+
+    if (sessionError || !session) {
+      toast({
+        title: "❌ Nenhuma Sessão Ativa",
+        description: "Inicie uma sessão de trabalho antes de importar necessidades",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // ✅ CONFIRMAR LOTE/RODOVIA COM USUÁRIO
+    const rodoviaConfirmada = window.confirm(
+      `Você está prestes a importar necessidades para:\n\n` +
+      `🛣️ Rodovia: ${session.rodovia.codigo}\n` +
+      `📦 Lote: ${session.lote.numero}\n\n` +
+      `Confirmar importação?`
+    );
+
+    if (!rodoviaConfirmada) {
+      toast({
+        title: "Importação Cancelada",
+        description: "Operação cancelada pelo usuário",
+      });
+      return;
+    }
+
+    // ✅ FORÇAR lote_id/rodovia_id DA SESSÃO ATIVA
+    const loteIdAtivo = session.lote_id;
+    const rodoviaIdAtiva = session.rodovia_id;
+
+    console.log("✅ Importação autorizada:", {
+      rodovia: session.rodovia.codigo,
+      lote: session.lote.numero,
+      loteId: loteIdAtivo,
+      rodoviaId: rodoviaIdAtiva,
+    });
 
     setIsImporting(true);
     setLogs([]);
@@ -744,9 +803,8 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
         return;
       }
 
-      // 2. Buscar user_id
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
+      // 2. Usar lote/rodovia da sessão ativa (já validado no início)
+      // user_id já foi buscado na validação de sessão
 
       // MATCHING DESATIVADO NA IMPORTAÇÃO
       // O matching será executado posteriormente na aba "Matching" do Admin

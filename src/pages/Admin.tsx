@@ -36,6 +36,8 @@ import { ParametrosMatchManager } from "@/components/admin/ParametrosMatchManage
 import { RelatorioMatching } from "@/components/admin/RelatorioMatching";
 import { ExecutarMatching } from "@/components/admin/ExecutarMatching";
 import { LimparResultadosMatching } from "@/components/admin/LimparResultadosMatching";
+import { DeletarImportacaoPorLote } from "@/components/admin/DeletarImportacaoPorLote";
+import { AuditoriaImportacoes } from "@/components/admin/AuditoriaImportacoes";
 
 import logoOperaVia from "@/assets/logo-operavia.png";
 
@@ -357,6 +359,8 @@ const Admin = () => {
 
               {/* Componentes com props compartilhadas */}
               <NecessidadesImporter loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
+              <DeletarImportacaoPorLote />
+              <AuditoriaImportacoes />
               <DeleteTodasNecessidades loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
               <RemoverDuplicatasNecessidades />
               

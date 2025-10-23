@@ -67,6 +67,38 @@ export function ExecutarMatching() {
     setEstatisticas({ total: 0, processados: 0, matches: 0, substituicoes: 0, ambiguos: 0, semMatch: 0, erros: 0 });
 
     try {
+      // ✅ VALIDAR SESSÃO ATIVA
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "❌ Erro",
+          description: "Usuário não autenticado",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data: session, error: sessionError } = await supabase
+        .from("sessoes_trabalho")
+        .select("lote_id, rodovia_id")
+        .eq("user_id", user.id)
+        .eq("ativa", true)
+        .maybeSingle();
+
+      if (sessionError || !session) {
+        toast({
+          title: "❌ Nenhuma Sessão Ativa",
+          description: "Inicie uma sessão de trabalho antes de executar o matching",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("✅ Matching autorizado para sessão:", {
+        lote_id: session.lote_id,
+        rodovia_id: session.rodovia_id,
+      });
+
       const tipos: Exclude<TipoElemento, "TODOS">[] =
         tipoSelecionado === "TODOS"
           ? ["PLACA", "PORTICO", "INSCRICAO", "MARCA_LONG", "TACHAS", "DEFENSA", "CILINDRO"]
@@ -94,6 +126,8 @@ export function ExecutarMatching() {
             .from(tabela as any)
             .select("*")
             .is("match_decision", null)
+            .eq("lote_id", session.lote_id) // ✅ FILTRAR POR LOTE DA SESSÃO
+            .eq("rodovia_id", session.rodovia_id) // ✅ FILTRAR POR RODOVIA DA SESSÃO
             .range(page * pageSize, (page + 1) * pageSize - 1);
 
           if (batchError) {
@@ -291,8 +325,8 @@ export function ExecutarMatching() {
       }
 
       toast({
-        title: "Matching concluído",
-        description: `Processadas ${processados} necessidades. ${stats.matches} MATCH, ${stats.substituicoes} SUBSTITUIÇÃO, ${stats.ambiguos} AMBÍGUO, ${stats.semMatch} SEM MATCH.`,
+        title: "✅ Matching Concluído",
+        description: `Processadas ${processados} necessidades do lote/rodovia ativo. ${stats.matches} MATCH, ${stats.substituicoes} SUBSTITUIÇÃO, ${stats.ambiguos} AMBÍGUO, ${stats.semMatch} SEM MATCH.`,
       });
     } catch (error) {
       console.error("Erro ao executar matching:", error);
