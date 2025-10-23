@@ -684,7 +684,9 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
         return obj;
       });
 
-      // Filtrar linhas vazias (que não têm KM) MAS MANTENDO O NÚMERO DA LINHA ORIGINAL
+      // ========== FILTRAR LINHAS VAZIAS COM LOG DETALHADO ==========
+      const linhasIgnoradas: LogEntry[] = [];
+      
       const dadosFiltrados = dadosComHeader.filter((row: any) => {
         // Helper para buscar primeira coluna que EXISTE e tem valor válido (inclusive 0)
         const getFirstValidValue = (...keys: string[]) => {
@@ -707,9 +709,28 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           ? getFirstValidValue("Km", "KM", "km")
           : getFirstValidValue("Km Inicial", "KM Inicial", "km inicial", "km_inicial");
         
-        // Aceitar 0 explicitamente como válido
-        return kmValue !== undefined && kmValue !== null && kmValue !== "";
+        // Se não tem KM válido, ignorar e logar
+        if (kmValue === undefined || kmValue === null || kmValue === "") {
+          linhasIgnoradas.push({
+            tipo: "warning",
+            linha: row.__linha_excel_original || 0,
+            mensagem: `⚠️ Linha vazia ignorada (sem KM)`
+          });
+          return false;
+        }
+        
+        return true;
       });
+
+      // Log de linhas ignoradas
+      if (linhasIgnoradas.length > 0) {
+        console.log(`⚠️ ${linhasIgnoradas.length} linhas vazias ignoradas`);
+        setLogs(prev => [...prev, {
+          tipo: "warning",
+          linha: null,
+          mensagem: `⚠️ ${linhasIgnoradas.length} linhas vazias ignoradas (sem KM válido)`
+        }]);
+      }
 
       // Validar se há dados após filtro
       if (dadosFiltrados.length === 0) {
@@ -730,7 +751,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       // MATCHING DESATIVADO NA IMPORTAÇÃO
       // O matching será executado posteriormente na aba "Matching" do Admin
 
-      // 4. Processar cada linha
+      // 4. Processar cada linha COM DETECÇÃO DE DUPLICATAS
       const total = dadosFiltrados.length;
       
       console.log(`📋 Importação pura: ${total} necessidades serão inseridas SEM matching automático`);
@@ -742,6 +763,32 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       }]);
       let sucessos = 0;
       let falhas = 0;
+      let duplicatasDetectadas = 0;
+      
+      // ========== DETECÇÃO DE DUPLICATAS ANTES DA INSERÇÃO ==========
+      // Criar Set para rastrear registros já processados
+      const registrosProcessados = new Set<string>();
+      
+      // Função para gerar chave única baseada nos campos-chave do tipo
+      const gerarChaveDuplicata = (dados: any, tipoAtual: string): string => {
+        switch (tipoAtual) {
+          case "placas":
+          case "porticos":
+          case "cilindros":
+            // Pontuais: KM + código/tipo + lado
+            return `${dados.km_inicial?.toFixed(3)}_${dados.codigo || dados.tipo}_${dados.lado || ''}`;
+          
+          case "marcas_longitudinais":
+          case "tachas":
+          case "defensas":
+          case "marcas_transversais":
+            // Lineares: KM_inicial + KM_final + código/tipo + lado
+            return `${dados.km_inicial?.toFixed(3)}_${dados.km_final?.toFixed(3)}_${dados.codigo || dados.tipo_demarcacao || dados.tipo || ''}_${dados.lado || ''}`;
+          
+          default:
+            return `${dados.km_inicial}_${dados.km_final}_${JSON.stringify(dados)}`;
+        }
+      };
       
       // 🚀 OTIMIZAÇÃO: Batch de logs e inserts
       const logsBuffer: LogEntry[] = [];
@@ -815,6 +862,55 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
         try {
           // Mapear colunas
           dados = mapearColunas(row, tipo);
+
+          // ========== VALIDAÇÃO DE CAMPOS OBRIGATÓRIOS ==========
+          const camposObrigatorios: Record<string, string[]> = {
+            placas: ['km_inicial', 'codigo'],
+            porticos: ['km_inicial', 'tipo'],
+            cilindros: ['km_inicial', 'km_final'],
+            marcas_longitudinais: ['km_inicial', 'km_final', 'codigo'],
+            marcas_transversais: ['km_inicial', 'codigo'],
+            tachas: ['km_inicial', 'km_final'],
+            defensas: ['km_inicial', 'km_final']
+          };
+
+          const camposRequeridos = camposObrigatorios[tipo] || [];
+          const camposFaltantes = camposRequeridos.filter(campo => {
+            const valor = dados[campo];
+            return valor === null || valor === undefined || valor === '';
+          });
+
+          if (camposFaltantes.length > 0) {
+            logsBuffer.push({
+              tipo: "error",
+              linha: linhaExcel,
+              mensagem: `❌ Campos obrigatórios faltando: ${camposFaltantes.join(', ')} - Linha ignorada`
+            });
+            falhas++;
+            continue; // Pular esta linha
+          }
+
+          // ========== DETECÇÃO DE DUPLICATAS ==========
+          const chaveDuplicata = gerarChaveDuplicata(dados, tipo);
+          
+          if (registrosProcessados.has(chaveDuplicata)) {
+            duplicatasDetectadas++;
+            logsBuffer.push({
+              tipo: "warning",
+              linha: linhaExcel,
+              mensagem: `⚠️ DUPLICATA detectada e ignorada (KM ${dados.km_inicial}${dados.km_final ? `-${dados.km_final}` : ''}, ${dados.codigo || dados.tipo || 'sem código'})`
+            });
+            
+            // Flush de logs a cada 50 duplicatas para visibilidade
+            if (duplicatasDetectadas % 50 === 0) {
+              flushLogs();
+            }
+            
+            continue; // Pular esta linha duplicada
+          }
+          
+          // Registrar como processado
+          registrosProcessados.add(chaveDuplicata);
 
           // ========== MATCHING DESATIVADO ==========
           // O matching será executado posteriormente na aba "Matching"
@@ -1080,11 +1176,14 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 RESUMO DA IMPORTAÇÃO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📂 Total processado: ${total} linhas
+   📂 Total lido: ${total} linhas
    ✅ Sucessos: ${sucessos}
+   ⚠️ Duplicatas bloqueadas: ${duplicatasDetectadas}
+   ⚠️ Linhas vazias ignoradas: ${linhasIgnoradas.length}
    ❌ Falhas: ${falhas}
    🔧 Valores convertidos para NULL automaticamente
 ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Verifique os logs acima para detalhes` : ''}
+${duplicatasDetectadas > 0 ? `\n⚠️ ${duplicatasDetectadas} DUPLICATAS BLOQUEADAS durante importação` : ''}
    
    ℹ️ PRÓXIMO PASSO: Execute o matching na aba "Matching"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1093,6 +1192,8 @@ ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Verifique os logs acima par
       const mensagemResultado = [
         `📂 ${total} linhas lidas`,
         `✅ ${sucessos} importadas`,
+        duplicatasDetectadas > 0 ? `⚠️ ${duplicatasDetectadas} duplicatas bloqueadas` : '',
+        linhasIgnoradas.length > 0 ? `⚠️ ${linhasIgnoradas.length} vazias ignoradas` : '',
         `❌ ${falhas} falhas`
       ].filter(Boolean).join(' • ');
 
