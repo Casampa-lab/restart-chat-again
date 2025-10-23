@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw } from "lucide-react";
+import { Search, MapPin, Eye, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -71,6 +71,7 @@ interface FichaDefensa {
   rodovia_id: string;
   lote_id: string;
   origem?: string;
+  match_decision?: string | null;
   tipo_origem?: string;
   cadastro_match_id?: string | null;
   distancia_match_metros?: number | null;
@@ -496,6 +497,53 @@ export const InventarioDefensasViewer = ({
                         origem={defensa.origem}
                         tipoOrigem={defensa.tipo_origem}
                       />
+                      
+                      {defensa.match_decision === 'AMBIGUOUS' && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 text-xs gap-1">
+                                <AlertTriangle className="h-3 w-3" />
+                                Requer Reconciliação
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Match ambíguo - precisa revisão manual</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                      
+                      {defensa.match_decision === 'MATCH_DIRECT' && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 text-xs gap-1">
+                                <CheckCircle2 className="h-3 w-3" />
+                                Match Confirmado
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Match direto confirmado automaticamente</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                      
+                      {defensa.match_decision === 'SUBSTITUICAO' && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
+                                Substituição
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Elemento será substituído</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                       
                       {(defensa.cadastro_match_id || defensa.origem === 'NECESSIDADE_CONSOLIDADA') && (
                         <TooltipProvider>

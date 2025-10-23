@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle } from "lucide-react";
+import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -675,6 +675,53 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                 tipoOrigem={placa.tipo_origem} 
                               />
                               
+                              {placa.match_decision === 'AMBIGUOUS' && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 text-xs gap-1">
+                                        <AlertTriangle className="h-3 w-3" />
+                                        Requer Reconciliação
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">Match ambíguo - precisa revisão manual</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                              
+                              {placa.match_decision === 'MATCH_DIRECT' && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 text-xs gap-1">
+                                        <CheckCircle2 className="h-3 w-3" />
+                                        Match Confirmado
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">Match direto confirmado automaticamente</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                              
+                              {placa.match_decision === 'SUBSTITUICAO' && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
+                                        Substituição
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">Elemento será substituído</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                              
                               {(placa.cadastro_match_id || placa.origem === 'NECESSIDADE_CONSOLIDADA') && (
                                 <TooltipProvider>
                                   <Tooltip>
@@ -843,7 +890,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     </div>
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">Origem:</span>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <OrigemIndicator 
                           origem={selectedPlaca.origem} 
                           tipoOrigem={selectedPlaca.tipo_origem} 
@@ -852,6 +899,26 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           origem={selectedPlaca.origem}
                           modificadoPorIntervencao={selectedPlaca.modificado_por_intervencao}
                         />
+                        
+                        {selectedPlaca.match_decision === 'AMBIGUOUS' && (
+                          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 text-xs gap-1">
+                            <AlertTriangle className="h-3 w-3" />
+                            Requer Reconciliação
+                          </Badge>
+                        )}
+                        
+                        {selectedPlaca.match_decision === 'MATCH_DIRECT' && (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 text-xs gap-1">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Match Confirmado
+                          </Badge>
+                        )}
+                        
+                        {selectedPlaca.match_decision === 'SUBSTITUICAO' && (
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
+                            Substituição
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </div>

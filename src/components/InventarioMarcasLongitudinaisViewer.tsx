@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -25,6 +25,7 @@ interface FichaMarcaLongitudinal {
   km_final: number | null;
   latitude_inicial: number | null;
   longitude_inicial: number | null;
+  match_decision?: string | null;
   latitude_final: number | null;
   longitude_final: number | null;
   data_vistoria: string;
@@ -466,6 +467,53 @@ export function InventarioMarcasLongitudinaisViewer({
                                 origem={marca.origem}
                                 tipoOrigem={marca.tipo_origem}
                               />
+                              
+                              {marca.match_decision === 'AMBIGUOUS' && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 text-xs gap-1">
+                                        <AlertTriangle className="h-3 w-3" />
+                                        Requer Reconciliação
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">Match ambíguo - precisa revisão manual</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                              
+                              {marca.match_decision === 'MATCH_DIRECT' && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 text-xs gap-1">
+                                        <CheckCircle2 className="h-3 w-3" />
+                                        Match Confirmado
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">Match direto confirmado automaticamente</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                              
+                              {marca.match_decision === 'SUBSTITUICAO' && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
+                                        Substituição
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">Elemento será substituído</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
                               
                               {(marca.cadastro_match_id || marca.origem === 'NECESSIDADE_CONSOLIDADA') && (
                                 <TooltipProvider>

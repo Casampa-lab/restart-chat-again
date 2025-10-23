@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Search, Library, Eye, MapPin, Calendar, X, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw, AlertTriangle } from "lucide-react";
+import { Loader2, Search, Library, Eye, MapPin, Calendar, X, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
@@ -624,6 +624,53 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                               origem={cilindro.origem}
                               tipoOrigem={cilindro.tipo_origem}
                             />
+                            
+                            {cilindro.match_decision === 'AMBIGUOUS' && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 text-xs gap-1">
+                                      <AlertTriangle className="h-3 w-3" />
+                                      Requer Reconciliação
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs">Match ambíguo - precisa revisão manual</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                            
+                            {cilindro.match_decision === 'MATCH_DIRECT' && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 text-xs gap-1">
+                                      <CheckCircle2 className="h-3 w-3" />
+                                      Match Confirmado
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs">Match direto confirmado automaticamente</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                            
+                            {cilindro.match_decision === 'SUBSTITUICAO' && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
+                                      Substituição
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs">Elemento será substituído</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
                             
                             {/* Badge Match: aparece para consolidados E erros pendentes */}
                             {(cilindro.cadastro_match_id || cilindro.origem === 'NECESSIDADE_CONSOLIDADA') && (

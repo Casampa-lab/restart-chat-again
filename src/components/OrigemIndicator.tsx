@@ -9,6 +9,9 @@ export function OrigemIndicator({ origem, tipoOrigem }: OrigemIndicatorProps) {
   const isConsolidado = origem === 'NECESSIDADE_CONSOLIDADA' || 
                         tipoOrigem === 'MATCH_CONFIRMADO';
 
+  const isPendenteReconciliacao = origem === 'NECESSIDADE_PENDENTE_RECONCILIACAO' ||
+                                   tipoOrigem === 'MATCH_AMBIGUO';
+
   const isErroProjetoPendente = origem === 'NECESSIDADE_COM_ERRO' ||
                                 tipoOrigem === 'ERRO_PROJETO_PENDENTE';
 
@@ -27,6 +30,7 @@ export function OrigemIndicator({ origem, tipoOrigem }: OrigemIndicatorProps) {
           <div 
             className={`w-3 h-3 rounded-full ${
               isConsolidado ? 'bg-green-500 border-2 border-green-600' :
+              isPendenteReconciliacao ? 'bg-yellow-500 border-2 border-yellow-600' :
               isErroProjetoPendente ? 'bg-blue-500 border-2 border-blue-600' :
               isCadastro ? 'bg-gray-300 border-2 border-gray-400' : 
               isNecessidadeNova ? 'bg-blue-500 border-2 border-blue-600' :
@@ -37,6 +41,7 @@ export function OrigemIndicator({ origem, tipoOrigem }: OrigemIndicatorProps) {
         <TooltipContent>
           <p className="text-xs">
             {isConsolidado ? '🟢 Match Consolidado (Cadastro + Necessidade)' :
+             isPendenteReconciliacao ? '🟡 Match Ambíguo (Requer Reconciliação Manual)' :
              isErroProjetoPendente ? '🔵 Necessidade com Erro de Projeto (Aguardando Revisão)' :
              isCadastro ? '⚪ Cadastro Original (Sem Intervenção)' : 
              isNecessidadeNova ? '🔵 Necessidade Nova (Implantar)' :
