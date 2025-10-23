@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { formatReasonCode } from '@/lib/triagemService';
 
@@ -26,8 +28,10 @@ interface EstatisticasMatching {
 export function RelatorioMatching({ rodoviaId, loteId }: RelatorioMatchingProps) {
   const [tipoFiltro, setTipoFiltro] = useState<string>('todos');
   
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading, refetch } = useQuery({
     queryKey: ['matching_stats', rodoviaId, loteId, tipoFiltro],
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000, // Refetch a cada 30 segundos
     queryFn: async () => {
       const tabelas = tipoFiltro === 'todos' 
         ? [
@@ -149,10 +153,23 @@ export function RelatorioMatching({ rodoviaId, loteId }: RelatorioMatchingProps)
   return (
     <Card>
       <CardHeader>
-        <CardTitle>📊 Relatório de Matching</CardTitle>
-        <CardDescription>
-          Estatísticas de matching entre necessidades e inventário
-        </CardDescription>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle>📊 Relatório de Matching</CardTitle>
+            <CardDescription>
+              Estatísticas de matching entre necessidades e inventário
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => refetch()}
+            disabled={isLoading}
+            className="ml-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
         
         <div className="pt-4">
           <Select value={tipoFiltro} onValueChange={setTipoFiltro}>
