@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigationContext } from "@/hooks/useNavigationContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Calendar, FileText } from "lucide-react";
@@ -51,6 +52,7 @@ export default function MinhasFichasPlaca() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { navigateBack } = useNavigationContext();
 
   useEffect(() => {
     fetchFichas();
@@ -274,7 +276,7 @@ export default function MinhasFichasPlaca() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Minhas Fichas de Placa</h1>
-        <Button variant="navigation" onClick={() => navigate('/')}>
+        <Button variant="navigation" onClick={() => navigateBack(navigate)}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigationContext } from "@/hooks/useNavigationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,6 +63,7 @@ interface IntervencaoSV {
 
 const MinhasIntervencoesSV = () => {
   const navigate = useNavigate();
+  const { navigateBack } = useNavigationContext();
   const { user } = useAuth();
   const [intervencoes, setIntervencoes] = useState<IntervencaoSV[]>([]);
   const [loading, setLoading] = useState(true);
@@ -213,7 +215,7 @@ const MinhasIntervencoesSV = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <img src={logoOperaVia} alt="OperaVia" className="h-24 object-contain" />
-            <Button variant="navigation" size="sm" onClick={() => navigate("/minhas-intervencoes")}>
+            <Button variant="navigation" size="sm" onClick={() => navigateBack(navigate)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar
             </Button>

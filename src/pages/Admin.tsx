@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigationContext } from "@/hooks/useNavigationContext";
 import { useSupervisora } from "@/hooks/useSupervisora";
 import { useWorkSession } from "@/hooks/useWorkSession";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +45,7 @@ import logoOperaVia from "@/assets/logo-operavia.png";
 
 const Admin = () => {
   const navigate = useNavigate();
+  const { navigateBack } = useNavigationContext();
   const { user, loading: authLoading } = useAuth();
   const { data: supervisora } = useSupervisora();
   const { activeSession } = useWorkSession(user?.id);
@@ -118,6 +120,15 @@ const Admin = () => {
     }
   }, [user, authLoading, navigate]);
 
+  // Proteção: redirecionar usuários mobile para /modo-campo
+  useEffect(() => {
+    const modoAcesso = localStorage.getItem('modoAcesso');
+    if (modoAcesso === 'campo') {
+      toast.error('Esta função não está disponível no modo campo');
+      navigate('/modo-campo');
+    }
+  }, [navigate]);
+
   // Preencher automaticamente lote e rodovia com base na sessão ativa
   useEffect(() => {
     if (activeSession?.lote_id && activeSession?.rodovia_id) {
@@ -168,7 +179,7 @@ const Admin = () => {
             <Button 
               variant="default" 
               size="lg"
-              onClick={() => navigate("/")}
+              onClick={() => navigateBack(navigate)}
               className="font-semibold shadow-md hover:shadow-lg transition-shadow bg-accent text-accent-foreground hover:bg-accent/90"
             >
               <ArrowLeft className="mr-2 h-5 w-5" />

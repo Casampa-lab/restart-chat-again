@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigationContext } from "@/hooks/useNavigationContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,6 +11,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function MeusElementosPendentes() {
   const navigate = useNavigate();
+  const { navigateBack } = useNavigationContext();
   const { user } = useAuth();
 
   const { data: elementos, isLoading } = useQuery({
@@ -61,7 +63,7 @@ export default function MeusElementosPendentes() {
       <div>
         <Button
           variant="ghost"
-          onClick={() => navigate("/")}
+          onClick={() => navigateBack(navigate)}
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

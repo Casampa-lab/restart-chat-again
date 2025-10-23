@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigationContext } from "@/hooks/useNavigationContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -54,6 +55,7 @@ interface Lote {
 
 const NCsCoordenador = () => {
   const navigate = useNavigate();
+  const { navigateBack } = useNavigationContext();
   const [ncs, setNcs] = useState<NaoConformidade[]>([]);
   const [lotes, setLotes] = useState<Lote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -438,7 +440,7 @@ const NCsCoordenador = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <Button variant="navigation" onClick={() => navigate("/")}>
+            <Button variant="navigation" onClick={() => navigateBack(navigate)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar
             </Button>

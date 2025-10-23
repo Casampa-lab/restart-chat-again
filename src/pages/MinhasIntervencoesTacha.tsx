@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigationContext } from "@/hooks/useNavigationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,6 +68,7 @@ interface IntervencaoTacha {
 
 const MinhasIntervencoesTacha = () => {
   const navigate = useNavigate();
+  const { navigateBack } = useNavigationContext();
   const { user, loading: authLoading } = useAuth();
   const [intervencoes, setIntervencoes] = useState<IntervencaoTacha[]>([]);
   const [loading, setLoading] = useState(true);

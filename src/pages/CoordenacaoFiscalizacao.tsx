@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigationContext } from "@/hooks/useNavigationContext";
 import { useWorkSession } from "@/hooks/useWorkSession";
 import { supabase } from "@/integrations/supabase/client";
 import { getConfig, type GrupoElemento } from "@/lib/reconciliacaoConfig";
@@ -17,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 const CoordenacaoFiscalizacao = () => {
   const navigate = useNavigate();
+  const { navigateBack } = useNavigationContext();
   const {
     user,
     loading: authLoading
@@ -124,6 +126,15 @@ const CoordenacaoFiscalizacao = () => {
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
+
+  // Proteção: redirecionar usuários mobile para /modo-campo
+  useEffect(() => {
+    const modoAcesso = localStorage.getItem('modoAcesso');
+    if (modoAcesso === 'campo') {
+      toast.error('Esta função não está disponível no modo campo');
+      navigate('/modo-campo');
+    }
+  }, [navigate]);
   useEffect(() => {
     const checkAdminOrCoordinator = async () => {
       if (!user) return;
@@ -207,7 +218,7 @@ const CoordenacaoFiscalizacao = () => {
             <div className="bg-white/95 rounded-lg px-4 py-2 shadow-md">
               <img src={logoOperaVia} alt="OperaVia" className="h-24 object-contain cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate("/")} />
             </div>
-            <Button variant="default" size="lg" onClick={() => navigate("/")} className="font-semibold shadow-md hover:shadow-lg transition-shadow bg-accent text-accent-foreground hover:bg-accent/90">
+            <Button variant="default" size="lg" onClick={() => navigateBack(navigate)} className="font-semibold shadow-md hover:shadow-lg transition-shadow bg-accent text-accent-foreground hover:bg-accent/90">
               <ArrowLeft className="mr-2 h-5 w-5" />
               Voltar
             </Button>
