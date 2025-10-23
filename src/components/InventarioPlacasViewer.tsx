@@ -385,7 +385,15 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
       
       if (cadastroOriginal) {
         setCadastroParaReconciliacao(cadastroOriginal);
-        setNecessidadeParaReconciliacao(placa); // A placa da view JÁ É a necessidade consolidada
+        
+        // Normalizar campos da necessidade (view usa tipo_suporte, drawer espera suporte)
+        const necessidadeNormalizada = {
+          ...placa,
+          suporte: placa.tipo_suporte, // Mapear tipo_suporte -> suporte
+          km: placa.km_inicial, // Adicionar km para compatibilidade
+        };
+        
+        setNecessidadeParaReconciliacao(necessidadeNormalizada);
         setReconciliacaoUniversalOpen(true);
         return; // Não abre o dialog normal
       }
