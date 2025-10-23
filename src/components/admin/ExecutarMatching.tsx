@@ -81,12 +81,42 @@ export function ExecutarMatching() {
         const tabela = TIPO_TO_TABLE_MAP[tipo];
         if (!tabela) continue;
 
-        // 1) Buscar necessidades PENDENTES (ainda sem decisão)
-        let { data: necessidades, error } = await supabase
-          .from(tabela as any)
-          .select("*")
-          .is("match_decision", null) // só processa quem ainda não tem decisão
-          .limit(5000);
+        // 1) Buscar necessidades PENDENTES (ainda sem decisão) - com paginação
+        let todasNecessidades: any[] = [];
+        let page = 0;
+        const pageSize = 1000;
+        let hasMore = true;
+
+        console.log(`📥 Buscando ${tipo} em páginas de ${pageSize}...`);
+
+        while (hasMore) {
+          const { data: batch, error: batchError } = await supabase
+            .from(tabela as any)
+            .select("*")
+            .is("match_decision", null)
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+
+          if (batchError) {
+            console.error(`❌ Erro ao buscar ${tipo} (página ${page}):`, batchError);
+            stats.erros++;
+            break;
+          }
+
+          if (!batch || batch.length === 0) {
+            hasMore = false;
+          } else {
+            todasNecessidades.push(...batch);
+            console.log(`📄 Página ${page}: ${batch.length} registros. Total acumulado: ${todasNecessidades.length}`);
+            page++;
+            
+            if (batch.length < pageSize) {
+              hasMore = false;
+            }
+          }
+        }
+
+        let necessidades = todasNecessidades;
+        const error = null; // para compatibilidade com código existente
 
         if (error) {
           console.error(`❌ Erro ao buscar ${tipo}:`, error);
