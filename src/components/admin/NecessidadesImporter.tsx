@@ -833,20 +833,28 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       const registrosProcessados = new Set<string>();
       
       // Função para gerar chave única baseada nos campos-chave do tipo
+      // Helper para formatar KM (trata valores não-numéricos)
+      const formatarKm = (valor: any): string => {
+        if (valor === null || valor === undefined || typeof valor !== 'number') {
+          return 'NA'; // "Não se aplica" ou outros valores inválidos
+        }
+        return valor.toFixed(3);
+      };
+
       const gerarChaveDuplicata = (dados: any, tipoAtual: string): string => {
         switch (tipoAtual) {
           case "placas":
           case "porticos":
           case "cilindros":
             // Pontuais: KM + código/tipo + lado
-            return `${dados.km_inicial?.toFixed(3)}_${dados.codigo || dados.tipo}_${dados.lado || ''}`;
+            return `${formatarKm(dados.km_inicial)}_${dados.codigo || dados.tipo}_${dados.lado || ''}`;
           
           case "marcas_longitudinais":
           case "tachas":
           case "defensas":
           case "marcas_transversais":
             // Lineares: KM_inicial + KM_final + código/tipo + lado
-            return `${dados.km_inicial?.toFixed(3)}_${dados.km_final?.toFixed(3)}_${dados.codigo || dados.tipo_demarcacao || dados.tipo || ''}_${dados.lado || ''}`;
+            return `${formatarKm(dados.km_inicial)}_${formatarKm(dados.km_final)}_${dados.codigo || dados.tipo_demarcacao || dados.tipo || ''}_${dados.lado || ''}`;
           
           default:
             return `${dados.km_inicial}_${dados.km_final}_${JSON.stringify(dados)}`;
