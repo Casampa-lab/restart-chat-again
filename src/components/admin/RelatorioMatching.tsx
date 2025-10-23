@@ -42,15 +42,32 @@ export function RelatorioMatching({ rodoviaId, loteId }: RelatorioMatchingProps)
         : [`necessidades_${tipoFiltro}`];
       
       const queries = tabelas.map(async (tabela) => {
-        let query = supabase
-          .from(tabela as any)
-          .select('match_decision, match_score, reason_code, estado');
+        let allData: any[] = [];
+        let offset = 0;
+        const pageSize = 1000;
+        let hasMore = true;
         
-        if (rodoviaId) query = query.eq('rodovia_id', rodoviaId);
-        if (loteId) query = query.eq('lote_id', loteId);
+        while (hasMore) {
+          let query = supabase
+            .from(tabela as any)
+            .select('match_decision, match_score, reason_code, estado')
+            .range(offset, offset + pageSize - 1);
+          
+          if (rodoviaId) query = query.eq('rodovia_id', rodoviaId);
+          if (loteId) query = query.eq('lote_id', loteId);
+          
+          const { data } = await query;
+          
+          if (data && data.length > 0) {
+            allData = [...allData, ...data];
+            offset += pageSize;
+            hasMore = data.length === pageSize;
+          } else {
+            hasMore = false;
+          }
+        }
         
-        const { data } = await query;
-        return { tabela, data: data || [] };
+        return { tabela, data: allData };
       });
       
       const results = await Promise.all(queries);

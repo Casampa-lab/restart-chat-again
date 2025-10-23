@@ -274,22 +274,56 @@ export default function MinhasNecessidadesRelatorios() {
       for (const tabela of tabelasAuditoria) {
         const sheet = workbook.addWorksheet(tabela.nome);
 
-        // Buscar dados do inventário
-        const { data: dadosInventario, error: errorInv } = await supabase
-          .from(tabela.inventario as any)
-          .select("*")
-          .limit(1000);
+        // Buscar dados do inventário com paginação
+        let dadosInventario: any[] = [];
+        let offset = 0;
+        const pageSize = 1000;
+        let hasMore = true;
 
-        if (errorInv) {
-          console.error(`Erro ao buscar ${tabela.nome}:`, errorInv);
-          continue;
+        while (hasMore) {
+          const { data: page, error: errorInv } = await supabase
+            .from(tabela.inventario as any)
+            .select("*")
+            .range(offset, offset + pageSize - 1);
+          
+          if (errorInv) {
+            console.error(`Erro ao buscar ${tabela.nome}:`, errorInv);
+            break;
+          }
+          
+          if (page && page.length > 0) {
+            dadosInventario = [...dadosInventario, ...page];
+            offset += pageSize;
+            hasMore = page.length === pageSize;
+          } else {
+            hasMore = false;
+          }
         }
 
-        // Buscar dados das intervenções
-        const { data: dadosIntervencoes, error: errorInt } = await supabase
-          .from(tabela.intervencoes as any)
-          .select("*")
-          .limit(1000);
+        // Buscar dados das intervenções com paginação
+        let dadosIntervencoes: any[] = [];
+        offset = 0;
+        hasMore = true;
+
+        while (hasMore) {
+          const { data: page, error: errorInt } = await supabase
+            .from(tabela.intervencoes as any)
+            .select("*")
+            .range(offset, offset + pageSize - 1);
+          
+          if (errorInt) {
+            console.error(`Erro ao buscar intervenções de ${tabela.nome}:`, errorInt);
+            break;
+          }
+          
+          if (page && page.length > 0) {
+            dadosIntervencoes = [...dadosIntervencoes, ...page];
+            offset += pageSize;
+            hasMore = page.length === pageSize;
+          } else {
+            hasMore = false;
+          }
+        }
 
         const totalRegistros = dadosInventario?.length || 0;
         const totalIntervencoes = dadosIntervencoes?.length || 0;
