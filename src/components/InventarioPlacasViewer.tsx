@@ -203,7 +203,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
         .select("*", { count: "exact" })
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .range(0, 9999);
+        .limit(10000);
 
       if (searchTerm) {
         query = query.or(
