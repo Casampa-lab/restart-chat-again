@@ -17,6 +17,7 @@ import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { OrigemIndicator } from "@/components/OrigemIndicator";
+import { SolucaoBadge } from "@/components/SolucaoBadge";
 import { toast } from "sonner";
 
 // Component to show reconciliation status badge
@@ -76,6 +77,8 @@ interface FichaPortico {
   tipo_origem?: string;
   cadastro_match_id?: string | null;
   distancia_match_metros?: number | null;
+  solucao_planilha?: string | null;
+  status_servico?: string | null;
 }
 
 interface InventarioPorticosViewerProps {
@@ -99,6 +102,7 @@ export function InventarioPorticosViewer({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
   const [showOnlyDivergencias, setShowOnlyDivergencias] = useState(false);
+  const [ocultarRemocoes, setOcultarRemocoes] = useState(false);
   const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
 
@@ -241,11 +245,18 @@ export function InventarioPorticosViewer({
     matchesPendentes
   });
 
-  // Filtrar pórticos com matches pendentes se necessário
+  // Filtrar pórticos com matches pendentes se necessário e/ou ocultar remoções
   const filteredPorticos = porticos?.filter(portico => {
-    if (!showOnlyDivergencias) return true;
-    const nec = necessidadesMap?.get(portico.id);
-    return nec && nec.reconciliado !== true;
+    // Filtro de divergências
+    if (showOnlyDivergencias) {
+      const nec = necessidadesMap?.get(portico.id);
+      if (!nec || nec.reconciliado === true) return false;
+    }
+    // Filtro de remoções
+    if (ocultarRemocoes && portico.solucao_planilha === 'Remover') {
+      return false;
+    }
+    return true;
   }) || [];
 
   // Função para ordenar dados
@@ -403,16 +414,28 @@ export function InventarioPorticosViewer({
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={showOnlyDivergencias}
-                    onCheckedChange={setShowOnlyDivergencias}
-                    id="filtro-divergencias"
-                  />
-                  <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
-                    <Filter className="h-4 w-4 inline mr-1" />
-                    Apenas divergências
-                  </Label>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={showOnlyDivergencias}
+                      onCheckedChange={setShowOnlyDivergencias}
+                      id="filtro-divergencias"
+                    />
+                    <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
+                      <Filter className="h-4 w-4 inline mr-1" />
+                      Apenas divergências
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={ocultarRemocoes}
+                      onCheckedChange={setOcultarRemocoes}
+                      id="ocultar-remocoes-porticos"
+                    />
+                    <Label htmlFor="ocultar-remocoes-porticos" className="cursor-pointer text-sm font-medium">
+                      Ocultar Remoções
+                    </Label>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -432,16 +455,28 @@ export function InventarioPorticosViewer({
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={showOnlyDivergencias}
-                    onCheckedChange={setShowOnlyDivergencias}
-                    id="filtro-divergencias"
-                  />
-                  <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
-                    <Filter className="h-4 w-4 inline mr-1" />
-                    Apenas divergências
-                  </Label>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={showOnlyDivergencias}
+                      onCheckedChange={setShowOnlyDivergencias}
+                      id="filtro-divergencias"
+                    />
+                    <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
+                      <Filter className="h-4 w-4 inline mr-1" />
+                      Apenas divergências
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={ocultarRemocoes}
+                      onCheckedChange={setOcultarRemocoes}
+                      id="ocultar-remocoes-porticos-2"
+                    />
+                    <Label htmlFor="ocultar-remocoes-porticos-2" className="cursor-pointer text-sm font-medium">
+                      Ocultar Remoções
+                    </Label>
+                  </div>
                 </div>
               </div>
             )
@@ -544,6 +579,7 @@ export function InventarioPorticosViewer({
                         <SortIcon column="vao_horizontal_m" />
                       </div>
                     </TableHead>
+                    <TableHead className="text-center">Solução</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -617,11 +653,14 @@ export function InventarioPorticosViewer({
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
-                        <Badge variant="outline" className="text-xs">
-                          {portico.vao_horizontal_m?.toFixed(2) || "-"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
+                      <Badge variant="outline" className="text-xs">
+                        {portico.vao_horizontal_m?.toFixed(2) || "-"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <SolucaoBadge solucao={portico.solucao_planilha} />
+                    </TableCell>
+                    <TableCell className="text-right">
                         <Button
                           variant="ghost"
                           size="sm"

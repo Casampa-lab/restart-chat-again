@@ -267,6 +267,8 @@ export type Database = {
           risco: string | null
           rodovia_id: string
           snv: string | null
+          solucao_planilha: string | null
+          status_servico: string | null
           substituido_em: string | null
           substituido_por: string | null
           terminal_entrada: string | null
@@ -321,6 +323,8 @@ export type Database = {
           risco?: string | null
           rodovia_id: string
           snv?: string | null
+          solucao_planilha?: string | null
+          status_servico?: string | null
           substituido_em?: string | null
           substituido_por?: string | null
           terminal_entrada?: string | null
@@ -375,6 +379,8 @@ export type Database = {
           risco?: string | null
           rodovia_id?: string
           snv?: string | null
+          solucao_planilha?: string | null
+          status_servico?: string | null
           substituido_em?: string | null
           substituido_por?: string | null
           terminal_entrada?: string | null
@@ -938,6 +944,8 @@ export type Database = {
           rodovia_id: string
           sigla: string | null
           snv: string | null
+          solucao_planilha: string | null
+          status_servico: string | null
           substituido_em: string | null
           substituido_por: string | null
           tipo_inscricao: string
@@ -969,6 +977,8 @@ export type Database = {
           rodovia_id: string
           sigla?: string | null
           snv?: string | null
+          solucao_planilha?: string | null
+          status_servico?: string | null
           substituido_em?: string | null
           substituido_por?: string | null
           tipo_inscricao: string
@@ -1000,6 +1010,8 @@ export type Database = {
           rodovia_id?: string
           sigla?: string | null
           snv?: string | null
+          solucao_planilha?: string | null
+          status_servico?: string | null
           substituido_em?: string | null
           substituido_por?: string | null
           tipo_inscricao?: string
@@ -1478,6 +1490,8 @@ export type Database = {
           secao_suporte_mm: string | null
           si_sinal_impresso: string | null
           snv: string | null
+          solucao_planilha: string | null
+          status_servico: string | null
           substituido_em: string | null
           substituido_por: string | null
           substrato: string | null
@@ -1537,6 +1551,8 @@ export type Database = {
           secao_suporte_mm?: string | null
           si_sinal_impresso?: string | null
           snv?: string | null
+          solucao_planilha?: string | null
+          status_servico?: string | null
           substituido_em?: string | null
           substituido_por?: string | null
           substrato?: string | null
@@ -1596,6 +1612,8 @@ export type Database = {
           secao_suporte_mm?: string | null
           si_sinal_impresso?: string | null
           snv?: string | null
+          solucao_planilha?: string | null
+          status_servico?: string | null
           substituido_em?: string | null
           substituido_por?: string | null
           substrato?: string | null
@@ -1822,6 +1840,8 @@ export type Database = {
           origem: string | null
           rodovia_id: string
           snv: string | null
+          solucao_planilha: string | null
+          status_servico: string | null
           substituido_em: string | null
           substituido_por: string | null
           tipo: string
@@ -1849,6 +1869,8 @@ export type Database = {
           origem?: string | null
           rodovia_id: string
           snv?: string | null
+          solucao_planilha?: string | null
+          status_servico?: string | null
           substituido_em?: string | null
           substituido_por?: string | null
           tipo: string
@@ -1876,6 +1898,8 @@ export type Database = {
           origem?: string | null
           rodovia_id?: string
           snv?: string | null
+          solucao_planilha?: string | null
+          status_servico?: string | null
           substituido_em?: string | null
           substituido_por?: string | null
           tipo?: string

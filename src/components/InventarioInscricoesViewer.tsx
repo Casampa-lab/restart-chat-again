@@ -18,6 +18,7 @@ import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastr
 import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 import { OrigemIndicator } from "@/components/OrigemIndicator";
+import { SolucaoBadge } from "@/components/SolucaoBadge";
 import { toast } from "sonner";
 
 // Component to show reconciliation status badge
@@ -78,6 +79,8 @@ interface FichaInscricao {
   tipo_origem?: string;
   cadastro_match_id?: string | null;
   distancia_match_metros?: number | null;
+  solucao_planilha?: string | null;
+  status_servico?: string | null;
 }
 
 // Mapeamento de siglas para descrições completas (apenas quando não há separador)
@@ -138,6 +141,7 @@ export function InventarioInscricoesViewer({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
   const [showOnlyDivergencias, setShowOnlyDivergencias] = useState(false);
+  const [ocultarRemocoes, setOcultarRemocoes] = useState(false);
   const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
@@ -269,9 +273,16 @@ export function InventarioInscricoesViewer({
   });
 
   const filteredInscricoes = inscricoes?.filter(inscricao => {
-    if (!showOnlyDivergencias) return true;
-    const nec = necessidadesMap?.get(inscricao.id);
-    return nec && !nec.solucao_confirmada;
+    // Filtro de divergências
+    if (showOnlyDivergencias) {
+      const nec = necessidadesMap?.get(inscricao.id);
+      if (!nec || nec.solucao_confirmada) return false;
+    }
+    // Filtro de remoções
+    if (ocultarRemocoes && inscricao.solucao_planilha === 'Remover') {
+      return false;
+    }
+    return true;
   }) || [];
 
   // Função para ordenar dados
@@ -493,6 +504,7 @@ export function InventarioInscricoesViewer({
                           <SortIcon column="area_m2" />
                         </div>
                       </TableHead>
+                      <TableHead className="text-center">Solução</TableHead>
                       <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -546,6 +558,9 @@ export function InventarioInscricoesViewer({
                           <TableCell>{inscricao.km_inicial?.toFixed(2) || "-"}</TableCell>
                           <TableCell>{inscricao.material_utilizado || "-"}</TableCell>
                           <TableCell>{inscricao.area_m2?.toFixed(2) || "-"}</TableCell>
+                          <TableCell className="text-center">
+                            <SolucaoBadge solucao={inscricao.solucao_planilha} />
+                          </TableCell>
                           <TableCell className="text-right">
                             <Button
                               variant="ghost"

@@ -21,6 +21,7 @@ import { TipoOrigemBadge } from "@/components/TipoOrigemBadge";
 import { OrigemIndicator } from "@/components/OrigemIndicator";
 import { AlertaErroProjeto } from "@/components/AlertaErroProjeto";
 import { ComparacaoAntesDepois } from "@/components/ComparacaoAntesDepois";
+import { SolucaoBadge } from "./SolucaoBadge";
 
 // Helper function to determine badge color based on placa type
 const getPlacaBadgeVariant = (tipo: string | null): { className: string } => {
@@ -119,6 +120,8 @@ interface FichaPlaca {
   rodovia_id: string;
   lote_id: string;
   user_id: string;
+  solucao_planilha: string | null;
+  status_servico: string | null;
 }
 
 interface Intervencao {
@@ -152,6 +155,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
   const [showOnlyDivergencias, setShowOnlyDivergencias] = useState(false);
+  const [ocultarRemocoes, setOcultarRemocoes] = useState(false);
   const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
   const [showComparacao, setShowComparacao] = useState(false);
@@ -289,11 +293,18 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
     nec => !nec.reconciliado
   ).length;
 
-  // Filtrar placas com matches pendentes se necessário
+  // Filtrar placas com matches pendentes se necessário e/ou ocultar remoções
   const filteredPlacas = placas?.filter(placa => {
-    if (!showOnlyDivergencias) return true;
-    const nec = necessidadesMap?.get(placa.id);
-    return nec && !nec.reconciliado;
+    // Filtro de divergências
+    if (showOnlyDivergencias) {
+      const nec = necessidadesMap?.get(placa.id);
+      if (!nec || nec.reconciliado) return false;
+    }
+    // Filtro de remoções
+    if (ocultarRemocoes && placa.solucao_planilha === 'Remover') {
+      return false;
+    }
+    return true;
   }) || [];
 
   // Função para ordenar dados
@@ -477,16 +488,28 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={showOnlyDivergencias}
-                    onCheckedChange={setShowOnlyDivergencias}
-                    id="filtro-divergencias"
-                  />
-                  <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
-                    <Filter className="h-4 w-4 inline mr-1" />
-                    Apenas divergências
-                  </Label>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={showOnlyDivergencias}
+                      onCheckedChange={setShowOnlyDivergencias}
+                      id="filtro-divergencias"
+                    />
+                    <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
+                      <Filter className="h-4 w-4 inline mr-1" />
+                      Apenas divergências
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={ocultarRemocoes}
+                      onCheckedChange={setOcultarRemocoes}
+                      id="ocultar-remocoes"
+                    />
+                    <Label htmlFor="ocultar-remocoes" className="cursor-pointer text-sm font-medium">
+                      Ocultar Remoções
+                    </Label>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -506,16 +529,28 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={showOnlyDivergencias}
-                    onCheckedChange={setShowOnlyDivergencias}
-                    id="filtro-divergencias"
-                  />
-                  <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
-                    <Filter className="h-4 w-4 inline mr-1" />
-                    Apenas divergências
-                  </Label>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={showOnlyDivergencias}
+                      onCheckedChange={setShowOnlyDivergencias}
+                      id="filtro-divergencias"
+                    />
+                    <Label htmlFor="filtro-divergencias" className="cursor-pointer text-sm font-medium">
+                      <Filter className="h-4 w-4 inline mr-1" />
+                      Apenas divergências
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={ocultarRemocoes}
+                      onCheckedChange={setOcultarRemocoes}
+                      id="ocultar-remocoes"
+                    />
+                    <Label htmlFor="ocultar-remocoes" className="cursor-pointer text-sm font-medium">
+                      Ocultar Remoções
+                    </Label>
+                  </div>
                 </div>
               </div>
             )
@@ -632,6 +667,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           <SortIcon column="tipo_pelicula_legenda_orla" />
                         </div>
                       </TableHead>
+                      <TableHead className="text-center">Solução</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -699,6 +735,9 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                             <Badge variant="outline" className="text-xs">
                               {placa.tipo_pelicula_legenda_orla || "-"}
                             </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <SolucaoBadge solucao={placa.solucao_planilha} />
                           </TableCell>
                           <TableCell className="text-right">
                           <Button

@@ -17,6 +17,7 @@ import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUn
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { OrigemIndicator } from "@/components/OrigemIndicator";
+import { SolucaoBadge } from "@/components/SolucaoBadge";
 import { toast } from "sonner";
 
 // Component to show reconciliation status badge
@@ -73,6 +74,8 @@ interface FichaDefensa {
   tipo_origem?: string;
   cadastro_match_id?: string | null;
   distancia_match_metros?: number | null;
+  solucao_planilha?: string | null;
+  status_servico?: string | null;
 }
 
 interface IntervencaoDefensa {
@@ -109,6 +112,7 @@ export const InventarioDefensasViewer = ({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showRegistrarNaoCadastrado, setShowRegistrarNaoCadastrado] = useState(false);
   const [showOnlyPendentes, setShowOnlyPendentes] = useState(false);
+  const [ocultarRemocoes, setOcultarRemocoes] = useState(false);
   const [reconciliacaoOpen, setReconciliacaoOpen] = useState(false);
   const [selectedNecessidade, setSelectedNecessidade] = useState<any>(null);
   const [selectedCadastroForReconciliacao, setSelectedCadastroForReconciliacao] = useState<any>(null);
@@ -233,9 +237,14 @@ export const InventarioDefensasViewer = ({
     : defensas;
 
   const filteredDefensas = filteredByGps?.filter(defensa => {
-    if (!showOnlyPendentes) return true;
-    const nec = necessidadesMap?.get(defensa.id);
-    return nec && !nec.reconciliado;
+    if (showOnlyPendentes) {
+      const nec = necessidadesMap?.get(defensa.id);
+      if (!nec || nec.reconciliado) return false;
+    }
+    if (ocultarRemocoes && defensa.solucao_planilha === 'Remover') {
+      return false;
+    }
+    return true;
   }) || [];
 
   const handleReconciliar = async () => {
@@ -482,6 +491,7 @@ export const InventarioDefensasViewer = ({
                 <TableHead className="text-center">
                   <div className="whitespace-normal leading-tight">Nível de<br/>Contenção</div>
                 </TableHead>
+                <TableHead className="text-center">Solução</TableHead>
                 <TableHead className="text-center w-[80px]">
                   <div className="whitespace-normal leading-tight">Ações</div>
                 </TableHead>
@@ -525,6 +535,9 @@ export const InventarioDefensasViewer = ({
                   <TableCell className="text-center">{defensa.extensao_metros}</TableCell>
                   <TableCell className="text-center">{(defensa as any).quantidade_laminas || "-"}</TableCell>
                   <TableCell className="text-center">{(defensa as any).nivel_contencao_en1317 || "-"}</TableCell>
+                  <TableCell className="text-center">
+                    <SolucaoBadge solucao={defensa.solucao_planilha} />
+                  </TableCell>
                   <TableCell className="text-center">
                     <Button
                       variant="ghost"

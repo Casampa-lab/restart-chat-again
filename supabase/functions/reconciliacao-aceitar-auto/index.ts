@@ -69,6 +69,8 @@ Deno.serve(async (req) => {
     const camposAtualizar: any = {
       last_source: 'PROJETO',
       updated_at: new Date().toISOString(),
+      solucao_planilha: necessidade.solucao_planilha || null,
+      status_servico: necessidade.solucao_planilha === 'Remover' ? 'AGUARDANDO_REMOCAO' : 'ATIVO',
     }
 
     // Mapear campos específicos por tipo (fonte de verdade = projeto)
