@@ -964,6 +964,17 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                   </div>
                 </div>
 
+                {/* Solução (se houver necessidade) */}
+                {selectedPlaca.solucao_planilha && (
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-3">Solução da Necessidade</h3>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-muted-foreground">Solução:</span>
+                      <SolucaoBadge solucao={selectedPlaca.solucao_planilha} />
+                    </div>
+                  </div>
+                )}
+
                 {/* Suporte e Substrato */}
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-3">Suporte e Substrato</h3>
