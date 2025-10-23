@@ -302,7 +302,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   const filteredPlacas = placas?.filter(placa => {
     // Filtro de divergências
     if (showOnlyDivergencias) {
-      const nec = necessidadesMap?.get(placa.id);
+      const nec = necessidadesMap?.get(placa.cadastro_match_id);
       if (!nec || nec.reconciliado) return false;
     }
     // Filtro de remoções
