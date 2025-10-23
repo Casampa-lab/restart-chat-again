@@ -450,7 +450,7 @@ export default function InventarioDinamico() {
                               <TableRow key={item.id}>
                                 <TableCell>
                                   <TipoOrigemBadge
-                                    tipoOrigem={item.tipo_origem}
+                                    origem={item.tipo_origem}
                                     modificadoPorIntervencao={item.modificado_por_intervencao}
                                     showLabel={false}
                                   />
@@ -545,14 +545,14 @@ export default function InventarioDinamico() {
             <h3 className="font-semibold">🎯 Tipos de Alteração</h3>
             <div className="grid md:grid-cols-3 gap-4 mt-2">
               <div className="p-3 border rounded-lg">
-                <TipoOrigemBadge tipoOrigem="execucao" modificadoPorIntervencao={true} />
+                <TipoOrigemBadge origem="execucao" modificadoPorIntervencao={true} />
                 <p className="text-xs text-muted-foreground mt-2">
                   Alterações estruturais aprovadas pelo projeto executivo
                 </p>
               </div>
               <div className="p-3 border rounded-lg">
                 <TipoOrigemBadge
-                  tipoOrigem="manutencao_pre_projeto"
+                  origem="manutencao_pre_projeto"
                   modificadoPorIntervencao={true}
                 />
                 <p className="text-xs text-muted-foreground mt-2">

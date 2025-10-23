@@ -858,7 +858,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                           tipoOrigem={selectedPlaca.tipo_origem} 
                         />
                         <TipoOrigemBadge 
-                          tipoOrigem={selectedPlaca.tipo_origem}
+                          origem={selectedPlaca.origem}
                           modificadoPorIntervencao={selectedPlaca.modificado_por_intervencao}
                         />
                       </div>

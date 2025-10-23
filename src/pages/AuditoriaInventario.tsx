@@ -190,9 +190,9 @@ export default function AuditoriaInventario() {
         <CardContent className="pt-6">
           <div className="flex flex-wrap gap-4 items-center">
       <span className="text-sm font-medium">Legenda:</span>
-      <TipoOrigemBadge tipoOrigem="execucao" />
-      <TipoOrigemBadge tipoOrigem="manutencao_pre_projeto" />
-      <TipoOrigemBadge tipoOrigem="cadastro_inicial" />
+      <TipoOrigemBadge origem="execucao" />
+      <TipoOrigemBadge origem="manutencao_pre_projeto" />
+      <TipoOrigemBadge origem="cadastro_inicial" />
           </div>
         </CardContent>
       </Card>
@@ -233,7 +233,7 @@ export default function AuditoriaInventario() {
                     <TableRow key={`${item.tipo_elemento}-${item.elemento_id}`}>
                       <TableCell>
                         <TipoOrigemBadge
-                          tipoOrigem={item.tipo_ultima_intervencao}
+                          origem={item.tipo_ultima_intervencao}
                           modificadoPorIntervencao={item.modificado_por_intervencao}
                           showLabel={false}
                         />
