@@ -23,7 +23,7 @@ const TIPOS_NECESSIDADES = [
 ];
 
 interface LogEntry {
-  tipo: "success" | "warning" | "error";
+  tipo: "success" | "warning" | "error" | "info";
   linha: number | null;
   mensagem: string;
 }
@@ -767,6 +767,14 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
         return obj;
       });
 
+      // ========== LOG INICIAL - TOTAL DE LINHAS LIDAS ==========
+      console.log(`📊 LINHAS TOTAIS LIDAS DO EXCEL: ${dadosComHeader.length}`);
+      setLogs(prev => [...prev, {
+        tipo: "info",
+        linha: null,
+        mensagem: `📊 Total de linhas lidas do Excel (incluindo vazias): ${dadosComHeader.length}`
+      }]);
+
       // ========== FILTRAR LINHAS VAZIAS COM LOG DETALHADO ==========
       const linhasIgnoradas: LogEntry[] = [];
       
@@ -807,11 +815,13 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
 
       // Log de linhas ignoradas
       if (linhasIgnoradas.length > 0) {
-        console.log(`⚠️ ${linhasIgnoradas.length} linhas vazias ignoradas`);
+        const linhasDetalhadas = linhasIgnoradas.map(l => `L${l.linha}`).slice(0, 20).join(', ');
+        const reticencias = linhasIgnoradas.length > 20 ? '...' : '';
+        console.log(`⚠️ LINHAS VAZIAS IGNORADAS (${linhasIgnoradas.length}): ${linhasDetalhadas}${reticencias}`);
         setLogs(prev => [...prev, {
           tipo: "warning",
           linha: null,
-          mensagem: `⚠️ ${linhasIgnoradas.length} linhas vazias ignoradas (sem KM válido)`
+          mensagem: `⚠️ ${linhasIgnoradas.length} linhas vazias ignoradas (sem KM válido): ${linhasDetalhadas}${reticencias}`
         }]);
       }
 
@@ -971,10 +981,12 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           });
 
           if (camposFaltantes.length > 0) {
+            const valoresFaltantes = camposFaltantes.map(c => `${c}=${dados[c]}`).join(', ');
+            console.log(`❌ LINHA ${linhaExcel} REJEITADA - Campos faltando:`, camposFaltantes, dados);
             logsBuffer.push({
               tipo: "error",
               linha: linhaExcel,
-              mensagem: `❌ Campos obrigatórios faltando: ${camposFaltantes.join(', ')} - Linha ignorada`
+              mensagem: `❌ Campos obrigatórios faltando: ${camposFaltantes.join(', ')} (${valoresFaltantes})`
             });
             falhas++;
             continue; // Pular esta linha
@@ -1241,6 +1253,16 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       await flushBatch(tabelaNecessidade);
       flushLogs();
 
+      // ========== LOG DE DUPLICATAS TOTAIS ==========
+      if (duplicatasDetectadas > 0) {
+        console.log(`🔄 TOTAL DE DUPLICATAS DETECTADAS: ${duplicatasDetectadas}`);
+        setLogs(prev => [...prev, {
+          tipo: "warning",
+          linha: null,
+          mensagem: `🔄 Total de duplicatas ignoradas: ${duplicatasDetectadas}`
+        }]);
+      }
+
       // 🔄 DELETAR Marco Zero - importação invalida o snapshot consolidado
       if (loteId && rodoviaId) {
         const { error: marcoError } = await supabase
@@ -1261,6 +1283,41 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           queryKey: ["marco-zero-recente", loteId, rodoviaId] 
         });
       }
+
+      // ========== LOG FINAL - RESUMO MATEMÁTICO COMPLETO ==========
+      const linhasLidasExcel = dadosComHeader.length;
+      const linhasVazias = linhasIgnoradas.length;
+      const linhasValidasFiltradas = dadosFiltrados.length;
+      const totalProcessado = sucessos + falhas;
+      const diferencaNaoContabilizada = linhasValidasFiltradas - totalProcessado - duplicatasDetectadas;
+
+      console.log(`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 ANÁLISE MATEMÁTICA DA IMPORTAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📄 Linhas totais lidas do Excel: ${linhasLidasExcel}
+⚠️  Linhas vazias ignoradas (sem KM): ${linhasVazias}
+✅ Linhas filtradas (válidas): ${linhasValidasFiltradas}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔄 Duplicatas detectadas: ${duplicatasDetectadas}
+✅ Sucessos: ${sucessos}
+❌ Falhas: ${falhas}
+📊 Total processado: ${totalProcessado}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❓ Diferença não contabilizada: ${diferencaNaoContabilizada}
+${diferencaNaoContabilizada !== 0 ? '⚠️ ATENÇÃO: Há linhas que não aparecem em nenhuma categoria!' : '✅ Todas as linhas foram contabilizadas'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Fórmula: ${linhasLidasExcel} (lidas) - ${linhasVazias} (vazias) = ${linhasValidasFiltradas} (válidas)
+         ${linhasValidasFiltradas} (válidas) - ${duplicatasDetectadas} (duplicatas) = ${linhasValidasFiltradas - duplicatasDetectadas} (esperado)
+         ${sucessos} (sucessos) + ${falhas} (falhas) = ${totalProcessado} (processado)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      `);
+
+      setLogs(prev => [...prev, {
+        tipo: "info",
+        linha: null,
+        mensagem: `📊 ANÁLISE: ${linhasLidasExcel} lidas → ${linhasVazias} vazias → ${linhasValidasFiltradas} válidas → ${duplicatasDetectadas} duplicatas → ${sucessos} importadas | ❓ Diferença: ${diferencaNaoContabilizada}`
+      }]);
 
       // 📊 RESUMO FINAL DETALHADO
       console.log(`
