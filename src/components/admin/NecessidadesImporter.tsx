@@ -362,7 +362,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       return null;
     };
 
-    // Para placas, não usar campos do baseMap (não tem inicial/final)
+    // Para elementos pontuais (placas, cilindros, pórticos, inscrições), não usar baseMap
     if (tipo === "placas") {
       return {
         km_inicial: sanitizarNumerico(getFirstValid("Km inicial", "Km", "KM", "km")),
@@ -376,6 +376,24 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
         suporte: row["Tipo de Suporte"] || row["Suporte"] || row["suporte"],
         snv: row["SNV"] || row["snv"],
         observacao: row["Observação"] || row["Observacao"] || row["observacao"],
+        solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
+      };
+    }
+
+    if (tipo === "marcas_transversais") {
+      return {
+        km_inicial: sanitizarNumerico(getFirstValid("Km inicial", "Km", "KM", "km")),
+        latitude_inicial: converterCoordenada(row["Latitude"] || row["latitude"]),
+        longitude_inicial: converterCoordenada(row["Longitude"] || row["longitude"]),
+        sigla: row["Sigla"] || row["sigla"],
+        descricao: row["Descrição"] || row["Descricao"] || row["descricao"],
+        tipo_inscricao: row["Sigla"] || row["sigla"],
+        cor: row["Cor"] || row["cor"],
+        material_utilizado: row["Material"] || row["material"],
+        espessura_mm: sanitizarNumerico(row["Espessura (mm)"] || row["Espessura"] || row["espessura_mm"]),
+        area_m2: sanitizarNumerico(row["Área (m²)"] || row["Área"] || row["area_m2"]),
+        snv: row["SNV"] || row["snv"],
+        observacao_usuario: row["Observação"] || row["Observacao"] || row["observacao"],
         solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
       };
     }
@@ -489,21 +507,6 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             row["quantidade"]
           ),
           motivo: sanitizarTexto(motivo),
-        };
-
-      case "marcas_transversais":
-        return {
-          ...baseMap,
-          sigla: row["Sigla"] || row["sigla"],
-          descricao: row["Descrição"] || row["Descricao"] || row["descricao"],
-          tipo_inscricao: row["Sigla"] || row["sigla"],
-          cor: row["Cor"] || row["cor"],
-          km_inicial: sanitizarNumerico(getFirstValid("Km inicial", "Km", "KM", "km")),
-          latitude_inicial: converterCoordenada(row["Latitude"] || row["latitude"]),
-          longitude_inicial: converterCoordenada(row["Longitude"] || row["longitude"]),
-          material_utilizado: row["Material"] || row["material"],
-          espessura_mm: sanitizarNumerico(row["Espessura (mm)"] || row["Espessura"] || row["espessura_mm"]),
-          area_m2: sanitizarNumerico(row["Área (m²)"] || row["Área"] || row["area_m2"]),
         };
 
       case "porticos":
