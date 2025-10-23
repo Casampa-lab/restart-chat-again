@@ -162,18 +162,18 @@ const Admin = () => {
       <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-white/95 rounded-lg px-3 py-2 shadow-md">
+            <div className="flex items-center gap-6">
+              <div className="bg-white/95 rounded-lg px-4 py-3 shadow-md">
                 <img 
                   src={logoToDisplay} 
                   alt={logoAlt}
-                  className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" 
-                  onClick={() => navigate("/")}
+                  className="h-28 object-contain cursor-pointer hover:scale-105 transition-transform" 
+                  onClick={() => navigateBack(navigate)}
                 />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-primary-foreground">Painel Administrativo</h1>
-                <p className="text-sm text-primary-foreground/80">Gestão de Empresas e Configurações</p>
+                <h1 className="text-3xl font-bold text-primary-foreground">Painel Administrativo</h1>
+                <p className="text-base text-primary-foreground/90">Gestão de Empresas e Configurações</p>
               </div>
             </div>
             <Button 
