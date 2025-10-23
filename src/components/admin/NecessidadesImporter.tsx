@@ -997,10 +997,20 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           
           if (registrosProcessados.has(chaveDuplicata)) {
             duplicatasDetectadas++;
+            
+            // 🔍 LOG DETALHADO COM TODAS AS INFORMAÇÕES PARA IDENTIFICAR A LINHA EXATA
+            const infoCompleta = tipo === "placas" 
+              ? `KM ${dados.km_inicial} | Código: ${dados.codigo} | Lado: ${dados.lado} | Chave: ${chaveDuplicata}`
+              : tipo === "cilindros"
+              ? `KM ${dados.km_inicial} | Tipo: ${dados.tipo} | Lado: ${dados.lado} | Chave: ${chaveDuplicata}`
+              : `KM ${dados.km_inicial}${dados.km_final ? `-${dados.km_final}` : ''} | ${dados.codigo || dados.tipo || 'sem código'} | Chave: ${chaveDuplicata}`;
+            
+            console.log(`🔄 DUPLICATA #${duplicatasDetectadas} - LINHA ${linhaExcel}: ${infoCompleta}`);
+            
             logsBuffer.push({
               tipo: "warning",
               linha: linhaExcel,
-              mensagem: `⚠️ DUPLICATA detectada e ignorada (KM ${dados.km_inicial}${dados.km_final ? `-${dados.km_final}` : ''}, ${dados.codigo || dados.tipo || 'sem código'})`
+              mensagem: `🔄 DUPLICATA: ${infoCompleta}`
             });
             
             // Flush de logs a cada 50 duplicatas para visibilidade
@@ -1255,11 +1265,22 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
 
       // ========== LOG DE DUPLICATAS TOTAIS ==========
       if (duplicatasDetectadas > 0) {
-        console.log(`🔄 TOTAL DE DUPLICATAS DETECTADAS: ${duplicatasDetectadas}`);
+        console.log(`
+🔄 ===== RESUMO DE DUPLICATAS =====
+Total de duplicatas bloqueadas: ${duplicatasDetectadas}
+
+📋 INSTRUÇÕES PARA ENCONTRAR AS DUPLICATAS NA PLANILHA:
+1. Veja os logs acima com "DUPLICATA #X - LINHA Y"
+2. Procure essas linhas no Excel (linha Y na planilha)
+3. Verifique se há linhas repetidas (mesmo KM + Código + Lado)
+4. Ou verifique se esses registros já existem no banco de dados
+5. Remova as duplicatas da planilha ou do banco antes de reimportar
+        `);
+        
         setLogs(prev => [...prev, {
           tipo: "warning",
           linha: null,
-          mensagem: `🔄 Total de duplicatas ignoradas: ${duplicatasDetectadas}`
+          mensagem: `🔄 ${duplicatasDetectadas} duplicatas bloqueadas - veja console para identificar as linhas exatas`
         }]);
       }
 
