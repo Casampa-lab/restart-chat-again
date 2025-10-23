@@ -207,7 +207,7 @@ export function ReconciliacaoDrawerUniversal({
             servico: necessidade.servico,
             localizado_em_campo: true,
             reconciliado: true,
-            cadastro_match_id: novoElementoId, // Vincular à placa nova
+            cadastro_id: novoElementoId, // Vincular ao elemento novo (corrigido)
             match_decision: 'MATCH_DIRECT', // Forçar verde
             reason_code: 'MANUAL_RECONCILIATION', // Indicador de reconciliação manual
           })
