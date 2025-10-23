@@ -62,8 +62,8 @@ export function GestaoConflitos({ loteId, rodoviaId }: GestaoConflitosProps) {
   const queryClient = useQueryClient();
   
   const [filtros, setFiltros] = useState({
-    tipoElemento: '',
-    tipoConflito: '',
+    tipoElemento: 'todos',
+    tipoConflito: 'todos',
     kmInicio: '',
     kmFim: '',
   });
@@ -105,7 +105,9 @@ export function GestaoConflitos({ loteId, rodoviaId }: GestaoConflitosProps) {
         
         if (loteId) query = query.eq('lote_id', loteId);
         if (rodoviaId) query = query.eq('rodovia_id', rodoviaId);
-        if (filtros.tipoConflito) query = query.eq('tipo_conflito', filtros.tipoConflito);
+        if (filtros.tipoConflito && filtros.tipoConflito !== 'todos') {
+          query = query.eq('tipo_conflito', filtros.tipoConflito);
+        }
         if (filtros.kmInicio) {
           const kmIni = parseFloat(filtros.kmInicio);
           query = query.gte('km', kmIni).or(`km_inicial.gte.${kmIni}`);
@@ -124,7 +126,7 @@ export function GestaoConflitos({ loteId, rodoviaId }: GestaoConflitosProps) {
         }));
       });
       
-      if (filtros.tipoElemento) {
+      if (filtros.tipoElemento && filtros.tipoElemento !== 'todos') {
         const tipoFiltrado = TIPOS_NECESSIDADES.find(t => t.value === filtros.tipoElemento);
         if (tipoFiltrado) {
           const idx = TIPOS_NECESSIDADES.indexOf(tipoFiltrado);
@@ -329,8 +331,8 @@ export function GestaoConflitos({ loteId, rodoviaId }: GestaoConflitosProps) {
 
   const limparFiltros = () => {
     setFiltros({
-      tipoElemento: '',
-      tipoConflito: '',
+      tipoElemento: 'todos',
+      tipoConflito: 'todos',
       kmInicio: '',
       kmFim: '',
     });
@@ -409,7 +411,7 @@ export function GestaoConflitos({ loteId, rodoviaId }: GestaoConflitosProps) {
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   {TIPOS_NECESSIDADES.map(tipo => (
                     <SelectItem key={tipo.value} value={tipo.value}>{tipo.label}</SelectItem>
                   ))}
@@ -424,7 +426,7 @@ export function GestaoConflitos({ loteId, rodoviaId }: GestaoConflitosProps) {
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="SERVICO_CONTRADICTORIO">Serviço Contraditório</SelectItem>
                   <SelectItem value="DUPLICATA_PROJETO">Duplicata</SelectItem>
                 </SelectContent>
