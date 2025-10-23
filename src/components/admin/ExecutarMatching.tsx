@@ -116,7 +116,7 @@ export function ExecutarMatching() {
         // 1) Buscar necessidades PENDENTES (ainda sem decisão) - com paginação
         let todasNecessidades: any[] = [];
         let page = 0;
-        const pageSize = 5000; // ⚡ Otimizado: reduz chamadas ao banco
+        const pageSize = 1000; // Limite máximo do Supabase
         let hasMore = true;
 
         console.log(`📥 Buscando ${tipo} em páginas de ${pageSize}...`);
