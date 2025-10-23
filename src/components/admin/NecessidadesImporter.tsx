@@ -371,6 +371,24 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
 
     // Para elementos pontuais (placas, cilindros, pórticos, inscrições), não usar baseMap
     if (tipo === "placas") {
+      // Extrair altura e largura individualmente
+      const altura = sanitizarNumerico(
+        row["Altura (m)"] || row["Altura"] || row["altura_m"] || row["altura"]
+      );
+      const largura = sanitizarNumerico(
+        row["Largura (m)"] || row["Largura"] || row["largura_m"] || row["largura"]
+      );
+
+      // Calcular dimensoes_mm se altura/largura existirem
+      let dimensoes_calculadas = null;
+      if (largura && altura) {
+        // Retangular: largura x altura (em mm)
+        dimensoes_calculadas = `${Math.round(largura * 1000)}x${Math.round(altura * 1000)}`;
+      } else if (altura) {
+        // Circular: apenas diâmetro (quando só há altura)
+        dimensoes_calculadas = `Ø ${Math.round(altura * 1000)}`;
+      }
+
       return {
         km_inicial: sanitizarNumerico(getFirstValid("Km inicial", "Km", "KM", "km")),
         latitude_inicial: converterCoordenada(row["Latitude"] || row["latitude"]),
@@ -378,7 +396,12 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
         codigo: row["Código da Placa"] || row["Código da placa"] || row["Codigo da Placa"] || row["Codigo da placa"] || row["Código"] || row["Codigo"] || row["codigo"],
         tipo: row["Tipo de Placa"] || row["Tipo de placa"] || row["Tipo da Placa"] || row["Tipo da placa"] || row["Tipo Placa"] || row["Tipo"] || row["tipo"],
         lado: row["Lado"] || row["lado"],
-        dimensoes_mm: row["Dimensões (mm)"] || row["dimensoes_mm"],
+        
+        // NOVOS CAMPOS:
+        altura_m: altura,
+        largura_m: largura,
+        dimensoes_mm: dimensoes_calculadas || row["Dimensões (mm)"] || row["dimensoes_mm"] || null,
+        
         substrato: row["Tipo de Substrato"] || row["Substrato"] || row["substrato"],
         suporte: row["Tipo de Suporte"] || row["Suporte"] || row["suporte"],
         snv: row["SNV"] || row["snv"],
