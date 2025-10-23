@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Search, MapPin, Eye, Image as ImageIcon, Calendar, Ruler, History, Library, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, AlertTriangle, CheckCircle2, Link, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -686,7 +686,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       return (
                         <TableRow key={placa.id} className="hover:bg-muted/50">
                           <TableCell className="text-center">
-                            <div className="flex items-center gap-2 justify-center min-h-[28px]">
+                            <div className="flex items-center gap-2 justify-start min-h-[28px]">
                               <div className="flex items-center">
                                 <OrigemIndicator 
                                   origem={placa.origem} 
@@ -698,9 +698,8 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger>
-                                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 text-xs gap-1">
-                                        <AlertTriangle className="h-3 w-3" />
-                                        Requer Reconciliação
+                                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 text-xs">
+                                        <AlertTriangle className="h-4 w-4" />
                                       </Badge>
                                     </TooltipTrigger>
                                     <TooltipContent>
@@ -714,9 +713,8 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger>
-                                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 text-xs gap-1">
-                                        <CheckCircle2 className="h-3 w-3" />
-                                        Match Confirmado
+                                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 text-xs">
+                                        <CheckCircle2 className="h-4 w-4" />
                                       </Badge>
                                     </TooltipTrigger>
                                     <TooltipContent>
@@ -731,7 +729,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                   <Tooltip>
                                     <TooltipTrigger>
                                       <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
-                                        Substituição
+                                        <RefreshCw className="h-4 w-4" />
                                       </Badge>
                                     </TooltipTrigger>
                                     <TooltipContent>
@@ -746,7 +744,7 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                                   <Tooltip>
                                     <TooltipTrigger>
                                       <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
-                                        🔗 Match
+                                        <Link className="h-4 w-4" />
                                       </Badge>
                                     </TooltipTrigger>
                                     <TooltipContent>

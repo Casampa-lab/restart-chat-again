@@ -462,7 +462,7 @@ export function InventarioMarcasLongitudinaisViewer({
                       return (
                         <TableRow key={marca.id} className="hover:bg-muted/50">
                           <TableCell className="text-center">
-                            <div className="flex items-center gap-2 justify-center min-h-[28px]">
+                            <div className="flex items-center gap-2 justify-start min-h-[28px]">
                               <div className="flex items-center">
                                 <OrigemIndicator 
                                   origem={marca.origem}
@@ -474,9 +474,8 @@ export function InventarioMarcasLongitudinaisViewer({
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger>
-                                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 text-xs gap-1">
-                                        <AlertTriangle className="h-3 w-3" />
-                                        Requer Reconciliação
+                                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 text-xs">
+                                        <AlertTriangle className="h-4 w-4" />
                                       </Badge>
                                     </TooltipTrigger>
                                     <TooltipContent>
