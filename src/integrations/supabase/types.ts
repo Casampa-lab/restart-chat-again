@@ -3645,6 +3645,8 @@ export type Database = {
           arquivo_origem: string | null
           cadastro_id: string | null
           cadastro_match_id: string | null
+          conflito_com_necessidade_id: string | null
+          conflito_detalhes: Json | null
           cor_corpo: string | null
           cor_refletivo: string | null
           created_at: string | null
@@ -3678,6 +3680,7 @@ export type Database = {
           match_score: number | null
           motivo: string | null
           observacao: string | null
+          observacao_conflito: string | null
           observacao_usuario: string | null
           overlap_porcentagem: number | null
           quantidade: number | null
@@ -3692,6 +3695,8 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
+          tem_conflito_servico: boolean | null
+          tipo_conflito: string | null
           tipo_erro_projeto: string | null
           tipo_match: string | null
           tipo_refletivo: string | null
@@ -3702,6 +3707,8 @@ export type Database = {
           arquivo_origem?: string | null
           cadastro_id?: string | null
           cadastro_match_id?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           cor_corpo?: string | null
           cor_refletivo?: string | null
           created_at?: string | null
@@ -3735,6 +3742,7 @@ export type Database = {
           match_score?: number | null
           motivo?: string | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           quantidade?: number | null
@@ -3749,6 +3757,8 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
+          tem_conflito_servico?: boolean | null
+          tipo_conflito?: string | null
           tipo_erro_projeto?: string | null
           tipo_match?: string | null
           tipo_refletivo?: string | null
@@ -3759,6 +3769,8 @@ export type Database = {
           arquivo_origem?: string | null
           cadastro_id?: string | null
           cadastro_match_id?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           cor_corpo?: string | null
           cor_refletivo?: string | null
           created_at?: string | null
@@ -3792,6 +3804,7 @@ export type Database = {
           match_score?: number | null
           motivo?: string | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           quantidade?: number | null
@@ -3806,6 +3819,8 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
+          tem_conflito_servico?: boolean | null
+          tipo_conflito?: string | null
           tipo_erro_projeto?: string | null
           tipo_match?: string | null
           tipo_refletivo?: string | null
@@ -3825,6 +3840,13 @@ export type Database = {
             columns: ["cadastro_match_id"]
             isOneToOne: false
             referencedRelation: "ficha_cilindros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_cilindros_conflito_com_necessidade_id_fkey"
+            columns: ["conflito_com_necessidade_id"]
+            isOneToOne: false
+            referencedRelation: "necessidades_cilindros"
             referencedColumns: ["id"]
           },
           {
@@ -3854,6 +3876,8 @@ export type Database = {
           cadastro_id: string | null
           classificacao_nivel_contencao: string | null
           comprimento_total_tramo_m: number | null
+          conflito_com_necessidade_id: string | null
+          conflito_detalhes: Json | null
           created_at: string | null
           data_importacao: string | null
           data_reconciliacao: string | null
@@ -3894,6 +3918,7 @@ export type Database = {
           nivel_contencao_nchrp350: string | null
           nivel_risco: string | null
           observacao: string | null
+          observacao_conflito: string | null
           observacao_usuario: string | null
           overlap_porcentagem: number | null
           percentual_veiculos_pesados: number | null
@@ -3911,9 +3936,11 @@ export type Database = {
           solicitado_por: string | null
           solucao_planilha: string | null
           status_revisao: string | null
+          tem_conflito_servico: boolean | null
           terminal_entrada: string | null
           terminal_saida: string | null
           tipo_avaria: string | null
+          tipo_conflito: string | null
           tipo_match: string | null
           tramo: string | null
           updated_at: string | null
@@ -3931,6 +3958,8 @@ export type Database = {
           cadastro_id?: string | null
           classificacao_nivel_contencao?: string | null
           comprimento_total_tramo_m?: number | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
@@ -3971,6 +4000,7 @@ export type Database = {
           nivel_contencao_nchrp350?: string | null
           nivel_risco?: string | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           percentual_veiculos_pesados?: number | null
@@ -3988,9 +4018,11 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           status_revisao?: string | null
+          tem_conflito_servico?: boolean | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
           tipo_avaria?: string | null
+          tipo_conflito?: string | null
           tipo_match?: string | null
           tramo?: string | null
           updated_at?: string | null
@@ -4008,6 +4040,8 @@ export type Database = {
           cadastro_id?: string | null
           classificacao_nivel_contencao?: string | null
           comprimento_total_tramo_m?: number | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
@@ -4048,6 +4082,7 @@ export type Database = {
           nivel_contencao_nchrp350?: string | null
           nivel_risco?: string | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           percentual_veiculos_pesados?: number | null
@@ -4065,9 +4100,11 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           status_revisao?: string | null
+          tem_conflito_servico?: boolean | null
           terminal_entrada?: string | null
           terminal_saida?: string | null
           tipo_avaria?: string | null
+          tipo_conflito?: string | null
           tipo_match?: string | null
           tramo?: string | null
           updated_at?: string | null
@@ -4081,6 +4118,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "defensas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_defensas_conflito_com_necessidade_id_fkey"
+            columns: ["conflito_com_necessidade_id"]
+            isOneToOne: false
+            referencedRelation: "necessidades_defensas"
             referencedColumns: ["id"]
           },
           {
@@ -4105,6 +4149,8 @@ export type Database = {
           arquivo_origem: string | null
           cadastro_id: string | null
           codigo: string | null
+          conflito_com_necessidade_id: string | null
+          conflito_detalhes: Json | null
           cor: string | null
           created_at: string | null
           data_importacao: string | null
@@ -4137,6 +4183,7 @@ export type Database = {
           match_score: number | null
           material: string | null
           observacao: string | null
+          observacao_conflito: string | null
           observacao_usuario: string | null
           overlap_porcentagem: number | null
           posicao: string | null
@@ -4152,6 +4199,8 @@ export type Database = {
           solicitado_por: string | null
           solucao_planilha: string | null
           status_revisao: string | null
+          tem_conflito_servico: boolean | null
+          tipo_conflito: string | null
           tipo_demarcacao: string | null
           tipo_match: string | null
           traco_m: number | null
@@ -4163,6 +4212,8 @@ export type Database = {
           arquivo_origem?: string | null
           cadastro_id?: string | null
           codigo?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           cor?: string | null
           created_at?: string | null
           data_importacao?: string | null
@@ -4195,6 +4246,7 @@ export type Database = {
           match_score?: number | null
           material?: string | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           posicao?: string | null
@@ -4210,6 +4262,8 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           status_revisao?: string | null
+          tem_conflito_servico?: boolean | null
+          tipo_conflito?: string | null
           tipo_demarcacao?: string | null
           tipo_match?: string | null
           traco_m?: number | null
@@ -4221,6 +4275,8 @@ export type Database = {
           arquivo_origem?: string | null
           cadastro_id?: string | null
           codigo?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           cor?: string | null
           created_at?: string | null
           data_importacao?: string | null
@@ -4253,6 +4309,7 @@ export type Database = {
           match_score?: number | null
           material?: string | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           posicao?: string | null
@@ -4268,6 +4325,8 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           status_revisao?: string | null
+          tem_conflito_servico?: boolean | null
+          tipo_conflito?: string | null
           tipo_demarcacao?: string | null
           tipo_match?: string | null
           traco_m?: number | null
@@ -4275,6 +4334,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "necessidades_marcas_longitudin_conflito_com_necessidade_id_fkey"
+            columns: ["conflito_com_necessidade_id"]
+            isOneToOne: false
+            referencedRelation: "necessidades_marcas_longitudinais"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "necessidades_marcas_longitudinais_cadastro_id_fkey"
             columns: ["cadastro_id"]
@@ -4303,6 +4369,8 @@ export type Database = {
           area_m2: number | null
           arquivo_origem: string | null
           cadastro_id: string | null
+          conflito_com_necessidade_id: string | null
+          conflito_detalhes: Json | null
           cor: string | null
           created_at: string | null
           data_importacao: string | null
@@ -4333,6 +4401,7 @@ export type Database = {
           match_score: number | null
           material_utilizado: string | null
           observacao: string | null
+          observacao_conflito: string | null
           observacao_usuario: string | null
           overlap_porcentagem: number | null
           reason_code: string | null
@@ -4347,6 +4416,8 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
+          tem_conflito_servico: boolean | null
+          tipo_conflito: string | null
           tipo_inscricao: string | null
           tipo_match: string | null
           updated_at: string | null
@@ -4356,6 +4427,8 @@ export type Database = {
           area_m2?: number | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           cor?: string | null
           created_at?: string | null
           data_importacao?: string | null
@@ -4386,6 +4459,7 @@ export type Database = {
           match_score?: number | null
           material_utilizado?: string | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           reason_code?: string | null
@@ -4400,6 +4474,8 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
+          tem_conflito_servico?: boolean | null
+          tipo_conflito?: string | null
           tipo_inscricao?: string | null
           tipo_match?: string | null
           updated_at?: string | null
@@ -4409,6 +4485,8 @@ export type Database = {
           area_m2?: number | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           cor?: string | null
           created_at?: string | null
           data_importacao?: string | null
@@ -4439,6 +4517,7 @@ export type Database = {
           match_score?: number | null
           material_utilizado?: string | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           reason_code?: string | null
@@ -4453,12 +4532,21 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
+          tem_conflito_servico?: boolean | null
+          tipo_conflito?: string | null
           tipo_inscricao?: string | null
           tipo_match?: string | null
           updated_at?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "necessidades_marcas_transversa_conflito_com_necessidade_id_fkey"
+            columns: ["conflito_com_necessidade_id"]
+            isOneToOne: false
+            referencedRelation: "necessidades_marcas_transversais"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "necessidades_marcas_transversais_cadastro_id_fkey"
             columns: ["cadastro_id"]
@@ -4491,6 +4579,8 @@ export type Database = {
           cadastro_id: string | null
           cadastro_match_id: string | null
           codigo: string | null
+          conflito_com_necessidade_id: string | null
+          conflito_detalhes: Json | null
           created_at: string | null
           data_importacao: string | null
           data_reconciliacao: string | null
@@ -4515,6 +4605,7 @@ export type Database = {
             | null
           match_score: number | null
           observacao: string | null
+          observacao_conflito: string | null
           observacao_reconciliacao: string | null
           observacao_usuario: string | null
           reason_code: string | null
@@ -4536,7 +4627,9 @@ export type Database = {
           solucao_planilha: string | null
           substrato: string | null
           suporte: string | null
+          tem_conflito_servico: boolean | null
           tipo: string | null
+          tipo_conflito: string | null
           uf: string | null
           updated_at: string | null
           user_id: string
@@ -4550,6 +4643,8 @@ export type Database = {
           cadastro_id?: string | null
           cadastro_match_id?: string | null
           codigo?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
@@ -4574,6 +4669,7 @@ export type Database = {
             | null
           match_score?: number | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_reconciliacao?: string | null
           observacao_usuario?: string | null
           reason_code?: string | null
@@ -4595,7 +4691,9 @@ export type Database = {
           solucao_planilha?: string | null
           substrato?: string | null
           suporte?: string | null
+          tem_conflito_servico?: boolean | null
           tipo?: string | null
+          tipo_conflito?: string | null
           uf?: string | null
           updated_at?: string | null
           user_id: string
@@ -4609,6 +4707,8 @@ export type Database = {
           cadastro_id?: string | null
           cadastro_match_id?: string | null
           codigo?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
@@ -4633,6 +4733,7 @@ export type Database = {
             | null
           match_score?: number | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_reconciliacao?: string | null
           observacao_usuario?: string | null
           reason_code?: string | null
@@ -4654,7 +4755,9 @@ export type Database = {
           solucao_planilha?: string | null
           substrato?: string | null
           suporte?: string | null
+          tem_conflito_servico?: boolean | null
           tipo?: string | null
+          tipo_conflito?: string | null
           uf?: string | null
           updated_at?: string | null
           user_id?: string
@@ -4666,6 +4769,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_placa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_placas_conflito_com_necessidade_id_fkey"
+            columns: ["conflito_com_necessidade_id"]
+            isOneToOne: false
+            referencedRelation: "necessidades_placas"
             referencedColumns: ["id"]
           },
           {
@@ -4689,6 +4799,8 @@ export type Database = {
           altura_livre_m: number | null
           arquivo_origem: string | null
           cadastro_id: string | null
+          conflito_com_necessidade_id: string | null
+          conflito_detalhes: Json | null
           created_at: string | null
           data_importacao: string | null
           data_reconciliacao: string | null
@@ -4711,6 +4823,7 @@ export type Database = {
             | null
           match_score: number | null
           motivo: string | null
+          observacao_conflito: string | null
           observacao_usuario: string | null
           reason_code: string | null
           reconciliado: boolean | null
@@ -4724,7 +4837,9 @@ export type Database = {
           solicitado_em: string | null
           solicitado_por: string | null
           solucao_planilha: string | null
+          tem_conflito_servico: boolean | null
           tipo: string | null
+          tipo_conflito: string | null
           updated_at: string | null
           user_id: string
           vao_horizontal_m: number | null
@@ -4733,6 +4848,8 @@ export type Database = {
           altura_livre_m?: number | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
@@ -4755,6 +4872,7 @@ export type Database = {
             | null
           match_score?: number | null
           motivo?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           reason_code?: string | null
           reconciliado?: boolean | null
@@ -4768,7 +4886,9 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
+          tem_conflito_servico?: boolean | null
           tipo?: string | null
+          tipo_conflito?: string | null
           updated_at?: string | null
           user_id: string
           vao_horizontal_m?: number | null
@@ -4777,6 +4897,8 @@ export type Database = {
           altura_livre_m?: number | null
           arquivo_origem?: string | null
           cadastro_id?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           created_at?: string | null
           data_importacao?: string | null
           data_reconciliacao?: string | null
@@ -4799,6 +4921,7 @@ export type Database = {
             | null
           match_score?: number | null
           motivo?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           reason_code?: string | null
           reconciliado?: boolean | null
@@ -4812,7 +4935,9 @@ export type Database = {
           solicitado_em?: string | null
           solicitado_por?: string | null
           solucao_planilha?: string | null
+          tem_conflito_servico?: boolean | null
           tipo?: string | null
+          tipo_conflito?: string | null
           updated_at?: string | null
           user_id?: string
           vao_horizontal_m?: number | null
@@ -4823,6 +4948,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_porticos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_porticos_conflito_com_necessidade_id_fkey"
+            columns: ["conflito_com_necessidade_id"]
+            isOneToOne: false
+            referencedRelation: "necessidades_porticos"
             referencedColumns: ["id"]
           },
           {
@@ -4845,6 +4977,8 @@ export type Database = {
         Row: {
           arquivo_origem: string | null
           cadastro_id: string | null
+          conflito_com_necessidade_id: string | null
+          conflito_detalhes: Json | null
           cor_refletivo: string | null
           corpo: string | null
           created_at: string | null
@@ -4876,6 +5010,7 @@ export type Database = {
             | null
           match_score: number | null
           observacao: string | null
+          observacao_conflito: string | null
           observacao_usuario: string | null
           overlap_porcentagem: number | null
           quantidade: number | null
@@ -4892,6 +5027,8 @@ export type Database = {
           solicitado_por: string | null
           solucao_planilha: string | null
           status_revisao: string | null
+          tem_conflito_servico: boolean | null
+          tipo_conflito: string | null
           tipo_match: string | null
           tipo_refletivo: string | null
           updated_at: string | null
@@ -4900,6 +5037,8 @@ export type Database = {
         Insert: {
           arquivo_origem?: string | null
           cadastro_id?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           cor_refletivo?: string | null
           corpo?: string | null
           created_at?: string | null
@@ -4931,6 +5070,7 @@ export type Database = {
             | null
           match_score?: number | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           quantidade?: number | null
@@ -4947,6 +5087,8 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           status_revisao?: string | null
+          tem_conflito_servico?: boolean | null
+          tipo_conflito?: string | null
           tipo_match?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
@@ -4955,6 +5097,8 @@ export type Database = {
         Update: {
           arquivo_origem?: string | null
           cadastro_id?: string | null
+          conflito_com_necessidade_id?: string | null
+          conflito_detalhes?: Json | null
           cor_refletivo?: string | null
           corpo?: string | null
           created_at?: string | null
@@ -4986,6 +5130,7 @@ export type Database = {
             | null
           match_score?: number | null
           observacao?: string | null
+          observacao_conflito?: string | null
           observacao_usuario?: string | null
           overlap_porcentagem?: number | null
           quantidade?: number | null
@@ -5002,6 +5147,8 @@ export type Database = {
           solicitado_por?: string | null
           solucao_planilha?: string | null
           status_revisao?: string | null
+          tem_conflito_servico?: boolean | null
+          tipo_conflito?: string | null
           tipo_match?: string | null
           tipo_refletivo?: string | null
           updated_at?: string | null
@@ -5013,6 +5160,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_tachas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_tachas_conflito_com_necessidade_id_fkey"
+            columns: ["conflito_com_necessidade_id"]
+            isOneToOne: false
+            referencedRelation: "necessidades_tachas"
             referencedColumns: ["id"]
           },
           {

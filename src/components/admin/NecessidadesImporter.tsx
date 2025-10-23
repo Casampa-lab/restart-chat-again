@@ -864,37 +864,93 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       let falhas = 0;
       let duplicatasDetectadas = 0;
       
-      // ========== DETECÇÃO DE DUPLICATAS ANTES DA INSERÇÃO ==========
-      // Criar Set para rastrear registros já processados
-      const registrosProcessados = new Set<string>();
+      // ========== DETECÇÃO DE CONFLITOS DE SERVIÇO ==========
+      // Rastrear necessidades por localização para detectar conflitos
+      const necessidadesPorLocalizacao = new Map<string, {
+        necessidades: any[],
+        servicos: Set<string>
+      }>();
       
-      // Função para gerar chave única baseada nos campos-chave do tipo
       // Helper para formatar KM (trata valores não-numéricos)
       const formatarKm = (valor: any): string => {
         if (valor === null || valor === undefined || typeof valor !== 'number') {
-          return 'NA'; // "Não se aplica" ou outros valores inválidos
+          return 'NA';
         }
         return valor.toFixed(3);
       };
 
-      const gerarChaveDuplicata = (dados: any, tipoAtual: string): string => {
+      // Função para gerar chave única baseada nos campos-chave do tipo
+      const gerarChaveLocalizacao = (dados: any, tipoAtual: string): string => {
         switch (tipoAtual) {
           case "placas":
           case "porticos":
           case "cilindros":
-          case "marcas_transversais": // Inscrições são pontuais!
-            // Pontuais: KM + código/tipo/sigla + lado
+          case "marcas_transversais":
             return `${formatarKm(dados.km_inicial)}_${dados.codigo || dados.tipo || dados.sigla || dados.tipo_inscricao}_${dados.lado || ''}`;
           
           case "marcas_longitudinais":
           case "tachas":
           case "defensas":
-            // Lineares: KM_inicial + KM_final + código/tipo + lado
             return `${formatarKm(dados.km_inicial)}_${formatarKm(dados.km_final)}_${dados.codigo || dados.tipo_demarcacao || dados.tipo || ''}_${dados.lado || ''}`;
           
           default:
             return `${dados.km_inicial}_${dados.km_final}_${JSON.stringify(dados)}`;
         }
+      };
+      
+      // Função para detectar conflito de serviço
+      const detectarConflitoServico = (
+        chave: string,
+        dados: any,
+        linhaExcel: number,
+        servico: string | null
+      ): {
+        temConflito: boolean,
+        tipoConflito?: string,
+        necessidadeConflitante?: any
+      } => {
+        const localizacao = necessidadesPorLocalizacao.get(chave);
+        
+        if (!localizacao) {
+          // Primeira ocorrência - registrar
+          necessidadesPorLocalizacao.set(chave, {
+            necessidades: [{ ...dados, linhaExcel, servico }],
+            servicos: new Set(servico ? [servico] : [])
+          });
+          return { temConflito: false };
+        }
+        
+        // Já existe - verificar serviço
+        if (servico) {
+          localizacao.servicos.add(servico);
+        }
+        
+        // CONFLITO CRÍTICO: IMPLANTAR + REMOVER no mesmo lugar
+        const temImplantar = localizacao.servicos.has('Implantar');
+        const temRemover = localizacao.servicos.has('Remover');
+        
+        if (temImplantar && temRemover) {
+          return {
+            temConflito: true,
+            tipoConflito: 'SERVICO_CONTRADICTORIO',
+            necessidadeConflitante: localizacao.necessidades[0]
+          };
+        }
+        
+        // CONFLITO MODERADO: Mesmo serviço repetido
+        const primeiroServico = localizacao.necessidades[0].servico;
+        if (servico && primeiroServico === servico) {
+          return {
+            temConflito: true,
+            tipoConflito: 'DUPLICATA_PROJETO',
+            necessidadeConflitante: localizacao.necessidades[0]
+          };
+        }
+        
+        // Adicionar aos registros
+        localizacao.necessidades.push({ ...dados, linhaExcel, servico });
+        
+        return { temConflito: false };
       };
       
       // 🚀 OTIMIZAÇÃO: Batch de logs e inserts
@@ -999,33 +1055,60 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             continue; // Pular esta linha
           }
 
-          // ========== DETECÇÃO DE DUPLICATAS ==========
-          const chaveDuplicata = gerarChaveDuplicata(dados, tipo);
+          // ========== DETECÇÃO DE CONFLITOS DE SERVIÇO ==========
+          const chaveLocalizacao = gerarChaveLocalizacao(dados, tipo);
           
-          if (registrosProcessados.has(chaveDuplicata)) {
-            duplicatasDetectadas++;
+          // Inferir serviço da planilha (se disponível)
+          const servicoPlanilha = dados.solucao_planilha?.toLowerCase().includes('remo') ? 'Remover' :
+                                  dados.solucao_planilha?.toLowerCase().includes('impl') ? 'Implantar' :
+                                  dados.solucao_planilha?.toLowerCase().includes('subst') ? 'Substituir' : null;
+          
+          const resultadoConflito = detectarConflitoServico(chaveLocalizacao, dados, linhaExcel, servicoPlanilha);
+          
+          if (resultadoConflito.temConflito) {
+            duplicatasDetectadas++; // Contar como conflito
             
-            // 🔍 LOG DETALHADO COM TODAS AS INFORMAÇÕES PARA IDENTIFICAR A LINHA EXATA
+            // NÃO BLOQUEAR - apenas anotar o conflito
+            dados.tem_conflito_servico = true;
+            dados.tipo_conflito = resultadoConflito.tipoConflito;
+            
             const infoCompleta = tipo === "placas" 
               ? `KM ${dados.km_inicial} | Código: ${dados.codigo} | Lado: ${dados.lado}`
               : tipo === "cilindros"
               ? `KM ${dados.km_inicial} | Tipo: ${dados.tipo} | Lado: ${dados.lado}`
               : `KM ${dados.km_inicial}${dados.km_final ? `-${dados.km_final}` : ''} | ${dados.codigo || dados.tipo || 'sem código'}`;
             
-            // 📦 Armazenar duplicata para mostrar no final
+            dados.conflito_detalhes = {
+              tipo: resultadoConflito.tipoConflito,
+              linha_excel: linhaExcel,
+              linha_conflitante_excel: resultadoConflito.necessidadeConflitante.linhaExcel,
+              servico_atual: servicoPlanilha || 'não informado',
+              servico_conflitante: resultadoConflito.necessidadeConflitante.servico || 'não informado',
+              km: dados.km_inicial,
+              codigo: dados.codigo || dados.tipo || dados.sigla,
+              lado: dados.lado,
+              detectado_em: new Date().toISOString(),
+              info: infoCompleta
+            };
+            
+            // 📦 Armazenar para mostrar no final
             duplicatasInfoRef.current.push({
               linha: linhaExcel,
               km: dados.km_inicial?.toString() || 'N/A',
-              info: infoCompleta
+              info: `⚠️ ${resultadoConflito.tipoConflito} - ${infoCompleta}`
             });
             
-            console.log(`🔄 DUPLICATA #${duplicatasDetectadas} - LINHA ${linhaExcel}: ${infoCompleta}`);
+            // Log na interface
+            logsBuffer.push({
+              tipo: 'warning',
+              linha: linhaExcel,
+              mensagem: `⚠️ CONFLITO: ${resultadoConflito.tipoConflito} - ` +
+                       `${servicoPlanilha || '?'} vs ${resultadoConflito.necessidadeConflitante.servico || '?'} ` +
+                       `(Linha ${resultadoConflito.necessidadeConflitante.linhaExcel})`
+            });
             
-            continue; // Pular esta linha duplicada
+            console.log(`⚠️ CONFLITO DETECTADO - LINHA ${linhaExcel}:`, dados.conflito_detalhes);
           }
-          
-          // Registrar como processado
-          registrosProcessados.add(chaveDuplicata);
 
           // ========== MATCHING DESATIVADO ==========
           // O matching será executado posteriormente na aba "Matching"
@@ -1251,45 +1334,45 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       await flushBatch(tabelaNecessidade);
       flushLogs();
 
-      // ========== LOG DE DUPLICATAS TOTAIS ==========
+      // ========== LOG DE CONFLITOS TOTAIS ==========
       if (duplicatasDetectadas > 0) {
         console.log(`
-🔄 ===== RESUMO DE DUPLICATAS =====
-Total de duplicatas bloqueadas: ${duplicatasDetectadas}
+⚠️ ===== RESUMO DE CONFLITOS DE SERVIÇO =====
+Total de conflitos detectados e anotados: ${duplicatasDetectadas}
 
-📋 DUPLICATAS ENCONTRADAS (linhas da planilha Excel):
+📋 CONFLITOS ENCONTRADOS (importados para revisão):
 `);
         
-        // Mostrar cada duplicata no console E na interface
-        const duplicatasLogs: LogEntry[] = [];
+        // Mostrar cada conflito no console E na interface
+        const conflitosLogs: LogEntry[] = [];
         
         duplicatasInfoRef.current.forEach((dup, idx) => {
           const msg = `#${idx + 1} - LINHA ${dup.linha}: ${dup.info}`;
           console.log(`   ${msg}`);
           
-          duplicatasLogs.push({
+          conflitosLogs.push({
             tipo: "warning",
             linha: dup.linha,
-            mensagem: `🔄 DUPLICATA ${msg}`
+            mensagem: `⚠️ CONFLITO ${msg}`
           });
         });
         
         console.log(`
 📋 PRÓXIMOS PASSOS:
-1. Procure essas linhas no Excel (números acima)
-2. Verifique se há linhas repetidas na planilha
-3. Ou se esses registros já existem no banco de dados
-4. Remova as duplicatas antes de reimportar
+1. Revise os conflitos no Inventário Dinâmico
+2. Verifique se há erros no projeto de sinalização
+3. Corrija manualmente ou marque como resolvido
+4. Exemplo: IMPLANTAR + REMOVER no mesmo lugar pode indicar que deveria ser SUBSTITUIR
         `);
         
-        // Adicionar TODAS as duplicatas aos logs visíveis de uma vez
+        // Adicionar TODAS as conflitos aos logs visíveis de uma vez
         setLogs(prev => [...prev, 
           {
             tipo: "info",
             linha: null,
-            mensagem: `━━━━━ 📋 ${duplicatasDetectadas} DUPLICATAS BLOQUEADAS ━━━━━`
+            mensagem: `━━━━━ ⚠️ ${duplicatasDetectadas} CONFLITOS DETECTADOS ━━━━━`
           },
-          ...duplicatasLogs,
+          ...conflitosLogs,
           {
             tipo: "info",
             linha: null,
@@ -1337,7 +1420,7 @@ Total de duplicatas bloqueadas: ${duplicatasDetectadas}
 ⚠️  Linhas vazias ignoradas (sem KM): ${linhasVazias}
 ✅ Linhas filtradas (válidas): ${linhasValidasFiltradas}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔄 Duplicatas detectadas: ${duplicatasDetectadas}
+⚠️ Conflitos detectados (anotados): ${duplicatasDetectadas}
 ✅ Sucessos: ${sucessos}
 ❌ Falhas: ${falhas}
 📊 Total processado: ${totalProcessado}
@@ -1346,7 +1429,7 @@ Total de duplicatas bloqueadas: ${duplicatasDetectadas}
 ${diferencaNaoContabilizada !== 0 ? '⚠️ ATENÇÃO: Há linhas que não aparecem em nenhuma categoria!' : '✅ Todas as linhas foram contabilizadas'}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Fórmula: ${linhasLidasExcel} (lidas) - ${linhasVazias} (vazias) = ${linhasValidasFiltradas} (válidas)
-         ${linhasValidasFiltradas} (válidas) - ${duplicatasDetectadas} (duplicatas) = ${linhasValidasFiltradas - duplicatasDetectadas} (esperado)
+         ${linhasValidasFiltradas} (válidas) incluindo ${duplicatasDetectadas} com conflito
          ${sucessos} (sucessos) + ${falhas} (falhas) = ${totalProcessado} (processado)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       `);
@@ -1354,7 +1437,7 @@ Fórmula: ${linhasLidasExcel} (lidas) - ${linhasVazias} (vazias) = ${linhasValid
       setLogs(prev => [...prev, {
         tipo: "info",
         linha: null,
-        mensagem: `📊 ANÁLISE: ${linhasLidasExcel} lidas → ${linhasVazias} vazias → ${linhasValidasFiltradas} válidas → ${duplicatasDetectadas} duplicatas → ${sucessos} importadas | ❓ Diferença: ${diferencaNaoContabilizada}`
+        mensagem: `📊 ANÁLISE: ${linhasLidasExcel} lidas → ${linhasVazias} vazias → ${linhasValidasFiltradas} válidas → ${duplicatasDetectadas} conflitos anotados → ${sucessos} importadas | ❓ Diferença: ${diferencaNaoContabilizada}`
       }]);
 
       // 📊 RESUMO FINAL DETALHADO
@@ -1364,12 +1447,12 @@ Fórmula: ${linhasLidasExcel} (lidas) - ${linhasVazias} (vazias) = ${linhasValid
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📂 Total lido: ${total} linhas
    ✅ Sucessos: ${sucessos}
-   ⚠️ Duplicatas bloqueadas: ${duplicatasDetectadas}
+   ⚠️ Conflitos detectados (anotados): ${duplicatasDetectadas}
    ⚠️ Linhas vazias ignoradas: ${linhasIgnoradas.length}
    ❌ Falhas: ${falhas}
    🔧 Valores convertidos para NULL automaticamente
 ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Verifique os logs acima para detalhes` : ''}
-${duplicatasDetectadas > 0 ? `\n⚠️ ${duplicatasDetectadas} DUPLICATAS BLOQUEADAS durante importação` : ''}
+${duplicatasDetectadas > 0 ? `\n⚠️ ${duplicatasDetectadas} CONFLITOS ANOTADOS - Revisar no Inventário Dinâmico` : ''}
    
    ℹ️ PRÓXIMO PASSO: Execute o matching na aba "Matching"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1378,7 +1461,7 @@ ${duplicatasDetectadas > 0 ? `\n⚠️ ${duplicatasDetectadas} DUPLICATAS BLOQUE
       const mensagemResultado = [
         `📂 ${total} linhas lidas`,
         `✅ ${sucessos} importadas`,
-        duplicatasDetectadas > 0 ? `⚠️ ${duplicatasDetectadas} duplicatas bloqueadas` : '',
+        duplicatasDetectadas > 0 ? `⚠️ ${duplicatasDetectadas} conflitos anotados` : '',
         linhasIgnoradas.length > 0 ? `⚠️ ${linhasIgnoradas.length} vazias ignoradas` : '',
         `❌ ${falhas} falhas`
       ].filter(Boolean).join(' • ');
@@ -1391,6 +1474,7 @@ ${duplicatasDetectadas > 0 ? `\n⚠️ ${duplicatasDetectadas} DUPLICATAS BLOQUE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${mensagemResultado}
 ${falhas > 0 ? `\n⚠️ ${falhas} LINHAS FALHARAM - Veja logs de erro acima para identificar o problema` : ''}
+${duplicatasDetectadas > 0 ? `\n⚠️ ${duplicatasDetectadas} CONFLITOS ANOTADOS - Revisar no Inventário Dinâmico` : ''}
 
 ℹ️ PRÓXIMO PASSO: Acesse a aba "Matching" para vincular ao cadastro
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
