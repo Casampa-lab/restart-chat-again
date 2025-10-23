@@ -44,6 +44,13 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const cancelImportRef = useRef(false);
+  
+  // 📦 Array para armazenar info das duplicatas e mostrar no final
+  const duplicatasInfoRef = useRef<Array<{
+    linha: number;
+    km: string;
+    info: string;
+  }>>([]);
 
   // Função para converter coordenadas com vírgula para ponto
   const converterCoordenada = (valor: any): number | null => {
@@ -1000,23 +1007,19 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             
             // 🔍 LOG DETALHADO COM TODAS AS INFORMAÇÕES PARA IDENTIFICAR A LINHA EXATA
             const infoCompleta = tipo === "placas" 
-              ? `KM ${dados.km_inicial} | Código: ${dados.codigo} | Lado: ${dados.lado} | Chave: ${chaveDuplicata}`
+              ? `KM ${dados.km_inicial} | Código: ${dados.codigo} | Lado: ${dados.lado}`
               : tipo === "cilindros"
-              ? `KM ${dados.km_inicial} | Tipo: ${dados.tipo} | Lado: ${dados.lado} | Chave: ${chaveDuplicata}`
-              : `KM ${dados.km_inicial}${dados.km_final ? `-${dados.km_final}` : ''} | ${dados.codigo || dados.tipo || 'sem código'} | Chave: ${chaveDuplicata}`;
+              ? `KM ${dados.km_inicial} | Tipo: ${dados.tipo} | Lado: ${dados.lado}`
+              : `KM ${dados.km_inicial}${dados.km_final ? `-${dados.km_final}` : ''} | ${dados.codigo || dados.tipo || 'sem código'}`;
             
-            console.log(`🔄 DUPLICATA #${duplicatasDetectadas} - LINHA ${linhaExcel}: ${infoCompleta}`);
-            
-            logsBuffer.push({
-              tipo: "warning",
+            // 📦 Armazenar duplicata para mostrar no final
+            duplicatasInfoRef.current.push({
               linha: linhaExcel,
-              mensagem: `🔄 DUPLICATA: ${infoCompleta}`
+              km: dados.km_inicial?.toString() || 'N/A',
+              info: infoCompleta
             });
             
-            // Flush de logs a cada 50 duplicatas para visibilidade
-            if (duplicatasDetectadas % 50 === 0) {
-              flushLogs();
-            }
+            console.log(`🔄 DUPLICATA #${duplicatasDetectadas} - LINHA ${linhaExcel}: ${infoCompleta}`);
             
             continue; // Pular esta linha duplicada
           }
@@ -1128,23 +1131,8 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             }
           });
 
-          if (tipo === "defensas") {
-            console.log(`🛡️ DEFENSAS PRE-PUSH - Linha ${linhaExcel}:`, {
-              servico: dadosInsercao.servico,
-              extensao_metros: dadosInsercao.extensao_metros,
-              km_inicial: dadosInsercao.km_inicial,
-              km_final: dadosInsercao.km_final,
-              tramo: dadosInsercao.tramo,
-              lado: dadosInsercao.lado
-            });
-          }
-          
-          console.log(`🎯 PRE-PUSH - Linha ${linhaExcel}: Importação pura, BatchSize=${batchInsert.length}`);
-          
           // 🚀 OTIMIZAÇÃO: Adicionar ao batch ao invés de inserir individualmente
           batchInsert.push(dadosInsercao);
-          
-          console.log(`✅ POST-PUSH - Linha ${linhaExcel}: BatchSize agora = ${batchInsert.length}`);
 
           // Fazer flush do batch quando atingir o tamanho limite
           if (batchInsert.length >= BATCH_SIZE) {
@@ -1269,19 +1257,48 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
 🔄 ===== RESUMO DE DUPLICATAS =====
 Total de duplicatas bloqueadas: ${duplicatasDetectadas}
 
-📋 INSTRUÇÕES PARA ENCONTRAR AS DUPLICATAS NA PLANILHA:
-1. Veja os logs acima com "DUPLICATA #X - LINHA Y"
-2. Procure essas linhas no Excel (linha Y na planilha)
-3. Verifique se há linhas repetidas (mesmo KM + Código + Lado)
-4. Ou verifique se esses registros já existem no banco de dados
-5. Remova as duplicatas da planilha ou do banco antes de reimportar
+📋 DUPLICATAS ENCONTRADAS (linhas da planilha Excel):
+`);
+        
+        // Mostrar cada duplicata no console E na interface
+        const duplicatasLogs: LogEntry[] = [];
+        
+        duplicatasInfoRef.current.forEach((dup, idx) => {
+          const msg = `#${idx + 1} - LINHA ${dup.linha}: ${dup.info}`;
+          console.log(`   ${msg}`);
+          
+          duplicatasLogs.push({
+            tipo: "warning",
+            linha: dup.linha,
+            mensagem: `🔄 DUPLICATA ${msg}`
+          });
+        });
+        
+        console.log(`
+📋 PRÓXIMOS PASSOS:
+1. Procure essas linhas no Excel (números acima)
+2. Verifique se há linhas repetidas na planilha
+3. Ou se esses registros já existem no banco de dados
+4. Remova as duplicatas antes de reimportar
         `);
         
-        setLogs(prev => [...prev, {
-          tipo: "warning",
-          linha: null,
-          mensagem: `🔄 ${duplicatasDetectadas} duplicatas bloqueadas - veja console para identificar as linhas exatas`
-        }]);
+        // Adicionar TODAS as duplicatas aos logs visíveis de uma vez
+        setLogs(prev => [...prev, 
+          {
+            tipo: "info",
+            linha: null,
+            mensagem: `━━━━━ 📋 ${duplicatasDetectadas} DUPLICATAS BLOQUEADAS ━━━━━`
+          },
+          ...duplicatasLogs,
+          {
+            tipo: "info",
+            linha: null,
+            mensagem: `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+          }
+        ]);
+        
+        // Limpar array para próxima importação
+        duplicatasInfoRef.current = [];
       }
 
       // 🔄 DELETAR Marco Zero - importação invalida o snapshot consolidado
