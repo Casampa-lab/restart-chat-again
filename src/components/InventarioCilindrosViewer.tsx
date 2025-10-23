@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Search, Library, Eye, MapPin, Calendar, X, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw, AlertTriangle } from "lucide-react";
+import { Loader2, Search, Library, Eye, MapPin, Calendar, X, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
@@ -401,15 +401,6 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
               Inventário de Cilindros Delineadores
             </CardTitle>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/minhas-necessidades?tipo=cilindros")}
-                className="gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                Ver Necessidades
-              </Button>
               <Button
                 variant="outline"
                 size="sm"
