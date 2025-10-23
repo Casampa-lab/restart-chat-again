@@ -254,7 +254,9 @@ serve(async (req) => {
         "altura_(m)": "altura_m",
         altura_m: "altura_m",
         altura: "altura_m",
-        "largura_(m)": "", // Ignorado - campo não existe na tabela
+        "largura_(m)": "largura_m",
+        largura_m: "largura_m",
+        largura: "largura_m",
         "área_(m²)": "area_m2",
         "area_(m²)": "area_m2",
         area_m2: "area_m2",

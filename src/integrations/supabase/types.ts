@@ -4594,6 +4594,7 @@ export type Database = {
           justificativa_reconciliacao: string | null
           km_inicial: number | null
           lado: string | null
+          largura_m: number | null
           latitude_inicial: number | null
           linha_planilha: number | null
           localizado_em_campo: boolean | null
@@ -4658,6 +4659,7 @@ export type Database = {
           justificativa_reconciliacao?: string | null
           km_inicial?: number | null
           lado?: string | null
+          largura_m?: number | null
           latitude_inicial?: number | null
           linha_planilha?: number | null
           localizado_em_campo?: boolean | null
@@ -4722,6 +4724,7 @@ export type Database = {
           justificativa_reconciliacao?: string | null
           km_inicial?: number | null
           lado?: string | null
+          largura_m?: number | null
           latitude_inicial?: number | null
           linha_planilha?: number | null
           localizado_em_campo?: boolean | null
