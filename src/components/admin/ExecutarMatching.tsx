@@ -49,6 +49,7 @@ export function ExecutarMatching() {
   const [tipoSelecionado, setTipoSelecionado] = useState<TipoElemento>("TODOS");
   const [executando, setExecutando] = useState(false);
   const [progresso, setProgresso] = useState(0);
+  const [tipoAtual, setTipoAtual] = useState<string>("");
   const [estatisticas, setEstatisticas] = useState({
     total: 0,
     processados: 0,
@@ -62,6 +63,7 @@ export function ExecutarMatching() {
   const executarMatching = async () => {
     setExecutando(true);
     setProgresso(0);
+    setTipoAtual("");
     setEstatisticas({ total: 0, processados: 0, matches: 0, substituicoes: 0, ambiguos: 0, semMatch: 0, erros: 0 });
 
     try {
@@ -75,6 +77,7 @@ export function ExecutarMatching() {
       const stats = { matches: 0, substituicoes: 0, ambiguos: 0, semMatch: 0, erros: 0 };
 
       for (const tipo of tipos) {
+        setTipoAtual(tipo);
         const tabela = TIPO_TO_TABLE_MAP[tipo];
         if (!tabela) continue;
 
@@ -330,9 +333,16 @@ export function ExecutarMatching() {
               <span>{Math.round(progresso)}%</span>
             </div>
             <Progress value={progresso} />
-            <p className="text-sm text-muted-foreground">
-              {estatisticas.processados} de {estatisticas.total} processados
-            </p>
+            <div className="flex flex-col gap-1">
+              {tipoAtual && (
+                <p className="text-sm font-medium text-primary">
+                  Processando: {tipoAtual}
+                </p>
+              )}
+              <p className="text-sm text-muted-foreground">
+                {estatisticas.processados} de {estatisticas.total} processados
+              </p>
+            </div>
           </div>
         )}
 
