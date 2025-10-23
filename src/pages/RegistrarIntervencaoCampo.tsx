@@ -248,10 +248,7 @@ export default function RegistrarIntervencaoCampo() {
                 key={tipo.value}
                 variant="outline"
                 className="h-20 text-lg"
-                onClick={() => {
-                  const tabDestino = TABS_MAP[tipo.value] || 'sh';
-                  navigate(`/minhas-intervencoes?tab=${tabDestino}`);
-                }}
+                onClick={() => setTipoSelecionado(tipo.value)}
               >
                 {tipo.label}
               </Button>
