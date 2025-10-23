@@ -44,6 +44,8 @@ interface FichaMarcaLongitudinal {
   posicao: string | null;
   origem?: string;
   tipo_origem?: string;
+  cadastro_match_id?: string | null;
+  distancia_match_metros?: number | null;
 }
 
 interface InventarioMarcasLongitudinaisViewerProps {
@@ -474,7 +476,7 @@ export function InventarioMarcasLongitudinaisViewer({
                                 tipoOrigem={marca.tipo_origem}
                               />
                               
-                              {necessidadesMap?.get(marca.id) && (
+                              {(marca.cadastro_match_id || marca.origem === 'NECESSIDADE_CONSOLIDADA') && (
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger>
@@ -484,9 +486,9 @@ export function InventarioMarcasLongitudinaisViewer({
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       <p className="text-xs">
-                                        Vinculado a necessidade{' '}
-                                        {necessidadesMap.get(marca.id)?.distancia_match_metros 
-                                          ? `(${necessidadesMap.get(marca.id)?.distancia_match_metros.toFixed(2)}m)` 
+                                        Vinculado a registro de cadastro{' '}
+                                        {marca.distancia_match_metros 
+                                          ? `(${marca.distancia_match_metros.toFixed(2)}m)` 
                                           : ''}
                                       </p>
                                     </TooltipContent>

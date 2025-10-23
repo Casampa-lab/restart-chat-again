@@ -93,6 +93,7 @@ interface FichaPlaca {
   match_score?: number;
   modificado_por_intervencao?: boolean;
   cadastro_match_id?: string;
+  distancia_match_metros?: number | null;
   // Campos da view
   snv: string | null;
   tipo: string | null;
@@ -641,11 +642,31 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       return (
                         <TableRow key={placa.id} className="hover:bg-muted/50">
                           <TableCell className="text-center">
-                            <div className="flex items-center justify-center">
+                            <div className="flex items-center gap-2 justify-center">
                               <OrigemIndicator 
                                 origem={placa.origem} 
                                 tipoOrigem={placa.tipo_origem} 
                               />
+                              
+                              {(placa.cadastro_match_id || placa.origem === 'NECESSIDADE_CONSOLIDADA') && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
+                                        🔗 Match
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">
+                                        Vinculado a registro de cadastro{' '}
+                                        {placa.distancia_match_metros 
+                                          ? `(${placa.distancia_match_metros.toFixed(2)}m)` 
+                                          : ''}
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell className="font-medium">{placa.snv || "-"}</TableCell>

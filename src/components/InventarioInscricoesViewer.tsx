@@ -76,6 +76,8 @@ interface FichaInscricao {
   rodovia_id: string;
   origem?: string;
   tipo_origem?: string;
+  cadastro_match_id?: string | null;
+  distancia_match_metros?: number | null;
 }
 
 // Mapeamento de siglas para descrições completas (apenas quando não há separador)
@@ -513,7 +515,7 @@ export function InventarioInscricoesViewer({
                                 tipoOrigem={inscricao.tipo_origem}
                               />
                               
-                              {necessidadesMap?.get(inscricao.id) && (
+                              {(inscricao.cadastro_match_id || inscricao.origem === 'NECESSIDADE_CONSOLIDADA') && (
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger>
@@ -523,9 +525,9 @@ export function InventarioInscricoesViewer({
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       <p className="text-xs">
-                                        Vinculado a necessidade{' '}
-                                        {necessidadesMap.get(inscricao.id)?.distancia_match_metros 
-                                          ? `(${necessidadesMap.get(inscricao.id)?.distancia_match_metros.toFixed(2)}m)` 
+                                        Vinculado a registro de cadastro{' '}
+                                        {inscricao.distancia_match_metros 
+                                          ? `(${inscricao.distancia_match_metros.toFixed(2)}m)` 
                                           : ''}
                                       </p>
                                     </TooltipContent>

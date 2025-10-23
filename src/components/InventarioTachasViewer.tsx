@@ -81,6 +81,8 @@ interface FichaTacha {
   quantidade: number;
   origem?: string;
   tipo_origem?: string;
+  cadastro_match_id?: string | null;
+  distancia_match_metros?: number | null;
 }
 
 interface InventarioTachasViewerProps {
@@ -536,8 +538,8 @@ export function InventarioTachasViewer({
                               tipoOrigem={tacha.tipo_origem}
                             />
                             
-                            {/* Badge Match quando existe necessidade vinculada */}
-                            {necessidadesMap?.get(tacha.id) && (
+                            {/* Badge Match quando existe cadastro vinculado ou origem consolidada */}
+                            {(tacha.cadastro_match_id || tacha.origem === 'NECESSIDADE_CONSOLIDADA') && (
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger>
@@ -547,9 +549,9 @@ export function InventarioTachasViewer({
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p className="text-xs">
-                                      Vinculado a necessidade{' '}
-                                      {necessidadesMap.get(tacha.id)?.distancia_match_metros 
-                                        ? `(${necessidadesMap.get(tacha.id)?.distancia_match_metros.toFixed(2)}m)` 
+                                      Vinculado a registro de cadastro{' '}
+                                      {tacha.distancia_match_metros 
+                                        ? `(${tacha.distancia_match_metros.toFixed(2)}m)` 
                                         : ''}
                                     </p>
                                   </TooltipContent>

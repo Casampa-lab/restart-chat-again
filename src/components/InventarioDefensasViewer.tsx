@@ -71,6 +71,8 @@ interface FichaDefensa {
   lote_id: string;
   origem?: string;
   tipo_origem?: string;
+  cadastro_match_id?: string | null;
+  distancia_match_metros?: number | null;
 }
 
 interface IntervencaoDefensa {
@@ -495,7 +497,7 @@ export const InventarioDefensasViewer = ({
                         tipoOrigem={defensa.tipo_origem}
                       />
                       
-                      {necessidadesMap?.get(defensa.id) && (
+                      {(defensa.cadastro_match_id || defensa.origem === 'NECESSIDADE_CONSOLIDADA') && (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
@@ -505,9 +507,9 @@ export const InventarioDefensasViewer = ({
                             </TooltipTrigger>
                             <TooltipContent>
                               <p className="text-xs">
-                                Vinculado a necessidade{' '}
-                                {necessidadesMap.get(defensa.id)?.distancia_match_metros 
-                                  ? `(${necessidadesMap.get(defensa.id)?.distancia_match_metros.toFixed(2)}m)` 
+                                Vinculado a registro de cadastro{' '}
+                                {defensa.distancia_match_metros 
+                                  ? `(${defensa.distancia_match_metros.toFixed(2)}m)` 
                                   : ''}
                               </p>
                             </TooltipContent>

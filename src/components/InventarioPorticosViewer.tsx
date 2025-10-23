@@ -74,6 +74,8 @@ interface FichaPortico {
   foto_url: string | null;
   origem?: string;
   tipo_origem?: string;
+  cadastro_match_id?: string | null;
+  distancia_match_metros?: number | null;
 }
 
 interface InventarioPorticosViewerProps {
@@ -555,7 +557,7 @@ export function InventarioPorticosViewer({
                             tipoOrigem={portico.tipo_origem}
                           />
                           
-                          {necessidadesMap?.get(portico.id) && (
+                          {(portico.cadastro_match_id || portico.origem === 'NECESSIDADE_CONSOLIDADA') && (
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger>
@@ -565,9 +567,9 @@ export function InventarioPorticosViewer({
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p className="text-xs">
-                                    Vinculado a necessidade{' '}
-                                    {necessidadesMap.get(portico.id)?.distancia_match_metros 
-                                      ? `(${necessidadesMap.get(portico.id)?.distancia_match_metros.toFixed(2)}m)` 
+                                    Vinculado a registro de cadastro{' '}
+                                    {portico.distancia_match_metros 
+                                      ? `(${portico.distancia_match_metros.toFixed(2)}m)` 
                                       : ''}
                                   </p>
                                 </TooltipContent>
