@@ -579,13 +579,11 @@ export function InventarioPorticosViewer({
                   {sortedPorticos.map((portico) => (
                     <TableRow key={portico.id}>
                       <TableCell className="text-center">
-                        <div className="flex items-center gap-2 justify-center min-h-[28px]">
-                          <div className="flex items-center">
-                            <OrigemIndicator 
-                              origem={portico.origem}
-                              tipoOrigem={portico.tipo_origem}
-                            />
-                          </div>
+                        <div className="flex items-center gap-2 justify-center">
+                          <OrigemIndicator 
+                            origem={portico.origem}
+                            tipoOrigem={portico.tipo_origem}
+                          />
                           
                           {portico.match_decision === 'AMBIGUOUS' && (
                             <TooltipProvider>
