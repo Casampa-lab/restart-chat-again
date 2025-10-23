@@ -38,6 +38,7 @@ import { ExecutarMatching } from "@/components/admin/ExecutarMatching";
 import { LimparResultadosMatching } from "@/components/admin/LimparResultadosMatching";
 import { DeletarImportacaoPorLote } from "@/components/admin/DeletarImportacaoPorLote";
 import { AuditoriaImportacoes } from "@/components/admin/AuditoriaImportacoes";
+import { GestaoConflitos } from "@/components/admin/GestaoConflitos";
 
 import logoOperaVia from "@/assets/logo-operavia.png";
 
@@ -179,7 +180,7 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="supervisoras" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-10' : 'grid-cols-8'}`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-11' : 'grid-cols-9'}`}>
             <TabsTrigger value="supervisoras">Supervisoras</TabsTrigger>
             <TabsTrigger value="usuarios">Usuários</TabsTrigger>
             <TabsTrigger value="empresas">Executoras</TabsTrigger>
@@ -188,6 +189,7 @@ const Admin = () => {
             <TabsTrigger value="inventario">Cadastro</TabsTrigger>
             <TabsTrigger value="necessidades">Projeto</TabsTrigger>
             <TabsTrigger value="matching">Matching</TabsTrigger>
+            <TabsTrigger value="conflitos" className="text-orange-600">Conflitos ⚠️</TabsTrigger>
             {isAdmin && <TabsTrigger value="auditoria">Auditoria GPS</TabsTrigger>}
             {isAdmin && <TabsTrigger value="sistema" className="text-destructive">Sistema</TabsTrigger>}
           </TabsList>
@@ -490,6 +492,80 @@ const Admin = () => {
               </Card>
             </TabsContent>
           )}
+
+          <TabsContent value="conflitos">
+            <div className="space-y-6">
+              {/* Card de Seleção de Contexto */}
+              <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Contexto de Trabalho
+                  </CardTitle>
+                  <CardDescription>
+                    Selecione o lote e rodovia para visualizar conflitos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Dropdown Lote */}
+                    <div>
+                      <Label htmlFor="conflitos-lote">Lote</Label>
+                      <Select value={selectedLoteId} onValueChange={(value) => {
+                        setSelectedLoteId(value);
+                        setSelectedRodoviaId("");
+                      }}>
+                        <SelectTrigger id="conflitos-lote">
+                          <SelectValue placeholder="Selecione o lote" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {lotes?.map((lote) => (
+                            <SelectItem key={lote.id} value={lote.id}>
+                              Lote {lote.numero}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Dropdown Rodovia */}
+                    <div>
+                      <Label htmlFor="conflitos-rodovia">Rodovia</Label>
+                      <Select 
+                        value={selectedRodoviaId} 
+                        onValueChange={setSelectedRodoviaId}
+                        disabled={!selectedLoteId}
+                      >
+                        <SelectTrigger id="conflitos-rodovia">
+                          <SelectValue placeholder={selectedLoteId ? "Selecione a rodovia" : "Primeiro selecione o lote"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {rodovias?.map((rodovia: any) => (
+                            <SelectItem key={rodovia.id} value={rodovia.id}>
+                              {rodovia.codigo}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  {/* Indicador visual */}
+                  {selectedLoteId && selectedRodoviaId && (
+                    <Alert className="mt-4 bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <AlertDescription className="text-green-800 dark:text-green-200">
+                        <strong>Contexto ativo:</strong> Lote {lotes?.find(l => l.id === selectedLoteId)?.numero} - {rodovias?.find((r: any) => r.id === selectedRodoviaId)?.codigo}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Componente de Gestão de Conflitos */}
+              <GestaoConflitos loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
+            </div>
+          </TabsContent>
 
           {isAdmin && (
             <TabsContent value="sistema">
