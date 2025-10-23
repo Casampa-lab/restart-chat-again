@@ -398,6 +398,22 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
       };
     }
 
+    if (tipo === "cilindros") {
+      return {
+        km_inicial: sanitizarNumerico(getFirstValid("Km inicial", "Km", "KM", "km")),
+        latitude_inicial: converterCoordenada(row["Latitude"] || row["latitude"]),
+        longitude_inicial: converterCoordenada(row["Longitude"] || row["longitude"]),
+        lado: row["Lado"] || row["lado"],
+        tipo: row["Tipo"] || row["tipo"],
+        cor_corpo: row["Cor do Corpo"] || row["Cor Corpo"] || row["cor_corpo"],
+        cor_refletivo: row["Cor Refletivo"] || row["cor_refletivo"],
+        tipo_refletivo: row["Tipo Refletivo"] || row["tipo_refletivo"],
+        snv: row["SNV"] || row["snv"],
+        observacao_usuario: row["Observação"] || row["Observacao"] || row["observacao"],
+        solucao_planilha: row["Solução"] || row["Solucao"] || row["solucao"],
+      };
+    }
+
     // Mapeamento básico para outros tipos (com inicial/final)
     const baseMap: any = {
       km_inicial: getFirstValid("Km Inicial", "KM Inicial", "km inicial", "km_inicial"),
