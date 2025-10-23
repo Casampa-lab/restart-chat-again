@@ -6495,6 +6495,10 @@ export type Database = {
         Returns: boolean
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
+      get_counts_inventario_placas: {
+        Args: { p_lote_id: string; p_rodovia_id: string }
+        Returns: Json
+      }
       get_rodovias_by_lote: {
         Args: { p_lote_id: string }
         Returns: {

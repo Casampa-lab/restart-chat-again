@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -195,43 +195,35 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
 
   const toleranciaRodovia = rodoviaConfig?.tolerancia_match_metros || 50;
 
-  const { data: placas, isLoading, refetch } = useQuery({
+  // Query otimizada com paginação virtual
+  const { 
+    data: placasPages, 
+    isLoading, 
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useInfiniteQuery({
     queryKey: ["inventario-placas", loteId, rodoviaId, searchTerm, searchLat, searchLng, toleranciaRodovia],
-    queryFn: async () => {
-      // Implementar paginação manual para buscar TODOS os registros
-      let allData: any[] = [];
-      let from = 0;
-      const pageSize = 1000;
-      let hasMore = true;
+    queryFn: async ({ pageParam = 0 }) => {
+      let query = supabase
+        .from("inventario_dinamico_placas")
+        .select("*")
+        .eq("lote_id", loteId)
+        .eq("rodovia_id", rodoviaId)
+        .range(pageParam, pageParam + 99)
+        .order("km_inicial", { ascending: true });
 
-      while (hasMore) {
-        let query = supabase
-          .from("inventario_dinamico_placas")
-          .select("*", { count: "exact" })
-          .eq("lote_id", loteId)
-          .eq("rodovia_id", rodoviaId)
-          .range(from, from + pageSize - 1);
-
-        if (searchTerm) {
-          query = query.or(
-            `snv.ilike.%${searchTerm}%,codigo.ilike.%${searchTerm}%,tipo.ilike.%${searchTerm}%,br.ilike.%${searchTerm}%`
-          );
-        }
-
-        const { data, error } = await query;
-        if (error) throw error;
-        
-        if (!data || data.length === 0) break;
-        
-        allData = [...allData, ...data];
-        from += pageSize;
-        hasMore = data.length === pageSize;
-        
-        // Limite de segurança para evitar loop infinito
-        if (from >= 10000) break;
+      if (searchTerm) {
+        query = query.or(
+          `snv.ilike.%${searchTerm}%,codigo.ilike.%${searchTerm}%,tipo.ilike.%${searchTerm}%,br.ilike.%${searchTerm}%`
+        );
       }
 
-      let filteredData = allData as FichaPlaca[];
+      const { data, error } = await query;
+      if (error) throw error;
+
+      let filteredData = data as FichaPlaca[];
 
       // Filtrar por coordenadas se fornecidas
       if (searchLat && searchLng) {
@@ -249,57 +241,53 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
             .filter((placa) => placa.distance <= toleranciaRodovia)
             .sort((a, b) => a.distance - b.distance);
         }
-      } else {
-        // Se não houver busca por coordenadas, ordena por km por padrão
-        filteredData = filteredData.sort((a, b) => (a.km_inicial || 0) - (b.km_inicial || 0));
       }
 
       return filteredData;
     },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < 100) return undefined;
+      return allPages.length * 100;
+    },
+    staleTime: 5 * 60 * 1000, // Cache de 5 minutos
   });
 
-  // Query de necessidades relacionadas com reconciliacao
+  // Combinar todas as páginas em um array único
+  const placas = placasPages?.pages.flat() || [];
+
+  // Query de necessidades relacionadas (SEM reconciliacoes - usar campos diretos da view)
   const { data: necessidadesMap, refetch: refetchNecessidades } = useQuery({
-    queryKey: ["necessidades-match-placas", loteId, rodoviaId, toleranciaRodovia],
+    queryKey: ["necessidades-match-placas", loteId, rodoviaId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("necessidades_placas")
         .select(`
           id, servico, servico_final, cadastro_id, codigo, tipo, km_inicial, divergencia, 
           solucao_planilha, servico_inferido, revisao_solicitada, localizado_em_campo, 
-          lado, suporte, substrato, latitude_inicial, longitude_inicial,
-          reconciliacao:reconciliacoes(
-            id,
-            status,
-            distancia_match_metros,
-            overlap_porcentagem,
-            tipo_match
-          )
+          lado, suporte, substrato, latitude_inicial, longitude_inicial, match_decision,
+          distancia_match_metros
         `)
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
-        .not("cadastro_id", "is", null);
+        .not("cadastro_id", "is", null)
+        .eq("match_decision", "AMBIGUOUS");
       
       if (error) throw error;
       
       // Indexar por cadastro_id para busca O(1)
       const map = new Map<string, any>();
       data?.forEach((nec: any) => {
-        const reconciliacao = Array.isArray(nec.reconciliacao) ? nec.reconciliacao[0] : nec.reconciliacao;
-        
-        // Filtrar apenas pendentes (sem restrição de distância)
-        if (reconciliacao?.status === 'pendente_aprovacao') {
-          map.set(nec.cadastro_id, {
-            ...nec,
-            servico: nec.servico_final || nec.servico,
-            distancia_match_metros: reconciliacao?.distancia_match_metros ?? null,
-          });
-        }
+        map.set(nec.cadastro_id, {
+          ...nec,
+          servico: nec.servico_final || nec.servico,
+        });
       });
       
       return map;
     },
     enabled: !!loteId && !!rodoviaId,
+    staleTime: 2 * 60 * 1000, // Cache de 2 minutos
   });
 
   // Contar TODAS as necessidades com match processados (não apenas divergências)
@@ -597,8 +585,19 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
               Carregando inventário...
             </div>
           ) : sortedPlacas && sortedPlacas.length > 0 ? (
-            <div className="border rounded-lg overflow-hidden">
-              <div className="max-h-[600px] overflow-y-auto">
+            <>
+              <div className="border rounded-lg overflow-hidden">
+                <div 
+                  className="max-h-[600px] overflow-y-auto"
+                  onScroll={(e) => {
+                    const target = e.target as HTMLDivElement;
+                    if (target.scrollHeight - target.scrollTop <= target.clientHeight * 1.5) {
+                      if (hasNextPage && !isFetchingNextPage) {
+                        fetchNextPage();
+                      }
+                    }
+                  }}
+                >
                 <Table>
                   <TableHeader className="sticky top-0 bg-muted z-10">
                     <TableRow>
@@ -805,6 +804,12 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                 </Table>
               </div>
             </div>
+            {isFetchingNextPage && (
+              <div className="text-center py-2 text-muted-foreground text-sm">
+                Carregando mais registros...
+              </div>
+            )}
+          </>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               {searchTerm || (searchLat && searchLng)
