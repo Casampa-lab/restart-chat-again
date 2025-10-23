@@ -14,7 +14,7 @@ type TipoElemento = "PLACA" | "PORTICO" | "INSCRICAO" | "MARCA_LONG" | "TACHAS" 
 const TIPO_TO_TABLE_MAP: Record<TipoElemento, string> = {
   PLACA: "necessidades_placas",
   PORTICO: "necessidades_porticos",
-  INSCRICAO: "necessidades_inscricoes",
+  INSCRICAO: "necessidades_marcas_transversais",
   MARCA_LONG: "necessidades_marcas_longitudinais",
   TACHAS: "necessidades_tachas",
   DEFENSA: "necessidades_defensas",
@@ -79,7 +79,7 @@ export function ExecutarMatching() {
         if (!tabela) continue;
 
         // 1) Buscar necessidades PENDENTES (ainda sem decisão)
-        const { data: necessidades, error } = await supabase
+        let { data: necessidades, error } = await supabase
           .from(tabela as any)
           .select("*")
           .is("match_decision", null) // só processa quem ainda não tem decisão
@@ -90,6 +90,14 @@ export function ExecutarMatching() {
           stats.erros++;
           continue;
         }
+
+        // Filtro adicional para INSCRICAO: só processar registros com tipo_inscricao e sigla
+        if (tipo === "INSCRICAO" && necessidades) {
+          necessidades = necessidades.filter(
+            (n: any) => n.tipo_inscricao != null && n.sigla != null
+          );
+        }
+
         if (!necessidades?.length) {
           console.log(`ℹ️ Tipo ${tipo}: sem necessidades pendentes.`);
           continue;
@@ -131,9 +139,9 @@ export function ExecutarMatching() {
                 atributos.lado = normLado(nec.lado); // se existir
               }
               if (tipo === "INSCRICAO") {
-                atributos.sigla = norm(nec.sigla);
-                atributos.tipo_inscricao = norm(nec.tipo_inscricao);
-                atributos.lado = normLado(nec.lado); // se existir
+                atributos.sigla = norm(nec.sigla ?? nec.codigo ?? nec.texto);
+                atributos.tipo_inscricao = norm(nec.tipo_inscricao ?? nec.tipo);
+                atributos.lado = normLado(nec.lado);
               }
               // fallback por KM sempre que houver KM (o serviço usa quando lat/lon forem nulos)
               if (temKM) atributos.km_inicial = Number(nec.km_inicial);
