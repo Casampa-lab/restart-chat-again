@@ -198,23 +198,40 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   const { data: placas, isLoading, refetch } = useQuery({
     queryKey: ["inventario-placas", loteId, rodoviaId, searchTerm, searchLat, searchLng, toleranciaRodovia],
     queryFn: async () => {
-      let query = supabase
-        .from("inventario_dinamico_placas")
-        .select("*", { count: "exact" })
-        .eq("lote_id", loteId)
-        .eq("rodovia_id", rodoviaId)
-        .limit(10000);
+      // Implementar paginação manual para buscar TODOS os registros
+      let allData: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      let hasMore = true;
 
-      if (searchTerm) {
-        query = query.or(
-          `snv.ilike.%${searchTerm}%,codigo.ilike.%${searchTerm}%,tipo.ilike.%${searchTerm}%,br.ilike.%${searchTerm}%`
-        );
+      while (hasMore) {
+        let query = supabase
+          .from("inventario_dinamico_placas")
+          .select("*", { count: "exact" })
+          .eq("lote_id", loteId)
+          .eq("rodovia_id", rodoviaId)
+          .range(from, from + pageSize - 1);
+
+        if (searchTerm) {
+          query = query.or(
+            `snv.ilike.%${searchTerm}%,codigo.ilike.%${searchTerm}%,tipo.ilike.%${searchTerm}%,br.ilike.%${searchTerm}%`
+          );
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        
+        if (!data || data.length === 0) break;
+        
+        allData = [...allData, ...data];
+        from += pageSize;
+        hasMore = data.length === pageSize;
+        
+        // Limite de segurança para evitar loop infinito
+        if (from >= 10000) break;
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
-      
-      let filteredData = data as FichaPlaca[];
+      let filteredData = allData as FichaPlaca[];
 
       // Filtrar por coordenadas se fornecidas
       if (searchLat && searchLng) {

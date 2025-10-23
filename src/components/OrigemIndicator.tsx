@@ -6,7 +6,11 @@ interface OrigemIndicatorProps {
 }
 
 export function OrigemIndicator({ origem, tipoOrigem }: OrigemIndicatorProps) {
-  const isConsolidado = origem === 'NECESSIDADE_CONSOLIDADA' || 
+  // PRIORIDADE 1: Verificar SUBSTITUICAO primeiro (deve ser AZUL)
+  const isSubstituicao = tipoOrigem === 'MATCH_SUBSTITUICAO';
+  
+  // PRIORIDADE 2: Verificar outros tipos
+  const isConsolidado = origem === 'NECESSIDADE_CONSOLIDADA' && 
                         tipoOrigem === 'MATCH_CONFIRMADO';
 
   const isPendenteReconciliacao = origem === 'NECESSIDADE_PENDENTE_RECONCILIACAO' ||
@@ -29,6 +33,7 @@ export function OrigemIndicator({ origem, tipoOrigem }: OrigemIndicatorProps) {
         <TooltipTrigger asChild>
           <div 
             className={`w-3 h-3 rounded-full ${
+              isSubstituicao ? 'bg-blue-500 border-2 border-blue-600' :
               isConsolidado ? 'bg-green-500 border-2 border-green-600' :
               isPendenteReconciliacao ? 'bg-yellow-500 border-2 border-yellow-600' :
               isErroProjetoPendente ? 'bg-blue-500 border-2 border-blue-600' :
@@ -40,7 +45,8 @@ export function OrigemIndicator({ origem, tipoOrigem }: OrigemIndicatorProps) {
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-xs">
-            {isConsolidado ? '🟢 Match Consolidado (Cadastro + Necessidade)' :
+            {isSubstituicao ? '🔵 Substituição (Remover + Implantar)' :
+             isConsolidado ? '🟢 Match Consolidado (Cadastro + Necessidade)' :
              isPendenteReconciliacao ? '🟡 Match Ambíguo (Requer Reconciliação Manual)' :
              isErroProjetoPendente ? '🔵 Necessidade com Erro de Projeto (Aguardando Revisão)' :
              isCadastro ? '⚪ Cadastro Original (Sem Intervenção)' : 
