@@ -507,10 +507,32 @@ export function InventarioInscricoesViewer({
                             </TableCell>
                           )}
                           <TableCell className="text-center">
-                            <OrigemIndicator 
-                              origem={inscricao.origem}
-                              tipoOrigem={inscricao.tipo_origem}
-                            />
+                            <div className="flex items-center gap-2 justify-center">
+                              <OrigemIndicator 
+                                origem={inscricao.origem}
+                                tipoOrigem={inscricao.tipo_origem}
+                              />
+                              
+                              {necessidadesMap?.get(inscricao.id) && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
+                                        🔗 Match
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">
+                                        Vinculado a necessidade{' '}
+                                        {necessidadesMap.get(inscricao.id)?.distancia_match_metros 
+                                          ? `(${necessidadesMap.get(inscricao.id)?.distancia_match_metros.toFixed(2)}m)` 
+                                          : ''}
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline">{sigla}</Badge>

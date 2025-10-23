@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Eye, Calendar, Library, FileText, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "./ReconciliacaoDrawerUniversal";
 import { OrigemIndicator } from "@/components/OrigemIndicator";
@@ -467,10 +468,32 @@ export function InventarioMarcasLongitudinaisViewer({
                       return (
                         <TableRow key={marca.id} className="hover:bg-muted/50">
                           <TableCell className="text-center">
-                            <OrigemIndicator 
-                              origem={marca.origem}
-                              tipoOrigem={marca.tipo_origem}
-                            />
+                            <div className="flex items-center gap-2 justify-center">
+                              <OrigemIndicator 
+                                origem={marca.origem}
+                                tipoOrigem={marca.tipo_origem}
+                              />
+                              
+                              {necessidadesMap?.get(marca.id) && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
+                                        🔗 Match
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">
+                                        Vinculado a necessidade{' '}
+                                        {necessidadesMap.get(marca.id)?.distancia_match_metros 
+                                          ? `(${necessidadesMap.get(marca.id)?.distancia_match_metros.toFixed(2)}m)` 
+                                          : ''}
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell className="font-medium">{marca.snv || "-"}</TableCell>
                           <TableCell>

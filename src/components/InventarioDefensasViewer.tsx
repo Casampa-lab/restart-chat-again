@@ -489,10 +489,32 @@ export const InventarioDefensasViewer = ({
               {sortedDefensas?.map((defensa) => (
                 <TableRow key={defensa.id}>
                   <TableCell className="text-center">
-                    <OrigemIndicator 
-                      origem={defensa.origem}
-                      tipoOrigem={defensa.tipo_origem}
-                    />
+                    <div className="flex items-center gap-2 justify-center">
+                      <OrigemIndicator 
+                        origem={defensa.origem}
+                        tipoOrigem={defensa.tipo_origem}
+                      />
+                      
+                      {necessidadesMap?.get(defensa.id) && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
+                                🔗 Match
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">
+                                Vinculado a necessidade{' '}
+                                {necessidadesMap.get(defensa.id)?.distancia_match_metros 
+                                  ? `(${necessidadesMap.get(defensa.id)?.distancia_match_metros.toFixed(2)}m)` 
+                                  : ''}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="text-center">{(defensa as any).tramo || "-"}</TableCell>
                   <TableCell className="text-center">{defensa.lado}</TableCell>

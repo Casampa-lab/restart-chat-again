@@ -549,10 +549,32 @@ export function InventarioPorticosViewer({
                   {sortedPorticos.map((portico) => (
                     <TableRow key={portico.id}>
                       <TableCell className="text-center">
-                        <OrigemIndicator 
-                          origem={portico.origem}
-                          tipoOrigem={portico.tipo_origem}
-                        />
+                        <div className="flex items-center gap-2 justify-center">
+                          <OrigemIndicator 
+                            origem={portico.origem}
+                            tipoOrigem={portico.tipo_origem}
+                          />
+                          
+                          {necessidadesMap?.get(portico.id) && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-xs">
+                                    🔗 Match
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">
+                                    Vinculado a necessidade{' '}
+                                    {necessidadesMap.get(portico.id)?.distancia_match_metros 
+                                      ? `(${necessidadesMap.get(portico.id)?.distancia_match_metros.toFixed(2)}m)` 
+                                      : ''}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="font-mono text-sm text-center">
                         {portico.snv || "-"}
