@@ -14,7 +14,7 @@ type TipoElemento = "PLACA" | "PORTICO" | "INSCRICAO" | "MARCA_LONG" | "TACHAS" 
 const TIPO_TO_TABLE_MAP: Record<TipoElemento, string> = {
   PLACA: "necessidades_placas",
   PORTICO: "necessidades_porticos",
-  INSCRICAO: "necessidades_marcas_transversais",
+  INSCRICAO: "necessidades_inscricoes",
   MARCA_LONG: "necessidades_marcas_longitudinais",
   TACHAS: "necessidades_tachas",
   DEFENSA: "necessidades_defensas",
