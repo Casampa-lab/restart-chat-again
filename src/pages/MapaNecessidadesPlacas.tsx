@@ -51,6 +51,7 @@ const DECISION_LABELS = {
   GRAY_ZONE: '⚠️ Faixa Cinza',
   AMBIGUOUS: '⚠️ Ambíguo',
   NO_MATCH: '❌ Sem Match',
+  MANUAL_RECONCILIATION: '✅ Confirmado Manualmente',
   null: '⏳ Pendente'
 };
 
@@ -160,7 +161,7 @@ export default function MapaNecessidadesPlacas() {
         bounds.extend([nec.longitude_inicial, nec.latitude_inicial]);
 
         const el = document.createElement('div');
-        el.className = 'cursor-pointer';
+        el.className = 'cursor-pointer relative';
         el.style.width = '30px';
         el.style.height = '30px';
         el.style.borderRadius = '50%';
@@ -168,6 +169,22 @@ export default function MapaNecessidadesPlacas() {
         el.style.backgroundColor = DECISION_COLORS[nec.match_decision as keyof typeof DECISION_COLORS] || DECISION_COLORS.null;
         el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
         el.style.transition = 'transform 0.2s';
+        
+        // Adicionar badge de reconciliação manual
+        if (nec.reason_code === 'MANUAL_RECONCILIATION') {
+          const badge = document.createElement('div');
+          badge.innerHTML = '🤝';
+          badge.style.position = 'absolute';
+          badge.style.top = '-8px';
+          badge.style.right = '-8px';
+          badge.style.fontSize = '14px';
+          badge.style.backgroundColor = 'white';
+          badge.style.borderRadius = '50%';
+          badge.style.padding = '2px';
+          badge.style.border = '2px solid #22c55e';
+          badge.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+          el.appendChild(badge);
+        }
         
         el.addEventListener('mouseenter', () => {
           el.style.transform = 'scale(1.2)';
@@ -184,7 +201,11 @@ export default function MapaNecessidadesPlacas() {
               <div class="p-2">
                 <div class="font-bold">${nec.codigo}</div>
                 <div class="text-sm text-gray-600">KM ${nec.km_inicial.toFixed(3)}</div>
-                <div class="text-sm">${DECISION_LABELS[nec.match_decision as keyof typeof DECISION_LABELS] || DECISION_LABELS.null}</div>
+                <div class="text-sm">${
+                  nec.reason_code === 'MANUAL_RECONCILIATION'
+                    ? '✅ Match Confirmado Manualmente 🤝'
+                    : DECISION_LABELS[nec.match_decision as keyof typeof DECISION_LABELS] || DECISION_LABELS.null
+                }</div>
               </div>
             `)
           )

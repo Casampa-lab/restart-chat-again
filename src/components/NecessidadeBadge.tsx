@@ -68,7 +68,10 @@ export function NecessidadeBadge({ necessidade, tipo }: NecessidadeBadgeProps) {
   const navigate = useNavigate();
   const config = SERVICO_CONFIG[necessidade.servico];
   const Icon = config.icon;
-  const matchLevel = getMatchLevel(necessidade.distancia_match_metros);
+  
+  // Verificar se foi reconciliação manual
+  const isManualReconciliation = necessidade.reconciliado && (necessidade as any).reason_code === 'MANUAL_RECONCILIATION';
+  const matchLevel = isManualReconciliation ? "confirmado" : getMatchLevel(necessidade.distancia_match_metros);
   const colorClasses = getMatchColorClasses(necessidade.servico, matchLevel);
   const distancia = necessidade.distancia_match_metros || 0;
 
@@ -154,7 +157,11 @@ export function NecessidadeBadge({ necessidade, tipo }: NecessidadeBadgeProps) {
             
             {!temConflito && (
               <div className="pt-1">
-                {matchLevel === "confirmado" ? (
+                {(necessidade as any).reason_code === 'MANUAL_RECONCILIATION' ? (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 text-[10px]">
+                    ✓ Match Confirmado Manualmente 🤝
+                  </Badge>
+                ) : matchLevel === "confirmado" ? (
                   <Badge variant="outline" className="bg-green-50 text-green-700 text-[10px]">
                     ✓ Match Confirmado ({distancia.toFixed(0)}m)
                   </Badge>

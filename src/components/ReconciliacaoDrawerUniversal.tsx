@@ -164,33 +164,38 @@ export function ReconciliacaoDrawerUniversal({
 
         const novoElementoId: string = elementoCriado.id;
 
-        // 3. Se existe cadastro_id (match), desativar o elemento antigo
-        if (necessidade.cadastro_id) {
+        // 3. Se existe cadastro_match_id (match), desativar o elemento antigo
+        if (necessidade.cadastro_match_id) {
           const { error: desativarError } = await supabase
             .from(config.tabelaCadastro as any)
             .update({
               ativo: false,
               substituido_por: novoElementoId,
               substituido_em: new Date().toISOString(),
+              modificado_por_intervencao: true,
             })
-            .eq("id", necessidade.cadastro_id);
+            .eq("id", necessidade.cadastro_match_id);
 
           if (desativarError) throw desativarError;
         }
 
-        // 4. Atualizar reconciliação para apontar para o novo elemento
+        // 4. Criar/atualizar reconciliação para apontar para o novo elemento
         const { error: reconciliacaoError } = await supabase
           .from('reconciliacoes')
-          .update({
+          .upsert({
+            necessidade_id: necessidade.id,
+            tipo_elemento: tipoElemento,
+            cadastro_id: novoElementoId, // Vincular ao novo elemento
             status: 'aprovado',
             reconciliado: true,
             aprovado_por: user.id,
             aprovado_em: new Date().toISOString(),
             observacao_coordenador: observacao,
-            cadastro_id: novoElementoId, // Vincular ao novo elemento
-          })
-          .eq("necessidade_id", necessidade.id)
-          .eq("tipo_elemento", tipoElemento);
+            distancia_match_metros: necessidade.distancia_match_metros || null,
+            tipo_match: necessidade.match_decision || null,
+          }, {
+            onConflict: 'necessidade_id,tipo_elemento'
+          });
 
         if (reconciliacaoError) throw reconciliacaoError;
 
@@ -198,10 +203,13 @@ export function ReconciliacaoDrawerUniversal({
         const { error: necessidadeError } = await supabase
           .from(config.tabelaNecessidades as any)
           .update({
-            servico_final: "Substituir",
-            servico: "Substituir",
+            servico_final: necessidade.servico === 'Remover' ? 'Remover' : 'Substituir',
+            servico: necessidade.servico,
             localizado_em_campo: true,
             reconciliado: true,
+            cadastro_match_id: novoElementoId, // Vincular à placa nova
+            match_decision: 'MATCH_DIRECT', // Forçar verde
+            reason_code: 'MANUAL_RECONCILIATION', // Indicador de reconciliação manual
           })
           .eq("id", necessidade.id);
 
