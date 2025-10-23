@@ -52,6 +52,8 @@ const fieldLabels: Record<string, string> = {
   retro_pelicula_legenda_orla: 'Retro Legenda/Orla',
   retro_fundo: 'Retrorrefletividade Fundo',
   retro_orla_legenda: 'Retrorrefletividade Orla/Legenda',
+  solucao_planilha: 'Solução',
+  status_servico: 'Status do Serviço',
   
   // Estado e condições
   placa_recuperada: 'Placa Recuperada',

@@ -110,6 +110,8 @@ interface FichaPlaca {
   cor_pelicula_fundo: string | null;
   tipo_pelicula_legenda_orla: string | null;
   cor_pelicula_legenda_orla: string | null;
+  solucao_planilha: string | null;
+  status_servico: string | null;
   observacao: string | null;
   data_registro: string | null;
   fotos_urls: string[] | null;
@@ -120,8 +122,6 @@ interface FichaPlaca {
   rodovia_id: string;
   lote_id: string;
   user_id: string;
-  solucao_planilha: string | null;
-  status_servico: string | null;
 }
 
 interface Intervencao {

@@ -6059,6 +6059,7 @@ export type Database = {
           created_at: string | null
           data_registro: string | null
           dimensoes_mm: string | null
+          distancia_match_metros: number | null
           fotos_urls: string[] | null
           id: string | null
           km_inicial: number | null
@@ -6076,6 +6077,8 @@ export type Database = {
           origem: string | null
           rodovia_id: string | null
           snv: string | null
+          solucao_planilha: string | null
+          status_servico: string | null
           substrato: string | null
           tipo: string | null
           tipo_origem: string | null
