@@ -86,7 +86,7 @@ export function ExecutarMatching() {
           .from(tabela as any)
           .select("*")
           .is("match_decision", null) // só processa quem ainda não tem decisão
-          .limit(2000);
+          .limit(5000);
 
         if (error) {
           console.error(`❌ Erro ao buscar ${tipo}:`, error);
