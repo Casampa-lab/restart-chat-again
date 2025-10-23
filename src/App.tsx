@@ -50,6 +50,7 @@ import MapaNecessidadesInscricoes from "./pages/MapaNecessidadesInscricoes";
 import ListaNecessidadesMarcas from "./pages/ListaNecessidadesMarcas";
 import ListaNecessidadesTachas from "./pages/ListaNecessidadesTachas";
 import ListaNecessidadesDefensas from "./pages/ListaNecessidadesDefensas";
+import ListaNecessidadesCilindros from "./pages/ListaNecessidadesCilindros";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,7 @@ const App = () => (
         <Route path="/lista-necessidades-marcas" element={<ListaNecessidadesMarcas />} />
         <Route path="/lista-necessidades-tachas" element={<ListaNecessidadesTachas />} />
         <Route path="/lista-necessidades-defensas" element={<ListaNecessidadesDefensas />} />
+        <Route path="/lista-necessidades-cilindros" element={<ListaNecessidadesCilindros />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ChatAssistant />
