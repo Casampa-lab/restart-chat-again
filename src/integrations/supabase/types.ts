@@ -3659,6 +3659,7 @@ export type Database = {
           extensao_km: number | null
           geom_line: unknown
           id: string
+          import_batch_id: string | null
           justificativa_reconciliacao: string | null
           km_final: number | null
           km_inicial: number | null
@@ -3715,6 +3716,7 @@ export type Database = {
           extensao_km?: number | null
           geom_line?: unknown
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_final?: number | null
           km_inicial?: number | null
@@ -3771,6 +3773,7 @@ export type Database = {
           extensao_km?: number | null
           geom_line?: unknown
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_final?: number | null
           km_inicial?: number | null
@@ -3869,6 +3872,7 @@ export type Database = {
           geometria: string | null
           id: string
           id_defensa: string | null
+          import_batch_id: string | null
           justificativa_reconciliacao: string | null
           km_final: number | null
           km_inicial: number | null
@@ -3945,6 +3949,7 @@ export type Database = {
           geometria?: string | null
           id?: string
           id_defensa?: string | null
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_final?: number | null
           km_inicial?: number | null
@@ -4021,6 +4026,7 @@ export type Database = {
           geometria?: string | null
           id?: string
           id_defensa?: string | null
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_final?: number | null
           km_inicial?: number | null
@@ -4112,6 +4118,7 @@ export type Database = {
           extensao_metros: number | null
           geom_line: unknown
           id: string
+          import_batch_id: string | null
           justificativa_reconciliacao: string | null
           km_final: number | null
           km_inicial: number | null
@@ -4169,6 +4176,7 @@ export type Database = {
           extensao_metros?: number | null
           geom_line?: unknown
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_final?: number | null
           km_inicial?: number | null
@@ -4226,6 +4234,7 @@ export type Database = {
           extensao_metros?: number | null
           geom_line?: unknown
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_final?: number | null
           km_inicial?: number | null
@@ -4306,6 +4315,7 @@ export type Database = {
           estado: string | null
           estado_conservacao: string | null
           id: string
+          import_batch_id: string | null
           justificativa_reconciliacao: string | null
           km_final: number | null
           km_inicial: number | null
@@ -4358,6 +4368,7 @@ export type Database = {
           estado?: string | null
           estado_conservacao?: string | null
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_final?: number | null
           km_inicial?: number | null
@@ -4410,6 +4421,7 @@ export type Database = {
           estado?: string | null
           estado_conservacao?: string | null
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_final?: number | null
           km_inicial?: number | null
@@ -4488,6 +4500,7 @@ export type Database = {
           divergencia: boolean | null
           estado: string | null
           id: string
+          import_batch_id: string | null
           justificativa_reconciliacao: string | null
           km_inicial: number | null
           lado: string | null
@@ -4546,6 +4559,7 @@ export type Database = {
           divergencia?: boolean | null
           estado?: string | null
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_inicial?: number | null
           lado?: string | null
@@ -4604,6 +4618,7 @@ export type Database = {
           divergencia?: boolean | null
           estado?: string | null
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_inicial?: number | null
           lado?: string | null
@@ -4681,6 +4696,7 @@ export type Database = {
           divergencia: boolean | null
           estado: string | null
           id: string
+          import_batch_id: string | null
           justificativa_reconciliacao: string | null
           km_inicial: number | null
           lado: string | null
@@ -4724,6 +4740,7 @@ export type Database = {
           divergencia?: boolean | null
           estado?: string | null
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_inicial?: number | null
           lado?: string | null
@@ -4767,6 +4784,7 @@ export type Database = {
           divergencia?: boolean | null
           estado?: string | null
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_inicial?: number | null
           lado?: string | null
@@ -4840,6 +4858,7 @@ export type Database = {
           extensao_km: number | null
           geom_line: unknown
           id: string
+          import_batch_id: string | null
           justificativa_reconciliacao: string | null
           km_final: number | null
           km_inicial: number | null
@@ -4894,6 +4913,7 @@ export type Database = {
           extensao_km?: number | null
           geom_line?: unknown
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_final?: number | null
           km_inicial?: number | null
@@ -4948,6 +4968,7 @@ export type Database = {
           extensao_km?: number | null
           geom_line?: unknown
           id?: string
+          import_batch_id?: string | null
           justificativa_reconciliacao?: string | null
           km_final?: number | null
           km_inicial?: number | null

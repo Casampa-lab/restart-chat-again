@@ -665,9 +665,14 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
     const loteIdAtivo = session.lote_id;
     const rodoviaIdAtiva = session.rodovia_id;
 
+    // ✅ GERAR UUID ÚNICO PARA ESTA IMPORTAÇÃO
+    const importBatchId = crypto.randomUUID();
+    console.log(`🆔 Import Batch ID gerado: ${importBatchId}`);
+
     console.log("✅ Importação autorizada:", {
       rodovia: session.rodovia.codigo,
       lote: session.lote.numero,
+      importBatchId,
       loteId: loteIdAtivo,
       rodoviaId: rodoviaIdAtiva,
     });
@@ -993,6 +998,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             user_id: user.id,
             lote_id: loteId,
             rodovia_id: rodoviaId,
+            import_batch_id: importBatchId, // ✅ Vincular ao batch da importação
             cadastro_id: null,        // Preenchido pelo matching
             servico: null,            // Preenchido pelo matching
             servico_inferido: null,   // Preenchido pelo matching

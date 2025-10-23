@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface ImportacaoAgrupada {
+  import_batch_id: string | null;
   rodovia_id: string;
   lote_id: string;
   created_at: string;
@@ -51,6 +52,7 @@ export function DeletarImportacaoPorLote() {
         const { data, error } = await supabase
           .from(tabela as any)
           .select(`
+            import_batch_id,
             rodovia_id,
             lote_id,
             created_at,
@@ -65,13 +67,16 @@ export function DeletarImportacaoPorLote() {
         }
 
         if (data && data.length > 0) {
-          // Agrupar por rodovia_id + lote_id + created_at (timestamp com segundos)
+          // ✅ Agrupar por import_batch_id (solução robusta)
+          // Se import_batch_id for null (importações antigas), usar fallback para rodovia+lote+timestamp
           const grupos = data.reduce((acc: Record<string, ImportacaoAgrupada>, item: any) => {
-            const timestampKey = new Date(item.created_at).toISOString();
-            const key = `${item.rodovia_id}_${item.lote_id}_${timestampKey}`;
+            const key = item.import_batch_id 
+              ? item.import_batch_id 
+              : `legacy_${item.rodovia_id}_${item.lote_id}_${new Date(item.created_at).toISOString()}`;
             
             if (!acc[key]) {
               acc[key] = {
+                import_batch_id: item.import_batch_id,
                 rodovia_id: item.rodovia_id,
                 lote_id: item.lote_id,
                 created_at: item.created_at,
@@ -90,7 +95,10 @@ export function DeletarImportacaoPorLote() {
 
       // Agrupar novamente se houver registros duplicados de tabelas diferentes
       const gruposFinal = resultados.reduce((acc: Record<string, ImportacaoAgrupada>, item: ImportacaoAgrupada) => {
-        const key = `${item.rodovia_id}_${item.lote_id}_${item.created_at}`;
+        const key = item.import_batch_id 
+          ? item.import_batch_id 
+          : `legacy_${item.rodovia_id}_${item.lote_id}_${item.created_at}`;
+        
         if (!acc[key]) {
           acc[key] = item;
         } else {
@@ -109,12 +117,24 @@ export function DeletarImportacaoPorLote() {
       let totalDeletados = 0;
 
       for (const tabela of TABELAS_NECESSIDADES) {
-        const { error, count } = await supabase
+        // ✅ Deletar por import_batch_id (solução robusta)
+        // Se import_batch_id for null, usar fallback para rodovia+lote+timestamp
+        let query = supabase
           .from(tabela as any)
-          .delete({ count: 'exact' })
-          .eq("rodovia_id", importacao.rodovia_id)
-          .eq("lote_id", importacao.lote_id)
-          .eq("created_at", importacao.created_at);
+          .delete({ count: 'exact' });
+
+        if (importacao.import_batch_id) {
+          // Importações novas: deletar por batch_id
+          query = query.eq("import_batch_id", importacao.import_batch_id);
+        } else {
+          // Importações antigas: deletar por rodovia+lote+timestamp
+          query = query
+            .eq("rodovia_id", importacao.rodovia_id)
+            .eq("lote_id", importacao.lote_id)
+            .eq("created_at", importacao.created_at);
+        }
+
+        const { error, count } = await query;
 
         if (error) {
           console.error(`Erro ao deletar de ${tabela}:`, error);
@@ -194,6 +214,11 @@ export function DeletarImportacaoPorLote() {
                     <div className="text-sm text-muted-foreground">
                       {new Date(imp.created_at).toLocaleString("pt-BR")}
                     </div>
+                    {imp.import_batch_id && (
+                      <div className="text-xs text-muted-foreground font-mono">
+                        ID: {imp.import_batch_id.substring(0, 8)}...
+                      </div>
+                    )}
                     <div className="text-sm font-medium text-primary">
                       {imp.total_registros} registro(s)
                     </div>
