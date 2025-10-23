@@ -492,11 +492,13 @@ export const InventarioDefensasViewer = ({
               {sortedDefensas?.map((defensa) => (
                 <TableRow key={defensa.id}>
                   <TableCell className="text-center">
-                    <div className="flex items-center gap-2 justify-center">
-                      <OrigemIndicator 
-                        origem={defensa.origem}
-                        tipoOrigem={defensa.tipo_origem}
-                      />
+                    <div className="flex items-center gap-2 justify-center min-h-[28px]">
+                      <div className="flex items-center">
+                        <OrigemIndicator 
+                          origem={defensa.origem}
+                          tipoOrigem={defensa.tipo_origem}
+                        />
+                      </div>
                       
                       {defensa.match_decision === 'AMBIGUOUS' && (
                         <TooltipProvider>

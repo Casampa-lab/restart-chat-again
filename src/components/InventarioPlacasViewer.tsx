@@ -686,11 +686,13 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
                       return (
                         <TableRow key={placa.id} className="hover:bg-muted/50">
                           <TableCell className="text-center">
-                            <div className="flex items-center gap-2 justify-center">
-                              <OrigemIndicator 
-                                origem={placa.origem} 
-                                tipoOrigem={placa.tipo_origem} 
-                              />
+                            <div className="flex items-center gap-2 justify-center min-h-[28px]">
+                              <div className="flex items-center">
+                                <OrigemIndicator 
+                                  origem={placa.origem} 
+                                  tipoOrigem={placa.tipo_origem} 
+                                />
+                              </div>
                               
                               {placa.match_decision === 'AMBIGUOUS' && (
                                 <TooltipProvider>
