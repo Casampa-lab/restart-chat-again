@@ -64,8 +64,20 @@ Deno.serve(async (req) => {
       throw new Error('Necessidade não encontrada')
     }
 
-    // 3. Preparar campos para atualizar no inventário (campos "fonte de verdade" do projeto)
+    // 3. Buscar registro antigo do inventário para verificar origem
     const tabelaInventario = `inventario_${tipo_elemento}`
+    const { data: registroAntigo, error: antigoError } = await supabaseClient
+      .from(tabelaInventario as any)
+      .select('*')
+      .eq('id', inventario_id)
+      .single()
+
+    if (antigoError || !registroAntigo) {
+      console.error('[Aceitar Auto] Erro ao buscar registro antigo:', antigoError)
+      throw new Error('Registro antigo não encontrado')
+    }
+
+    // 4. Preparar campos para o novo/atualizado registro
     const camposAtualizar: any = {
       last_source: 'PROJETO',
       updated_at: new Date().toISOString(),
@@ -73,7 +85,7 @@ Deno.serve(async (req) => {
       status_servico: necessidade.solucao_planilha === 'Remover' ? 'AGUARDANDO_REMOCAO' : 'ATIVO',
     }
 
-    // Mapear campos específicos por tipo (fonte de verdade = projeto)
+    // Mapear campos específicos por tipo
     if (tipo_elemento === 'placas') {
       camposAtualizar.codigo = necessidade.codigo
       camposAtualizar.tipo = necessidade.tipo || necessidade.tipo_placa
@@ -109,18 +121,86 @@ Deno.serve(async (req) => {
       if (necessidade.extensao_metros) camposAtualizar.extensao_metros = necessidade.extensao_metros
     }
 
-    // 4. Atualizar inventário com dados da necessidade
-    const { error: updateError } = await supabaseClient
-      .from(tabelaInventario as any)
-      .update(camposAtualizar)
-      .eq('id', inventario_id)
+    let novoRegistroId = inventario_id
 
-    if (updateError) {
-      console.error('[Aceitar Auto] Erro ao atualizar inventário:', updateError)
-      throw updateError
+    // 5. Lógica de substituição ou atualização
+    if (registroAntigo.origem === 'cadastro_inicial') {
+      // CASO 1: Substituição - desativar antigo e criar novo
+      console.log(`[Aceitar Auto] Substituindo registro cadastro_inicial por necessidade`)
+
+      // 5.1. Desativar registro antigo
+      const { error: desativarError } = await supabaseClient
+        .from(tabelaInventario as any)
+        .update({
+          ativo: false,
+          substituido_em: new Date().toISOString(),
+        })
+        .eq('id', inventario_id)
+
+      if (desativarError) {
+        console.error('[Aceitar Auto] Erro ao desativar registro antigo:', desativarError)
+        throw desativarError
+      }
+
+      // 5.2. Criar novo registro com origem='necessidade'
+      const novoRegistro: any = {
+        ...camposAtualizar,
+        origem: 'necessidade',
+        ativo: true,
+        user_id: necessidade.user_id || registroAntigo.user_id,
+        lote_id: necessidade.lote_id || registroAntigo.lote_id,
+        rodovia_id: necessidade.rodovia_id || registroAntigo.rodovia_id,
+        km_inicial: necessidade.km_inicial || registroAntigo.km_inicial,
+        km_final: necessidade.km_final || registroAntigo.km_final,
+        latitude_inicial: necessidade.latitude_inicial || registroAntigo.latitude_inicial,
+        longitude_inicial: necessidade.longitude_inicial || registroAntigo.longitude_inicial,
+        latitude_final: necessidade.latitude_final || registroAntigo.latitude_final,
+        longitude_final: necessidade.longitude_final || registroAntigo.longitude_final,
+      }
+
+      const { data: novoReg, error: insertError } = await supabaseClient
+        .from(tabelaInventario as any)
+        .insert(novoRegistro)
+        .select()
+        .single()
+
+      if (insertError || !novoReg) {
+        console.error('[Aceitar Auto] Erro ao criar novo registro:', insertError)
+        throw insertError
+      }
+
+      novoRegistroId = novoReg.id
+
+      // 5.3. Linkar antigo → novo
+      const { error: linkError } = await supabaseClient
+        .from(tabelaInventario as any)
+        .update({
+          substituido_por: novoRegistroId,
+        })
+        .eq('id', inventario_id)
+
+      if (linkError) {
+        console.error('[Aceitar Auto] Erro ao linkar registros:', linkError)
+        throw linkError
+      }
+
+      console.log(`[Aceitar Auto] ✓ Novo registro criado: ${novoRegistroId}, antigo desativado: ${inventario_id}`)
+    } else {
+      // CASO 2: Atualização - já é origem='necessidade', apenas atualizar
+      console.log(`[Aceitar Auto] Atualizando registro origem=necessidade existente`)
+
+      const { error: updateError } = await supabaseClient
+        .from(tabelaInventario as any)
+        .update(camposAtualizar)
+        .eq('id', inventario_id)
+
+      if (updateError) {
+        console.error('[Aceitar Auto] Erro ao atualizar inventário:', updateError)
+        throw updateError
+      }
+
+      console.log(`[Aceitar Auto] ✓ Registro ${inventario_id} atualizado`)
     }
-
-    console.log(`[Aceitar Auto] Inventário ${inventario_id} atualizado com dados do projeto`)
 
     // 5. Atualizar match_resultados
     const { error: matchUpdateError } = await supabaseClient
