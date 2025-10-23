@@ -6322,6 +6322,17 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      match_linear_km: {
+        Args: {
+          p_atributos: Json
+          p_km_fim: number
+          p_km_ini: number
+          p_rodovia_id: string
+          p_servico: string
+          p_tipo: string
+        }
+        Returns: Json
+      }
       match_pontual: {
         Args: {
           p_atributos: Json

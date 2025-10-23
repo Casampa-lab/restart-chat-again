@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { matchPontual, matchLinear, buildLineStringWKT, MatchResult } from "@/lib/matchingService";
+import { matchPontual, matchLinear, matchLinearKm, buildLineStringWKT, MatchResult } from "@/lib/matchingService";
 import { Play, CheckCircle, XCircle, Loader2 } from "lucide-react";
 
 type TipoElemento = "PLACA" | "PORTICO" | "INSCRICAO" | "MARCA_LONG" | "TACHAS" | "DEFENSA" | "CILINDRO" | "TODOS";
@@ -152,65 +152,70 @@ export function ExecutarMatching() {
                 nec.latitude_inicial != null && nec.longitude_inicial != null &&
                 nec.latitude_final   != null && nec.longitude_final   != null;
 
-  const hasKMLine =
-    nec.km_inicial != null && nec.km_final != null &&
-    Number(nec.km_final) >= Number(nec.km_inicial);
+              const hasKMLine =
+                nec.km_inicial != null && nec.km_final != null &&
+                Number(nec.km_final) >= Number(nec.km_inicial);
 
-  if (!hasGPSLine && !hasKMLine) {
-    console.error(`⚠️ ${tipo} ${nec.id}: sem dados suficientes (nem GPS nem KM).`, {
-      km_ini: nec.km_inicial, km_fim: nec.km_final,
-      lat_ini: nec.latitude_inicial, lon_ini: nec.longitude_inicial,
-      lat_fim: nec.latitude_final,   lon_fim: nec.longitude_final,
-    });
-    stats.erros++; processados++;
-    setProgresso((processados / totalNecessidades) * 100);
-    continue;
-  }
+              if (!hasGPSLine && !hasKMLine) {
+                console.error(`⚠️ ${tipo} ${nec.id}: sem dados suficientes (nem GPS nem KM).`, {
+                  km_ini: nec.km_inicial, km_fim: nec.km_final,
+                  lat_ini: nec.latitude_inicial, lon_ini: nec.longitude_inicial,
+                  lat_fim: nec.latitude_final,   lon_fim: nec.longitude_final,
+                });
+                stats.erros++; processados++;
+                setProgresso((processados / totalNecessidades) * 100);
+                continue;
+              }
 
-  // Atributos normalizados por tipo (apenas os que influenciam no filtro de candidatos)
-  const atributos: Record<string, any> = {};
-  if (tipo === 'MARCA_LONG') {
-    atributos.tipo_demarcacao = norm(nec.tipo_demarcacao);
-    atributos.cor             = norm(nec.cor);
-    atributos.lado            = normLado(nec.lado);
-  }
-  if (tipo === 'TACHAS') {
-    atributos.corpo         = norm(nec.corpo);
-    atributos.cor_refletivo = norm(nec.cor_refletivo);
-  }
-  if (tipo === 'DEFENSA') {
-    atributos.funcao = norm(nec.funcao);
-    atributos.lado   = normLado(nec.lado);
-  }
-  if (tipo === 'CILINDRO') {
-    atributos.cor_corpo         = norm(nec.cor_corpo);
-    atributos.local_implantacao = norm(nec.local_implantacao);
-  }
+              // Atributos normalizados por tipo (apenas os que influenciam no filtro de candidatos)
+              const atributos: Record<string, any> = {};
+              if (tipo === 'MARCA_LONG') {
+                atributos.tipo_demarcacao = norm(nec.tipo_demarcacao);
+                atributos.cor             = norm(nec.cor);
+                atributos.lado            = normLado(nec.lado);
+              }
+              if (tipo === 'TACHAS') {
+                atributos.corpo         = norm(nec.corpo);
+                atributos.cor_refletivo = norm(nec.cor_refletivo);
+              }
+              if (tipo === 'DEFENSA') {
+                atributos.funcao = norm(nec.funcao);
+                atributos.lado   = normLado(nec.lado);
+              }
+              if (tipo === 'CILINDRO') {
+                atributos.cor_corpo         = norm(nec.cor_corpo);
+                atributos.local_implantacao = norm(nec.local_implantacao);
+              }
 
-  if (!hasGPSLine) {
-    // Elementos lineares requerem GPS completo - não há fallback por KM implementado
-    console.error(`⚠️ ${tipo} ${nec.id}: requer GPS completo para matching linear`);
-    stats.erros++;
-    processados++;
-    setProgresso((processados / totalNecessidades) * 100);
-    continue;
-  }
-
-  try {
-    const wkt = buildLineStringWKT(
-      Number(nec.latitude_inicial),  Number(nec.longitude_inicial),
-      Number(nec.latitude_final),    Number(nec.longitude_final)
-    );
-    result = await matchLinear(
-      tipo, wkt, nec.rodovia_id, atributos, nec.servico || 'Substituição'
-    );
-  } catch (e) {
-    console.error(`❌ ERRO MATCH LINEAR — ${tipo} ${nec.id}`, { atributos, e });
-    stats.erros++; processados++;
-    setProgresso((processados / totalNecessidades) * 100);
-    continue;
-  }
-}
+              try {
+                if (hasGPSLine) {
+                  // GPS disponível → usa geometria WKT
+                  const wkt = buildLineStringWKT(
+                    Number(nec.latitude_inicial), Number(nec.longitude_inicial),
+                    Number(nec.latitude_final),   Number(nec.longitude_final)
+                  );
+                  result = await matchLinear(
+                    tipo, wkt, nec.rodovia_id, atributos, nec.servico || 'Substituição'
+                  );
+                } else {
+                  // Fallback por KM → overlap por km_inicial/km_final
+                  console.warn(`⚠️ ${tipo} ${nec.id}: usando fallback por KM (sem GPS). km_inicial=${nec.km_inicial}, km_final=${nec.km_final}`);
+                  result = await matchLinearKm(
+                    tipo,
+                    Number(nec.km_inicial),
+                    Number(nec.km_final),
+                    nec.rodovia_id,
+                    atributos,
+                    nec.servico || 'Substituição'
+                  );
+                }
+              } catch (e) {
+                console.error(`❌ ERRO MATCH LINEAR — ${tipo} ${nec.id}`, { atributos, e });
+                stats.erros++; processados++;
+                setProgresso((processados / totalNecessidades) * 100);
+                continue;
+              }
+            }
             // 3) Persistir decisão na necessidade
             const { error: upErr } = await supabase
               .from(TIPO_TO_TABLE_MAP[tipo] as any)

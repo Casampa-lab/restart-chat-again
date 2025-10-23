@@ -144,6 +144,44 @@ export async function matchLinear(
 }
 
 /**
+ * Executa matching de elemento linear usando KM (fallback quando GPS não disponível)
+ * Considera overlap de segmento por KM + similaridade de atributos
+ * 
+ * @param tipo - Tipo do elemento (MARCA_LONG, TACHAS, DEFENSA, CILINDRO)
+ * @param km_inicial - KM inicial da necessidade
+ * @param km_final - KM final da necessidade
+ * @param rodoviaId - UUID da rodovia
+ * @param atributos - Objeto com atributos da necessidade
+ * @param servico - Tipo de serviço ('Inclusão', 'Substituição', 'Remoção')
+ * @returns MatchResult com decisão, score (=overlap ratio), reason code e divergências
+ */
+export async function matchLinearKm(
+  tipo: TipoElementoMatch,
+  km_inicial: number,
+  km_final: number,
+  rodoviaId: string,
+  atributos: Record<string, any>,
+  servico: string
+): Promise<MatchResult> {
+  const { data, error } = await supabase.rpc('match_linear_km', {
+    p_tipo: tipo,
+    p_km_ini: km_inicial,
+    p_km_fim: km_final,
+    p_rodovia_id: rodoviaId,
+    p_atributos: atributos,
+    p_servico: servico
+  });
+  
+  if (error) {
+    console.error('Erro ao executar match_linear_km:', error);
+    throw error;
+  }
+  
+  // A função SQL retorna JSONB, então precisamos fazer cast apropriado
+  return data as unknown as MatchResult;
+}
+
+/**
  * Helper para construir WKT LINESTRING a partir de coordenadas
  * @param latIni - Latitude inicial
  * @param lonIni - Longitude inicial
