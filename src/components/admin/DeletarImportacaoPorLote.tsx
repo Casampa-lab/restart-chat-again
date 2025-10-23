@@ -72,7 +72,7 @@ export function DeletarImportacaoPorLote() {
           const grupos = data.reduce((acc: Record<string, ImportacaoAgrupada>, item: any) => {
             const key = item.import_batch_id 
               ? item.import_batch_id 
-              : `legacy_${item.rodovia_id}_${item.lote_id}_${new Date(item.created_at).toISOString()}`;
+              : `legacy_${item.rodovia_id}_${item.lote_id}_${item.created_at.substring(0, 16)}`;
             
             if (!acc[key]) {
               acc[key] = {
@@ -97,7 +97,7 @@ export function DeletarImportacaoPorLote() {
       const gruposFinal = resultados.reduce((acc: Record<string, ImportacaoAgrupada>, item: ImportacaoAgrupada) => {
         const key = item.import_batch_id 
           ? item.import_batch_id 
-          : `legacy_${item.rodovia_id}_${item.lote_id}_${item.created_at}`;
+          : `legacy_${item.rodovia_id}_${item.lote_id}_${item.created_at.substring(0, 16)}`;
         
         if (!acc[key]) {
           acc[key] = item;
@@ -127,11 +127,19 @@ export function DeletarImportacaoPorLote() {
           // Importações novas: deletar por batch_id
           query = query.eq("import_batch_id", importacao.import_batch_id);
         } else {
-          // Importações antigas: deletar por rodovia+lote+timestamp
+          // Importações antigas: deletar por rodovia+lote+timestamp (janela de 1 minuto)
+          const timestampBase = new Date(importacao.created_at);
+          const timestampInicio = new Date(timestampBase);
+          timestampInicio.setSeconds(0, 0);
+          
+          const timestampFim = new Date(timestampInicio);
+          timestampFim.setMinutes(timestampFim.getMinutes() + 1);
+          
           query = query
             .eq("rodovia_id", importacao.rodovia_id)
             .eq("lote_id", importacao.lote_id)
-            .eq("created_at", importacao.created_at);
+            .gte("created_at", timestampInicio.toISOString())
+            .lt("created_at", timestampFim.toISOString());
         }
 
         const { error, count } = await query;
