@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
 import { NecessidadeBadge } from "./NecessidadeBadge";
 import { ReconciliacaoDrawer } from "./ReconciliacaoDrawer";
+import { ReconciliacaoDrawerUniversal } from "./ReconciliacaoDrawerUniversal";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -161,6 +162,11 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
   const [showComparacao, setShowComparacao] = useState(false);
   const [comparacaoNecessidadeId, setComparacaoNecessidadeId] = useState<string | null>(null);
   const [comparacaoCadastroId, setComparacaoCadastroId] = useState<string | null>(null);
+  
+  // Estados para reconciliação de matches ambíguos
+  const [reconciliacaoUniversalOpen, setReconciliacaoUniversalOpen] = useState(false);
+  const [cadastroParaReconciliacao, setCadastroParaReconciliacao] = useState<any>(null);
+  const [necessidadeParaReconciliacao, setNecessidadeParaReconciliacao] = useState<any>(null);
 
   // Função para calcular distância entre dois pontos (Haversine)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -354,7 +360,38 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
       : <ArrowDown className="h-3 w-3 ml-1" />;
   };
 
-  const handleViewPlacaDetails = (placa: FichaPlaca) => {
+  // Buscar cadastro original para comparação em caso de match ambíguo
+  const buscarCadastroOriginal = async (cadastro_match_id: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('ficha_placa')
+        .select('*')
+        .eq('id', cadastro_match_id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Erro ao buscar cadastro original:', error);
+      toast.error('Erro ao buscar dados para comparação');
+      return null;
+    }
+  };
+
+  const handleViewPlacaDetails = async (placa: FichaPlaca) => {
+    // Se for match AMBÍGUO, abre drawer de reconciliação
+    if (placa.match_decision === 'AMBIGUOUS' && placa.cadastro_match_id) {
+      const cadastroOriginal = await buscarCadastroOriginal(placa.cadastro_match_id);
+      
+      if (cadastroOriginal) {
+        setCadastroParaReconciliacao(cadastroOriginal);
+        setNecessidadeParaReconciliacao(placa); // A placa da view JÁ É a necessidade consolidada
+        setReconciliacaoUniversalOpen(true);
+        return; // Não abre o dialog normal
+      }
+    }
+
+    // Para todos os outros casos (verde, azul, sem bolinha), abre dialog normal
     openPlacaDetail(placa);
   };
 
@@ -1161,6 +1198,23 @@ export function InventarioPlacasViewer({ loteId, rodoviaId, onRegistrarIntervenc
         necessidade={selectedNecessidade}
         cadastro={selectedPlaca}
         onReconciliar={handleReconciliar}
+      />
+
+      {/* Drawer de Reconciliação Universal para Matches Ambíguos */}
+      <ReconciliacaoDrawerUniversal
+        open={reconciliacaoUniversalOpen}
+        onOpenChange={setReconciliacaoUniversalOpen}
+        necessidade={necessidadeParaReconciliacao}
+        cadastro={cadastroParaReconciliacao}
+        tipoElemento="placas"
+        onReconciliar={async () => {
+          setReconciliacaoUniversalOpen(false);
+          setCadastroParaReconciliacao(null);
+          setNecessidadeParaReconciliacao(null);
+          // Recarregar dados
+          await refetch();
+          toast.success('Reconciliação processada com sucesso!');
+        }}
       />
 
       {/* Modal de Comparação Antes/Depois */}
