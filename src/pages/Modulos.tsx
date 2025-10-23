@@ -25,7 +25,7 @@ const Modulos = () => {
                 <img 
                   src={logoOperaVia} 
                   alt="OperaVia - Sistema de Supervisão de Operação Rodoviária" 
-                  className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" 
+                  className="h-24 object-contain cursor-pointer hover:scale-105 transition-transform" 
                   onClick={() => navigate("/")}
                 />
               </div>

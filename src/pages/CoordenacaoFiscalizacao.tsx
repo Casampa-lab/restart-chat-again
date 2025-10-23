@@ -205,7 +205,7 @@ const CoordenacaoFiscalizacao = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="bg-white/95 rounded-lg px-4 py-2 shadow-md">
-              <img src={logoOperaVia} alt="OperaVia" className="h-20 object-contain cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate("/")} />
+              <img src={logoOperaVia} alt="OperaVia" className="h-24 object-contain cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate("/")} />
             </div>
             <Button variant="default" size="lg" onClick={() => navigate("/")} className="font-semibold shadow-md hover:shadow-lg transition-shadow bg-accent text-accent-foreground hover:bg-accent/90">
               <ArrowLeft className="mr-2 h-5 w-5" />

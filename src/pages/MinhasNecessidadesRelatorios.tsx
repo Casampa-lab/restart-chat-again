@@ -1389,7 +1389,7 @@ export default function MinhasNecessidadesRelatorios() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img src={logoOperaVia} alt="Logo" className="h-12 object-contain" />
+              <img src={logoOperaVia} alt="Logo" className="h-24 object-contain" />
               <div>
                 <h1 className="text-2xl font-bold">Relatórios de Programa de Sinalização e Segurança Viária</h1>
                 <p className="text-sm text-muted-foreground">

@@ -469,7 +469,7 @@ const Index = () => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="bg-white/95 rounded-lg px-3 py-2 shadow-md">
-                <img src={logoToDisplay} alt={logoAlt} className="h-16 object-contain cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate("/")} />
+                <img src={logoToDisplay} alt={logoAlt} className="h-24 object-contain cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate("/")} />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-primary-foreground">OperaVia</h1>
