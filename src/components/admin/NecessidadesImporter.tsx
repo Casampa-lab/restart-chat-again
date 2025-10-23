@@ -846,13 +846,13 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
           case "placas":
           case "porticos":
           case "cilindros":
-            // Pontuais: KM + código/tipo + lado
-            return `${formatarKm(dados.km_inicial)}_${dados.codigo || dados.tipo}_${dados.lado || ''}`;
+          case "marcas_transversais": // Inscrições são pontuais!
+            // Pontuais: KM + código/tipo/sigla + lado
+            return `${formatarKm(dados.km_inicial)}_${dados.codigo || dados.tipo || dados.sigla || dados.tipo_inscricao}_${dados.lado || ''}`;
           
           case "marcas_longitudinais":
           case "tachas":
           case "defensas":
-          case "marcas_transversais":
             // Lineares: KM_inicial + KM_final + código/tipo + lado
             return `${formatarKm(dados.km_inicial)}_${formatarKm(dados.km_final)}_${dados.codigo || dados.tipo_demarcacao || dados.tipo || ''}_${dados.lado || ''}`;
           
