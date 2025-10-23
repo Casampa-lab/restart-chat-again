@@ -3646,6 +3646,7 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          match_at: string | null
           match_decision:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -3701,6 +3702,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -3756,6 +3758,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -3853,6 +3856,7 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          match_at: string | null
           match_decision:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -3928,6 +3932,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4003,6 +4008,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4093,6 +4099,7 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          match_at: string | null
           match_decision:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4149,6 +4156,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4205,6 +4213,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4283,6 +4292,7 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          match_at: string | null
           match_decision:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4334,6 +4344,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4385,6 +4396,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4460,6 +4472,7 @@ export type Database = {
           localizado_em_campo: boolean | null
           longitude_inicial: number | null
           lote_id: string
+          match_at: string | null
           match_decision:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4517,6 +4530,7 @@ export type Database = {
           localizado_em_campo?: boolean | null
           longitude_inicial?: number | null
           lote_id: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4574,6 +4588,7 @@ export type Database = {
           localizado_em_campo?: boolean | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4650,6 +4665,7 @@ export type Database = {
           localizado_em_campo: boolean | null
           longitude_inicial: number | null
           lote_id: string
+          match_at: string | null
           match_decision:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4692,6 +4708,7 @@ export type Database = {
           localizado_em_campo?: boolean | null
           longitude_inicial?: number | null
           lote_id: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4734,6 +4751,7 @@ export type Database = {
           localizado_em_campo?: boolean | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4809,6 +4827,7 @@ export type Database = {
           longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string
+          match_at: string | null
           match_decision:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4862,6 +4881,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
@@ -4915,6 +4935,7 @@ export type Database = {
           longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string
+          match_at?: string | null
           match_decision?:
             | Database["public"]["Enums"]["match_decision_enum"]
             | null
