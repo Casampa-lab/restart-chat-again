@@ -4,17 +4,8 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from 'vite-plugin-pwa';
 
-// Detecta se é build legacy (iOS 12 compatível)
-const isLegacy = process.env.VITE_BUILD_LEGACY === 'true';
-
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: isLegacy ? '/app-legacy/' : '/app/',
-  build: {
-    outDir: isLegacy ? 'dist-legacy' : 'dist',
-    target: isLegacy ? 'es2015' : 'esnext',
-    cssTarget: isLegacy ? 'safari11' : 'chrome90',
-  },
   server: {
     host: "::",
     port: 8080,
