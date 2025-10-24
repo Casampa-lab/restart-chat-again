@@ -1055,7 +1055,7 @@ export function NecessidadesImporter({ loteId, rodoviaId }: NecessidadesImporter
             porticos: ['km_inicial', 'tipo'],
             cilindros: ['km_inicial', 'km_final'],
             marcas_longitudinais: ['km_inicial', 'km_final', 'codigo'],
-            marcas_transversais: ['km_inicial', 'codigo'],
+            marcas_transversais: ['km_inicial', 'sigla'],
             tachas: ['km_inicial', 'km_final'],
             defensas: ['km_inicial', 'km_final']
           };
