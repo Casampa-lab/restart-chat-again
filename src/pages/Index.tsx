@@ -706,12 +706,9 @@ const Index = () => {
             </Card>
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 h-auto bg-muted p-2 gap-1">
+              <TabsList className="grid w-full grid-cols-2 h-auto bg-muted p-2 gap-1">
                 <TabsTrigger value="prontuario" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Inventário Dinâmico</span>
-                </TabsTrigger>
-                <TabsTrigger value="controle-qualidade" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Controle de Qualidade</span>
                 </TabsTrigger>
                 <TabsTrigger value="ncs" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
                   <span className="text-xs">Não Conformidade</span>
@@ -732,28 +729,6 @@ const Index = () => {
                         </Button>
                       </div>
                       <NaoConformidadeSimples loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="controle-qualidade" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Controle de Qualidade</CardTitle>
-                    <CardDescription>Use o Modo Campo para registrar Fichas de Verificação com medições de retrorefletividade</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                      <p className="text-muted-foreground text-center">
-                        As Fichas de Verificação agora incluem medições de retrorefletividade integradas.
-                      </p>
-                      <Button 
-                        size="lg" 
-                        onClick={() => navigate("/modo-campo")}
-                        className="shadow-md hover:shadow-lg transition-shadow"
-                      >
-                        Ir para Modo Campo
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>

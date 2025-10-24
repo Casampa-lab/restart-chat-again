@@ -428,31 +428,29 @@ const NCsCoordenador = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-background border-b">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-center gap-8">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold">Sistema de Registro de Não Conformidades</h1>
-              <p className="text-sm text-muted-foreground">Coordenador/Fiscal - Visualização por Lote</p>
+          <div className="flex items-center justify-between gap-8">
+            <div className="text-center flex-1">
+              <h1 className="text-2xl font-bold">Validação de Não Conformidades</h1>
+              <p className="text-sm text-muted-foreground">Coordenador - Aprovar, Rejeitar ou Notificar NCs</p>
             </div>
+            <Button variant="outline" onClick={() => navigateBack(navigate)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar
+            </Button>
           </div>
         </div>
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <Button variant="navigation" onClick={() => navigateBack(navigate)}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar
-            </Button>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Não Conformidades por Lote</CardTitle>
-              <CardDescription>
-                Visualize as NCs enviadas filtradas por lote
-              </CardDescription>
-            </CardHeader>
+        <Card className="shadow-elevated border-2 border-primary/20">
+          <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
+            <CardTitle className="text-2xl text-primary">
+              Não Conformidades Enviadas
+            </CardTitle>
+            <CardDescription className="text-base">
+              Filtre por lote e gerencie as NCs pendentes de validação
+            </CardDescription>
+          </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4">
                 <label className="text-sm font-medium">Filtrar por Lote:</label>
@@ -580,7 +578,6 @@ const NCsCoordenador = () => {
               )}
             </CardContent>
           </Card>
-        </div>
       </main>
 
       <footer className="bg-background border-t mt-auto">

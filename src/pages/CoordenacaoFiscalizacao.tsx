@@ -8,7 +8,7 @@ import { getConfig, type GrupoElemento } from "@/lib/reconciliacaoConfig";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Download, ClipboardCheck, GitCompareArrows, CheckSquare, Eye, FileText, FileSearch, Activity, History as HistoryIcon } from "lucide-react";
+import { ArrowLeft, Download, ClipboardCheck, GitCompareArrows, CheckSquare, Eye, FileText, FileSearch, Activity, History as HistoryIcon, XCircle } from "lucide-react";
 import { BarChart3, FileSpreadsheet } from "lucide-react";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
 import { exportFrentesLiberadas, exportNaoConformidades, exportRetrorrefletividadeEstaticaHorizontal, exportRetrorrefletividadeEstaticaVertical, exportRetrorrefletividadeDinamica, exportDefensas, exportIntervencoesSH, exportIntervencoesInscricoes, exportIntervencoesSV, exportIntervencoesTacha, exportFichasVerificacao, exportFichasPlaca, exportRegistroNC } from "@/lib/excelExport";
@@ -116,6 +116,24 @@ const CoordenacaoFiscalizacao = () => {
         .from('ficha_verificacao')
         .select("*", { count: "exact", head: true })
         .eq("status", "pendente_aprovacao_coordenador");
+      return count || 0;
+    },
+    enabled: !!user,
+    refetchInterval: 30000
+  });
+
+  // Contador de NCs pendentes de validação
+  const {
+    data: countNCsPendentes = 0
+  } = useQuery({
+    queryKey: ["count-ncs-pendentes"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('nao_conformidades')
+        .select("*", { count: "exact", head: true })
+        .eq("deleted", false)
+        .eq("enviado_coordenador", true)
+        .is("data_notificacao", null);
       return count || 0;
     },
     enabled: !!user,
@@ -337,6 +355,32 @@ const CoordenacaoFiscalizacao = () => {
                       </div>
                       <Button size="lg" variant="default" className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-purple-600 hover:bg-purple-700 text-white" onClick={() => navigate("/validacao-fichas-verificacao")}>
                         <ClipboardCheck className="mr-2 h-5 w-5" />
+                        Acessar Validação
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Card Validação de Não Conformidades */}
+                <Card className="bg-gradient-to-r from-pink-50 to-pink-100 border-2 border-pink-300 shadow-lg">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <XCircle className="h-6 w-6 text-pink-600" />
+                          <h3 className="text-xl font-bold text-pink-900">Validação de Não Conformidades</h3>
+                        </div>
+                        <p className="text-sm text-pink-700">
+                          Aprovar, rejeitar ou notificar NCs enviadas pelos técnicos de campo
+                        </p>
+                        {countNCsPendentes > 0 && <div className="mt-3 flex items-center gap-2">
+                            <Badge className="bg-pink-500 text-white text-base px-3 py-1">
+                              {countNCsPendentes} {countNCsPendentes === 1 ? 'NC pendente' : 'NCs pendentes'}
+                            </Badge>
+                          </div>}
+                      </div>
+                      <Button size="lg" variant="default" className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-pink-600 hover:bg-pink-700 text-white" onClick={() => navigate("/ncs-coordenador")}>
+                        <XCircle className="mr-2 h-5 w-5" />
                         Acessar Validação
                       </Button>
                     </div>
