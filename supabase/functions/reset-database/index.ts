@@ -102,59 +102,13 @@ serve(async (req) => {
     // 10. PRESERVAR lotes, rodovias e lotes_rodovias
     console.log('🔒 Preservando lotes, rodovias e vínculos (não deletados)')
 
-    // 11. Deletar empresas
-    console.log('Deletando empresas...')
-    await supabaseAdmin.from('empresas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    // 11. PRESERVAR empresas, assinaturas e módulos
+    console.log('🔒 Preservando empresas e assinaturas (não deletados)')
 
-    // 12. Deletar assinaturas e módulos
-    console.log('Deletando assinaturas...')
-    await supabaseAdmin.from('assinatura_modulos').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabaseAdmin.from('assinaturas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    // 12. PRESERVAR todos os usuários (profiles, roles, supervisoras, auth)
+    console.log('🔒 Preservando todos os usuários e supervisoras (não deletados)')
 
-    // 13. Buscar admin antes de deletar usuários
-    console.log('Identificando usuário admin...')
-    const { data: adminUsers } = await supabaseAdmin
-      .from('user_roles')
-      .select('user_id')
-      .eq('role', 'admin')
-    
-    const adminIds = adminUsers?.map(u => u.user_id) || []
-    console.log(`Admin IDs preservados: ${adminIds.join(', ')}`)
-
-    // 14. Deletar user_roles (exceto admin)
-    console.log('Deletando user roles (exceto admin)...')
-    if (adminIds.length > 0) {
-      await supabaseAdmin
-        .from('user_roles')
-        .delete()
-        .not('user_id', 'in', `(${adminIds.map(id => `'${id}'`).join(',')})`)
-    }
-
-    // 15. Deletar profiles (exceto admin)
-    console.log('Deletando profiles (exceto admin)...')
-    if (adminIds.length > 0) {
-      await supabaseAdmin
-        .from('profiles')
-        .delete()
-        .not('id', 'in', `(${adminIds.map(id => `'${id}'`).join(',')})`)
-    }
-
-    // 16. Deletar supervisoras
-    console.log('Deletando supervisoras...')
-    await supabaseAdmin.from('supervisoras').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-
-    // 17. Deletar usuários auth (exceto admin)
-    console.log('Deletando usuários auth (exceto admin)...')
-    const { data: allUsers } = await supabaseAdmin.auth.admin.listUsers()
-    
-    for (const user of allUsers.users) {
-      if (!adminIds.includes(user.id)) {
-        await supabaseAdmin.auth.admin.deleteUser(user.id)
-        console.log(`Usuário deletado: ${user.email}`)
-      }
-    }
-
-    // 18. Limpar storage buckets
+    // 13. Limpar storage buckets
     console.log('Limpando storage buckets...')
     const buckets = [
       'nc-photos',
@@ -188,7 +142,11 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         message: 'Banco de dados resetado com sucesso',
-        admins_preservados: adminIds.length,
+        preservados: {
+          lotes_rodovias: true,
+          empresas: true,
+          usuarios: true
+        },
         timestamp: new Date().toISOString()
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
