@@ -68,7 +68,8 @@ export function ResetDatabaseButton() {
             <li>Todas as fichas de cadastro</li>
             <li>Todas as intervenções e históricos</li>
             <li>Todas as não-conformidades</li>
-            <li>Todos os lotes e rodovias</li>
+            <li className="line-through opacity-50">Todos os lotes e rodovias (preservados)</li>
+            <li className="line-through opacity-50">Atribuições de coordenadores (preservadas)</li>
             <li>Todas as fotos armazenadas</li>
           </ul>
           

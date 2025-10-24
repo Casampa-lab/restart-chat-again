@@ -91,16 +91,15 @@ serve(async (req) => {
     await supabaseAdmin.from('necessidades_tachas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
     await supabaseAdmin.from('necessidades_defensas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
-    // 8. Deletar coordinator assignments
-    console.log('Deletando coordinator assignments...')
-    await supabaseAdmin.from('coordinator_assignments').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    // 8. PRESERVAR coordinator_assignments
+    console.log('🔒 Preservando coordinator_assignments (não deletados)')
 
     // 9. Deletar destinatários email
     console.log('Deletando destinatários email...')
     await supabaseAdmin.from('destinatarios_email').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
-    // 10. PRESERVAR lotes, rodovias e lotes_rodovias
-    console.log('🔒 Preservando lotes, rodovias e vínculos (não deletados)')
+    // 10. PRESERVAR lotes, rodovias, lotes_rodovias e coordinator_assignments
+    console.log('🔒 Preservando lotes, rodovias, vínculos e atribuições de coordenadores (não deletados)')
 
     // 11. PRESERVAR empresas, assinaturas e módulos
     console.log('🔒 Preservando empresas e assinaturas (não deletados)')
@@ -144,6 +143,7 @@ serve(async (req) => {
         message: 'Banco de dados resetado com sucesso',
         preservados: {
           lotes_rodovias: true,
+          coordinator_assignments: true,
           empresas: true,
           usuarios: true
         },
