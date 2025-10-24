@@ -51,7 +51,6 @@ import ListaNecessidadesMarcas from "./pages/ListaNecessidadesMarcas";
 import ListaNecessidadesTachas from "./pages/ListaNecessidadesTachas";
 import ListaNecessidadesDefensas from "./pages/ListaNecessidadesDefensas";
 import ListaNecessidadesCilindros from "./pages/ListaNecessidadesCilindros";
-import InstalarPWA from "./pages/InstalarPWA";
 
 const queryClient = new QueryClient();
 
@@ -107,7 +106,6 @@ const App = () => (
         <Route path="/lista-necessidades-tachas" element={<ListaNecessidadesTachas />} />
         <Route path="/lista-necessidades-defensas" element={<ListaNecessidadesDefensas />} />
         <Route path="/lista-necessidades-cilindros" element={<ListaNecessidadesCilindros />} />
-        <Route path="/instalar" element={<InstalarPWA />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ChatAssistant />
