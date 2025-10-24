@@ -13,19 +13,39 @@ export default function IntervencoesManutencaoContent() {
   const { data: manutencoes, isLoading } = useQuery({
     queryKey: ["minhas-manutencoes", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("manutencoes_pre_projeto" as any)
-        .select(`
-          *,
-          rodovia:rodovias(codigo),
-          lote:lotes(numero)
-        `)
-        .eq("user_id", user!.id)
-        .eq("ativo", true)
-        .order("created_at", { ascending: false });
+      // Buscar em TODAS as tabelas *_intervencoes filtradas por tipo_origem
+      const tabelas = [
+        'ficha_placa_intervencoes',
+        'ficha_marcas_longitudinais_intervencoes',
+        'ficha_inscricoes_intervencoes',
+        'ficha_tacha_intervencoes',
+        'ficha_cilindro_intervencoes',
+        'ficha_portico_intervencoes',
+        'ficha_defensa_intervencoes'
+      ];
 
-      if (error) throw error;
-      return data as any[];
+      const promises = tabelas.map(async (tabela) => {
+        const { data, error } = await supabase
+          .from(tabela as any)
+          .select(`
+            *,
+            rodovia:rodovias(codigo),
+            lote:lotes(numero)
+          `)
+          .eq("user_id", user!.id)
+          .eq("tipo_origem", "manutencao_pre_projeto")
+          .eq("ativo", true)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        return (data || []).map((item: any) => ({
+          ...item,
+          tipo_elemento: tabela.replace('ficha_', '').replace('_intervencoes', '')
+        }));
+      });
+
+      const results = await Promise.all(promises);
+      return results.flat();
     },
     enabled: !!user,
   });
@@ -63,7 +83,7 @@ export default function IntervencoesManutencaoContent() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <CardTitle className="text-base flex items-center gap-2 flex-wrap">
-                    <span>🟠 {m.tipo_elemento}</span>
+                    <span>🟠 {m.tipo_elemento?.toUpperCase()}</span>
                     <Badge variant={
                       m.status === 'AUDITADA' ? 'default' :
                       m.status === 'INVALIDADA' ? 'destructive' : 'secondary'

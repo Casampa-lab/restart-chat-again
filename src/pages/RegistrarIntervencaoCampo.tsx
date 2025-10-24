@@ -155,36 +155,7 @@ export default function RegistrarIntervencaoCampo() {
     try {
       setLoading(true);
 
-      // Se for MANUTENÇÃO 🟠 → usar RPC dedicada
-      if (modoOperacao === 'manutencao') {
-        const { data: manutencaoId, error } = await supabase.rpc(
-          'registrar_manutencao_pre_projeto' as any,
-          {
-            p_tipo_elemento: tipoSelecionado,
-            p_rodovia_id: activeSession.rodovia_id,
-            p_lote_id: activeSession.lote_id,
-            p_inventario_id: necessidadeProp?.elemento_id || null,
-            p_km_inicial: dadosIntervencao.km_inicial,
-            p_km_final: dadosIntervencao.km_final || null,
-            p_lado: dadosIntervencao.lado || null,
-            p_latitude: parseFloat(manualPosition.latitude) || null,
-            p_longitude: parseFloat(manualPosition.longitude) || null,
-            p_tipo: dadosIntervencao.motivo || 'PINTURA_DEMARCACAO',
-            p_descricao: dadosIntervencao.observacoes || justificativaNC || null,
-            p_fotos_antes: [],
-            p_fotos_depois: fotos,
-            p_caracteristicas: dadosIntervencao
-          }
-        );
-
-        if (error) throw error;
-
-        toast.success('🟠 Manutenção registrada com sucesso!');
-        navigate('/minhas-intervencoes?tab=manutencoes');
-        return;
-      }
-
-      // Se for EXECUÇÃO 🟢 → lógica atual (salva em *_intervencoes)
+      // Manutenção e Execução usam o mesmo fluxo unificado
       const payload = {
         ...dadosIntervencao,
         fotos_urls: fotos,
@@ -231,7 +202,7 @@ export default function RegistrarIntervencaoCampo() {
         longitude: parseFloat(manualPosition.longitude) || null,
         pendente_aprovacao_coordenador: isConforme,
         aplicado_ao_inventario: false,
-        tipo_origem: 'execucao'
+        tipo_origem: modoOperacao === 'manutencao' ? 'manutencao_pre_projeto' : 'execucao'
       };
 
       // Converter strings vazias para null em campos numéricos
