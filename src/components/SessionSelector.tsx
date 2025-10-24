@@ -17,9 +17,13 @@ interface Lote {
   } | null;
 }
 
-interface Rodovia {
-  id: string;
+interface RodoviaSegmento {
+  id: string;              // ID do vínculo (lotes_rodovias.id)
+  rodovia_id: string;      // ID da rodovia original
   codigo: string;
+  km_inicial: number;
+  km_final: number;
+  extensao_km: number;
 }
 
 interface SessionSelectorProps {
@@ -29,7 +33,7 @@ interface SessionSelectorProps {
 
 const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => {
   const [lotes, setLotes] = useState<Lote[]>([]);
-  const [rodovias, setRodovias] = useState<Rodovia[]>([]);
+  const [rodovias, setRodovias] = useState<RodoviaSegmento[]>([]);
   const [selectedLote, setSelectedLote] = useState<string>("");
   const [selectedRodovia, setSelectedRodovia] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -65,13 +69,12 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
   const loadRodoviasByLote = async (loteId: string) => {
     try {
       const { data, error } = await supabase
-        .from("lotes_rodovias")
-        .select("rodovias(*)")
-        .eq("lote_id", loteId);
+        .rpc("get_segmentos_rodovias_by_lote", {
+          p_lote_id: loteId,
+        });
 
       if (error) throw error;
-      const rodoviasList = data?.map((lr: any) => lr.rodovias).filter((r): r is Rodovia => r !== null && r !== undefined) || [];
-      setRodovias(rodoviasList);
+      setRodovias(data || []);
     } catch (error: any) {
       toast.error("Erro ao carregar rodovias: " + error.message);
     }
@@ -83,10 +86,19 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
       return;
     }
 
+    // selectedRodovia agora é o ID do vínculo (lotes_rodovias.id)
+    const segmentoSelecionado = rodovias.find(r => r.id === selectedRodovia);
+    
+    if (!segmentoSelecionado) {
+      toast.error("Segmento não encontrado");
+      return;
+    }
+
     setLoading(true);
     try {
-      await startSession(selectedLote, selectedRodovia);
-      onSessionStarted(); // Notifica o componente pai que a sessão foi criada
+      // Passa o rodovia_id original para a sessão
+      await startSession(selectedLote, segmentoSelecionado.rodovia_id);
+      onSessionStarted();
     } catch (error) {
       console.error(error);
     } finally {
@@ -135,11 +147,21 @@ const SessionSelector = ({ userId, onSessionStarted }: SessionSelectorProps) => 
               </SelectTrigger>
                 <SelectContent className="bg-popover">
                   {rodovias && rodovias.length > 0 ? (
-                    rodovias.map((rodovia) => (
-                      <SelectItem key={rodovia.id} value={rodovia.id}>
-                        {rodovia.codigo}
-                      </SelectItem>
-                    ))
+                    rodovias.map((segmento, idx) => {
+                      // Calcular número do segmento se houver múltiplos da mesma rodovia
+                      const segmentosIguais = rodovias.filter(r => r.codigo === segmento.codigo);
+                      const numeroSegmento = segmentosIguais.length > 1 
+                        ? segmentosIguais.findIndex(r => r.id === segmento.id) + 1 
+                        : null;
+
+                      return (
+                        <SelectItem key={segmento.id} value={segmento.id}>
+                          {segmento.codigo}
+                          {numeroSegmento && ` - Segmento ${numeroSegmento}`}
+                          {` (KM ${segmento.km_inicial?.toFixed(1)} - ${segmento.km_final?.toFixed(1)})`}
+                        </SelectItem>
+                      );
+                    })
                   ) : (
                     <SelectItem value="no-rodovias" disabled>
                       Nenhuma rodovia disponível para este lote

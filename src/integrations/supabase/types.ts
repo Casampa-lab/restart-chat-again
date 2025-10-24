@@ -7324,6 +7324,17 @@ export type Database = {
           id: string
         }[]
       }
+      get_segmentos_rodovias_by_lote: {
+        Args: { p_lote_id: string }
+        Returns: {
+          codigo: string
+          extensao_km: number
+          id: string
+          km_final: number
+          km_inicial: number
+          rodovia_id: string
+        }[]
+      }
       get_tipo_origem_badge: {
         Args: { p_tipo_origem: string }
         Returns: string

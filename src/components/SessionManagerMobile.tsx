@@ -38,9 +38,13 @@ interface Lote {
   };
 }
 
-interface Rodovia {
-  id: string;
+interface RodoviaSegmento {
+  id: string;              // ID do vínculo (lotes_rodovias.id)
+  rodovia_id: string;      // ID da rodovia original
   codigo: string;
+  km_inicial: number;
+  km_final: number;
+  extensao_km: number;
 }
 
 export function SessionManagerMobile({
@@ -50,7 +54,7 @@ export function SessionManagerMobile({
 }: SessionManagerMobileProps) {
   const [open, setOpen] = useState(false);
   const [lotes, setLotes] = useState<Lote[]>([]);
-  const [rodovias, setRodovias] = useState<Rodovia[]>([]);
+  const [rodovias, setRodovias] = useState<RodoviaSegmento[]>([]);
   const [selectedLote, setSelectedLote] = useState<string>("");
   const [selectedRodovia, setSelectedRodovia] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -89,7 +93,7 @@ export function SessionManagerMobile({
 
   const loadRodoviasByLote = async (loteId: string) => {
     try {
-      const { data, error } = await supabase.rpc("get_rodovias_by_lote", {
+      const { data, error } = await supabase.rpc("get_segmentos_rodovias_by_lote", {
         p_lote_id: loteId,
       });
 
@@ -107,6 +111,14 @@ export function SessionManagerMobile({
       return;
     }
 
+    // selectedRodovia agora é o ID do vínculo (lotes_rodovias.id)
+    const segmentoSelecionado = rodovias.find(r => r.id === selectedRodovia);
+    
+    if (!segmentoSelecionado) {
+      toast.error("Segmento não encontrado");
+      return;
+    }
+
     setLoading(true);
     try {
       // Finalizar sessão atual
@@ -117,23 +129,22 @@ export function SessionManagerMobile({
 
       if (endError) throw endError;
 
-      // Criar nova sessão
+      // Criar nova sessão com o rodovia_id original
       const { error: startError } = await supabase
         .from("sessoes_trabalho")
         .insert({
           user_id: userId,
           lote_id: selectedLote,
-          rodovia_id: selectedRodovia,
+          rodovia_id: segmentoSelecionado.rodovia_id,
           ativa: true,
         });
 
       if (startError) throw startError;
 
       const lote = lotes.find((l) => l.id === selectedLote);
-      const rodovia = rodovias.find((r) => r.id === selectedRodovia);
 
       toast.success(
-        `Sessão trocada para ${lote?.numero} - ${rodovia?.codigo}`
+        `Sessão trocada para ${lote?.numero} - ${segmentoSelecionado.codigo}`
       );
 
       setOpen(false);
@@ -216,11 +227,21 @@ export function SessionManagerMobile({
                       <SelectValue placeholder="Selecione a rodovia" />
                     </SelectTrigger>
                     <SelectContent>
-                      {rodovias.map((rodovia) => (
-                        <SelectItem key={rodovia.id} value={rodovia.id}>
-                          {rodovia.codigo}
-                        </SelectItem>
-                      ))}
+                      {rodovias.map((segmento, idx) => {
+                        // Calcular número do segmento se houver múltiplos da mesma rodovia
+                        const segmentosIguais = rodovias.filter(r => r.codigo === segmento.codigo);
+                        const numeroSegmento = segmentosIguais.length > 1 
+                          ? segmentosIguais.findIndex(r => r.id === segmento.id) + 1 
+                          : null;
+
+                        return (
+                          <SelectItem key={segmento.id} value={segmento.id}>
+                            {segmento.codigo}
+                            {numeroSegmento && ` - Segmento ${numeroSegmento}`}
+                            {` (KM ${segmento.km_inicial?.toFixed(1)} - ${segmento.km_final?.toFixed(1)})`}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
