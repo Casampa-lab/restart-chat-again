@@ -1168,6 +1168,7 @@ export type Database = {
           estado_conservacao: string | null
           ficha_inscricoes_id: string | null
           fora_plano_manutencao: boolean | null
+          fotos: string[] | null
           fotos_urls: string[] | null
           id: string
           justificativa_fora_plano: string | null
@@ -1198,6 +1199,7 @@ export type Database = {
           estado_conservacao?: string | null
           ficha_inscricoes_id?: string | null
           fora_plano_manutencao?: boolean | null
+          fotos?: string[] | null
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
@@ -1228,6 +1230,7 @@ export type Database = {
           estado_conservacao?: string | null
           ficha_inscricoes_id?: string | null
           fora_plano_manutencao?: boolean | null
+          fotos?: string[] | null
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
@@ -1470,7 +1473,9 @@ export type Database = {
           km_final: number | null
           km_inicial: number | null
           largura_cm: number | null
+          latitude_final: number | null
           latitude_inicial: number | null
+          longitude_final: number | null
           longitude_inicial: number | null
           material: string | null
           motivo: string
@@ -1499,7 +1504,9 @@ export type Database = {
           km_final?: number | null
           km_inicial?: number | null
           largura_cm?: number | null
+          latitude_final?: number | null
           latitude_inicial?: number | null
+          longitude_final?: number | null
           longitude_inicial?: number | null
           material?: string | null
           motivo: string
@@ -1528,7 +1535,9 @@ export type Database = {
           km_final?: number | null
           km_inicial?: number | null
           largura_cm?: number | null
+          latitude_final?: number | null
           latitude_inicial?: number | null
+          longitude_final?: number | null
           longitude_inicial?: number | null
           material?: string | null
           motivo?: string

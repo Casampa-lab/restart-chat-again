@@ -71,8 +71,10 @@ const formSchema = z.object({
   largura_cm: z.string().optional(),
   espessura_cm: z.string().optional(),
   material: z.string().optional(),
-  latitude_inicial: z.string().min(1, "Latitude é obrigatória"),
-  longitude_inicial: z.string().min(1, "Longitude é obrigatória"),
+  latitude_inicial: z.string().min(1, "Latitude inicial é obrigatória"),
+  longitude_inicial: z.string().min(1, "Longitude inicial é obrigatória"),
+  latitude_final: z.string().min(1, "Latitude final é obrigatória"),
+  longitude_final: z.string().min(1, "Longitude final é obrigatória"),
   observacao: z.string().optional(),
 });
 
@@ -86,7 +88,8 @@ const IntervencoesSHForm = ({
   rodoviaId,
   modoOperacao
 }: IntervencoesSHFormProps) => {
-  const [isCapturing, setIsCapturing] = useState(false);
+  const [isCapturingInicial, setIsCapturingInicial] = useState(false);
+  const [isCapturingFinal, setIsCapturingFinal] = useState(false);
   const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('marcas_longitudinais');
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -106,10 +109,19 @@ const IntervencoesSHForm = ({
       material: "",
       latitude_inicial: "",
       longitude_inicial: "",
+      latitude_final: "",
+      longitude_final: "",
       observacao: "",
     },
   });
 
+
+  // Sincronizar modo operação com tipo origem
+  useEffect(() => {
+    if (modoOperacao) {
+      setTipoOrigem(modoOperacao === 'manutencao' ? 'manutencao_rotineira' : 'execucao');
+    }
+  }, [modoOperacao, setTipoOrigem]);
 
   // Preencher formulário com dados da marca selecionada
   useEffect(() => {
@@ -134,20 +146,20 @@ const IntervencoesSHForm = ({
     }
   }, [marcaSelecionada, modo, form]);
 
-  const handleCapturarGPS = async () => {
-    setIsCapturing(true);
+  const handleCapturarGPSInicial = async () => {
+    setIsCapturingInicial(true);
     try {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
             form.setValue('latitude_inicial', position.coords.latitude.toString());
             form.setValue('longitude_inicial', position.coords.longitude.toString());
-            toast.success('GPS capturado com sucesso!');
-            setIsCapturing(false);
+            toast.success('📍 GPS Inicial capturado!');
+            setIsCapturingInicial(false);
           },
           (error) => {
-            toast.error(`Erro ao capturar GPS: ${error.message}. Digite manualmente.`);
-            setIsCapturing(false);
+            toast.error(`Erro ao capturar GPS inicial: ${error.message}. Digite manualmente.`);
+            setIsCapturingInicial(false);
           },
           {
             enableHighAccuracy: true,
@@ -157,12 +169,44 @@ const IntervencoesSHForm = ({
         );
       } else {
         toast.error('GPS não disponível. Digite as coordenadas manualmente.');
-        setIsCapturing(false);
+        setIsCapturingInicial(false);
       }
     } catch (err) {
       console.error('Erro GPS:', err);
       toast.error('Erro ao acessar GPS. Digite manualmente.');
-      setIsCapturing(false);
+      setIsCapturingInicial(false);
+    }
+  };
+
+  const handleCapturarGPSFinal = async () => {
+    setIsCapturingFinal(true);
+    try {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            form.setValue('latitude_final', position.coords.latitude.toString());
+            form.setValue('longitude_final', position.coords.longitude.toString());
+            toast.success('📍 GPS Final capturado!');
+            setIsCapturingFinal(false);
+          },
+          (error) => {
+            toast.error(`Erro ao capturar GPS final: ${error.message}. Digite manualmente.`);
+            setIsCapturingFinal(false);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          }
+        );
+      } else {
+        toast.error('GPS não disponível. Digite as coordenadas manualmente.');
+        setIsCapturingFinal(false);
+      }
+    } catch (err) {
+      console.error('Erro GPS:', err);
+      toast.error('Erro ao acessar GPS. Digite manualmente.');
+      setIsCapturingFinal(false);
     }
   };
 
@@ -207,6 +251,8 @@ const IntervencoesSHForm = ({
           material: data.material || null,
           latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
           longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
+          latitude_final: data.latitude_final ? parseFloat(data.latitude_final) : null,
+          longitude_final: data.longitude_final ? parseFloat(data.longitude_final) : null,
           observacao: data.observacao || null,
           tipo_origem: tipoOrigem,
         });
@@ -235,27 +281,39 @@ const IntervencoesSHForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-6 p-4 bg-muted rounded-lg space-y-3">
-          <Label className="text-base font-semibold">Tipo de Intervenção</Label>
-          <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="manutencao_rotineira" id="pre-sh" />
-              <Label htmlFor="pre-sh" className="flex items-center gap-2 cursor-pointer font-normal">
-                🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
-                <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="execucao" id="exec-sh" />
-              <Label htmlFor="exec-sh" className="cursor-pointer font-normal">
-                🟢 {LABELS_TIPO_ORIGEM.execucao}
-              </Label>
-            </div>
-          </RadioGroup>
-          {isManutencaoRotineira && (
-            <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
-          )}
-        </div>
+        {!modoOperacao ? (
+          <div className="mb-6 p-4 bg-muted rounded-lg space-y-3">
+            <Label className="text-base font-semibold">Tipo de Intervenção</Label>
+            <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="manutencao_rotineira" id="pre-sh" />
+                <Label htmlFor="pre-sh" className="flex items-center gap-2 cursor-pointer font-normal">
+                  🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
+                  <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="execucao" id="exec-sh" />
+                <Label htmlFor="exec-sh" className="cursor-pointer font-normal">
+                  🟢 {LABELS_TIPO_ORIGEM.execucao}
+                </Label>
+              </div>
+            </RadioGroup>
+            {isManutencaoRotineira && (
+              <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
+            )}
+          </div>
+        ) : (
+          <Alert className="mb-6">
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Modo selecionado: {modoOperacao === 'manutencao' 
+                ? '🟠 Manutenção Rotineira (IN-3)' 
+                : '🟢 Execução de Projeto'
+              }
+            </AlertDescription>
+          </Alert>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Dados Básicos da Intervenção */}
@@ -538,86 +596,157 @@ const IntervencoesSHForm = ({
             </div>
 
             {/* Localização GPS */}
-            <div className="space-y-4 border-l-4 border-green-500 pl-4 bg-green-50 dark:bg-green-950/20 py-4 rounded-r-lg">
+            <div className="space-y-6 border-l-4 border-green-500 pl-4 bg-green-50 dark:bg-green-950/20 py-4 rounded-r-lg">
               <div className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-green-600" />
                 <h3 className="font-semibold text-green-700 dark:text-green-500 text-lg">
-                  Coordenadas GPS
+                  Coordenadas GPS (Ponto Inicial e Final)
                 </h3>
               </div>
 
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription className="text-xs">
-                  📍 As coordenadas GPS são <strong>obrigatórias</strong> para fins de 
-                  auditoria e relatório. Digite manualmente ou use o botão de captura automática.
+                  📍 Este é um elemento <strong>linear</strong>. Capture o GPS no <strong>início</strong> e no <strong>fim</strong> do trecho de intervenção.
                 </AlertDescription>
               </Alert>
 
-              {/* Botão de captura (se modo normal) */}
-              {modo === 'normal' && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCapturarGPS}
-                  disabled={isCapturing}
-                  className="w-full"
-                >
-                  {isCapturing ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Capturando GPS...
-                    </>
-                  ) : (
-                    <>
-                      <MapPin className="mr-2 h-4 w-4" />
-                      Capturar GPS Automaticamente
-                    </>
+              {/* GPS Inicial */}
+              <div className="space-y-3 p-3 border border-green-200 rounded-lg bg-white dark:bg-gray-900">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-semibold text-green-700">📍 Ponto Inicial</Label>
+                  {modo === 'normal' && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCapturarGPSInicial}
+                      disabled={isCapturingInicial}
+                    >
+                      {isCapturingInicial ? (
+                        <>
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          Capturando...
+                        </>
+                      ) : (
+                        <>
+                          <MapPin className="mr-2 h-3 w-3" />
+                          Capturar GPS Inicial
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
-              )}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="latitude_inicial"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Latitude Inicial *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.000001"
+                            placeholder="-15.123456"
+                            {...field}
+                            className="font-mono text-sm"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="longitude_inicial"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Longitude Inicial *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.000001"
+                            placeholder="-47.123456"
+                            {...field}
+                            className="font-mono text-sm"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
 
-              {/* Inputs manuais */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="latitude_inicial"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Latitude *</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.000001"
-                          placeholder="-15.123456"
-                          {...field}
-                          className="font-mono"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+              {/* GPS Final */}
+              <div className="space-y-3 p-3 border border-green-200 rounded-lg bg-white dark:bg-gray-900">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-semibold text-green-700">📍 Ponto Final</Label>
+                  {modo === 'normal' && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCapturarGPSFinal}
+                      disabled={isCapturingFinal}
+                    >
+                      {isCapturingFinal ? (
+                        <>
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          Capturando...
+                        </>
+                      ) : (
+                        <>
+                          <MapPin className="mr-2 h-3 w-3" />
+                          Capturar GPS Final
+                        </>
+                      )}
+                    </Button>
                   )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="longitude_inicial"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Longitude *</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.000001"
-                          placeholder="-47.123456"
-                          {...field}
-                          className="font-mono"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="latitude_final"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Latitude Final *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.000001"
+                            placeholder="-15.234567"
+                            {...field}
+                            className="font-mono text-sm"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="longitude_final"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Longitude Final *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.000001"
+                            placeholder="-47.234567"
+                            {...field}
+                            className="font-mono text-sm"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </div>
 

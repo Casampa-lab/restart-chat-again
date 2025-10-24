@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, MapPin, Check, PaintBucket, Lock, Info } from "lucide-react";
+import { Loader2, MapPin, Check, PaintBucket, Lock, Info, Camera } from "lucide-react";
+import { CameraCapture } from "@/components/CameraCapture";
 import { useTipoOrigem } from "@/hooks/useTipoOrigem";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
@@ -90,6 +91,8 @@ const IntervencoesInscricoesForm = ({
   modoOperacao
 }: IntervencoesInscricoesFormProps) => {
   const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('inscricoes');
+  const [fotos, setFotos] = useState<string[]>([]);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -109,6 +112,13 @@ const IntervencoesInscricoesForm = ({
     longitude_inicial: "",
     },
   });
+
+  // Sincronizar modo operação com tipo origem
+  useEffect(() => {
+    if (modoOperacao) {
+      setTipoOrigem(modoOperacao === 'manutencao' ? 'manutencao_rotineira' : 'execucao');
+    }
+  }, [modoOperacao, setTipoOrigem]);
 
   // Preencher formulário com dados da inscrição selecionada
   useEffect(() => {
@@ -173,6 +183,7 @@ const IntervencoesInscricoesForm = ({
         longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
           observacao: data.observacao || null,
           tipo_origem: tipoOrigem,
+          fotos: fotos,
         });
 
       if (error) throw error;
@@ -199,27 +210,39 @@ const IntervencoesInscricoesForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-6 p-4 bg-muted rounded-lg space-y-3">
-          <Label className="text-base font-semibold">Tipo de Intervenção</Label>
-          <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="manutencao_rotineira" id="pre-insc" />
-              <Label htmlFor="pre-insc" className="flex items-center gap-2 cursor-pointer font-normal">
-                🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
-                <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="execucao" id="exec-insc" />
-              <Label htmlFor="exec-insc" className="cursor-pointer font-normal">
-                🟢 {LABELS_TIPO_ORIGEM.execucao}
-              </Label>
-            </div>
-          </RadioGroup>
-          {isManutencaoRotineira && (
-            <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
-          )}
-        </div>
+        {!modoOperacao ? (
+          <div className="mb-6 p-4 bg-muted rounded-lg space-y-3">
+            <Label className="text-base font-semibold">Tipo de Intervenção</Label>
+            <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="manutencao_rotineira" id="pre-insc" />
+                <Label htmlFor="pre-insc" className="flex items-center gap-2 cursor-pointer font-normal">
+                  🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
+                  <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="execucao" id="exec-insc" />
+                <Label htmlFor="exec-insc" className="cursor-pointer font-normal">
+                  🟢 {LABELS_TIPO_ORIGEM.execucao}
+                </Label>
+              </div>
+            </RadioGroup>
+            {isManutencaoRotineira && (
+              <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
+            )}
+          </div>
+        ) : (
+          <Alert className="mb-6">
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Modo selecionado: {modoOperacao === 'manutencao' 
+                ? '🟠 Manutenção Rotineira (IN-3)' 
+                : '🟢 Execução de Projeto'
+              }
+            </AlertDescription>
+          </Alert>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
@@ -506,6 +529,39 @@ const IntervencoesInscricoesForm = ({
                 )}
               />
 
+            </div>
+
+            {/* Seção de Fotos */}
+            <div className="space-y-4 border-l-4 border-blue-500 pl-4 bg-blue-50 dark:bg-blue-950/20 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2 justify-between">
+                <div className="flex items-center gap-2">
+                  <Camera className="h-5 w-5 text-blue-600" />
+                  <h3 className="font-semibold text-blue-700 dark:text-blue-500 text-lg">
+                    Documentação Fotográfica
+                  </h3>
+                </div>
+                {fotos.length > 0 && (
+                  <Badge variant="outline" className="text-sm">
+                    ✓ {fotos.length} foto{fotos.length > 1 ? 's' : ''}
+                  </Badge>
+                )}
+              </div>
+
+              {fotos.length === 0 && (
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    📸 Nenhuma foto capturada ainda. As fotos são importantes para documentação da intervenção.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              <CameraCapture
+                photos={fotos}
+                onPhotosChange={setFotos}
+                maxPhotos={5}
+                bucketName="intervencoes-fotos"
+              />
             </div>
 
             {!hideSubmitButton && (
