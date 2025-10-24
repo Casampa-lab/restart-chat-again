@@ -99,75 +99,19 @@ serve(async (req) => {
     console.log('Deletando destinatários email...')
     await supabaseAdmin.from('destinatarios_email').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
-    // 10. Deletar lotes_rodovias
-    console.log('Deletando lotes_rodovias...')
-    await supabaseAdmin.from('lotes_rodovias').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    // 10. PRESERVAR lotes, rodovias e lotes_rodovias
+    console.log('🔒 Preservando lotes, rodovias e vínculos (não deletados)')
 
-    // 11. Deletar rodovias e lotes
-    console.log('Deletando rodovias e lotes...')
-    await supabaseAdmin.from('rodovias').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabaseAdmin.from('lotes').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-
-    // 11.5. Aguardar migrations recriarem dados base (lotes e rodovias)
-    console.log('⏳ Aguardando migrations recriarem dados base...')
-    await new Promise(resolve => setTimeout(resolve, 3000))
-
-    // 11.6. Recriar vínculos essenciais lote-rodovia
-    console.log('🔗 Recriando vínculos lote-rodovia...')
-    
-    // Buscar Lote 99
-    const { data: lote99, error: loteError } = await supabaseAdmin
-      .from('lotes')
-      .select('id')
-      .eq('numero', 99)
-      .maybeSingle()
-
-    if (loteError) {
-      console.log('⚠️ Erro ao buscar Lote 99:', loteError.message)
-    }
-
-    // Buscar BR-116
-    const { data: br116, error: rodoviaError } = await supabaseAdmin
-      .from('rodovias')
-      .select('id')
-      .eq('codigo', 'BR-116')
-      .maybeSingle()
-
-    if (rodoviaError) {
-      console.log('⚠️ Erro ao buscar BR-116:', rodoviaError.message)
-    }
-
-    // Recriar vínculo se ambos existirem
-    if (lote99 && br116) {
-      const { error: vinculoError } = await supabaseAdmin
-        .from('lotes_rodovias')
-        .insert({
-          lote_id: lote99.id,
-          rodovia_id: br116.id,
-          km_inicial: 0,
-          km_final: 999
-        })
-
-      if (vinculoError) {
-        console.log('⚠️ Erro ao recriar vínculo Lote 99 - BR-116:', vinculoError.message)
-      } else {
-        console.log('✅ Vínculo Lote 99 - BR-116 recriado com sucesso')
-      }
-    } else {
-      console.log('⚠️ Lote 99 ou BR-116 não encontrados após reset. Vínculo não recriado.')
-      console.log(`   Lote 99 encontrado: ${!!lote99}, BR-116 encontrada: ${!!br116}`)
-    }
-
-    // 12. Deletar empresas
+    // 11. Deletar empresas
     console.log('Deletando empresas...')
     await supabaseAdmin.from('empresas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
-    // 13. Deletar assinaturas e módulos
+    // 12. Deletar assinaturas e módulos
     console.log('Deletando assinaturas...')
     await supabaseAdmin.from('assinatura_modulos').delete().neq('id', '00000000-0000-0000-0000-000000000000')
     await supabaseAdmin.from('assinaturas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
-    // 14. Buscar admin antes de deletar usuários
+    // 13. Buscar admin antes de deletar usuários
     console.log('Identificando usuário admin...')
     const { data: adminUsers } = await supabaseAdmin
       .from('user_roles')
@@ -177,7 +121,7 @@ serve(async (req) => {
     const adminIds = adminUsers?.map(u => u.user_id) || []
     console.log(`Admin IDs preservados: ${adminIds.join(', ')}`)
 
-    // 15. Deletar user_roles (exceto admin)
+    // 14. Deletar user_roles (exceto admin)
     console.log('Deletando user roles (exceto admin)...')
     if (adminIds.length > 0) {
       await supabaseAdmin
@@ -186,7 +130,7 @@ serve(async (req) => {
         .not('user_id', 'in', `(${adminIds.map(id => `'${id}'`).join(',')})`)
     }
 
-    // 16. Deletar profiles (exceto admin)
+    // 15. Deletar profiles (exceto admin)
     console.log('Deletando profiles (exceto admin)...')
     if (adminIds.length > 0) {
       await supabaseAdmin
@@ -195,11 +139,11 @@ serve(async (req) => {
         .not('id', 'in', `(${adminIds.map(id => `'${id}'`).join(',')})`)
     }
 
-    // 17. Deletar supervisoras
+    // 16. Deletar supervisoras
     console.log('Deletando supervisoras...')
     await supabaseAdmin.from('supervisoras').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
-    // 18. Deletar usuários auth (exceto admin)
+    // 17. Deletar usuários auth (exceto admin)
     console.log('Deletando usuários auth (exceto admin)...')
     const { data: allUsers } = await supabaseAdmin.auth.admin.listUsers()
     
@@ -210,7 +154,7 @@ serve(async (req) => {
       }
     }
 
-    // 19. Limpar storage buckets
+    // 18. Limpar storage buckets
     console.log('Limpando storage buckets...')
     const buckets = [
       'nc-photos',
