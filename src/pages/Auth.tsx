@@ -9,8 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Monitor, Smartphone } from "lucide-react";
 import logoOperaVia from "@/assets/logo-operavia.png";
+import { useIOSDetection } from "@/hooks/useIOSDetection";
+
 const Auth = () => {
   const navigate = useNavigate();
+  const { isModernIOS } = useIOSDetection();
+  
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -20,6 +24,13 @@ const Auth = () => {
   const [telefone, setTelefone] = useState("");
   const [loading, setLoading] = useState(false);
   const [modoAcesso, setModoAcesso] = useState<'web' | 'campo'>(() => {
+    // Se for iOS moderno, forçar modo campo
+    if (isModernIOS) {
+      localStorage.setItem('modoAcesso', 'campo');
+      return 'campo';
+    }
+    
+    // Senão, usar modo salvo ou padrão
     const savedModo = localStorage.getItem('modoAcesso') as 'web' | 'campo';
     return savedModo || 'web';
   });
@@ -31,6 +42,14 @@ const Auth = () => {
       setEmail(lastEmail);
     }
   }, []);
+
+  // Sincronizar modo quando detecção iOS completar
+  useEffect(() => {
+    if (isModernIOS && modoAcesso !== 'campo') {
+      setModoAcesso('campo');
+      localStorage.setItem('modoAcesso', 'campo');
+    }
+  }, [isModernIOS, modoAcesso]);
   useEffect(() => {
     const checkSession = async () => {
       const startTime = Date.now();
@@ -195,61 +214,77 @@ const Auth = () => {
           </div>
           
           {/* Seleção de Modo */}
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle className="text-xl text-center">Escolha o Modo de Acesso</CardTitle>
-              <CardDescription className="text-center">
-                Selecione a interface ideal para seu contexto
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Modo Web Completo */}
-                <button
-                  onClick={() => {
-                    setModoAcesso('web');
-                    localStorage.setItem('modoAcesso', 'web');
-                  }}
-                  className={`p-6 rounded-lg border-2 transition-all ${
-                    modoAcesso === 'web' 
-                      ? 'border-primary bg-primary/10 shadow-lg' 
-                      : 'border-muted hover:border-primary/50'
-                  }`}
-                >
-                  <Monitor className="h-12 w-12 mx-auto mb-3 text-primary" />
-                  <h3 className="font-bold text-lg mb-2">Sistema Web</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Escritório • Dashboard completo • Relatórios • VABLE
-                  </p>
-                  {modoAcesso === 'web' && (
-                    <Badge className="mt-3 bg-primary">Selecionado</Badge>
-                  )}
-                </button>
+          {!isModernIOS && (
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle className="text-xl text-center">Escolha o Modo de Acesso</CardTitle>
+                <CardDescription className="text-center">
+                  Selecione a interface ideal para seu contexto
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Modo Web Completo */}
+                  <button
+                    onClick={() => {
+                      setModoAcesso('web');
+                      localStorage.setItem('modoAcesso', 'web');
+                    }}
+                    className={`p-6 rounded-lg border-2 transition-all ${
+                      modoAcesso === 'web' 
+                        ? 'border-primary bg-primary/10 shadow-lg' 
+                        : 'border-muted hover:border-primary/50'
+                    }`}
+                  >
+                    <Monitor className="h-12 w-12 mx-auto mb-3 text-primary" />
+                    <h3 className="font-bold text-lg mb-2">Sistema Web</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Escritório • Dashboard completo • Relatórios • VABLE
+                    </p>
+                    {modoAcesso === 'web' && (
+                      <Badge className="mt-3 bg-primary">Selecionado</Badge>
+                    )}
+                  </button>
 
-                {/* Modo Campo */}
-                <button
-                  onClick={() => {
-                    setModoAcesso('campo');
-                    localStorage.setItem('modoAcesso', 'campo');
-                  }}
-                  className={`p-6 rounded-lg border-2 transition-all ${
-                    modoAcesso === 'campo' 
-                      ? 'border-green-600 bg-green-50 shadow-lg' 
-                      : 'border-muted hover:border-green-600/50'
-                  }`}
-                >
-                  <Smartphone className="h-12 w-12 mx-auto mb-3 text-green-600" />
-                  <h3 className="font-bold text-lg mb-2">Modo Campo</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Mobile • GPS • Fotos • Intervenções rápidas
+                  {/* Modo Campo */}
+                  <button
+                    onClick={() => {
+                      setModoAcesso('campo');
+                      localStorage.setItem('modoAcesso', 'campo');
+                    }}
+                    className={`p-6 rounded-lg border-2 transition-all ${
+                      modoAcesso === 'campo' 
+                        ? 'border-green-600 bg-green-50 shadow-lg' 
+                        : 'border-muted hover:border-green-600/50'
+                    }`}
+                  >
+                    <Smartphone className="h-12 w-12 mx-auto mb-3 text-green-600" />
+                    <h3 className="font-bold text-lg mb-2">Modo Campo</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Mobile • GPS • Fotos • Intervenções rápidas
+                    </p>
+                    {modoAcesso === 'campo' && (
+                      <Badge className="mt-3 bg-green-600">Selecionado</Badge>
+                    )}
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Badge informativo para usuários iOS */}
+          {isModernIOS && (
+            <Card className="w-full bg-green-50 border-green-600">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-center gap-2">
+                  <Smartphone className="h-5 w-5 text-green-600" />
+                  <p className="text-sm font-medium text-green-900">
+                    Modo Campo ativado automaticamente (dispositivo iOS detectado)
                   </p>
-                  {modoAcesso === 'campo' && (
-                    <Badge className="mt-3 bg-green-600">Selecionado</Badge>
-                  )}
-                </button>
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
+          )}
           
           <Card className="w-full">
             <CardHeader>

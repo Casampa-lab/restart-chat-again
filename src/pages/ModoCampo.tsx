@@ -15,17 +15,29 @@ import { useAuth } from '@/hooks/useAuth';
 import { SessionManagerMobile } from '@/components/SessionManagerMobile';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
+import { useIOSDetection } from '@/hooks/useIOSDetection';
 
 export default function ModoCampo() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { activeSession, refreshSession } = useWorkSession(user?.id);
+  const { isModernIOS } = useIOSDetection();
 
   // Salvar que o usuário está no modo campo
   useEffect(() => {
     localStorage.setItem('modoAcesso', 'campo');
     localStorage.setItem('lastRoute', '/modo-campo');
   }, []);
+
+  // Garantir que modo campo está ativo para iOS
+  useEffect(() => {
+    const modoAtual = localStorage.getItem('modoAcesso');
+    
+    // Se for iOS, sempre forçar modo campo
+    if (isModernIOS && modoAtual !== 'campo') {
+      localStorage.setItem('modoAcesso', 'campo');
+    }
+  }, [isModernIOS]);
 
   const handleVoltar = async () => {
     if (Capacitor.isNativePlatform()) {

@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia.png";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import IntervencoesSHForm from "@/components/IntervencoesSHForm";
+import { useIOSDetection } from "@/hooks/useIOSDetection";
 import { IntervencoesSVForm } from "@/components/IntervencoesSVForm";
 import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm";
 import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
@@ -38,6 +39,7 @@ import { useMarcoZeroRecente } from "@/hooks/useMarcoZeroRecente";
 import { ConsolidatedInventoryBadge } from "@/components/ConsolidatedInventoryBadge";
 const Index = () => {
   const navigate = useNavigate();
+  const { isModernIOS } = useIOSDetection();
   const {
     user,
     loading: authLoading,
@@ -432,6 +434,13 @@ const Index = () => {
     if (!authLoading && !user) {
       navigate("/auth");
     } else if (user) {
+      // Se for iOS moderno, SEMPRE ir para modo campo
+      if (isModernIOS) {
+        localStorage.setItem('modoAcesso', 'campo');
+        navigate('/modo-campo');
+        return;
+      }
+      
       // Verificar se está no modo campo e redirecionar para /modo-campo
       const modoAtual = localStorage.getItem('modoAcesso');
       if (modoAtual === 'campo') {
@@ -449,7 +458,7 @@ const Index = () => {
       
       localStorage.setItem('lastRoute', '/');
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, isModernIOS]);
   const handleSignOut = async () => {
     try {
       await signOut();
