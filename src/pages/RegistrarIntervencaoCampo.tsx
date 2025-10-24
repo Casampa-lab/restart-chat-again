@@ -82,9 +82,11 @@ export default function RegistrarIntervencaoCampo() {
   const [isConforme, setIsConforme] = useState(true);
   const [justificativaNC, setJustificativaNC] = useState('');
   const [loading, setLoading] = useState(false);
-  const [manualPosition, setManualPosition] = useState<{ latitude: string; longitude: string }>({
-    latitude: '',
-    longitude: ''
+  const [manualPosition, setManualPosition] = useState({
+    latitude_inicial: '',
+    longitude_inicial: '',
+    latitude_final: '',
+    longitude_final: ''
   });
 
   const necessidadeProp = location.state?.necessidade;
@@ -120,11 +122,12 @@ export default function RegistrarIntervencaoCampo() {
     try {
       const pos = await getCurrentPosition();
       if (pos) {
-        setManualPosition({
-          latitude: pos.latitude.toString(),
-          longitude: pos.longitude.toString()
-        });
-        toast.success('Localização capturada!');
+        setManualPosition(prev => ({
+          ...prev,
+          latitude_inicial: pos.latitude.toString(),
+          longitude_inicial: pos.longitude.toString()
+        }));
+        toast.success('GPS Inicial capturado!');
       }
     } catch (error) {
       toast.error('Erro ao capturar GPS');
@@ -134,10 +137,11 @@ export default function RegistrarIntervencaoCampo() {
   // Sincronizar posição manual com position do hook
   useEffect(() => {
     if (position) {
-      setManualPosition({
-        latitude: position.latitude.toString(),
-        longitude: position.longitude.toString()
-      });
+      setManualPosition(prev => ({
+        ...prev,
+        latitude_inicial: position.latitude.toString(),
+        longitude_inicial: position.longitude.toString()
+      }));
     }
   }, [position]);
 
@@ -159,8 +163,6 @@ export default function RegistrarIntervencaoCampo() {
       const payload = {
         ...dadosIntervencao,
         fotos_urls: fotos,
-        latitude: parseFloat(manualPosition.latitude) || null,
-        longitude: parseFloat(manualPosition.longitude) || null,
         pendente_aprovacao_coordenador: isConforme,
       };
 
@@ -176,8 +178,8 @@ export default function RegistrarIntervencaoCampo() {
             tipo_nc: 'Não Conformidade de Intervenção',
             descricao_problema: justificativaNC,
             empresa: activeSession.lote?.empresa?.nome || 'Não especificada',
-            latitude: parseFloat(manualPosition.latitude) || null,
-            longitude: parseFloat(manualPosition.longitude) || null,
+            latitude: parseFloat(manualPosition.latitude_inicial) || null,
+            longitude: parseFloat(manualPosition.longitude_inicial) || null,
             status_aprovacao: 'pendente',
             deleted: false
           } as any);
@@ -198,12 +200,18 @@ export default function RegistrarIntervencaoCampo() {
         ...payload,
         user_id: user!.id,
         fotos_urls: fotos,
-        latitude: parseFloat(manualPosition.latitude) || null,
-        longitude: parseFloat(manualPosition.longitude) || null,
+        latitude_inicial: parseFloat(manualPosition.latitude_inicial) || null,
+        longitude_inicial: parseFloat(manualPosition.longitude_inicial) || null,
         pendente_aprovacao_coordenador: isConforme,
         aplicado_ao_inventario: false,
         tipo_origem: modoOperacao === 'manutencao' ? 'manutencao_pre_projeto' : 'execucao'
       };
+
+      // Adicionar GPS Final apenas para Marcas SH
+      if (tipoSelecionado === 'marcas_longitudinais') {
+        payloadIntervencao.latitude_final = parseFloat(manualPosition.latitude_final) || null;
+        payloadIntervencao.longitude_final = parseFloat(manualPosition.longitude_final) || null;
+      }
 
       // Converter strings vazias para null em campos numéricos
       Object.keys(payloadIntervencao).forEach(key => {
@@ -450,52 +458,115 @@ export default function RegistrarIntervencaoCampo() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Botão de captura */}
+              {/* Botão de captura GPS Inicial */}
               <Button 
                 onClick={capturarGPS} 
-                variant={manualPosition.latitude && manualPosition.longitude ? "outline" : "default"}
+                variant={manualPosition.latitude_inicial && manualPosition.longitude_inicial ? "outline" : "default"}
                 className="w-full"
               >
                 <MapPin className="mr-2 h-4 w-4" />
-                {manualPosition.latitude && manualPosition.longitude ? 'Atualizar GPS' : 'Capturar GPS Automaticamente'}
+                {manualPosition.latitude_inicial && manualPosition.longitude_inicial ? 'Atualizar GPS Inicial' : 'Capturar GPS Inicial'}
               </Button>
 
-              {/* Inputs manuais sempre visíveis */}
+              {/* Inputs manuais GPS Inicial */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="latitude">Latitude *</Label>
+                  <Label htmlFor="latitude_inicial">Latitude Inicial *</Label>
                   <Input
-                    id="latitude"
+                    id="latitude_inicial"
                     type="number"
                     step="0.000001"
                     placeholder="-15.123456"
-                    value={manualPosition.latitude}
+                    value={manualPosition.latitude_inicial}
                     onChange={(e) => setManualPosition(prev => ({
                       ...prev,
-                      latitude: e.target.value
+                      latitude_inicial: e.target.value
                     }))}
                     className="font-mono"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="longitude">Longitude *</Label>
+                  <Label htmlFor="longitude_inicial">Longitude Inicial *</Label>
                   <Input
-                    id="longitude"
+                    id="longitude_inicial"
                     type="number"
                     step="0.000001"
                     placeholder="-47.123456"
-                    value={manualPosition.longitude}
+                    value={manualPosition.longitude_inicial}
                     onChange={(e) => setManualPosition(prev => ({
                       ...prev,
-                      longitude: e.target.value
+                      longitude_inicial: e.target.value
                     }))}
                     className="font-mono"
                   />
                 </div>
               </div>
 
+              {/* GPS Final - Apenas para Marcas SH */}
+              {tipoSelecionado === 'marcas_longitudinais' && (
+                <>
+                  <div className="border-t pt-4 mt-2">
+                    <Button 
+                      onClick={async () => {
+                        try {
+                          const pos = await getCurrentPosition();
+                          if (pos) {
+                            setManualPosition(prev => ({
+                              ...prev,
+                              latitude_final: pos.latitude.toString(),
+                              longitude_final: pos.longitude.toString()
+                            }));
+                            toast.success('GPS Final capturado!');
+                          }
+                        } catch (error) {
+                          toast.error('Erro ao capturar GPS Final');
+                        }
+                      }}
+                      variant={manualPosition.latitude_final && manualPosition.longitude_final ? "outline" : "default"}
+                      className="w-full"
+                    >
+                      <MapPin className="mr-2 h-4 w-4" />
+                      {manualPosition.latitude_final && manualPosition.longitude_final ? 'Atualizar GPS Final' : 'Capturar GPS Final'}
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="latitude_final">Latitude Final *</Label>
+                      <Input
+                        id="latitude_final"
+                        type="number"
+                        step="0.000001"
+                        placeholder="-15.123456"
+                        value={manualPosition.latitude_final}
+                        onChange={(e) => setManualPosition(prev => ({
+                          ...prev,
+                          latitude_final: e.target.value
+                        }))}
+                        className="font-mono"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="longitude_final">Longitude Final *</Label>
+                      <Input
+                        id="longitude_final"
+                        type="number"
+                        step="0.000001"
+                        placeholder="-47.123456"
+                        value={manualPosition.longitude_final}
+                        onChange={(e) => setManualPosition(prev => ({
+                          ...prev,
+                          longitude_final: e.target.value
+                        }))}
+                        className="font-mono"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* Feedback visual */}
-              {(!manualPosition.latitude || !manualPosition.longitude) && (
+              {(!manualPosition.latitude_inicial || !manualPosition.longitude_inicial) && (
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertDescription>
@@ -556,7 +627,7 @@ export default function RegistrarIntervencaoCampo() {
           {/* 7. Enviar */}
           <Button
             onClick={handleEnviar}
-            disabled={loading || !dadosIntervencao || !manualPosition.latitude || !manualPosition.longitude}
+            disabled={loading || !dadosIntervencao || !manualPosition.latitude_inicial || !manualPosition.longitude_inicial}
             size="lg"
             className={`w-full h-14 text-lg ${
               modoOperacao === 'manutencao' 
