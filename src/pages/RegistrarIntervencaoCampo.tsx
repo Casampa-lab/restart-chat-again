@@ -10,7 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, MapPin, Camera, CheckCircle2, AlertCircle, RefreshCw, Wrench, HardHat } from 'lucide-react';
+import { ArrowLeft, MapPin, Camera, CheckCircle2, AlertCircle, RefreshCw, Wrench, HardHat, Info } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Capacitor } from '@capacitor/core';
@@ -80,6 +82,10 @@ export default function RegistrarIntervencaoCampo() {
   const [isConforme, setIsConforme] = useState(true);
   const [justificativaNC, setJustificativaNC] = useState('');
   const [loading, setLoading] = useState(false);
+  const [manualPosition, setManualPosition] = useState<{ latitude: string; longitude: string }>({
+    latitude: '',
+    longitude: ''
+  });
 
   const necessidadeProp = location.state?.necessidade;
 
@@ -103,12 +109,28 @@ export default function RegistrarIntervencaoCampo() {
 
   const capturarGPS = async () => {
     try {
-      await getCurrentPosition();
-      toast.success('Localização capturada!');
+      const pos = await getCurrentPosition();
+      if (pos) {
+        setManualPosition({
+          latitude: pos.latitude.toString(),
+          longitude: pos.longitude.toString()
+        });
+        toast.success('Localização capturada!');
+      }
     } catch (error) {
       toast.error('Erro ao capturar GPS');
     }
   };
+
+  // Sincronizar posição manual com position do hook
+  useEffect(() => {
+    if (position) {
+      setManualPosition({
+        latitude: position.latitude.toString(),
+        longitude: position.longitude.toString()
+      });
+    }
+  }, [position]);
 
   const handleEnviar = async () => {
     if (!activeSession || !dadosIntervencao || !tipoSelecionado || !modoOperacao) {
@@ -136,8 +158,8 @@ export default function RegistrarIntervencaoCampo() {
             p_km_inicial: dadosIntervencao.km_inicial,
             p_km_final: dadosIntervencao.km_final || null,
             p_lado: dadosIntervencao.lado || null,
-            p_latitude: position?.latitude || null,
-            p_longitude: position?.longitude || null,
+            p_latitude: parseFloat(manualPosition.latitude) || null,
+            p_longitude: parseFloat(manualPosition.longitude) || null,
             p_tipo: dadosIntervencao.motivo || 'PINTURA_DEMARCACAO',
             p_descricao: dadosIntervencao.observacoes || justificativaNC || null,
             p_fotos_antes: [],
@@ -157,8 +179,8 @@ export default function RegistrarIntervencaoCampo() {
       const payload = {
         ...dadosIntervencao,
         fotos_urls: fotos,
-        latitude: position?.latitude,
-        longitude: position?.longitude,
+        latitude: parseFloat(manualPosition.latitude) || null,
+        longitude: parseFloat(manualPosition.longitude) || null,
         pendente_aprovacao_coordenador: isConforme,
       };
 
@@ -174,8 +196,8 @@ export default function RegistrarIntervencaoCampo() {
             tipo_nc: 'Não Conformidade de Intervenção',
             descricao_problema: justificativaNC,
             empresa: activeSession.lote?.empresa?.nome || 'Não especificada',
-            latitude: position?.latitude,
-            longitude: position?.longitude,
+            latitude: parseFloat(manualPosition.latitude) || null,
+            longitude: parseFloat(manualPosition.longitude) || null,
             status_aprovacao: 'pendente',
             deleted: false
           } as any);
@@ -196,8 +218,8 @@ export default function RegistrarIntervencaoCampo() {
         ...payload,
         user_id: user!.id,
         fotos_urls: fotos,
-        latitude: position?.latitude,
-        longitude: position?.longitude,
+        latitude: parseFloat(manualPosition.latitude) || null,
+        longitude: parseFloat(manualPosition.longitude) || null,
         pendente_aprovacao_coordenador: isConforme,
         aplicado_ao_inventario: false,
         tipo_origem: 'execucao'
@@ -418,31 +440,60 @@ export default function RegistrarIntervencaoCampo() {
                 5️⃣ Localização GPS
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {position ? (
+            <CardContent className="space-y-4">
+              {/* Botão de captura */}
+              <Button 
+                onClick={capturarGPS} 
+                variant={manualPosition.latitude && manualPosition.longitude ? "outline" : "default"}
+                className="w-full"
+              >
+                <MapPin className="mr-2 h-4 w-4" />
+                {manualPosition.latitude && manualPosition.longitude ? 'Atualizar GPS' : 'Capturar GPS Automaticamente'}
+              </Button>
+
+              {/* Inputs manuais sempre visíveis */}
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Badge variant="outline" className="text-sm">
-                    ✓ Capturado: {position.latitude.toFixed(6)}°, {position.longitude.toFixed(6)}°
-                  </Badge>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={capturarGPS}
-                    className="w-full"
-                  >
-                    Atualizar Localização
-                  </Button>
+                  <Label htmlFor="latitude">Latitude *</Label>
+                  <Input
+                    id="latitude"
+                    type="number"
+                    step="0.000001"
+                    placeholder="-15.123456"
+                    value={manualPosition.latitude}
+                    onChange={(e) => setManualPosition(prev => ({
+                      ...prev,
+                      latitude: e.target.value
+                    }))}
+                    className="font-mono"
+                  />
                 </div>
-              ) : (
                 <div className="space-y-2">
-                  <Button onClick={capturarGPS} className="w-full">
-                    <MapPin className="mr-2 h-4 w-4" />
-                    Capturar Localização
-                  </Button>
-                  <Badge variant="outline" className="text-xs text-amber-600 w-full justify-center">
-                    ⚠️ GPS não capturado - {modoOperacao === 'manutencao' ? 'Opcional' : 'Obrigatório'}
-                  </Badge>
+                  <Label htmlFor="longitude">Longitude *</Label>
+                  <Input
+                    id="longitude"
+                    type="number"
+                    step="0.000001"
+                    placeholder="-47.123456"
+                    value={manualPosition.longitude}
+                    onChange={(e) => setManualPosition(prev => ({
+                      ...prev,
+                      longitude: e.target.value
+                    }))}
+                    className="font-mono"
+                  />
                 </div>
+              </div>
+
+              {/* Feedback visual */}
+              {(!manualPosition.latitude || !manualPosition.longitude) && (
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    📍 Coordenadas GPS são <strong>obrigatórias</strong> para o relatório. 
+                    Capture automaticamente ou digite manualmente.
+                  </AlertDescription>
+                </Alert>
               )}
             </CardContent>
           </Card>
@@ -496,7 +547,7 @@ export default function RegistrarIntervencaoCampo() {
           {/* 7. Enviar */}
           <Button
             onClick={handleEnviar}
-            disabled={loading || !dadosIntervencao || (modoOperacao === 'execucao' && !position)}
+            disabled={loading || !dadosIntervencao || !manualPosition.latitude || !manualPosition.longitude}
             size="lg"
             className={`w-full h-14 text-lg ${
               modoOperacao === 'manutencao' 

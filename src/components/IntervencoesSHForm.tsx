@@ -4,14 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, MapPin, Check, PaintBucket, Lock, Info } from "lucide-react";
+import { Loader2, MapPin, Check, PaintBucket, Lock, Info, FileText } from "lucide-react";
 import { useTipoOrigem } from "@/hooks/useTipoOrigem";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
@@ -70,8 +70,9 @@ const formSchema = z.object({
   largura_cm: z.string().optional(),
   espessura_cm: z.string().optional(),
   material: z.string().optional(),
-  latitude_inicial: z.string().optional(),
-  longitude_inicial: z.string().optional(),
+  latitude_inicial: z.string().min(1, "Latitude é obrigatória"),
+  longitude_inicial: z.string().min(1, "Longitude é obrigatória"),
+  observacao: z.string().optional(),
 });
 
 const IntervencoesSHForm = ({ 
@@ -101,8 +102,9 @@ const IntervencoesSHForm = ({
       largura_cm: "",
       espessura_cm: "",
       material: "",
-    latitude_inicial: "",
-    longitude_inicial: "",
+      latitude_inicial: "",
+      longitude_inicial: "",
+      observacao: "",
     },
   });
 
@@ -125,9 +127,42 @@ const IntervencoesSHForm = ({
         material: (marcaSelecionada as any).material || "",
         latitude_inicial: "",
         longitude_inicial: "",
+        observacao: "",
       });
     }
   }, [marcaSelecionada, modo, form]);
+
+  const handleCapturarGPS = async () => {
+    setIsCapturing(true);
+    try {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            form.setValue('latitude_inicial', position.coords.latitude.toString());
+            form.setValue('longitude_inicial', position.coords.longitude.toString());
+            toast.success('GPS capturado com sucesso!');
+            setIsCapturing(false);
+          },
+          (error) => {
+            toast.error(`Erro ao capturar GPS: ${error.message}. Digite manualmente.`);
+            setIsCapturing(false);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          }
+        );
+      } else {
+        toast.error('GPS não disponível. Digite as coordenadas manualmente.');
+        setIsCapturing(false);
+      }
+    } catch (err) {
+      console.error('Erro GPS:', err);
+      toast.error('Erro ao acessar GPS. Digite manualmente.');
+      setIsCapturing(false);
+    }
+  };
 
   // Propagar mudanças em tempo real no modo controlado
   useEffect(() => {
@@ -168,8 +203,9 @@ const IntervencoesSHForm = ({
           largura_cm: data.largura_cm ? parseFloat(data.largura_cm) : null,
           espessura_cm: data.espessura_cm ? parseFloat(data.espessura_cm) : null,
           material: data.material || null,
-        latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
-        longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
+          latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
+          longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
+          observacao: data.observacao || null,
           tipo_origem: tipoOrigem,
         });
 
@@ -497,6 +533,125 @@ const IntervencoesSHForm = ({
                   )}
                 />
               </div>
+            </div>
+
+            {/* Localização GPS */}
+            <div className="space-y-4 border-l-4 border-green-500 pl-4 bg-green-50 dark:bg-green-950/20 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-green-600" />
+                <h3 className="font-semibold text-green-700 dark:text-green-500 text-lg">
+                  Coordenadas GPS
+                </h3>
+              </div>
+
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  📍 As coordenadas GPS são <strong>obrigatórias</strong> para fins de 
+                  auditoria e relatório. Digite manualmente ou use o botão de captura automática.
+                </AlertDescription>
+              </Alert>
+
+              {/* Botão de captura (se modo normal) */}
+              {modo === 'normal' && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCapturarGPS}
+                  disabled={isCapturing}
+                  className="w-full"
+                >
+                  {isCapturing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Capturando GPS...
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Capturar GPS Automaticamente
+                    </>
+                  )}
+                </Button>
+              )}
+
+              {/* Inputs manuais */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="latitude_inicial"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Latitude *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          placeholder="-15.123456"
+                          {...field}
+                          className="font-mono"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="longitude_inicial"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Longitude *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          placeholder="-47.123456"
+                          {...field}
+                          className="font-mono"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Campo de Observações (Texto Livre) */}
+            <div className="space-y-4 border-l-4 border-amber-500 pl-4 bg-amber-50 dark:bg-amber-950/20 py-4 rounded-r-lg">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-amber-600" />
+                <h3 className="font-semibold text-amber-700 dark:text-amber-500 text-lg">
+                  Observações da Intervenção
+                </h3>
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="observacao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      Observações
+                      <Badge variant="outline" className="text-xs">Campo livre</Badge>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Ex: Repintura realizada no eixo central e bordo direito entre km 10+500 e 12+300. Acostamento não foi pintado devido ao tráfego intenso."
+                        className="min-h-[100px] resize-y"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      💡 Use este campo para registrar detalhes sobre a localização da repintura (eixo, bordos, acostamento) 
+                      e outras informações relevantes que não podem ser capturadas nos campos estruturais.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {!hideSubmitButton && (
