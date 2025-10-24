@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, MapPin, Camera, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, MapPin, Camera, CheckCircle2, AlertCircle, RefreshCw, Wrench, HardHat } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Capacitor } from '@capacitor/core';
@@ -73,6 +73,7 @@ export default function RegistrarIntervencaoCampo() {
   const { activeSession } = useWorkSession(user?.id);
   const { position, getCurrentPosition } = useGPSTracking();
 
+  const [modoOperacao, setModoOperacao] = useState<'manutencao' | 'execucao' | null>(null);
   const [tipoSelecionado, setTipoSelecionado] = useState<string>('');
   const [dadosIntervencao, setDadosIntervencao] = useState<any>(null);
   const [fotos, setFotos] = useState<string[]>([]);
@@ -110,7 +111,7 @@ export default function RegistrarIntervencaoCampo() {
   };
 
   const handleEnviar = async () => {
-    if (!activeSession || !dadosIntervencao || !tipoSelecionado) {
+    if (!activeSession || !dadosIntervencao || !tipoSelecionado || !modoOperacao) {
       toast.error('Dados incompletos');
       return;
     }
@@ -123,6 +124,36 @@ export default function RegistrarIntervencaoCampo() {
     try {
       setLoading(true);
 
+      // Se for MANUTENÇÃO 🟠 → usar RPC dedicada
+      if (modoOperacao === 'manutencao') {
+        const { data: manutencaoId, error } = await supabase.rpc(
+          'registrar_manutencao_pre_projeto' as any,
+          {
+            p_tipo_elemento: tipoSelecionado,
+            p_rodovia_id: activeSession.rodovia_id,
+            p_lote_id: activeSession.lote_id,
+            p_inventario_id: necessidadeProp?.elemento_id || null,
+            p_km_inicial: dadosIntervencao.km_inicial,
+            p_km_final: dadosIntervencao.km_final || null,
+            p_lado: dadosIntervencao.lado || null,
+            p_latitude: position?.latitude || null,
+            p_longitude: position?.longitude || null,
+            p_tipo: dadosIntervencao.motivo || 'PINTURA_DEMARCACAO',
+            p_descricao: dadosIntervencao.observacoes || justificativaNC || null,
+            p_fotos_antes: [],
+            p_fotos_depois: fotos,
+            p_caracteristicas: dadosIntervencao
+          }
+        );
+
+        if (error) throw error;
+
+        toast.success('🟠 Manutenção registrada com sucesso!');
+        navigate('/minhas-intervencoes?tab=manutencoes');
+        return;
+      }
+
+      // Se for EXECUÇÃO 🟢 → lógica atual (salva em *_intervencoes)
       const payload = {
         ...dadosIntervencao,
         fotos_urls: fotos,
@@ -235,12 +266,70 @@ export default function RegistrarIntervencaoCampo() {
         </div>
       </div>
 
-      {/* Etapa 1: Selecionar Tipo */}
-      {!tipoSelecionado && (
+      {/* Etapa 1: Escolher Modo de Operação */}
+      {!modoOperacao && (
         <Card>
           <CardHeader>
-            <CardTitle>1️⃣ Selecionar Tipo de Elemento</CardTitle>
-            <CardDescription>Escolha o tipo de intervenção que deseja registrar</CardDescription>
+            <CardTitle>1️⃣ Escolher Tipo de Operação</CardTitle>
+            <CardDescription>
+              Selecione conforme o tipo de trabalho que está executando
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button
+              variant="outline"
+              className="w-full h-24 text-left flex-col items-start justify-center space-y-1 border-orange-300 hover:bg-orange-50"
+              onClick={() => setModoOperacao('manutencao')}
+            >
+              <div className="flex items-center gap-2 text-lg font-semibold text-orange-600">
+                <Wrench className="h-5 w-5" />
+                🟠 Manutenção Pré-Projeto (IN-3)
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Reparo, limpeza, pintura - NÃO altera inventário
+              </p>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full h-24 text-left flex-col items-start justify-center space-y-1 border-green-300 hover:bg-green-50"
+              onClick={() => setModoOperacao('execucao')}
+            >
+              <div className="flex items-center gap-2 text-lg font-semibold text-green-600">
+                <HardHat className="h-5 w-5" />
+                🟢 Execução de Projeto
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Implantação, substituição - ALTERA inventário
+              </p>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Etapa 2: Selecionar Tipo (só aparece após escolher modo) */}
+      {modoOperacao && !tipoSelecionado && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>2️⃣ Selecionar Tipo de Elemento</CardTitle>
+                <CardDescription>
+                  {modoOperacao === 'manutencao' 
+                    ? '🟠 Modo: Manutenção IN-3'
+                    : '🟢 Modo: Execução de Projeto'
+                  }
+                </CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setModoOperacao(null)}
+              >
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Alterar Modo
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3">
             {TIPOS_ELEMENTOS.map(tipo => (
@@ -257,13 +346,20 @@ export default function RegistrarIntervencaoCampo() {
         </Card>
       )}
 
-      {/* Etapas 2-6: Formulário e Captura */}
+      {/* Etapas 3-7: Formulário e Captura */}
       {tipoSelecionado && (
         <div className="space-y-4">
           {/* Badge do tipo selecionado */}
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-base px-3 py-1">
-              {TIPOS_ELEMENTOS.find(t => t.value === tipoSelecionado)?.label}
+            <Badge 
+              variant="outline" 
+              className={`text-base px-3 py-1 ${
+                modoOperacao === 'manutencao' 
+                  ? 'border-orange-500 text-orange-700 bg-orange-50' 
+                  : 'border-green-500 text-green-700 bg-green-50'
+              }`}
+            >
+              {modoOperacao === 'manutencao' ? '🟠' : '🟢'} {TIPOS_ELEMENTOS.find(t => t.value === tipoSelecionado)?.label}
             </Badge>
             <Button
               variant="outline"
@@ -279,10 +375,10 @@ export default function RegistrarIntervencaoCampo() {
             </Button>
           </div>
 
-          {/* 2. Formulário Específico */}
+          {/* 3. Formulário Específico */}
           <Card>
             <CardHeader>
-              <CardTitle>2️⃣ Dados da Intervenção</CardTitle>
+              <CardTitle>3️⃣ Dados da {modoOperacao === 'manutencao' ? 'Manutenção' : 'Intervenção'}</CardTitle>
             </CardHeader>
             <CardContent>
               {FormularioAtual && (
@@ -297,12 +393,12 @@ export default function RegistrarIntervencaoCampo() {
             </CardContent>
           </Card>
 
-          {/* 3. Capturar Fotos */}
+          {/* 4. Capturar Fotos */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Camera className="h-5 w-5" />
-                3️⃣ Capturar Fotos
+                4️⃣ Capturar Fotos
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -314,12 +410,12 @@ export default function RegistrarIntervencaoCampo() {
             </CardContent>
           </Card>
 
-          {/* 4. GPS */}
+          {/* 5. GPS */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                4️⃣ Localização GPS
+                5️⃣ Localização GPS
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -346,10 +442,10 @@ export default function RegistrarIntervencaoCampo() {
             </CardContent>
           </Card>
 
-          {/* 5. Validação Manual */}
+          {/* 6. Validação Manual */}
           <Card>
             <CardHeader>
-              <CardTitle>5️⃣ Validação de Conformidade</CardTitle>
+              <CardTitle>6️⃣ Validação de Conformidade</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
@@ -392,14 +488,18 @@ export default function RegistrarIntervencaoCampo() {
             </CardContent>
           </Card>
 
-          {/* 6. Enviar */}
+          {/* 7. Enviar */}
           <Button
             onClick={handleEnviar}
             disabled={loading || !dadosIntervencao || !position}
             size="lg"
-            className="w-full h-14 text-lg"
+            className={`w-full h-14 text-lg ${
+              modoOperacao === 'manutencao' 
+                ? 'bg-orange-600 hover:bg-orange-700' 
+                : ''
+            }`}
           >
-            {loading ? 'Enviando...' : 'Enviar Intervenção'}
+            {loading ? 'Enviando...' : (modoOperacao === 'manutencao' ? '🟠 Registrar Manutenção' : '🟢 Enviar Intervenção')}
           </Button>
         </div>
       )}

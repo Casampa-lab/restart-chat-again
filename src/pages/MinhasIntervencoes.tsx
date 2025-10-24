@@ -12,6 +12,7 @@ import IntervencoesTachaContent from "@/components/IntervencoesTachaContent";
 import IntervencoesCilindrosContent from "@/components/IntervencoesCilindrosContent";
 import IntervencoesPorticosContent from "@/components/IntervencoesPorticosContent";
 import IntervencoesDefensasContent from "@/components/IntervencoesDefensasContent";
+import IntervencoesManutencaoContent from "@/components/IntervencoesManutencaoContent";
 
 const MinhasIntervencoes = () => {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ const MinhasIntervencoes = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-6">
+          <TabsList className="grid w-full grid-cols-8 mb-6">
             <TabsTrigger value="sh">
               SH
             </TabsTrigger>
@@ -71,6 +72,9 @@ const MinhasIntervencoes = () => {
             </TabsTrigger>
             <TabsTrigger value="defensas">
               Defensas
+            </TabsTrigger>
+            <TabsTrigger value="manutencoes" className="text-orange-600">
+              🟠 Manutenções
             </TabsTrigger>
           </TabsList>
           
@@ -100,6 +104,10 @@ const MinhasIntervencoes = () => {
           
           <TabsContent value="defensas">
             <IntervencoesDefensasContent />
+          </TabsContent>
+          
+          <TabsContent value="manutencoes">
+            <IntervencoesManutencaoContent />
           </TabsContent>
         </Tabs>
       </main>

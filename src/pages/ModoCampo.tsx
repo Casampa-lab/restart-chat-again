@@ -42,33 +42,17 @@ export default function ModoCampo() {
 
   const menuItems = [
     {
-      icon: Map,
-      title: 'Inventário Dinâmico',
-      description: 'Ver necessidades próximas com alerta GPS',
-      path: '/modo-campo/inventario-dinamico',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-    },
-    {
       icon: Wrench,
-      title: 'Registrar Intervenção',
-      description: 'Registrar nova intervenção em campo',
+      title: 'Ações de Campo',
+      description: 'Manutenção IN-3 ou Execução de Projeto',
       path: '/modo-campo/registrar-intervencao',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-    },
-    {
-      icon: AlertTriangle,
-      title: 'Não Conformidades',
-      description: 'Registrar NCs encontradas',
-      path: '/minhas-ncs',
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
     },
     {
       icon: Search,
       title: 'Controle de Qualidade',
-      description: 'Fichas de verificação',
+      description: 'Fichas de verificação e retrorefletividade',
       path: '/minhas-fichas-verificacao',
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',

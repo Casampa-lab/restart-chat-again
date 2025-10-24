@@ -14,6 +14,16 @@ export function TipoOrigemBadge({
   showLabel = true,
   className 
 }: TipoOrigemBadgeProps) {
+  // Se for manutenção pré-projeto, mostrar badge laranja específico
+  if (origem === 'manutencao_pre_projeto') {
+    return (
+      <Badge variant="outline" className={`border-orange-500 text-orange-700 bg-orange-50 ${className}`}>
+        <Wrench className="h-3 w-3 mr-1" />
+        {showLabel && "🟠 Manutenção IN-3"}
+      </Badge>
+    );
+  }
+
   // Se foi modificado por intervenção, mostrar badge específico
   if (modificadoPorIntervencao) {
     return (
