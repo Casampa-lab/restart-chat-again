@@ -74,7 +74,7 @@ export function IntervencoesSVForm({
   const [coordenadas, setCoordenadas] = useState({ latitude: "", longitude: "" });
   const [codigosFiltrados, setCodigosFiltrados] = useState<readonly {codigo: string, nome: string}[]>([]);
   const [codigoAtual, setCodigoAtual] = useState<string | null>(null);
-  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoPreProjeto } = useTipoOrigem('placas');
+  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('placas');
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -256,9 +256,9 @@ export function IntervencoesSVForm({
           <FormLabel className="text-base font-semibold">Tipo de Intervenção</FormLabel>
           <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="manutencao_pre_projeto" id="pre-sv" />
+              <RadioGroupItem value="manutencao_rotineira" id="pre-sv" />
               <FormLabel htmlFor="pre-sv" className="flex items-center gap-2 cursor-pointer font-normal">
-                🟡 {LABELS_TIPO_ORIGEM.manutencao_pre_projeto}
+                🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
                 <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
               </FormLabel>
             </div>
@@ -270,7 +270,7 @@ export function IntervencoesSVForm({
             </div>
           </RadioGroup>
           
-          {isManutencaoPreProjeto && (
+          {isManutencaoRotineira && (
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>

@@ -60,7 +60,7 @@ export function IntervencoesTachaForm({
   loteId,
   rodoviaId
 }: IntervencoesTachaFormProps) {
-  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoPreProjeto } = useTipoOrigem('tachas');
+  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('tachas');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
@@ -122,9 +122,9 @@ export function IntervencoesTachaForm({
       return;
     }
     
-    // Validação: Manutenção Pré-Projeto exige tacha existente
-    if (isManutencaoPreProjeto && !tachaSelecionada) {
-      toast.error("Para Manutenção Pré-Projeto, selecione uma tacha do inventário primeiro");
+    // Validação: Manutenção Rotineira exige tacha existente
+    if (isManutencaoRotineira && !tachaSelecionada) {
+      toast.error("Para Manutenção Rotineira, selecione uma tacha do inventário primeiro");
       return;
     }
 
@@ -175,9 +175,9 @@ export function IntervencoesTachaForm({
           <Label className="text-base font-semibold">Tipo de Intervenção</Label>
           <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="manutencao_pre_projeto" id="pre-tacha" />
+              <RadioGroupItem value="manutencao_rotineira" id="pre-tacha" />
               <Label htmlFor="pre-tacha" className="flex items-center gap-2 cursor-pointer font-normal">
-                🟡 {LABELS_TIPO_ORIGEM.manutencao_pre_projeto}
+                🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
                 <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
               </Label>
             </div>
@@ -188,7 +188,7 @@ export function IntervencoesTachaForm({
               </Label>
             </div>
           </RadioGroup>
-          {isManutencaoPreProjeto && (
+          {isManutencaoRotineira && (
             <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
           )}
         </div>
@@ -490,7 +490,7 @@ export function IntervencoesTachaForm({
                 type="submit" 
                 className="w-full" 
                 disabled={
-                  (isManutencaoPreProjeto && !tachaSelecionada) || 
+                  (isManutencaoRotineira && !tachaSelecionada) || 
                   modo === 'controlado'
                 }
               >

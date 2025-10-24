@@ -5,7 +5,7 @@ export function useTipoOrigem(tipoElemento: TipoElemento) {
   const [tipoOrigem, setTipoOrigem] = useState<string>(TIPOS_ORIGEM.EXECUCAO);
 
   const isCampoEstruturalBloqueado = (nomeCampo: string): boolean => {
-    if (tipoOrigem !== TIPOS_ORIGEM.MANUTENCAO_PRE_PROJETO) {
+    if (tipoOrigem !== TIPOS_ORIGEM.MANUTENCAO_ROTINEIRA) {
       return false;
     }
 
@@ -17,6 +17,6 @@ export function useTipoOrigem(tipoElemento: TipoElemento) {
     tipoOrigem,
     setTipoOrigem,
     isCampoEstruturalBloqueado,
-    isManutencaoPreProjeto: tipoOrigem === TIPOS_ORIGEM.MANUTENCAO_PRE_PROJETO,
+    isManutencaoRotineira: tipoOrigem === TIPOS_ORIGEM.MANUTENCAO_ROTINEIRA,
   };
 }

@@ -84,7 +84,7 @@ const IntervencoesSHForm = ({
   rodoviaId
 }: IntervencoesSHFormProps) => {
   const [isCapturing, setIsCapturing] = useState(false);
-  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoPreProjeto } = useTipoOrigem('marcas_longitudinais');
+  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('marcas_longitudinais');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -145,9 +145,9 @@ const IntervencoesSHForm = ({
       return;
     }
     
-    // Validação: Manutenção Pré-Projeto exige marca existente
-    if (isManutencaoPreProjeto && !marcaSelecionada) {
-      toast.error("Para Manutenção Pré-Projeto, selecione uma marca longitudinal do inventário primeiro");
+    // Validação: Manutenção Rotineira exige marca existente
+    if (isManutencaoRotineira && !marcaSelecionada) {
+      toast.error("Para Manutenção Rotineira, selecione uma marca longitudinal do inventário primeiro");
       return;
     }
 
@@ -201,9 +201,9 @@ const IntervencoesSHForm = ({
           <Label className="text-base font-semibold">Tipo de Intervenção</Label>
           <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="manutencao_pre_projeto" id="pre-sh" />
+              <RadioGroupItem value="manutencao_rotineira" id="pre-sh" />
               <Label htmlFor="pre-sh" className="flex items-center gap-2 cursor-pointer font-normal">
-                🟡 {LABELS_TIPO_ORIGEM.manutencao_pre_projeto}
+                🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
                 <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
               </Label>
             </div>
@@ -214,7 +214,7 @@ const IntervencoesSHForm = ({
               </Label>
             </div>
           </RadioGroup>
-          {isManutencaoPreProjeto && (
+          {isManutencaoRotineira && (
             <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
           )}
         </div>
@@ -504,7 +504,7 @@ const IntervencoesSHForm = ({
                 type="submit" 
                 className="w-full" 
                 disabled={
-                  (isManutencaoPreProjeto && !marcaSelecionada) || 
+                  (isManutencaoRotineira && !marcaSelecionada) || 
                   modo === 'controlado'
                 }
               >

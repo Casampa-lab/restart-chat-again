@@ -61,7 +61,7 @@ export function IntervencoesCilindrosForm({
   rodoviaId
 }: IntervencoesCilindrosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoPreProjeto } = useTipoOrigem('cilindros');
+  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('cilindros');
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -121,9 +121,9 @@ export function IntervencoesCilindrosForm({
       return;
     }
     
-    // Validação: Manutenção Pré-Projeto exige cilindro existente
-    if (isManutencaoPreProjeto && !cilindroSelecionado) {
-      toast.error("Para Manutenção Pré-Projeto, selecione um cilindro do inventário primeiro");
+    // Validação: Manutenção Rotineira exige cilindro existente
+    if (isManutencaoRotineira && !cilindroSelecionado) {
+      toast.error("Para Manutenção Rotineira, selecione um cilindro do inventário primeiro");
       return;
     }
 
@@ -179,9 +179,9 @@ export function IntervencoesCilindrosForm({
           <Label className="text-base font-semibold">Tipo de Intervenção</Label>
           <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="manutencao_pre_projeto" id="pre-cilindro" />
+              <RadioGroupItem value="manutencao_rotineira" id="pre-cilindro" />
               <Label htmlFor="pre-cilindro" className="flex items-center gap-2 cursor-pointer font-normal">
-                🟡 {LABELS_TIPO_ORIGEM.manutencao_pre_projeto}
+                🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
                 <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
               </Label>
             </div>
@@ -192,7 +192,7 @@ export function IntervencoesCilindrosForm({
               </Label>
             </div>
           </RadioGroup>
-          {isManutencaoPreProjeto && (
+          {isManutencaoRotineira && (
             <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
           )}
         </div>
@@ -477,7 +477,7 @@ export function IntervencoesCilindrosForm({
                 className="w-full" 
                 disabled={
                   isSubmitting || 
-                  (isManutencaoPreProjeto && !cilindroSelecionado) || 
+                  (isManutencaoRotineira && !cilindroSelecionado) || 
                   modo === 'controlado'
                 }
               >

@@ -37,9 +37,9 @@ export function TipoOrigemBadge({
       bgColor: "bg-green-500",
       textColor: "text-black",
     },
-    manutencao_pre_projeto: {
+    manutencao_rotineira: {
       icon: Wrench,
-      label: "Manutenção",
+      label: "Manutenção Rotineira",
       bgColor: "bg-yellow-400",
       textColor: "text-black",
     },

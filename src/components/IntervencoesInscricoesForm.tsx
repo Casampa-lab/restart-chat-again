@@ -87,7 +87,7 @@ const IntervencoesInscricoesForm = ({
   loteId,
   rodoviaId
 }: IntervencoesInscricoesFormProps) => {
-  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoPreProjeto } = useTipoOrigem('inscricoes');
+  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('inscricoes');
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -201,9 +201,9 @@ const IntervencoesInscricoesForm = ({
           <Label className="text-base font-semibold">Tipo de Intervenção</Label>
           <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="manutencao_pre_projeto" id="pre-insc" />
+              <RadioGroupItem value="manutencao_rotineira" id="pre-insc" />
               <Label htmlFor="pre-insc" className="flex items-center gap-2 cursor-pointer font-normal">
-                🟡 {LABELS_TIPO_ORIGEM.manutencao_pre_projeto}
+                🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
                 <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
               </Label>
             </div>
@@ -214,7 +214,7 @@ const IntervencoesInscricoesForm = ({
               </Label>
             </div>
           </RadioGroup>
-          {isManutencaoPreProjeto && (
+          {isManutencaoRotineira && (
             <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
           )}
         </div>
@@ -507,7 +507,7 @@ const IntervencoesInscricoesForm = ({
             </div>
 
             {!hideSubmitButton && (
-              <Button type="submit" className="w-full" disabled={(isManutencaoPreProjeto && !inscricaoSelecionada) || modo === 'controlado'}>
+              <Button type="submit" className="w-full" disabled={(isManutencaoRotineira && !inscricaoSelecionada) || modo === 'controlado'}>
                 {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Salvar Intervenção
               </Button>

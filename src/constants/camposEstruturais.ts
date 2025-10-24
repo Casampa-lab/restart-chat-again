@@ -60,12 +60,12 @@ export type TipoElemento = keyof typeof CAMPOS_ESTRUTURAIS;
 
 export const TIPOS_ORIGEM = {
   EXECUCAO: 'execucao',
-  MANUTENCAO_PRE_PROJETO: 'manutencao_pre_projeto',
+  MANUTENCAO_ROTINEIRA: 'manutencao_rotineira',
 } as const;
 
 export const LABELS_TIPO_ORIGEM = {
   execucao: 'Execução de Projeto',
-  manutencao_pre_projeto: 'Manutenção Pré-Projeto',
+  manutencao_rotineira: 'Manutenção Rotineira',
 } as const;
 
 /**
@@ -85,7 +85,7 @@ export function validarCamposEstruturais(
   tipoOrigem: string,
   camposAlterados: string[]
 ): { valido: boolean; violacoes: string[] } {
-  if (tipoOrigem !== TIPOS_ORIGEM.MANUTENCAO_PRE_PROJETO) {
+  if (tipoOrigem !== TIPOS_ORIGEM.MANUTENCAO_ROTINEIRA) {
     return { valido: true, violacoes: [] };
   }
 

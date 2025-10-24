@@ -408,6 +408,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "defensas_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_defensas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "defensas_ultima_intervencao_id_fkey"
             columns: ["ultima_intervencao_id"]
             isOneToOne: false
@@ -460,6 +467,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "inventario_dinamico_defensas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "defensas_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_defensas"
             referencedColumns: ["id"]
           },
           {
@@ -787,6 +801,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ficha_cilindros_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_cilindros"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ficha_cilindros_ultima_intervencao_id_fkey"
             columns: ["ultima_intervencao_id"]
             isOneToOne: false
@@ -832,6 +853,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_cilindros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_cilindros_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_cilindros"
             referencedColumns: ["id"]
           },
           {
@@ -1049,6 +1077,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ficha_inscricoes_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_inscricoes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ficha_inscricoes_ultima_intervencao_id_fkey"
             columns: ["ultima_intervencao_id"]
             isOneToOne: false
@@ -1101,6 +1136,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "inventario_dinamico_inscricoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_inscricoes_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_inscricoes"
             referencedColumns: ["id"]
           },
           {
@@ -1333,6 +1375,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ficha_marcas_longitudinais_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_marcas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ficha_marcas_longitudinais_ultima_intervencao_id_fkey"
             columns: ["ultima_intervencao_id"]
             isOneToOne: false
@@ -1385,6 +1434,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "inventario_dinamico_marcas_longitudinais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_marcas_longitudinais_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_marcas"
             referencedColumns: ["id"]
           },
           {
@@ -1679,6 +1735,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ficha_placa_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_placas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ficha_placa_ultima_intervencao_id_fkey"
             columns: ["ultima_intervencao_id"]
             isOneToOne: false
@@ -1726,6 +1789,13 @@ export type Database = {
             referencedRelation: "ficha_placa"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ficha_placa_danos_ficha_placa_id_fkey"
+            columns: ["ficha_placa_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_placas"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ficha_placa_historico: {
@@ -1765,6 +1835,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_placa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_placa_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_placas"
             referencedColumns: ["id"]
           },
           {
@@ -1858,6 +1935,13 @@ export type Database = {
             columns: ["ficha_placa_id"]
             isOneToOne: false
             referencedRelation: "ficha_placa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_placa_intervencoes_ficha_placa_id_fkey"
+            columns: ["ficha_placa_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_placas"
             referencedColumns: ["id"]
           },
         ]
@@ -3906,10 +3990,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "necessidades_cilindros_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_cilindros"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "necessidades_cilindros_cadastro_match_id_fkey"
             columns: ["cadastro_match_id"]
             isOneToOne: false
             referencedRelation: "ficha_cilindros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_cilindros_cadastro_match_id_fkey"
+            columns: ["cadastro_match_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_cilindros"
             referencedColumns: ["id"]
           },
           {
@@ -4198,6 +4296,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "necessidades_defensas_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_defensas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "necessidades_defensas_conflito_com_necessidade_id_fkey"
             columns: ["conflito_com_necessidade_id"]
             isOneToOne: false
@@ -4433,6 +4538,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "necessidades_marcas_longitudinais_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_marcas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "necessidades_marcas_longitudinais_lote_id_fkey"
             columns: ["lote_id"]
             isOneToOne: false
@@ -4643,6 +4755,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "inventario_dinamico_inscricoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_marcas_transversais_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_inscricoes"
             referencedColumns: ["id"]
           },
           {
@@ -4863,6 +4982,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_placa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_placas_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_placas"
             referencedColumns: ["id"]
           },
           {
@@ -6345,6 +6471,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "defensas_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_defensas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "defensas_ultima_intervencao_id_fkey"
             columns: ["ultima_intervencao_id"]
             isOneToOne: false
@@ -6469,6 +6602,13 @@ export type Database = {
             columns: ["substituido_por"]
             isOneToOne: false
             referencedRelation: "inventario_dinamico_inscricoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_inscricoes_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_inscricoes"
             referencedColumns: ["id"]
           },
           {
@@ -6608,6 +6748,13 @@ export type Database = {
             columns: ["substituido_por"]
             isOneToOne: false
             referencedRelation: "inventario_dinamico_marcas_longitudinais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_marcas_longitudinais_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "v_inventario_dinamico_marcas"
             referencedColumns: ["id"]
           },
           {
@@ -6929,6 +7076,222 @@ export type Database = {
           tipo_origem_cadastro: string | null
           tipo_ultima_intervencao: string | null
           ultima_intervencao_id: string | null
+        }
+        Relationships: []
+      }
+      v_inventario_dinamico_cilindros: {
+        Row: {
+          cor_corpo: string | null
+          cor_refletivo: string | null
+          id: string | null
+          km_final: number | null
+          km_inicial: number | null
+          latitude_inicial: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          modificado_por_intervencao: boolean | null
+          origem: string | null
+          rodovia_id: string | null
+          tipo_origem: string | null
+        }
+        Insert: {
+          cor_corpo?: string | null
+          cor_refletivo?: string | null
+          id?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          tipo_origem?: never
+        }
+        Update: {
+          cor_corpo?: string | null
+          cor_refletivo?: string | null
+          id?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          tipo_origem?: never
+        }
+        Relationships: []
+      }
+      v_inventario_dinamico_defensas: {
+        Row: {
+          classificacao_nivel_contencao: string | null
+          id: string | null
+          km_final: number | null
+          km_inicial: number | null
+          latitude_inicial: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          modificado_por_intervencao: boolean | null
+          origem: string | null
+          rodovia_id: string | null
+          tipo_origem: string | null
+        }
+        Insert: {
+          classificacao_nivel_contencao?: string | null
+          id?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          tipo_origem?: never
+        }
+        Update: {
+          classificacao_nivel_contencao?: string | null
+          id?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          tipo_origem?: never
+        }
+        Relationships: []
+      }
+      v_inventario_dinamico_inscricoes: {
+        Row: {
+          id: string | null
+          km_inicial: number | null
+          latitude_inicial: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          modificado_por_intervencao: boolean | null
+          origem: string | null
+          rodovia_id: string | null
+          sigla: string | null
+          tipo_inscricao: string | null
+          tipo_origem: string | null
+        }
+        Insert: {
+          id?: string | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          sigla?: string | null
+          tipo_inscricao?: string | null
+          tipo_origem?: never
+        }
+        Update: {
+          id?: string | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          sigla?: string | null
+          tipo_inscricao?: string | null
+          tipo_origem?: never
+        }
+        Relationships: []
+      }
+      v_inventario_dinamico_marcas: {
+        Row: {
+          cor: string | null
+          id: string | null
+          km_final: number | null
+          km_inicial: number | null
+          latitude_inicial: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          modificado_por_intervencao: boolean | null
+          origem: string | null
+          rodovia_id: string | null
+          tipo_demarcacao: string | null
+          tipo_origem: string | null
+        }
+        Insert: {
+          cor?: string | null
+          id?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          tipo_demarcacao?: string | null
+          tipo_origem?: never
+        }
+        Update: {
+          cor?: string | null
+          id?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          tipo_demarcacao?: string | null
+          tipo_origem?: never
+        }
+        Relationships: []
+      }
+      v_inventario_dinamico_placas: {
+        Row: {
+          codigo: string | null
+          id: string | null
+          km_inicial: number | null
+          latitude_inicial: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          modificado_por_intervencao: boolean | null
+          origem: string | null
+          rodovia_id: string | null
+          tipo: string | null
+          tipo_origem: string | null
+        }
+        Insert: {
+          codigo?: string | null
+          id?: string | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          tipo?: string | null
+          tipo_origem?: never
+        }
+        Update: {
+          codigo?: string | null
+          id?: string | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          tipo?: string | null
+          tipo_origem?: never
         }
         Relationships: []
       }
@@ -8049,6 +8412,14 @@ export type Database = {
         Returns: boolean
       }
       validar_campos_manutencao_pre_projeto: {
+        Args: {
+          p_dados_novos: Json
+          p_tipo_elemento: string
+          p_tipo_origem: string
+        }
+        Returns: boolean
+      }
+      validar_campos_manutencao_rotineira: {
         Args: {
           p_dados_novos: Json
           p_tipo_elemento: string
