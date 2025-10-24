@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, MapPin, Pencil } from "lucide-react";
+import { Plus, Trash2, MapPin, Pencil, Check, X } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 interface Empresa {
   id: string;
   nome: string;
@@ -76,6 +77,18 @@ const LotesManager = () => {
   const [rodoviasVinculadas, setRodoviasVinculadas] = useState<RodoviaComKm[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingLote, setEditingLote] = useState<string | null>(null);
+  const [editingRodoviaLote, setEditingRodoviaLote] = useState<{
+    loteId: string;
+    rodoviaId: string;
+  } | null>(null);
+  const [tempRodoviaData, setTempRodoviaData] = useState({
+    km_inicial: "",
+    km_final: "",
+    latitude_inicial: "",
+    longitude_inicial: "",
+    latitude_final: "",
+    longitude_final: ""
+  });
   const [formData, setFormData] = useState({
     numero: "",
     empresa_id: "",
@@ -415,6 +428,72 @@ const LotesManager = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUpdateRodoviaKm = async (loteId: string, rodoviaId: string) => {
+    setLoading(true);
+    try {
+      // Validações
+      const kmInicial = parseFloat(tempRodoviaData.km_inicial);
+      const kmFinal = parseFloat(tempRodoviaData.km_final);
+
+      if (kmInicial && kmFinal && kmFinal <= kmInicial) {
+        toast.error("KM final deve ser maior que KM inicial");
+        return;
+      }
+
+      // Atualizar apenas o vínculo específico lote-rodovia
+      const { error } = await supabase
+        .from("lotes_rodovias")
+        .update({
+          km_inicial: tempRodoviaData.km_inicial ? parseFloat(tempRodoviaData.km_inicial) : null,
+          km_final: tempRodoviaData.km_final ? parseFloat(tempRodoviaData.km_final) : null,
+          latitude_inicial: tempRodoviaData.latitude_inicial ? parseFloat(tempRodoviaData.latitude_inicial) : null,
+          longitude_inicial: tempRodoviaData.longitude_inicial ? parseFloat(tempRodoviaData.longitude_inicial) : null,
+          latitude_final: tempRodoviaData.latitude_final ? parseFloat(tempRodoviaData.latitude_final) : null,
+          longitude_final: tempRodoviaData.longitude_final ? parseFloat(tempRodoviaData.longitude_final) : null,
+          extensao_km: (kmInicial && kmFinal) ? (kmFinal - kmInicial) : null
+        })
+        .eq("lote_id", loteId)
+        .eq("rodovia_id", rodoviaId);
+
+      if (error) throw error;
+
+      // Recalcular extensão total do lote
+      await recalcularExtensaoLote(loteId);
+
+      toast.success("Quilometragem atualizada!");
+      setEditingRodoviaLote(null);
+      loadData();
+    } catch (error: any) {
+      toast.error("Erro ao atualizar: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const recalcularExtensaoLote = async (loteId: string) => {
+    // Buscar todas as rodovias do lote
+    const { data: rodovias } = await supabase
+      .from("lotes_rodovias")
+      .select("km_inicial, km_final")
+      .eq("lote_id", loteId);
+
+    if (!rodovias) return;
+
+    // Calcular extensão total
+    const extensao_total_km = rodovias.reduce((total, r) => {
+      if (r.km_inicial && r.km_final) {
+        return total + (r.km_final - r.km_inicial);
+      }
+      return total;
+    }, 0);
+
+    // Atualizar lote
+    await supabase
+      .from("lotes")
+      .update({ extensao_total_km })
+      .eq("id", loteId);
   };
 
   return <div className="space-y-6">
@@ -782,29 +861,204 @@ const LotesManager = () => {
                   <TableCell>{lote.contrato || "-"}</TableCell>
                   <TableCell>
                     <div className="space-y-3">
-                      {lote.lotes_rodovias.map((lr, idx) => (
-                        <div key={idx} className="border-l-2 border-primary/30 pl-3 py-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="secondary" className="font-semibold">
-                              {lr.rodovias?.codigo || "-"}
-                            </Badge>
+                      {lote.lotes_rodovias.map((lr, idx) => {
+                        const rodoviaId = Object.values(lote.lotes_rodovias).find((r: any) => r.rodovias?.codigo === lr.rodovias?.codigo);
+                        const isEditing = editingRodoviaLote?.loteId === lote.id && 
+                                         editingRodoviaLote?.rodoviaId === lr.rodovias?.codigo;
+
+                        return isEditing ? (
+                          <div key={idx} className="border rounded p-3 bg-background space-y-3 shadow-sm">
+                            <div className="flex items-center justify-between">
+                              <Badge variant="secondary" className="font-semibold">
+                                {lr.rodovias?.codigo}
+                              </Badge>
+                              <div className="flex gap-1">
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7"
+                                  onClick={async () => {
+                                    // Buscar o rodovia_id correto
+                                    const { data: rodoviaData } = await supabase
+                                      .from("rodovias")
+                                      .select("id")
+                                      .eq("codigo", lr.rodovias?.codigo)
+                                      .single();
+                                    
+                                    if (rodoviaData) {
+                                      await handleUpdateRodoviaKm(lote.id, rodoviaData.id);
+                                    }
+                                  }}
+                                  disabled={loading}
+                                >
+                                  <Check className="h-4 w-4 text-green-600" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7"
+                                  onClick={() => setEditingRodoviaLote(null)}
+                                >
+                                  <X className="h-4 w-4 text-red-600" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            {lr.snv_inicial && lr.snv_final && (
+                              <div className="text-xs text-muted-foreground">
+                                📍 SNV: <span className="font-mono">{lr.snv_inicial}</span> → 
+                                <span className="font-mono">{lr.snv_final}</span>
+                              </div>
+                            )}
+                            
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                  <Label className="text-xs">KM Inicial</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.001"
+                                    value={tempRodoviaData.km_inicial}
+                                    onChange={(e) => setTempRodoviaData({
+                                      ...tempRodoviaData, 
+                                      km_inicial: e.target.value
+                                    })}
+                                    className="h-8 text-sm"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs">KM Final</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.001"
+                                    value={tempRodoviaData.km_final}
+                                    onChange={(e) => setTempRodoviaData({
+                                      ...tempRodoviaData, 
+                                      km_final: e.target.value
+                                    })}
+                                    className="h-8 text-sm"
+                                  />
+                                </div>
+                              </div>
+                              
+                              <Collapsible>
+                                <CollapsibleTrigger className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  Editar Coordenadas
+                                </CollapsibleTrigger>
+                                <CollapsibleContent className="space-y-2 mt-2">
+                                  <div className="text-xs font-medium text-muted-foreground mb-1">
+                                    Coordenadas Iniciais:
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <Input
+                                      type="number"
+                                      step="0.000001"
+                                      placeholder="Latitude"
+                                      value={tempRodoviaData.latitude_inicial}
+                                      onChange={(e) => setTempRodoviaData({
+                                        ...tempRodoviaData, 
+                                        latitude_inicial: e.target.value
+                                      })}
+                                      className="h-7 text-xs"
+                                    />
+                                    <Input
+                                      type="number"
+                                      step="0.000001"
+                                      placeholder="Longitude"
+                                      value={tempRodoviaData.longitude_inicial}
+                                      onChange={(e) => setTempRodoviaData({
+                                        ...tempRodoviaData, 
+                                        longitude_inicial: e.target.value
+                                      })}
+                                      className="h-7 text-xs"
+                                    />
+                                  </div>
+                                  <div className="text-xs font-medium text-muted-foreground mb-1 mt-2">
+                                    Coordenadas Finais:
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <Input
+                                      type="number"
+                                      step="0.000001"
+                                      placeholder="Latitude"
+                                      value={tempRodoviaData.latitude_final}
+                                      onChange={(e) => setTempRodoviaData({
+                                        ...tempRodoviaData, 
+                                        latitude_final: e.target.value
+                                      })}
+                                      className="h-7 text-xs"
+                                    />
+                                    <Input
+                                      type="number"
+                                      step="0.000001"
+                                      placeholder="Longitude"
+                                      value={tempRodoviaData.longitude_final}
+                                      onChange={(e) => setTempRodoviaData({
+                                        ...tempRodoviaData, 
+                                        longitude_final: e.target.value
+                                      })}
+                                      className="h-7 text-xs"
+                                    />
+                                  </div>
+                                </CollapsibleContent>
+                              </Collapsible>
+                            </div>
                           </div>
-                          
-                          {lr.snv_inicial && lr.snv_final && (
-                            <div className="text-xs text-muted-foreground">
-                              📍 SNV: <span className="font-mono">{lr.snv_inicial}</span> → 
-                              <span className="font-mono">{lr.snv_final}</span>
+                        ) : (
+                          <div key={idx} className="border-l-2 border-primary/30 pl-3 py-1">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <Badge variant="secondary" className="font-semibold">
+                                {lr.rodovias?.codigo || "-"}
+                              </Badge>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={async () => {
+                                  const { data: rodoviaData } = await supabase
+                                    .from("rodovias")
+                                    .select("id")
+                                    .eq("codigo", lr.rodovias?.codigo)
+                                    .single();
+                                  
+                                  setEditingRodoviaLote({ 
+                                    loteId: lote.id, 
+                                    rodoviaId: lr.rodovias?.codigo 
+                                  });
+                                  setTempRodoviaData({
+                                    km_inicial: lr.km_inicial?.toString() || "",
+                                    km_final: lr.km_final?.toString() || "",
+                                    latitude_inicial: lr.latitude_inicial?.toString() || "",
+                                    longitude_inicial: lr.longitude_inicial?.toString() || "",
+                                    latitude_final: lr.latitude_final?.toString() || "",
+                                    longitude_final: lr.longitude_final?.toString() || ""
+                                  });
+                                }}
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </Button>
                             </div>
-                          )}
-                          
-                          {(lr.km_inicial || lr.km_final) && (
-                            <div className="text-xs text-muted-foreground">
-                              📏 KM: <span className="font-mono">{lr.km_inicial?.toFixed(3)}</span> - 
-                              <span className="font-mono">{lr.km_final?.toFixed(3)}</span>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                            
+                            {lr.snv_inicial && lr.snv_final && (
+                              <div className="text-xs text-muted-foreground">
+                                📍 SNV: <span className="font-mono">{lr.snv_inicial}</span> → 
+                                <span className="font-mono">{lr.snv_final}</span>
+                              </div>
+                            )}
+                            
+                            {(lr.km_inicial || lr.km_final) && (
+                              <div className="text-xs text-muted-foreground">
+                                📏 KM: <span className="font-mono">{lr.km_inicial?.toFixed(3)}</span> - 
+                                <span className="font-mono">{lr.km_final?.toFixed(3)}</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </TableCell>
                   <TableCell>
