@@ -7,20 +7,40 @@ import { Camera as CameraIcon, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CameraCaptureProps {
+  photos: string[];                       // ← controlado pelo parent
   onPhotosChange: (urls: string[]) => void;
   maxPhotos?: number;
   bucketName?: string;
 }
 
 export function CameraCapture({ 
+  photos,
   onPhotosChange, 
   maxPhotos = 5,
   bucketName = 'intervencoes-fotos'
 }: CameraCaptureProps) {
-  const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isNative = Capacitor.isNativePlatform();
+
+  // Comprimir DataURL para reduzir tamanho
+  async function compressDataUrlToJpeg(dataUrl: string, quality = 0.85): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas context null'));
+        ctx.drawImage(img, 0, 0);
+        const compressed = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressed);
+      };
+      img.onerror = reject;
+      img.src = dataUrl;
+    });
+  }
 
   const takePicture = async () => {
     if (photos.length >= maxPhotos) {
@@ -87,16 +107,53 @@ export function CameraCapture({
   };
 
   const uploadPhoto = async (dataUrl: string) => {
+    console.log('🔍 [CameraCapture] Iniciando upload', {
+      dataUrlLength: dataUrl?.length ?? 0,
+      fotosAtuais: photos.length,
+      maxPhotos,
+    });
+
     try {
       setUploading(true);
+
+      // Comprimir imagem
+      console.log('🖼️ [CameraCapture] Comprimindo imagem...');
+      const compressed = await compressDataUrlToJpeg(dataUrl, 0.85);
       
-      // Converter DataUrl para Blob
-      const response = await fetch(dataUrl);
+      // Converter para Blob
+      const response = await fetch(compressed);
       const blob = await response.blob();
       
-      // Gerar nome único para o arquivo
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
-      const filePath = `${fileName}`;
+      // Validação de tamanho (5MB)
+      const MAX_SIZE = 5 * 1024 * 1024;
+      if (blob.size > MAX_SIZE) {
+        throw new Error(
+          `Foto muito grande (${(blob.size / 1024 / 1024).toFixed(1)}MB). Máximo 5MB.`
+        );
+      }
+
+      console.log('📦 [CameraCapture] Blob gerado', {
+        size: `${(blob.size / 1024).toFixed(1)}KB`,
+        type: blob.type,
+      });
+
+      // Obter usuário autenticado
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData?.user?.id ?? 'anon';
+      
+      // Estrutura de pastas: uid/AAAA/MM/DD/filename.jpg
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+      const filePath = `${uid}/${yyyy}/${mm}/${dd}/${filename}`;
+
+      console.log('📤 [CameraCapture] Enviando para Supabase', {
+        bucketName,
+        filePath,
+        blobSize: `${(blob.size / 1024).toFixed(1)}KB`,
+      });
 
       // Upload
       const { data, error } = await supabase.storage
@@ -107,21 +164,36 @@ export function CameraCapture({
           upsert: false,
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ [CameraCapture] Erro no upload', error);
+        throw error;
+      }
+
+      console.log('✅ [CameraCapture] Upload concluído', data);
 
       // Obter URL pública
       const { data: { publicUrl } } = supabase.storage
         .from(bucketName)
         .getPublicUrl(data.path);
 
+      console.log('🔗 [CameraCapture] URL pública gerada', publicUrl);
+
       const newPhotos = [...photos, publicUrl];
-      setPhotos(newPhotos);
+      console.log('📸 [CameraCapture] Atualizando estado', {
+        antes: photos.length,
+        depois: newPhotos.length,
+        novaURL: publicUrl,
+      });
+
       onPhotosChange(newPhotos);
-      
       toast.success('Foto capturada e enviada!');
     } catch (error: any) {
-      console.error('Erro ao fazer upload:', error);
-      toast.error('Erro ao fazer upload da foto');
+      console.error('❌ [CameraCapture] Erro completo', {
+        message: error?.message,
+        stack: error?.stack,
+        error,
+      });
+      toast.error(`Erro ao enviar foto: ${error?.message ?? 'Falha inesperada'}`);
     } finally {
       setUploading(false);
     }
@@ -129,7 +201,11 @@ export function CameraCapture({
 
   const removePhoto = (index: number) => {
     const newPhotos = photos.filter((_, i) => i !== index);
-    setPhotos(newPhotos);
+    console.log('🗑️ [CameraCapture] Removendo foto', {
+      index,
+      antes: photos.length,
+      depois: newPhotos.length,
+    });
     onPhotosChange(newPhotos);
     toast.info('Foto removida');
   };
@@ -146,6 +222,14 @@ export function CameraCapture({
         className="hidden"
       />
       
+      {/* Badge de progresso */}
+      <div className="text-sm text-muted-foreground flex items-center justify-between">
+        <span>
+          {photos.length}/{maxPhotos} foto(s) capturada(s)
+        </span>
+        {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
+      </div>
+      
       <Button
         type="button"
         variant="outline"
@@ -161,7 +245,7 @@ export function CameraCapture({
         ) : (
           <>
             <CameraIcon className="mr-2 h-5 w-5" />
-            Tirar Foto ({photos.length}/{maxPhotos})
+            Tirar Foto
           </>
         )}
       </Button>
@@ -169,7 +253,7 @@ export function CameraCapture({
       {photos.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
           {photos.map((url, index) => (
-            <div key={index} className="relative group">
+            <div key={url} className="relative group">
               <img
                 src={url}
                 alt={`Foto ${index + 1}`}

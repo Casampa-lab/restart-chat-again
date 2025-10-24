@@ -107,6 +107,15 @@ export default function RegistrarIntervencaoCampo() {
     }
   }, [necessidadeProp]);
 
+  const handlePhotosChange = (urls: string[]) => {
+    console.log('📸 [RegistrarIntervencaoCampo] Fotos atualizadas', {
+      antes: fotos.length,
+      depois: urls.length,
+      urls,
+    });
+    setFotos(urls);
+  };
+
   const capturarGPS = async () => {
     try {
       const pos = await getCurrentPosition();
@@ -416,21 +425,38 @@ export default function RegistrarIntervencaoCampo() {
           </Card>
 
           {/* 4. Capturar Fotos */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Camera className="h-5 w-5" />
-                4️⃣ Capturar Fotos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CameraCapture
-                onPhotosChange={setFotos}
-                maxPhotos={5}
-                bucketName="intervencoes-fotos"
-              />
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 justify-between">
+                  <div className="flex items-center gap-2">
+                    <Camera className="h-5 w-5" />
+                    4️⃣ Capturar Fotos
+                  </div>
+                  {fotos.length > 0 && (
+                    <Badge variant="outline" className="text-sm">
+                      ✓ {fotos.length} foto{fotos.length > 1 ? 's' : ''}
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fotos.length === 0 && (
+                  <Alert className="mb-4">
+                    <Info className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      📸 Nenhuma foto capturada ainda. As fotos são importantes para documentação da intervenção.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
+                <CameraCapture
+                  photos={fotos}
+                  onPhotosChange={handlePhotosChange}
+                  maxPhotos={5}
+                  bucketName="intervencoes-fotos"
+                />
+              </CardContent>
+            </Card>
 
           {/* 5. GPS */}
           <Card>
