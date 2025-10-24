@@ -53,6 +53,10 @@ const Index = () => {
     data: supervisora
   } = useSupervisora();
   const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
+  const [showVableCard, setShowVableCard] = useState(() => {
+    const vableHidden = sessionStorage.getItem('vableCardHidden');
+    return vableHidden !== 'true';
+  });
   const [inventarioShSubTab, setInventarioShSubTab] = useState("longitudinais");
   const [inventarioSvSubTab, setInventarioSvSubTab] = useState("placas");
   const [showInviteCode, setShowInviteCode] = useState(() => {
@@ -439,6 +443,10 @@ const Index = () => {
       if (!modoAtual) {
         localStorage.setItem('modoAcesso', 'web');
       }
+      
+      // Limpar flag de card VABLE oculto ao entrar (reaparece no próximo login)
+      sessionStorage.removeItem('vableCardHidden');
+      
       localStorage.setItem('lastRoute', '/');
     }
   }, [user, authLoading, navigate]);
@@ -651,16 +659,33 @@ const Index = () => {
             </Card>
 
             {/* Seção VABLE - Rastreabilidade */}
-            <Card className="border-2 border-primary/30 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Activity className="h-6 w-6 text-primary" />
-                  VABLE - Sistema de Rastreabilidade
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Controle de intervenções conforme IN 3/2025 do DNIT
-                </CardDescription>
-              </CardHeader>
+            {showVableCard && (
+              <Card className="border-2 border-primary/30 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-2xl">
+                        <Activity className="h-6 w-6 text-primary" />
+                        VABLE - Sistema de Rastreabilidade
+                      </CardTitle>
+                      <CardDescription className="text-base">
+                        Controle de intervenções conforme IN 3/2025 do DNIT
+                      </CardDescription>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setShowVableCard(false);
+                        sessionStorage.setItem('vableCardHidden', 'true');
+                        toast.success("Card VABLE ocultado. Reaparecerá no próximo login.");
+                      }}
+                      className="shrink-0 hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </CardHeader>
               <CardContent className="pt-6">
                 <div className="grid md:grid-cols-3 gap-4">
                   {/* Card 1: Documentação */}
@@ -703,7 +728,8 @@ const Index = () => {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+              </Card>
+            )}
 
             <div className="mt-6">
                 <Card>
