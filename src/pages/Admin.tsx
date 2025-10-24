@@ -367,7 +367,6 @@ const Admin = () => {
               {/* Componentes com props compartilhadas */}
               <NecessidadesImporter loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
               <DeleteTodasNecessidades loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
-              <RemoverDuplicatasNecessidades />
               
               <DeleteNecessidades loteId={selectedLoteId} rodoviaId={selectedRodoviaId} />
             </div>
@@ -609,6 +608,7 @@ const Admin = () => {
                 <LimparReconciliacoesInconsistentes />
                 <LimparReconciliacoesOrfas />
                 <RemoverDuplicatasInventario />
+                <RemoverDuplicatasNecessidades />
                 <ResetDatabaseButton />
               </div>
             </TabsContent>
