@@ -572,39 +572,6 @@ const Admin = () => {
           {isAdmin && (
             <TabsContent value="sistema">
               <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>🔗 Associar Coordenador CONSOL (Temporário)</CardTitle>
-                    <CardDescription>
-                      Associa manualmente sampaio.mcvs@gmail.com aos lotes 04-10 da CONSOL
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      onClick={async () => {
-                        setIsAssigningCoordinator(true);
-                        try {
-                          const result = await assignCoordinatorConsol();
-                          toast.success(`✅ ${result.message}`, {
-                            description: `Lotes: ${result.lotes_associados.join(', ')}`
-                          });
-                        } catch (error: any) {
-                          console.error('Erro ao associar coordenador:', error);
-                          toast.error('❌ Erro ao associar coordenador', {
-                            description: error.message
-                          });
-                        } finally {
-                          setIsAssigningCoordinator(false);
-                        }
-                      }}
-                      disabled={isAssigningCoordinator}
-                      variant="outline"
-                    >
-                      {isAssigningCoordinator ? "Associando..." : "Associar Sampaio aos Lotes CONSOL"}
-                    </Button>
-                  </CardContent>
-                </Card>
-                
                 <LimparReconciliacoesInconsistentes />
                 <LimparReconciliacoesOrfas />
                 <RemoverDuplicatasInventario />
