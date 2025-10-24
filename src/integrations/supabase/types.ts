@@ -2627,6 +2627,7 @@ export type Database = {
           retro_sv_gps_lat: number | null
           retro_sv_gps_lng: number | null
           retro_sv_medias: Json | null
+          retro_sv_medicoes: Json | null
           retro_sv_obs: string | null
           sentido: string | null
           substrato: string | null
@@ -2713,6 +2714,7 @@ export type Database = {
           retro_sv_gps_lat?: number | null
           retro_sv_gps_lng?: number | null
           retro_sv_medias?: Json | null
+          retro_sv_medicoes?: Json | null
           retro_sv_obs?: string | null
           sentido?: string | null
           substrato?: string | null
@@ -2799,6 +2801,7 @@ export type Database = {
           retro_sv_gps_lat?: number | null
           retro_sv_gps_lng?: number | null
           retro_sv_medias?: Json | null
+          retro_sv_medicoes?: Json | null
           retro_sv_obs?: string | null
           sentido?: string | null
           substrato?: string | null
