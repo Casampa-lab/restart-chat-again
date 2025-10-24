@@ -856,6 +856,11 @@ serve(async (req) => {
           record.tipo = "Informativo";
         } else if (tableName === "ficha_marcas_longitudinais") {
           // Campos opcionais, não há obrigatórios além dos básicos
+        } else if (tableName === "ficha_inscricoes") {
+          // Se data_vistoria não vier do Excel, usar data padrão
+          if (!record.data_vistoria) {
+            record.data_vistoria = "2023-01-01";
+          }
         }
 
         // Mapear campos do Excel para os campos da tabela
