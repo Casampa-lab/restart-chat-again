@@ -230,13 +230,39 @@ export default function MinhasFichasVerificacao() {
 
       if (updateError) throw updateError;
 
-      // 3. Buscar coordenadores vinculados ao lote
-      const { data: coordenadores, error: coordError } = await supabase
+      // 3. BUSCA INTELIGENTE: Primeiro por coordinator_assignments, depois por supervisora
+      let { data: coordenadores } = await supabase
         .from('coordinator_assignments')
         .select('user_id')
         .eq('lote_id', fichaData.lote_id);
 
-      if (coordError) throw coordError;
+      // 3.1. Se vazio, buscar coordenadores pela supervisora do lote
+      if (!coordenadores || coordenadores.length === 0) {
+        const { data: loteData } = await supabase
+          .from('lotes')
+          .select('supervisora_id')
+          .eq('id', fichaData.lote_id)
+          .single();
+
+        if (loteData?.supervisora_id) {
+          // Buscar perfis da mesma supervisora
+          const { data: profilesBySupervisora } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('supervisora_id', loteData.supervisora_id);
+
+          if (profilesBySupervisora && profilesBySupervisora.length > 0) {
+            // Filtrar apenas quem tem role de coordenador
+            const { data: coordenadoresRole } = await supabase
+              .from('user_roles')
+              .select('user_id')
+              .eq('role', 'coordenador')
+              .in('user_id', profilesBySupervisora.map(p => p.id));
+
+            coordenadores = coordenadoresRole || [];
+          }
+        }
+      }
 
       // 4. Criar notificações para cada coordenador
       if (coordenadores && coordenadores.length > 0) {
@@ -260,7 +286,7 @@ export default function MinhasFichasVerificacao() {
 
         toast.success(`Ficha enviada para ${coordenadores.length} coordenador(es)!`);
       } else {
-        toast.warning('Ficha enviada, mas nenhum coordenador vinculado a este lote');
+        toast.error('Nenhum coordenador encontrado para esta supervisora');
       }
 
       // 5. Atualizar listagem
