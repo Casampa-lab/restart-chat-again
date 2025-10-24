@@ -393,47 +393,6 @@ const LotesManager = () => {
     }
   };
 
-  const handleImportRodovias = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('import-rodovias-lotes');
-      
-      if (error) throw error;
-      
-      if (data.success) {
-        toast.success(data.message);
-        console.log('Resultados:', data.results);
-        loadData();
-      } else {
-        toast.error('Erro na importação: ' + data.error);
-      }
-    } catch (error: any) {
-      toast.error('Erro ao importar rodovias: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleImportLotesData = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('import-lotes-data');
-      
-      if (error) throw error;
-      
-      if (data.success) {
-        toast.success('Importação concluída com sucesso!');
-        console.log('Resultados:', data.results);
-        loadData();
-      } else {
-        toast.error('Erro na importação: ' + data.error);
-      }
-    } catch (error: any) {
-      toast.error('Erro ao importar dados: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleUpdateRodoviaKm = async (loteId: string, rodoviaId: string) => {
     setLoading(true);
@@ -550,41 +509,6 @@ const LotesManager = () => {
   };
 
   return <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>1. Importar Rodovias (Pré-requisito)</CardTitle>
-          <CardDescription>
-            Cadastra automaticamente as 14 rodovias necessárias para os Lotes 04-10 (BR-367, BR-116, BR-259, BR-381, BR-135, BR-251, BR-365, BR-262, BR-458, BR-491, BR-040, BR-267, BR-354, BR-146)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            onClick={handleImportRodovias}
-            disabled={loading}
-            className="w-full"
-            variant="outline"
-          >
-            {loading ? 'Importando...' : 'Importar Rodovias'}
-          </Button>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>2. Importar Dados da Planilha</CardTitle>
-          <CardDescription>
-            Importa dados dos Lotes 04 a 10 com suas rodovias e coordenadas (execute após importar as rodovias)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            onClick={handleImportLotesData}
-            disabled={loading}
-            className="w-full"
-          >
-            {loading ? 'Importando...' : 'Importar Dados da Planilha'}
-          </Button>
-        </CardContent>
-      </Card>
       <Card>
         <CardHeader>
           <CardTitle>Cadastrar Novo Lote</CardTitle>
