@@ -25,6 +25,10 @@ import { IntervencoesCilindrosForm } from '@/components/IntervencoesCilindrosFor
 import { IntervencoesPorticosForm } from '@/components/IntervencoesPorticosForm';
 import { IntervencoesInscricoesForm } from '@/components/IntervencoesInscricoesForm';
 
+// Elementos lineares vs pontuais
+const ELEMENTOS_LINEARES = ['marcas_longitudinais', 'defensas', 'cilindros', 'tachas'];
+const ELEMENTOS_PONTUAIS = ['placas', 'porticos', 'inscricoes'];
+
 // Mapeamento de tipos de elementos para suas tabelas de intervenção
 const TABELAS_INTERVENCAO: Record<string, string> = {
   'marcas_longitudinais': 'ficha_marcas_longitudinais_intervencoes',
@@ -207,8 +211,9 @@ export default function RegistrarIntervencaoCampo() {
         tipo_origem: modoOperacao === 'manutencao' ? 'manutencao_pre_projeto' : 'execucao'
       };
 
-      // Adicionar GPS Final apenas para Marcas SH
-      if (tipoSelecionado === 'marcas_longitudinais') {
+      // Adicionar GPS Final para TODOS os elementos lineares
+      const isElementoLinear = ELEMENTOS_LINEARES.includes(tipoSelecionado);
+      if (isElementoLinear) {
         payloadIntervencao.latitude_final = parseFloat(manualPosition.latitude_final) || null;
         payloadIntervencao.longitude_final = parseFloat(manualPosition.longitude_final) || null;
       }
@@ -502,8 +507,8 @@ export default function RegistrarIntervencaoCampo() {
                 </div>
               </div>
 
-              {/* GPS Final - Apenas para Marcas SH */}
-              {tipoSelecionado === 'marcas_longitudinais' && (
+              {/* GPS Final - Para TODOS elementos lineares */}
+              {ELEMENTOS_LINEARES.includes(tipoSelecionado) && (
                 <>
                   <div className="border-t pt-4 mt-2">
                     <Button 
