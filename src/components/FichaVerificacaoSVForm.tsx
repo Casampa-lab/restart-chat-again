@@ -91,8 +91,6 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
   const [dataVerificacao, setDataVerificacao] = useState('');
   const [itens, setItens] = useState<ItemSV[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [fichaIdCriada, setFichaIdCriada] = useState<string | null>(null);
-  const [enviandoCoordenador, setEnviandoCoordenador] = useState(false);
   const [retroModalOpen, setRetroModalOpen] = useState(false);
   const [retroModalContext, setRetroModalContext] = useState<{
     itemIndex: number;
@@ -325,8 +323,16 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
       }
 
       toast.success("Ficha de verificação criada com sucesso!");
-      setFichaIdCriada(ficha.id);
-      // NÃO limpar formulário ainda - aguardar decisão do usuário
+      
+      // Limpar formulário e chamar callback de sucesso
+      setSnv("");
+      setDataVerificacao('');
+      itens.forEach(i => URL.revokeObjectURL(i.preview));
+      setItens([]);
+      
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error: any) {
       toast.error("Erro ao criar ficha: " + error.message);
     } finally {
@@ -334,38 +340,6 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
     }
   };
 
-  const handleLimparFormulario = () => {
-    setFichaIdCriada(null);
-    setSnv("");
-    setDataVerificacao('');
-    itens.forEach(i => URL.revokeObjectURL(i.preview));
-    setItens([]);
-    if (onSuccess) onSuccess();
-  };
-
-  const handleEnviarCoordenador = async () => {
-    if (!fichaIdCriada) return;
-    
-    setEnviandoCoordenador(true);
-    try {
-      const { error } = await supabase
-        .from('ficha_verificacao')
-        .update({
-          status: 'pendente_aprovacao_coordenador',
-          enviado_coordenador_em: new Date().toISOString()
-        })
-        .eq('id', fichaIdCriada);
-
-      if (error) throw error;
-
-      toast.success('Ficha enviada para validação do coordenador!');
-      handleLimparFormulario();
-    } catch (error: any) {
-      toast.error('Erro ao enviar: ' + error.message);
-    } finally {
-      setEnviandoCoordenador(false);
-    }
-  };
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -393,38 +367,6 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
           </div>
         </CardContent>
       </Card>
-
-      {/* Card de confirmação após criar ficha */}
-      {fichaIdCriada && (
-        <Card className="border-primary">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold">Ficha criada com sucesso!</p>
-                <p className="text-sm text-muted-foreground">
-                  Deseja enviar para validação do coordenador?
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleLimparFormulario}
-                >
-                  Continuar Editando
-                </Button>
-                <Button
-                  type="button"
-                  disabled={enviandoCoordenador}
-                  onClick={handleEnviarCoordenador}
-                >
-                  {enviandoCoordenador ? 'Enviando...' : 'Enviar para Coordenador'}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <Card>
         <CardHeader>
@@ -888,7 +830,7 @@ export function FichaVerificacaoSVForm({ loteId, rodoviaId, onSuccess }: FichaVe
         </CardContent>
       </Card>
 
-      <Button type="submit" className="w-full" disabled={uploading || !!fichaIdCriada}>
+      <Button type="submit" className="w-full" disabled={uploading}>
         {uploading ? "Salvando..." : "Salvar Ficha"}
       </Button>
 
