@@ -157,6 +157,7 @@ export const exportRetrorrefletividadeEstaticaHorizontal = async () => {
       .from('retrorrefletividade_estatica')
       .select('*')
       .eq('tipo_sinalizacao', 'Horizontal')
+      .eq('status', 'aprovado')
       .order('data_medicao', { ascending: false });
 
     if (error) throw error;
@@ -221,6 +222,7 @@ export const exportRetrorrefletividadeEstaticaVertical = async () => {
       .from('retrorrefletividade_estatica')
       .select('*')
       .eq('tipo_sinalizacao', 'Vertical')
+      .eq('status', 'aprovado')
       .order('data_medicao', { ascending: false });
 
     if (error) throw error;
@@ -281,6 +283,7 @@ export const exportRetrorrefletividadeDinamica = async () => {
     const { data, error } = await supabase
       .from('retrorrefletividade_dinamica')
       .select('*')
+      .eq('status', 'aprovado')
       .order('data_medicao', { ascending: false });
 
     if (error) throw error;

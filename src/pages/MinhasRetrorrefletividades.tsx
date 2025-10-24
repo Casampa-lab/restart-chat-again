@@ -149,7 +149,11 @@ const MinhasRetrorrefletividades = () => {
     try {
       const { error } = await supabase
         .from("retrorrefletividade_estatica")
-        .update({ enviado_coordenador: true })
+        .update({ 
+          enviado_coordenador: true,
+          status: 'pendente_aprovacao_coordenador',
+          enviado_coordenador_em: new Date().toISOString()
+        })
         .in("id", Array.from(selectedMedicoesEstaticas));
 
       if (error) throw error;
@@ -171,7 +175,11 @@ const MinhasRetrorrefletividades = () => {
     try {
       const { error } = await supabase
         .from("retrorrefletividade_dinamica")
-        .update({ enviado_coordenador: true })
+        .update({ 
+          enviado_coordenador: true,
+          status: 'pendente_aprovacao_coordenador',
+          enviado_coordenador_em: new Date().toISOString()
+        })
         .in("id", Array.from(selectedMedicoesDinamicas));
 
       if (error) throw error;

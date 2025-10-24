@@ -5819,11 +5819,14 @@ export type Database = {
       }
       retrorrefletividade_dinamica: {
         Row: {
+          aprovado_coordenador_em: string | null
+          aprovado_por: string | null
           condicao_climatica: string | null
           cor: string
           created_at: string
           data_medicao: string
           enviado_coordenador: boolean | null
+          enviado_coordenador_em: string | null
           faixa: string
           id: string
           km_final: number
@@ -5834,8 +5837,10 @@ export type Database = {
           longitude_inicial: number | null
           lote_id: string
           observacao: string | null
+          observacao_coordenador: string | null
           rodovia_id: string
           situacao: string
+          status: string | null
           tipo_demarcacao: string
           updated_at: string
           user_id: string
@@ -5844,11 +5849,14 @@ export type Database = {
           velocidade_medicao: number | null
         }
         Insert: {
+          aprovado_coordenador_em?: string | null
+          aprovado_por?: string | null
           condicao_climatica?: string | null
           cor: string
           created_at?: string
           data_medicao: string
           enviado_coordenador?: boolean | null
+          enviado_coordenador_em?: string | null
           faixa: string
           id?: string
           km_final: number
@@ -5859,8 +5867,10 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id: string
           observacao?: string | null
+          observacao_coordenador?: string | null
           rodovia_id: string
           situacao: string
+          status?: string | null
           tipo_demarcacao: string
           updated_at?: string
           user_id: string
@@ -5869,11 +5879,14 @@ export type Database = {
           velocidade_medicao?: number | null
         }
         Update: {
+          aprovado_coordenador_em?: string | null
+          aprovado_por?: string | null
           condicao_climatica?: string | null
           cor?: string
           created_at?: string
           data_medicao?: string
           enviado_coordenador?: boolean | null
+          enviado_coordenador_em?: string | null
           faixa?: string
           id?: string
           km_final?: number
@@ -5884,8 +5897,10 @@ export type Database = {
           longitude_inicial?: number | null
           lote_id?: string
           observacao?: string | null
+          observacao_coordenador?: string | null
           rodovia_id?: string
           situacao?: string
+          status?: string | null
           tipo_demarcacao?: string
           updated_at?: string
           user_id?: string
@@ -5897,6 +5912,8 @@ export type Database = {
       }
       retrorrefletividade_estatica: {
         Row: {
+          aprovado_coordenador_em: string | null
+          aprovado_por: string | null
           codigo_dispositivo: string | null
           cor_fundo: string | null
           cor_horizontal: string | null
@@ -5904,6 +5921,7 @@ export type Database = {
           created_at: string
           data_medicao: string
           enviado_coordenador: boolean | null
+          enviado_coordenador_em: string | null
           id: string
           km_referencia: number
           lado: string | null
@@ -5921,12 +5939,14 @@ export type Database = {
           longitude: number | null
           lote_id: string
           observacao: string | null
+          observacao_coordenador: string | null
           posicao_horizontal: string | null
           rodovia_id: string
           situacao: string
           situacao_fundo: string | null
           situacao_horizontal: string | null
           situacao_legenda: string | null
+          status: string | null
           tipo_dispositivo: string | null
           tipo_sinalizacao: string | null
           updated_at: string
@@ -5941,6 +5961,8 @@ export type Database = {
           valor_minimo_legenda: number | null
         }
         Insert: {
+          aprovado_coordenador_em?: string | null
+          aprovado_por?: string | null
           codigo_dispositivo?: string | null
           cor_fundo?: string | null
           cor_horizontal?: string | null
@@ -5948,6 +5970,7 @@ export type Database = {
           created_at?: string
           data_medicao: string
           enviado_coordenador?: boolean | null
+          enviado_coordenador_em?: string | null
           id?: string
           km_referencia: number
           lado?: string | null
@@ -5965,12 +5988,14 @@ export type Database = {
           longitude?: number | null
           lote_id: string
           observacao?: string | null
+          observacao_coordenador?: string | null
           posicao_horizontal?: string | null
           rodovia_id: string
           situacao: string
           situacao_fundo?: string | null
           situacao_horizontal?: string | null
           situacao_legenda?: string | null
+          status?: string | null
           tipo_dispositivo?: string | null
           tipo_sinalizacao?: string | null
           updated_at?: string
@@ -5985,6 +6010,8 @@ export type Database = {
           valor_minimo_legenda?: number | null
         }
         Update: {
+          aprovado_coordenador_em?: string | null
+          aprovado_por?: string | null
           codigo_dispositivo?: string | null
           cor_fundo?: string | null
           cor_horizontal?: string | null
@@ -5992,6 +6019,7 @@ export type Database = {
           created_at?: string
           data_medicao?: string
           enviado_coordenador?: boolean | null
+          enviado_coordenador_em?: string | null
           id?: string
           km_referencia?: number
           lado?: string | null
@@ -6009,12 +6037,14 @@ export type Database = {
           longitude?: number | null
           lote_id?: string
           observacao?: string | null
+          observacao_coordenador?: string | null
           posicao_horizontal?: string | null
           rodovia_id?: string
           situacao?: string
           situacao_fundo?: string | null
           situacao_horizontal?: string | null
           situacao_legenda?: string | null
+          status?: string | null
           tipo_dispositivo?: string | null
           tipo_sinalizacao?: string | null
           updated_at?: string

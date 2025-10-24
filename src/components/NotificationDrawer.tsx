@@ -34,6 +34,8 @@ export function NotificationDrawer({ open, onOpenChange }: NotificationDrawerPro
       navigate("/minhas-ncs");
     } else if (notif.elemento_pendente_id) {
       navigate("/meus-elementos-pendentes");
+    } else if (notif.tipo === 'retrorrefletividade_pendente') {
+      navigate("/validacao-retrorrefletividades");
     }
   };
 

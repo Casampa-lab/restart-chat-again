@@ -139,6 +139,26 @@ const CoordenacaoFiscalizacao = () => {
     enabled: !!user,
     refetchInterval: 30000
   });
+
+  // Contador de retrorefletividades pendentes
+  const {
+    data: countRetrorrefletividadesPendentes = 0
+  } = useQuery({
+    queryKey: ["count-retrorrefletividades-pendentes"],
+    queryFn: async () => {
+      const [estaticasRes, dinamicasRes] = await Promise.all([
+        supabase.from('retrorrefletividade_estatica')
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pendente_aprovacao_coordenador"),
+        supabase.from('retrorrefletividade_dinamica')
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pendente_aprovacao_coordenador")
+      ]);
+      return (estaticasRes.count || 0) + (dinamicasRes.count || 0);
+    },
+    enabled: !!user,
+    refetchInterval: 30000
+  });
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
@@ -355,6 +375,39 @@ const CoordenacaoFiscalizacao = () => {
                       </div>
                       <Button size="lg" variant="default" className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-purple-600 hover:bg-purple-700 text-white" onClick={() => navigate("/validacao-fichas-verificacao")}>
                         <ClipboardCheck className="mr-2 h-5 w-5" />
+                        Acessar Validação
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Card Validação de Retrorefletividades */}
+                <Card className="bg-gradient-to-r from-teal-50 to-teal-100 border-2 border-teal-300 shadow-lg">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Activity className="h-6 w-6 text-teal-600" />
+                          <h3 className="text-xl font-bold text-teal-900">Validação de Retrorefletividades</h3>
+                        </div>
+                        <p className="text-sm text-teal-700">
+                          Aprovar medições estáticas e dinâmicas antes de gerar relatórios
+                        </p>
+                        {countRetrorrefletividadesPendentes > 0 && (
+                          <div className="mt-3 flex items-center gap-2">
+                            <Badge className="bg-teal-500 text-white text-base px-3 py-1">
+                              {countRetrorrefletividadesPendentes} {countRetrorrefletividadesPendentes === 1 ? 'medição pendente' : 'medições pendentes'}
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        size="lg"
+                        variant="default"
+                        className="font-semibold text-base px-6 py-6 shadow-md hover:shadow-lg transition-all bg-teal-600 hover:bg-teal-700 text-white"
+                        onClick={() => navigate("/validacao-retrorrefletividades")}
+                      >
+                        <Activity className="mr-2 h-5 w-5" />
                         Acessar Validação
                       </Button>
                     </div>
