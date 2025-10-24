@@ -121,6 +121,19 @@ const LotesManager = () => {
     latitude_final: "",
     longitude_final: ""
   });
+
+  const [showNovaRodoviaDialog, setShowNovaRodoviaDialog] = useState(false);
+  const [novaRodoviaForm, setNovaRodoviaForm] = useState({
+    codigo: "",
+    uf: "",
+    tolerancia_placas_metros: "50",
+    tolerancia_porticos_metros: "200",
+    tolerancia_defensas_metros: "20",
+    tolerancia_marcas_metros: "20",
+    tolerancia_cilindros_metros: "25",
+    tolerancia_tachas_metros: "25",
+    tolerancia_inscricoes_metros: "30"
+  });
   useEffect(() => {
     loadData();
   }, []);
@@ -460,6 +473,65 @@ const LotesManager = () => {
       .eq("id", loteId);
   };
 
+  const handleCriarNovaRodovia = async () => {
+    if (!novaRodoviaForm.codigo) {
+      toast.error("Código da rodovia é obrigatório!");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("rodovias")
+        .insert({
+          codigo: novaRodoviaForm.codigo,
+          uf: novaRodoviaForm.uf || null,
+          tolerancia_placas_metros: parseInt(novaRodoviaForm.tolerancia_placas_metros),
+          tolerancia_porticos_metros: parseInt(novaRodoviaForm.tolerancia_porticos_metros),
+          tolerancia_defensas_metros: parseInt(novaRodoviaForm.tolerancia_defensas_metros),
+          tolerancia_marcas_metros: parseInt(novaRodoviaForm.tolerancia_marcas_metros),
+          tolerancia_cilindros_metros: parseInt(novaRodoviaForm.tolerancia_cilindros_metros),
+          tolerancia_tachas_metros: parseInt(novaRodoviaForm.tolerancia_tachas_metros),
+          tolerancia_inscricoes_metros: parseInt(novaRodoviaForm.tolerancia_inscricoes_metros)
+        })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      
+      toast.success("Rodovia cadastrada com sucesso!");
+      
+      // Recarrega lista de rodovias
+      const { data: novasRodovias } = await supabase
+        .from("rodovias")
+        .select("id, codigo")
+        .order("codigo");
+      if (novasRodovias) setRodovias(novasRodovias);
+      
+      // Seleciona automaticamente a nova rodovia
+      setNovaRodovia({ ...novaRodovia, rodovia_id: data.id });
+      
+      // Fecha o dialog e limpa o form
+      setShowNovaRodoviaDialog(false);
+      setNovaRodoviaForm({
+        codigo: "",
+        uf: "",
+        tolerancia_placas_metros: "50",
+        tolerancia_porticos_metros: "200",
+        tolerancia_defensas_metros: "20",
+        tolerancia_marcas_metros: "20",
+        tolerancia_cilindros_metros: "25",
+        tolerancia_tachas_metros: "25",
+        tolerancia_inscricoes_metros: "30"
+      });
+      
+    } catch (error: any) {
+      toast.error("Erro ao cadastrar rodovia: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleEditRodoviaDialog = (rodoviaId: string) => {
     const rodovia = rodoviasVinculadas.find(r => r.rodovia_id === rodoviaId);
     if (!rodovia) return;
@@ -661,21 +733,34 @@ const LotesManager = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="rodovia">Rodovia</Label>
-                      <Select value={novaRodovia.rodovia_id} onValueChange={value => setNovaRodovia({
-                      ...novaRodovia,
-                      rodovia_id: value
-                    })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {rodovias.map(rodovia => <SelectItem key={rodovia.id} value={rodovia.id}>
-                                {rodovia.codigo}
-                              </SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                    <div className="flex gap-2 items-end">
+                      <div className="flex-1 space-y-2">
+                        <Label htmlFor="rodovia">Rodovia</Label>
+                        <Select value={novaRodovia.rodovia_id} onValueChange={value => setNovaRodovia({
+                        ...novaRodovia,
+                        rodovia_id: value
+                      })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {rodovias.map(rodovia => <SelectItem key={rodovia.id} value={rodovia.id}>
+                                  {rodovia.codigo}
+                                </SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setShowNovaRodoviaDialog(true)}
+                        className="mb-0"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nova Rodovia
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
@@ -759,7 +844,6 @@ const LotesManager = () => {
                     <Plus className="mr-2 h-4 w-4" />
                     Adicionar Rodovia ao Lote
                   </Button>
-                </div>
 
                 {/* Lista de rodovias adicionadas */}
                 {rodoviasVinculadas.length > 0 && <div className="space-y-2">
@@ -1675,6 +1759,128 @@ const LotesManager = () => {
           </form>
         </DialogContent>
       </Dialog>
-    </div>;
+
+      {/* Dialog para cadastrar nova rodovia */}
+      <Dialog open={showNovaRodoviaDialog} onOpenChange={setShowNovaRodoviaDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Cadastrar Nova Rodovia</DialogTitle>
+            <DialogDescription>
+              Preencha os dados da rodovia. Após criar, ela será automaticamente selecionada.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="novo_codigo">Código *</Label>
+                <Input
+                  id="novo_codigo"
+                  value={novaRodoviaForm.codigo}
+                  onChange={(e) => setNovaRodoviaForm({ ...novaRodoviaForm, codigo: e.target.value })}
+                  placeholder="Ex: BR-040"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="novo_uf">UF</Label>
+                <Input
+                  id="novo_uf"
+                  value={novaRodoviaForm.uf}
+                  onChange={(e) => setNovaRodoviaForm({ ...novaRodoviaForm, uf: e.target.value.toUpperCase() })}
+                  placeholder="Ex: MG"
+                  maxLength={2}
+                />
+              </div>
+            </div>
+            
+            <div className="border-t pt-4">
+              <h4 className="font-medium mb-3">Tolerâncias GPS (metros)</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <Label>🚏 Placas</Label>
+                  <Input
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={novaRodoviaForm.tolerancia_placas_metros}
+                    onChange={(e) => setNovaRodoviaForm({ ...novaRodoviaForm, tolerancia_placas_metros: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>🌉 Pórticos</Label>
+                  <Input
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={novaRodoviaForm.tolerancia_porticos_metros}
+                    onChange={(e) => setNovaRodoviaForm({ ...novaRodoviaForm, tolerancia_porticos_metros: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>🛣️ Defensas</Label>
+                  <Input
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={novaRodoviaForm.tolerancia_defensas_metros}
+                    onChange={(e) => setNovaRodoviaForm({ ...novaRodoviaForm, tolerancia_defensas_metros: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>➖ Marcas</Label>
+                  <Input
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={novaRodoviaForm.tolerancia_marcas_metros}
+                    onChange={(e) => setNovaRodoviaForm({ ...novaRodoviaForm, tolerancia_marcas_metros: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>🔴 Cilindros</Label>
+                  <Input
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={novaRodoviaForm.tolerancia_cilindros_metros}
+                    onChange={(e) => setNovaRodoviaForm({ ...novaRodoviaForm, tolerancia_cilindros_metros: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>💎 Tachas</Label>
+                  <Input
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={novaRodoviaForm.tolerancia_tachas_metros}
+                    onChange={(e) => setNovaRodoviaForm({ ...novaRodoviaForm, tolerancia_tachas_metros: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>➡️ Inscrições</Label>
+                  <Input
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={novaRodoviaForm.tolerancia_inscricoes_metros}
+                    onChange={(e) => setNovaRodoviaForm({ ...novaRodoviaForm, tolerancia_inscricoes_metros: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex gap-2 justify-end mt-4">
+            <Button variant="outline" onClick={() => setShowNovaRodoviaDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCriarNovaRodovia} disabled={loading}>
+              <Plus className="h-4 w-4 mr-2" />
+              Cadastrar e Selecionar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
 };
 export default LotesManager;
