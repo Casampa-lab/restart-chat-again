@@ -25,6 +25,24 @@ import { IntervencoesCilindrosForm } from '@/components/IntervencoesCilindrosFor
 import { IntervencoesPorticosForm } from '@/components/IntervencoesPorticosForm';
 import { IntervencoesInscricoesForm } from '@/components/IntervencoesInscricoesForm';
 
+// Importar viewers de execução
+import IntervencoesExecucaoMarcasSHContent from '@/components/intervencoes/execucao/IntervencoesExecucaoMarcasSHContent';
+import IntervencoesExecucaoPlacasSVContent from '@/components/intervencoes/execucao/IntervencoesExecucaoPlacasSVContent';
+import IntervencoesExecucaoDefensasContent from '@/components/intervencoes/execucao/IntervencoesExecucaoDefensasContent';
+import IntervencoesExecucaoCilindrosContent from '@/components/intervencoes/execucao/IntervencoesExecucaoCilindrosContent';
+import IntervencoesExecucaoPorticosContent from '@/components/intervencoes/execucao/IntervencoesExecucaoPorticosContent';
+import IntervencoesExecucaoTachasContent from '@/components/intervencoes/execucao/IntervencoesExecucaoTachasContent';
+import IntervencoesExecucaoInscricoesContent from '@/components/intervencoes/execucao/IntervencoesExecucaoInscricoesContent';
+
+// Importar viewers de manutenção
+import IntervencoesManutencaoMarcasSHContent from '@/components/intervencoes/manutencao/IntervencoesManutencaoMarcasSHContent';
+import IntervencoesManutencaoPlacasSVContent from '@/components/intervencoes/manutencao/IntervencoesManutencaoPlacasSVContent';
+import IntervencoesManutencaoDefensasContent from '@/components/intervencoes/manutencao/IntervencoesManutencaoDefensasContent';
+import IntervencoesManutencaoCilindrosContent from '@/components/intervencoes/manutencao/IntervencoesManutencaoCilindrosContent';
+import IntervencoesManutencaoPorticosContent from '@/components/intervencoes/manutencao/IntervencoesManutencaoPorticosContent';
+import IntervencoesManutencaoTachasContent from '@/components/intervencoes/manutencao/IntervencoesManutencaoTachasContent';
+import IntervencoesManutencaoInscricoesContent from '@/components/intervencoes/manutencao/IntervencoesManutencaoInscricoesContent';
+
 // Elementos lineares vs pontuais
 const ELEMENTOS_LINEARES = ['marcas_longitudinais', 'defensas', 'cilindros', 'tachas'];
 const ELEMENTOS_PONTUAIS = ['placas', 'porticos', 'inscricoes'];
@@ -62,6 +80,28 @@ const TABS_MAP: Record<string, string> = {
   'porticos': 'porticos'
 };
 
+  // Mapeamento de viewers
+  const VIEWERS_MAP = {
+    'execucao': {
+      'marcas_longitudinais': IntervencoesExecucaoMarcasSHContent,
+      'placas': IntervencoesExecucaoPlacasSVContent,
+      'defensas': IntervencoesExecucaoDefensasContent,
+      'cilindros': IntervencoesExecucaoCilindrosContent,
+      'porticos': IntervencoesExecucaoPorticosContent,
+      'tachas': IntervencoesExecucaoTachasContent,
+      'inscricoes': IntervencoesExecucaoInscricoesContent,
+    },
+    'manutencao': {
+      'marcas_longitudinais': IntervencoesManutencaoMarcasSHContent,
+      'placas': IntervencoesManutencaoPlacasSVContent,
+      'defensas': IntervencoesManutencaoDefensasContent,
+      'cilindros': IntervencoesManutencaoCilindrosContent,
+      'porticos': IntervencoesManutencaoPorticosContent,
+      'tachas': IntervencoesManutencaoTachasContent,
+      'inscricoes': IntervencoesManutencaoInscricoesContent,
+    }
+  };
+
 const TIPOS_ELEMENTOS = [
   { value: 'cilindros', label: '🔵 Cilindro', component: IntervencoesCilindrosForm },
   { value: 'defensas', label: '🛡️ Defensa', component: DefensasIntervencoesForm },
@@ -81,6 +121,8 @@ export default function RegistrarIntervencaoCampo() {
 
   const [modoOperacao, setModoOperacao] = useState<'manutencao' | 'execucao' | null>(null);
   const [tipoSelecionado, setTipoSelecionado] = useState<string>('');
+  const [modoVisualizacao, setModoVisualizacao] = useState<'viewer' | 'formulario'>('viewer');
+  const [elementoSelecionado, setElementoSelecionado] = useState<any>(null);
   const [dadosIntervencao, setDadosIntervencao] = useState<any>(null);
   const [fotos, setFotos] = useState<string[]>([]);
   const [isConforme, setIsConforme] = useState(true);
@@ -92,6 +134,34 @@ export default function RegistrarIntervencaoCampo() {
     latitude_final: '',
     longitude_final: ''
   });
+
+  // Resetar modo visualização quando mudar tipo ou modo
+  useEffect(() => {
+    setModoVisualizacao('viewer');
+    setElementoSelecionado(null);
+  }, [tipoSelecionado, modoOperacao]);
+
+  // Mapeamento de viewers
+  const VIEWERS_MAP = {
+    'execucao': {
+      'marcas_longitudinais': IntervencoesExecucaoMarcasSHContent,
+      'placas': IntervencoesExecucaoPlacasSVContent,
+      'defensas': IntervencoesExecucaoDefensasContent,
+      'cilindros': IntervencoesExecucaoCilindrosContent,
+      'porticos': IntervencoesExecucaoPorticosContent,
+      'tachas': IntervencoesExecucaoTachasContent,
+      'inscricoes': IntervencoesExecucaoInscricoesContent,
+    },
+    'manutencao': {
+      'marcas_longitudinais': IntervencoesManutencaoMarcasSHContent,
+      'placas': IntervencoesManutencaoPlacasSVContent,
+      'defensas': IntervencoesManutencaoDefensasContent,
+      'cilindros': IntervencoesManutencaoCilindrosContent,
+      'porticos': IntervencoesManutencaoPorticosContent,
+      'tachas': IntervencoesManutencaoTachasContent,
+      'inscricoes': IntervencoesManutencaoInscricoesContent,
+    }
+  };
 
   const necessidadeProp = location.state?.necessidade;
 
@@ -361,7 +431,7 @@ export default function RegistrarIntervencaoCampo() {
         </Card>
       )}
 
-      {/* Etapas 3-7: Formulário e Captura */}
+      {/* Etapas 3-7: Viewer e Formulário */}
       {tipoSelecionado && (
         <div className="space-y-4">
           {/* Badge do tipo selecionado */}
@@ -382,6 +452,8 @@ export default function RegistrarIntervencaoCampo() {
               onClick={() => {
                 setTipoSelecionado('');
                 setDadosIntervencao(null);
+                setModoVisualizacao('viewer');
+                setElementoSelecionado(null);
               }}
               className="h-8"
             >
@@ -390,23 +462,58 @@ export default function RegistrarIntervencaoCampo() {
             </Button>
           </div>
 
-          {/* 3. Formulário Específico */}
-          <Card>
-            <CardHeader>
-              <CardTitle>3️⃣ Dados da {modoOperacao === 'manutencao' ? 'Manutenção' : 'Intervenção'}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {FormularioAtual && (
-                <>
-                  {modoOperacao === 'manutencao' && (
-                    <Alert className="mb-4 border-orange-300 bg-orange-50">
-                      <Info className="h-4 w-4 text-orange-600" />
-                      <AlertDescription className="text-sm text-orange-900">
-                        <strong>Modo Manutenção IN-3:</strong> Campos estruturais (tipo, código, dimensões) não podem ser alterados.
-                        Apenas estado/condição da sinalização.
-                      </AlertDescription>
-                    </Alert>
-                  )}
+          {/* 3. VIEWER - Elementos Já Registrados */}
+          {modoVisualizacao === 'viewer' && (() => {
+            const ViewerComponent = VIEWERS_MAP[modoOperacao!][tipoSelecionado];
+            return ViewerComponent ? (
+              <ViewerComponent 
+                onEditarElemento={(elem: any) => {
+                  setElementoSelecionado(elem);
+                  setModoVisualizacao('formulario');
+                }}
+              />
+            ) : null;
+          })()}
+
+          {/* 3 (Execução) ou 4 (Manutenção): FORMULÁRIO */}
+          {modoVisualizacao === 'formulario' && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>
+                    {modoOperacao === 'manutencao' ? '4️⃣' : '3️⃣'} Dados da {modoOperacao === 'manutencao' ? 'Manutenção' : 'Intervenção'}
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setModoVisualizacao('viewer');
+                      setElementoSelecionado(null);
+                    }}
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Voltar para Lista
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {elementoSelecionado && (
+                  <Alert className="mb-4 border-blue-300 bg-blue-50">
+                    <Info className="h-4 w-4 text-blue-600" />
+                    <AlertDescription className="text-sm text-blue-900">
+                      <strong>Editando elemento existente:</strong> KM {elementoSelecionado.km_inicial?.toFixed(3)}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {modoOperacao === 'manutencao' && (
+                  <Alert className="mb-4 border-orange-300 bg-orange-50">
+                    <Info className="h-4 w-4 text-orange-600" />
+                    <AlertDescription className="text-sm text-orange-900">
+                      <strong>Modo Manutenção IN-3:</strong> Campos estruturais não podem ser alterados.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {FormularioAtual && (
                   <FormularioAtual
                     modo="controlado"
                     hideSubmitButton
@@ -415,18 +522,19 @@ export default function RegistrarIntervencaoCampo() {
                     rodoviaId={activeSession?.rodovia_id}
                     tipoOrigem={modoOperacao === 'manutencao' ? 'manutencao_pre_projeto' : 'execucao'}
                   />
-                </>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
-          {/* 4. Capturar Fotos */}
+          {/* 4 (Execução) ou 5 (Manutenção): Capturar Fotos */}
+          {modoVisualizacao === 'formulario' && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 justify-between">
                   <div className="flex items-center gap-2">
                     <Camera className="h-5 w-5" />
-                    4️⃣ Capturar Fotos
+                    {modoOperacao === 'manutencao' ? '5️⃣' : '4️⃣'} Capturar Fotos
                   </div>
                   {fotos.length > 0 && (
                     <Badge variant="outline" className="text-sm">
@@ -453,14 +561,16 @@ export default function RegistrarIntervencaoCampo() {
                 />
               </CardContent>
             </Card>
+          )}
 
-          {/* 5. GPS */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                5️⃣ Localização GPS
-              </CardTitle>
+          {/* 5 (Execução) ou 6 (Manutenção): GPS */}
+          {modoVisualizacao === 'formulario' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  {modoOperacao === 'manutencao' ? '6️⃣' : '5️⃣'} Localização GPS
+                </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Botão de captura GPS Inicial */}
@@ -582,12 +692,14 @@ export default function RegistrarIntervencaoCampo() {
               )}
             </CardContent>
           </Card>
+          )}
 
-          {/* 6. Validação Manual */}
-          <Card>
-            <CardHeader>
-              <CardTitle>6️⃣ Validação de Conformidade</CardTitle>
-            </CardHeader>
+          {/* 6 (Execução) ou 7 (Manutenção): Validação Manual */}
+          {modoVisualizacao === 'formulario' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{modoOperacao === 'manutencao' ? '7️⃣' : '6️⃣'} Validação de Conformidade</CardTitle>
+              </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -628,20 +740,23 @@ export default function RegistrarIntervencaoCampo() {
               )}
             </CardContent>
           </Card>
+          )}
 
-          {/* 7. Enviar */}
-          <Button
-            onClick={handleEnviar}
-            disabled={loading || !dadosIntervencao || !manualPosition.latitude_inicial || !manualPosition.longitude_inicial}
-            size="lg"
-            className={`w-full h-14 text-lg ${
-              modoOperacao === 'manutencao' 
-                ? 'bg-orange-600 hover:bg-orange-700' 
-                : ''
-            }`}
-          >
-            {loading ? 'Enviando...' : (modoOperacao === 'manutencao' ? '🟠 Registrar Manutenção' : '🟢 Enviar Intervenção')}
-          </Button>
+          {/* 7 (Execução) ou 8 (Manutenção): Enviar */}
+          {modoVisualizacao === 'formulario' && (
+            <Button
+              onClick={handleEnviar}
+              disabled={loading || !dadosIntervencao || !manualPosition.latitude_inicial || !manualPosition.longitude_inicial}
+              size="lg"
+              className={`w-full h-14 text-lg ${
+                modoOperacao === 'manutencao' 
+                  ? 'bg-orange-600 hover:bg-orange-700' 
+                  : ''
+              }`}
+            >
+              {loading ? 'Enviando...' : (modoOperacao === 'manutencao' ? '🟠 Registrar Manutenção' : '🟢 Enviar Intervenção')}
+            </Button>
+          )}
         </div>
       )}
     </div>
