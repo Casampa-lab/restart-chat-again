@@ -751,7 +751,7 @@ const LotesManager = () => {
                           <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
                         <SelectContent>
-                          {rodovias.filter(r => !rodoviasVinculadas.find(rv => rv.rodovia_id === r.id)).map(rodovia => <SelectItem key={rodovia.id} value={rodovia.id}>
+                          {rodovias.map(rodovia => <SelectItem key={rodovia.id} value={rodovia.id}>
                                 {rodovia.codigo}
                               </SelectItem>)}
                         </SelectContent>
@@ -1487,7 +1487,7 @@ const LotesManager = () => {
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
-                        {rodovias.filter(r => !rodoviasVinculadas.find(rv => rv.rodovia_id === r.id)).map(rodovia => <SelectItem key={rodovia.id} value={rodovia.id}>
+                        {rodovias.map(rodovia => <SelectItem key={rodovia.id} value={rodovia.id}>
                               {rodovia.codigo}
                             </SelectItem>)}
                       </SelectContent>
