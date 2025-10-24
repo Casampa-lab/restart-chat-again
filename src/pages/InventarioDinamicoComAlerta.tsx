@@ -12,7 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, MapPin, Navigation } from 'lucide-react';
+import { ArrowLeft, MapPin, Navigation, Search, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 const TIPO_ELEMENTO_LABELS: Record<string, string> = {
@@ -105,6 +106,7 @@ export default function InventarioDinamicoComAlerta() {
   const [grupoSelecionado, setGrupoSelecionado] = useState<'todos' | 'sv' | 'sh' | 'defensas'>('todos');
   const [tipoSV, setTipoSV] = useState<'placas' | 'porticos'>('placas');
   const [tipoSH, setTipoSH] = useState<'marcas_longitudinais' | 'cilindros' | 'inscricoes' | 'tachas'>('marcas_longitudinais');
+  const [searchTerm, setSearchTerm] = useState("");
   const [contadores, setContadores] = useState<Contadores>({
     todos: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0, total_inventario: 0 },
     sh: { cadastro_inicial: 0, criados_match: 0, necessidades_totais: 0, necessidades_pendentes: 0, total_inventario: 0 },
@@ -363,25 +365,45 @@ export default function InventarioDinamicoComAlerta() {
   const tipoAtivo = getTipoElementoAtivo();
 
   const necessidadesFiltradas = (() => {
-    const filtradas = tipoAtivo === null 
+    // 1. Filtrar por tipo (grupo SH/SV/Defensas)
+    let filtradas = tipoAtivo === null 
       ? necessidades 
       : necessidades.filter(n => n.tipo_elemento === tipoAtivo);
     
-    if (!position) return filtradas;
+    // 2. Aplicar busca textual
+    if (searchTerm) {
+      const termLower = searchTerm.toLowerCase();
+      filtradas = filtradas.filter(n => 
+        (n.codigo?.toLowerCase().includes(termLower)) ||
+        (n.tipo?.toLowerCase().includes(termLower)) ||
+        (n.lado?.toLowerCase().includes(termLower)) ||
+        (n.posicao?.toLowerCase().includes(termLower)) ||
+        (n.snv?.toLowerCase().includes(termLower)) ||
+        (n.km_inicial?.toString().includes(termLower)) ||
+        (n.km_final?.toString().includes(termLower)) ||
+        (n.acao?.toLowerCase().includes(termLower)) ||
+        (n.descricao_servico?.toLowerCase().includes(termLower)) ||
+        (n.observacao?.toLowerCase().includes(termLower)) ||
+        (n.cor?.toLowerCase().includes(termLower)) ||
+        (n.material?.toLowerCase().includes(termLower))
+      );
+    }
     
-    // Separar necessidades com e sem coordenadas
+    // 3. Ordenar
+    if (!position) {
+      // Sem GPS: ordenar por KM
+      return filtradas.sort((a, b) => (a.km_inicial || 0) - (b.km_inicial || 0));
+    }
+    
+    // Com GPS: separar e ordenar
     const comCoordenadas = filtradas.filter(n => n.latitude_inicial && n.longitude_inicial);
     const semCoordenadas = filtradas.filter(n => !n.latitude_inicial || !n.longitude_inicial);
     
-    // Ordenar as que têm coordenadas por proximidade
     const ordenadas = sortByProximity(comCoordenadas, position.latitude, position.longitude);
-    
-    // Ordenar as sem coordenadas por km
     const semCoordenadasOrdenadas = semCoordenadas.sort((a, b) => 
       (a.km_inicial || 0) - (b.km_inicial || 0)
     );
     
-    // Juntar: primeiro as próximas, depois as sem coordenadas
     return [...ordenadas, ...semCoordenadasOrdenadas];
   })();
 
@@ -438,6 +460,47 @@ export default function InventarioDinamicoComAlerta() {
               </Badge>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Campo de Busca */}
+      <Card className="mb-4">
+        <CardContent className="pt-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Buscar por código, tipo, km, lado..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+            {searchTerm && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+                onClick={() => setSearchTerm("")}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          {searchTerm && (
+            <div className="mt-2 flex items-center gap-2">
+              <Badge variant="secondary">
+                {necessidadesFiltradas.length} resultado(s) encontrado(s)
+              </Badge>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setSearchTerm("")}
+                className="h-6 text-xs"
+              >
+                Limpar busca
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
