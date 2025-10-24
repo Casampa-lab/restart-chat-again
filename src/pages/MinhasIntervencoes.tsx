@@ -19,9 +19,7 @@ const MinhasIntervencoes = () => {
   const { user, loading: authLoading } = useAuth();
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
-  const modoFromUrl = searchParams.get("modo") as 'manutencao' | 'execucao' | null;
   const [activeTab, setActiveTab] = useState(tabFromUrl || "sh");
-  const [modoOperacao] = useState<'manutencao' | 'execucao' | null>(modoFromUrl);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -81,31 +79,31 @@ const MinhasIntervencoes = () => {
           </TabsList>
           
           <TabsContent value="sh">
-            <IntervencoesSHContent modoOperacao={modoOperacao} />
+            <IntervencoesSHContent />
           </TabsContent>
           
           <TabsContent value="sv">
-            <IntervencoesSVContent modoOperacao={modoOperacao} />
+            <IntervencoesSVContent />
           </TabsContent>
           
           <TabsContent value="inscricoes">
-            <IntervencoesInscricoesContent modoOperacao={modoOperacao} />
+            <IntervencoesInscricoesContent />
           </TabsContent>
           
           <TabsContent value="tacha">
-            <IntervencoesTachaContent modoOperacao={modoOperacao} />
+            <IntervencoesTachaContent />
           </TabsContent>
           
           <TabsContent value="cilindros">
-            <IntervencoesCilindrosContent modoOperacao={modoOperacao} />
+            <IntervencoesCilindrosContent />
           </TabsContent>
           
           <TabsContent value="porticos">
-            <IntervencoesPorticosContent modoOperacao={modoOperacao} />
+            <IntervencoesPorticosContent />
           </TabsContent>
           
           <TabsContent value="defensas">
-            <IntervencoesDefensasContent modoOperacao={modoOperacao} />
+            <IntervencoesDefensasContent />
           </TabsContent>
           
           <TabsContent value="manutencoes">

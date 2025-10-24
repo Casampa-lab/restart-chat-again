@@ -24,8 +24,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,11 +55,7 @@ interface IntervencaoPortico {
   };
 }
 
-interface IntervencoesPorticosContentProps {
-  modoOperacao?: 'manutencao' | 'execucao' | null;
-}
-
-const IntervencoesPorticosContent = ({ modoOperacao }: IntervencoesPorticosContentProps = {}) => {
+const IntervencoesPorticosContent = () => {
   const { user } = useAuth();
   const [intervencoes, setIntervencoes] = useState<IntervencaoPortico[]>([]);
   const [loading, setLoading] = useState(true);
@@ -240,18 +234,6 @@ const IntervencoesPorticosContent = ({ modoOperacao }: IntervencoesPorticosConte
 
   return (
     <div className="space-y-4">
-      {modoOperacao && (
-        <Alert className="mb-4">
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Modo selecionado: {modoOperacao === 'manutencao' 
-              ? '🟠 Manutenção Rotineira (IN-3)' 
-              : '🟢 Execução de Projeto'
-            }
-          </AlertDescription>
-        </Alert>
-      )}
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -452,7 +434,6 @@ const IntervencoesPorticosContent = ({ modoOperacao }: IntervencoesPorticosConte
             <DialogTitle>Registrar Nova Intervenção em Pórticos</DialogTitle>
           </DialogHeader>
           <IntervencoesPorticosForm 
-            modoOperacao={modoOperacao}
             onIntervencaoRegistrada={() => {
               setNovaIntervencaoOpen(false);
               loadData();

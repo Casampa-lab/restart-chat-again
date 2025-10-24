@@ -36,8 +36,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
 
 interface IntervencaoSV {
   id: string;
@@ -59,11 +57,7 @@ interface IntervencaoSV {
   enviado_coordenador: boolean;
 }
 
-interface IntervencoesSVContentProps {
-  modoOperacao?: 'manutencao' | 'execucao' | null;
-}
-
-const IntervencoesSVContent = ({ modoOperacao }: IntervencoesSVContentProps = {}) => {
+const IntervencoesSVContent = () => {
   const { user } = useAuth();
   const [intervencoes, setIntervencoes] = useState<IntervencaoSV[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,18 +206,6 @@ const IntervencoesSVContent = ({ modoOperacao }: IntervencoesSVContentProps = {}
 
   return (
     <div className="space-y-4">
-      {modoOperacao && (
-        <Alert className="mb-4">
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Modo selecionado: {modoOperacao === 'manutencao' 
-              ? '🟠 Manutenção Rotineira (IN-3)' 
-              : '🟢 Execução de Projeto'
-            }
-          </AlertDescription>
-        </Alert>
-      )}
-
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <label htmlFor="show-enviadas-sv" className="text-sm cursor-pointer">

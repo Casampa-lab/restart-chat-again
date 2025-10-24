@@ -9,8 +9,6 @@ import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Trash2, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import {
@@ -44,11 +42,7 @@ interface IntervencaoInscricao {
   } | null;
 }
 
-interface IntervencoesInscricoesContentProps {
-  modoOperacao?: 'manutencao' | 'execucao' | null;
-}
-
-const IntervencoesInscricoesContent = ({ modoOperacao }: IntervencoesInscricoesContentProps = {}) => {
+const IntervencoesInscricoesContent = () => {
   const { user } = useAuth();
   const [intervencoes, setIntervencoes] = useState<IntervencaoInscricao[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,18 +143,6 @@ const IntervencoesInscricoesContent = ({ modoOperacao }: IntervencoesInscricoesC
 
   return (
     <div className="space-y-4">
-      {modoOperacao && (
-        <Alert className="mb-4">
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Modo selecionado: {modoOperacao === 'manutencao' 
-              ? '🟠 Manutenção Rotineira (IN-3)' 
-              : '🟢 Execução de Projeto'
-            }
-          </AlertDescription>
-        </Alert>
-      )}
-
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <label htmlFor="show-enviadas-insc" className="text-sm cursor-pointer">
@@ -264,7 +246,6 @@ const IntervencoesInscricoesContent = ({ modoOperacao }: IntervencoesInscricoesC
             <DialogTitle>Registrar Nova Intervenção em Inscrições</DialogTitle>
           </DialogHeader>
           <IntervencoesInscricoesForm 
-            modoOperacao={modoOperacao}
             onIntervencaoRegistrada={() => {
               setNovaIntervencaoOpen(false);
               loadData();

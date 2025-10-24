@@ -31,7 +31,6 @@ interface IntervencoesTachaFormProps {
   hideSubmitButton?: boolean;
   loteId?: string;
   rodoviaId?: string;
-  modoOperacao?: 'manutencao' | 'execucao' | null;
 }
 
 const formSchema = z.object({
@@ -59,8 +58,7 @@ export function IntervencoesTachaForm({
   onDataChange,
   hideSubmitButton = false,
   loteId,
-  rodoviaId,
-  modoOperacao
+  rodoviaId
 }: IntervencoesTachaFormProps) {
   const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('tachas');
 

@@ -66,7 +66,7 @@ export default function ModoCampo() {
       icon: Wrench,
       title: 'Ações de Campo',
       description: 'Manutenção IN-3 ou Execução de Projeto',
-      path: '/modo-campo/escolher-acao',
+      path: '/modo-campo/registrar-intervencao',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
     },

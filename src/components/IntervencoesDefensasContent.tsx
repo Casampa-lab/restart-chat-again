@@ -24,8 +24,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,11 +58,7 @@ interface IntervencaoDefensa {
   };
 }
 
-interface IntervencoesDefensasContentProps {
-  modoOperacao?: 'manutencao' | 'execucao' | null;
-}
-
-const IntervencoesDefensasContent = ({ modoOperacao }: IntervencoesDefensasContentProps = {}) => {
+const IntervencoesDefensasContent = () => {
   const { user } = useAuth();
   const [intervencoes, setIntervencoes] = useState<IntervencaoDefensa[]>([]);
   const [loading, setLoading] = useState(true);
@@ -247,18 +241,6 @@ const IntervencoesDefensasContent = ({ modoOperacao }: IntervencoesDefensasConte
 
   return (
     <div className="space-y-4">
-      {modoOperacao && (
-        <Alert className="mb-4">
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Modo selecionado: {modoOperacao === 'manutencao' 
-              ? '🟠 Manutenção Rotineira (IN-3)' 
-              : '🟢 Execução de Projeto'
-            }
-          </AlertDescription>
-        </Alert>
-      )}
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -459,7 +441,7 @@ const IntervencoesDefensasContent = ({ modoOperacao }: IntervencoesDefensasConte
           <DialogHeader>
             <DialogTitle>Registrar Nova Intervenção em Defensas</DialogTitle>
           </DialogHeader>
-          <DefensasIntervencoesForm modoOperacao={modoOperacao} />
+          <DefensasIntervencoesForm />
         </DialogContent>
       </Dialog>
     </div>
