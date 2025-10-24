@@ -33,6 +33,7 @@ import { DiagnosticoMatch } from "@/components/admin/DiagnosticoMatch";
 import { LimparFotosOrfas } from "@/components/admin/LimparFotosOrfas";
 import { SnvShapefileUploader } from "@/components/admin/SnvShapefileUploader";
 import { ResetDatabaseButton } from "@/components/admin/ResetDatabaseButton";
+import { assignCoordinatorConsol } from "@/lib/assignCoordinatorConsol";
 import { ParametrosMatchManager } from "@/components/admin/ParametrosMatchManager";
 import { RelatorioMatching } from "@/components/admin/RelatorioMatching";
 import { ExecutarMatching } from "@/components/admin/ExecutarMatching";
@@ -54,6 +55,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLoteId, setSelectedLoteId] = useState<string>("");
   const [selectedRodoviaId, setSelectedRodoviaId] = useState<string>("");
+  const [isAssigningCoordinator, setIsAssigningCoordinator] = useState(false);
 
   // Buscar lotes
   const { data: lotes } = useQuery({
@@ -581,6 +583,39 @@ const Admin = () => {
           {isAdmin && (
             <TabsContent value="sistema">
               <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>🔗 Associar Coordenador CONSOL (Temporário)</CardTitle>
+                    <CardDescription>
+                      Associa manualmente sampaio.mcvs@gmail.com aos lotes 04-10 da CONSOL
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      onClick={async () => {
+                        setIsAssigningCoordinator(true);
+                        try {
+                          const result = await assignCoordinatorConsol();
+                          toast.success(`✅ ${result.message}`, {
+                            description: `Lotes: ${result.lotes_associados.join(', ')}`
+                          });
+                        } catch (error: any) {
+                          console.error('Erro ao associar coordenador:', error);
+                          toast.error('❌ Erro ao associar coordenador', {
+                            description: error.message
+                          });
+                        } finally {
+                          setIsAssigningCoordinator(false);
+                        }
+                      }}
+                      disabled={isAssigningCoordinator}
+                      variant="outline"
+                    >
+                      {isAssigningCoordinator ? "Associando..." : "Associar Sampaio aos Lotes CONSOL"}
+                    </Button>
+                  </CardContent>
+                </Card>
+                
                 <LimparReconciliacoesInconsistentes />
                 <RemoverDuplicatasInventario />
                 <ResetDatabaseButton />
