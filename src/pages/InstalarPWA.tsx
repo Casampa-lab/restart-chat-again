@@ -12,8 +12,15 @@ export default function InstalarPWA() {
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    // Detectar iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    // Detecção robusta de iOS/iPadOS (funciona com iPad antigo e novo)
+    const iOS = 
+      // Método 1: User Agent tradicional (iPad antigo, iPhone, iPod)
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      // Método 2: iPad moderno (iPadOS 13+) - identifica-se como Mac mas tem touch
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+      // Método 3: Detecção explícita de iPadOS
+      (/Mac/.test(navigator.userAgent) && 'ontouchend' in document);
+    
     setIsIOS(iOS);
 
     // Detectar se já está instalado
