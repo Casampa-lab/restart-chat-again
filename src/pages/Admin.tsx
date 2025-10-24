@@ -16,7 +16,6 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import EmpresasManager from "@/components/admin/EmpresasManager";
 import LotesManager from "@/components/admin/LotesManager";
-import RodoviasManager from "@/components/admin/RodoviasManager";
 import { SupervisorasManager } from "@/components/admin/SupervisorasManager";
 import { UsuariosManager } from "@/components/admin/UsuariosManager";
 import { InventarioImporterManager } from "@/components/admin/InventarioImporterManager";
@@ -193,12 +192,11 @@ const Admin = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Tabs defaultValue="supervisoras" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-11' : 'grid-cols-9'}`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-10' : 'grid-cols-8'}`}>
             <TabsTrigger value="supervisoras">Supervisoras</TabsTrigger>
             <TabsTrigger value="usuarios">Usuários</TabsTrigger>
             <TabsTrigger value="empresas">Executoras</TabsTrigger>
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
-            <TabsTrigger value="rodovias">Rodovias</TabsTrigger>
             <TabsTrigger value="inventario">Cadastro</TabsTrigger>
             <TabsTrigger value="necessidades">Projeto</TabsTrigger>
             <TabsTrigger value="matching">Matching</TabsTrigger>
@@ -221,10 +219,6 @@ const Admin = () => {
 
           <TabsContent value="lotes">
             <LotesManager />
-          </TabsContent>
-
-          <TabsContent value="rodovias">
-            <RodoviasManager />
           </TabsContent>
 
           <TabsContent value="inventario">
