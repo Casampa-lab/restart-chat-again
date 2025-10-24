@@ -39,19 +39,55 @@ serve(async (req) => {
       '0f23788b-3fd8-44b3-b398-0c0b7896e649'  // Lote 10
     ]
 
-    // Criar registros de associação (com upsert para evitar duplicatas)
+    // Verificar se o coordenador existe
+    console.log('🔍 Verificando se o coordenador existe...')
+    const { data: coordenador, error: coordError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, nome')
+      .eq('id', coordinatorId)
+      .single()
+    
+    if (coordError || !coordenador) {
+      console.error('❌ Coordenador não encontrado:', coordError)
+      throw new Error(`Coordenador não encontrado: ${coordError?.message || 'ID inválido'}`)
+    }
+    
+    console.log('✅ Coordenador encontrado:', coordenador.nome)
+
+    // Verificar se os lotes existem
+    console.log('🔍 Verificando se os lotes existem...')
+    const { data: lotes, error: lotesError } = await supabaseAdmin
+      .from('lotes')
+      .select('id, numero')
+      .in('id', loteIds)
+    
+    if (lotesError) {
+      console.error('❌ Erro ao buscar lotes:', lotesError)
+      throw new Error(`Erro ao buscar lotes: ${lotesError.message}`)
+    }
+    
+    if (!lotes || lotes.length !== loteIds.length) {
+      console.warn('⚠️ Alguns lotes não foram encontrados')
+      console.log('Lotes encontrados:', lotes?.map(l => `${l.numero} (${l.id})`).join(', '))
+      console.log('Lotes esperados:', loteIds.length)
+    } else {
+      console.log('✅ Todos os lotes encontrados:', lotes.map(l => l.numero).join(', '))
+    }
+
+    // Criar registros de associação
     const assignments = loteIds.map(loteId => ({
       user_id: coordinatorId,
       lote_id: loteId
     }))
 
+    console.log('📝 Criando associações:', JSON.stringify(assignments, null, 2))
+
     const { data, error } = await supabaseAdmin
       .from('coordinator_assignments')
-      .upsert(assignments, { 
-        onConflict: 'user_id,lote_id',
-        ignoreDuplicates: false 
-      })
+      .insert(assignments)
       .select()
+    
+    console.log('📊 Resultado do insert:', { data, error })
 
     if (error) {
       throw error
@@ -72,11 +108,15 @@ serve(async (req) => {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+    const errorDetails = error instanceof Error ? error.stack : JSON.stringify(error)
     console.error('❌ Erro ao associar coordenador:', errorMessage)
+    console.error('📋 Detalhes completos do erro:', errorDetails)
+    console.error('🔍 Objeto de erro:', JSON.stringify(error, null, 2))
     return new Response(
       JSON.stringify({ 
         error: errorMessage,
-        details: error instanceof Error ? error.stack : undefined
+        details: errorDetails,
+        fullError: error
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     )
