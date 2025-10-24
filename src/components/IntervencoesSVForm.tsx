@@ -340,12 +340,12 @@ export function IntervencoesSVForm({
 
         {!placaSelecionada && (
           <>
-            <div className="grid md:grid-cols-[1fr_140px] gap-4 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_140px] gap-4 items-start">
               <FormField
                 control={form.control}
                 name="tipo_placa"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <FormLabel className="flex items-center gap-2">
                       Tipo de Placa *
                       {isCampoEstruturalBloqueado('tipo') && <Lock className="h-3 w-3 text-muted-foreground" />}
@@ -377,7 +377,7 @@ export function IntervencoesSVForm({
               control={form.control}
               name="codigo_placa"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <FormLabel className="flex items-center gap-2">
                     Código da Placa *
                     {isCampoEstruturalBloqueado('codigo') && <Lock className="h-3 w-3 text-muted-foreground" />}
