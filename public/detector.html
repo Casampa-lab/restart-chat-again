@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OperaVia - Sistema de Supervisão Rodoviária</title>
+  <meta name="description" content="Carregando OperaVia...">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0EA5E9 0%, #0369a1 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .loader {
+      text-align: center;
+    }
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0;
+    }
+    p {
+      font-size: 14px;
+      opacity: 0.9;
+      margin: 8px 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="spinner"></div>
+    <h1>OperaVia</h1>
+    <p>Carregando aplicação...</p>
+  </div>
+
+  <script>
+    (function() {
+      // Detecção robusta de iOS/iPadOS
+      const iOS = 
+        // Método 1: User Agent tradicional (iPad antigo, iPhone, iPod)
+        /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        // Método 2: iPad moderno (iPadOS 13+) - identifica-se como Mac mas tem touch
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+        // Método 3: Detecção explícita de iPadOS
+        (/Mac/.test(navigator.userAgent) && 'ontouchend' in document);
+      
+      // Extrai versão do iOS (retorna undefined se não for iOS)
+      const iOSVersion = iOS && parseInt(
+        (navigator.userAgent.match(/OS (\d+)_/) || [])[1], 10
+      );
+      
+      // Log para debug (remover em produção se necessário)
+      console.log('[OperaVia Detector]', {
+        iOS: iOS,
+        version: iOSVersion || 'N/A',
+        userAgent: navigator.userAgent,
+        platform: navigator.platform
+      });
+      
+      // Redireciona para versão apropriada
+      if (iOSVersion && iOSVersion < 14) {
+        console.log('[OperaVia Detector] Redirecionando para versão legacy (iOS ' + iOSVersion + ')');
+        window.location.href = '/app-legacy/';
+      } else {
+        console.log('[OperaVia Detector] Redirecionando para versão moderna');
+        window.location.href = '/app/';
+      }
+    })();
+  </script>
+</body>
+</html>
