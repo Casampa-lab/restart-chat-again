@@ -433,8 +433,17 @@ const Index = () => {
     if (!authLoading && !user) {
       navigate("/auth");
     } else if (user) {
-      // Salvar que está na tela desktop
-      localStorage.setItem('modoAcesso', 'web');
+      // Verificar se está no modo campo e redirecionar para /modo-campo
+      const modoAtual = localStorage.getItem('modoAcesso');
+      if (modoAtual === 'campo') {
+        navigate('/modo-campo');
+        return;
+      }
+      
+      // Só definir como 'web' se não houver modo definido
+      if (!modoAtual) {
+        localStorage.setItem('modoAcesso', 'web');
+      }
       localStorage.setItem('lastRoute', '/');
     }
   }, [user, authLoading, navigate]);
