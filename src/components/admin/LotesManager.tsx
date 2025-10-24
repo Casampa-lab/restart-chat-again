@@ -89,6 +89,15 @@ const LotesManager = () => {
     latitude_final: "",
     longitude_final: ""
   });
+  const [editingRodoviaDialog, setEditingRodoviaDialog] = useState<string | null>(null);
+  const [tempDialogRodoviaData, setTempDialogRodoviaData] = useState({
+    km_inicial: "",
+    km_final: "",
+    latitude_inicial: "",
+    longitude_inicial: "",
+    latitude_final: "",
+    longitude_final: ""
+  });
   const [formData, setFormData] = useState({
     numero: "",
     empresa_id: "",
@@ -496,6 +505,54 @@ const LotesManager = () => {
       .eq("id", loteId);
   };
 
+  const handleEditRodoviaDialog = (rodoviaId: string) => {
+    const rodovia = rodoviasVinculadas.find(r => r.rodovia_id === rodoviaId);
+    if (!rodovia) return;
+
+    setEditingRodoviaDialog(rodoviaId);
+    setTempDialogRodoviaData({
+      km_inicial: rodovia.km_inicial?.toString() || "",
+      km_final: rodovia.km_final?.toString() || "",
+      latitude_inicial: rodovia.latitude_inicial?.toString() || "",
+      longitude_inicial: rodovia.longitude_inicial?.toString() || "",
+      latitude_final: rodovia.latitude_final?.toString() || "",
+      longitude_final: rodovia.longitude_final?.toString() || ""
+    });
+  };
+
+  const handleSaveRodoviaDialog = (rodoviaId: string) => {
+    const km_inicial = parseFloat(tempDialogRodoviaData.km_inicial);
+    const km_final = parseFloat(tempDialogRodoviaData.km_final);
+
+    // Validação
+    if (isNaN(km_inicial) || isNaN(km_final)) {
+      toast.error("KM inicial e final devem ser números válidos");
+      return;
+    }
+
+    if (km_final <= km_inicial) {
+      toast.error("KM final deve ser maior que KM inicial");
+      return;
+    }
+
+    // Atualizar array local
+    setRodoviasVinculadas(prev => prev.map(r => 
+      r.rodovia_id === rodoviaId ? {
+        ...r,
+        km_inicial: km_inicial.toString(),
+        km_final: km_final.toString(),
+        latitude_inicial: tempDialogRodoviaData.latitude_inicial || "",
+        longitude_inicial: tempDialogRodoviaData.longitude_inicial || "",
+        latitude_final: tempDialogRodoviaData.latitude_final || "",
+        longitude_final: tempDialogRodoviaData.longitude_final || "",
+        extensao_km: (km_final - km_inicial).toFixed(3)
+      } : r
+    ));
+
+    setEditingRodoviaDialog(null);
+    toast.success("Rodovia atualizada localmente");
+  };
+
   return <div className="space-y-6">
       <Card>
         <CardHeader>
@@ -788,27 +845,165 @@ const LotesManager = () => {
                 {rodoviasVinculadas.length > 0 && <div className="space-y-2">
                     <Label className="text-sm">Rodovias Adicionadas:</Label>
                     <div className="space-y-2">
-                      {rodoviasVinculadas.map(rodovia => <div key={rodovia.rodovia_id} className="flex items-center justify-between p-3 bg-background rounded border">
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline">{rodovia.codigo}</Badge>
-                              {rodovia.snv_inicial && rodovia.snv_final && (
-                                <span className="text-xs text-muted-foreground">
-                                  SNV: {rodovia.snv_inicial} → {rodovia.snv_final}
-                                </span>
-                              )}
+                      {rodoviasVinculadas.map(rodovia => (
+                        <div key={rodovia.rodovia_id}>
+                          {editingRodoviaDialog === rodovia.rodovia_id ? (
+                            // MODO EDIÇÃO
+                            <div className="p-3 bg-muted/50 rounded border border-primary space-y-3">
+                              <div className="flex items-center justify-between">
+                                <Badge>{rodovia.codigo}</Badge>
+                                <div className="flex gap-1">
+                                  <Button
+                                    type="button"
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-7 w-7"
+                                    onClick={() => handleSaveRodoviaDialog(rodovia.rodovia_id)}
+                                  >
+                                    <Check className="h-4 w-4 text-green-600" />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-7 w-7"
+                                    onClick={() => setEditingRodoviaDialog(null)}
+                                  >
+                                    <X className="h-4 w-4 text-destructive" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <Label className="text-xs">KM Inicial</Label>
+                                    <Input
+                                      type="number"
+                                      step="0.001"
+                                      value={tempDialogRodoviaData.km_inicial}
+                                      onChange={(e) => setTempDialogRodoviaData({
+                                        ...tempDialogRodoviaData, 
+                                        km_inicial: e.target.value
+                                      })}
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs">KM Final</Label>
+                                    <Input
+                                      type="number"
+                                      step="0.001"
+                                      value={tempDialogRodoviaData.km_final}
+                                      onChange={(e) => setTempDialogRodoviaData({
+                                        ...tempDialogRodoviaData, 
+                                        km_final: e.target.value
+                                      })}
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
+                                </div>
+
+                                <Collapsible>
+                                  <CollapsibleTrigger className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" />
+                                    Editar Coordenadas (opcional)
+                                  </CollapsibleTrigger>
+                                  <CollapsibleContent className="space-y-2 mt-2">
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <Input
+                                        type="number"
+                                        step="0.000001"
+                                        placeholder="Latitude Inicial"
+                                        value={tempDialogRodoviaData.latitude_inicial}
+                                        onChange={(e) => setTempDialogRodoviaData({
+                                          ...tempDialogRodoviaData, 
+                                          latitude_inicial: e.target.value
+                                        })}
+                                        className="h-7 text-xs"
+                                      />
+                                      <Input
+                                        type="number"
+                                        step="0.000001"
+                                        placeholder="Longitude Inicial"
+                                        value={tempDialogRodoviaData.longitude_inicial}
+                                        onChange={(e) => setTempDialogRodoviaData({
+                                          ...tempDialogRodoviaData, 
+                                          longitude_inicial: e.target.value
+                                        })}
+                                        className="h-7 text-xs"
+                                      />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <Input
+                                        type="number"
+                                        step="0.000001"
+                                        placeholder="Latitude Final"
+                                        value={tempDialogRodoviaData.latitude_final}
+                                        onChange={(e) => setTempDialogRodoviaData({
+                                          ...tempDialogRodoviaData, 
+                                          latitude_final: e.target.value
+                                        })}
+                                        className="h-7 text-xs"
+                                      />
+                                      <Input
+                                        type="number"
+                                        step="0.000001"
+                                        placeholder="Longitude Final"
+                                        value={tempDialogRodoviaData.longitude_final}
+                                        onChange={(e) => setTempDialogRodoviaData({
+                                          ...tempDialogRodoviaData, 
+                                          longitude_final: e.target.value
+                                        })}
+                                        className="h-7 text-xs"
+                                      />
+                                    </div>
+                                  </CollapsibleContent>
+                                </Collapsible>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                              <span>KM: {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}</span>
-                              {rodovia.extensao_km && (
-                                <span className="font-medium">• Ext: {rodovia.extensao_km} km</span>
-                              )}
+                          ) : (
+                            // MODO VISUALIZAÇÃO
+                            <div className="flex items-center justify-between p-3 bg-background rounded border">
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline">{rodovia.codigo}</Badge>
+                                  {rodovia.snv_inicial && rodovia.snv_final && (
+                                    <span className="text-xs text-muted-foreground">
+                                      SNV: {rodovia.snv_inicial} → {rodovia.snv_final}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                  <span>KM: {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}</span>
+                                  {rodovia.extensao_km && (
+                                    <span className="font-medium">• Ext: {rodovia.extensao_km} km</span>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div className="flex gap-1">
+                                <Button 
+                                  type="button" 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleEditRodoviaDialog(rodovia.rodovia_id)}
+                                >
+                                  <Pencil className="h-4 w-4 text-primary" />
+                                </Button>
+                                <Button 
+                                  type="button" 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => removerRodovia(rodovia.rodovia_id)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                          <Button type="button" variant="ghost" size="sm" onClick={() => removerRodovia(rodovia.rodovia_id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>)}
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>}
               </CardContent>
@@ -1386,27 +1581,165 @@ const LotesManager = () => {
               {rodoviasVinculadas.length > 0 && <div className="space-y-2">
                   <Label className="text-sm">Rodovias Adicionadas:</Label>
                   <div className="space-y-2">
-                    {rodoviasVinculadas.map(rodovia => <div key={rodovia.rodovia_id} className="flex items-center justify-between p-3 bg-background rounded border">
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">{rodovia.codigo}</Badge>
-                            {rodovia.snv_inicial && rodovia.snv_final && (
-                              <span className="text-xs text-muted-foreground">
-                                SNV: {rodovia.snv_inicial} → {rodovia.snv_final}
-                              </span>
-                            )}
+                    {rodoviasVinculadas.map(rodovia => (
+                      <div key={rodovia.rodovia_id}>
+                        {editingRodoviaDialog === rodovia.rodovia_id ? (
+                          // MODO EDIÇÃO
+                          <div className="p-3 bg-muted/50 rounded border border-primary space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Badge>{rodovia.codigo}</Badge>
+                              <div className="flex gap-1">
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7"
+                                  onClick={() => handleSaveRodoviaDialog(rodovia.rodovia_id)}
+                                >
+                                  <Check className="h-4 w-4 text-green-600" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7"
+                                  onClick={() => setEditingRodoviaDialog(null)}
+                                >
+                                  <X className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                  <Label className="text-xs">KM Inicial</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.001"
+                                    value={tempDialogRodoviaData.km_inicial}
+                                    onChange={(e) => setTempDialogRodoviaData({
+                                      ...tempDialogRodoviaData, 
+                                      km_inicial: e.target.value
+                                    })}
+                                    className="h-8 text-sm"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs">KM Final</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.001"
+                                    value={tempDialogRodoviaData.km_final}
+                                    onChange={(e) => setTempDialogRodoviaData({
+                                      ...tempDialogRodoviaData, 
+                                      km_final: e.target.value
+                                    })}
+                                    className="h-8 text-sm"
+                                  />
+                                </div>
+                              </div>
+
+                              <Collapsible>
+                                <CollapsibleTrigger className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  Editar Coordenadas (opcional)
+                                </CollapsibleTrigger>
+                                <CollapsibleContent className="space-y-2 mt-2">
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <Input
+                                      type="number"
+                                      step="0.000001"
+                                      placeholder="Latitude Inicial"
+                                      value={tempDialogRodoviaData.latitude_inicial}
+                                      onChange={(e) => setTempDialogRodoviaData({
+                                        ...tempDialogRodoviaData, 
+                                        latitude_inicial: e.target.value
+                                      })}
+                                      className="h-7 text-xs"
+                                    />
+                                    <Input
+                                      type="number"
+                                      step="0.000001"
+                                      placeholder="Longitude Inicial"
+                                      value={tempDialogRodoviaData.longitude_inicial}
+                                      onChange={(e) => setTempDialogRodoviaData({
+                                        ...tempDialogRodoviaData, 
+                                        longitude_inicial: e.target.value
+                                      })}
+                                      className="h-7 text-xs"
+                                    />
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <Input
+                                      type="number"
+                                      step="0.000001"
+                                      placeholder="Latitude Final"
+                                      value={tempDialogRodoviaData.latitude_final}
+                                      onChange={(e) => setTempDialogRodoviaData({
+                                        ...tempDialogRodoviaData, 
+                                        latitude_final: e.target.value
+                                      })}
+                                      className="h-7 text-xs"
+                                    />
+                                    <Input
+                                      type="number"
+                                      step="0.000001"
+                                      placeholder="Longitude Final"
+                                      value={tempDialogRodoviaData.longitude_final}
+                                      onChange={(e) => setTempDialogRodoviaData({
+                                        ...tempDialogRodoviaData, 
+                                        longitude_final: e.target.value
+                                      })}
+                                      className="h-7 text-xs"
+                                    />
+                                  </div>
+                                </CollapsibleContent>
+                              </Collapsible>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                            <span>KM: {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}</span>
-                            {rodovia.extensao_km && (
-                              <span className="font-medium">• Ext: {rodovia.extensao_km} km</span>
-                            )}
+                        ) : (
+                          // MODO VISUALIZAÇÃO
+                          <div className="flex items-center justify-between p-3 bg-background rounded border">
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline">{rodovia.codigo}</Badge>
+                                {rodovia.snv_inicial && rodovia.snv_final && (
+                                  <span className="text-xs text-muted-foreground">
+                                    SNV: {rodovia.snv_inicial} → {rodovia.snv_final}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                <span>KM: {rodovia.km_inicial || "?"} - {rodovia.km_final || "?"}</span>
+                                {rodovia.extensao_km && (
+                                  <span className="font-medium">• Ext: {rodovia.extensao_km} km</span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex gap-1">
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleEditRodoviaDialog(rodovia.rodovia_id)}
+                              >
+                                <Pencil className="h-4 w-4 text-primary" />
+                              </Button>
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => removerRodovia(rodovia.rodovia_id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => removerRodovia(rodovia.rodovia_id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>)}
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>}
             </div>
