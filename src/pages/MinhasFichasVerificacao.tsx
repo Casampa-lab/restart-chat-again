@@ -210,18 +210,62 @@ export default function MinhasFichasVerificacao() {
 
   const handleEnviarParaCoordenador = async (fichaId: string) => {
     try {
-      const { error } = await supabase
-        .from("ficha_verificacao")
+      // 1. Buscar dados completos da ficha
+      const { data: fichaData, error: fichaError } = await supabase
+        .from('ficha_verificacao')
+        .select('tipo, lote_id, snv, data_verificacao, user_id')
+        .eq('id', fichaId)
+        .single();
+
+      if (fichaError) throw fichaError;
+
+      // 2. Atualizar status da ficha
+      const { error: updateError } = await supabase
+        .from('ficha_verificacao')
         .update({ 
           status: 'pendente_aprovacao_coordenador',
           enviado_coordenador_em: new Date().toISOString()
         })
-        .eq("id", fichaId);
+        .eq('id', fichaId);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
-      toast.success("Ficha enviada para validação do coordenador!");
+      // 3. Buscar coordenadores vinculados ao lote
+      const { data: coordenadores, error: coordError } = await supabase
+        .from('coordinator_assignments')
+        .select('user_id')
+        .eq('lote_id', fichaData.lote_id);
+
+      if (coordError) throw coordError;
+
+      // 4. Criar notificações para cada coordenador
+      if (coordenadores && coordenadores.length > 0) {
+        const notificacoes = coordenadores.map(coord => ({
+          user_id: coord.user_id,
+          tipo: 'ficha_verificacao_pendente',
+          titulo: 'Nova Ficha de Verificação',
+          mensagem: `Ficha de ${fichaData.tipo} do SNV ${fichaData.snv || 'não informado'} (${new Date(fichaData.data_verificacao).toLocaleDateString('pt-BR')}) aguarda sua validação`,
+          lida: false,
+          elemento_pendente_id: null,
+          nc_id: null
+        }));
+
+        const { error: notifError } = await supabase
+          .from('notificacoes')
+          .insert(notificacoes);
+
+        if (notifError) {
+          console.error('Erro ao criar notificações:', notifError);
+        }
+
+        toast.success(`Ficha enviada para ${coordenadores.length} coordenador(es)!`);
+      } else {
+        toast.warning('Ficha enviada, mas nenhum coordenador vinculado a este lote');
+      }
+
+      // 5. Atualizar listagem
       fetchFichas();
+
     } catch (error: any) {
       toast.error("Erro ao enviar ficha: " + error.message);
     }
