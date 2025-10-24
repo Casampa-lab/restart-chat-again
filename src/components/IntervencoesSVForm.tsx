@@ -15,7 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info, Lock, Loader2 } from "lucide-react";
 import { useTipoOrigem } from "@/hooks/useTipoOrigem";
-import { LABELS_TIPO_ORIGEM } from "@/constants/camposEstruturais";
+import { LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstruturais";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
@@ -122,13 +122,6 @@ export function IntervencoesSVForm({
       form.setValue("codigo_placa", placaSelecionada.codigo || "");
       form.setValue("latitude_inicial", placaSelecionada.latitude_inicial?.toString() || "");
       form.setValue("longitude_inicial", placaSelecionada.longitude_inicial?.toString() || "");
-      
-      if (placaSelecionada.latitude_inicial) {
-        setCoordenadas({
-          latitude: placaSelecionada.latitude_inicial.toString(),
-          longitude: placaSelecionada.longitude_inicial?.toString() || "",
-        });
-      }
     }
   }, [placaSelecionada, form]);
 
@@ -246,7 +239,6 @@ export function IntervencoesSVForm({
 
       toast.success("Intervenção registrada com sucesso!");
       form.reset();
-      setCoordenadas({ latitude: "", longitude: "" });
       onIntervencaoRegistrada?.();
     } catch (error: any) {
       console.error("Erro ao salvar intervenção:", error);

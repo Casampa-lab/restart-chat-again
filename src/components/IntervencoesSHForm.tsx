@@ -144,48 +144,6 @@ const IntervencoesSHForm = ({
     }
   }, [marcaSelecionada, modo, form]);
 
-  const handleCapturarGPSInicial = async () => {
-    if (isCapturingInicial) return;
-    setIsCapturingInicial(true);
-    try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
-        });
-      });
-      form.setValue('latitude_inicial', position.coords.latitude.toString());
-      form.setValue('longitude_inicial', position.coords.longitude.toString());
-      toast.success("📍 GPS Inicial capturado com sucesso");
-    } catch (error) {
-      toast.error("Erro ao capturar GPS Inicial");
-    } finally {
-      setIsCapturingInicial(false);
-    }
-  };
-
-  const handleCapturarGPSFinal = async () => {
-    if (isCapturingFinal) return;
-    setIsCapturingFinal(true);
-    try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
-        });
-      });
-      form.setValue('latitude_final', position.coords.latitude.toString());
-      form.setValue('longitude_final', position.coords.longitude.toString());
-      toast.success("📍 GPS Final capturado com sucesso");
-    } catch (error) {
-      toast.error("Erro ao capturar GPS Final");
-    } finally {
-      setIsCapturingFinal(false);
-    }
-  };
-
   // Propagar mudanças em tempo real no modo controlado
   useEffect(() => {
     if (modo === 'controlado' && onDataChange) {
@@ -231,7 +189,6 @@ const IntervencoesSHForm = ({
           longitude_final: data.longitude_final ? parseFloat(data.longitude_final) : null,
           observacao: data.observacao || null,
           tipo_origem: tipoOrigem,
-          fotos: fotos,
         });
 
       if (error) throw error;
@@ -239,7 +196,6 @@ const IntervencoesSHForm = ({
       toast.success("Intervenção em sinalização horizontal registrada com sucesso");
 
       form.reset();
-      setFotos([]);
       onIntervencaoRegistrada?.();
     } catch (error) {
       console.error("Erro ao salvar intervenção:", error);
@@ -541,153 +497,6 @@ const IntervencoesSHForm = ({
             </div>
 
             {/* Coordenadas GPS Inicial e Final */}
-            <div className="space-y-4 border-l-4 border-green-500 pl-4 bg-green-50 dark:bg-green-950/20 py-4 rounded-r-lg">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-green-600" />
-                <h3 className="font-semibold text-green-700 dark:text-green-500 text-lg">
-                  Coordenadas GPS Inicial e Final
-                </h3>
-              </div>
-
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertDescription className="text-xs">
-                  📍 As coordenadas GPS são <strong>obrigatórias</strong> para fins de auditoria. 
-                  Para elementos lineares, capture GPS no início e no final do segmento.
-                </AlertDescription>
-              </Alert>
-
-              {/* GPS Inicial */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">📍 GPS Inicial</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="latitude_inicial"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Latitude</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="0.000000" readOnly className="bg-muted font-mono" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="longitude_inicial"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Longitude</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="0.000000" readOnly className="bg-muted font-mono" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCapturarGPSInicial}
-                  disabled={isCapturingInicial}
-                  className="w-full"
-                >
-                  {isCapturingInicial ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando GPS Inicial...</>
-                  ) : (
-                    form.watch('latitude_inicial') ? (
-                      <><Check className="mr-2 h-4 w-4 text-green-600" />GPS Inicial Capturado</>
-                    ) : (
-                      <><MapPin className="mr-2 h-4 w-4" />Capturar GPS Inicial</>
-                    )
-                  )}
-                </Button>
-              </div>
-
-              {/* GPS Final */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">🏁 GPS Final</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="latitude_final"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Latitude</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="0.000000" readOnly className="bg-muted font-mono" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="longitude_final"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Longitude</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="0.000000" readOnly className="bg-muted font-mono" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCapturarGPSFinal}
-                  disabled={isCapturingFinal}
-                  className="w-full"
-                >
-                  {isCapturingFinal ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Capturando GPS Final...</>
-                  ) : (
-                    form.watch('latitude_final') ? (
-                      <><Check className="mr-2 h-4 w-4 text-green-600" />GPS Final Capturado</>
-                    ) : (
-                      <><MapPin className="mr-2 h-4 w-4" />Capturar GPS Final</>
-                    )
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            {/* Documentação Fotográfica */}
-            <div className="space-y-4 border-l-4 border-blue-500 pl-4 bg-blue-50 dark:bg-blue-950/20 py-4 rounded-r-lg">
-              <div className="flex items-center gap-2 justify-between">
-                <div className="flex items-center gap-2">
-                  <Camera className="h-5 w-5 text-blue-600" />
-                  <h3 className="font-semibold text-blue-700 dark:text-blue-500 text-lg">
-                    Documentação Fotográfica
-                  </h3>
-                </div>
-                {fotos.length > 0 && (
-                  <Badge variant="outline" className="text-sm">
-                    ✓ {fotos.length} foto{fotos.length > 1 ? 's' : ''}
-                  </Badge>
-                )}
-              </div>
-
-              {fotos.length === 0 && (
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription className="text-xs">
-                    📸 Nenhuma foto capturada ainda. As fotos são importantes para documentação da intervenção.
-                  </AlertDescription>
-                </Alert>
-              )}
-              
-              <CameraCapture
-                photos={fotos}
-                onPhotosChange={setFotos}
-                maxPhotos={5}
-                bucketName="intervencoes-fotos"
-              />
-            </div>
 
             {/* Campo de Observações (Texto Livre) */}
             <div className="space-y-4 border-l-4 border-amber-500 pl-4 bg-amber-50 dark:bg-amber-950/20 py-4 rounded-r-lg">
