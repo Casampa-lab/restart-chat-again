@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Camera as CameraIcon, X, Loader2, Info } from 'lucide-react';
+import { Camera as CameraIcon, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CameraCaptureProps {
@@ -23,23 +22,6 @@ export function CameraCapture({
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isNative = Capacitor.isNativePlatform();
-
-  // DEBUG - Fase 1: Logging de montagem e mudanças
-  useEffect(() => {
-    console.log('🔴 [DEBUG] CameraCapture MONTADO', { 
-      photos: photos.length, 
-      maxPhotos, 
-      isNative,
-      bucketName 
-    });
-  }, []);
-
-  useEffect(() => {
-    console.log('📸 [DEBUG] Estado fotos alterado', { 
-      quantidade: photos.length,
-      urls: photos 
-    });
-  }, [photos]);
 
   // Comprimir DataURL para reduzir tamanho
   async function compressDataUrlToJpeg(dataUrl: string, quality = 0.85): Promise<string> {
@@ -229,31 +211,7 @@ export function CameraCapture({
   };
 
   return (
-    <div className="space-y-4 min-h-[200px] p-4 border-2 border-dashed border-blue-300 rounded-lg bg-white dark:bg-gray-900">
-      {/* DEBUG - Fase 1: Marcador visual */}
-      <div className="bg-red-500 text-white p-2 text-center font-bold rounded">
-        🔴 COMPONENTE CameraCapture RENDERIZADO - {isNative ? 'MODO NATIVO' : 'MODO WEB'}
-      </div>
-
-      {/* Badge de progresso */}
-      <div className="text-sm text-muted-foreground flex items-center justify-between">
-        <span className="font-medium">
-          {photos.length}/{maxPhotos} foto(s) capturada(s)
-        </span>
-        {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
-      </div>
-
-      {/* Fase 3: Alert de contexto para modo web */}
-      {!isNative && (
-        <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/20">
-          <Info className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-xs text-blue-700 dark:text-blue-400">
-            💡 <strong>Modo Web/Preview:</strong> O botão abrirá a seleção de arquivos. 
-            Em dispositivos móveis, você poderá tirar foto diretamente pela câmera do navegador.
-          </AlertDescription>
-        </Alert>
-      )}
-
+    <div className="space-y-4">
       {/* Input file oculto para web */}
       <input
         ref={fileInputRef}
@@ -264,42 +222,48 @@ export function CameraCapture({
         className="hidden"
       />
       
-      {/* Fase 2: Botão com altura garantida e melhor visibilidade */}
+      {/* Badge de progresso */}
+      <div className="text-sm text-muted-foreground flex items-center justify-between">
+        <span>
+          {photos.length}/{maxPhotos} foto(s) capturada(s)
+        </span>
+        {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
+      </div>
+      
       <Button
         type="button"
         variant="outline"
         onClick={takePicture}
         disabled={uploading || photos.length >= maxPhotos}
-        className="w-full h-16 text-lg font-semibold border-2 border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-colors dark:hover:bg-blue-950"
+        className="w-full h-14 text-lg"
       >
         {uploading ? (
           <>
-            <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-            Enviando foto...
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Enviando...
           </>
         ) : (
           <>
-            <CameraIcon className="mr-2 h-6 w-6" />
-            {isNative ? '📸 Abrir Câmera' : '📸 Escolher/Tirar Foto'}
+            <CameraIcon className="mr-2 h-5 w-5" />
+            Tirar Foto
           </>
         )}
       </Button>
 
-      {/* Grid de fotos com melhor visibilidade */}
       {photos.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 mt-4">
+        <div className="grid grid-cols-2 gap-2">
           {photos.map((url, index) => (
             <div key={url} className="relative group">
               <img
                 src={url}
                 alt={`Foto ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-700"
+                className="w-full h-32 object-cover rounded-lg border"
               />
               <Button
                 type="button"
                 variant="destructive"
                 size="icon"
-                className="absolute top-2 right-2 h-8 w-8 opacity-90 hover:opacity-100 transition-opacity shadow-lg"
+                className="absolute top-1 right-1 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={() => removePhoto(index)}
               >
                 <X className="h-4 w-4" />
