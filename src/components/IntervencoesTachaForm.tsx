@@ -13,12 +13,12 @@ import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info, Lock, Loader2, MapPin, Check, Wrench } from "lucide-react";
-import { useTipoOrigem } from "@/hooks/useTipoOrigem";
-import { LABELS_TIPO_ORIGEM, TIPOS_ORIGEM } from "@/constants/camposEstruturais";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstruturais";
 
 interface IntervencoesTachaFormProps {
+  tipoOrigem?: 'manutencao_pre_projeto' | 'execucao';
   tachaSelecionada?: {
     id: string;
     km_inicial: number;
@@ -52,6 +52,7 @@ const formSchema = z.object({
 });
 
 export function IntervencoesTachaForm({ 
+  tipoOrigem: tipoOrigemProp,
   tachaSelecionada, 
   onIntervencaoRegistrada,
   modo = 'normal',
@@ -60,7 +61,13 @@ export function IntervencoesTachaForm({
   loteId,
   rodoviaId
 }: IntervencoesTachaFormProps) {
-  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('tachas');
+  const tipoOrigem = tipoOrigemProp || 'execucao';
+  const isManutencaoRotineira = tipoOrigem === 'manutencao_pre_projeto';
+  
+  const isCampoEstruturalBloqueado = (campo: string) => {
+    if (!isManutencaoRotineira) return false;
+    return (CAMPOS_ESTRUTURAIS['tachas'] as readonly string[]).includes(campo);
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
@@ -171,27 +178,6 @@ export function IntervencoesTachaForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-6 p-4 bg-muted rounded-lg space-y-3">
-          <Label className="text-base font-semibold">Tipo de Intervenção</Label>
-          <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="manutencao_rotineira" id="pre-tacha" />
-              <Label htmlFor="pre-tacha" className="flex items-center gap-2 cursor-pointer font-normal">
-                🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
-                <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="execucao" id="exec-tacha" />
-              <Label htmlFor="exec-tacha" className="cursor-pointer font-normal">
-                🟢 {LABELS_TIPO_ORIGEM.execucao}
-              </Label>
-            </div>
-          </RadioGroup>
-          {isManutencaoRotineira && (
-            <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
-          )}
-        </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             

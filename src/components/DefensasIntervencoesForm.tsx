@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Loader2, MapPin, Check, Shield } from "lucide-react";
 
 interface DefensasIntervencoesFormProps {
+  tipoOrigem?: 'manutencao_pre_projeto' | 'execucao';
   defensaSelecionada?: any;
   onIntervencaoRegistrada?: () => void;
   modo?: 'normal' | 'controlado';
@@ -81,6 +82,7 @@ const formSchema = z.object({
 });
 
 const DefensasIntervencoesForm = ({ 
+  tipoOrigem: tipoOrigemProp,
   defensaSelecionada, 
   onIntervencaoRegistrada,
   modo = 'normal',
@@ -89,6 +91,8 @@ const DefensasIntervencoesForm = ({
   loteId,
   rodoviaId
 }: DefensasIntervencoesFormProps) => {
+  const tipoOrigem = tipoOrigemProp || 'execucao';
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

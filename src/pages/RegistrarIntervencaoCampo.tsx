@@ -384,13 +384,25 @@ export default function RegistrarIntervencaoCampo() {
             </CardHeader>
             <CardContent>
               {FormularioAtual && (
-                <FormularioAtual
-                  modo="controlado"
-                  hideSubmitButton
-                  onDataChange={setDadosIntervencao}
-                  loteId={activeSession?.lote_id}
-                  rodoviaId={activeSession?.rodovia_id}
-                />
+                <>
+                  {modoOperacao === 'manutencao' && (
+                    <Alert className="mb-4 border-orange-300 bg-orange-50">
+                      <Info className="h-4 w-4 text-orange-600" />
+                      <AlertDescription className="text-sm text-orange-900">
+                        <strong>Modo Manutenção IN-3:</strong> Campos estruturais (tipo, código, dimensões) não podem ser alterados.
+                        Apenas estado/condição da sinalização.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  <FormularioAtual
+                    modo="controlado"
+                    hideSubmitButton
+                    onDataChange={setDadosIntervencao}
+                    loteId={activeSession?.lote_id}
+                    rodoviaId={activeSession?.rodovia_id}
+                    tipoOrigem={modoOperacao === 'manutencao' ? 'manutencao_pre_projeto' : 'execucao'}
+                  />
+                </>
               )}
             </CardContent>
           </Card>

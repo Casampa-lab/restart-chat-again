@@ -15,7 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
-import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM } from "@/constants/camposEstruturais";
+import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstruturais";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
@@ -37,6 +37,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface IntervencoesCilindrosFormProps {
+  tipoOrigem?: 'manutencao_pre_projeto' | 'execucao';
   cilindroSelecionado?: {
     id: string;
     km_inicial: number;
@@ -52,6 +53,7 @@ interface IntervencoesCilindrosFormProps {
 }
 
 export function IntervencoesCilindrosForm({ 
+  tipoOrigem: tipoOrigemProp,
   cilindroSelecionado, 
   onIntervencaoRegistrada,
   modo = 'normal',
@@ -61,7 +63,13 @@ export function IntervencoesCilindrosForm({
   rodoviaId
 }: IntervencoesCilindrosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('cilindros');
+  const tipoOrigem = tipoOrigemProp || 'execucao';
+  const isManutencaoRotineira = tipoOrigem === 'manutencao_pre_projeto';
+  
+  const isCampoEstruturalBloqueado = (campo: string) => {
+    if (!isManutencaoRotineira) return false;
+    return (CAMPOS_ESTRUTURAIS['cilindros'] as readonly string[]).includes(campo);
+  };
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -175,27 +183,6 @@ export function IntervencoesCilindrosForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-6 p-4 bg-muted rounded-lg space-y-3">
-          <Label className="text-base font-semibold">Tipo de Intervenção</Label>
-          <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="manutencao_rotineira" id="pre-cilindro" />
-              <Label htmlFor="pre-cilindro" className="flex items-center gap-2 cursor-pointer font-normal">
-                🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
-                <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="execucao" id="exec-cilindro" />
-              <Label htmlFor="exec-cilindro" className="cursor-pointer font-normal">
-                🟢 {LABELS_TIPO_ORIGEM.execucao}
-              </Label>
-            </div>
-          </RadioGroup>
-          {isManutencaoRotineira && (
-            <Alert><Info className="h-4 w-4" /><AlertDescription>Base normativa: IN 3/2025, Art. 17-19.</AlertDescription></Alert>
-          )}
-        </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Dados Básicos da Intervenção */}

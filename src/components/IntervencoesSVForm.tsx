@@ -52,6 +52,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface IntervencoesSVFormProps {
+  tipoOrigem?: 'manutencao_pre_projeto' | 'execucao';
   placaSelecionada?: any;
   loteId?: string;
   rodoviaId?: string;
@@ -61,20 +62,27 @@ interface IntervencoesSVFormProps {
   hideSubmitButton?: boolean;
 }
 
-export function IntervencoesSVForm({ 
-  placaSelecionada, 
-  loteId, 
-  rodoviaId, 
+export function IntervencoesSVForm({
+  tipoOrigem: tipoOrigemProp,
+  placaSelecionada,
+  loteId,
+  rodoviaId,
   onIntervencaoRegistrada,
   modo = 'normal',
   onDataChange,
-  hideSubmitButton = false 
+  hideSubmitButton = false
 }: IntervencoesSVFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [coordenadas, setCoordenadas] = useState({ latitude: "", longitude: "" });
   const [codigosFiltrados, setCodigosFiltrados] = useState<readonly {codigo: string, nome: string}[]>([]);
   const [codigoAtual, setCodigoAtual] = useState<string | null>(null);
-  const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('placas');
+  
+  const tipoOrigem = tipoOrigemProp || 'execucao';
+  const isManutencaoRotineira = tipoOrigem === 'manutencao_pre_projeto';
+  
+  const isCampoEstruturalBloqueado = (campo: string) => {
+    if (!isManutencaoRotineira) return false;
+    return (CAMPOS_ESTRUTURAIS['placas'] as readonly string[]).includes(campo);
+  };
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -251,34 +259,6 @@ export function IntervencoesSVForm({
   const formContent = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Seletor de Tipo de Origem */}
-        <div className="mb-6 p-4 bg-muted rounded-lg space-y-3">
-          <FormLabel className="text-base font-semibold">Tipo de Intervenção</FormLabel>
-          <RadioGroup value={tipoOrigem} onValueChange={setTipoOrigem}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="manutencao_rotineira" id="pre-sv" />
-              <FormLabel htmlFor="pre-sv" className="flex items-center gap-2 cursor-pointer font-normal">
-                🟡 {LABELS_TIPO_ORIGEM.manutencao_rotineira}
-                <Badge variant="outline" className="text-xs">Campos estruturais bloqueados</Badge>
-              </FormLabel>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="execucao" id="exec-sv" />
-              <FormLabel htmlFor="exec-sv" className="cursor-pointer font-normal">
-                🟢 {LABELS_TIPO_ORIGEM.execucao}
-              </FormLabel>
-            </div>
-          </RadioGroup>
-          
-          {isManutencaoRotineira && (
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                Base normativa: IN 3/2025, Art. 17-19. Apenas campos de estado/condição podem ser alterados.
-              </AlertDescription>
-            </Alert>
-          )}
-        </div>
 
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
