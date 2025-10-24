@@ -15,7 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Search, MapPin, Eye, Calendar, Library, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, AlertTriangle, CheckCircle2, RefreshCw, Link } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
-import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
+import { ReconciliacaoDrawerUniversal } from '@/components/ReconciliacaoDrawerUniversal';
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
 import { OrigemIndicator } from "@/components/OrigemIndicator";
 import { SolucaoBadge } from "@/components/SolucaoBadge";
@@ -230,10 +230,10 @@ export function InventarioInscricoesViewer({
   };
 
   const { data: inscricoes, isLoading } = useQuery({
-    queryKey: ["inventario-inscricoes", loteId, rodoviaId, searchTerm, searchLat, searchLng],
+    queryKey: ["inventario-dinamico-inscricoes", loteId, rodoviaId, searchTerm, searchLat, searchLng],
     queryFn: async () => {
       let query = supabase
-        .from("ficha_inscricoes")
+        .from("inventario_dinamico_inscricoes")
         .select("*", { count: "exact" })
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
@@ -862,12 +862,13 @@ export function InventarioInscricoesViewer({
       </Dialog>
 
       {/* Drawer de Reconciliação */}
-      <ReconciliacaoDrawer
+      <ReconciliacaoDrawerUniversal
         open={reconciliacaoOpen}
         onOpenChange={setReconciliacaoOpen}
         necessidade={selectedNecessidade}
         cadastro={selectedCadastroForReconciliacao}
         onReconciliar={handleReconciliar}
+        tipoElemento="inscricoes"
       />
     </>
   );

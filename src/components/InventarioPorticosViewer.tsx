@@ -13,7 +13,7 @@ import { Search, MapPin, Eye, Calendar, Library, ArrowUpDown, ArrowUp, ArrowDown
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RegistrarItemNaoCadastrado } from "@/components/RegistrarItemNaoCadastrado";
 import { NecessidadeBadge } from "@/components/NecessidadeBadge";
-import { ReconciliacaoDrawer } from "@/components/ReconciliacaoDrawer";
+import { ReconciliacaoDrawerUniversal } from "@/components/ReconciliacaoDrawerUniversal";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { OrigemIndicator } from "@/components/OrigemIndicator";
@@ -140,10 +140,10 @@ export function InventarioPorticosViewer({
   const toleranciaRodovia = rodoviaConfig?.tolerancia_match_metros || 50;
 
   const { data: porticos, isLoading } = useQuery({
-    queryKey: ["inventario-porticos", loteId, rodoviaId, searchTerm, searchLat, searchLng, toleranciaRodovia],
+    queryKey: ["inventario-dinamico-porticos", loteId, rodoviaId, searchTerm, searchLat, searchLng, toleranciaRodovia],
     queryFn: async () => {
       let query = supabase
-        .from("ficha_porticos")
+        .from("inventario_dinamico_porticos")
         .select("*", { count: "exact" })
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
@@ -732,12 +732,13 @@ export function InventarioPorticosViewer({
         </DialogContent>
       </Dialog>
 
-      <ReconciliacaoDrawer
+      <ReconciliacaoDrawerUniversal
         open={reconciliacaoOpen}
         onOpenChange={setReconciliacaoOpen}
         necessidade={selectedNecessidade}
         cadastro={selectedPortico}
         onReconciliar={handleReconciliar}
+        tipoElemento="porticos"
       />
 
       <Dialog open={!!selectedPortico} onOpenChange={() => setSelectedPortico(null)}>

@@ -189,10 +189,10 @@ export function InventarioTachasViewer({
   });
 
   const { data: tachas, isLoading } = useQuery({
-    queryKey: ["inventario-tachas", loteId, rodoviaId, searchTerm, searchLat, searchLng],
+    queryKey: ["inventario-dinamico-tachas", loteId, rodoviaId, searchTerm, searchLat, searchLng],
     queryFn: async () => {
       let query = supabase
-        .from("ficha_tachas")
+        .from("inventario_dinamico_tachas")
         .select("*", { count: "exact" })
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)

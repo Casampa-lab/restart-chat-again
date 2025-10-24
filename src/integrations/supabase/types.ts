@@ -401,6 +401,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "defensas_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_defensas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "defensas_ultima_intervencao_id_fkey"
             columns: ["ultima_intervencao_id"]
             isOneToOne: false
@@ -446,6 +453,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "defensas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "defensas_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_defensas"
             referencedColumns: ["id"]
           },
           {
@@ -1028,6 +1042,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ficha_inscricoes_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_inscricoes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ficha_inscricoes_ultima_intervencao_id_fkey"
             columns: ["ultima_intervencao_id"]
             isOneToOne: false
@@ -1073,6 +1094,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_inscricoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_inscricoes_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_inscricoes"
             referencedColumns: ["id"]
           },
           {
@@ -1298,6 +1326,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ficha_marcas_longitudinais_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_marcas_longitudinais"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ficha_marcas_longitudinais_ultima_intervencao_id_fkey"
             columns: ["ultima_intervencao_id"]
             isOneToOne: false
@@ -1343,6 +1378,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_marcas_longitudinais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_marcas_longitudinais_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_marcas_longitudinais"
             referencedColumns: ["id"]
           },
           {
@@ -1917,6 +1959,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ficha_porticos_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_porticos"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ficha_porticos_ultima_intervencao_id_fkey"
             columns: ["ultima_intervencao_id"]
             isOneToOne: false
@@ -1962,6 +2011,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_porticos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_porticos_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_porticos"
             referencedColumns: ["id"]
           },
           {
@@ -2169,6 +2225,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ficha_tachas_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_tachas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ficha_tachas_ultima_intervencao_id_fkey"
             columns: ["ultima_intervencao_id"]
             isOneToOne: false
@@ -2214,6 +2277,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_tachas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_tachas_historico_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_tachas"
             referencedColumns: ["id"]
           },
           {
@@ -4121,6 +4191,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "necessidades_defensas_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_defensas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "necessidades_defensas_conflito_com_necessidade_id_fkey"
             columns: ["conflito_com_necessidade_id"]
             isOneToOne: false
@@ -4349,6 +4426,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "necessidades_marcas_longitudinais_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_marcas_longitudinais"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "necessidades_marcas_longitudinais_lote_id_fkey"
             columns: ["lote_id"]
             isOneToOne: false
@@ -4552,6 +4636,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_inscricoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_marcas_transversais_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_inscricoes"
             referencedColumns: ["id"]
           },
           {
@@ -4954,6 +5045,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "necessidades_porticos_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_porticos"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "necessidades_porticos_conflito_com_necessidade_id_fkey"
             columns: ["conflito_com_necessidade_id"]
             isOneToOne: false
@@ -5163,6 +5261,13 @@ export type Database = {
             columns: ["cadastro_id"]
             isOneToOne: false
             referencedRelation: "ficha_tachas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "necessidades_tachas_cadastro_id_fkey"
+            columns: ["cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_tachas"
             referencedColumns: ["id"]
           },
           {
@@ -6052,6 +6157,468 @@ export type Database = {
         }
         Relationships: []
       }
+      inventario_dinamico_defensas: {
+        Row: {
+          adequacao_funcionalidade_lamina: string | null
+          adequacao_funcionalidade_laminas_inadequadas: string | null
+          adequacao_funcionalidade_terminais: string | null
+          adequacao_funcionalidade_terminais_inadequados: string | null
+          ativo: boolean | null
+          br: string | null
+          classificacao_nivel_contencao: string | null
+          comprimento_total_tramo_m: number | null
+          created_at: string | null
+          data_ultima_modificacao: string | null
+          data_vistoria: string | null
+          distancia_bordo_pista_face_defensa_m: number | null
+          distancia_face_defensa_obstaculo_m: number | null
+          distancia_pista_obstaculo_m: number | null
+          enviado_coordenador: boolean | null
+          espaco_trabalho: string | null
+          especificacao_obstaculo_fixo: string | null
+          extensao_metros: number | null
+          fotos_urls: string[] | null
+          funcao: string | null
+          geom_line: unknown
+          geometria: string | null
+          id: string | null
+          id_defensa: string | null
+          km_final: number | null
+          km_inicial: number | null
+          lado: string | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          link_fotografia: string | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          modificado_por_intervencao: boolean | null
+          nivel_contencao_en1317: string | null
+          nivel_contencao_nchrp350: string | null
+          origem: string | null
+          percentual_veiculos_pesados: number | null
+          quantidade_laminas: number | null
+          risco: string | null
+          rodovia_id: string | null
+          snv: string | null
+          solucao_planilha: string | null
+          status_reconciliacao: string | null
+          status_servico: string | null
+          substituido_em: string | null
+          substituido_por: string | null
+          terminal_entrada: string | null
+          terminal_saida: string | null
+          tramo: string | null
+          ultima_intervencao_id: string | null
+          updated_at: string | null
+          user_id: string | null
+          velocidade_kmh: number | null
+          vmd_veic_dia: number | null
+        }
+        Insert: {
+          adequacao_funcionalidade_lamina?: string | null
+          adequacao_funcionalidade_laminas_inadequadas?: string | null
+          adequacao_funcionalidade_terminais?: string | null
+          adequacao_funcionalidade_terminais_inadequados?: string | null
+          ativo?: boolean | null
+          br?: string | null
+          classificacao_nivel_contencao?: string | null
+          comprimento_total_tramo_m?: number | null
+          created_at?: string | null
+          data_ultima_modificacao?: string | null
+          data_vistoria?: string | null
+          distancia_bordo_pista_face_defensa_m?: number | null
+          distancia_face_defensa_obstaculo_m?: number | null
+          distancia_pista_obstaculo_m?: number | null
+          enviado_coordenador?: boolean | null
+          espaco_trabalho?: string | null
+          especificacao_obstaculo_fixo?: string | null
+          extensao_metros?: number | null
+          fotos_urls?: string[] | null
+          funcao?: string | null
+          geom_line?: unknown
+          geometria?: string | null
+          id?: string | null
+          id_defensa?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          lado?: string | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          link_fotografia?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          nivel_contencao_en1317?: string | null
+          nivel_contencao_nchrp350?: string | null
+          origem?: string | null
+          percentual_veiculos_pesados?: number | null
+          quantidade_laminas?: number | null
+          risco?: string | null
+          rodovia_id?: string | null
+          snv?: string | null
+          solucao_planilha?: string | null
+          status_reconciliacao?: never
+          status_servico?: string | null
+          substituido_em?: string | null
+          substituido_por?: string | null
+          terminal_entrada?: string | null
+          terminal_saida?: string | null
+          tramo?: string | null
+          ultima_intervencao_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          velocidade_kmh?: number | null
+          vmd_veic_dia?: number | null
+        }
+        Update: {
+          adequacao_funcionalidade_lamina?: string | null
+          adequacao_funcionalidade_laminas_inadequadas?: string | null
+          adequacao_funcionalidade_terminais?: string | null
+          adequacao_funcionalidade_terminais_inadequados?: string | null
+          ativo?: boolean | null
+          br?: string | null
+          classificacao_nivel_contencao?: string | null
+          comprimento_total_tramo_m?: number | null
+          created_at?: string | null
+          data_ultima_modificacao?: string | null
+          data_vistoria?: string | null
+          distancia_bordo_pista_face_defensa_m?: number | null
+          distancia_face_defensa_obstaculo_m?: number | null
+          distancia_pista_obstaculo_m?: number | null
+          enviado_coordenador?: boolean | null
+          espaco_trabalho?: string | null
+          especificacao_obstaculo_fixo?: string | null
+          extensao_metros?: number | null
+          fotos_urls?: string[] | null
+          funcao?: string | null
+          geom_line?: unknown
+          geometria?: string | null
+          id?: string | null
+          id_defensa?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          lado?: string | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          link_fotografia?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          nivel_contencao_en1317?: string | null
+          nivel_contencao_nchrp350?: string | null
+          origem?: string | null
+          percentual_veiculos_pesados?: number | null
+          quantidade_laminas?: number | null
+          risco?: string | null
+          rodovia_id?: string | null
+          snv?: string | null
+          solucao_planilha?: string | null
+          status_reconciliacao?: never
+          status_servico?: string | null
+          substituido_em?: string | null
+          substituido_por?: string | null
+          terminal_entrada?: string | null
+          terminal_saida?: string | null
+          tramo?: string | null
+          ultima_intervencao_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          velocidade_kmh?: number | null
+          vmd_veic_dia?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "defensas_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "defensas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "defensas_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_defensas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "defensas_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "defensas_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventario_dinamico_inscricoes: {
+        Row: {
+          area_m2: number | null
+          ativo: boolean | null
+          cor: string | null
+          created_at: string | null
+          data_ultima_modificacao: string | null
+          data_vistoria: string | null
+          dimensoes: string | null
+          enviado_coordenador: boolean | null
+          espessura_mm: number | null
+          fotos_urls: string[] | null
+          id: string | null
+          km_inicial: number | null
+          latitude_inicial: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          material_utilizado: string | null
+          modificado_por_intervencao: boolean | null
+          observacao: string | null
+          origem: string | null
+          outros_materiais: string | null
+          rodovia_id: string | null
+          sigla: string | null
+          snv: string | null
+          solucao_planilha: string | null
+          status_reconciliacao: string | null
+          status_servico: string | null
+          substituido_em: string | null
+          substituido_por: string | null
+          tipo_inscricao: string | null
+          ultima_intervencao_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          area_m2?: number | null
+          ativo?: boolean | null
+          cor?: string | null
+          created_at?: string | null
+          data_ultima_modificacao?: string | null
+          data_vistoria?: string | null
+          dimensoes?: string | null
+          enviado_coordenador?: boolean | null
+          espessura_mm?: number | null
+          fotos_urls?: string[] | null
+          id?: string | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          material_utilizado?: string | null
+          modificado_por_intervencao?: boolean | null
+          observacao?: string | null
+          origem?: string | null
+          outros_materiais?: string | null
+          rodovia_id?: string | null
+          sigla?: string | null
+          snv?: string | null
+          solucao_planilha?: string | null
+          status_reconciliacao?: never
+          status_servico?: string | null
+          substituido_em?: string | null
+          substituido_por?: string | null
+          tipo_inscricao?: string | null
+          ultima_intervencao_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          area_m2?: number | null
+          ativo?: boolean | null
+          cor?: string | null
+          created_at?: string | null
+          data_ultima_modificacao?: string | null
+          data_vistoria?: string | null
+          dimensoes?: string | null
+          enviado_coordenador?: boolean | null
+          espessura_mm?: number | null
+          fotos_urls?: string[] | null
+          id?: string | null
+          km_inicial?: number | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          material_utilizado?: string | null
+          modificado_por_intervencao?: boolean | null
+          observacao?: string | null
+          origem?: string | null
+          outros_materiais?: string | null
+          rodovia_id?: string | null
+          sigla?: string | null
+          snv?: string | null
+          solucao_planilha?: string | null
+          status_reconciliacao?: never
+          status_servico?: string | null
+          substituido_em?: string | null
+          substituido_por?: string | null
+          tipo_inscricao?: string | null
+          ultima_intervencao_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_inscricoes_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "ficha_inscricoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_inscricoes_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_inscricoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_inscricoes_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_inscricoes_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventario_dinamico_marcas_longitudinais: {
+        Row: {
+          area_m2: number | null
+          ativo: boolean | null
+          codigo: string | null
+          cor: string | null
+          created_at: string | null
+          data_ultima_modificacao: string | null
+          data_vistoria: string | null
+          enviado_coordenador: boolean | null
+          espacamento_m: number | null
+          espessura_cm: number | null
+          extensao_metros: number | null
+          fotos_urls: string[] | null
+          geom_line: unknown
+          id: string | null
+          km_final: number | null
+          km_inicial: number | null
+          largura_cm: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          material: string | null
+          modificado_por_intervencao: boolean | null
+          origem: string | null
+          posicao: string | null
+          rodovia_id: string | null
+          snv: string | null
+          status_reconciliacao: string | null
+          substituido_em: string | null
+          substituido_por: string | null
+          tipo_demarcacao: string | null
+          traco_m: number | null
+          ultima_intervencao_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          area_m2?: number | null
+          ativo?: boolean | null
+          codigo?: string | null
+          cor?: string | null
+          created_at?: string | null
+          data_ultima_modificacao?: string | null
+          data_vistoria?: string | null
+          enviado_coordenador?: boolean | null
+          espacamento_m?: number | null
+          espessura_cm?: number | null
+          extensao_metros?: number | null
+          fotos_urls?: string[] | null
+          geom_line?: unknown
+          id?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          largura_cm?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          material?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          posicao?: string | null
+          rodovia_id?: string | null
+          snv?: string | null
+          status_reconciliacao?: never
+          substituido_em?: string | null
+          substituido_por?: string | null
+          tipo_demarcacao?: string | null
+          traco_m?: number | null
+          ultima_intervencao_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          area_m2?: number | null
+          ativo?: boolean | null
+          codigo?: string | null
+          cor?: string | null
+          created_at?: string | null
+          data_ultima_modificacao?: string | null
+          data_vistoria?: string | null
+          enviado_coordenador?: boolean | null
+          espacamento_m?: number | null
+          espessura_cm?: number | null
+          extensao_metros?: number | null
+          fotos_urls?: string[] | null
+          geom_line?: unknown
+          id?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          largura_cm?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          material?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          posicao?: string | null
+          rodovia_id?: string | null
+          snv?: string | null
+          status_reconciliacao?: never
+          substituido_em?: string | null
+          substituido_por?: string | null
+          tipo_demarcacao?: string | null
+          traco_m?: number | null
+          ultima_intervencao_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_marcas_longitudinais_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "ficha_marcas_longitudinais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_marcas_longitudinais_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_marcas_longitudinais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_marcas_longitudinais_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_marcas_longitudinais_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventario_dinamico_placas: {
         Row: {
           ativo: boolean | null
@@ -6093,6 +6660,254 @@ export type Database = {
           user_id: string | null
         }
         Relationships: []
+      }
+      inventario_dinamico_porticos: {
+        Row: {
+          altura_livre_m: number | null
+          ativo: boolean | null
+          created_at: string | null
+          data_ultima_modificacao: string | null
+          data_vistoria: string | null
+          enviado_coordenador: boolean | null
+          foto_url: string | null
+          fotos_urls: string[] | null
+          id: string | null
+          km_inicial: number | null
+          lado: string | null
+          latitude_inicial: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          modificado_por_intervencao: boolean | null
+          origem: string | null
+          rodovia_id: string | null
+          snv: string | null
+          solucao_planilha: string | null
+          status_reconciliacao: string | null
+          status_servico: string | null
+          substituido_em: string | null
+          substituido_por: string | null
+          tipo: string | null
+          ultima_intervencao_id: string | null
+          updated_at: string | null
+          user_id: string | null
+          vao_horizontal_m: number | null
+        }
+        Insert: {
+          altura_livre_m?: number | null
+          ativo?: boolean | null
+          created_at?: string | null
+          data_ultima_modificacao?: string | null
+          data_vistoria?: string | null
+          enviado_coordenador?: boolean | null
+          foto_url?: string | null
+          fotos_urls?: string[] | null
+          id?: string | null
+          km_inicial?: number | null
+          lado?: string | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          snv?: string | null
+          solucao_planilha?: string | null
+          status_reconciliacao?: never
+          status_servico?: string | null
+          substituido_em?: string | null
+          substituido_por?: string | null
+          tipo?: string | null
+          ultima_intervencao_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          vao_horizontal_m?: number | null
+        }
+        Update: {
+          altura_livre_m?: number | null
+          ativo?: boolean | null
+          created_at?: string | null
+          data_ultima_modificacao?: string | null
+          data_vistoria?: string | null
+          enviado_coordenador?: boolean | null
+          foto_url?: string | null
+          fotos_urls?: string[] | null
+          id?: string | null
+          km_inicial?: number | null
+          lado?: string | null
+          latitude_inicial?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          rodovia_id?: string | null
+          snv?: string | null
+          solucao_planilha?: string | null
+          status_reconciliacao?: never
+          status_servico?: string | null
+          substituido_em?: string | null
+          substituido_por?: string | null
+          tipo?: string | null
+          ultima_intervencao_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          vao_horizontal_m?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_porticos_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "ficha_porticos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_porticos_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_porticos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_porticos_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_porticos_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventario_dinamico_tachas: {
+        Row: {
+          ativo: boolean | null
+          cor_refletivo: string | null
+          corpo: string | null
+          created_at: string | null
+          data_ultima_modificacao: string | null
+          data_vistoria: string | null
+          descricao: string | null
+          enviado_coordenador: boolean | null
+          espacamento_m: number | null
+          extensao_km: number | null
+          fotos_urls: string[] | null
+          geom_line: unknown
+          id: string | null
+          km_final: number | null
+          km_inicial: number | null
+          latitude_final: number | null
+          latitude_inicial: number | null
+          local_implantacao: string | null
+          longitude_final: number | null
+          longitude_inicial: number | null
+          lote_id: string | null
+          modificado_por_intervencao: boolean | null
+          origem: string | null
+          quantidade: number | null
+          refletivo: string | null
+          rodovia_id: string | null
+          snv: string | null
+          status_reconciliacao: string | null
+          substituido_em: string | null
+          substituido_por: string | null
+          tipo_refletivo: string | null
+          ultima_intervencao_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          cor_refletivo?: string | null
+          corpo?: string | null
+          created_at?: string | null
+          data_ultima_modificacao?: string | null
+          data_vistoria?: string | null
+          descricao?: string | null
+          enviado_coordenador?: boolean | null
+          espacamento_m?: number | null
+          extensao_km?: number | null
+          fotos_urls?: string[] | null
+          geom_line?: unknown
+          id?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          local_implantacao?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          quantidade?: number | null
+          refletivo?: string | null
+          rodovia_id?: string | null
+          snv?: string | null
+          status_reconciliacao?: never
+          substituido_em?: string | null
+          substituido_por?: string | null
+          tipo_refletivo?: string | null
+          ultima_intervencao_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          cor_refletivo?: string | null
+          corpo?: string | null
+          created_at?: string | null
+          data_ultima_modificacao?: string | null
+          data_vistoria?: string | null
+          descricao?: string | null
+          enviado_coordenador?: boolean | null
+          espacamento_m?: number | null
+          extensao_km?: number | null
+          fotos_urls?: string[] | null
+          geom_line?: unknown
+          id?: string | null
+          km_final?: number | null
+          km_inicial?: number | null
+          latitude_final?: number | null
+          latitude_inicial?: number | null
+          local_implantacao?: string | null
+          longitude_final?: number | null
+          longitude_inicial?: number | null
+          lote_id?: string | null
+          modificado_por_intervencao?: boolean | null
+          origem?: string | null
+          quantidade?: number | null
+          refletivo?: string | null
+          rodovia_id?: string | null
+          snv?: string | null
+          status_reconciliacao?: never
+          substituido_em?: string | null
+          substituido_por?: string | null
+          tipo_refletivo?: string | null
+          ultima_intervencao_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ficha_tachas_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "ficha_tachas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_tachas_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "inventario_dinamico_tachas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_tachas_ultima_intervencao_id_fkey"
+            columns: ["ultima_intervencao_id"]
+            isOneToOne: false
+            referencedRelation: "ficha_tachas_intervencoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_auditoria_inventario: {
         Row: {

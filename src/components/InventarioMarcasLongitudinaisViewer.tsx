@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Eye, Calendar, Library, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw, AlertTriangle, CheckCircle2, Link } from "lucide-react";
+import { Search, MapPin, Eye, Calendar, Library, ArrowUpDown, ArrowUp, ArrowDown, Plus, ClipboardList, AlertCircle, Filter, CheckCircle, RefreshCw, AlertTriangle, CheckCircle2, Link, Circle, XCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -17,6 +17,63 @@ import { RegistrarItemNaoCadastrado } from "./RegistrarItemNaoCadastrado";
 import { ReconciliacaoDrawerUniversal } from "./ReconciliacaoDrawerUniversal";
 import { OrigemIndicator } from "@/components/OrigemIndicator";
 import { toast } from "sonner";
+
+// Component to show reconciliation status badge
+function StatusReconciliacaoBadge({ status }: { status: string | null }) {
+  if (!status) return null;
+
+  const config = {
+    approved: {
+      icon: CheckCircle2,
+      color: "text-green-600",
+      bg: "bg-green-50",
+      label: "Aprovado"
+    },
+    pending: {
+      icon: Circle,
+      color: "text-yellow-600",
+      bg: "bg-yellow-50",
+      label: "Pendente"
+    },
+    rejected: {
+      icon: XCircle,
+      color: "text-red-600",
+      bg: "bg-red-50",
+      label: "Rejeitado"
+    },
+    inactive: {
+      icon: Circle,
+      color: "text-gray-400",
+      bg: "bg-gray-50",
+      label: "Inativo"
+    },
+    original: {
+      icon: Circle,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      label: "Original"
+    }
+  };
+
+  const item = config[status as keyof typeof config] || config.original;
+  const Icon = item.icon;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge className={`${item.bg} ${item.color} border-0 gap-1`}>
+            <Icon className="h-3 w-3" />
+            {item.label}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-xs">{item.label}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 interface FichaMarcaLongitudinal {
   id: string;
@@ -153,10 +210,10 @@ export function InventarioMarcasLongitudinaisViewer({
   const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
   const { data: marcas, isLoading, refetch } = useQuery({
-    queryKey: ["inventario-marcas-longitudinais", loteId, rodoviaId, searchTerm, searchLat, searchLng],
+    queryKey: ["inventario-dinamico-marcas-longitudinais", loteId, rodoviaId, searchTerm, searchLat, searchLng],
     queryFn: async () => {
       let query = supabase
-        .from("ficha_marcas_longitudinais")
+        .from("inventario_dinamico_marcas_longitudinais")
         .select("*", { count: "exact" })
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)

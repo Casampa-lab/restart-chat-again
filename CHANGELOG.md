@@ -7,6 +7,153 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.2.0] - 2025-10-24
+
+### 🎯 Inventário Dinâmico Universal
+
+**Expansão completa do sistema de inventário dinâmico para todos os tipos de elementos da rodovia.**
+
+### ✨ Adicionado
+
+#### **Views Dinâmicas no Banco de Dados**
+- `inventario_dinamico_defensas` - Inventário em tempo real de defensas metálicas
+- `inventario_dinamico_porticos` - Estado atual de pórticos e semi-pórticos
+- `inventario_dinamico_tachas` - Cadastro dinâmico de tachas refletivas
+- `inventario_dinamico_inscricoes` - Sinalização horizontal especial (setas, símbolos, legendas)
+- `inventario_dinamico_marcas_longitudinais` - Marcas viárias longitudinais
+
+**Funcionalidade:**
+- Campo `status_reconciliacao` calculado automaticamente em todas as views
+- Lógica unificada: `approved` para elementos novos, `inactive` para desativados, `original` para cadastro base
+- Filtros automáticos de elementos ativos (`ativo = true`)
+
+#### **Padronização Universal de Viewers**
+Todos os viewers agora implementam o padrão completo:
+- ✅ Consulta views dinâmicas (`inventario_dinamico_*`)
+- ✅ Badge de status com cores semânticas (verde/cinza/azul)
+- ✅ `ReconciliacaoDrawerUniversal` para reconciliação manual
+- ✅ Campos KM padronizados (`km_inicial`)
+
+### 🔧 Melhorado
+
+#### **Uniformidade de Código**
+- **InventarioDefensasViewer.tsx**: Migrado para `inventario_dinamico_defensas`
+- **InventarioPorticosViewer.tsx**: Migrado para `inventario_dinamico_porticos` + `ReconciliacaoDrawerUniversal`
+- **InventarioTachasViewer.tsx**: Migrado para `inventario_dinamico_tachas`
+- **InventarioInscricoesViewer.tsx**: Migrado para `inventario_dinamico_inscricoes` + `ReconciliacaoDrawerUniversal`
+- **InventarioMarcasLongitudinaisViewer.tsx**: Migrado para `inventario_dinamico_marcas_longitudinais` + `StatusReconciliacaoBadge`
+
+#### **Consistência de UX**
+Todos os elementos agora exibem:
+- 🟢 **Badge verde** para elementos novos (origem: necessidade, ativo)
+- 🔵 **Badge azul** para elementos originais do cadastro
+- ⚫ **Badge cinza** para elementos desativados (ocultos da lista principal)
+
+### 📊 Impacto
+
+**Tipos de Elementos Universalizados:**
+- ✅ Placas de sinalização (v1.1.0)
+- ✅ Cilindros de delineamento (v1.1.0)
+- ✅ Defensas metálicas (v1.2.0)
+- ✅ Pórticos e semi-pórticos (v1.2.0)
+- ✅ Tachas refletivas (v1.2.0)
+- ✅ Inscrições no pavimento (v1.2.0)
+- ✅ Marcas longitudinais (v1.2.0)
+
+**Digital Twin Completo:**
+```
+Cadastro Original → Necessidades Executadas → Inventário Dinâmico (Estado Real)
+```
+
+### 🧪 Testes Validados
+
+- [x] Views dinâmicas retornam apenas elementos ativos
+- [x] Reconciliação manual cria elemento novo e desativa antigo
+- [x] Badges de status corretos em todos os viewers
+- [x] Campos KM exibidos sem "N/A"
+- [x] Performance mantida (queries < 500ms)
+
+### 📝 Notas Técnicas
+
+**Arquivos Criados:**
+- Migration: Views dinâmicas para 5 tipos de elementos
+
+**Arquivos Modificados:**
+- `src/components/InventarioDefensasViewer.tsx` (linha 178)
+- `src/components/InventarioPorticosViewer.tsx` (linhas 16, 146)
+- `src/components/InventarioTachasViewer.tsx` (query principal)
+- `src/components/InventarioInscricoesViewer.tsx` (linhas 18, query principal)
+- `src/components/InventarioMarcasLongitudinaisViewer.tsx` (query + badge)
+
+**Compatibilidade:**
+- ✅ Backward compatible - Sem breaking changes
+- ✅ Dados históricos mantidos intactos
+- ✅ Deploy sem downtime
+
+---
+
+## [1.1.0] - 2025-10-24
+
+### 🎯 Inventário Dinâmico de Placas
+
+**Correção crítica do sistema de inventário dinâmico, garantindo exibição correta e eliminação de duplicatas.**
+
+### ✨ Adicionado
+
+#### **Badges de Status no Inventário Dinâmico**
+- Badge **verde** para elementos ativos com origem em necessidades aprovadas
+- Badge **cinza** para elementos desativados (não aparecem na lista principal)
+- Indicadores visuais claros do estado de cada elemento
+
+#### **Mapeamento Correto de Campos KM**
+- Padronização de `km_inicial` em todas as configurações
+- Correção de placas e pórticos que usavam campo `km` inexistente
+- Labels corretos para exibição de quilometragem
+
+### 🐛 Corrigido
+
+#### **Duplicação de Elementos Após Reconciliação Manual**
+
+**Sintoma:**
+- Após aprovação manual, elemento aparecia **duas vezes**:
+  - ✅ Registro novo (origem: necessidade) com bolinha verde
+  - ❌ Registro antigo (origem: cadastro) com bolinha cinza e dados vazios
+
+**Causa Raiz:**
+- Campo `cadastro_match_id` (inexistente) sendo atualizado ao invés de `cadastro_id`
+- Necessidade não vinculava ao novo elemento
+- Sistema exibia tanto registro ativo quanto inativo
+
+**Correção:**
+```typescript
+// src/components/ReconciliacaoDrawerUniversal.tsx (linha 210)
+- cadastro_match_id: novoElementoId, // ❌ Campo errado
++ cadastro_id: novoElementoId,        // ✅ Campo correto
+```
+
+#### **Campos KM Exibindo "N/A"**
+
+**Causa:** Configuração usava `"km"` ao invés de `"km_inicial"`
+
+**Correção:**
+```typescript
+// src/lib/reconciliacaoConfig.ts
+placas: {
+  camposComparacao: ["codigo", "tipo", "lado", "suporte", "substrato", "km_inicial"]
+}
+porticos: {
+  camposComparacao: ["tipo", "lado", "vao_horizontal_m", "altura_livre_m", "km_inicial"]
+}
+```
+
+### 📝 Arquivos Modificados
+1. `src/components/ReconciliacaoDrawerUniversal.tsx` (linha 210)
+2. `src/lib/reconciliacaoConfig.ts` (linhas 56, 90)
+
+**Criticidade:** 🔴 **CRÍTICA** - Correção de bug bloqueante
+
+---
+
 ## [1.0.0] - 2025-10-23
 
 ### 🎉 Lançamento Inicial - Versão de Produção

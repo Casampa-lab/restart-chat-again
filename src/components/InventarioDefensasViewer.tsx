@@ -172,10 +172,10 @@ export const InventarioDefensasViewer = ({
   const totalMatchesProcessados = Array.from(necessidadesMap?.values() || []).length;
 
   const { data: defensas, isLoading } = useQuery({
-    queryKey: ["inventario-defensas", loteId, rodoviaId, searchTerm],
+    queryKey: ["inventario-dinamico-defensas", loteId, rodoviaId, searchTerm],
     queryFn: async () => {
       let query = supabase
-        .from("defensas")
+        .from("inventario_dinamico_defensas")
         .select("*", { count: "exact" })
         .eq("lote_id", loteId)
         .eq("rodovia_id", rodoviaId)
