@@ -47,6 +47,7 @@ interface IntervencoesPorticosFormProps {
   hideSubmitButton?: boolean;
   loteId?: string;
   rodoviaId?: string;
+  modoOperacao?: 'manutencao' | 'execucao' | null;
 }
 
 export function IntervencoesPorticosForm({ 
@@ -56,7 +57,8 @@ export function IntervencoesPorticosForm({
   onDataChange,
   hideSubmitButton = false,
   loteId,
-  rodoviaId
+  rodoviaId,
+  modoOperacao
 }: IntervencoesPorticosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('porticos');

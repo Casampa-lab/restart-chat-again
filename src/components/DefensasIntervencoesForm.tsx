@@ -20,6 +20,7 @@ interface DefensasIntervencoesFormProps {
   hideSubmitButton?: boolean;
   loteId?: string;
   rodoviaId?: string;
+  modoOperacao?: 'manutencao' | 'execucao' | null;
 }
 
 const ESTADOS_CONSERVACAO = [
@@ -87,7 +88,8 @@ const DefensasIntervencoesForm = ({
   onDataChange,
   hideSubmitButton = false,
   loteId,
-  rodoviaId
+  rodoviaId,
+  modoOperacao
 }: DefensasIntervencoesFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

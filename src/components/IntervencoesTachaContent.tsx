@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Send, Trash2, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
@@ -23,7 +25,11 @@ interface IntervencaoTacha {
   enviado_coordenador: boolean;
 }
 
-const IntervencoesTachaContent = () => {
+interface IntervencoesTachaContentProps {
+  modoOperacao?: 'manutencao' | 'execucao' | null;
+}
+
+const IntervencoesTachaContent = ({ modoOperacao }: IntervencoesTachaContentProps = {}) => {
   const { user } = useAuth();
   const [intervencoes, setIntervencoes] = useState<IntervencaoTacha[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,6 +93,18 @@ const IntervencoesTachaContent = () => {
 
   return (
     <div className="space-y-4">
+      {modoOperacao && (
+        <Alert className="mb-4">
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Modo selecionado: {modoOperacao === 'manutencao' 
+              ? '🟠 Manutenção Rotineira (IN-3)' 
+              : '🟢 Execução de Projeto'
+            }
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <label htmlFor="show-enviadas-tacha" className="text-sm cursor-pointer">Mostrar intervenções enviadas</label>
@@ -153,6 +171,7 @@ const IntervencoesTachaContent = () => {
             <DialogTitle>Registrar Nova Intervenção em Tachas</DialogTitle>
           </DialogHeader>
           <IntervencoesTachaForm 
+            modoOperacao={modoOperacao}
             onIntervencaoRegistrada={() => {
               setNovaIntervencaoOpen(false);
               loadData();

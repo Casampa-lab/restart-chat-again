@@ -32,6 +32,7 @@ interface IntervencoesSHFormProps {
   hideSubmitButton?: boolean;
   loteId?: string;
   rodoviaId?: string;
+  modoOperacao?: 'manutencao' | 'execucao' | null;
 }
 
 const MATERIAIS = [
@@ -82,7 +83,8 @@ const IntervencoesSHForm = ({
   onDataChange,
   hideSubmitButton = false,
   loteId,
-  rodoviaId
+  rodoviaId,
+  modoOperacao
 }: IntervencoesSHFormProps) => {
   const [isCapturing, setIsCapturing] = useState(false);
   const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('marcas_longitudinais');

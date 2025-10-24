@@ -38,6 +38,7 @@ import ReconciliacaoPendente from "./pages/ReconciliacaoPendente";
 import ModoCampo from "./pages/ModoCampo";
 import InventarioDinamicoComAlerta from "./pages/InventarioDinamicoComAlerta";
 import RegistrarIntervencaoCampo from "./pages/RegistrarIntervencaoCampo";
+import EscolherAcaoCampo from "./pages/EscolherAcaoCampo";
 import AuditoriaSinalizacoes from "./pages/AuditoriaSinalizacoes";
 import DocumentacaoVABLE from "./pages/DocumentacaoVABLE";
 import AuditoriaInventario from "./pages/AuditoriaInventario";
@@ -84,6 +85,7 @@ const App = () => (
         <Route path="/minhas-intervencoes-tacha" element={<MinhasIntervencoesTacha />} />
         <Route path="/minhas-necessidades-relatorios" element={<MinhasNecessidadesRelatorios />} />
         <Route path="/reconciliacao-pendente" element={<ReconciliacaoPendente />} />
+        <Route path="/modo-campo/escolher-acao" element={<EscolherAcaoCampo />} />
         <Route path="/modo-campo/registrar-intervencao" element={<RegistrarIntervencaoCampo />} />
         <Route path="/modo-campo/registrar-nc" element={<RegistrarNC />} />
         <Route path="/dashboard-necessidades" element={<DashboardNecessidades />} />

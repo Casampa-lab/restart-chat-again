@@ -35,6 +35,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -59,7 +61,11 @@ interface IntervencaoSH {
   };
 }
 
-const IntervencoesSHContent = () => {
+interface IntervencoesSHContentProps {
+  modoOperacao?: 'manutencao' | 'execucao' | null;
+}
+
+const IntervencoesSHContent = ({ modoOperacao }: IntervencoesSHContentProps = {}) => {
   const { user } = useAuth();
   const [intervencoes, setIntervencoes] = useState<IntervencaoSH[]>([]);
   const [loading, setLoading] = useState(true);
@@ -275,6 +281,18 @@ const IntervencoesSHContent = () => {
         )}
       </div>
 
+      {modoOperacao && (
+        <Alert className="mb-4">
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Modo selecionado: {modoOperacao === 'manutencao' 
+              ? '🟠 Manutenção Rotineira (IN-3)' 
+              : '🟢 Execução de Projeto'
+            }
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -414,6 +432,7 @@ const IntervencoesSHContent = () => {
             <DialogTitle>Registrar Nova Intervenção em Sinalização Horizontal</DialogTitle>
           </DialogHeader>
           <IntervencoesSHForm 
+            modoOperacao={modoOperacao}
             onIntervencaoRegistrada={() => {
               setNovaIntervencaoOpen(false);
               const loadData = async () => {

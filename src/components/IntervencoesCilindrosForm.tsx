@@ -49,6 +49,7 @@ interface IntervencoesCilindrosFormProps {
   hideSubmitButton?: boolean;
   loteId?: string;
   rodoviaId?: string;
+  modoOperacao?: 'manutencao' | 'execucao' | null;
 }
 
 export function IntervencoesCilindrosForm({ 
@@ -58,7 +59,8 @@ export function IntervencoesCilindrosForm({
   onDataChange,
   hideSubmitButton = false,
   loteId,
-  rodoviaId
+  rodoviaId,
+  modoOperacao
 }: IntervencoesCilindrosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('cilindros');

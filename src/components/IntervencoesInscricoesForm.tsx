@@ -31,6 +31,7 @@ interface IntervencoesInscricoesFormProps {
   hideSubmitButton?: boolean;
   loteId?: string;
   rodoviaId?: string;
+  modoOperacao?: 'manutencao' | 'execucao' | null;
 }
 
 const MATERIAIS = [
@@ -85,7 +86,8 @@ const IntervencoesInscricoesForm = ({
   onDataChange,
   hideSubmitButton = false,
   loteId,
-  rodoviaId
+  rodoviaId,
+  modoOperacao
 }: IntervencoesInscricoesFormProps) => {
   const { tipoOrigem, setTipoOrigem, isCampoEstruturalBloqueado, isManutencaoRotineira } = useTipoOrigem('inscricoes');
   const form = useForm<z.infer<typeof formSchema>>({
