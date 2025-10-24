@@ -11,13 +11,11 @@ import { getConfig, type GrupoElemento } from "@/lib/reconciliacaoConfig";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Eye, Boxes, Copy, X, FileText, FileSearch, History as HistoryIcon, Activity } from "lucide-react";
+import { LogOut, MapPin, Briefcase, Settings, ClipboardList, ArrowLeftRight, Boxes, Copy, X, FileText, FileSearch, History as HistoryIcon, Activity } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import SessionSelector from "@/components/SessionSelector";
-import NaoConformidadeSimples from "@/components/NaoConformidadeSimples";
 
 import DefensasForm from "@/components/DefensasForm";
-import { RegistroNCForm } from "@/components/RegistroNCForm";
 import { FichaPlacaForm } from "@/components/FichaPlacaForm";
 import { InventarioPlacasViewer } from "@/components/InventarioPlacasViewer";
 import { InventarioMarcasLongitudinaisViewer } from "@/components/InventarioMarcasLongitudinaisViewer";
@@ -55,9 +53,6 @@ const Index = () => {
     data: supervisora
   } = useSupervisora();
   const [isAdminOrCoordinator, setIsAdminOrCoordinator] = useState(false);
-  const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem('activeTab') || 'prontuario';
-  });
   const [inventarioShSubTab, setInventarioShSubTab] = useState("longitudinais");
   const [inventarioSvSubTab, setInventarioSvSubTab] = useState("placas");
   const [showInviteCode, setShowInviteCode] = useState(() => {
@@ -458,10 +453,6 @@ const Index = () => {
       });
     }
   };
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    localStorage.setItem('activeTab', value);
-  };
 
   if (authLoading || sessionLoading) {
     return <div className="fixed inset-0 flex items-center justify-center bg-background">
@@ -714,35 +705,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 h-auto bg-muted p-2 gap-1">
-                <TabsTrigger value="prontuario" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Inventário Dinâmico</span>
-                </TabsTrigger>
-                <TabsTrigger value="ncs" className="flex flex-col py-3 px-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md font-semibold">
-                  <span className="text-xs">Não Conformidade</span>
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="ncs" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Registro de Não Conformidades</CardTitle>
-                    <CardDescription>Documente irregularidades e não conformidades identificadas durante as inspeções</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-end">
-                        <Button variant="secondary" onClick={() => navigate("/minhas-ncs")} className="shadow-md hover:shadow-lg transition-shadow">
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver meus registros
-                        </Button>
-                      </div>
-                      <NaoConformidadeSimples loteId={activeSession.lote_id} rodoviaId={activeSession.rodovia_id} />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="prontuario" className="mt-6">
+            <div className="mt-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Inventário Dinâmico da Rodovia</CardTitle>
@@ -850,8 +813,7 @@ const Index = () => {
                   </Tabs>
                   </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
+              </div>
           </> : <SessionSelector userId={user?.id} onSessionStarted={handleSessionStarted} />}
       </main>
 
