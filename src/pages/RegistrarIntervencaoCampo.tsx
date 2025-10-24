@@ -434,10 +434,15 @@ export default function RegistrarIntervencaoCampo() {
                   </Button>
                 </div>
               ) : (
-                <Button onClick={capturarGPS} className="w-full">
-                  <MapPin className="mr-2 h-4 w-4" />
-                  Capturar Localização
-                </Button>
+                <div className="space-y-2">
+                  <Button onClick={capturarGPS} className="w-full">
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Capturar Localização
+                  </Button>
+                  <Badge variant="outline" className="text-xs text-amber-600 w-full justify-center">
+                    ⚠️ GPS não capturado - {modoOperacao === 'manutencao' ? 'Opcional' : 'Obrigatório'}
+                  </Badge>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -491,7 +496,7 @@ export default function RegistrarIntervencaoCampo() {
           {/* 7. Enviar */}
           <Button
             onClick={handleEnviar}
-            disabled={loading || !dadosIntervencao || !position}
+            disabled={loading || !dadosIntervencao || (modoOperacao === 'execucao' && !position)}
             size="lg"
             className={`w-full h-14 text-lg ${
               modoOperacao === 'manutencao' 
