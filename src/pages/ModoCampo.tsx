@@ -16,10 +16,11 @@ import { SessionManagerMobile } from '@/components/SessionManagerMobile';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 import { useIOSDetection } from '@/hooks/useIOSDetection';
+import SessionSelector from '@/components/SessionSelector';
 
 export default function ModoCampo() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { activeSession, refreshSession } = useWorkSession(user?.id);
   const { isModernIOS } = useIOSDetection();
 
@@ -45,10 +46,18 @@ export default function ModoCampo() {
         await CapApp.minimizeApp();
       } catch (error) {
         console.error('Erro ao minimizar app:', error);
-        navigate('/');
+        await signOut();
+        navigate('/auth');
       }
     } else {
-      navigate('/');
+      const confirmLogout = window.confirm(
+        'Deseja sair do modo campo? Você será deslogado do sistema.'
+      );
+      
+      if (confirmLogout) {
+        await signOut();
+        navigate('/auth');
+      }
     }
   };
 
@@ -98,16 +107,10 @@ export default function ModoCampo() {
             onSessionChanged={refreshSession}
           />
         ) : (
-          <Card className="border-primary/20">
-            <CardContent className="pt-6 text-center">
-              <p className="text-muted-foreground mb-4">
-                Nenhuma sessão ativa. Inicie uma sessão para trabalhar.
-              </p>
-              <Button onClick={() => navigate('/')}>
-                Iniciar Sessão
-              </Button>
-            </CardContent>
-          </Card>
+          <SessionSelector 
+            userId={user?.id} 
+            onSessionStarted={refreshSession}
+          />
         )}
 
         {/* Menu de Opções */}
