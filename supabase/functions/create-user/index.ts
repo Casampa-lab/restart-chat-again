@@ -114,6 +114,48 @@ serve(async (req) => {
 
     if (roleError) throw roleError
 
+    // Se o role for coordenador E tiver supervisora, criar assignments automaticamente
+    if (role === 'coordenador' && supervisoraId) {
+      console.log('🔗 Coordenador detectado, criando assignments automáticos...')
+      
+      // Buscar todos os lotes da supervisora
+      const { data: lotesData, error: lotesError } = await supabaseAdmin
+        .from('lotes')
+        .select('id')
+        .eq('supervisora_id', supervisoraId)
+      
+      if (lotesError) {
+        console.error('Erro ao buscar lotes:', lotesError)
+      } else if (lotesData && lotesData.length > 0) {
+        console.log(`📦 Encontrados ${lotesData.length} lotes para associar`)
+        
+        // Criar assignments para cada lote
+        const assignments = lotesData.map(lote => ({
+          user_id: userId,
+          lote_id: lote.id
+        }))
+        
+        // Remover assignments antigos deste coordenador
+        await supabaseAdmin
+          .from('coordinator_assignments')
+          .delete()
+          .eq('user_id', userId)
+        
+        // Inserir novos assignments
+        const { error: assignError } = await supabaseAdmin
+          .from('coordinator_assignments')
+          .insert(assignments)
+        
+        if (assignError) {
+          console.error('Erro ao criar assignments:', assignError)
+        } else {
+          console.log(`✅ ${assignments.length} assignments criados com sucesso`)
+        }
+      } else {
+        console.log('⚠️ Nenhum lote encontrado para esta supervisora')
+      }
+    }
+
     return new Response(
       JSON.stringify({ 
         message: 'Usuário criado/atualizado com sucesso',

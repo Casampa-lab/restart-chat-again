@@ -213,6 +213,41 @@ export const UsuariosManager = () => {
         if (roleError) throw roleError;
       }
 
+      // Se mudou para coordenador E tem supervisora, criar assignments automáticos
+      if (selectedRole === 'coordenador' && selectedSupervisora) {
+        console.log('🔗 Atualizando assignments do coordenador...')
+        
+        // Buscar lotes da supervisora
+        const { data: lotesData } = await supabase
+          .from('lotes')
+          .select('id')
+          .eq('supervisora_id', selectedSupervisora)
+        
+        if (lotesData && lotesData.length > 0) {
+          // Remover assignments antigos
+          await supabase
+            .from('coordinator_assignments')
+            .delete()
+            .eq('user_id', editingProfile.id)
+          
+          // Criar novos assignments
+          const assignments = lotesData.map(lote => ({
+            user_id: editingProfile.id,
+            lote_id: lote.id
+          }))
+          
+          const { error: assignError } = await supabase
+            .from('coordinator_assignments')
+            .insert(assignments)
+          
+          if (assignError) {
+            console.error('Erro ao criar assignments:', assignError)
+          } else {
+            console.log(`✅ ${assignments.length} assignments criados`)
+          }
+        }
+      }
+
       toast.success("Usuário atualizado com sucesso!");
       handleCloseDialog();
       await loadProfiles();
