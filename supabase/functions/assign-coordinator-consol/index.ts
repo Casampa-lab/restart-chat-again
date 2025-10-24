@@ -25,8 +25,8 @@ serve(async (req) => {
 
     console.log('🔗 Iniciando associação do coordenador Sampaio aos lotes da CONSOL...')
 
-    // Dados do coordenador Sampaio
-    const coordinatorId = '0487d64b-0101-4273-b264-dfea66623d99'
+    // Dados do coordenador Sampaio (sampaio.mcvs@gmail.com)
+    const coordinatorId = 'f3bfcc6a-1188-453c-b61b-e83564b3495a'
     
     // IDs dos 7 lotes da CONSOL (04 a 10)
     const loteIds = [
