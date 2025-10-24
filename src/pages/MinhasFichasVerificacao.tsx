@@ -20,20 +20,8 @@ import { useWorkSession } from "@/hooks/useWorkSession";
 import { FichaVerificacaoForm } from "@/components/FichaVerificacaoForm";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 
 interface Ficha {
@@ -76,12 +64,14 @@ export default function MinhasFichasVerificacao() {
   const [mostrarEnviadas, setMostrarEnviadas] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [fichaToDelete, setFichaToDelete] = useState<string | null>(null);
-  
+
   const { activeSession } = useWorkSession(userId);
 
   useEffect(() => {
     const getUserAndFetch = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
       }
@@ -91,18 +81,18 @@ export default function MinhasFichasVerificacao() {
 
     // Configurar realtime para atualizações automáticas
     const channel = supabase
-      .channel('ficha-verificacao-changes')
+      .channel("ficha-verificacao-changes")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'ficha_verificacao'
+          event: "*",
+          schema: "public",
+          table: "ficha_verificacao",
         },
         () => {
-          console.log('Ficha atualizada, recarregando lista...');
+          console.log("Ficha atualizada, recarregando lista...");
           fetchFichas();
-        }
+        },
       )
       .subscribe();
 
@@ -113,7 +103,9 @@ export default function MinhasFichasVerificacao() {
 
   const fetchFichas = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
       const { data: fichasData, error: fichasError } = await supabase
@@ -139,7 +131,7 @@ export default function MinhasFichasVerificacao() {
               total_pontos: 0,
               pontos_conformes: 0,
               pontos_nao_conformes: 0,
-              percentual_conformidade: 0
+              percentual_conformidade: 0,
             };
           }
 
@@ -149,18 +141,15 @@ export default function MinhasFichasVerificacao() {
 
           // Para SH: verificar retro_bd_conforme, retro_e_conforme, retro_be_conforme
           // Para SV: verificar retro_sv_conforme
-          itens?.forEach(item => {
-            const campos = ficha.tipo === "Sinalização Horizontal" 
-              ? ['retro_bd_conforme', 'retro_e_conforme', 'retro_be_conforme']
-              : ['retro_sv_conforme'];
+          itens?.forEach((item) => {
+            const campos =
+              ficha.tipo === "Sinalização Horizontal"
+                ? ["retro_bd_conforme", "retro_e_conforme", "retro_be_conforme"]
+                : ["retro_sv_conforme"];
 
-            const todosCamposConformes = campos.every(campo => 
-              item[campo] === true || item[campo] === null
-            );
+            const todosCamposConformes = campos.every((campo) => item[campo] === true || item[campo] === null);
 
-            const algumCampoNaoConforme = campos.some(campo => 
-              item[campo] === false
-            );
+            const algumCampoNaoConforme = campos.some((campo) => item[campo] === false);
 
             if (algumCampoNaoConforme) {
               pontos_nao_conformes++;
@@ -169,18 +158,16 @@ export default function MinhasFichasVerificacao() {
             }
           });
 
-          const percentual = total_pontos > 0 
-            ? (pontos_conformes / total_pontos) * 100 
-            : 0;
+          const percentual = total_pontos > 0 ? (pontos_conformes / total_pontos) * 100 : 0;
 
           return {
             ...ficha,
             total_pontos,
             pontos_conformes,
             pontos_nao_conformes,
-            percentual_conformidade: percentual
+            percentual_conformidade: percentual,
           };
-        })
+        }),
       );
 
       setFichas(fichasComEstatisticas);
@@ -210,93 +197,121 @@ export default function MinhasFichasVerificacao() {
 
   const handleEnviarParaCoordenador = async (fichaId: string) => {
     try {
-      // 1. Buscar dados completos da ficha
-      const { data: fichaData, error: fichaError } = await supabase
-        .from('ficha_verificacao')
-        .select('tipo, lote_id, snv, data_verificacao, user_id')
-        .eq('id', fichaId)
+      // 1) Buscar dados essenciais da ficha
+      const { data: ficha, error: fErr } = await supabase
+        .from("ficha_verificacao")
+        .select("id, tipo, lote_id, snv, data_verificacao, user_id")
+        .eq("id", fichaId)
         .single();
+      if (fErr) throw fErr;
 
-      if (fichaError) throw fichaError;
+      if (!ficha?.lote_id) {
+        toast.error("Esta ficha não tem Lote definido. Edite e selecione um Lote antes de enviar.");
+        return;
+      }
 
-      // 2. Atualizar status da ficha
-      const { error: updateError } = await supabase
-        .from('ficha_verificacao')
-        .update({ 
-          status: 'pendente_aprovacao_coordenador',
-          enviado_coordenador_em: new Date().toISOString()
+      // 2) Atualização otimista de status
+      const { error: upErr } = await supabase
+        .from("ficha_verificacao")
+        .update({
+          status: "pendente_aprovacao_coordenador",
+          enviado_coordenador_em: new Date().toISOString(),
         })
-        .eq('id', fichaId);
+        .eq("id", fichaId);
+      if (upErr) throw upErr;
 
-      if (updateError) throw updateError;
+      // 3) Cadeia de busca de coordenadores (com fallbacks)
+      let destinatarios: { user_id: string }[] = [];
 
-      // 3. BUSCA INTELIGENTE: Primeiro por coordinator_assignments, depois por supervisora
-      let { data: coordenadores } = await supabase
-        .from('coordinator_assignments')
-        .select('user_id')
-        .eq('lote_id', fichaData.lote_id);
+      // 3.1 coordinator_assignments por lote
+      const { data: assign, error: assignErr } = await supabase
+        .from("coordinator_assignments")
+        .select("user_id")
+        .eq("lote_id", ficha.lote_id);
+      if (!assignErr && assign?.length) destinatarios = assign as any;
 
-      // 3.1. Se vazio, buscar coordenadores pela supervisora do lote
-      if (!coordenadores || coordenadores.length === 0) {
-        const { data: loteData } = await supabase
-          .from('lotes')
-          .select('supervisora_id')
-          .eq('id', fichaData.lote_id)
+      // 3.2 coordenador direto no cadastro do lote (se existir)
+      if (!destinatarios.length) {
+        const { data: lote } = await supabase
+          .from("lotes")
+          .select("coordenador_id, supervisora_id, ul_id, contrato_id")
+          .eq("id", ficha.lote_id)
           .single();
 
-        if (loteData?.supervisora_id) {
-          // Buscar perfis da mesma supervisora
-          const { data: profilesBySupervisora } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('supervisora_id', loteData.supervisora_id);
+        if (lote?.coordenador_id) {
+          destinatarios = [{ user_id: lote.coordenador_id as string }];
+        }
 
-          if (profilesBySupervisora && profilesBySupervisora.length > 0) {
-            // Filtrar apenas quem tem role de coordenador
-            const { data: coordenadoresRole } = await supabase
-              .from('user_roles')
-              .select('user_id')
-              .eq('role', 'coordenador')
-              .in('user_id', profilesBySupervisora.map(p => p.id));
+        // 3.3 mesma supervisora + role 'coordenador'
+        if (!destinatarios.length && lote?.supervisora_id) {
+          const { data: profs } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("supervisora_id", lote.supervisora_id);
 
-            coordenadores = coordenadoresRole || [];
+          if (profs?.length) {
+            const ids = (profs as any[]).map((p) => p.id);
+            const { data: coordsRole } = await supabase
+              .from("user_roles")
+              .select("user_id")
+              .eq("role", "coordenador")
+              .in("user_id", ids);
+
+            if (coordsRole?.length) destinatarios = coordsRole as any;
+          }
+        }
+
+        // 3.4 fallback final: coordenadores padrão por contrato/UL (tabela/view opcional)
+        if (!destinatarios.length && (lote?.contrato_id || lote?.ul_id)) {
+          const orParts: string[] = [];
+          if (lote?.contrato_id) orParts.push(`contrato_id.eq.${lote.contrato_id}`);
+          if (lote?.ul_id) orParts.push(`ul_id.eq.${lote.ul_id}`);
+          if (orParts.length) {
+            const { data: defaults } = await supabase
+              .from("default_coordinators")
+              .select("user_id")
+              .or(orParts.join(","));
+            if (defaults?.length) destinatarios = defaults as any;
           }
         }
       }
 
-      // 4. Criar notificações para cada coordenador
-      if (coordenadores && coordenadores.length > 0) {
-        const notificacoes = coordenadores.map(coord => ({
-          user_id: coord.user_id,
-          tipo: 'ficha_verificacao_pendente',
-          titulo: 'Nova Ficha de Verificação',
-          mensagem: `Ficha de ${fichaData.tipo} do SNV ${fichaData.snv || 'não informado'} (${new Date(fichaData.data_verificacao).toLocaleDateString('pt-BR')}) aguarda sua validação`,
-          lida: false,
-          elemento_pendente_id: null,
-          nc_id: null
-        }));
+      // 4) Sem destinatário → reverter status e instruir
+      if (!destinatarios.length) {
+        await supabase
+          .from("ficha_verificacao")
+          .update({ status: "rascunho", enviado_coordenador_em: null })
+          .eq("id", fichaId);
 
-        const { error: notifError } = await supabase
-          .from('notificacoes')
-          .insert(notificacoes);
-
-        if (notifError) {
-          console.error('Erro ao criar notificações:', notifError);
-        }
-
-        toast.success(`Ficha enviada para ${coordenadores.length} coordenador(es)!`);
-      } else {
-        toast.error('Nenhum coordenador encontrado para esta supervisora');
+        toast.error(
+          'Nenhum coordenador encontrado para este Lote/Supervisora. Cadastre em "Configurações → Coordenações" ou defina o coordenador no cadastro do Lote.',
+        );
+        return;
       }
 
-      // 5. Atualizar listagem
-      fetchFichas();
+      // 5) Notificações aos coordenadores
+      const msgData = ficha.data_verificacao
+        ? new Date(ficha.data_verificacao).toLocaleDateString("pt-BR")
+        : "data não informada";
+      const notifications = (destinatarios as any[]).map((d) => ({
+        user_id: d.user_id,
+        tipo: "ficha_verificacao_pendente",
+        titulo: "Nova Ficha de Verificação",
+        mensagem: `Ficha de ${ficha.tipo} (SNV ${ficha.snv || "não informado"} / ${msgData}) aguarda sua validação`,
+        lida: false,
+        elemento_pendente_id: null,
+        nc_id: null,
+      }));
 
-    } catch (error: any) {
-      toast.error("Erro ao enviar ficha: " + error.message);
+      const { error: nErr } = await supabase.from("notificacoes").insert(notifications);
+      if (nErr) console.error("Erro ao notificar coordenadores:", nErr);
+
+      toast.success(`Ficha enviada para ${destinatarios.length} coordenador(es).`);
+      fetchFichas?.();
+    } catch (e: any) {
+      toast.error(`Erro ao enviar ficha: ${e.message || e.toString()}`);
     }
   };
-
   const handleDelete = async () => {
     if (!fichaToDelete) return;
 
@@ -310,10 +325,7 @@ export default function MinhasFichasVerificacao() {
       if (itensError) throw itensError;
 
       // Deletar ficha
-      const { error } = await supabase
-        .from("ficha_verificacao")
-        .delete()
-        .eq("id", fichaToDelete);
+      const { error } = await supabase.from("ficha_verificacao").delete().eq("id", fichaToDelete);
 
       if (error) throw error;
 
@@ -327,49 +339,43 @@ export default function MinhasFichasVerificacao() {
     }
   };
 
-  const fichasFiltradas = mostrarEnviadas
-    ? fichas
-    : fichas.filter(f => !f.status || f.status === "rascunho");
+  const fichasFiltradas = mostrarEnviadas ? fichas : fichas.filter((f) => !f.status || f.status === "rascunho");
 
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto space-y-4">
-        <Button
-          variant="navigation"
-          onClick={() => navigate("/modo-campo")}
-          className="mb-4"
-        >
+        <Button variant="navigation" onClick={() => navigate("/modo-campo")} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <div>
-            <CardTitle>Minhas Fichas de Verificação (3.1.19)</CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Revise e envie suas fichas para o coordenador e fiscal
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            {activeSession && (
-              <Button onClick={() => setCreateDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Nova Ficha
-              </Button>
-            )}
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="mostrar-enviadas" 
-                checked={mostrarEnviadas}
-                onCheckedChange={(checked) => setMostrarEnviadas(checked as boolean)}
-              />
-              <Label htmlFor="mostrar-enviadas" className="cursor-pointer text-sm font-normal">
-                Mostrar fichas enviadas
-              </Label>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <div>
+              <CardTitle>Minhas Fichas de Verificação (3.1.19)</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Revise e envie suas fichas para o coordenador e fiscal
+              </p>
             </div>
-          </div>
-        </CardHeader>
+            <div className="flex items-center gap-3">
+              {activeSession && (
+                <Button onClick={() => setCreateDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nova Ficha
+                </Button>
+              )}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="mostrar-enviadas"
+                  checked={mostrarEnviadas}
+                  onCheckedChange={(checked) => setMostrarEnviadas(checked as boolean)}
+                />
+                <Label htmlFor="mostrar-enviadas" className="cursor-pointer text-sm font-normal">
+                  Mostrar fichas enviadas
+                </Label>
+              </div>
+            </div>
+          </CardHeader>
           <CardContent>
             {loading ? (
               <p>Carregando...</p>
@@ -377,152 +383,160 @@ export default function MinhasFichasVerificacao() {
               <p className="text-muted-foreground">Nenhuma ficha encontrada.</p>
             ) : fichasFiltradas.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                {mostrarEnviadas 
-                  ? "Nenhuma ficha cadastrada ainda"
-                  : "Nenhuma ficha não enviada"}
+                {mostrarEnviadas ? "Nenhuma ficha cadastrada ainda" : "Nenhuma ficha não enviada"}
               </p>
             ) : (
               <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead className="text-center">Pontos Verificados</TableHead>
-                  <TableHead>Conformidade</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {fichasFiltradas.map((ficha) => (
-                        <TableRow key={ficha.id}>
-                          <TableCell>
-                            <Badge variant={ficha.tipo === "Sinalização Horizontal" ? "default" : "secondary"}>
-                              {ficha.tipo}
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead className="text-center">Pontos Verificados</TableHead>
+                      <TableHead>Conformidade</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {fichasFiltradas.map((ficha) => (
+                      <TableRow key={ficha.id}>
+                        <TableCell>
+                          <Badge variant={ficha.tipo === "Sinalização Horizontal" ? "default" : "secondary"}>
+                            {ficha.tipo}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{new Date(ficha.data_verificacao).toLocaleDateString("pt-BR")}</TableCell>
+                        <TableCell>
+                          <div className="text-center">
+                            <p className="font-semibold text-lg">{ficha.total_pontos}</p>
+                            <p className="text-xs text-muted-foreground">pontos</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <Badge
+                              variant={
+                                ficha.percentual_conformidade >= 90
+                                  ? "default"
+                                  : ficha.percentual_conformidade >= 70
+                                    ? "secondary"
+                                    : "destructive"
+                              }
+                              className="w-full justify-center text-base"
+                            >
+                              {ficha.percentual_conformidade.toFixed(0)}% conforme
                             </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {new Date(ficha.data_verificacao).toLocaleDateString('pt-BR')}
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-center">
-                              <p className="font-semibold text-lg">{ficha.total_pontos}</p>
-                              <p className="text-xs text-muted-foreground">pontos</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              <Badge 
-                                variant={
-                                  ficha.percentual_conformidade >= 90 ? "default" :
-                                  ficha.percentual_conformidade >= 70 ? "secondary" :
-                                  "destructive"
-                                }
-                                className="w-full justify-center text-base"
-                              >
-                                {ficha.percentual_conformidade.toFixed(0)}% conforme
-                              </Badge>
-                              <div className="flex gap-2 text-xs justify-center">
+                            <div className="flex gap-2 text-xs justify-center">
+                              <span className="flex items-center gap-1">
+                                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                {ficha.pontos_conformes} OK
+                              </span>
+                              {ficha.pontos_nao_conformes > 0 && (
                                 <span className="flex items-center gap-1">
-                                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                                  {ficha.pontos_conformes} OK
+                                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                                  {ficha.pontos_nao_conformes} NC
                                 </span>
-                                {ficha.pontos_nao_conformes > 0 && (
-                                  <span className="flex items-center gap-1">
-                                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                                    {ficha.pontos_nao_conformes} NC
-                                  </span>
-                                )}
-                              </div>
+                              )}
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={
-                              ficha.status === 'rascunho' || !ficha.status ? 'outline' :
-                              ficha.status === 'pendente_aprovacao_coordenador' ? 'secondary' :
-                              ficha.status === 'aprovado' ? 'default' :
-                              'destructive'
-                            }>
-                              {ficha.status === 'rascunho' || !ficha.status ? 'Rascunho' :
-                               ficha.status === 'pendente_aprovacao_coordenador' ? 'Pendente' :
-                               ficha.status === 'aprovado' ? 'Aprovado' :
-                               'Rejeitado'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex justify-end gap-2">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleEnviarParaCoordenador(ficha.id)}
-                                      disabled={ficha.status && ficha.status !== "rascunho"}
-                                      title={
-                                        ficha.status && ficha.status !== "rascunho"
-                                          ? "Ficha já foi enviada ao coordenador"
-                                          : "Enviar para Coordenador"
-                                      }
-                                    >
-                                      <Send className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{ficha.status && ficha.status !== "rascunho" ? "Já enviada" : "Enviar para coordenador"}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              ficha.status === "rascunho" || !ficha.status
+                                ? "outline"
+                                : ficha.status === "pendente_aprovacao_coordenador"
+                                  ? "secondary"
+                                  : ficha.status === "aprovado"
+                                    ? "default"
+                                    : "destructive"
+                            }
+                          >
+                            {ficha.status === "rascunho" || !ficha.status
+                              ? "Rascunho"
+                              : ficha.status === "pendente_aprovacao_coordenador"
+                                ? "Pendente"
+                                : ficha.status === "aprovado"
+                                  ? "Aprovado"
+                                  : "Rejeitado"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex justify-end gap-2">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEnviarParaCoordenador(ficha.id)}
+                                    disabled={ficha.status && ficha.status !== "rascunho"}
+                                    title={
+                                      ficha.status && ficha.status !== "rascunho"
+                                        ? "Ficha já foi enviada ao coordenador"
+                                        : "Enviar para Coordenador"
+                                    }
+                                  >
+                                    <Send className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    {ficha.status && ficha.status !== "rascunho"
+                                      ? "Já enviada"
+                                      : "Enviar para coordenador"}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
 
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleViewDetails(ficha)}
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Visualizar pontos de verificação</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="ghost" size="sm" onClick={() => handleViewDetails(ficha)}>
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Visualizar pontos de verificação</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
 
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        setFichaToDelete(ficha.id);
-                                        setDeleteDialogOpen(true);
-                                      }}
-                                      disabled={ficha.status && ficha.status !== "rascunho"}
-                                      title={
-                                        ficha.status && ficha.status !== "rascunho"
-                                          ? "Não é possível excluir fichas enviadas"
-                                          : "Excluir ficha"
-                                      }
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{ficha.status && ficha.status !== "rascunho" ? "Não pode excluir" : "Excluir ficha"}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setFichaToDelete(ficha.id);
+                                      setDeleteDialogOpen(true);
+                                    }}
+                                    disabled={ficha.status && ficha.status !== "rascunho"}
+                                    title={
+                                      ficha.status && ficha.status !== "rascunho"
+                                        ? "Não é possível excluir fichas enviadas"
+                                        : "Excluir ficha"
+                                    }
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    {ficha.status && ficha.status !== "rascunho" ? "Não pode excluir" : "Excluir ficha"}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             )}
           </CardContent>
@@ -532,9 +546,7 @@ export default function MinhasFichasVerificacao() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {selectedFicha?.tipo} - Detalhes
-            </DialogTitle>
+            <DialogTitle>{selectedFicha?.tipo} - Detalhes</DialogTitle>
           </DialogHeader>
 
           {selectedFicha && (
@@ -542,7 +554,7 @@ export default function MinhasFichasVerificacao() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-semibold">Data:</p>
-                  <p>{new Date(selectedFicha.data_verificacao).toLocaleDateString('pt-BR')}</p>
+                  <p>{new Date(selectedFicha.data_verificacao).toLocaleDateString("pt-BR")}</p>
                 </div>
                 {selectedFicha.contrato && (
                   <div>
@@ -579,31 +591,54 @@ export default function MinhasFichasVerificacao() {
                           />
                         </CardHeader>
                         <CardContent className="space-y-2 text-sm">
-                          {item.km_inicial && <p><strong>KM:</strong> {item.km_inicial}</p>}
-                          {item.sentido && <p><strong>Sentido:</strong> {item.sentido}</p>}
+                          {item.km_inicial && (
+                            <p>
+                              <strong>KM:</strong> {item.km_inicial}
+                            </p>
+                          )}
+                          {item.sentido && (
+                            <p>
+                              <strong>Sentido:</strong> {item.sentido}
+                            </p>
+                          )}
                           {item.latitude_inicial && item.longitude_inicial && (
-                            <p><strong>Coordenadas:</strong> {item.latitude_inicial}, {item.longitude_inicial}</p>
+                            <p>
+                              <strong>Coordenadas:</strong> {item.latitude_inicial}, {item.longitude_inicial}
+                            </p>
                           )}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
                             {Object.entries(item)
-                              .filter(([key]) => !['ordem', 'foto_url', 'latitude_inicial', 'longitude_inicial', 'sentido', 'km_inicial', 'ficha_id', 'id', 'created_at'].includes(key))
-                              .filter(([key]) => !key.endsWith('_medicoes')) // Não exibir arrays de medições
-                              .filter(([_, value]) => value !== null && value !== undefined && value !== '')
+                              .filter(
+                                ([key]) =>
+                                  ![
+                                    "ordem",
+                                    "foto_url",
+                                    "latitude_inicial",
+                                    "longitude_inicial",
+                                    "sentido",
+                                    "km_inicial",
+                                    "ficha_id",
+                                    "id",
+                                    "created_at",
+                                  ].includes(key),
+                              )
+                              .filter(([key]) => !key.endsWith("_medicoes")) // Não exibir arrays de medições
+                              .filter(([_, value]) => value !== null && value !== undefined && value !== "")
                               .map(([key, value]) => {
-                                if (key.endsWith('_conforme')) return null;
-                                if (key.endsWith('_obs') && !value) return null;
-                                
+                                if (key.endsWith("_conforme")) return null;
+                                if (key.endsWith("_obs") && !value) return null;
+
                                 // Para campos de retrorefletividade, mostrar apenas a média
-                                const isRetro = key.startsWith('retro_');
-                                const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                const isRetro = key.startsWith("retro_");
+                                const label = key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
                                 const conforme = item[`${key}_conforme`];
-                                
+
                                 return (
                                   <div key={key} className="border-l-2 border-primary pl-2">
                                     <p className="font-semibold">{label}:</p>
                                     <p className={isRetro ? "text-lg font-bold text-primary" : ""}>
-                                      {typeof value === 'boolean' ? (value ? 'Sim' : 'Não') : value}
-                                      {isRetro && ' mcd/lux'}
+                                      {typeof value === "boolean" ? (value ? "Sim" : "Não") : value}
+                                      {isRetro && " mcd/lux"}
                                     </p>
                                     {conforme !== undefined && (
                                       <Badge variant={conforme ? "default" : "destructive"} className="mt-1">
@@ -611,9 +646,7 @@ export default function MinhasFichasVerificacao() {
                                       </Badge>
                                     )}
                                     {item[`${key}_obs`] && (
-                                      <p className="text-xs text-muted-foreground mt-1">
-                                        Obs: {item[`${key}_obs`]}
-                                      </p>
+                                      <p className="text-xs text-muted-foreground mt-1">Obs: {item[`${key}_obs`]}</p>
                                     )}
                                   </div>
                                 );
@@ -637,7 +670,7 @@ export default function MinhasFichasVerificacao() {
             <DialogTitle>Nova Ficha de Verificação</DialogTitle>
           </DialogHeader>
           {activeSession && (
-            <FichaVerificacaoForm 
+            <FichaVerificacaoForm
               loteId={activeSession.lote_id}
               rodoviaId={activeSession.rodovia_id}
               onSuccess={() => {
@@ -659,10 +692,11 @@ export default function MinhasFichasVerificacao() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setFichaToDelete(null)}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogCancel onClick={() => setFichaToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
