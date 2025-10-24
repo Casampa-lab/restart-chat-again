@@ -164,11 +164,7 @@ const LotesManager = () => {
       toast.error("Selecione uma rodovia");
       return;
     }
-    const rodoviaExistente = rodoviasVinculadas.find(r => r.rodovia_id === novaRodovia.rodovia_id);
-    if (rodoviaExistente) {
-      toast.error("Esta rodovia já foi adicionada");
-      return;
-    }
+   // Permitir múltiplos segmentos da mesma rodovia
     const rodovia = rodovias.find(r => r.id === novaRodovia.rodovia_id);
     if (!rodovia) return;
     setRodoviasVinculadas([...rodoviasVinculadas, {
