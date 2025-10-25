@@ -27,20 +27,17 @@ const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
   
-  // SEÇÃO 1: LOCALIZAÇÃO
-  br: z.string().optional(),
+  // SEÇÃO 1: LOCALIZAÇÃO (BR e coordenadas vêm da sessão/GPS)
   snv: z.string().optional(),
   km_inicial: z.string().optional(),
-  latitude_inicial: z.string().optional(),
-  longitude_inicial: z.string().optional(),
+  velocidade: z.string().optional(),
   
   // SEÇÃO 2: IDENTIFICAÇÃO DA PLACA
   tipo_placa: z.string().optional(),
   codigo_placa: z.string().optional(),
-  velocidade: z.string().optional(),
-  lado: z.string().optional(),
-  posicao: z.string().optional(),
+  posicao: z.string().optional(), // Mapeado para 'lado' no banco
   detalhamento_pagina: z.coerce.number().optional(),
+  si_sinal_impresso: z.string().optional(),
   
   // SEÇÃO 3: SUPORTE
   suporte: z.string().optional(),
@@ -49,14 +46,15 @@ const formSchema = z.object({
   secao_suporte_mm: z.string().optional(),
   substrato_suporte: z.string().optional(),
   
-  // SEÇÃO 4: CHAPA DA PLACA
-  substrato: z.string().optional(),
-  si_sinal_impresso: z.string().optional(),
+  // SEÇÃO 4: DIMENSÕES (só nova placa)
   largura_mm: z.coerce.number().optional(),
   altura_mm: z.coerce.number().optional(),
   area_m2: z.coerce.number().optional(),
   
-  // SEÇÃO 5: PELÍCULAS
+  // SEÇÃO 5: CHAPA DA PLACA
+  substrato: z.string().optional(),
+  
+  // SEÇÃO 6: PELÍCULAS
   tipo_pelicula_fundo: z.string().optional(),
   cor_pelicula_fundo: z.string().optional(),
   retro_pelicula_fundo: z.string().optional(),
@@ -112,30 +110,27 @@ export function IntervencoesSVForm({
       data_intervencao: new Date().toISOString().split('T')[0],
       motivo: "",
       // Localização
-      br: "",
       snv: "",
       km_inicial: "",
-      latitude_inicial: "",
-      longitude_inicial: "",
+      velocidade: "",
       // Identificação
       tipo_placa: "",
       codigo_placa: "",
-      velocidade: "",
-      lado: "",
       posicao: "",
       detalhamento_pagina: undefined,
+      si_sinal_impresso: "",
       // Suporte
       suporte: "",
       qtde_suporte: undefined,
       tipo_secao_suporte: "",
       secao_suporte_mm: "",
       substrato_suporte: "",
-      // Chapa
-      substrato: "",
-      si_sinal_impresso: "",
+      // Dimensões
       largura_mm: undefined,
       altura_mm: undefined,
       area_m2: undefined,
+      // Chapa
+      substrato: "",
       // Películas
       tipo_pelicula_fundo: "",
       cor_pelicula_fundo: "",
@@ -163,17 +158,12 @@ export function IntervencoesSVForm({
       form.setValue("km_inicial", placaSelecionada.km_inicial?.toString() || "");
       form.setValue("tipo_placa", placaSelecionada.tipo || "");
       form.setValue("codigo_placa", placaSelecionada.codigo || "");
-      form.setValue("latitude_inicial", placaSelecionada.latitude_inicial?.toString() || "");
-      form.setValue("longitude_inicial", placaSelecionada.longitude_inicial?.toString() || "");
-      form.setValue("br", placaSelecionada.br || "");
       form.setValue("snv", placaSelecionada.snv || "");
       form.setValue("velocidade", placaSelecionada.velocidade || "");
-      form.setValue("lado", placaSelecionada.lado || "");
       form.setValue("posicao", placaSelecionada.posicao || "");
       form.setValue("suporte", placaSelecionada.suporte || "");
       form.setValue("substrato", placaSelecionada.substrato || "");
-      form.setValue("largura_mm", placaSelecionada.largura_m ? placaSelecionada.largura_m * 1000 : undefined);
-      form.setValue("altura_mm", placaSelecionada.altura_m ? placaSelecionada.altura_m * 1000 : undefined);
+      form.setValue("substrato_suporte", placaSelecionada.substrato_suporte || "");
     }
   }, [placaSelecionada, form]);
 
@@ -252,13 +242,22 @@ export function IntervencoesSVForm({
             km_inicial: parseFloat(data.km_inicial),
             tipo: data.tipo_placa,
             codigo: data.codigo_placa,
-            latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
-            longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
+            posicao: data.posicao || null,
+            snv: data.snv || null,
+            velocidade: data.velocidade || null,
             suporte: data.suporte || null,
             substrato: data.substrato || null,
             substrato_suporte: data.substrato_suporte || null,
+            dimensoes_mm: data.largura_mm && data.altura_mm ? `${data.largura_mm}x${data.altura_mm}` : null,
+            largura_m: data.largura_mm ? data.largura_mm / 1000 : null,
+            altura_m: data.altura_mm ? data.altura_mm / 1000 : null,
+            area_m2: data.area_m2 || null,
             tipo_pelicula_fundo: data.tipo_pelicula_fundo || null,
+            cor_pelicula_fundo: data.cor_pelicula_fundo || null,
             tipo_pelicula_legenda_orla: data.tipo_pelicula_legenda_orla || null,
+            cor_pelicula_legenda_orla: data.cor_pelicula_legenda_orla || null,
+            si_sinal_impresso: data.si_sinal_impresso || null,
+            detalhamento_pagina: data.detalhamento_pagina || null,
             data_vistoria: data.data_intervencao,
           })
           .select()
@@ -280,30 +279,20 @@ export function IntervencoesSVForm({
         substrato: data.substrato || null,
         substrato_suporte: data.substrato_suporte || null,
         tipo_pelicula_fundo_novo: data.tipo_pelicula_fundo || null,
+        cor_pelicula_fundo: data.cor_pelicula_fundo || null,
         tipo_pelicula_legenda_orla: data.tipo_pelicula_legenda_orla || null,
+        cor_pelicula_legenda_orla: data.cor_pelicula_legenda_orla || null,
         retro_fundo: data.retro_pelicula_fundo ? parseFloat(data.retro_pelicula_fundo) : null,
         retro_orla_legenda: data.retro_pelicula_legenda_orla ? parseFloat(data.retro_pelicula_legenda_orla) : null,
         fora_plano_manutencao: data.fora_plano_manutencao,
         justificativa_fora_plano: data.justificativa_fora_plano || null,
-        latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
-        longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
         tipo: data.tipo_placa || null,
         codigo: data.codigo_placa || null,
-        lado: data.lado || null,
-        largura_mm: data.largura_mm || null,
-        altura_mm: data.altura_mm || null,
-        // Novos campos
-        br: data.br || null,
-        snv: data.snv || null,
-        velocidade: data.velocidade || null,
         posicao: data.posicao || null,
-        detalhamento_pagina: data.detalhamento_pagina || null,
         qtde_suporte: data.qtde_suporte || null,
         tipo_secao_suporte: data.tipo_secao_suporte || null,
         secao_suporte_mm: data.secao_suporte_mm || null,
         si_sinal_impresso: data.si_sinal_impresso || null,
-        cor_pelicula_fundo: data.cor_pelicula_fundo || null,
-        cor_pelicula_legenda_orla: data.cor_pelicula_legenda_orla || null,
         area_m2: data.area_m2 || null,
         km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : (placaSelecionada?.km_inicial || null),
       });
@@ -470,21 +459,7 @@ export function IntervencoesSVForm({
             <div className="space-y-4 border-l-4 border-blue-500 pl-4 bg-blue-50 dark:bg-blue-950/20 py-4 rounded-r-lg">
               <h3 className="font-semibold text-blue-700 dark:text-blue-400 text-lg">📍 Localização</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="br"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>BR</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: 040" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="snv"
@@ -519,36 +494,6 @@ export function IntervencoesSVForm({
                           <SelectItem value="110">110</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="latitude_inicial"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Latitude</FormLabel>
-                      <FormControl>
-                        <Input placeholder="-15.793889" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="longitude_inicial"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Longitude</FormLabel>
-                      <FormControl>
-                        <Input placeholder="-47.882778" {...field} />
-                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -796,25 +741,19 @@ export function IntervencoesSVForm({
 
           <FormField
             control={form.control}
-            name="suporte"
+            name="si_sinal_impresso"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  Suporte
-                  {isCampoEstruturalBloqueado('suporte') && <Lock className="h-3 w-3 text-muted-foreground" />}
-                </FormLabel>
-                <Select onValueChange={field.onChange} value={field.value} disabled={isCampoEstruturalBloqueado('suporte')}>
+                <FormLabel>SI - Sinal Impresso</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione o suporte" />
+                      <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Poste Metálico">Poste Metálico</SelectItem>
-                    <SelectItem value="Poste Madeira">Poste Madeira</SelectItem>
-                    <SelectItem value="Poste Concreto">Poste Concreto</SelectItem>
-                    <SelectItem value="Fixação em Defensa">Fixação em Defensa</SelectItem>
-                    <SelectItem value="Fixação em Estrutura Existente">Fixação em Estrutura Existente</SelectItem>
+                    <SelectItem value="Sim">Sim</SelectItem>
+                    <SelectItem value="Não">Não</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -825,23 +764,20 @@ export function IntervencoesSVForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="lado"
+              name="tipo_pelicula_fundo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    Lado
-                    {isCampoEstruturalBloqueado('lado') && <Lock className="h-3 w-3 text-muted-foreground" />}
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value} disabled={isCampoEstruturalBloqueado('lado')}>
+                  <FormLabel>Tipo Película Fundo</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="direito">Direito</SelectItem>
-                      <SelectItem value="esquerdo">Esquerdo</SelectItem>
-                      <SelectItem value="canteiro_central">Canteiro Central</SelectItem>
+                      <SelectItem value="Grau Técnico I">Grau Técnico I</SelectItem>
+                      <SelectItem value="Grau Técnico II">Grau Técnico II</SelectItem>
+                      <SelectItem value="Grau Técnico III">Grau Técnico III</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -851,15 +787,37 @@ export function IntervencoesSVForm({
 
             <FormField
               control={form.control}
-              name="largura_mm"
+              name="cor_pelicula_fundo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    Largura (mm)
-                    {isCampoEstruturalBloqueado('largura_mm') && <Lock className="h-3 w-3 text-muted-foreground" />}
-                  </FormLabel>
+                  <FormLabel>Cor Película Fundo</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Branco">Branco</SelectItem>
+                      <SelectItem value="Amarelo">Amarelo</SelectItem>
+                      <SelectItem value="Verde">Verde</SelectItem>
+                      <SelectItem value="Azul">Azul</SelectItem>
+                      <SelectItem value="Vermelho">Vermelho</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="retro_pelicula_fundo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Retrorrefletância Fundo</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Ex: 600" {...field} disabled={isCampoEstruturalBloqueado('largura_mm')} />
+                    <Input type="number" placeholder="Ex: 250" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -868,15 +826,59 @@ export function IntervencoesSVForm({
 
             <FormField
               control={form.control}
-              name="altura_mm"
+              name="tipo_pelicula_legenda_orla"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    Altura (mm)
-                    {isCampoEstruturalBloqueado('altura_mm') && <Lock className="h-3 w-3 text-muted-foreground" />}
-                  </FormLabel>
+                  <FormLabel>Tipo Película Legenda/Orla</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Grau Técnico I">Grau Técnico I</SelectItem>
+                      <SelectItem value="Grau Técnico II">Grau Técnico II</SelectItem>
+                      <SelectItem value="Grau Técnico III">Grau Técnico III</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cor_pelicula_legenda_orla"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cor Película Legenda/Orla</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Preto">Preto</SelectItem>
+                      <SelectItem value="Branco">Branco</SelectItem>
+                      <SelectItem value="Amarelo">Amarelo</SelectItem>
+                      <SelectItem value="Vermelho">Vermelho</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="retro_pelicula_legenda_orla"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Retrorrefletância Legenda/Orla</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Ex: 600" {...field} disabled={isCampoEstruturalBloqueado('altura_mm')} />
+                    <Input type="number" placeholder="Ex: 250" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
