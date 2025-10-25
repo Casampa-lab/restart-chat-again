@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Info, Plus, Eye } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info, Plus, Eye, Send, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -69,6 +70,45 @@ export function IntervencoesViewerBase({
       toast.error('Erro ao carregar elementos registrados');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEnviarParaCoordenador = async (intervencaoId: string) => {
+    try {
+      const { error } = await supabase
+        .from(tabelaIntervencao as any)
+        .update({
+          pendente_aprovacao_coordenador: false,
+          data_aprovacao_coordenador: new Date().toISOString(),
+        })
+        .eq('id', intervencaoId);
+
+      if (error) throw error;
+
+      toast.success('Intervenção enviada para aprovação!');
+      carregar();
+    } catch (error: any) {
+      console.error('Erro ao enviar:', error);
+      toast.error('Erro ao enviar intervenção: ' + error.message);
+    }
+  };
+
+  const handleExcluir = async (intervencaoId: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta intervenção?')) return;
+
+    try {
+      const { error } = await supabase
+        .from(tabelaIntervencao as any)
+        .delete()
+        .eq('id', intervencaoId);
+
+      if (error) throw error;
+
+      toast.success('Intervenção excluída com sucesso!');
+      carregar();
+    } catch (error: any) {
+      console.error('Erro ao excluir:', error);
+      toast.error('Erro ao excluir intervenção: ' + error.message);
     }
   };
 
@@ -162,14 +202,53 @@ export function IntervencoesViewerBase({
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEditarElemento?.(elem)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEnviarParaCoordenador(elem.id)}
+                                disabled={!elem.pendente_aprovacao_coordenador}
+                                title={!elem.pendente_aprovacao_coordenador ? "Intervenção já foi enviada" : "Enviar para Coordenador"}
+                              >
+                                <Send className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Enviar para Coordenador</TooltipContent>
+                          </Tooltip>
+                          
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => onEditarElemento?.(elem)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Visualizar detalhes</TooltipContent>
+                          </Tooltip>
+                          
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleExcluir(elem.id)}
+                                disabled={!elem.pendente_aprovacao_coordenador}
+                                title={!elem.pendente_aprovacao_coordenador ? "Não pode excluir: intervenção já enviada" : "Excluir"}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Excluir</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
