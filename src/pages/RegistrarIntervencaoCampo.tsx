@@ -319,7 +319,16 @@ export default function RegistrarIntervencaoCampo() {
         .from(tabelaIntervencao as any)
         .insert(payloadIntervencao);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao inserir intervenção:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+          payload: payloadIntervencao
+        });
+        throw error;
+      }
 
       toast.success(isConforme 
         ? 'Intervenção enviada para aprovação!' 
