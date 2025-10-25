@@ -139,6 +139,8 @@ export default function RegistrarIntervencaoCampo() {
   useEffect(() => {
     setModoVisualizacao('viewer');
     setElementoSelecionado(null);
+    setDadosIntervencao(null);
+    console.log('🔄 Reset de visualização:', { tipoSelecionado, modoOperacao });
   }, [tipoSelecionado, modoOperacao]);
 
   // Mapeamento de viewers
@@ -361,6 +363,11 @@ export default function RegistrarIntervencaoCampo() {
   };
 
   const FormularioAtual = TIPOS_ELEMENTOS.find(t => t.value === tipoSelecionado)?.component;
+  
+  // Log de debug para identificar problemas de sincronização
+  if (modoVisualizacao === 'formulario' && !FormularioAtual) {
+    console.error('⚠️ Formulário não encontrado para tipo:', tipoSelecionado);
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
@@ -504,6 +511,17 @@ export default function RegistrarIntervencaoCampo() {
             return ViewerComponent ? (
               <ViewerComponent 
                 onEditarElemento={(elem: any) => {
+                  // ✅ Garantir que o elemento tem o tipo_elemento definido
+                  if (elem && !elem.tipo_elemento) {
+                    elem.tipo_elemento = tipoSelecionado;
+                  }
+                  
+                  console.log('📝 Editando elemento:', {
+                    tipo: tipoSelecionado,
+                    elemento: elem,
+                    formulario: TIPOS_ELEMENTOS.find(t => t.value === tipoSelecionado)?.label
+                  });
+                  
                   setElementoSelecionado(elem);
                   setModoVisualizacao('formulario');
                 }}
@@ -546,6 +564,15 @@ export default function RegistrarIntervencaoCampo() {
                     <Info className="h-4 w-4 text-orange-600" />
                     <AlertDescription className="text-sm text-orange-900">
                       <strong>Modo Manutenção IN-3:</strong> Campos estruturais não podem ser alterados.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {!FormularioAtual && (
+                  <Alert className="mb-4 border-red-300 bg-red-50">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <AlertDescription className="text-sm text-red-900">
+                      <strong>Erro:</strong> Formulário não encontrado para o tipo "{tipoSelecionado}". 
+                      Tente alterar o tipo de elemento.
                     </AlertDescription>
                   </Alert>
                 )}
