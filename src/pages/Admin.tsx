@@ -32,7 +32,6 @@ import { DiagnosticoMatch } from "@/components/admin/DiagnosticoMatch";
 import { LimparFotosOrfas } from "@/components/admin/LimparFotosOrfas";
 import { SnvShapefileUploader } from "@/components/admin/SnvShapefileUploader";
 import { ResetDatabaseButton } from "@/components/admin/ResetDatabaseButton";
-import { assignCoordinatorConsol } from "@/lib/assignCoordinatorConsol";
 import { ParametrosMatchManager } from "@/components/admin/ParametrosMatchManager";
 import { RelatorioMatching } from "@/components/admin/RelatorioMatching";
 import { ExecutarMatching } from "@/components/admin/ExecutarMatching";
