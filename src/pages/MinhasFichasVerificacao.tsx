@@ -220,6 +220,32 @@ export default function MinhasFichasVerificacao() {
         .eq("id", fichaId);
       if (upErr) throw upErr;
 
+      // DEBUG INÍCIO — remover depois
+      try {
+        // 1) assignments por lote
+        const a = await supabase.from("coordinator_assignments").select("user_id").eq("lote_id", ficha.lote_id);
+        console.log("[DEBUG] assignments", a);
+        // 2) lote -> supervisora_id
+        const l = await supabase.from("lotes").select("supervisora_id").eq("id", ficha.lote_id).maybeSingle();
+        console.log("[DEBUG] lote", l);
+        // 3) perfis da mesma supervisora
+        const p = l.data?.supervisora_id
+          ? await supabase.from("profiles").select("id").eq("supervisora_id", l.data.supervisora_id)
+          : { data: [], error: null };
+        console.log("[DEBUG] profiles", p);
+        // 4) roles=coordenador
+        const ids = (p.data ?? []).map((x: any) => x.id);
+        const r = ids.length
+          ? await supabase.from("user_roles").select("user_id").eq("role", "coordenador").in("user_id", ids)
+          : { data: [], error: null };
+        console.log("[DEBUG] roles", r);
+        // aviso visual
+        toast(`DBG: a=${a.data?.length || 0} l=${!!l.data} p=${p.data?.length || 0} r=${r.data?.length || 0}`);
+      } catch (err) {
+        console.error("[DEBUG] erro", err);
+      }
+      // DEBUG FIM
+
       // Busca determinística de coordenadores (prioriza assignments)
       const destinatarios = await findCoordinatorsByLoteId(supabase as any, ficha.lote_id);
 
