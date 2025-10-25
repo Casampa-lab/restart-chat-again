@@ -67,8 +67,6 @@ const formSchema = z.object({
   snv: z.string().optional(),
   tipo_demarcacao: z.string().optional(),
   cor: z.string().optional(),
-  posicao: z.string().optional(),
-  codigo: z.string().optional(),
   largura_cm: z.string().optional(),
   espessura_cm: z.string().optional(),
   material: z.string().optional(),
@@ -107,8 +105,6 @@ const IntervencoesSHForm = ({
       snv: "",
       tipo_demarcacao: "",
       cor: "",
-      posicao: "",
-      codigo: "",
       largura_cm: "",
       espessura_cm: "",
       material: "",
@@ -132,8 +128,6 @@ const IntervencoesSHForm = ({
         snv: (marcaSelecionada as any).snv || "",
         tipo_demarcacao: (marcaSelecionada as any).tipo_demarcacao || "",
         cor: (marcaSelecionada as any).cor || "",
-        posicao: (marcaSelecionada as any).posicao || "",
-        codigo: (marcaSelecionada as any).codigo || "",
         largura_cm: (marcaSelecionada as any).largura_cm?.toString() || "",
         espessura_cm: (marcaSelecionada as any).espessura_cm?.toString() || "",
         material: (marcaSelecionada as any).material || "",
@@ -178,8 +172,6 @@ const IntervencoesSHForm = ({
           snv: data.snv || null,
           tipo_demarcacao: data.tipo_demarcacao || null,
           cor: data.cor || null,
-          posicao: data.posicao || null,
-          codigo: data.codigo || null,
           largura_cm: data.largura_cm ? parseFloat(data.largura_cm) : null,
           espessura_cm: data.espessura_cm ? parseFloat(data.espessura_cm) : null,
           material: data.material || null,
@@ -371,50 +363,8 @@ const IntervencoesSHForm = ({
                       </Select>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="posicao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Posição
-                        {isCampoEstruturalBloqueado('posicao') && <Lock className="h-3 w-3 text-muted-foreground" />}
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Ex: Eixo, Bordo Direito" 
-                          {...field}
-                          disabled={isCampoEstruturalBloqueado('posicao')}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="codigo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Código
-                        {isCampoEstruturalBloqueado('codigo') && <Lock className="h-3 w-3 text-muted-foreground" />}
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Ex: LBO, LCO" 
-                          {...field}
-                          disabled={isCampoEstruturalBloqueado('codigo')}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              )}
+            />
 
                 <FormField
                   control={form.control}
