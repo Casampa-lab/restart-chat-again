@@ -270,7 +270,8 @@ export default function RegistrarIntervencaoCampo() {
         'pendente_aprovacao_coordenador', 'coordenador_id', 'data_aprovacao_coordenador',
         'aplicado_ao_inventario', 'observacao_coordenador', 'latitude_inicial',
         'longitude_inicial', 'fotos_urls', 'tipo_origem', 'user_id',
-        'tipo', 'codigo', 'lado', 'material', 'largura_mm', 'altura_mm', 'km_inicial'
+        'tipo', 'codigo', 'lado', 'material', 'largura_mm', 'altura_mm',
+        'lote_id', 'rodovia_id', 'km_inicial'
       ];
 
       // Filtrar apenas campos permitidos de dadosIntervencao
@@ -291,6 +292,8 @@ export default function RegistrarIntervencaoCampo() {
         pendente_aprovacao_coordenador: isConforme,
         aplicado_ao_inventario: false,
         tipo_origem: modoOperacao === 'manutencao' ? 'manutencao_pre_projeto' : 'execucao',
+        lote_id: activeSession?.lote_id || null,
+        rodovia_id: activeSession?.rodovia_id || null,
         km_inicial: parseFloat(dadosIntervencao?.km_inicial) || null,
       };
 

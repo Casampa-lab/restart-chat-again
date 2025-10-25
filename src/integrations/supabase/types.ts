@@ -1889,6 +1889,7 @@ export type Database = {
           largura_mm: number | null
           latitude_inicial: number | null
           longitude_inicial: number | null
+          lote_id: string | null
           material: string | null
           motivo: string
           observacao_coordenador: string | null
@@ -1898,6 +1899,7 @@ export type Database = {
           qtde_suporte: number | null
           retro_fundo: number | null
           retro_orla_legenda: number | null
+          rodovia_id: string | null
           secao_suporte_mm: string | null
           si_sinal_impresso: string | null
           snv: string | null
@@ -1935,6 +1937,7 @@ export type Database = {
           largura_mm?: number | null
           latitude_inicial?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           material?: string | null
           motivo: string
           observacao_coordenador?: string | null
@@ -1944,6 +1947,7 @@ export type Database = {
           qtde_suporte?: number | null
           retro_fundo?: number | null
           retro_orla_legenda?: number | null
+          rodovia_id?: string | null
           secao_suporte_mm?: string | null
           si_sinal_impresso?: string | null
           snv?: string | null
@@ -1981,6 +1985,7 @@ export type Database = {
           largura_mm?: number | null
           latitude_inicial?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           material?: string | null
           motivo?: string
           observacao_coordenador?: string | null
@@ -1990,6 +1995,7 @@ export type Database = {
           qtde_suporte?: number | null
           retro_fundo?: number | null
           retro_orla_legenda?: number | null
+          rodovia_id?: string | null
           secao_suporte_mm?: string | null
           si_sinal_impresso?: string | null
           snv?: string | null
@@ -2017,6 +2023,20 @@ export type Database = {
             columns: ["ficha_placa_id"]
             isOneToOne: false
             referencedRelation: "v_inventario_dinamico_placas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_placa_intervencoes_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_placa_intervencoes_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
             referencedColumns: ["id"]
           },
           {
