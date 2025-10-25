@@ -1869,11 +1869,16 @@ export type Database = {
         Row: {
           altura_mm: number | null
           aplicado_ao_inventario: boolean | null
+          area_m2: number | null
+          br: string | null
           codigo: string | null
           coordenador_id: string | null
+          cor_pelicula_fundo: string | null
+          cor_pelicula_legenda_orla: string | null
           created_at: string
           data_aprovacao_coordenador: string | null
           data_intervencao: string
+          detalhamento_pagina: number | null
           ficha_placa_id: string | null
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
@@ -1889,23 +1894,37 @@ export type Database = {
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
           placa_recuperada: boolean | null
+          posicao: string | null
+          qtde_suporte: number | null
           retro_fundo: number | null
           retro_orla_legenda: number | null
+          secao_suporte_mm: string | null
+          si_sinal_impresso: string | null
+          snv: string | null
           substrato: string | null
+          substrato_suporte: string | null
           suporte: string | null
           tipo: string | null
           tipo_origem: string | null
           tipo_pelicula_fundo_novo: string | null
+          tipo_pelicula_legenda_orla: string | null
+          tipo_secao_suporte: string | null
           user_id: string | null
+          velocidade: string | null
         }
         Insert: {
           altura_mm?: number | null
           aplicado_ao_inventario?: boolean | null
+          area_m2?: number | null
+          br?: string | null
           codigo?: string | null
           coordenador_id?: string | null
+          cor_pelicula_fundo?: string | null
+          cor_pelicula_legenda_orla?: string | null
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
+          detalhamento_pagina?: number | null
           ficha_placa_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
@@ -1921,23 +1940,37 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           placa_recuperada?: boolean | null
+          posicao?: string | null
+          qtde_suporte?: number | null
           retro_fundo?: number | null
           retro_orla_legenda?: number | null
+          secao_suporte_mm?: string | null
+          si_sinal_impresso?: string | null
+          snv?: string | null
           substrato?: string | null
+          substrato_suporte?: string | null
           suporte?: string | null
           tipo?: string | null
           tipo_origem?: string | null
           tipo_pelicula_fundo_novo?: string | null
+          tipo_pelicula_legenda_orla?: string | null
+          tipo_secao_suporte?: string | null
           user_id?: string | null
+          velocidade?: string | null
         }
         Update: {
           altura_mm?: number | null
           aplicado_ao_inventario?: boolean | null
+          area_m2?: number | null
+          br?: string | null
           codigo?: string | null
           coordenador_id?: string | null
+          cor_pelicula_fundo?: string | null
+          cor_pelicula_legenda_orla?: string | null
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
+          detalhamento_pagina?: number | null
           ficha_placa_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
@@ -1953,14 +1986,23 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           placa_recuperada?: boolean | null
+          posicao?: string | null
+          qtde_suporte?: number | null
           retro_fundo?: number | null
           retro_orla_legenda?: number | null
+          secao_suporte_mm?: string | null
+          si_sinal_impresso?: string | null
+          snv?: string | null
           substrato?: string | null
+          substrato_suporte?: string | null
           suporte?: string | null
           tipo?: string | null
           tipo_origem?: string | null
           tipo_pelicula_fundo_novo?: string | null
+          tipo_pelicula_legenda_orla?: string | null
+          tipo_secao_suporte?: string | null
           user_id?: string | null
+          velocidade?: string | null
         }
         Relationships: [
           {

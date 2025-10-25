@@ -27,32 +27,46 @@ const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
   
-  // SEÇÃO 1: CHAPA DA PLACA E PELÍCULAS
-  substrato: z.string().optional(),
-  tipo_pelicula_fundo: z.string().optional(),
-  retro_pelicula_fundo: z.string().optional(),
-  tipo_pelicula_legenda_orla: z.string().optional(),
-  retro_pelicula_legenda_orla: z.string().optional(),
-  
-  // SEÇÃO 2: SUPORTE FÍSICO
-  suporte: z.string().optional(),
-  substrato_suporte: z.string().optional(),
-  
-  fora_plano_manutencao: z.boolean().default(false),
-  justificativa_fora_plano: z.string().optional(),
-  
-  // Campos para criar nova placa caso não exista no inventário
+  // SEÇÃO 1: LOCALIZAÇÃO
+  br: z.string().optional(),
+  snv: z.string().optional(),
   km_inicial: z.string().optional(),
-  tipo_placa: z.string().optional(),
-  codigo_placa: z.string().optional(),
   latitude_inicial: z.string().optional(),
   longitude_inicial: z.string().optional(),
   
-  // Campos estruturais da placa
+  // SEÇÃO 2: IDENTIFICAÇÃO DA PLACA
+  tipo_placa: z.string().optional(),
+  codigo_placa: z.string().optional(),
+  velocidade: z.string().optional(),
   lado: z.string().optional(),
-  material: z.string().optional(),
+  posicao: z.string().optional(),
+  detalhamento_pagina: z.coerce.number().optional(),
+  
+  // SEÇÃO 3: SUPORTE
+  suporte: z.string().optional(),
+  qtde_suporte: z.coerce.number().optional(),
+  tipo_secao_suporte: z.string().optional(),
+  secao_suporte_mm: z.string().optional(),
+  substrato_suporte: z.string().optional(),
+  
+  // SEÇÃO 4: CHAPA DA PLACA
+  substrato: z.string().optional(),
+  si_sinal_impresso: z.string().optional(),
   largura_mm: z.coerce.number().optional(),
   altura_mm: z.coerce.number().optional(),
+  area_m2: z.coerce.number().optional(),
+  
+  // SEÇÃO 5: PELÍCULAS
+  tipo_pelicula_fundo: z.string().optional(),
+  cor_pelicula_fundo: z.string().optional(),
+  retro_pelicula_fundo: z.string().optional(),
+  tipo_pelicula_legenda_orla: z.string().optional(),
+  cor_pelicula_legenda_orla: z.string().optional(),
+  retro_pelicula_legenda_orla: z.string().optional(),
+  
+  // CONTROLE
+  fora_plano_manutencao: z.boolean().default(false),
+  justificativa_fora_plano: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -106,15 +120,6 @@ export function IntervencoesSVForm({
       retro_pelicula_legenda_orla: "",
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
-      km_inicial: "",
-      tipo_placa: "",
-      codigo_placa: "",
-      latitude_inicial: "",
-      longitude_inicial: "",
-      lado: "",
-      material: "",
-      largura_mm: undefined,
-      altura_mm: undefined,
     },
   });
 
@@ -134,6 +139,15 @@ export function IntervencoesSVForm({
       form.setValue("codigo_placa", placaSelecionada.codigo || "");
       form.setValue("latitude_inicial", placaSelecionada.latitude_inicial?.toString() || "");
       form.setValue("longitude_inicial", placaSelecionada.longitude_inicial?.toString() || "");
+      form.setValue("br", placaSelecionada.br || "");
+      form.setValue("snv", placaSelecionada.snv || "");
+      form.setValue("velocidade", placaSelecionada.velocidade || "");
+      form.setValue("lado", placaSelecionada.lado || "");
+      form.setValue("posicao", placaSelecionada.posicao || "");
+      form.setValue("suporte", placaSelecionada.suporte || "");
+      form.setValue("substrato", placaSelecionada.substrato || "");
+      form.setValue("largura_mm", placaSelecionada.largura_m ? placaSelecionada.largura_m * 1000 : undefined);
+      form.setValue("altura_mm", placaSelecionada.altura_m ? placaSelecionada.altura_m * 1000 : undefined);
     }
   }, [placaSelecionada, form]);
 
@@ -250,9 +264,22 @@ export function IntervencoesSVForm({
         tipo: data.tipo_placa || null,
         codigo: data.codigo_placa || null,
         lado: data.lado || null,
-        material: data.material || null,
         largura_mm: data.largura_mm || null,
         altura_mm: data.altura_mm || null,
+        // Novos campos
+        br: data.br || null,
+        snv: data.snv || null,
+        velocidade: data.velocidade || null,
+        posicao: data.posicao || null,
+        detalhamento_pagina: data.detalhamento_pagina || null,
+        qtde_suporte: data.qtde_suporte || null,
+        tipo_secao_suporte: data.tipo_secao_suporte || null,
+        secao_suporte_mm: data.secao_suporte_mm || null,
+        si_sinal_impresso: data.si_sinal_impresso || null,
+        cor_pelicula_fundo: data.cor_pelicula_fundo || null,
+        cor_pelicula_legenda_orla: data.cor_pelicula_legenda_orla || null,
+        area_m2: data.area_m2 || null,
+        km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : (placaSelecionada?.km_inicial || null),
       });
 
       toast.success("Intervenção registrada com sucesso!");
@@ -496,33 +523,6 @@ export function IntervencoesSVForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="material"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    Material
-                    {isCampoEstruturalBloqueado('material') && <Lock className="h-3 w-3 text-muted-foreground" />}
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value} disabled={isCampoEstruturalBloqueado('material')}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="aluminio">Alumínio</SelectItem>
-                      <SelectItem value="aco">Aço</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="largura_mm"
