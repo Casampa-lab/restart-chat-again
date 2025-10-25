@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { findCoordinatorsByLoteId } from "@/lib/coordenadores";
 
 interface Ficha {
   id: string;
@@ -197,20 +198,19 @@ export default function MinhasFichasVerificacao() {
 
   const handleEnviarParaCoordenador = async (fichaId: string) => {
     try {
-      // 1) Buscar dados essenciais da ficha
       const { data: ficha, error: fErr } = await supabase
         .from("ficha_verificacao")
-        .select("id, tipo, lote_id, snv, data_verificacao, user_id")
+        .select("id, tipo, lote_id, snv, data_verificacao")
         .eq("id", fichaId)
         .single();
       if (fErr) throw fErr;
 
       if (!ficha?.lote_id) {
-        toast.error("Esta ficha não tem Lote definido. Edite e selecione um Lote antes de enviar.");
+        toast.error("Esta ficha não tem Lote definido. Selecione o Lote e tente novamente.");
         return;
       }
 
-      // 2) Atualização otimista de status
+      // Atualiza status de forma otimista
       const { error: upErr } = await supabase
         .from("ficha_verificacao")
         .update({
@@ -220,64 +220,11 @@ export default function MinhasFichasVerificacao() {
         .eq("id", fichaId);
       if (upErr) throw upErr;
 
-      // 3) Cadeia de busca de coordenadores (com fallbacks)
-      let destinatarios: { user_id: string }[] = [];
+      // Busca determinística de coordenadores (prioriza assignments)
+      const destinatarios = await findCoordinatorsByLoteId(supabase as any, ficha.lote_id);
 
-      // 3.1 coordinator_assignments por lote
-      const { data: assign, error: assignErr } = await supabase
-        .from("coordinator_assignments")
-        .select("user_id")
-        .eq("lote_id", ficha.lote_id);
-      if (!assignErr && assign?.length) destinatarios = assign as any;
-
-      // 3.2 coordenador direto no cadastro do lote (se existir)
       if (!destinatarios.length) {
-        const { data: lote } = await supabase
-          .from("lotes")
-          .select("coordenador_id, supervisora_id, ul_id, contrato_id")
-          .eq("id", ficha.lote_id)
-          .single();
-
-        if (lote?.coordenador_id) {
-          destinatarios = [{ user_id: lote.coordenador_id as string }];
-        }
-
-        // 3.3 mesma supervisora + role 'coordenador'
-        if (!destinatarios.length && lote?.supervisora_id) {
-          const { data: profs } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("supervisora_id", lote.supervisora_id);
-
-          if (profs?.length) {
-            const ids = (profs as any[]).map((p) => p.id);
-            const { data: coordsRole } = await supabase
-              .from("user_roles")
-              .select("user_id")
-              .eq("role", "coordenador")
-              .in("user_id", ids);
-
-            if (coordsRole?.length) destinatarios = coordsRole as any;
-          }
-        }
-
-        // 3.4 fallback final: coordenadores padrão por contrato/UL (tabela/view opcional)
-        if (!destinatarios.length && (lote?.contrato_id || lote?.ul_id)) {
-          const orParts: string[] = [];
-          if (lote?.contrato_id) orParts.push(`contrato_id.eq.${lote.contrato_id}`);
-          if (lote?.ul_id) orParts.push(`ul_id.eq.${lote.ul_id}`);
-          if (orParts.length) {
-            const { data: defaults } = await supabase
-              .from("default_coordinators")
-              .select("user_id")
-              .or(orParts.join(","));
-            if (defaults?.length) destinatarios = defaults as any;
-          }
-        }
-      }
-
-      // 4) Sem destinatário → reverter status e instruir
-      if (!destinatarios.length) {
+        // Reverte status se ninguém for encontrado
         await supabase
           .from("ficha_verificacao")
           .update({ status: "rascunho", enviado_coordenador_em: null })
@@ -289,15 +236,15 @@ export default function MinhasFichasVerificacao() {
         return;
       }
 
-      // 5) Notificações aos coordenadores
-      const msgData = ficha.data_verificacao
+      const dataBR = ficha.data_verificacao
         ? new Date(ficha.data_verificacao).toLocaleDateString("pt-BR")
         : "data não informada";
-      const notifications = (destinatarios as any[]).map((d) => ({
-        user_id: d.user_id,
+
+      const notifications = destinatarios.map((uid: string) => ({
+        user_id: uid,
         tipo: "ficha_verificacao_pendente",
         titulo: "Nova Ficha de Verificação",
-        mensagem: `Ficha de ${ficha.tipo} (SNV ${ficha.snv || "não informado"} / ${msgData}) aguarda sua validação`,
+        mensagem: `Ficha de ${ficha.tipo} (SNV ${ficha.snv ?? "—"} / ${dataBR}) aguarda sua validação`,
         lida: false,
         elemento_pendente_id: null,
         nc_id: null,
@@ -307,9 +254,10 @@ export default function MinhasFichasVerificacao() {
       if (nErr) console.error("Erro ao notificar coordenadores:", nErr);
 
       toast.success(`Ficha enviada para ${destinatarios.length} coordenador(es).`);
-      fetchFichas?.();
+      if (typeof fetchFichas === "function") fetchFichas();
     } catch (e: any) {
-      toast.error(`Erro ao enviar ficha: ${e.message || e.toString()}`);
+      console.error(e);
+      toast.error(`Erro ao enviar ficha: ${e?.message ?? "Falha ao enviar"}`);
     }
   };
   const handleDelete = async () => {
