@@ -83,7 +83,7 @@ const IntervencoesSVContent = () => {
         .select(`
           *,
           placa:ficha_placa!ficha_placa_intervencoes_ficha_placa_id_fkey(
-            codigo, tipo, lado, material, largura_mm, altura_mm, tipo_suporte
+            codigo, tipo, lado, largura_mm, altura_mm, tipo_suporte, substrato, suporte
           )
         `)
         .eq("user_id", user?.id)
@@ -105,7 +105,7 @@ const IntervencoesSVContent = () => {
         codigo_placa: item.placa?.codigo || item.codigo || null,
         lado: item.placa?.lado || item.lado || '-',
         dimensoes: item.placa ? `${item.placa.largura_mm}x${item.placa.altura_mm}` : item.dimensoes || null,
-        material: item.placa?.material || item.material || null,
+        material: item.material || item.placa?.substrato || null,
         tipo_suporte: item.placa?.tipo_suporte || item.tipo_suporte || null,
         estado_conservacao: item.estado_conservacao || '-',
         quantidade: item.quantidade || 1,
