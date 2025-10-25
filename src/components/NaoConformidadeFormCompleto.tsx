@@ -79,7 +79,6 @@ const NaoConformidadeForm = ({
     data_atendimento: "",
     data_notificacao: "",
     observacao: "Verificar prazo de atendimento e informar à supervisora para agendamento de nova vistoria após a execução do serviço.",
-    km_referencia: "",
     km_inicial: "",
     km_final: "",
     natureza: "",
@@ -388,7 +387,6 @@ const NaoConformidadeForm = ({
         data_atendimento: "",
         data_notificacao: "",
         observacao: "",
-        km_referencia: "",
         km_inicial: "",
         km_final: "",
         natureza: "",
@@ -503,14 +501,12 @@ const NaoConformidadeForm = ({
             longitude_final: locationFim!.lng,
             latitude: null,
             longitude: null,
-            km_referencia: null
           }
         : {
             ...baseData,
             latitude: location!.lat,
             longitude: location!.lng,
-            km_referencia: formData.km_referencia ? parseFloat(formData.km_referencia) : null,
-            km_inicial: null,
+            km_inicial: formData.km_inicial ? parseFloat(formData.km_inicial) : null,
             km_final: null,
             latitude_inicial: null,
             longitude_inicial: null,
@@ -643,7 +639,6 @@ const NaoConformidadeForm = ({
         observacao: ncCompleta.observacao || "",
         km_inicial: ncCompleta.km_inicial,
         km_final: ncCompleta.km_final,
-        km_referencia: ncCompleta.km_referencia,
         rodovia: {
           codigo: (ncCompleta as any).rodovias?.codigo || "N/A",
           uf: (ncCompleta as any).rodovias?.uf || "N/A",
@@ -721,7 +716,6 @@ const NaoConformidadeForm = ({
         data_atendimento: "",
         data_notificacao: "",
         observacao: "",
-        km_referencia: "",
         km_inicial: "",
         km_final: "",
         natureza: "",
@@ -917,13 +911,13 @@ const NaoConformidadeForm = ({
           {/* km - Condicional baseado no tipo */}
           {formData.tipo_nc && !isExtensao && (
             <div className="space-y-2">
-              <Label htmlFor="km_referencia">km Referência (opcional)</Label>
-              <Input id="km_referencia" type="number" step="0.001" value={formData.km_referencia} onChange={e => setFormData({
+              <Label htmlFor="km_inicial">KM Inicial (opcional)</Label>
+              <Input id="km_inicial" type="number" step="0.001" value={formData.km_inicial} onChange={e => setFormData({
               ...formData,
-              km_referencia: e.target.value
+              km_inicial: e.target.value
             })} placeholder="Ex: 123.456" />
               <p className="text-xs text-muted-foreground">
-                GPS é obrigatório. km é opcional e apenas para referência.
+                GPS é obrigatório. KM é opcional e apenas para referência.
               </p>
             </div>
           )}

@@ -1879,6 +1879,7 @@ export type Database = {
           fotos_urls: string[] | null
           id: string
           justificativa_fora_plano: string | null
+          km_inicial: number | null
           lado: string | null
           largura_mm: number | null
           latitude_inicial: number | null
@@ -1910,6 +1911,7 @@ export type Database = {
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km_inicial?: number | null
           lado?: string | null
           largura_mm?: number | null
           latitude_inicial?: number | null
@@ -1941,6 +1943,7 @@ export type Database = {
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          km_inicial?: number | null
           lado?: string | null
           largura_mm?: number | null
           latitude_inicial?: number | null
@@ -5972,6 +5975,7 @@ export type Database = {
           enviado_coordenador: boolean | null
           enviado_coordenador_em: string | null
           id: string
+          km_inicial: number | null
           km_referencia: number
           lado: string | null
           latitude: number | null
@@ -6021,6 +6025,7 @@ export type Database = {
           enviado_coordenador?: boolean | null
           enviado_coordenador_em?: string | null
           id?: string
+          km_inicial?: number | null
           km_referencia: number
           lado?: string | null
           latitude?: number | null
@@ -6070,6 +6075,7 @@ export type Database = {
           enviado_coordenador?: boolean | null
           enviado_coordenador_em?: string | null
           id?: string
+          km_inicial?: number | null
           km_referencia?: number
           lado?: string | null
           latitude?: number | null

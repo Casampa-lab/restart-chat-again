@@ -22,7 +22,6 @@ const fieldLabels: Record<string, string> = {
   longitude_inicial: 'Longitude Inicial',
   latitude_final: 'Latitude Final',
   longitude_final: 'Longitude Final',
-  km_referencia: 'KM de Referência',
   lado: 'Lado',
   posicao: 'Posição',
   
@@ -131,13 +130,13 @@ export function ElementoDataDisplay({ dados_elemento, tipo_elemento }: ElementoD
   const localizacao = camposVisiveis.filter(([key]) => 
     ['latitude_inicial', 'longitude_inicial', 
      'latitude_final', 'longitude_final', 'km_inicial', 'km_final', 
-     'km_referencia', 'lado', 'posicao', 'snv', 'br'].includes(key)
+     'lado', 'posicao', 'snv', 'br'].includes(key)
   );
   
   const caracteristicas = camposVisiveis.filter(([key]) => 
     !['latitude_inicial', 'longitude_inicial',
       'latitude_final', 'longitude_final', 'km_inicial', 'km_final',
-      'km_referencia', 'lado', 'posicao', 'snv', 'br'].includes(key)
+      'lado', 'posicao', 'snv', 'br'].includes(key)
   );
 
   const renderField = (key: string, value: any) => {

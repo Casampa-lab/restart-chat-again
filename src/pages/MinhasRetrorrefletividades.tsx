@@ -21,7 +21,7 @@ import { toast } from "sonner";
 interface RetrorrefletividadeEstatica {
   id: string;
   data_medicao: string;
-  km_referencia: number;
+  km_inicial: number;
   lado: string;
   tipo_dispositivo: string;
   codigo_dispositivo: string | null;
@@ -219,7 +219,7 @@ const MinhasRetrorrefletividades = () => {
         .from("retrorrefletividade_estatica")
         .update({
           data_medicao: medicaoEstaticaToEdit.data_medicao,
-          km_referencia: medicaoEstaticaToEdit.km_referencia,
+          km_inicial: medicaoEstaticaToEdit.km_inicial,
           lado: medicaoEstaticaToEdit.lado,
           tipo_dispositivo: medicaoEstaticaToEdit.tipo_dispositivo,
           codigo_dispositivo: medicaoEstaticaToEdit.codigo_dispositivo,
@@ -397,7 +397,7 @@ const MinhasRetrorrefletividades = () => {
                                     </TableCell>
                                     <TableCell>{lotes[medicao.lote_id] || "-"}</TableCell>
                                     <TableCell>{rodovias[medicao.rodovia_id] || "-"}</TableCell>
-                                    <TableCell>{medicao.km_referencia.toFixed(3)}</TableCell>
+                                    <TableCell>{medicao.km_inicial.toFixed(3)}</TableCell>
                                     <TableCell>{medicaoData.posicao_horizontal || "-"}</TableCell>
                                     <TableCell>{medicaoData.cor_horizontal || "-"}</TableCell>
                                     <TableCell>{medicaoData.valor_medido_horizontal?.toFixed(1) || "-"}</TableCell>
@@ -506,7 +506,7 @@ const MinhasRetrorrefletividades = () => {
                                   </TableCell>
                                   <TableCell>{lotes[medicao.lote_id] || "-"}</TableCell>
                                   <TableCell>{rodovias[medicao.rodovia_id] || "-"}</TableCell>
-                                  <TableCell>{medicao.km_referencia.toFixed(3)}</TableCell>
+                                  <TableCell>{medicao.km_inicial.toFixed(3)}</TableCell>
                                   <TableCell>{medicao.lado}</TableCell>
                                   <TableCell className="max-w-xs truncate">{medicao.tipo_dispositivo}</TableCell>
                                   <TableCell>{medicao.codigo_dispositivo || "-"}</TableCell>
@@ -771,12 +771,12 @@ const MinhasRetrorrefletividades = () => {
               </div>
               <div>
                 <Label>km de Referência</Label>
-                <Input
-                  type="number"
-                  step="0.001"
-                  value={medicaoEstaticaToEdit.km_referencia}
-                  onChange={(e) => setMedicaoEstaticaToEdit({...medicaoEstaticaToEdit, km_referencia: parseFloat(e.target.value)})}
-                />
+                  <Input
+                    type="number"
+                    step="0.001"
+                    value={medicaoEstaticaToEdit.km_inicial}
+                    onChange={(e) => setMedicaoEstaticaToEdit({...medicaoEstaticaToEdit, km_inicial: parseFloat(e.target.value)})}
+                  />
               </div>
               <div>
                 <Label>Lado</Label>

@@ -42,7 +42,7 @@ const formSchema = z.object({
   justificativa_fora_plano: z.string().optional(),
   
   // Campos para criar nova placa caso não exista no inventário
-  km_referencia: z.string().optional(),
+  km_inicial: z.string().optional(),
   tipo_placa: z.string().optional(),
   codigo_placa: z.string().optional(),
   latitude_inicial: z.string().optional(),
@@ -106,7 +106,7 @@ export function IntervencoesSVForm({
       retro_pelicula_legenda_orla: "",
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
-      km_referencia: "",
+      km_inicial: "",
       tipo_placa: "",
       codigo_placa: "",
       latitude_inicial: "",
@@ -129,7 +129,7 @@ export function IntervencoesSVForm({
 
   useEffect(() => {
     if (placaSelecionada) {
-      form.setValue("km_referencia", placaSelecionada.km_inicial?.toString() || "");
+      form.setValue("km_inicial", placaSelecionada.km_inicial?.toString() || "");
       form.setValue("tipo_placa", placaSelecionada.tipo || "");
       form.setValue("codigo_placa", placaSelecionada.codigo || "");
       form.setValue("latitude_inicial", placaSelecionada.latitude_inicial?.toString() || "");
@@ -202,14 +202,14 @@ export function IntervencoesSVForm({
           if (updateError) throw updateError;
         }
       } 
-      else if (data.km_referencia && data.tipo_placa && data.codigo_placa && loteId && rodoviaId) {
+      else if (data.km_inicial && data.tipo_placa && data.codigo_placa && loteId && rodoviaId) {
         const { data: novaPlaca, error: insertError } = await supabase
           .from("ficha_placa")
           .insert({
             user_id: user.id,
             lote_id: loteId,
             rodovia_id: rodoviaId,
-            km_inicial: parseFloat(data.km_referencia),
+            km_inicial: parseFloat(data.km_inicial),
             tipo: data.tipo_placa,
             codigo: data.codigo_placa,
             latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
@@ -314,10 +314,10 @@ export function IntervencoesSVForm({
           {!placaSelecionada && (
             <FormField
               control={form.control}
-              name="km_referencia"
+              name="km_inicial"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>KM de Referência *</FormLabel>
+                  <FormLabel>KM Inicial *</FormLabel>
                   <FormControl>
                     <Input type="number" step="0.001" placeholder="123.456" {...field} />
                   </FormControl>

@@ -42,7 +42,7 @@ import logoOperaVia from "@/assets/logo-operavia.png";
 interface IntervencaoSV {
   id: string;
   data_intervencao: string;
-  km_referencia: number;
+  km_inicial: number;
   tipo_intervencao: string;
   tipo_placa: string;
   codigo_placa: string | null;
@@ -171,7 +171,7 @@ const MinhasIntervencoesSV = () => {
         .from("intervencoes_sv")
         .update({
           data_intervencao: intervencaoToEdit.data_intervencao,
-          km_referencia: intervencaoToEdit.km_referencia,
+          km_inicial: intervencaoToEdit.km_inicial,
           tipo_intervencao: intervencaoToEdit.tipo_intervencao,
           tipo_placa: intervencaoToEdit.tipo_placa,
           codigo_placa: intervencaoToEdit.codigo_placa,
@@ -298,10 +298,10 @@ const MinhasIntervencoesSV = () => {
                         <TableCell>
                           {format(new Date(intervencao.data_intervencao), "dd/MM/yyyy")}
                         </TableCell>
-                        <TableCell>{lotes[intervencao.lote_id] || "-"}</TableCell>
-                        <TableCell>{rodovias[intervencao.rodovia_id] || "-"}</TableCell>
-                        <TableCell>{intervencao.km_referencia}</TableCell>
-                        <TableCell>{intervencao.tipo_intervencao}</TableCell>
+                      <TableCell>{lotes[intervencao.lote_id] || "-"}</TableCell>
+                      <TableCell>{rodovias[intervencao.rodovia_id] || "-"}</TableCell>
+                      <TableCell>{intervencao.km_inicial}</TableCell>
+                      <TableCell>{intervencao.tipo_intervencao}</TableCell>
                         <TableCell>{intervencao.tipo_placa}</TableCell>
                         <TableCell>{intervencao.codigo_placa || "-"}</TableCell>
                         <TableCell>{intervencao.lado}</TableCell>
@@ -399,12 +399,12 @@ const MinhasIntervencoesSV = () => {
                   />
                 </div>
                 <div>
-                  <Label>km Referência</Label>
+                  <Label>KM Inicial</Label>
                   <Input
                     type="number"
                     step="0.001"
-                    value={intervencaoToEdit.km_referencia}
-                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, km_referencia: parseFloat(e.target.value)})}
+                    value={intervencaoToEdit.km_inicial}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, km_inicial: parseFloat(e.target.value)})}
                   />
                 </div>
               </div>

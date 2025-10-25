@@ -41,7 +41,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
   const [formData, setFormData] = useState({
     data_medicao: new Date().toISOString().split('T')[0],
     tipo_sinalizacao: "",
-    km_referencia: "",
+    km_inicial: "",
     lado: "",
     tipo_dispositivo: "",
     codigo_dispositivo: "",
@@ -186,7 +186,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
     }
 
     if (formData.tipo_sinalizacao === "Horizontal") {
-      if (!formData.km_referencia || !formData.valor_medido_horizontal || !formData.valor_minimo_horizontal) {
+      if (!formData.km_inicial || !formData.valor_medido_horizontal || !formData.valor_minimo_horizontal) {
         toast({
           title: "Erro",
           description: "Preencha todos os campos obrigatórios para Sinalização Horizontal",
@@ -195,7 +195,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
         return;
       }
     } else {
-      if (!formData.km_referencia || !formData.lado || !formData.tipo_dispositivo || 
+      if (!formData.km_inicial || !formData.lado || !formData.tipo_dispositivo ||
           !formData.valor_medido_fundo || !formData.valor_minimo_fundo ||
           !formData.valor_medido_legenda || !formData.valor_minimo_legenda) {
         toast({
@@ -221,7 +221,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
         lote_id: loteId,
         rodovia_id: rodoviaId,
         data_medicao: formData.data_medicao,
-        km_referencia: parseFloat(formData.km_referencia),
+        km_inicial: parseFloat(formData.km_inicial),
         tipo_sinalizacao: formData.tipo_sinalizacao,
         situacao: situacaoGeral,
         observacao: formData.observacao || null,
@@ -255,7 +255,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
 
       const { error } = await supabase
         .from("retrorrefletividade_estatica")
-        .insert(dadosInsert);
+        .insert(dadosInsert as any); // Cast temporário até regeneração de tipos
 
       if (error) throw error;
 
@@ -268,7 +268,7 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
       setFormData({
         data_medicao: new Date().toISOString().split('T')[0],
         tipo_sinalizacao: "",
-        km_referencia: "",
+        km_inicial: "",
         lado: "",
         tipo_dispositivo: "",
         codigo_dispositivo: "",
@@ -357,16 +357,16 @@ const RetrorrefletividadeEstaticaForm = ({ loteId, rodoviaId }: Retrorrefletivid
           </div>
 
           {formData.tipo_sinalizacao && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="km_referencia">km de Referência *</Label>
+                <Label htmlFor="km_inicial">KM Inicial *</Label>
                 <Input
-                  id="km_referencia"
+                  id="km_inicial"
                   type="number"
                   step="0.001"
-                  value={formData.km_referencia}
+                  value={formData.km_inicial}
                   onChange={(e) =>
-                    setFormData({ ...formData, km_referencia: e.target.value })
+                    setFormData({ ...formData, km_inicial: e.target.value })
                   }
                   placeholder="0.000"
                   required

@@ -29,7 +29,7 @@ interface NCData {
   data_atendimento: string | null;
   data_notificacao: string | null;
   observacao: string | null;
-  km_referencia: number | null;
+  km_inicial: number | null;
   latitude: number;
   longitude: number;
   empresa: string;
@@ -80,7 +80,7 @@ const NCEditDialog = ({ ncId, open, onOpenChange, onSaved }: NCEditDialogProps) 
           data_atendimento: formData.data_atendimento,
           data_notificacao: formData.data_notificacao,
           observacao: formData.observacao,
-          km_referencia: formData.km_referencia,
+          km_inicial: formData.km_inicial,
         })
         .eq("id", ncId);
 
@@ -228,15 +228,15 @@ const NCEditDialog = ({ ncId, open, onOpenChange, onSaved }: NCEditDialogProps) 
             </div>
           </div>
 
-          {/* km Referência */}
+          {/* km Inicial */}
           <div className="space-y-2">
-            <Label htmlFor="edit_km_referencia">km Referência</Label>
+            <Label htmlFor="edit_km_inicial">KM Inicial</Label>
             <Input
-              id="edit_km_referencia"
+              id="edit_km_inicial"
               type="number"
               step="0.001"
-              value={formData.km_referencia || ""}
-              onChange={(e) => setFormData({ ...formData, km_referencia: parseFloat(e.target.value) || null })}
+              value={formData.km_inicial || ""}
+              onChange={(e) => setFormData({ ...formData, km_inicial: parseFloat(e.target.value) || null })}
             />
           </div>
 

@@ -113,7 +113,7 @@ export async function generateNCPDF(ncData: NCData): Promise<Blob> {
      'Lote', ncData.lote.numero],
     ['Km', ncData.km_inicial && ncData.km_final 
         ? `${ncData.km_inicial.toFixed(3)} ao ${ncData.km_final.toFixed(3)}` 
-        : (ncData.km_referencia ? `km ${ncData.km_referencia.toFixed(3)}` : 'N/A'),
+        : (ncData.km_inicial ? `km ${ncData.km_inicial.toFixed(3)}` : 'N/A'),
      'SNV', ncData.snv || 'N/A', '', ''],
     ['Supervisora', ncData.supervisora.nome_empresa.substring(0, 40),
      'Contrato Supervisora', ncData.supervisora.contrato || 'N/A', '', ''],

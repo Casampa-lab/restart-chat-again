@@ -40,7 +40,7 @@ import { Badge } from "@/components/ui/badge";
 interface IntervencaoSV {
   id: string;
   data_intervencao: string;
-  km_referencia: number;
+  km_inicial: number;
   tipo_intervencao: string;
   tipo_placa: string;
   codigo_placa: string | null;
@@ -99,7 +99,7 @@ const IntervencoesSVContent = () => {
       const mapped = (data || []).map((item: any) => ({
         id: item.id,
         data_intervencao: item.data_intervencao || item.created_at?.split('T')[0],
-        km_referencia: item.km_inicial || 0,
+        km_inicial: item.km_inicial || 0,
         tipo_intervencao: item.tipo_intervencao || '-',
         tipo_placa: item.placa?.tipo || item.tipo || '-',
         codigo_placa: item.placa?.codigo || item.codigo || null,
@@ -197,7 +197,7 @@ const IntervencoesSVContent = () => {
         .from("intervencoes_sv")
         .update({
           data_intervencao: intervencaoToEdit.data_intervencao,
-          km_referencia: intervencaoToEdit.km_referencia,
+          km_inicial: intervencaoToEdit.km_inicial,
           tipo_intervencao: intervencaoToEdit.tipo_intervencao,
           tipo_placa: intervencaoToEdit.tipo_placa,
           codigo_placa: intervencaoToEdit.codigo_placa,
@@ -321,7 +321,7 @@ const IntervencoesSVContent = () => {
                       </TableCell>
                       <TableCell>{lotes[intervencao.lote_id] || "-"}</TableCell>
                       <TableCell>{rodovias[intervencao.rodovia_id] || "-"}</TableCell>
-                      <TableCell>{intervencao.km_referencia}</TableCell>
+                      <TableCell>{intervencao.km_inicial}</TableCell>
                       <TableCell>{intervencao.tipo_intervencao}</TableCell>
                       <TableCell>{intervencao.tipo_placa}</TableCell>
                       <TableCell>{intervencao.codigo_placa || "-"}</TableCell>
@@ -415,12 +415,12 @@ const IntervencoesSVContent = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>km de Referência</Label>
+                  <Label>KM Inicial</Label>
                   <Input
                     type="number"
                     step="0.001"
-                    value={intervencaoToEdit.km_referencia}
-                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, km_referencia: parseFloat(e.target.value)})}
+                    value={intervencaoToEdit.km_inicial}
+                    onChange={(e) => setIntervencaoToEdit({...intervencaoToEdit, km_inicial: parseFloat(e.target.value)})}
                   />
                 </div>
                 <div>
