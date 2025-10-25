@@ -52,8 +52,6 @@ interface IntervencaoSV {
   quantidade: number;
   observacao: string | null;
   created_at: string;
-  lote_id: string;
-  rodovia_id: string;
   enviado_coordenador: boolean;
 }
 
@@ -64,8 +62,6 @@ const IntervencoesSVContent = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedIntervencoes, setSelectedIntervencoes] = useState<Set<string>>(new Set());
   const [showEnviadas, setShowEnviadas] = useState(true);
-  const [lotes, setLotes] = useState<Record<string, string>>({});
-  const [rodovias, setRodovias] = useState<Record<string, string>>({});
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [intervencaoToEdit, setIntervencaoToEdit] = useState<IntervencaoSV | null>(null);
   const [novaIntervencaoOpen, setNovaIntervencaoOpen] = useState(false);
@@ -113,26 +109,10 @@ const IntervencoesSVContent = () => {
         quantidade: item.quantidade || 1,
         observacao: item.observacao,
         created_at: item.created_at,
-        lote_id: item.lote_id,
-        rodovia_id: item.rodovia_id,
         enviado_coordenador: item.pendente_aprovacao_coordenador === false
       }));
 
       setIntervencoes(mapped);
-
-      const { data: lotesData } = await supabase.from("lotes").select("id, numero");
-      if (lotesData) {
-        const lotesMap: Record<string, string> = {};
-        lotesData.forEach((lote) => { lotesMap[lote.id] = lote.numero; });
-        setLotes(lotesMap);
-      }
-
-      const { data: rodoviasData } = await supabase.from("rodovias").select("id, codigo");
-      if (rodoviasData) {
-        const rodoviasMap: Record<string, string> = {};
-        rodoviasData.forEach((rodovia) => { rodoviasMap[rodovia.id] = rodovia.codigo; });
-        setRodovias(rodoviasMap);
-      }
     } catch (error: any) {
       toast.error("Erro ao carregar intervenções: " + error.message);
     } finally {
@@ -290,8 +270,6 @@ const IntervencoesSVContent = () => {
                   <TableRow>
                     <TableHead className="w-12">Sel.</TableHead>
                     <TableHead>Data</TableHead>
-                    <TableHead>Lote</TableHead>
-                    <TableHead>Rodovia</TableHead>
                     <TableHead>km</TableHead>
                     <TableHead>Tipo Intervenção</TableHead>
                     <TableHead>Tipo Placa</TableHead>
@@ -321,8 +299,6 @@ const IntervencoesSVContent = () => {
                       <TableCell>
                         {format(new Date(intervencao.data_intervencao), "dd/MM/yyyy")}
                       </TableCell>
-                      <TableCell>{lotes[intervencao.lote_id] || "-"}</TableCell>
-                      <TableCell>{rodovias[intervencao.rodovia_id] || "-"}</TableCell>
                       <TableCell>{intervencao.km_inicial}</TableCell>
                       <TableCell>{intervencao.tipo_intervencao}</TableCell>
                       <TableCell>{intervencao.tipo_placa}</TableCell>
