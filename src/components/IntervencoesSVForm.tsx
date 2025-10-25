@@ -231,42 +231,8 @@ export function IntervencoesSVForm({
 
           if (updateError) throw updateError;
         }
-      } 
-      else if (data.km_inicial && data.tipo_placa && data.codigo_placa && loteId && rodoviaId) {
-        const { data: novaPlaca, error: insertError } = await supabase
-          .from("ficha_placa")
-          .insert({
-            user_id: user.id,
-            lote_id: loteId,
-            rodovia_id: rodoviaId,
-            km_inicial: parseFloat(data.km_inicial),
-            tipo: data.tipo_placa,
-            codigo: data.codigo_placa,
-            posicao: data.posicao || null,
-            snv: data.snv || null,
-            velocidade: data.velocidade || null,
-            suporte: data.suporte || null,
-            substrato: data.substrato || null,
-            substrato_suporte: data.substrato_suporte || null,
-            dimensoes_mm: data.largura_mm && data.altura_mm ? `${data.largura_mm}x${data.altura_mm}` : null,
-            largura_m: data.largura_mm ? data.largura_mm / 1000 : null,
-            altura_m: data.altura_mm ? data.altura_mm / 1000 : null,
-            area_m2: data.area_m2 || null,
-            tipo_pelicula_fundo: data.tipo_pelicula_fundo || null,
-            cor_pelicula_fundo: data.cor_pelicula_fundo || null,
-            tipo_pelicula_legenda_orla: data.tipo_pelicula_legenda_orla || null,
-            cor_pelicula_legenda_orla: data.cor_pelicula_legenda_orla || null,
-            si_sinal_impresso: data.si_sinal_impresso || null,
-            detalhamento_pagina: data.detalhamento_pagina || null,
-            data_vistoria: data.data_intervencao,
-          })
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-        fichaPlacaId = novaPlaca.id;
       } else {
-        toast.error("Selecione uma placa do inventário ou preencha KM, Tipo e Código para criar nova");
+        toast.error("Selecione uma placa do inventário para registrar a intervenção");
         return;
       }
 
