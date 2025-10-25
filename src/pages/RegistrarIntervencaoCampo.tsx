@@ -269,7 +269,9 @@ export default function RegistrarIntervencaoCampo() {
         'retro_orla_legenda', 'fora_plano_manutencao', 'justificativa_fora_plano',
         'pendente_aprovacao_coordenador', 'coordenador_id', 'data_aprovacao_coordenador',
         'aplicado_ao_inventario', 'observacao_coordenador', 'latitude_inicial',
-        'longitude_inicial', 'fotos_urls', 'tipo_origem', 'user_id'
+        'longitude_inicial', 'fotos_urls', 'tipo_origem', 'user_id',
+        'tipo', 'codigo', 'lado', 'material', 'largura_mm', 'altura_mm',
+        'lote_id', 'rodovia_id', 'km_inicial'
       ];
 
       // Filtrar apenas campos permitidos de dadosIntervencao
@@ -312,9 +314,19 @@ export default function RegistrarIntervencaoCampo() {
         }
       });
 
-      // Se houver um elemento selecionado (necessidade vinculada), adicionar FK
+      // Se houver um elemento selecionado (necessidade vinculada), adicionar FK e copiar dados estruturais
       if (necessidadeProp?.elemento_id) {
         payloadIntervencao[campoFK] = necessidadeProp.elemento_id;
+        
+        // Copiar dados estruturais da placa do inventário
+        if (necessidadeProp?.elemento && tipoSelecionado === 'placas') {
+          payloadIntervencao.tipo = necessidadeProp.elemento.tipo || null;
+          payloadIntervencao.codigo = necessidadeProp.elemento.codigo || null;
+          payloadIntervencao.lado = necessidadeProp.elemento.lado || null;
+          payloadIntervencao.material = necessidadeProp.elemento.material || null;
+          payloadIntervencao.largura_mm = necessidadeProp.elemento.largura_mm || null;
+          payloadIntervencao.altura_mm = necessidadeProp.elemento.altura_mm || null;
+        }
       }
 
       // Inserir na tabela de intervenções específica

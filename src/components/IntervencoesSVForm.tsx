@@ -47,6 +47,12 @@ const formSchema = z.object({
   codigo_placa: z.string().optional(),
   latitude_inicial: z.string().optional(),
   longitude_inicial: z.string().optional(),
+  
+  // Campos estruturais da placa
+  lado: z.string().optional(),
+  material: z.string().optional(),
+  largura_mm: z.coerce.number().optional(),
+  altura_mm: z.coerce.number().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -101,8 +107,12 @@ export function IntervencoesSVForm({
       km_referencia: "",
       tipo_placa: "",
       codigo_placa: "",
-    latitude_inicial: "",
-    longitude_inicial: "",
+      latitude_inicial: "",
+      longitude_inicial: "",
+      lado: "",
+      material: "",
+      largura_mm: undefined,
+      altura_mm: undefined,
     },
   });
 
@@ -235,6 +245,12 @@ export function IntervencoesSVForm({
         justificativa_fora_plano: data.justificativa_fora_plano || null,
         latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
         longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
+        tipo: data.tipo_placa || null,
+        codigo: data.codigo_placa || null,
+        lado: data.lado || null,
+        material: data.material || null,
+        largura_mm: data.largura_mm || null,
+        altura_mm: data.altura_mm || null,
       });
 
       toast.success("Intervenção registrada com sucesso!");
@@ -450,6 +466,95 @@ export function IntervencoesSVForm({
               </FormItem>
             )}
           />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="lado"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    Lado
+                    {isCampoEstruturalBloqueado('lado') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isCampoEstruturalBloqueado('lado')}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="direito">Direito</SelectItem>
+                      <SelectItem value="esquerdo">Esquerdo</SelectItem>
+                      <SelectItem value="canteiro_central">Canteiro Central</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="material"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    Material
+                    {isCampoEstruturalBloqueado('material') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isCampoEstruturalBloqueado('material')}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="aluminio">Alumínio</SelectItem>
+                      <SelectItem value="aco">Aço</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="largura_mm"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    Largura (mm)
+                    {isCampoEstruturalBloqueado('largura_mm') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                  </FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Ex: 600" {...field} disabled={isCampoEstruturalBloqueado('largura_mm')} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="altura_mm"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    Altura (mm)
+                    {isCampoEstruturalBloqueado('altura_mm') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                  </FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Ex: 600" {...field} disabled={isCampoEstruturalBloqueado('altura_mm')} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         {!hideSubmitButton && (
