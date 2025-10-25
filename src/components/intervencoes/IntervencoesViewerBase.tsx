@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info, Plus } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Info, Plus, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -75,20 +76,14 @@ export function IntervencoesViewerBase({
     carregar();
   }, [user, tipoOrigem]);
 
-  const renderDetalhes = (elem: any) => {
-    // Renderizar detalhes específicos baseado no tipo de elemento
-    const detalhes: string[] = [];
-    
-    if (elem.codigo) detalhes.push(`Código: ${elem.codigo}`);
-    if (elem.tipo_demarcacao) detalhes.push(`Tipo: ${elem.tipo_demarcacao}`);
-    if (elem.tipo) detalhes.push(`Tipo: ${elem.tipo}`);
-    if (elem.cor) detalhes.push(`Cor: ${elem.cor}`);
-    if (elem.cor_corpo) detalhes.push(`Cor: ${elem.cor_corpo}`);
-    if (elem.tipo_tacha) detalhes.push(`Tipo: ${elem.tipo_tacha}`);
-    if (elem.quantidade) detalhes.push(`Qtd: ${elem.quantidade}`);
-    if (elem.motivo) detalhes.push(`Motivo: ${elem.motivo}`);
-    
-    return detalhes.join(' • ');
+  const renderTipoIdentificacao = (elem: any) => {
+    // Renderizar identificação principal do elemento
+    if (elem.motivo) return elem.motivo;
+    if (elem.codigo) return elem.codigo;
+    if (elem.tipo_demarcacao) return elem.tipo_demarcacao;
+    if (elem.tipo) return elem.tipo;
+    if (elem.tipo_tacha) return elem.tipo_tacha;
+    return 'Sem identificação';
   };
 
   if (loading) {
@@ -116,7 +111,7 @@ export function IntervencoesViewerBase({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent>
         {elementos.length === 0 ? (
           <Alert>
             <Info className="h-4 w-4" />
@@ -125,49 +120,61 @@ export function IntervencoesViewerBase({
             </AlertDescription>
           </Alert>
         ) : (
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {elementos.map((elem) => (
-              <Button
-                key={elem.id}
-                variant="outline"
-                className="w-full justify-start h-auto p-4 hover:bg-accent"
-                onClick={() => onEditarElemento?.(elem)}
-              >
-                <div className="text-left w-full">
-                  <div className="font-semibold text-base">
-                    {renderDetalhes(elem) || 'Sem identificação'}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {elem.autor?.nome && (
-                      <>
-                        👤 {elem.autor.nome}
-                        {' • '}
-                      </>
-                    )}
-                    📍 KM {elem.km_inicial?.toFixed(3)}{elem.km_final ? ` - ${elem.km_final.toFixed(3)}` : ''}
-                    {' • '}
-                    📅 {elem.data_intervencao ? format(new Date(elem.data_intervencao), 'dd/MM/yyyy') : format(new Date(elem.created_at), 'dd/MM/yyyy')}
-                  </div>
-                  {elem.observacao && (
-                    <div className="text-xs text-muted-foreground mt-1 truncate">
-                      💬 {elem.observacao}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 mt-2">
-                    {elem.pendente_aprovacao_coordenador !== undefined && (
-                      <Badge variant="outline" className={elem.pendente_aprovacao_coordenador ? "bg-yellow-50" : "bg-green-50"}>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>KM</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {elementos.map((elem) => (
+                  <TableRow key={elem.id}>
+                    <TableCell>
+                      <Badge variant={tipoOrigem === 'execucao' ? 'default' : 'secondary'}>
+                        {renderTipoIdentificacao(elem)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs">📍</span>
+                        <span>{elem.km_inicial?.toFixed(3) || '-'}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {elem.data_intervencao 
+                        ? format(new Date(elem.data_intervencao), 'dd/MM/yyyy') 
+                        : format(new Date(elem.created_at), 'dd/MM/yyyy')}
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={elem.pendente_aprovacao_coordenador ? 'secondary' : 'default'}
+                      >
                         {elem.pendente_aprovacao_coordenador ? 'Pendente' : 'Aprovada'}
                       </Badge>
-                    )}
-                    {elem.fotos_urls?.length > 0 && (
-                      <Badge variant="secondary">
-                        📸 {elem.fotos_urls.length}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </Button>
-            ))}
+                      {elem.fotos_urls?.length > 0 && (
+                        <Badge variant="outline" className="ml-2">
+                          📸 {elem.fotos_urls.length}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEditarElemento?.(elem)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         )}
 
