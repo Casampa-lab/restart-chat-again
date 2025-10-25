@@ -167,10 +167,10 @@ export default function ValidacaoFichasVerificacao() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Buscar rodovia_id e lote_id diretamente da ficha
+      // Buscar rodovia_id, lote_id e empresa diretamente da ficha
       const { data: fichaCompleta } = await supabase
         .from('ficha_verificacao')
-        .select('rodovia_id, lote_id')
+        .select('rodovia_id, lote_id, empresa, contrato, snv')
         .eq('id', selectedFicha.id)
         .single();
 
@@ -185,7 +185,10 @@ export default function ValidacaoFichasVerificacao() {
           data_ocorrencia: new Date().toISOString().split('T')[0],
           user_id: selectedFicha.user_id,
           rodovia_id: fichaCompleta?.rodovia_id,
-          lote_id: fichaCompleta?.lote_id
+          lote_id: fichaCompleta?.lote_id,
+          empresa: fichaCompleta?.empresa || 'Não informado',
+          contrato: fichaCompleta?.contrato,
+          snv: fichaCompleta?.snv
         }] as any)
         .select()
         .single();
