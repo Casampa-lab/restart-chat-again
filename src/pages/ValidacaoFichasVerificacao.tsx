@@ -170,7 +170,7 @@ export default function ValidacaoFichasVerificacao() {
       // Buscar rodovia_id, lote_id e empresa diretamente da ficha
       const { data: fichaCompleta } = await supabase
         .from('ficha_verificacao')
-        .select('rodovia_id, lote_id, empresa, contrato, snv')
+        .select('rodovia_id, lote_id, empresa, snv')
         .eq('id', selectedFicha.id)
         .single();
 
@@ -187,7 +187,6 @@ export default function ValidacaoFichasVerificacao() {
           rodovia_id: fichaCompleta?.rodovia_id,
           lote_id: fichaCompleta?.lote_id,
           empresa: fichaCompleta?.empresa || 'Não informado',
-          contrato: fichaCompleta?.contrato,
           snv: fichaCompleta?.snv
         }] as any)
         .select()
