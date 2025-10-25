@@ -7,9 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Info, Plus, Eye, Send, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { findCoordinatorsByLoteId } from "@/lib/coordenadores";
 
 interface IntervencoesViewerBaseProps {
   tipoElemento: string;
@@ -35,6 +38,7 @@ export function IntervencoesViewerBase({
   const { user } = useAuth();
   const [elementos, setElementos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mostrarEnviadas, setMostrarEnviadas] = useState(true);
 
   const carregar = async () => {
     if (!user) return;
@@ -75,17 +79,79 @@ export function IntervencoesViewerBase({
 
   const handleEnviarParaCoordenador = async (intervencaoId: string) => {
     try {
-      const { error } = await supabase
+      // Buscar dados da intervenção
+      const { data: intervencao, error: fetchError } = await supabase
+        .from(tabelaIntervencao as any)
+        .select('id, lote_id, km_inicial, data_intervencao, created_at, motivo, codigo, tipo')
+        .eq('id', intervencaoId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      if (!intervencao) throw new Error('Intervenção não encontrada');
+
+      const loteId = (intervencao as any).lote_id;
+      if (!loteId) {
+        toast.error('Esta intervenção não tem Lote definido. Não é possível enviar.');
+        return;
+      }
+
+      // Atualizar status
+      const { error: updateError } = await supabase
         .from(tabelaIntervencao as any)
         .update({
           pendente_aprovacao_coordenador: false,
           data_aprovacao_coordenador: new Date().toISOString(),
+          enviado_coordenador: true,
+          enviado_coordenador_em: new Date().toISOString(),
         })
         .eq('id', intervencaoId);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
-      toast.success('Intervenção enviada para aprovação!');
+      // Buscar coordenadores
+      const destinatarios = await findCoordinatorsByLoteId(supabase as any, loteId);
+
+      if (!destinatarios.length) {
+        // Reverter status se ninguém for encontrado
+        await supabase
+          .from(tabelaIntervencao as any)
+          .update({ 
+            pendente_aprovacao_coordenador: true,
+            data_aprovacao_coordenador: null,
+            enviado_coordenador: false,
+            enviado_coordenador_em: null
+          })
+          .eq('id', intervencaoId);
+
+        toast.error(
+          'Nenhum coordenador encontrado para este Lote. Cadastre em "Configurações → Coordenações" ou defina o coordenador no cadastro do Lote.',
+        );
+        return;
+      }
+
+      // Criar identificação da intervenção
+      const intervencaoAny = intervencao as any;
+      const identificacao = intervencaoAny.motivo || intervencaoAny.codigo || intervencaoAny.tipo || 'Intervenção';
+      const kmTexto = intervencaoAny.km_inicial ? `KM ${intervencaoAny.km_inicial.toFixed(3)}` : 'localização não informada';
+      const dataTexto = intervencaoAny.data_intervencao
+        ? new Date(intervencaoAny.data_intervencao).toLocaleDateString("pt-BR")
+        : new Date(intervencaoAny.created_at).toLocaleDateString("pt-BR");
+
+      // Criar notificações
+      const notifications = destinatarios.map((uid: string) => ({
+        user_id: uid,
+        tipo: 'intervencao_pendente',
+        titulo: `Nova ${tipoOrigem === 'manutencao_pre_projeto' ? 'Manutenção' : 'Execução'} - ${tipoElemento}`,
+        mensagem: `${identificacao} (${kmTexto} / ${dataTexto}) aguarda sua validação`,
+        lida: false,
+        elemento_pendente_id: null,
+        nc_id: null,
+      }));
+
+      const { error: notifError } = await supabase.from("notificacoes").insert(notifications);
+      if (notifError) console.error("Erro ao notificar coordenadores:", notifError);
+
+      toast.success(`Intervenção enviada para ${destinatarios.length} coordenador(es)!`);
       carregar();
     } catch (error: any) {
       console.error('Erro ao enviar:', error);
@@ -134,6 +200,10 @@ export function IntervencoesViewerBase({
     );
   }
 
+  const elementosFiltrados = mostrarEnviadas 
+    ? elementos 
+    : elementos.filter((e) => e.pendente_aprovacao_coordenador !== false && !e.enviado_coordenador);
+
   return (
     <Card>
       <CardHeader>
@@ -146,8 +216,18 @@ export function IntervencoesViewerBase({
               )}
             </CardTitle>
             <CardDescription>
-              {elementos.length} registro(s) encontrado(s)
+              {elementosFiltrados.length} de {elementos.length} registro(s)
             </CardDescription>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="mostrar-enviadas"
+              checked={mostrarEnviadas}
+              onCheckedChange={(checked) => setMostrarEnviadas(checked as boolean)}
+            />
+            <Label htmlFor="mostrar-enviadas" className="cursor-pointer text-sm font-normal">
+              Mostrar enviadas
+            </Label>
           </div>
         </div>
       </CardHeader>
@@ -157,6 +237,13 @@ export function IntervencoesViewerBase({
             <Info className="h-4 w-4" />
             <AlertDescription>
               Nenhum elemento registrado ainda para este tipo.
+            </AlertDescription>
+          </Alert>
+        ) : elementosFiltrados.length === 0 ? (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              {mostrarEnviadas ? "Nenhum elemento registrado" : "Nenhum elemento não enviado"}
             </AlertDescription>
           </Alert>
         ) : (
@@ -172,7 +259,7 @@ export function IntervencoesViewerBase({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {elementos.map((elem) => (
+                {elementosFiltrados.map((elem) => (
                   <TableRow key={elem.id}>
                     <TableCell>
                       <Badge variant={tipoOrigem === 'execucao' ? 'default' : 'secondary'}>
@@ -192,9 +279,15 @@ export function IntervencoesViewerBase({
                     </TableCell>
                     <TableCell>
                       <Badge 
-                        variant={elem.pendente_aprovacao_coordenador ? 'secondary' : 'default'}
+                        variant={
+                          elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
+                            ? 'default'
+                            : 'outline'
+                        }
                       >
-                        {elem.pendente_aprovacao_coordenador ? 'Pendente' : 'Aprovada'}
+                        {elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
+                          ? 'Enviada'
+                          : 'Rascunho'}
                       </Badge>
                       {elem.fotos_urls?.length > 0 && (
                         <Badge variant="outline" className="ml-2">
@@ -211,8 +304,12 @@ export function IntervencoesViewerBase({
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleEnviarParaCoordenador(elem.id)}
-                                disabled={!elem.pendente_aprovacao_coordenador}
-                                title={!elem.pendente_aprovacao_coordenador ? "Intervenção já foi enviada" : "Enviar para Coordenador"}
+                                disabled={elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false}
+                                title={
+                                  elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
+                                    ? "Intervenção já foi enviada"
+                                    : "Enviar para Coordenador"
+                                }
                               >
                                 <Send className="h-4 w-4" />
                               </Button>
@@ -239,8 +336,12 @@ export function IntervencoesViewerBase({
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleExcluir(elem.id)}
-                                disabled={!elem.pendente_aprovacao_coordenador}
-                                title={!elem.pendente_aprovacao_coordenador ? "Não pode excluir: intervenção já enviada" : "Excluir"}
+                                disabled={elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false}
+                                title={
+                                  elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
+                                    ? "Não pode excluir: intervenção já enviada"
+                                    : "Excluir"
+                                }
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
