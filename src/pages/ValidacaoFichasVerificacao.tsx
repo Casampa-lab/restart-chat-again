@@ -24,8 +24,10 @@ interface FichaComDetalhes {
   contrato: string;
   empresa: string;
   snv: string;
-  profiles: {
+  autor?: {
+    id: string;
     nome: string;
+    email: string;
   };
   rodovias: {
     codigo: string;
@@ -98,7 +100,7 @@ export default function ValidacaoFichasVerificacao() {
         .from('ficha_verificacao')
         .select(`
           *,
-          profiles:user_id(nome),
+          autor:profiles!ficha_verificacao_user_id_fkey(id, nome, email),
           rodovias:rodovia_id(codigo),
           lotes:lote_id(numero),
           ficha_verificacao_itens(*)
@@ -282,7 +284,7 @@ export default function ValidacaoFichasVerificacao() {
                 {fichas.map((ficha) => (
                   <TableRow key={ficha.id}>
                     <TableCell>{new Date(ficha.data_verificacao).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell>{ficha.profiles?.nome || 'N/A'}</TableCell>
+                    <TableCell>{ficha.autor?.nome || 'N/A'}</TableCell>
                     <TableCell>
                       <Badge variant="default">SH</Badge>
                     </TableCell>
@@ -347,7 +349,7 @@ export default function ValidacaoFichasVerificacao() {
         <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              Ficha SH - {selectedFicha?.rodovias?.codigo} - {selectedFicha?.profiles?.nome}
+              Ficha SH - {selectedFicha?.rodovias?.codigo} - {selectedFicha?.autor?.nome}
             </DialogTitle>
           </DialogHeader>
 
@@ -363,7 +365,7 @@ export default function ValidacaoFichasVerificacao() {
                     </div>
                     <div>
                       <p className="font-semibold text-muted-foreground">Técnico:</p>
-                      <p>{selectedFicha.profiles?.nome}</p>
+                      <p>{selectedFicha.autor?.nome}</p>
                     </div>
                     <div>
                       <p className="font-semibold text-muted-foreground">Rodovia/Lote:</p>
