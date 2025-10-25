@@ -53,10 +53,17 @@ export function IntervencoesViewerBase({
         .select(selectQuery)
         .eq('user_id', user.id)
         .eq('tipo_origem', tipoOrigem)
-        .eq('ativo', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao carregar intervenções:', {
+          tabela: tabelaIntervencao,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
       setElementos(data || []);
 
       // Carregar lotes e rodovias
