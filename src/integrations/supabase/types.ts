@@ -1867,7 +1867,9 @@ export type Database = {
       }
       ficha_placa_intervencoes: {
         Row: {
+          altura_mm: number | null
           aplicado_ao_inventario: boolean | null
+          codigo: string | null
           coordenador_id: string | null
           created_at: string
           data_aprovacao_coordenador: string | null
@@ -1877,8 +1879,11 @@ export type Database = {
           fotos_urls: string[] | null
           id: string
           justificativa_fora_plano: string | null
+          lado: string | null
+          largura_mm: number | null
           latitude_inicial: number | null
           longitude_inicial: number | null
+          material: string | null
           motivo: string
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
@@ -1887,12 +1892,15 @@ export type Database = {
           retro_orla_legenda: number | null
           substrato: string | null
           suporte: string | null
+          tipo: string | null
           tipo_origem: string | null
           tipo_pelicula_fundo_novo: string | null
           user_id: string | null
         }
         Insert: {
+          altura_mm?: number | null
           aplicado_ao_inventario?: boolean | null
+          codigo?: string | null
           coordenador_id?: string | null
           created_at?: string
           data_aprovacao_coordenador?: string | null
@@ -1902,8 +1910,11 @@ export type Database = {
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          lado?: string | null
+          largura_mm?: number | null
           latitude_inicial?: number | null
           longitude_inicial?: number | null
+          material?: string | null
           motivo: string
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
@@ -1912,12 +1923,15 @@ export type Database = {
           retro_orla_legenda?: number | null
           substrato?: string | null
           suporte?: string | null
+          tipo?: string | null
           tipo_origem?: string | null
           tipo_pelicula_fundo_novo?: string | null
           user_id?: string | null
         }
         Update: {
+          altura_mm?: number | null
           aplicado_ao_inventario?: boolean | null
+          codigo?: string | null
           coordenador_id?: string | null
           created_at?: string
           data_aprovacao_coordenador?: string | null
@@ -1927,8 +1941,11 @@ export type Database = {
           fotos_urls?: string[] | null
           id?: string
           justificativa_fora_plano?: string | null
+          lado?: string | null
+          largura_mm?: number | null
           latitude_inicial?: number | null
           longitude_inicial?: number | null
+          material?: string | null
           motivo?: string
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
@@ -1937,6 +1954,7 @@ export type Database = {
           retro_orla_legenda?: number | null
           substrato?: string | null
           suporte?: string | null
+          tipo?: string | null
           tipo_origem?: string | null
           tipo_pelicula_fundo_novo?: string | null
           user_id?: string | null
