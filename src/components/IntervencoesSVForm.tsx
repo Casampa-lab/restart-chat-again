@@ -111,13 +111,39 @@ export function IntervencoesSVForm({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       motivo: "",
+      // Localização
+      br: "",
+      snv: "",
+      km_inicial: "",
+      latitude_inicial: "",
+      longitude_inicial: "",
+      // Identificação
+      tipo_placa: "",
+      codigo_placa: "",
+      velocidade: "",
+      lado: "",
+      posicao: "",
+      detalhamento_pagina: undefined,
+      // Suporte
       suporte: "",
-      substrato: "",
+      qtde_suporte: undefined,
+      tipo_secao_suporte: "",
+      secao_suporte_mm: "",
       substrato_suporte: "",
+      // Chapa
+      substrato: "",
+      si_sinal_impresso: "",
+      largura_mm: undefined,
+      altura_mm: undefined,
+      area_m2: undefined,
+      // Películas
       tipo_pelicula_fundo: "",
-      tipo_pelicula_legenda_orla: "",
+      cor_pelicula_fundo: "",
       retro_pelicula_fundo: "",
+      tipo_pelicula_legenda_orla: "",
+      cor_pelicula_legenda_orla: "",
       retro_pelicula_legenda_orla: "",
+      // Controle
       fora_plano_manutencao: false,
       justificativa_fora_plano: "",
     },
@@ -434,13 +460,313 @@ export function IntervencoesSVForm({
                   )}
                   <FormMessage />
                 </FormItem>
-              )}
-            />
-          </>
-        )}
+                )}
+              />
+            </>
+          )}
+
+          {/* SEÇÃO: LOCALIZAÇÃO */}
+          {!placaSelecionada && (
+            <div className="space-y-4 border-l-4 border-blue-500 pl-4 bg-blue-50 dark:bg-blue-950/20 py-4 rounded-r-lg">
+              <h3 className="font-semibold text-blue-700 dark:text-blue-400 text-lg">📍 Localização</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="br"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>BR</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: 040" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="snv"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SNV</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: SNV-001" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="velocidade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Velocidade (km/h)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="40">40</SelectItem>
+                          <SelectItem value="60">60</SelectItem>
+                          <SelectItem value="80">80</SelectItem>
+                          <SelectItem value="100">100</SelectItem>
+                          <SelectItem value="110">110</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="latitude_inicial"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Latitude</FormLabel>
+                      <FormControl>
+                        <Input placeholder="-15.793889" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="longitude_inicial"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Longitude</FormLabel>
+                      <FormControl>
+                        <Input placeholder="-47.882778" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* SEÇÃO: CARACTERÍSTICAS DA PLACA */}
+          {!placaSelecionada && (
+            <div className="space-y-4 border-l-4 border-green-500 pl-4 bg-green-50 dark:bg-green-950/20 py-4 rounded-r-lg">
+              <h3 className="font-semibold text-green-700 dark:text-green-400 text-lg">🚦 Características da Placa</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="posicao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Posição</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Lateral Direita">Lateral Direita</SelectItem>
+                          <SelectItem value="Lateral Esquerda">Lateral Esquerda</SelectItem>
+                          <SelectItem value="Sobre a Pista">Sobre a Pista</SelectItem>
+                          <SelectItem value="Canteiro Central">Canteiro Central</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="detalhamento_pagina"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Página de Detalhamento</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="1" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="si_sinal_impresso"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SI - Sinal Impresso</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Sim">Sim</SelectItem>
+                        <SelectItem value="Não">Não</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+
+          {/* SEÇÃO: SUPORTE */}
+          {!placaSelecionada && (
+            <div className="space-y-4 border-l-4 border-purple-500 pl-4 bg-purple-50 dark:bg-purple-950/20 py-4 rounded-r-lg">
+              <h3 className="font-semibold text-purple-700 dark:text-purple-400 text-lg">🔧 Suporte</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="qtde_suporte"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantidade de Suportes</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="1" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tipo_secao_suporte"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Seção</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Circular">Circular</SelectItem>
+                          <SelectItem value="Retangular">Retangular</SelectItem>
+                          <SelectItem value="Quadrada">Quadrada</SelectItem>
+                          <SelectItem value="Perfil U">Perfil U</SelectItem>
+                          <SelectItem value="Perfil I">Perfil I</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="secao_suporte_mm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Seção do Suporte (mm)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: 76.2 ou 50x50" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="substrato_suporte"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Substrato do Suporte</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Aço Galvanizado">Aço Galvanizado</SelectItem>
+                          <SelectItem value="Alumínio">Alumínio</SelectItem>
+                          <SelectItem value="Madeira">Madeira</SelectItem>
+                          <SelectItem value="Concreto">Concreto</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* SEÇÃO: DIMENSÕES E ÁREA */}
+          {!placaSelecionada && (
+            <div className="space-y-4 border-l-4 border-orange-500 pl-4 bg-orange-50 dark:bg-orange-950/20 py-4 rounded-r-lg">
+              <h3 className="font-semibold text-orange-700 dark:text-orange-400 text-lg">📐 Dimensões e Área</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="largura_mm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Largura (mm)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="600" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="altura_mm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Altura (mm)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="800" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="area_m2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Área (m²)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" placeholder="0.48" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          )}
 
         <div className="space-y-4 border-l-4 border-primary pl-4 bg-primary/5 py-4 rounded-r-lg">
-          <h3 className="font-semibold text-primary text-lg">Chapa da Placa e Películas</h3>
+          <h3 className="font-semibold text-primary text-lg">🎨 Chapa da Placa e Películas</h3>
           
           <FormField
             control={form.control}
