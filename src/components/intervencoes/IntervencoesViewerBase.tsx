@@ -33,8 +33,6 @@ export function IntervencoesViewerBase({
   const { user } = useAuth();
   const [elementos, setElementos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [lotes, setLotes] = useState<Record<string, string>>({});
-  const [rodovias, setRodovias] = useState<Record<string, string>>({});
 
   const carregar = async () => {
     if (!user) return;
@@ -65,21 +63,6 @@ export function IntervencoesViewerBase({
         throw error;
       }
       setElementos(data || []);
-
-      // Carregar lotes e rodovias
-      const { data: lotesData } = await supabase.from("lotes").select("id, numero");
-      if (lotesData) {
-        const lotesMap: Record<string, string> = {};
-        lotesData.forEach((lote) => { lotesMap[lote.id] = lote.numero; });
-        setLotes(lotesMap);
-      }
-
-      const { data: rodoviasData } = await supabase.from("rodovias").select("id, codigo");
-      if (rodoviasData) {
-        const rodoviasMap: Record<string, string> = {};
-        rodoviasData.forEach((rodovia) => { rodoviasMap[rodovia.id] = rodovia.codigo; });
-        setRodovias(rodoviasMap);
-      }
     } catch (error) {
       console.error('Erro ao carregar elementos:', error);
       toast.error('Erro ao carregar elementos registrados');
