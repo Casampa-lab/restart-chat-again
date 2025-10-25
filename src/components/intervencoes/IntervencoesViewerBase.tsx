@@ -17,6 +17,7 @@ interface IntervencoesViewerBaseProps {
   onEditarElemento?: (elemento: any) => void;
   badgeColor?: string;
   badgeLabel?: string;
+  usarJoinExplicito?: boolean;
 }
 
 export function IntervencoesViewerBase({
@@ -26,7 +27,8 @@ export function IntervencoesViewerBase({
   tabelaIntervencao,
   onEditarElemento,
   badgeColor = "bg-primary",
-  badgeLabel
+  badgeLabel,
+  usarJoinExplicito = false
 }: IntervencoesViewerBaseProps) {
   const { user } = useAuth();
   const [elementos, setElementos] = useState<any[]>([]);
@@ -39,9 +41,16 @@ export function IntervencoesViewerBase({
     
     setLoading(true);
     try {
+      const selectQuery = usarJoinExplicito
+        ? `
+            *,
+            autor:profiles!${tabelaIntervencao}_user_id_fkey(id, nome, email)
+          `
+        : '*';
+
       const { data, error } = await supabase
         .from(tabelaIntervencao as any)
-        .select('*')
+        .select(selectQuery)
         .eq('user_id', user.id)
         .eq('tipo_origem', tipoOrigem)
         .eq('ativo', true)
@@ -139,6 +148,12 @@ export function IntervencoesViewerBase({
                     {renderDetalhes(elem) || 'Sem identificação'}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
+                    {elem.autor?.nome && (
+                      <>
+                        👤 {elem.autor.nome}
+                        {' • '}
+                      </>
+                    )}
                     📍 KM {elem.km_inicial?.toFixed(3)}{elem.km_final ? ` - ${elem.km_final.toFixed(3)}` : ''}
                     {' • '}
                     📅 {elem.data_intervencao ? format(new Date(elem.data_intervencao), 'dd/MM/yyyy') : format(new Date(elem.created_at), 'dd/MM/yyyy')}
