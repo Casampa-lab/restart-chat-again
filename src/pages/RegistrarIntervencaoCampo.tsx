@@ -289,7 +289,10 @@ export default function RegistrarIntervencaoCampo() {
         longitude_inicial: parseFloat(manualPosition.longitude_inicial) || null,
         pendente_aprovacao_coordenador: isConforme,
         aplicado_ao_inventario: false,
-        tipo_origem: modoOperacao === 'manutencao' ? 'manutencao_pre_projeto' : 'execucao'
+        tipo_origem: modoOperacao === 'manutencao' ? 'manutencao_pre_projeto' : 'execucao',
+        lote_id: activeSession?.lote_id || null,
+        rodovia_id: activeSession?.rodovia_id || null,
+        km_inicial: parseFloat(dadosIntervencao?.km_inicial) || null,
       };
 
       // Adicionar GPS Final para TODOS os elementos lineares

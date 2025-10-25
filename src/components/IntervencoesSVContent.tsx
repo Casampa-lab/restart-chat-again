@@ -80,12 +80,43 @@ const IntervencoesSVContent = () => {
     try {
       const { data, error } = await supabase
         .from("ficha_placa_intervencoes")
-        .select("*")
+        .select(`
+          *,
+          placa:ficha_placa!ficha_placa_intervencoes_ficha_placa_id_fkey(
+            codigo, tipo, lado, material, largura_mm, altura_mm, tipo_suporte
+          )
+        `)
         .eq("user_id", user?.id)
-        .order("data_intervencao", { ascending: false });
+        .eq("tipo_origem", "execucao")
+        .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setIntervencoes(data as any || []);
+      if (error) {
+        console.error('❌ Erro ao carregar intervenções SV:', error);
+        throw error;
+      }
+
+      // Mapear dados para interface esperada
+      const mapped = (data || []).map((item: any) => ({
+        id: item.id,
+        data_intervencao: item.data_intervencao || item.created_at?.split('T')[0],
+        km_referencia: item.km_inicial || 0,
+        tipo_intervencao: item.tipo_intervencao || '-',
+        tipo_placa: item.placa?.tipo || item.tipo || '-',
+        codigo_placa: item.placa?.codigo || item.codigo || null,
+        lado: item.placa?.lado || item.lado || '-',
+        dimensoes: item.placa ? `${item.placa.largura_mm}x${item.placa.altura_mm}` : item.dimensoes || null,
+        material: item.placa?.material || item.material || null,
+        tipo_suporte: item.placa?.tipo_suporte || item.tipo_suporte || null,
+        estado_conservacao: item.estado_conservacao || '-',
+        quantidade: item.quantidade || 1,
+        observacao: item.observacao,
+        created_at: item.created_at,
+        lote_id: item.lote_id,
+        rodovia_id: item.rodovia_id,
+        enviado_coordenador: item.pendente_aprovacao_coordenador === false
+      }));
+
+      setIntervencoes(mapped);
 
       const { data: lotesData } = await supabase.from("lotes").select("id, numero");
       if (lotesData) {
