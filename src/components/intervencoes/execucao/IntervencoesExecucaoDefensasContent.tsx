@@ -14,6 +14,7 @@ export default function IntervencoesExecucaoDefensasContent({ onEditarElemento }
       onEditarElemento={onEditarElemento}
       badgeColor="bg-blue-500"
       badgeLabel="EXECUÇÃO"
+      usarJoinExplicito={true}
     />
   );
 }
