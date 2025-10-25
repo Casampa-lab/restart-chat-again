@@ -2557,6 +2557,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ficha_verificacao_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_verificacao_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ficha_verificacao_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false

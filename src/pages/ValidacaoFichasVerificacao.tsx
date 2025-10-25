@@ -101,8 +101,8 @@ export default function ValidacaoFichasVerificacao() {
         .select(`
           *,
           autor:profiles!ficha_verificacao_user_id_fkey(id, nome, email),
-          rodovias:rodovia_id(codigo),
-          lotes:lote_id(numero),
+          rodovias:rodovias!ficha_verificacao_rodovia_id_fkey(codigo),
+          lotes:lotes!ficha_verificacao_lote_id_fkey(numero),
           ficha_verificacao_itens(*)
         `)
         .order('enviado_coordenador_em', { ascending: false });
