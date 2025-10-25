@@ -86,7 +86,9 @@ export function IntervencoesSVForm({
   const isManutencaoRotineira = tipoOrigem === 'manutencao_pre_projeto';
   
   const isCampoEstruturalBloqueado = (campo: string) => {
+    // Só bloqueia campos estruturais se for manutenção E houver placa vinculada
     if (!isManutencaoRotineira) return false;
+    if (!placaSelecionada) return false; // Nova placa → libera campos
     return (CAMPOS_ESTRUTURAIS['placas'] as readonly string[]).includes(campo);
   };
 
