@@ -739,28 +739,6 @@ export function IntervencoesSVForm({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="si_sinal_impresso"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>SI - Sinal Impresso</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Sim">Sim</SelectItem>
-                    <SelectItem value="Não">Não</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
