@@ -233,13 +233,6 @@ export default function RegistrarIntervencaoCampo() {
     try {
       setLoading(true);
 
-      // Manutenção e Execução usam o mesmo fluxo unificado
-      const payload = {
-        ...dadosIntervencao,
-        fotos_urls: fotos,
-        pendente_aprovacao_coordenador: isConforme,
-      };
-
       // Se não conforme, criar NC
       if (!isConforme) {
         const { error: ncError } = await supabase
@@ -269,9 +262,27 @@ export default function RegistrarIntervencaoCampo() {
         throw new Error(`Tipo de elemento não mapeado: ${tipoSelecionado}`);
       }
 
+      // Campos permitidos em ficha_placa_intervencoes
+      const camposPermitidos = [
+        'ficha_placa_id', 'motivo', 'data_intervencao', 'placa_recuperada',
+        'suporte', 'substrato', 'tipo_pelicula_fundo_novo', 'retro_fundo',
+        'retro_orla_legenda', 'fora_plano_manutencao', 'justificativa_fora_plano',
+        'pendente_aprovacao_coordenador', 'coordenador_id', 'data_aprovacao_coordenador',
+        'aplicado_ao_inventario', 'observacao_coordenador', 'latitude_inicial',
+        'longitude_inicial', 'fotos_urls', 'tipo_origem', 'user_id'
+      ];
+
+      // Filtrar apenas campos permitidos de dadosIntervencao
+      const payloadFiltrado: any = {};
+      Object.keys(dadosIntervencao).forEach(key => {
+        if (camposPermitidos.includes(key)) {
+          payloadFiltrado[key] = dadosIntervencao[key];
+        }
+      });
+
       // Montar payload base com campos comuns
       const payloadIntervencao: any = {
-        ...payload,
+        ...payloadFiltrado,
         user_id: user!.id,
         fotos_urls: fotos,
         latitude_inicial: parseFloat(manualPosition.latitude_inicial) || null,
@@ -292,7 +303,8 @@ export default function RegistrarIntervencaoCampo() {
       Object.keys(payloadIntervencao).forEach(key => {
         if (payloadIntervencao[key] === "" && 
             (key.includes("km") || key.includes("_m") || key.includes("quantidade") || 
-             key.includes("area") || key.includes("extensao") || key.includes("espacamento"))) {
+             key.includes("area") || key.includes("extensao") || key.includes("espacamento") ||
+             key.includes("retro"))) {
           payloadIntervencao[key] = null;
         }
       });
