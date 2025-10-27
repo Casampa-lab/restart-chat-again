@@ -79,32 +79,7 @@ export function IntervencaoInventarioForm({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // 1. Salvar na tabela intervencoes_sv (registro geral)
-      const intervencaoSV = {
-        user_id: user.id,
-        lote_id: placaInfo.loteId,
-        rodovia_id: placaInfo.rodoviaId,
-        data_intervencao: values.data_intervencao,
-        km_referencia: placaInfo.km_inicial || 0,
-        lado: placaInfo.lado || "Direito",
-        tipo_intervencao: "Manutenção",
-        tipo_placa: "Regulamentação",
-        codigo_placa: placaInfo.codigo,
-        estado_conservacao: values.placa_recuperada ? "Bom" : "Regular",
-        quantidade: 1,
-        dimensoes: "",
-        material: values.substrato || "",
-        tipo_suporte: values.suporte || "",
-        observacao: values.motivo,
-      };
-
-      const { error: errorSV } = await supabase
-        .from("intervencoes_sv")
-        .insert(intervencaoSV);
-
-      if (errorSV) throw errorSV;
-
-      // 2. Salvar na tabela ficha_placa_intervencoes (vinculado ao inventário)
+      // Salvar intervenção vinculada ao inventário
       const intervencaoInventario = {
         ficha_placa_id: fichaPlacaId,
         data_intervencao: values.data_intervencao,
@@ -125,7 +100,7 @@ export function IntervencaoInventarioForm({
 
       toast({
         title: "Intervenção registrada!",
-        description: "A intervenção foi salva em suas intervenções e vinculada ao inventário.",
+        description: "A intervenção foi vinculada ao inventário.",
       });
 
       form.reset();

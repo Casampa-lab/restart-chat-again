@@ -16,10 +16,6 @@ import NCsCoordenador from "./pages/NCsCoordenador";
 import MinhasFrentesLiberadas from "./pages/MinhasFrentesLiberadas";
 import MinhasRetrorrefletividades from "./pages/MinhasRetrorrefletividades";
 import MinhasDefensas from "./pages/MinhasDefensas";
-import MinhasIntervencoesSH from "./pages/MinhasIntervencoesSH";
-import MinhasIntervencoesInscricoes from "./pages/MinhasIntervencoesInscricoes";
-import MinhasIntervencoesSV from "./pages/MinhasIntervencoesSV";
-import MinhasIntervencoesTacha from "./pages/MinhasIntervencoesTacha";
 import MinhasIntervencoes from "./pages/MinhasIntervencoes";
 import MeusRegistrosNC from "./pages/MeusRegistrosNC";
 import MinhasFichasVerificacao from "./pages/MinhasFichasVerificacao";
@@ -79,10 +75,6 @@ const App = () => (
         <Route path="/revisao-intervencoes" element={<RevisaoIntervencoes />} />
         <Route path="/elementos-pendentes" element={<ElementosPendentes />} />
         <Route path="/meus-elementos-pendentes" element={<MeusElementosPendentes />} />
-        <Route path="/minhas-intervencoes-inscricoes" element={<MinhasIntervencoesInscricoes />} />
-        <Route path="/minhas-intervencoes-sv" element={<MinhasIntervencoesSV />} />
-        <Route path="/minhas-intervencoes-sh" element={<MinhasIntervencoesSH />} />
-        <Route path="/minhas-intervencoes-tacha" element={<MinhasIntervencoesTacha />} />
         <Route path="/minhas-necessidades-relatorios" element={<MinhasNecessidadesRelatorios />} />
         <Route path="/reconciliacao-pendente" element={<ReconciliacaoPendente />} />
         <Route path="/modo-campo/registrar-intervencao" element={<RegistrarIntervencaoCampo />} />

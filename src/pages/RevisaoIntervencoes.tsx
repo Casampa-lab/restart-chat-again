@@ -16,10 +16,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type TipoIntervencao = 
-  | "intervencoes_sh"
-  | "intervencoes_inscricoes"
-  | "intervencoes_sv"
-  | "intervencoes_tacha"
   | "ficha_marcas_longitudinais_intervencoes"
   | "ficha_cilindros_intervencoes"
   | "ficha_porticos_intervencoes"
@@ -77,16 +73,12 @@ export default function RevisaoIntervencoes() {
   const [tipoFiltro, setTipoFiltro] = useState<string>("todos");
 
   const TIPOS_INTERVENCAO = [
-    { value: "intervencoes_sh", label: "SH - Sinalização Horizontal", funcaoRPC: null },
-    { value: "intervencoes_inscricoes", label: "Inscrições", funcaoRPC: null },
-    { value: "intervencoes_sv", label: "SV - Sinalização Vertical", funcaoRPC: null },
-    { value: "intervencoes_tacha", label: "Tachas", funcaoRPC: null },
     { value: "ficha_marcas_longitudinais_intervencoes", label: "Marcas Longitudinais", funcaoRPC: "aplicar_intervencao_marcas_longitudinais" },
     { value: "ficha_cilindros_intervencoes", label: "Cilindros", funcaoRPC: "aplicar_intervencao_cilindros" },
     { value: "ficha_porticos_intervencoes", label: "Pórticos", funcaoRPC: "aplicar_intervencao_portico" },
     { value: "defensas_intervencoes", label: "Defensas", funcaoRPC: "aplicar_intervencao_defensas" },
-    { value: "ficha_inscricoes_intervencoes", label: "Inscrições (Ficha)", funcaoRPC: "aplicar_intervencao_inscricoes" },
-    { value: "ficha_tachas_intervencoes", label: "Tachas (Ficha)", funcaoRPC: "aplicar_intervencao_tachas" },
+    { value: "ficha_inscricoes_intervencoes", label: "Inscrições", funcaoRPC: "aplicar_intervencao_inscricoes" },
+    { value: "ficha_tachas_intervencoes", label: "Tachas", funcaoRPC: "aplicar_intervencao_tachas" },
     { value: "ficha_placa_intervencoes", label: "Placas", funcaoRPC: "aplicar_intervencao_placa" },
   ];
 
@@ -274,11 +266,7 @@ export default function RevisaoIntervencoes() {
             let descricao = "";
             let km = item.km_inicial || 0;
 
-            if (tipo.value === "intervencoes_sh") {
-              descricao = `${item.tipo_demarcacao || ""} - ${item.cor || ""} - ${item.extensao_metros || 0}m`;
-            } else if (tipo.value === "intervencoes_tacha") {
-              descricao = `${item.refletivo || ""} - ${item.quantidade || 0} unid.`;
-            } else if (tipo.value === "ficha_placa_intervencoes") {
+            if (tipo.value === "ficha_placa_intervencoes") {
               descricao = `Placa - ${item.motivo || ""}`;
             } else {
               descricao = item.motivo || item.tipo_intervencao || "Intervenção";

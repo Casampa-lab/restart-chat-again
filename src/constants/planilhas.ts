@@ -65,43 +65,6 @@ export const PLANILHAS: Record<string, Planilha> = {
     tabela: 'defensas'
   },
 
-  '3.1.5-sh': {
-    codigo: '3.1.5',
-    nome: 'INTERVENÇÕES REALIZADAS - SH',
-    categoria: 'intervencoes',
-    implementado: true,
-    descricao: 'Registro de intervenções realizadas em sinalização horizontal',
-    tabela: 'intervencoes_sh'
-  },
-
-  // A implementar
-  '3.1.5-inscricoes': {
-    codigo: '3.1.5',
-    nome: 'INTERVENÇÕES REALIZADAS - INSCRIÇÕES NOS PAVIMENTOS',
-    categoria: 'intervencoes',
-    implementado: true,
-    descricao: 'Registro de intervenções realizadas em inscrições no pavimento',
-    tabela: 'intervencoes_inscricoes'
-  },
-
-  '3.1.5-sv': {
-    codigo: '3.1.5',
-    nome: 'INTERVENÇÕES REALIZADAS - SV',
-    categoria: 'intervencoes',
-    implementado: true,
-    descricao: 'Registro de intervenções realizadas em sinalização vertical',
-    tabela: 'intervencoes_sv'
-  },
-
-  '3.1.5-tacha': {
-    codigo: '3.1.5',
-    nome: 'INTERVENÇÕES REALIZADAS - TACHA',
-    categoria: 'intervencoes',
-    implementado: true,
-    descricao: 'Registro de intervenções realizadas em tachas refletivas',
-    tabela: 'intervencoes_tacha'
-  },
-
   '3.1.18': {
     codigo: '3.1.18',
     nome: 'REGISTRO DE NÃO CONFORMIDADE',
