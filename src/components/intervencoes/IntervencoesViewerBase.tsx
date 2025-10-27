@@ -48,12 +48,9 @@ export function IntervencoesViewerBase({
     
     setLoading(true);
     try {
-      const selectQuery = joinExplicito
-        ? `
-            *,
-            autor:profiles!${tabelaIntervencao}_user_id_fkey(id, nome, email)
-          `
-        : '*';
+    // Hotfix: Removido JOIN de autor até que as FKs sejam criadas no banco
+    // O campo 'autor' não é usado na UI atualmente
+    const selectQuery = '*';
 
       const { data, error } = await supabase
         .from(tabelaIntervencao as any)
