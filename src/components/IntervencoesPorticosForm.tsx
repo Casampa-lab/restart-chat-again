@@ -18,6 +18,19 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstruturais";
 
+const SOLUCOES_PORTICOS = [
+  "Manter",
+  "Remover",
+  "Implantar",
+  "Substituir"
+];
+
+const MOTIVOS_REMOCAO_SUBSTITUICAO_PORTICOS = [
+  "1 - Suporte danificado",
+  "2 - Instalado em local impróprio ou indevido",
+  "3 - Necessidade de adequação imediata da solução"
+];
+
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   solucao: z.string().min(1, "Solução é obrigatória"),
@@ -75,7 +88,7 @@ export function IntervencoesPorticosForm({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       solucao: "",
-      motivo: "",
+      motivo: "-",
       km_inicial: "",
       tipo: "",
       altura_livre_m: "",
@@ -87,13 +100,16 @@ export function IntervencoesPorticosForm({
     },
   });
 
+  const solucaoAtual = form.watch('solucao');
+  const mostrarMotivosNumerados = solucaoAtual === 'Remover' || solucaoAtual === 'Substituir';
+
   // Preencher formulário com dados do pórtico selecionado
   useEffect(() => {
     if (porticoSelecionado && modo === 'normal') {
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
         solucao: "",
-        motivo: "",
+        motivo: "-",
         km_inicial: porticoSelecionado.km_inicial?.toString() || "",
         tipo: porticoSelecionado.tipo || "",
         altura_livre_m: (porticoSelecionado as any).altura_livre_m?.toString() || "",
@@ -105,6 +121,20 @@ export function IntervencoesPorticosForm({
       });
     }
   }, [porticoSelecionado, modo, form]);
+
+  // Reset condicional do motivo baseado na solução
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'solucao') {
+        if (value.solucao === 'Manter' || value.solucao === 'Implantar') {
+          form.setValue('motivo', '-');
+        } else if (value.solucao === 'Remover' || value.solucao === 'Substituir') {
+          form.setValue('motivo', '');
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   // Em modo controlado, repassar dados em tempo real
   useEffect(() => {
@@ -133,6 +163,14 @@ export function IntervencoesPorticosForm({
 
     setIsSubmitting(true);
     try {
+      // Validar motivo condicional
+      if ((data.solucao === 'Remover' || data.solucao === 'Substituir') && 
+          (!data.motivo || data.motivo === '-')) {
+        toast.error('Para Remoção ou Substituição, selecione um motivo específico');
+        setIsSubmitting(false);
+        return;
+      }
+
       const { error } = await supabase
         .from("ficha_porticos_intervencoes")
         .insert({
@@ -208,11 +246,11 @@ export function IntervencoesPorticosForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Implantação">Implantação</SelectItem>
-                        <SelectItem value="Manutenção">Manutenção</SelectItem>
-                        <SelectItem value="Substituição">Substituição</SelectItem>
-                        <SelectItem value="Remoção">Remoção</SelectItem>
-                        <SelectItem value="Recuperação">Recuperação</SelectItem>
+                        {SOLUCOES_PORTICOS.map((sol) => (
+                          <SelectItem key={sol} value={sol}>
+                            {sol}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -226,20 +264,30 @@ export function IntervencoesPorticosForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Motivo *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    {mostrarMotivosNumerados ? (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o motivo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {MOTIVOS_REMOCAO_SUBSTITUICAO_PORTICOS.map((motivo) => (
+                            <SelectItem key={motivo} value={motivo}>
+                              {motivo}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
+                        <Input 
+                          value="-" 
+                          disabled 
+                          className="bg-muted text-muted-foreground"
+                        />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Implantação">Implantação</SelectItem>
-                        <SelectItem value="Manutenção">Manutenção</SelectItem>
-                        <SelectItem value="Substituição">Substituição</SelectItem>
-                        <SelectItem value="Remoção">Remoção</SelectItem>
-                        <SelectItem value="Recuperação">Recuperação</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
