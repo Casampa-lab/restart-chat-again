@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, FileText, ExternalLink, Trash2, Filter, FileSpreadsheet, Map, BarChart3, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import logoOperaVia from "@/assets/logo-operavia.png";
+import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
 
 const NecessidadesMap = lazy(() => import("@/components/NecessidadesMap").then(module => ({ default: module.NecessidadesMap })));
 

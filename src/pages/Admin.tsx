@@ -39,7 +39,7 @@ import { LimparResultadosMatching } from "@/components/admin/LimparResultadosMat
 import { DeletarImportacaoPorLote } from "@/components/admin/DeletarImportacaoPorLote";
 import { GestaoConflitos } from "@/components/admin/GestaoConflitos";
 
-import logoOperaVia from "@/assets/logo-operavia.png";
+import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
 
 const Admin = () => {
   const navigate = useNavigate();

@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, CheckCircle, XCircle, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import logoOperaVia from "@/assets/logo-operavia.png";
+import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
 import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,

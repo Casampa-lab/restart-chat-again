@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from "lucide-react";
-import logoOperaVia from "@/assets/logo-operavia.png";
+import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
 import IntervencoesSHContent from "@/components/IntervencoesSHContent";
 import IntervencoesSVContent from "@/components/IntervencoesSVContent";
 import IntervencoesInscricoesContent from "@/components/IntervencoesInscricoesContent";
