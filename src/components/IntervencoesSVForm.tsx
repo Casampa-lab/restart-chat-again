@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,12 +13,11 @@ import { CODIGOS_PLACAS } from "@/constants/codigosPlacas";
 import { PlacaPreview } from "./PlacaPreview";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info, Lock, Loader2, Unlock, MapPin } from "lucide-react";
+import { Info, Loader2, Lock } from "lucide-react";
 import { useTipoOrigem } from "@/hooks/useTipoOrigem";
 import { LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstruturais";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useGPSTracking } from "@/hooks/useGPSTracking";
 
 const SOLUCOES_PLACAS = [
   "Manter",
@@ -111,13 +110,9 @@ export function IntervencoesSVForm({
   const [isLoading, setIsLoading] = useState(false);
   const [codigosFiltrados, setCodigosFiltrados] = useState<readonly {codigo: string, nome: string}[]>([]);
   const [codigoAtual, setCodigoAtual] = useState<string | null>(null);
-  const [snvReadOnly, setSnvReadOnly] = useState(true);
   
   const tipoOrigem = tipoOrigemProp || 'execucao';
   const isManutencaoRotineira = tipoOrigem === 'manutencao_pre_projeto';
-  
-  // Hook GPS com identificação SNV
-  const { snvIdentificado, snvConfianca, snvDistancia } = useGPSTracking();
 
   const isCampoEstruturalBloqueado = (campo: string) => {
     // Só bloqueia campos estruturais se for manutenção E houver placa vinculada
@@ -167,15 +162,6 @@ export function IntervencoesSVForm({
     },
   });
   
-  // Auto-preencher SNV quando identificado (depois da declaração do form)
-  useEffect(() => {
-    if (snvIdentificado && !form.getValues('snv')) {
-      form.setValue('snv', snvIdentificado);
-      setSnvReadOnly(true);
-      console.log(`✅ SNV auto-preenchido: ${snvIdentificado}`);
-    }
-  }, [snvIdentificado, form]);
-
   const solucaoAtual = form.watch('solucao');
   const mostrarMotivosNumerados = solucaoAtual === 'Remover' || solucaoAtual === 'Substituir';
 
@@ -524,50 +510,16 @@ export function IntervencoesSVForm({
                   name="snv"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center justify-between">
-                        <span className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          SNV
-                          {snvIdentificado && snvConfianca && (
-                            <Badge 
-                              variant={
-                                snvConfianca === 'alta' ? 'default' : 
-                                snvConfianca === 'media' ? 'secondary' : 
-                                'outline'
-                              }
-                              className="text-xs"
-                            >
-                              {snvConfianca === 'alta' ? '✓ Alta' : 
-                               snvConfianca === 'media' ? '~ Média' : 
-                               '? Baixa'}
-                              {snvDistancia && ` (${snvDistancia.toFixed(0)}m)`}
-                            </Badge>
-                          )}
-                        </span>
-                        {snvIdentificado && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSnvReadOnly(!snvReadOnly)}
-                          >
-                            {snvReadOnly ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-                          </Button>
-                        )}
-                      </FormLabel>
+                      <FormLabel>SNV (Sistema Nacional de Viação)</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
                           placeholder="Ex: BR-381/MG"
-                          readOnly={snvReadOnly && !!snvIdentificado}
-                          className={snvReadOnly && snvIdentificado ? 'bg-muted' : ''}
                         />
                       </FormControl>
-                      {snvIdentificado && (
-                        <p className="text-xs text-muted-foreground">
-                          🎯 Auto-identificado via GPS. Clique no cadeado para editar.
-                        </p>
-                      )}
+                      <FormDescription className="text-xs">
+                        Preenchido automaticamente via GPS ao salvar.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

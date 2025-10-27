@@ -117,7 +117,7 @@ export default function RegistrarIntervencaoCampo() {
   const location = useLocation();
   const { user } = useAuth();
   const { activeSession } = useWorkSession(user?.id);
-  const { position, getCurrentPosition } = useGPSTracking();
+  const { position, getCurrentPosition, snvIdentificado, snvConfianca, snvDistancia } = useGPSTracking();
 
   const [modoOperacao, setModoOperacao] = useState<'manutencao' | 'execucao' | null>(null);
   const [tipoSelecionado, setTipoSelecionado] = useState<string>('');
@@ -297,6 +297,7 @@ export default function RegistrarIntervencaoCampo() {
         lote_id: activeSession?.lote_id || null,
         rodovia_id: activeSession?.rodovia_id || null,
         km_inicial: parseFloat(dadosIntervencao?.km_inicial) || null,
+        snv: snvIdentificado || dadosIntervencao?.snv || null,
       };
 
       // Adicionar GPS Final para TODOS os elementos lineares
@@ -347,10 +348,24 @@ export default function RegistrarIntervencaoCampo() {
         throw error;
       }
 
-      toast.success(isConforme 
+      // Mensagem de sucesso personalizada com SNV
+      let mensagemSucesso = isConforme 
         ? 'Intervenção enviada para aprovação!' 
-        : 'Não conformidade registrada!'
-      );
+        : 'Não conformidade registrada!';
+
+      // Adicionar SNV se foi identificado automaticamente
+      if (snvIdentificado) {
+        mensagemSucesso += `\n📍 SNV: ${snvIdentificado}`;
+        if (snvConfianca) {
+          const confiancaEmoji = snvConfianca === 'alta' ? '✅' : snvConfianca === 'media' ? '⚠️' : '❓';
+          mensagemSucesso += ` ${confiancaEmoji}`;
+        }
+        if (snvDistancia !== null) {
+          mensagemSucesso += ` (${Math.round(snvDistancia)}m)`;
+        }
+      }
+
+      toast.success(mensagemSucesso);
       
       // Voltar para o viewer ao invés de navegar
       setModoVisualizacao('viewer');
