@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import { toast } from 'sonner';
+import { loadSnvGeojsonByUF, lookupPoint, ConfiancaSNV } from '@/lib/snvLookup';
 
 interface GPSPosition {
   latitude: number;
@@ -15,6 +16,34 @@ export function useGPSTracking() {
   const [watching, setWatching] = useState(false);
   const [watchId, setWatchId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Estados SNV
+  const [snvIdentificado, setSnvIdentificado] = useState<string | null>(null);
+  const [snvConfianca, setSnvConfianca] = useState<ConfiancaSNV | null>(null);
+  const [snvDistancia, setSnvDistancia] = useState<number | null>(null);
+
+  // Função de identificação SNV
+  const identificarSNVAutomatico = useCallback(async (lat: number, lon: number, tolerancia = 50, uf = 'MG') => {
+    try {
+      const geojson = await loadSnvGeojsonByUF(uf);
+      const resultado = lookupPoint({ lon, lat, geojson, toleranciaMetros: tolerancia });
+      
+      if (resultado) {
+        setSnvIdentificado(resultado.codigo_snv);
+        setSnvConfianca(resultado.confianca);
+        setSnvDistancia(resultado.dist_m);
+        toast.success(`✅ SNV: ${resultado.codigo_snv} (${resultado.dist_m.toFixed(0)}m - ${resultado.confianca})`);
+      } else {
+        setSnvIdentificado(null);
+        setSnvConfianca(null);
+        setSnvDistancia(null);
+        toast.error('❌ SNV não identificado nesta posição');
+      }
+    } catch (err: any) {
+      console.error('Erro ao identificar SNV:', err);
+      toast.error(`Erro ao identificar SNV: ${err.message}`);
+    }
+  }, []);
 
   const startWatching = useCallback(async () => {
     try {
@@ -135,6 +164,10 @@ export function useGPSTracking() {
 
       setPosition(gpsPos);
       setError(null);
+      
+      // Identificar SNV automaticamente após captura GPS
+      await identificarSNVAutomatico(gpsPos.latitude, gpsPos.longitude, 50);
+      
       return gpsPos;
     } catch (err: any) {
       console.error('Erro ao obter posição:', err);
@@ -163,5 +196,9 @@ export function useGPSTracking() {
     startWatching,
     stopWatching,
     getCurrentPosition,
+    snvIdentificado,
+    snvConfianca,
+    snvDistancia,
+    identificarSNVAutomatico,
   };
 }
