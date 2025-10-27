@@ -14,7 +14,7 @@ export default function IntervencoesManutencaoPorticosContent({ onEditarElemento
       onEditarElemento={onEditarElemento}
       badgeColor="bg-orange-500"
       badgeLabel="MANUTENÇÃO"
-      usarJoinExplicito={false}
+      usarJoinExplicito={true}
     />
   );
 }

@@ -33,19 +33,22 @@ export function IntervencoesViewerBase({
   onEditarElemento,
   badgeColor = "bg-primary",
   badgeLabel,
-  usarJoinExplicito = false
+  usarJoinExplicito = true  // ⚠️ SEGURANÇA: Sempre true por padrão
 }: IntervencoesViewerBaseProps) {
   const { user } = useAuth();
   const [elementos, setElementos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [mostrarEnviadas, setMostrarEnviadas] = useState(true);
 
+  // 🔒 PROTEÇÃO DUPLA: Garantir que JOIN explícito sempre seja usado
+  const joinExplicito = usarJoinExplicito ?? true;
+
   const carregar = async () => {
     if (!user) return;
     
     setLoading(true);
     try {
-      const selectQuery = usarJoinExplicito
+      const selectQuery = joinExplicito
         ? `
             *,
             autor:profiles!${tabelaIntervencao}_user_id_fkey(id, nome, email)

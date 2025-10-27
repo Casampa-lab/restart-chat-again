@@ -14,7 +14,7 @@ export default function IntervencoesExecucaoMarcasSHContent({ onEditarElemento }
       onEditarElemento={onEditarElemento}
       badgeColor="bg-blue-500"
       badgeLabel="EXECUÇÃO"
-      usarJoinExplicito={false}
+      usarJoinExplicito={true}
     />
   );
 }

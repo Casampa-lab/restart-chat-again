@@ -14,7 +14,7 @@ export default function IntervencoesExecucaoPorticosContent({ onEditarElemento }
       onEditarElemento={onEditarElemento}
       badgeColor="bg-blue-500"
       badgeLabel="EXECUÇÃO"
-      usarJoinExplicito={false}
+      usarJoinExplicito={true}
     />
   );
 }
