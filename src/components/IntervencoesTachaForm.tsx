@@ -35,8 +35,8 @@ interface IntervencoesTachaFormProps {
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
-  solucao: z.string().min(1, "Solução é obrigatória"),
-  motivo: z.string().min(1, "Motivo é obrigatório"),
+  solucao: z.string().default("-"),
+  motivo: z.string().default("-"),
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   km_final: z.string().min(1, "KM final é obrigatório"),
   snv: z.string().optional(),
@@ -74,8 +74,8 @@ export function IntervencoesTachaForm({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
-      solucao: "",
-      motivo: "",
+      solucao: "-",
+      motivo: "-",
       km_inicial: "",
       km_final: "",
       snv: "",
@@ -97,8 +97,8 @@ export function IntervencoesTachaForm({
     if (tachaSelecionada && modo === 'normal') {
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
-        solucao: "",
-        motivo: "",
+        solucao: "-",
+        motivo: "-",
         km_inicial: tachaSelecionada.km_inicial?.toString() || "",
         km_final: tachaSelecionada.km_final?.toString() || "",
         snv: (tachaSelecionada as any).snv || "",
@@ -196,54 +196,6 @@ export function IntervencoesTachaForm({
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="solucao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Solução *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Instalação">Instalação</SelectItem>
-                        <SelectItem value="Substituição">Substituição</SelectItem>
-                        <SelectItem value="Remoção">Remoção</SelectItem>
-                        <SelectItem value="Manutenção">Manutenção</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="motivo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Motivo *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Instalação">Instalação</SelectItem>
-                        <SelectItem value="Substituição">Substituição</SelectItem>
-                        <SelectItem value="Remoção">Remoção</SelectItem>
-                        <SelectItem value="Manutenção">Manutenção</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

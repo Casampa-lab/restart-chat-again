@@ -61,7 +61,7 @@ const TIPOS_DEMARCACAO = [
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
-  motivo: z.string().min(1, "Motivo é obrigatório"),
+  motivo: z.string().default("-"),
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   km_final: z.string().min(1, "KM final é obrigatório"),
   snv: z.string().optional(),
@@ -99,7 +99,7 @@ const IntervencoesSHForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
-      motivo: "",
+      motivo: "-",
       km_inicial: "",
       km_final: "",
       snv: "",
@@ -122,7 +122,7 @@ const IntervencoesSHForm = ({
     if (marcaSelecionada && modo === 'normal') {
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
-        motivo: "",
+        motivo: "-",
         km_inicial: marcaSelecionada.km_inicial?.toString() || "",
         km_final: marcaSelecionada.km_final?.toString() || "",
         snv: (marcaSelecionada as any).snv || "",
@@ -220,32 +220,6 @@ const IntervencoesSHForm = ({
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="motivo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Motivo da Intervenção</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o motivo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Implantação">Implantação</SelectItem>
-                        <SelectItem value="Pintura Nova">Pintura Nova</SelectItem>
-                        <SelectItem value="Repintura">Repintura</SelectItem>
-                        <SelectItem value="Reforço">Reforço</SelectItem>
-                        <SelectItem value="Recuperação">Recuperação</SelectItem>
-                        <SelectItem value="Manutenção">Manutenção</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
