@@ -266,7 +266,7 @@ export default function RegistrarIntervencaoCampo() {
 
       // Campos permitidos em ficha_placa_intervencoes
       const camposPermitidos = [
-        'ficha_placa_id', 'motivo', 'data_intervencao', 'placa_recuperada',
+        'ficha_placa_id', 'motivo', 'solucao', 'data_intervencao', 'placa_recuperada',
         'suporte', 'substrato', 'tipo_pelicula_fundo_novo', 'retro_fundo',
         'retro_orla_legenda', 'fora_plano_manutencao', 'justificativa_fora_plano',
         'pendente_aprovacao_coordenador', 'coordenador_id', 'data_aprovacao_coordenador',
