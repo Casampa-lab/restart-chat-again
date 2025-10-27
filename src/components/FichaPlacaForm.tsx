@@ -51,6 +51,7 @@ const danoSchema = z.object({
 });
 
 const intervencaoSchema = z.object({
+  solucao: z.string().min(1, "Solução obrigatória"),
   motivo: z.string().min(1, "Motivo obrigatório"),
   data_intervencao: z.string().min(1, "Data obrigatória"),
   placa_recuperada: z.boolean(),
@@ -235,6 +236,7 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
           .from('ficha_placa_intervencoes')
           .insert(intervencoes.map(intervencao => ({
             ficha_placa_id: ficha.id,
+            solucao: intervencao.solucao,
             motivo: intervencao.motivo,
             data_intervencao: intervencao.data_intervencao,
             placa_recuperada: intervencao.placa_recuperada,

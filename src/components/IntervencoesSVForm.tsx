@@ -25,6 +25,7 @@ import { toast } from "sonner";
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
+  solucao: z.string().min(1, "Solução é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
   
   // SEÇÃO 1: LOCALIZAÇÃO (BR e coordenadas vêm da sessão/GPS)
@@ -108,6 +109,7 @@ export function IntervencoesSVForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
+      solucao: "",
       motivo: "",
       // Localização
       snv: "",
@@ -239,6 +241,7 @@ export function IntervencoesSVForm({
       await supabase.from("ficha_placa_intervencoes").insert({
         ficha_placa_id: fichaPlacaId,
         data_intervencao: data.data_intervencao,
+        solucao: data.solucao,
         motivo: data.motivo,
         tipo_origem: tipoOrigem,
         suporte: data.suporte || null,
@@ -296,10 +299,35 @@ export function IntervencoesSVForm({
 
           <FormField
             control={form.control}
+            name="solucao"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Solução *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Implantação">Implantação</SelectItem>
+                    <SelectItem value="Substituição">Substituição</SelectItem>
+                    <SelectItem value="Manutenção">Manutenção</SelectItem>
+                    <SelectItem value="Remoção">Remoção</SelectItem>
+                    <SelectItem value="Recuperação">Recuperação</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="motivo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Motivo da Intervenção *</FormLabel>
+                <FormLabel>Motivo *</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>

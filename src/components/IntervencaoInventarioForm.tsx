@@ -14,6 +14,7 @@ import { Loader2 } from "lucide-react";
 
 const intervencaoSchema = z.object({
   data_intervencao: z.string().min(1, "Data obrigatória"),
+  solucao: z.string().min(1, "Solução obrigatória"),
   motivo: z.string().min(1, "Motivo obrigatório"),
   placa_recuperada: z.boolean().default(false),
   suporte: z.string().optional(),
@@ -62,6 +63,7 @@ export function IntervencaoInventarioForm({
     resolver: zodResolver(intervencaoSchema),
     defaultValues: {
       data_intervencao: new Date().toISOString().split("T")[0],
+      solucao: "",
       motivo: "",
       placa_recuperada: false,
       suporte: "",
@@ -83,6 +85,7 @@ export function IntervencaoInventarioForm({
       const intervencaoInventario = {
         ficha_placa_id: fichaPlacaId,
         data_intervencao: values.data_intervencao,
+        solucao: values.solucao,
         motivo: values.motivo,
         placa_recuperada: values.placa_recuperada,
         suporte: values.suporte || null,
@@ -158,10 +161,35 @@ export function IntervencaoInventarioForm({
 
         <FormField
           control={form.control}
+          name="solucao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Solução *</FormLabel>
+              <FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a solução" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Implantação">Implantação</SelectItem>
+                    <SelectItem value="Substituição">Substituição</SelectItem>
+                    <SelectItem value="Recuperação">Recuperação</SelectItem>
+                    <SelectItem value="Remoção">Remoção</SelectItem>
+                    <SelectItem value="Manutenção">Manutenção</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="motivo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Motivo da Intervenção *</FormLabel>
+              <FormLabel>Motivo *</FormLabel>
               <FormControl>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger>

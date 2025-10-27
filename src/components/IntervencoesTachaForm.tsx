@@ -35,6 +35,7 @@ interface IntervencoesTachaFormProps {
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
+  solucao: z.string().min(1, "Solução é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   km_final: z.string().min(1, "KM final é obrigatório"),
@@ -73,6 +74,7 @@ export function IntervencoesTachaForm({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
+      solucao: "",
       motivo: "",
       km_inicial: "",
       km_final: "",
@@ -95,6 +97,7 @@ export function IntervencoesTachaForm({
     if (tachaSelecionada && modo === 'normal') {
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
+        solucao: "",
         motivo: "",
         km_inicial: tachaSelecionada.km_inicial?.toString() || "",
         km_final: tachaSelecionada.km_final?.toString() || "",
@@ -139,6 +142,7 @@ export function IntervencoesTachaForm({
       const { error } = await supabase.from("ficha_tachas_intervencoes").insert({
         ficha_tachas_id: tachaSelecionada?.id || null,
         data_intervencao: values.data_intervencao,
+        solucao: values.solucao,
         motivo: values.motivo,
         km_inicial: values.km_inicial ? parseFloat(values.km_inicial) : null,
         km_final: values.km_final ? parseFloat(values.km_final) : null,
@@ -199,10 +203,34 @@ export function IntervencoesTachaForm({
 
               <FormField
                 control={form.control}
+                name="solucao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Solução *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Instalação">Instalação</SelectItem>
+                        <SelectItem value="Substituição">Substituição</SelectItem>
+                        <SelectItem value="Remoção">Remoção</SelectItem>
+                        <SelectItem value="Manutenção">Manutenção</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="motivo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Motivo da Intervenção *</FormLabel>
+                    <FormLabel>Motivo *</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>

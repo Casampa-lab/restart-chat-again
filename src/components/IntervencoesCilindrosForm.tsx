@@ -20,6 +20,7 @@ import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constant
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   snv: z.string().optional(),
+  solucao: z.string().min(1, "Solução é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
   km_inicial: z.string().min(1, "km Inicial é obrigatório"),
   km_final: z.string().min(1, "km Final é obrigatório"),
@@ -76,6 +77,7 @@ export function IntervencoesCilindrosForm({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       snv: "",
+      solucao: "",
       motivo: "",
       km_inicial: "",
       km_final: "",
@@ -97,6 +99,7 @@ export function IntervencoesCilindrosForm({
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
         snv: (cilindroSelecionado as any).snv || "",
+        solucao: "",
         motivo: "",
         km_inicial: cilindroSelecionado.km_inicial?.toString() || "",
         km_final: cilindroSelecionado.km_final?.toString() || "",
@@ -158,6 +161,7 @@ export function IntervencoesCilindrosForm({
         .insert({
           ficha_cilindros_id: cilindroSelecionado?.id || null,
           data_intervencao: data.data_intervencao,
+          solucao: data.solucao,
           motivo: data.motivo,
           km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
           km_final: data.km_final ? parseFloat(data.km_final) : null,
@@ -236,10 +240,35 @@ export function IntervencoesCilindrosForm({
 
               <FormField
                 control={form.control}
+                name="solucao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Solução *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a solução" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Implantação">Implantação</SelectItem>
+                        <SelectItem value="Substituição">Substituição</SelectItem>
+                        <SelectItem value="Recuperação">Recuperação</SelectItem>
+                        <SelectItem value="Remoção">Remoção</SelectItem>
+                        <SelectItem value="Manutenção">Manutenção</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="motivo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Motivo da Intervenção</FormLabel>
+                    <FormLabel>Motivo *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -251,7 +280,7 @@ export function IntervencoesCilindrosForm({
                         <SelectItem value="Substituição">Substituição</SelectItem>
                         <SelectItem value="Manutenção">Manutenção</SelectItem>
                         <SelectItem value="Remoção">Remoção</SelectItem>
-                        <SelectItem value="Inclusão por Necessidade de Campo">Inclusão por Necessidade de Campo</SelectItem>
+                        <SelectItem value="Recuperação">Recuperação</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

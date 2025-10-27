@@ -599,6 +599,7 @@ export type Database = {
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
           snv: string | null
+          solucao: string
           status: string
           tipo_avaria: string | null
           tipo_origem: string | null
@@ -630,6 +631,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
+          solucao: string
           status?: string
           tipo_avaria?: string | null
           tipo_origem?: string | null
@@ -661,6 +663,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
+          solucao?: string
           status?: string
           tipo_avaria?: string | null
           tipo_origem?: string | null
@@ -993,6 +996,7 @@ export type Database = {
           quantidade: number | null
           rodovia_id: string | null
           snv: string | null
+          solucao: string
           status: string
           tipo_origem: string | null
           tipo_refletivo: string | null
@@ -1026,6 +1030,7 @@ export type Database = {
           quantidade?: number | null
           rodovia_id?: string | null
           snv?: string | null
+          solucao: string
           status?: string
           tipo_origem?: string | null
           tipo_refletivo?: string | null
@@ -1059,6 +1064,7 @@ export type Database = {
           quantidade?: number | null
           rodovia_id?: string | null
           snv?: string | null
+          solucao?: string
           status?: string
           tipo_origem?: string | null
           tipo_refletivo?: string | null
@@ -2036,6 +2042,7 @@ export type Database = {
           secao_suporte_mm: string | null
           si_sinal_impresso: string | null
           snv: string | null
+          solucao: string
           status: string
           substrato: string | null
           substrato_suporte: string | null
@@ -2086,6 +2093,7 @@ export type Database = {
           secao_suporte_mm?: string | null
           si_sinal_impresso?: string | null
           snv?: string | null
+          solucao: string
           status?: string
           substrato?: string | null
           substrato_suporte?: string | null
@@ -2136,6 +2144,7 @@ export type Database = {
           secao_suporte_mm?: string | null
           si_sinal_impresso?: string | null
           snv?: string | null
+          solucao?: string
           status?: string
           substrato?: string | null
           substrato_suporte?: string | null
@@ -2369,6 +2378,7 @@ export type Database = {
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
           snv: string | null
+          solucao: string
           status: string
           tipo: string | null
           tipo_origem: string | null
@@ -2397,6 +2407,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
+          solucao: string
           status?: string
           tipo?: string | null
           tipo_origem?: string | null
@@ -2425,6 +2436,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
+          solucao?: string
           status?: string
           tipo?: string | null
           tipo_origem?: string | null

@@ -56,6 +56,7 @@ const MOTIVOS = [
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
+  solucao: z.string().min(1, "Solução é obrigatória"),
   motivo: z.string().min(1, "Motivo é obrigatório"),
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   km_final: z.string().min(1, "KM final é obrigatório"),
@@ -97,6 +98,7 @@ const DefensasIntervencoesForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
+      solucao: "",
       motivo: "",
       km_inicial: "",
       km_final: "",
@@ -120,6 +122,7 @@ const DefensasIntervencoesForm = ({
     if (defensaSelecionada && modo === 'normal') {
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
+        solucao: "",
         motivo: "",
         km_inicial: (defensaSelecionada as any).km_inicial?.toString() || "",
         km_final: (defensaSelecionada as any).km_final?.toString() || "",
@@ -166,6 +169,7 @@ const DefensasIntervencoesForm = ({
         .insert({
           defensa_id: defensaSelecionada.id,
           data_intervencao: data.data_intervencao,
+          solucao: data.solucao,
           motivo: data.motivo,
           km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
           km_final: data.km_final ? parseFloat(data.km_final) : null,
@@ -216,10 +220,35 @@ const DefensasIntervencoesForm = ({
 
         <FormField
           control={form.control}
+          name="solucao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Solução *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a solução" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {MOTIVOS.map((motivo) => (
+                    <SelectItem key={motivo} value={motivo}>
+                      {motivo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="motivo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Motivo da Intervenção *</FormLabel>
+              <FormLabel>Motivo *</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
