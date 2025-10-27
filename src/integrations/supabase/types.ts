@@ -590,14 +590,18 @@ export type Database = {
           km_final: number | null
           km_inicial: number | null
           lado: string | null
+          latitude_final: number | null
           latitude_inicial: number | null
+          longitude_final: number | null
           longitude_inicial: number | null
+          lote_id: string | null
           motivo: string
           necessita_intervencao: boolean | null
           nivel_risco: string | null
           observacao: string | null
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
+          rodovia_id: string | null
           snv: string | null
           solucao: string
           status: string
@@ -622,14 +626,18 @@ export type Database = {
           km_final?: number | null
           km_inicial?: number | null
           lado?: string | null
+          latitude_final?: number | null
           latitude_inicial?: number | null
+          longitude_final?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           motivo: string
           necessita_intervencao?: boolean | null
           nivel_risco?: string | null
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          rodovia_id?: string | null
           snv?: string | null
           solucao: string
           status?: string
@@ -654,14 +662,18 @@ export type Database = {
           km_final?: number | null
           km_inicial?: number | null
           lado?: string | null
+          latitude_final?: number | null
           latitude_inicial?: number | null
+          longitude_final?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           motivo?: string
           necessita_intervencao?: boolean | null
           nivel_risco?: string | null
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          rodovia_id?: string | null
           snv?: string | null
           solucao?: string
           status?: string
@@ -669,7 +681,22 @@ export type Database = {
           tipo_origem?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "defensas_intervencoes_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "defensas_intervencoes_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       destinatarios_email: {
         Row: {
@@ -986,8 +1013,10 @@ export type Database = {
           justificativa_fora_plano: string | null
           km_final: number | null
           km_inicial: number | null
+          latitude_final: number | null
           latitude_inicial: number | null
           local_implantacao: string | null
+          longitude_final: number | null
           longitude_inicial: number | null
           lote_id: string | null
           motivo: string
@@ -1020,8 +1049,10 @@ export type Database = {
           justificativa_fora_plano?: string | null
           km_final?: number | null
           km_inicial?: number | null
+          latitude_final?: number | null
           latitude_inicial?: number | null
           local_implantacao?: string | null
+          longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string | null
           motivo: string
@@ -1054,8 +1085,10 @@ export type Database = {
           justificativa_fora_plano?: string | null
           km_final?: number | null
           km_inicial?: number | null
+          latitude_final?: number | null
           latitude_inicial?: number | null
           local_implantacao?: string | null
+          longitude_final?: number | null
           longitude_inicial?: number | null
           lote_id?: string | null
           motivo?: string
@@ -1302,11 +1335,13 @@ export type Database = {
           km_inicial: number | null
           latitude_inicial: number | null
           longitude_inicial: number | null
+          lote_id: string | null
           material_utilizado: string | null
           motivo: string
           observacao: string | null
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
+          rodovia_id: string | null
           sigla: string | null
           snv: string | null
           status: string
@@ -1335,11 +1370,13 @@ export type Database = {
           km_inicial?: number | null
           latitude_inicial?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           material_utilizado?: string | null
           motivo: string
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          rodovia_id?: string | null
           sigla?: string | null
           snv?: string | null
           status?: string
@@ -1368,11 +1405,13 @@ export type Database = {
           km_inicial?: number | null
           latitude_inicial?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           material_utilizado?: string | null
           motivo?: string
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          rodovia_id?: string | null
           sigla?: string | null
           snv?: string | null
           status?: string
@@ -1380,7 +1419,22 @@ export type Database = {
           tipo_origem?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_inscricoes_intervencoes_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_inscricoes_intervencoes_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_marcas_longitudinais: {
         Row: {
@@ -1611,11 +1665,13 @@ export type Database = {
           latitude_inicial: number | null
           longitude_final: number | null
           longitude_inicial: number | null
+          lote_id: string | null
           material: string | null
           motivo: string
           observacao: string | null
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
+          rodovia_id: string | null
           snv: string | null
           status: string
           tipo_demarcacao: string | null
@@ -1645,11 +1701,13 @@ export type Database = {
           latitude_inicial?: number | null
           longitude_final?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           material?: string | null
           motivo: string
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          rodovia_id?: string | null
           snv?: string | null
           status?: string
           tipo_demarcacao?: string | null
@@ -1679,18 +1737,35 @@ export type Database = {
           latitude_inicial?: number | null
           longitude_final?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           material?: string | null
           motivo?: string
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          rodovia_id?: string | null
           snv?: string | null
           status?: string
           tipo_demarcacao?: string | null
           tipo_origem?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_marcas_longitudinais_intervencoes_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_marcas_longitudinais_intervencoes_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_placa: {
         Row: {
@@ -2373,10 +2448,12 @@ export type Database = {
           km_inicial: number | null
           latitude_inicial: number | null
           longitude_inicial: number | null
+          lote_id: string | null
           motivo: string
           observacao: string | null
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
+          rodovia_id: string | null
           snv: string | null
           solucao: string
           status: string
@@ -2402,10 +2479,12 @@ export type Database = {
           km_inicial?: number | null
           latitude_inicial?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           motivo: string
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          rodovia_id?: string | null
           snv?: string | null
           solucao: string
           status?: string
@@ -2431,10 +2510,12 @@ export type Database = {
           km_inicial?: number | null
           latitude_inicial?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           motivo?: string
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
+          rodovia_id?: string | null
           snv?: string | null
           solucao?: string
           status?: string
@@ -2443,7 +2524,22 @@ export type Database = {
           user_id?: string | null
           vao_horizontal_m?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_porticos_intervencoes_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_porticos_intervencoes_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_tachas: {
         Row: {
@@ -2649,14 +2745,18 @@ export type Database = {
           km_final: number | null
           km_inicial: number | null
           lado: string | null
+          latitude_final: number | null
           latitude_inicial: number | null
+          longitude_final: number | null
           longitude_inicial: number | null
+          lote_id: string | null
           material: string | null
           motivo: string
           observacao: string | null
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
           quantidade: number | null
+          rodovia_id: string | null
           snv: string | null
           status: string
           tipo_origem: string | null
@@ -2682,14 +2782,18 @@ export type Database = {
           km_final?: number | null
           km_inicial?: number | null
           lado?: string | null
+          latitude_final?: number | null
           latitude_inicial?: number | null
+          longitude_final?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           material?: string | null
           motivo: string
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
+          rodovia_id?: string | null
           snv?: string | null
           status?: string
           tipo_origem?: string | null
@@ -2715,14 +2819,18 @@ export type Database = {
           km_final?: number | null
           km_inicial?: number | null
           lado?: string | null
+          latitude_final?: number | null
           latitude_inicial?: number | null
+          longitude_final?: number | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           material?: string | null
           motivo?: string
           observacao?: string | null
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
+          rodovia_id?: string | null
           snv?: string | null
           status?: string
           tipo_origem?: string | null
@@ -2730,7 +2838,22 @@ export type Database = {
           tipo_tacha?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_tachas_intervencoes_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_tachas_intervencoes_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_verificacao: {
         Row: {
