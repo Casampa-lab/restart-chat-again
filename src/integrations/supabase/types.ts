@@ -2177,13 +2177,6 @@ export type Database = {
             referencedRelation: "rodovias"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "ficha_placa_intervencoes_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       ficha_porticos: {
