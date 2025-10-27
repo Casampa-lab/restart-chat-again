@@ -352,8 +352,7 @@ export default function RegistrarIntervencaoCampo() {
         : 'Não conformidade registrada!'
       );
       
-      const tabDestino = TABS_MAP[tipoSelecionado] || 'sh';
-      navigate(`/minhas-intervencoes?tab=${tabDestino}`);
+      navigate('/modo-campo');
     } catch (error) {
       console.error('Erro ao enviar:', error);
       toast.error('Erro ao registrar intervenção');
