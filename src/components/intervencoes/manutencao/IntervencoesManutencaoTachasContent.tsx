@@ -14,7 +14,7 @@ export default function IntervencoesManutencaoTachasContent({ onEditarElemento }
       onEditarElemento={onEditarElemento}
       badgeColor="bg-orange-500"
       badgeLabel="MANUTENÇÃO"
-      usarJoinExplicito={true}
+      usarJoinExplicito={false}
     />
   );
 }

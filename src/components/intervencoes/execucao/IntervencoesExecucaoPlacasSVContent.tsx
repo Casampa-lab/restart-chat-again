@@ -14,7 +14,7 @@ export default function IntervencoesExecucaoPlacasSVContent({ onEditarElemento }
       onEditarElemento={onEditarElemento}
       badgeColor="bg-blue-500"
       badgeLabel="EXECUÇÃO"
-      usarJoinExplicito={true} // ✅ Canário ativado após correção da FK
+      usarJoinExplicito={false}
     />
   );
 }
