@@ -146,6 +146,13 @@ export function IntervencoesCilindrosForm({
         return;
       }
 
+      // Validar lote e rodovia obrigatórios
+      if (!loteId || !rodoviaId) {
+        toast.error('Lote e rodovia são obrigatórios');
+        setIsSubmitting(false);
+        return;
+      }
+
       const { error } = await supabase
         .from("ficha_cilindros_intervencoes")
         .insert({
@@ -166,8 +173,8 @@ export function IntervencoesCilindrosForm({
           longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
           tipo_origem: tipoOrigem,
           user_id: user.id,
-          lote_id: loteId || null,
-          rodovia_id: rodoviaId || null
+          lote_id: loteId,
+          rodovia_id: rodoviaId
         });
 
       if (error) throw error;

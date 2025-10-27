@@ -892,14 +892,16 @@ export type Database = {
           latitude_inicial: number | null
           local_implantacao: string | null
           longitude_inicial: number | null
+          lote_id: string | null
           motivo: string
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
           quantidade: number | null
+          rodovia_id: string | null
           snv: string | null
           tipo_origem: string | null
           tipo_refletivo: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           aplicado_ao_inventario?: boolean | null
@@ -921,14 +923,16 @@ export type Database = {
           latitude_inicial?: number | null
           local_implantacao?: string | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           motivo: string
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
+          rodovia_id?: string | null
           snv?: string | null
           tipo_origem?: string | null
           tipo_refletivo?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           aplicado_ao_inventario?: boolean | null
@@ -950,16 +954,33 @@ export type Database = {
           latitude_inicial?: number | null
           local_implantacao?: string | null
           longitude_inicial?: number | null
+          lote_id?: string | null
           motivo?: string
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
+          rodovia_id?: string | null
           snv?: string | null
           tipo_origem?: string | null
           tipo_refletivo?: string | null
-          user_id?: string | null
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ficha_cilindros_intervencoes_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ficha_cilindros_intervencoes_rodovia_id_fkey"
+            columns: ["rodovia_id"]
+            isOneToOne: false
+            referencedRelation: "rodovias"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ficha_inscricoes: {
         Row: {
