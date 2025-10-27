@@ -2,7 +2,7 @@
 // Utilitários para auto-preenchimento do SNV a partir de coordenadas (MVP front).
 // Requisitos: npm i @turf/turf
 
-import * as turf from '@turf/turf';
+import { point, lineString, pointToLineDistance, centroid } from '@turf/turf';
 
 export type ConfiancaSNV = 'alta' | 'media' | 'baixa';
 
@@ -61,20 +61,20 @@ export async function loadSnvGeojsonByUF(uf: string, pathOverride?: string) {
  * Retorna a menor distância (em metros) entre um ponto e um feature LineString/MultiLineString.
  * Suporta pistas duplas (MultiLineString) — calcula por segmento.
  */
-function distancePointToFeatureMeters(pt: turf.helpers.Point, feature: any): number {
+function distancePointToFeatureMeters(pt: ReturnType<typeof point>, feature: any): number {
   const g = feature?.geometry;
   if (!g) return Infinity;
 
   if (g.type === 'LineString') {
-    const line = turf.lineString(g.coordinates);
-    return turf.pointToLineDistance(pt, line, { units: 'meters' });
+    const line = lineString(g.coordinates);
+    return pointToLineDistance(pt, line, { units: 'meters' });
   }
 
   if (g.type === 'MultiLineString') {
     let best = Infinity;
     for (const coords of g.coordinates) {
-      const line = turf.lineString(coords);
-      const d = turf.pointToLineDistance(pt, line, { units: 'meters' });
+      const line = lineString(coords);
+      const d = pointToLineDistance(pt, line, { units: 'meters' });
       if (d < best) best = d;
     }
     return best;
@@ -117,7 +117,7 @@ export function lookupPoint({
     return null;
   }
 
-  const pt = turf.point([lon, lat]);
+  const pt = point([lon, lat]);
 
   let bestFeature: any = null;
   let bestDist = Infinity;
@@ -171,8 +171,8 @@ export function lookupLineNearest({
 }: LookupLineParams): LookupResult | null {
   if (!geojson || !Array.isArray(geojson.features)) return null;
 
-  const line = turf.lineString([[lon1, lat1], [lon2, lat2]]);
-  const centroid = turf.centroid(line); // aproximação: usa o centro p/ nearest
+  const line = lineString([[lon1, lat1], [lon2, lat2]]);
+  const centro = centroid(line); // aproximação: usa o centro p/ nearest
 
   let bestFeature: any = null;
   let bestDist = Infinity;
@@ -182,7 +182,7 @@ export function lookupLineNearest({
     if (!getCodigoSNV(f.properties)) continue;
 
     // Distância do centro do segmento até o eixo SNV
-    const d = distancePointToFeatureMeters(centroid, f);
+    const d = distancePointToFeatureMeters(centro, f);
     if (d < bestDist) {
       bestDist = d;
       bestFeature = f;

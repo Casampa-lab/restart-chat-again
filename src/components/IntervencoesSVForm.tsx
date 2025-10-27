@@ -118,15 +118,6 @@ export function IntervencoesSVForm({
   
   // Hook GPS com identificação SNV
   const { snvIdentificado, snvConfianca, snvDistancia } = useGPSTracking();
-  
-  // Auto-preencher SNV quando identificado
-  useEffect(() => {
-    if (snvIdentificado && !form.getValues('snv')) {
-      form.setValue('snv', snvIdentificado);
-      setSnvReadOnly(true);
-      console.log(`✅ SNV auto-preenchido: ${snvIdentificado}`);
-    }
-  }, [snvIdentificado, form]);
 
   const isCampoEstruturalBloqueado = (campo: string) => {
     // Só bloqueia campos estruturais se for manutenção E houver placa vinculada
@@ -175,6 +166,15 @@ export function IntervencoesSVForm({
       justificativa_fora_plano: "",
     },
   });
+  
+  // Auto-preencher SNV quando identificado (depois da declaração do form)
+  useEffect(() => {
+    if (snvIdentificado && !form.getValues('snv')) {
+      form.setValue('snv', snvIdentificado);
+      setSnvReadOnly(true);
+      console.log(`✅ SNV auto-preenchido: ${snvIdentificado}`);
+    }
+  }, [snvIdentificado, form]);
 
   const solucaoAtual = form.watch('solucao');
   const mostrarMotivosNumerados = solucaoAtual === 'Remover' || solucaoAtual === 'Substituir';
