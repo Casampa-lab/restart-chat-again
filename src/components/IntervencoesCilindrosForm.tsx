@@ -400,12 +400,16 @@ export function IntervencoesCilindrosForm({
                   name="quantidade"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quantidade (und)</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        Quantidade (und)
+                        {isCampoEstruturalBloqueado('quantidade') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           placeholder="Ex: 100" 
-                          {...field} 
+                          {...field}
+                          disabled={isCampoEstruturalBloqueado('quantidade')}
                         />
                       </FormControl>
                       <FormMessage />
@@ -418,8 +422,15 @@ export function IntervencoesCilindrosForm({
                   name="local_implantacao"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Local de Implantação</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel className="flex items-center gap-2">
+                        Local de Implantação
+                        {isCampoEstruturalBloqueado('local_implantacao') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={isCampoEstruturalBloqueado('local_implantacao')}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione" />
@@ -442,13 +453,17 @@ export function IntervencoesCilindrosForm({
                   name="espacamento_m"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Espaçamento (m)</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        Espaçamento (m)
+                        {isCampoEstruturalBloqueado('espacamento_m') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           step="0.01" 
                           placeholder="Ex: 4.00" 
-                          {...field} 
+                          {...field}
+                          disabled={isCampoEstruturalBloqueado('espacamento_m')}
                         />
                       </FormControl>
                       <FormMessage />
@@ -461,13 +476,17 @@ export function IntervencoesCilindrosForm({
                   name="extensao_km"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Extensão (km)</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        Extensão (km)
+                        {isCampoEstruturalBloqueado('extensao_km') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           step="0.001" 
                           placeholder="Ex: 0.500" 
-                          {...field} 
+                          {...field}
+                          disabled={isCampoEstruturalBloqueado('extensao_km')}
                         />
                       </FormControl>
                       <FormMessage />
