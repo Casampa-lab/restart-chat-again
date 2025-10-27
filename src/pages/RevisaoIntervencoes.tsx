@@ -7,11 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, CheckCircle, XCircle, Eye, GitCompareArrows } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Eye, GitCompareArrows, FileText } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
+import { DetalhesIntervencaoViewer } from "@/components/DetalhesIntervencaoViewer";
 
 type TipoIntervencao = 
   | "ficha_marcas_longitudinais_intervencoes"
@@ -47,6 +49,8 @@ export default function RevisaoIntervencoes() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [observacaoCoordenador, setObservacaoCoordenador] = useState("");
   const [processando, setProcessando] = useState(false);
+  const [abrirDetalhesCompletos, setAbrirDetalhesCompletos] = useState(false);
+  const [mostrarCamposVazios, setMostrarCamposVazios] = useState(false);
 
   const TIPOS_INTERVENCAO = [
     { value: "ficha_marcas_longitudinais_intervencoes", label: "Marcas Longitudinais", funcaoRPC: "aplicar_intervencao_marcas_longitudinais" },
@@ -307,7 +311,17 @@ export default function RevisaoIntervencoes() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Revisar Intervenção - {intervencaoSelecionada?.tipo_label}</DialogTitle>
+              <DialogTitle className="flex items-center justify-between">
+                <span>Revisar Intervenção - {intervencaoSelecionada?.tipo_label}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAbrirDetalhesCompletos(true)}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  Ver Detalhes Completos
+                </Button>
+              </DialogTitle>
             </DialogHeader>
 
             {intervencaoSelecionada && (
@@ -390,6 +404,47 @@ export default function RevisaoIntervencoes() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de Detalhes Completos */}
+        <Dialog open={abrirDetalhesCompletos} onOpenChange={setAbrirDetalhesCompletos}>
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between">
+                <span>Detalhes Completos — {intervencaoSelecionada?.tipo_label}</span>
+                <div className="flex items-center gap-3">
+                  <Label htmlFor="mostrar-vazios" className="text-sm cursor-pointer">
+                    Exibir campos vazios
+                  </Label>
+                  <Switch
+                    id="mostrar-vazios"
+                    checked={mostrarCamposVazios}
+                    onCheckedChange={setMostrarCamposVazios}
+                  />
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+
+            {intervencaoSelecionada && (
+              <DetalhesIntervencaoViewer
+                intervencao={{
+                  id: intervencaoSelecionada.id,
+                  tipo_tabela: intervencaoSelecionada.tipo_tabela,
+                  tipo_label: intervencaoSelecionada.tipo_label,
+                  detalhes: intervencaoSelecionada.detalhes,
+                  foto_url: intervencaoSelecionada.foto_url,
+                }}
+                mostrarVazios={mostrarCamposVazios}
+              />
+            )}
+
+            {/* Footer apenas com botão de voltar */}
+            <div className="mt-6 flex justify-end gap-2">
+              <Button onClick={() => setAbrirDetalhesCompletos(false)}>
+                Voltar para Aprovação
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
