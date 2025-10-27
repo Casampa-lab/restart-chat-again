@@ -352,7 +352,12 @@ export default function RegistrarIntervencaoCampo() {
         : 'Não conformidade registrada!'
       );
       
-      navigate('/modo-campo');
+      // Voltar para o viewer ao invés de navegar
+      setModoVisualizacao('viewer');
+      setDadosIntervencao(null);
+      setFotos([]);
+      setIsConforme(true);
+      setJustificativaNC('');
     } catch (error) {
       console.error('Erro ao enviar:', error);
       toast.error('Erro ao registrar intervenção');
