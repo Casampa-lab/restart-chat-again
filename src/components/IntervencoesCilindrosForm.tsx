@@ -111,6 +111,7 @@ export function IntervencoesCilindrosForm({
   const motivoAtual = form.watch('motivo');
   const mostrarMotivosNumerados = solucaoAtual === 'Remover' || solucaoAtual === 'Substituir';
   const motivoObrigatorio = mostrarMotivosNumerados && (!motivoAtual || motivoAtual === '-' || motivoAtual.trim() === '');
+  const solucaoObrigatoria = !solucaoAtual || solucaoAtual.trim() === '';
 
   // Preencher formulário com dados do cilindro selecionado
   useEffect(() => {
@@ -177,9 +178,17 @@ export function IntervencoesCilindrosForm({
     console.log("📋 Dados do formulário:", {
       solucao: data.solucao,
       motivo: data.motivo,
+      solucaoLength: data.solucao?.length,
       motivoLength: data.motivo?.length,
       motivoTrimmed: data.motivo?.trim()
     });
+
+    // Validar solução obrigatória
+    if (!data.solucao || data.solucao.trim() === '') {
+      toast.error("⚠️ Selecione uma Solução antes de registrar a intervenção");
+      setIsSubmitting(false);
+      return;
+    }
 
     // Validar motivo condicional
     if ((data.solucao === 'Remover' || data.solucao === 'Substituir') && 
@@ -293,7 +302,9 @@ export function IntervencoesCilindrosForm({
                 name="solucao"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Solução *</FormLabel>
+                    <FormLabel className={solucaoObrigatoria ? "text-destructive font-semibold" : ""}>
+                      Solução <span className="text-destructive">*</span>
+                    </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -589,6 +600,14 @@ export function IntervencoesCilindrosForm({
 
             {!hideSubmitButton && (
               <>
+                {solucaoObrigatoria && (
+                  <Alert variant="destructive">
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>
+                      ⚠️ Selecione uma Solução antes de registrar a intervenção
+                    </AlertDescription>
+                  </Alert>
+                )}
                 {motivoObrigatorio && (
                   <Alert variant="destructive">
                     <Info className="h-4 w-4" />
@@ -604,6 +623,7 @@ export function IntervencoesCilindrosForm({
                     isSubmitting || 
                     (isManutencaoRotineira && !cilindroSelecionado) || 
                     modo === 'controlado' ||
+                    solucaoObrigatoria ||
                     motivoObrigatorio
                   }
                 >
