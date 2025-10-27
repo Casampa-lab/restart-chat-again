@@ -95,6 +95,9 @@ interface IntervencoesSVFormProps {
   modo?: 'normal' | 'controlado';
   onDataChange?: (data: any) => void;
   hideSubmitButton?: boolean;
+  snvIdentificado?: string | null;
+  snvConfianca?: 'alta' | 'media' | 'baixa' | null;
+  snvDistancia?: number | null;
 }
 
 export function IntervencoesSVForm({
@@ -105,7 +108,10 @@ export function IntervencoesSVForm({
   onIntervencaoRegistrada,
   modo = 'normal',
   onDataChange,
-  hideSubmitButton = false
+  hideSubmitButton = false,
+  snvIdentificado,
+  snvConfianca,
+  snvDistancia
 }: IntervencoesSVFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [codigosFiltrados, setCodigosFiltrados] = useState<readonly {codigo: string, nome: string}[]>([]);
@@ -201,6 +207,14 @@ export function IntervencoesSVForm({
       form.setValue("substrato_suporte", placaSelecionada.substrato_suporte || "");
     }
   }, [placaSelecionada, form]);
+
+  // Auto-preencher SNV quando identificado via GPS
+  useEffect(() => {
+    if (snvIdentificado && !form.getValues('snv')) {
+      form.setValue('snv', snvIdentificado, { shouldDirty: true });
+      console.log(`✅ SNV auto-preenchido: ${snvIdentificado} (${snvConfianca}, ${snvDistancia?.toFixed(0)}m)`);
+    }
+  }, [snvIdentificado, snvConfianca, snvDistancia, form]);
 
   useEffect(() => {
     if (modo === 'controlado' && onDataChange) {

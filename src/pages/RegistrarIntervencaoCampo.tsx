@@ -273,14 +273,24 @@ export default function RegistrarIntervencaoCampo() {
         'aplicado_ao_inventario', 'observacao_coordenador', 'latitude_inicial',
         'longitude_inicial', 'fotos_urls', 'tipo_origem', 'user_id',
         'tipo', 'codigo', 'lado', 'material', 'largura_mm', 'altura_mm',
-        'lote_id', 'rodovia_id', 'km_inicial'
+        'lote_id', 'rodovia_id', 'km_inicial', 'snv', 'velocidade', 'posicao',
+        'qtde_suporte', 'tipo_secao_suporte', 'secao_suporte_mm', 'substrato_suporte',
+        'si_sinal_impresso', 'detalhamento_pagina', 'area_m2'
       ];
+
+      // Mapeamento de nomes de campos: formulário → banco
+      const MAPEAMENTO_CAMPOS: Record<string, string> = {
+        'tipo_placa': 'tipo',
+        'codigo_placa': 'codigo',
+      };
 
       // Filtrar apenas campos permitidos de dadosIntervencao
       const payloadFiltrado: any = {};
       Object.keys(dadosIntervencao).forEach(key => {
-        if (camposPermitidos.includes(key)) {
-          payloadFiltrado[key] = dadosIntervencao[key];
+        const nomeCampo = MAPEAMENTO_CAMPOS[key] || key; // Mapear ou usar nome original
+        
+        if (camposPermitidos.includes(nomeCampo)) {
+          payloadFiltrado[nomeCampo] = dadosIntervencao[key];
         }
       });
 
@@ -603,6 +613,9 @@ export default function RegistrarIntervencaoCampo() {
                     loteId={activeSession?.lote_id}
                     rodoviaId={activeSession?.rodovia_id}
                     tipoOrigem={modoOperacao === 'manutencao' ? 'manutencao_pre_projeto' : 'execucao'}
+                    snvIdentificado={snvIdentificado}
+                    snvConfianca={snvConfianca}
+                    snvDistancia={snvDistancia}
                   />
                 )}
               </CardContent>
