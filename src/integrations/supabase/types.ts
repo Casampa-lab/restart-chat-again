@@ -580,6 +580,7 @@ export type Database = {
           data_aprovacao_coordenador: string | null
           data_intervencao: string
           defensa_id: string | null
+          enviado_coordenador: boolean
           estado_conservacao: string | null
           extensao_metros: number | null
           fora_plano_manutencao: boolean | null
@@ -598,6 +599,7 @@ export type Database = {
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
           snv: string | null
+          status: string
           tipo_avaria: string | null
           tipo_origem: string | null
           user_id: string | null
@@ -609,6 +611,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
           defensa_id?: string | null
+          enviado_coordenador?: boolean
           estado_conservacao?: string | null
           extensao_metros?: number | null
           fora_plano_manutencao?: boolean | null
@@ -627,6 +630,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
+          status?: string
           tipo_avaria?: string | null
           tipo_origem?: string | null
           user_id?: string | null
@@ -638,6 +642,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           defensa_id?: string | null
+          enviado_coordenador?: boolean
           estado_conservacao?: string | null
           extensao_metros?: number | null
           fora_plano_manutencao?: boolean | null
@@ -656,6 +661,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
+          status?: string
           tipo_avaria?: string | null
           tipo_origem?: string | null
           user_id?: string | null
@@ -967,6 +973,7 @@ export type Database = {
           created_at: string
           data_aprovacao_coordenador: string | null
           data_intervencao: string
+          enviado_coordenador: boolean
           espacamento_m: number | null
           extensao_km: number | null
           ficha_cilindros_id: string | null
@@ -986,9 +993,10 @@ export type Database = {
           quantidade: number | null
           rodovia_id: string | null
           snv: string | null
+          status: string
           tipo_origem: string | null
           tipo_refletivo: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           aplicado_ao_inventario?: boolean | null
@@ -998,6 +1006,7 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
+          enviado_coordenador?: boolean
           espacamento_m?: number | null
           extensao_km?: number | null
           ficha_cilindros_id?: string | null
@@ -1017,9 +1026,10 @@ export type Database = {
           quantidade?: number | null
           rodovia_id?: string | null
           snv?: string | null
+          status?: string
           tipo_origem?: string | null
           tipo_refletivo?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           aplicado_ao_inventario?: boolean | null
@@ -1029,6 +1039,7 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
+          enviado_coordenador?: boolean
           espacamento_m?: number | null
           extensao_km?: number | null
           ficha_cilindros_id?: string | null
@@ -1048,9 +1059,10 @@ export type Database = {
           quantidade?: number | null
           rodovia_id?: string | null
           snv?: string | null
+          status?: string
           tipo_origem?: string | null
           tipo_refletivo?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1272,6 +1284,7 @@ export type Database = {
           data_aprovacao_coordenador: string | null
           data_intervencao: string
           dimensoes: string | null
+          enviado_coordenador: boolean
           espessura_mm: number | null
           estado_conservacao: string | null
           ficha_inscricoes_id: string | null
@@ -1290,6 +1303,7 @@ export type Database = {
           pendente_aprovacao_coordenador: boolean | null
           sigla: string | null
           snv: string | null
+          status: string
           tipo_inscricao: string | null
           tipo_origem: string | null
           user_id: string | null
@@ -1303,6 +1317,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
           dimensoes?: string | null
+          enviado_coordenador?: boolean
           espessura_mm?: number | null
           estado_conservacao?: string | null
           ficha_inscricoes_id?: string | null
@@ -1321,6 +1336,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           sigla?: string | null
           snv?: string | null
+          status?: string
           tipo_inscricao?: string | null
           tipo_origem?: string | null
           user_id?: string | null
@@ -1334,6 +1350,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           dimensoes?: string | null
+          enviado_coordenador?: boolean
           espessura_mm?: number | null
           estado_conservacao?: string | null
           ficha_inscricoes_id?: string | null
@@ -1352,6 +1369,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           sigla?: string | null
           snv?: string | null
+          status?: string
           tipo_inscricao?: string | null
           tipo_origem?: string | null
           user_id?: string | null
@@ -1571,6 +1589,7 @@ export type Database = {
           created_at: string
           data_aprovacao_coordenador: string | null
           data_intervencao: string
+          enviado_coordenador: boolean
           espessura_cm: number | null
           estado_conservacao: string | null
           ficha_marcas_longitudinais_id: string | null
@@ -1592,6 +1611,7 @@ export type Database = {
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
           snv: string | null
+          status: string
           tipo_demarcacao: string | null
           tipo_origem: string | null
           user_id: string | null
@@ -1603,6 +1623,7 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
+          enviado_coordenador?: boolean
           espessura_cm?: number | null
           estado_conservacao?: string | null
           ficha_marcas_longitudinais_id?: string | null
@@ -1624,6 +1645,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
+          status?: string
           tipo_demarcacao?: string | null
           tipo_origem?: string | null
           user_id?: string | null
@@ -1635,6 +1657,7 @@ export type Database = {
           created_at?: string
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
+          enviado_coordenador?: boolean
           espessura_cm?: number | null
           estado_conservacao?: string | null
           ficha_marcas_longitudinais_id?: string | null
@@ -1656,6 +1679,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
+          status?: string
           tipo_demarcacao?: string | null
           tipo_origem?: string | null
           user_id?: string | null
@@ -1987,6 +2011,7 @@ export type Database = {
           data_aprovacao_coordenador: string | null
           data_intervencao: string
           detalhamento_pagina: number | null
+          enviado_coordenador: boolean
           ficha_placa_id: string | null
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
@@ -2011,6 +2036,7 @@ export type Database = {
           secao_suporte_mm: string | null
           si_sinal_impresso: string | null
           snv: string | null
+          status: string
           substrato: string | null
           substrato_suporte: string | null
           suporte: string | null
@@ -2035,6 +2061,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
           detalhamento_pagina?: number | null
+          enviado_coordenador?: boolean
           ficha_placa_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
@@ -2059,6 +2086,7 @@ export type Database = {
           secao_suporte_mm?: string | null
           si_sinal_impresso?: string | null
           snv?: string | null
+          status?: string
           substrato?: string | null
           substrato_suporte?: string | null
           suporte?: string | null
@@ -2083,6 +2111,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           detalhamento_pagina?: number | null
+          enviado_coordenador?: boolean
           ficha_placa_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
@@ -2107,6 +2136,7 @@ export type Database = {
           secao_suporte_mm?: string | null
           si_sinal_impresso?: string | null
           snv?: string | null
+          status?: string
           substrato?: string | null
           substrato_suporte?: string | null
           suporte?: string | null
@@ -2332,6 +2362,7 @@ export type Database = {
           data_aprovacao_coordenador: string | null
           data_intervencao: string
           descricao: string | null
+          enviado_coordenador: boolean
           ficha_porticos_id: string | null
           fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
@@ -2345,6 +2376,7 @@ export type Database = {
           observacao_coordenador: string | null
           pendente_aprovacao_coordenador: boolean | null
           snv: string | null
+          status: string
           tipo: string | null
           tipo_origem: string | null
           user_id: string | null
@@ -2358,6 +2390,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
           descricao?: string | null
+          enviado_coordenador?: boolean
           ficha_porticos_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
@@ -2371,6 +2404,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
+          status?: string
           tipo?: string | null
           tipo_origem?: string | null
           user_id?: string | null
@@ -2384,6 +2418,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           descricao?: string | null
+          enviado_coordenador?: boolean
           ficha_porticos_id?: string | null
           fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
@@ -2397,6 +2432,7 @@ export type Database = {
           observacao_coordenador?: string | null
           pendente_aprovacao_coordenador?: boolean | null
           snv?: string | null
+          status?: string
           tipo?: string | null
           tipo_origem?: string | null
           user_id?: string | null
@@ -2598,6 +2634,7 @@ export type Database = {
           data_aprovacao_coordenador: string | null
           data_intervencao: string
           descricao: string | null
+          enviado_coordenador: boolean
           espacamento_m: number | null
           ficha_tachas_id: string | null
           fora_plano_manutencao: boolean | null
@@ -2616,6 +2653,7 @@ export type Database = {
           pendente_aprovacao_coordenador: boolean | null
           quantidade: number | null
           snv: string | null
+          status: string
           tipo_origem: string | null
           tipo_refletivo: string | null
           tipo_tacha: string | null
@@ -2629,6 +2667,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao: string
           descricao?: string | null
+          enviado_coordenador?: boolean
           espacamento_m?: number | null
           ficha_tachas_id?: string | null
           fora_plano_manutencao?: boolean | null
@@ -2647,6 +2686,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           snv?: string | null
+          status?: string
           tipo_origem?: string | null
           tipo_refletivo?: string | null
           tipo_tacha?: string | null
@@ -2660,6 +2700,7 @@ export type Database = {
           data_aprovacao_coordenador?: string | null
           data_intervencao?: string
           descricao?: string | null
+          enviado_coordenador?: boolean
           espacamento_m?: number | null
           ficha_tachas_id?: string | null
           fora_plano_manutencao?: boolean | null
@@ -2678,6 +2719,7 @@ export type Database = {
           pendente_aprovacao_coordenador?: boolean | null
           quantidade?: number | null
           snv?: string | null
+          status?: string
           tipo_origem?: string | null
           tipo_refletivo?: string | null
           tipo_tacha?: string | null
