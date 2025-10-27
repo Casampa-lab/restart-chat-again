@@ -196,15 +196,55 @@ export function IntervencoesSVForm({
 
   useEffect(() => {
     if (placaSelecionada) {
+      // 🔹 LOCALIZAÇÃO
       form.setValue("km_inicial", placaSelecionada.km_inicial?.toString() || "");
-      form.setValue("tipo_placa", placaSelecionada.tipo || "");
-      form.setValue("codigo_placa", placaSelecionada.codigo || "");
       form.setValue("snv", placaSelecionada.snv || "");
       form.setValue("velocidade", placaSelecionada.velocidade || "");
-      form.setValue("posicao", placaSelecionada.posicao || "");
+      
+      // 🔹 IDENTIFICAÇÃO
+      form.setValue("tipo_placa", placaSelecionada.tipo || "");
+      form.setValue("codigo_placa", placaSelecionada.codigo || "");
+      form.setValue("posicao", placaSelecionada.lado || placaSelecionada.posicao || "");
+      form.setValue("detalhamento_pagina", placaSelecionada.detalhamento_pagina || undefined);
+      form.setValue("si_sinal_impresso", placaSelecionada.si_sinal_impresso || "");
+      
+      // 🔹 SUPORTE
       form.setValue("suporte", placaSelecionada.suporte || "");
-      form.setValue("substrato", placaSelecionada.substrato || "");
+      form.setValue("qtde_suporte", placaSelecionada.qtde_suporte || undefined);
+      form.setValue("tipo_secao_suporte", placaSelecionada.tipo_secao_suporte || "");
+      form.setValue("secao_suporte_mm", placaSelecionada.secao_suporte_mm || "");
       form.setValue("substrato_suporte", placaSelecionada.substrato_suporte || "");
+      
+      // 🔹 DIMENSÕES
+      form.setValue("largura_mm", placaSelecionada.largura_mm || undefined);
+      form.setValue("altura_mm", placaSelecionada.altura_mm || undefined);
+      form.setValue("area_m2", placaSelecionada.area_m2 || undefined);
+      
+      // 🔹 CHAPA
+      form.setValue("substrato", placaSelecionada.substrato || "");
+      
+      // 🔹 PELÍCULAS
+      form.setValue("tipo_pelicula_fundo", placaSelecionada.tipo_pelicula_fundo || "");
+      form.setValue("cor_pelicula_fundo", placaSelecionada.cor_pelicula_fundo || "");
+      form.setValue("retro_pelicula_fundo", placaSelecionada.retro_fundo || placaSelecionada.retro_pelicula_fundo || "");
+      form.setValue("tipo_pelicula_legenda_orla", placaSelecionada.tipo_pelicula_legenda_orla || "");
+      form.setValue("cor_pelicula_legenda_orla", placaSelecionada.cor_pelicula_legenda_orla || "");
+      form.setValue("retro_pelicula_legenda_orla", placaSelecionada.retro_orla_legenda || placaSelecionada.retro_pelicula_legenda_orla || "");
+      
+      // 🔹 INTERVENÇÃO
+      form.setValue("solucao", placaSelecionada.solucao || "");
+      form.setValue("motivo", placaSelecionada.motivo || "-");
+      form.setValue("data_intervencao", placaSelecionada.data_intervencao || new Date().toISOString().split('T')[0]);
+      form.setValue("fora_plano_manutencao", placaSelecionada.fora_plano_manutencao || false);
+      form.setValue("justificativa_fora_plano", placaSelecionada.justificativa_fora_plano || "");
+      
+      console.log('✅ Formulário preenchido com dados da placa editada', {
+        km: placaSelecionada.km_inicial,
+        tipo: placaSelecionada.tipo,
+        codigo: placaSelecionada.codigo,
+        snv: placaSelecionada.snv,
+        totalCampos: Object.keys(placaSelecionada).length
+      });
     }
   }, [placaSelecionada, form]);
 

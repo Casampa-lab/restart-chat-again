@@ -616,6 +616,7 @@ export default function RegistrarIntervencaoCampo() {
                     snvIdentificado={snvIdentificado}
                     snvConfianca={snvConfianca}
                     snvDistancia={snvDistancia}
+                    placaSelecionada={elementoSelecionado}
                   />
                 )}
               </CardContent>
