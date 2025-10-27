@@ -137,6 +137,15 @@ export function IntervencoesCilindrosForm({
 
     setIsSubmitting(true);
     try {
+      // Obter usuário autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('Você precisa estar autenticado para registrar uma intervenção');
+        setIsSubmitting(false);
+        return;
+      }
+
       const { error } = await supabase
         .from("ficha_cilindros_intervencoes")
         .insert({
@@ -153,9 +162,12 @@ export function IntervencoesCilindrosForm({
           cor_refletivo: data.cor_refletivo || null,
           tipo_refletivo: data.tipo_refletivo || null,
           quantidade: data.quantidade ? parseInt(data.quantidade) : null,
-        latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
-        longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
+          latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
+          longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
           tipo_origem: tipoOrigem,
+          user_id: user.id,
+          lote_id: loteId || null,
+          rodovia_id: rodoviaId || null
         });
 
       if (error) throw error;
