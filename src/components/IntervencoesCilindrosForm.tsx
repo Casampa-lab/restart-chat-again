@@ -17,6 +17,20 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstruturais";
 
+const SOLUCOES_CILINDROS = [
+  "Manter",
+  "Remover", 
+  "Implantar",
+  "Substituir"
+];
+
+const MOTIVOS_REMOCAO_SUBSTITUICAO = [
+  "1 - Material fora do padrão das soluções propostas/obsoleto",
+  "2 - Material dentro do padrão das soluções, porém, sofreu atualização com os novos parâmetros levantados",
+  "3 - Material danificado",
+  "4 - Encontra-se em local impróprio/indevido"
+];
+
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   snv: z.string().optional(),
@@ -78,7 +92,7 @@ export function IntervencoesCilindrosForm({
       data_intervencao: new Date().toISOString().split('T')[0],
       snv: "",
       solucao: "",
-      motivo: "",
+      motivo: "-",
       km_inicial: "",
       km_final: "",
       local_implantacao: "",
@@ -93,6 +107,9 @@ export function IntervencoesCilindrosForm({
     },
   });
 
+  const solucaoAtual = form.watch('solucao');
+  const mostrarMotivosNumerados = solucaoAtual === 'Remover' || solucaoAtual === 'Substituir';
+
   // Preencher formulário com dados do cilindro selecionado
   useEffect(() => {
     if (cilindroSelecionado && modo === 'normal') {
@@ -100,7 +117,7 @@ export function IntervencoesCilindrosForm({
         data_intervencao: new Date().toISOString().split('T')[0],
         snv: (cilindroSelecionado as any).snv || "",
         solucao: "",
-        motivo: "",
+        motivo: "-",
         km_inicial: cilindroSelecionado.km_inicial?.toString() || "",
         km_final: cilindroSelecionado.km_final?.toString() || "",
         local_implantacao: (cilindroSelecionado as any).local_implantacao || "",
@@ -115,6 +132,20 @@ export function IntervencoesCilindrosForm({
       });
     }
   }, [cilindroSelecionado, modo, form]);
+
+  // Resetar motivo quando solução mudar
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'solucao') {
+        if (value.solucao === 'Manter' || value.solucao === 'Implantar') {
+          form.setValue('motivo', '-');
+        } else if (value.solucao === 'Remover' || value.solucao === 'Substituir') {
+          form.setValue('motivo', '');
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   // Propagar mudanças em tempo real no modo controlado
   useEffect(() => {
@@ -139,6 +170,15 @@ export function IntervencoesCilindrosForm({
     }
 
     setIsSubmitting(true);
+    
+    // Validar motivo condicional
+    if ((data.solucao === 'Remover' || data.solucao === 'Substituir') && 
+        (!data.motivo || data.motivo === '-')) {
+      toast.error("Para Remoção ou Substituição, selecione um motivo específico");
+      setIsSubmitting(false);
+      return;
+    }
+    
     try {
       // Obter usuário autenticado
       const { data: { user } } = await supabase.auth.getUser();
@@ -251,11 +291,11 @@ export function IntervencoesCilindrosForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Implantação">Implantação</SelectItem>
-                        <SelectItem value="Substituição">Substituição</SelectItem>
-                        <SelectItem value="Recuperação">Recuperação</SelectItem>
-                        <SelectItem value="Remoção">Remoção</SelectItem>
-                        <SelectItem value="Manutenção">Manutenção</SelectItem>
+                        {SOLUCOES_CILINDROS.map((sol) => (
+                          <SelectItem key={sol} value={sol}>
+                            {sol}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -269,20 +309,30 @@ export function IntervencoesCilindrosForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Motivo *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    {mostrarMotivosNumerados ? (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o motivo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {MOTIVOS_REMOCAO_SUBSTITUICAO.map((motivo) => (
+                            <SelectItem key={motivo} value={motivo}>
+                              {motivo}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o motivo" />
-                        </SelectTrigger>
+                        <Input 
+                          value="-" 
+                          disabled 
+                          className="bg-muted text-muted-foreground"
+                        />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Implantação">Implantação</SelectItem>
-                        <SelectItem value="Substituição">Substituição</SelectItem>
-                        <SelectItem value="Manutenção">Manutenção</SelectItem>
-                        <SelectItem value="Remoção">Remoção</SelectItem>
-                        <SelectItem value="Recuperação">Recuperação</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
