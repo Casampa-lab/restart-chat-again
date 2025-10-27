@@ -35,7 +35,7 @@ const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
   snv: z.string().optional(),
   solucao: z.string().min(1, "Solução é obrigatória"),
-  motivo: z.string().min(1, "Motivo é obrigatório"),
+  motivo: z.string().default("-"),
   km_inicial: z.string().min(1, "km Inicial é obrigatório"),
   km_final: z.string().min(1, "km Final é obrigatório"),
   local_implantacao: z.string().optional(),
@@ -108,7 +108,9 @@ export function IntervencoesCilindrosForm({
   });
 
   const solucaoAtual = form.watch('solucao');
+  const motivoAtual = form.watch('motivo');
   const mostrarMotivosNumerados = solucaoAtual === 'Remover' || solucaoAtual === 'Substituir';
+  const motivoObrigatorio = mostrarMotivosNumerados && (!motivoAtual || motivoAtual === '-' || motivoAtual.trim() === '');
 
   // Preencher formulário com dados do cilindro selecionado
   useEffect(() => {
@@ -171,10 +173,18 @@ export function IntervencoesCilindrosForm({
 
     setIsSubmitting(true);
     
+    // Log de debug
+    console.log("📋 Dados do formulário:", {
+      solucao: data.solucao,
+      motivo: data.motivo,
+      motivoLength: data.motivo?.length,
+      motivoTrimmed: data.motivo?.trim()
+    });
+
     // Validar motivo condicional
     if ((data.solucao === 'Remover' || data.solucao === 'Substituir') && 
-        (!data.motivo || data.motivo === '-')) {
-      toast.error("Para Remoção ou Substituição, selecione um motivo específico");
+        (!data.motivo || data.motivo === '-' || data.motivo.trim() === '')) {
+      toast.error("⚠️ Selecione um motivo específico para Remoção ou Substituição");
       setIsSubmitting(false);
       return;
     }
@@ -308,7 +318,9 @@ export function IntervencoesCilindrosForm({
                 name="motivo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Motivo *</FormLabel>
+                    <FormLabel className={mostrarMotivosNumerados ? "text-destructive font-semibold" : ""}>
+                      Motivo {mostrarMotivosNumerados && <span className="text-destructive">*</span>}
+                    </FormLabel>
                     {mostrarMotivosNumerados ? (
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
@@ -576,18 +588,29 @@ export function IntervencoesCilindrosForm({
             </div>
 
             {!hideSubmitButton && (
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={
-                  isSubmitting || 
-                  (isManutencaoRotineira && !cilindroSelecionado) || 
-                  modo === 'controlado'
-                }
-              >
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Registrar Intervenção
-              </Button>
+              <>
+                {motivoObrigatorio && (
+                  <Alert variant="destructive">
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>
+                      ⚠️ Selecione um motivo específico antes de registrar a intervenção
+                    </AlertDescription>
+                  </Alert>
+                )}
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={
+                    isSubmitting || 
+                    (isManutencaoRotineira && !cilindroSelecionado) || 
+                    modo === 'controlado' ||
+                    motivoObrigatorio
+                  }
+                >
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Registrar Intervenção
+                </Button>
+              </>
             )}
           </form>
         </Form>

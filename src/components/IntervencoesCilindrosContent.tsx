@@ -52,8 +52,8 @@ interface IntervencaoCilindro {
   cor_refletivo: string | null;
   tipo_refletivo: string | null;
   quantidade: number | null;
-  fora_plano_manutencao: boolean;
-  justificativa_fora_plano: string | null;
+  fora_plano_manutencao?: boolean;
+  justificativa_fora_plano?: string | null;
   ficha_cilindros_id: string;
   pendente_aprovacao_coordenador: boolean;
   ficha_cilindros?: {
