@@ -104,6 +104,93 @@ export type Database = {
           },
         ]
       }
+      audit_intervencoes_recommendations: {
+        Row: {
+          deps_views: number | null
+          family: string | null
+          fk_incoming: number | null
+          policies: number | null
+          recommendation: string | null
+          rls_on: boolean | null
+          row_count: number | null
+          table_name: string
+          writes_counter: number | null
+        }
+        Insert: {
+          deps_views?: number | null
+          family?: string | null
+          fk_incoming?: number | null
+          policies?: number | null
+          recommendation?: string | null
+          rls_on?: boolean | null
+          row_count?: number | null
+          table_name: string
+          writes_counter?: number | null
+        }
+        Update: {
+          deps_views?: number | null
+          family?: string | null
+          fk_incoming?: number | null
+          policies?: number | null
+          recommendation?: string | null
+          rls_on?: boolean | null
+          row_count?: number | null
+          table_name?: string
+          writes_counter?: number | null
+        }
+        Relationships: []
+      }
+      audit_intervencoes_report: {
+        Row: {
+          deps_views: number | null
+          family: string | null
+          fk_incoming: number | null
+          fk_outgoing: number | null
+          has_created_at: boolean | null
+          has_index_user_id: boolean | null
+          has_updated_at: boolean | null
+          has_user_id: boolean | null
+          last_row_ts: string | null
+          policies: number | null
+          rls_on: boolean | null
+          row_count: number | null
+          table_name: string
+          writes_counter: number | null
+        }
+        Insert: {
+          deps_views?: number | null
+          family?: string | null
+          fk_incoming?: number | null
+          fk_outgoing?: number | null
+          has_created_at?: boolean | null
+          has_index_user_id?: boolean | null
+          has_updated_at?: boolean | null
+          has_user_id?: boolean | null
+          last_row_ts?: string | null
+          policies?: number | null
+          rls_on?: boolean | null
+          row_count?: number | null
+          table_name: string
+          writes_counter?: number | null
+        }
+        Update: {
+          deps_views?: number | null
+          family?: string | null
+          fk_incoming?: number | null
+          fk_outgoing?: number | null
+          has_created_at?: boolean | null
+          has_index_user_id?: boolean | null
+          has_updated_at?: boolean | null
+          has_user_id?: boolean | null
+          last_row_ts?: string | null
+          policies?: number | null
+          rls_on?: boolean | null
+          row_count?: number | null
+          table_name?: string
+          writes_counter?: number | null
+        }
+        Relationships: []
+      }
       auditoria_sinalizacoes: {
         Row: {
           created_at: string | null
