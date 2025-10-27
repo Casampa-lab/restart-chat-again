@@ -23,9 +23,9 @@ export function useGPSTracking() {
   const [snvDistancia, setSnvDistancia] = useState<number | null>(null);
 
   // Função de identificação SNV
-  const identificarSNVAutomatico = useCallback(async (lat: number, lon: number, tolerancia = 50, uf = 'MG') => {
+  const identificarSNVAutomatico = useCallback(async (lat: number, lon: number, tolerancia = 50) => {
     try {
-      const geojson = await loadSnvGeojsonByUF(uf);
+      const geojson = await loadSnvGeojsonByUF();
       const resultado = lookupPoint({ lon, lat, geojson, toleranciaMetros: tolerancia });
       
       if (resultado) {

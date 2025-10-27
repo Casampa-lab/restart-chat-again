@@ -24,32 +24,29 @@ export interface LookupResult {
 const geojsonCachePorUF: Record<string, any> = Object.create(null);
 
 /**
- * Caminho padrão para arquivos SNV por UF.
- * Ex.: /public/data/snv/SNV_MG.geojson
+ * Caminho padrão para o GeoJSON SNV Brasil completo.
  */
-export function defaultSnvPath(uf: string) {
-  const ufUpper = (uf || '').toUpperCase();
-  return `/data/snv/SNV_${ufUpper}.geojson`;
+export function defaultSnvPath() {
+  return '/geojson/snv-brasil-completo.geojson';
 }
 
 /**
- * Carrega o GeoJSON do SNV para uma UF com cache em memória.
- * @param uf Sigla da UF (ex.: 'MG')
+ * Carrega o GeoJSON do SNV Brasil completo com cache em memória.
  * @param pathOverride caminho alternativo (opcional)
  */
-export async function loadSnvGeojsonByUF(uf: string, pathOverride?: string) {
-  const key = uf.toUpperCase();
+export async function loadSnvGeojsonByUF(pathOverride?: string) {
+  const key = 'snv-brasil-completo';
   if (geojsonCachePorUF[key]) return geojsonCachePorUF[key];
 
-  const path = pathOverride ?? defaultSnvPath(key);
+  const path = pathOverride ?? defaultSnvPath();
   const resp = await fetch(path);
   if (!resp.ok) {
-    throw new Error(`Falha ao carregar SNV da UF ${key}: ${resp.status} ${resp.statusText}`);
+    throw new Error(`Falha ao carregar SNV Brasil: ${resp.status} ${resp.statusText}`);
   }
   const gj = await resp.json();
   // Checagem leve
   if (!gj || !Array.isArray(gj.features)) {
-    throw new Error(`GeoJSON inválido para UF ${key}: missing features[]`);
+    throw new Error(`GeoJSON inválido: missing features[]`);
   }
   geojsonCachePorUF[key] = gj;
   return gj;
