@@ -392,10 +392,6 @@ export const exportFichasVerificacao = async () => {
 
     const { lotesMap, rodoviasMap } = await fetchRelatedData();
 
-    if (error) throw error;
-
-    const { lotesMap, rodoviasMap } = await fetchRelatedData();
-
     const wsData = [
       ['3.1.19 - FICHAS DE VERIFICAÇÃO'],
       [],
@@ -625,6 +621,158 @@ export const exportDadosRodovias = async () => {
     throw error;
   }
 };
+
+// ============= EXPORTS DE INTERVENÇÕES (TABELAS NOVAS) =============
+
+export const exportIntervencoesSH = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('ficha_marcas_longitudinais_intervencoes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const wsData = [
+      ['INTERVENÇÕES - MARCAS LONGITUDINAIS (SH)'],
+      [],
+      ['Data', 'SNV', 'KM Inicial', 'KM Final', 'Tipo Demarcação', 'Motivo', 'Pendente Aprovação', 'Aplicado', 'Observações'],
+      ...(data || []).map(item => [
+        formatDate(item.data_intervencao),
+        item.snv || '',
+        item.km_inicial || '',
+        item.km_final || '',
+        item.tipo_demarcacao || '',
+        item.motivo || '',
+        item.pendente_aprovacao_coordenador ? 'Sim' : 'Não',
+        item.aplicado_ao_inventario ? 'Sim' : 'Não',
+        item.observacao || ''
+      ])
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Intervenções SH');
+    XLSX.writeFile(wb, 'intervencoes_sh.xlsx');
+  } catch (error) {
+    console.error('Erro ao exportar intervenções SH:', error);
+    throw error;
+  }
+};
+
+export const exportIntervencoesInscricoes = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('ficha_inscricoes_intervencoes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const wsData = [
+      ['INTERVENÇÕES - INSCRIÇÕES'],
+      [],
+      ['Data', 'SNV', 'KM', 'Tipo Inscrição', 'Sigla', 'Motivo', 'Pendente Aprovação', 'Aplicado', 'Observações'],
+      ...(data || []).map(item => [
+        formatDate(item.data_intervencao),
+        item.snv || '',
+        item.km_inicial || '',
+        item.tipo_inscricao || '',
+        item.sigla || '',
+        item.motivo || '',
+        item.pendente_aprovacao_coordenador ? 'Sim' : 'Não',
+        item.aplicado_ao_inventario ? 'Sim' : 'Não',
+        item.observacao || ''
+      ])
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Intervenções Inscrições');
+    XLSX.writeFile(wb, 'intervencoes_inscricoes.xlsx');
+  } catch (error) {
+    console.error('Erro ao exportar intervenções inscrições:', error);
+    throw error;
+  }
+};
+
+export const exportIntervencoesSV = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('ficha_placa_intervencoes')
+      .select(`
+        *,
+        lotes!ficha_placa_intervencoes_lote_id_fkey(numero),
+        rodovias!ficha_placa_intervencoes_rodovia_id_fkey(codigo)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const wsData = [
+      ['INTERVENÇÕES - PLACAS (SV)'],
+      [],
+      ['Data', 'Lote', 'Rodovia', 'KM', 'Código Placa', 'Motivo', 'Pendente Aprovação', 'Aplicado'],
+      ...(data || []).map(item => [
+        formatDate(item.data_intervencao),
+        item.lotes?.numero || '',
+        item.rodovias?.codigo || '',
+        item.km_inicial || '',
+        item.codigo || '',
+        item.motivo || '',
+        item.pendente_aprovacao_coordenador ? 'Sim' : 'Não',
+        item.aplicado_ao_inventario ? 'Sim' : 'Não'
+      ])
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Intervenções SV');
+    XLSX.writeFile(wb, 'intervencoes_sv.xlsx');
+  } catch (error) {
+    console.error('Erro ao exportar intervenções SV:', error);
+    throw error;
+  }
+};
+
+export const exportIntervencoesTacha = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('ficha_tachas_intervencoes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const wsData = [
+      ['INTERVENÇÕES - TACHAS'],
+      [],
+      ['Data', 'SNV', 'KM Inicial', 'KM Final', 'Tipo Tacha', 'Quantidade', 'Motivo', 'Pendente Aprovação', 'Aplicado', 'Observações'],
+      ...(data || []).map(item => [
+        formatDate(item.data_intervencao),
+        item.snv || '',
+        item.km_inicial || '',
+        item.km_final || '',
+        item.tipo_tacha || '',
+        item.quantidade || '',
+        item.motivo || '',
+        item.pendente_aprovacao_coordenador ? 'Sim' : 'Não',
+        item.aplicado_ao_inventario ? 'Sim' : 'Não',
+        item.observacao || ''
+      ])
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Intervenções Tachas');
+    XLSX.writeFile(wb, 'intervencoes_tacha.xlsx');
+  } catch (error) {
+    console.error('Erro ao exportar intervenções tachas:', error);
+    throw error;
+  }
+};
+
+// ============= FIM DOS EXPORTS DE INTERVENÇÕES =============
 
 // Função auxiliar para gerar link do Google Maps
 const gerarLinkGoogleMaps = (lat: number, lng: number): string => {
