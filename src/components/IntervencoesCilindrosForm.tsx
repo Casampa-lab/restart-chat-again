@@ -116,10 +116,11 @@ export function IntervencoesCilindrosForm({
   // Preencher formulário com dados do cilindro selecionado
   useEffect(() => {
     if (cilindroSelecionado && modo === 'normal') {
+      console.log("🔄 Reset do form com cilindro selecionado:", cilindroSelecionado.id);
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
         snv: (cilindroSelecionado as any).snv || "",
-        solucao: "",
+        // NÃO resetar solucao para permitir que o usuário mantenha a seleção
         motivo: "-",
         km_inicial: cilindroSelecionado.km_inicial?.toString() || "",
         km_final: cilindroSelecionado.km_final?.toString() || "",
@@ -174,13 +175,15 @@ export function IntervencoesCilindrosForm({
 
     setIsSubmitting(true);
     
-    // Log de debug
-    console.log("📋 Dados do formulário:", {
-      solucao: data.solucao,
-      motivo: data.motivo,
-      solucaoLength: data.solucao?.length,
-      motivoLength: data.motivo?.length,
-      motivoTrimmed: data.motivo?.trim()
+    // Log de debug DETALHADO
+    console.log("🔍 Estado RAW do form (getValues):", form.getValues());
+    console.log("📋 Dados recebidos no onSubmit:", data);
+    console.log("🎯 Campo solucao específico:", {
+      raw: form.getValues('solucao'),
+      fromData: data.solucao,
+      length: data.solucao?.length,
+      type: typeof data.solucao,
+      isEmpty: !data.solucao || data.solucao.trim() === ''
     });
 
     // Validar solução obrigatória
@@ -305,7 +308,15 @@ export function IntervencoesCilindrosForm({
                     <FormLabel className={solucaoObrigatoria ? "text-destructive font-semibold" : ""}>
                       Solução <span className="text-destructive">*</span>
                     </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select 
+                      onValueChange={(value) => {
+                        console.log("✅ Solução SELECIONADA pelo usuário:", value);
+                        console.log("📊 Estado do form ANTES do onChange:", form.getValues('solucao'));
+                        field.onChange(value);
+                        console.log("📊 Estado do form DEPOIS do onChange:", form.getValues('solucao'));
+                      }} 
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a solução" />
