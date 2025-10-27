@@ -19,6 +19,22 @@ import { LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstrut
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
+const SOLUCOES_PLACAS = [
+  "Manter",
+  "Remover",
+  "Implantar",
+  "Substituir"
+];
+
+const MOTIVOS_REMOCAO_SUBSTITUICAO_PLACAS = [
+  "1 - Placa não retrorrefletivas ou semirrefletivas",
+  "2 - Placa com diagramação incorreta",
+  "3 - Placa danificada",
+  "4 - Suporte danificado",
+  "5 - Instalada em local impróprio ou indevido",
+  "6 - Necessidade de adequação imediata da solução"
+];
+
 /**
  * Formulário para registrar intervenções em Sinalização Vertical (Placas)
  */
@@ -110,7 +126,7 @@ export function IntervencoesSVForm({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       solucao: "",
-      motivo: "",
+      motivo: "-",
       // Localização
       snv: "",
       km_inicial: "",
@@ -145,6 +161,23 @@ export function IntervencoesSVForm({
       justificativa_fora_plano: "",
     },
   });
+
+  const solucaoAtual = form.watch('solucao');
+  const mostrarMotivosNumerados = solucaoAtual === 'Remover' || solucaoAtual === 'Substituir';
+
+  // Reset condicional do motivo quando solução mudar
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'solucao') {
+        if (value.solucao === 'Manter' || value.solucao === 'Implantar') {
+          form.setValue('motivo', '-');
+        } else if (value.solucao === 'Remover' || value.solucao === 'Substituir') {
+          form.setValue('motivo', '');
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   useEffect(() => {
     if (modo === 'controlado' && onDataChange) {
@@ -207,6 +240,14 @@ export function IntervencoesSVForm({
     
     setIsLoading(true);
     try {
+      // Validar motivo condicional
+      if ((data.solucao === 'Remover' || data.solucao === 'Substituir') && 
+          (!data.motivo || data.motivo === '-')) {
+        toast.error('Para Remoção ou Substituição, selecione um motivo específico');
+        setIsLoading(false);
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -310,11 +351,11 @@ export function IntervencoesSVForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Implantação">Implantação</SelectItem>
-                    <SelectItem value="Substituição">Substituição</SelectItem>
-                    <SelectItem value="Manutenção">Manutenção</SelectItem>
-                    <SelectItem value="Remoção">Remoção</SelectItem>
-                    <SelectItem value="Recuperação">Recuperação</SelectItem>
+                    {SOLUCOES_PLACAS.map((sol) => (
+                      <SelectItem key={sol} value={sol}>
+                        {sol}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -328,20 +369,30 @@ export function IntervencoesSVForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Motivo *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                {mostrarMotivosNumerados ? (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o motivo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {MOTIVOS_REMOCAO_SUBSTITUICAO_PLACAS.map((motivo) => (
+                        <SelectItem key={motivo} value={motivo}>
+                          {motivo}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
+                    <Input 
+                      value="-" 
+                      disabled 
+                      className="bg-muted text-muted-foreground"
+                    />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Implantação">Implantação</SelectItem>
-                    <SelectItem value="Substituição">Substituição</SelectItem>
-                    <SelectItem value="Manutenção">Manutenção</SelectItem>
-                    <SelectItem value="Remoção">Remoção</SelectItem>
-                    <SelectItem value="Recuperação">Recuperação</SelectItem>
-                  </SelectContent>
-                </Select>
+                )}
                 <FormMessage />
               </FormItem>
             )}

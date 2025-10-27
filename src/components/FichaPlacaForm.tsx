@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -14,6 +14,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, X, Loader2, MapPin } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { extractDateFromPhotos } from "@/lib/photoMetadata";
+
+const SOLUCOES_PLACAS = [
+  "Manter",
+  "Remover",
+  "Implantar",
+  "Substituir"
+];
+
+const MOTIVOS_REMOCAO_SUBSTITUICAO_PLACAS = [
+  "1 - Placa não retrorrefletivas ou semirrefletivas",
+  "2 - Placa com diagramação incorreta",
+  "3 - Placa danificada",
+  "4 - Suporte danificado",
+  "5 - Instalada em local impróprio ou indevido",
+  "6 - Necessidade de adequação imediata da solução"
+];
 
 const fichaPlacaSchema = z.object({
   data_implantacao: z.string().optional(),
@@ -97,8 +113,29 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
 
   const intervencaoForm = useForm<IntervencaoFormValues>({
     resolver: zodResolver(intervencaoSchema),
-    defaultValues: { placa_recuperada: false },
+    defaultValues: { 
+      placa_recuperada: false,
+      motivo: "-",
+      solucao: ""
+    },
   });
+
+  const solucaoIntervencao = intervencaoForm.watch('solucao');
+  const mostrarMotivosNumeradosIntervencao = solucaoIntervencao === 'Remover' || solucaoIntervencao === 'Substituir';
+
+  // Reset condicional do motivo quando solução mudar (intervenções)
+  useEffect(() => {
+    const subscription = intervencaoForm.watch((value, { name }) => {
+      if (name === 'solucao') {
+        if (value.solucao === 'Manter' || value.solucao === 'Implantar') {
+          intervencaoForm.setValue('motivo', '-');
+        } else if (value.solucao === 'Remover' || value.solucao === 'Substituir') {
+          intervencaoForm.setValue('motivo', '');
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [intervencaoForm]);
 
   const handlePhotoChange = async (type: keyof typeof photos, file: File | undefined) => {
     setPhotos(prev => ({ ...prev, [type]: file }));
@@ -148,8 +185,15 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
   };
 
   const addIntervencao = (data: IntervencaoFormValues) => {
+    // Validar motivo condicional
+    if ((data.solucao === 'Remover' || data.solucao === 'Substituir') && 
+        (!data.motivo || data.motivo === '-')) {
+      toast.error('Para Remoção ou Substituição, selecione um motivo específico');
+      return;
+    }
+    
     setIntervencoes([...intervencoes, data]);
-    intervencaoForm.reset({ placa_recuperada: false });
+    intervencaoForm.reset({ placa_recuperada: false, motivo: "-", solucao: "" });
     setShowIntervencaoForm(false);
     toast.success("Intervenção adicionada com sucesso");
   };
@@ -856,13 +900,58 @@ export function FichaPlacaForm({ loteId, rodoviaId, onSuccess }: FichaPlacaFormP
                             <div className="grid gap-4 md:grid-cols-2">
                               <FormField
                                 control={intervencaoForm.control}
+                                name="solucao"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Solução *</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Selecione" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {SOLUCOES_PLACAS.map((sol) => (
+                                          <SelectItem key={sol} value={sol}>
+                                            {sol}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={intervencaoForm.control}
                                 name="motivo"
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>Motivo *</FormLabel>
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
+                                    {mostrarMotivosNumeradosIntervencao ? (
+                                      <Select onValueChange={field.onChange} value={field.value}>
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Selecione o motivo" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          {MOTIVOS_REMOCAO_SUBSTITUICAO_PLACAS.map((motivo) => (
+                                            <SelectItem key={motivo} value={motivo}>
+                                              {motivo}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    ) : (
+                                      <FormControl>
+                                        <Input 
+                                          value="-" 
+                                          disabled 
+                                          className="bg-muted text-muted-foreground"
+                                        />
+                                      </FormControl>
+                                    )}
                                     <FormMessage />
                                   </FormItem>
                                 )}
