@@ -41,6 +41,10 @@ export const CAMPOS_ESTRUTURAIS = {
     'cor_corpo',
     'cor_refletivo',
     'tipo_refletivo',
+    'quantidade',
+    'local_implantacao',
+    'espacamento_m',
+    'extensao_km',
   ],
   porticos: [
     'tipo',
