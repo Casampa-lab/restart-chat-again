@@ -46,12 +46,18 @@ const NIVEIS_RISCO = [
   "Muito Alto"
 ];
 
-const MOTIVOS = [
-  "Substituição",
-  "Recuperação",
-  "Remoção",
-  "Manutenção",
-  "Implantação"
+const SOLUCOES_DEFENSAS = [
+  "Manter",
+  "Remover",
+  "Implantar",
+  "Substituir"
+];
+
+const MOTIVOS_REMOCAO_SUBSTITUICAO_DEFENSAS = [
+  "1 - Material fora do padrão das soluções propostas/obsoleto",
+  "2 - Material dentro do padrão das soluções, porém, sofreu atualização com os novos parâmetros levantados",
+  "3 - Material danificado",
+  "4 - Encontra-se em local impróprio/indevido"
 ];
 
 const formSchema = z.object({
@@ -99,7 +105,7 @@ const DefensasIntervencoesForm = ({
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
       solucao: "",
-      motivo: "",
+      motivo: "-",
       km_inicial: "",
       km_final: "",
       lado: "",
@@ -117,13 +123,16 @@ const DefensasIntervencoesForm = ({
     },
   });
 
+  const solucaoAtual = form.watch('solucao');
+  const mostrarMotivosNumerados = solucaoAtual === 'Remover' || solucaoAtual === 'Substituir';
+
   // Preencher formulário com dados da defensa selecionada
   useEffect(() => {
     if (defensaSelecionada && modo === 'normal') {
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
         solucao: "",
-        motivo: "",
+        motivo: "-",
         km_inicial: (defensaSelecionada as any).km_inicial?.toString() || "",
         km_final: (defensaSelecionada as any).km_final?.toString() || "",
         lado: (defensaSelecionada as any).lado || "",
@@ -141,6 +150,20 @@ const DefensasIntervencoesForm = ({
       });
     }
   }, [defensaSelecionada, modo, form]);
+
+  // Reset condicional do motivo baseado na solução
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'solucao') {
+        if (value.solucao === 'Manter' || value.solucao === 'Implantar') {
+          form.setValue('motivo', '-');
+        } else if (value.solucao === 'Remover' || value.solucao === 'Substituir') {
+          form.setValue('motivo', '');
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   // Propagar mudanças em tempo real no modo controlado
   useEffect(() => {
@@ -164,6 +187,13 @@ const DefensasIntervencoesForm = ({
     }
 
     try {
+      // Validar motivo condicional
+      if ((data.solucao === 'Remover' || data.solucao === 'Substituir') && 
+          (!data.motivo || data.motivo === '-')) {
+        toast.error('Para Remoção ou Substituição, selecione um motivo específico');
+        return;
+      }
+
       const { error } = await supabase
         .from("defensas_intervencoes")
         .insert({
@@ -231,9 +261,9 @@ const DefensasIntervencoesForm = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {MOTIVOS.map((motivo) => (
-                    <SelectItem key={motivo} value={motivo}>
-                      {motivo}
+                  {SOLUCOES_DEFENSAS.map((sol) => (
+                    <SelectItem key={sol} value={sol}>
+                      {sol}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -249,20 +279,30 @@ const DefensasIntervencoesForm = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Motivo *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              {mostrarMotivosNumerados ? (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o motivo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {MOTIVOS_REMOCAO_SUBSTITUICAO_DEFENSAS.map((motivo) => (
+                      <SelectItem key={motivo} value={motivo}>
+                        {motivo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o motivo" />
-                  </SelectTrigger>
+                  <Input 
+                    value="-" 
+                    disabled 
+                    className="bg-muted text-muted-foreground"
+                  />
                 </FormControl>
-                <SelectContent>
-                  {MOTIVOS.map((motivo) => (
-                    <SelectItem key={motivo} value={motivo}>
-                      {motivo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              )}
               <FormMessage />
             </FormItem>
           )}
