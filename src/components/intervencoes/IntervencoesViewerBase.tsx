@@ -252,15 +252,15 @@ export function IntervencoesViewerBase({
         ) : (
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>KM</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Solução</TableHead>
+                      <TableHead>KM</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
               <TableBody>
                 {elementosFiltrados.map((elem) => (
                   <TableRow key={elem.id}>
