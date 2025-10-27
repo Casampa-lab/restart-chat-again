@@ -338,7 +338,7 @@ const IntervencoesSHContent = () => {
                       <TableCell>{lotes[loteId] || "-"}</TableCell>
                       <TableCell>{rodovias[rodoviaId] || "-"}</TableCell>
                       <TableCell>
-                        {intervencao.km_inicial.toFixed(3)} - {intervencao.km_final.toFixed(3)}
+                        {intervencao.km_inicial?.toFixed(3) ?? '-'} - {intervencao.km_final?.toFixed(3) ?? '-'}
                       </TableCell>
                       <TableCell>{intervencao.motivo}</TableCell>
                       <TableCell className="max-w-xs truncate">{intervencao.tipo_demarcacao}</TableCell>
