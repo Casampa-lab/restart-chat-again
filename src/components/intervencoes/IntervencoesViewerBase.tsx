@@ -183,15 +183,11 @@ export function IntervencoesViewerBase({
   }, [user, tipoOrigem]);
 
   const renderTipoIdentificacao = (elem: any) => {
-    // Priorizar solução para elementos que a possuem (cilindros, defensas, pórticos)
-    if (elem.solucao) return elem.solucao;
-    // Depois verificar campos específicos de identificação
+    // Usado apenas como fallback quando 'solucao' não existe
     if (elem.codigo) return elem.codigo;
     if (elem.tipo_demarcacao) return elem.tipo_demarcacao;
     if (elem.tipo) return elem.tipo;
     if (elem.tipo_tacha) return elem.tipo_tacha;
-    // Motivo só como última opção (para elementos que não têm outros identificadores)
-    if (elem.motivo && elem.motivo !== '-') return elem.motivo;
     return 'Sem identificação';
   };
 
@@ -252,32 +248,53 @@ export function IntervencoesViewerBase({
         ) : (
           <div className="overflow-x-auto">
             <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Solução</TableHead>
-                      <TableHead>KM</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>KM Inicial</TableHead>
+                  <TableHead>KM Final</TableHead>
+                  <TableHead>Solução</TableHead>
+                  <TableHead>Motivo</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
               <TableBody>
                 {elementosFiltrados.map((elem) => (
                   <TableRow key={elem.id}>
                     <TableCell>
-                      <Badge variant={tipoOrigem === 'execucao' ? 'default' : 'secondary'}>
-                        {renderTipoIdentificacao(elem)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
                       <div className="flex items-center gap-1">
                         <span className="text-xs">📍</span>
-                        {elem.km_final ? (
-                          <span>{elem.km_inicial?.toFixed(3)} - {elem.km_final?.toFixed(3)}</span>
-                        ) : (
-                          <span>{elem.km_inicial?.toFixed(3) || '-'}</span>
-                        )}
+                        <span className="font-mono">{elem.km_inicial?.toFixed(3) || '-'}</span>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {elem.km_final ? (
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs">📍</span>
+                          <span className="font-mono">{elem.km_final.toFixed(3)}</span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {elem.solucao ? (
+                        <Badge variant={tipoOrigem === 'execucao' ? 'default' : 'secondary'}>
+                          {elem.solucao}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline">
+                          {renderTipoIdentificacao(elem)}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {elem.motivo && elem.motivo !== '-' ? (
+                        <span className="text-sm">{elem.motivo}</span>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">-</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {elem.data_intervencao 
