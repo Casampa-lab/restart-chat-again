@@ -1007,10 +1007,8 @@ export type Database = {
           espacamento_m: number | null
           extensao_km: number | null
           ficha_cilindros_id: string | null
-          fora_plano_manutencao: boolean | null
           fotos_urls: string[] | null
           id: string
-          justificativa_fora_plano: string | null
           km_final: number | null
           km_inicial: number | null
           latitude_final: number | null
@@ -1043,10 +1041,8 @@ export type Database = {
           espacamento_m?: number | null
           extensao_km?: number | null
           ficha_cilindros_id?: string | null
-          fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
-          justificativa_fora_plano?: string | null
           km_final?: number | null
           km_inicial?: number | null
           latitude_final?: number | null
@@ -1079,10 +1075,8 @@ export type Database = {
           espacamento_m?: number | null
           extensao_km?: number | null
           ficha_cilindros_id?: string | null
-          fora_plano_manutencao?: boolean | null
           fotos_urls?: string[] | null
           id?: string
-          justificativa_fora_plano?: string | null
           km_final?: number | null
           km_inicial?: number | null
           latitude_final?: number | null
