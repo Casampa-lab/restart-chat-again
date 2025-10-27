@@ -183,12 +183,15 @@ export function IntervencoesViewerBase({
   }, [user, tipoOrigem]);
 
   const renderTipoIdentificacao = (elem: any) => {
-    // Renderizar identificação principal do elemento
-    if (elem.motivo) return elem.motivo;
+    // Priorizar solução para elementos que a possuem (cilindros, defensas, pórticos)
+    if (elem.solucao) return elem.solucao;
+    // Depois verificar campos específicos de identificação
     if (elem.codigo) return elem.codigo;
     if (elem.tipo_demarcacao) return elem.tipo_demarcacao;
     if (elem.tipo) return elem.tipo;
     if (elem.tipo_tacha) return elem.tipo_tacha;
+    // Motivo só como última opção (para elementos que não têm outros identificadores)
+    if (elem.motivo && elem.motivo !== '-') return elem.motivo;
     return 'Sem identificação';
   };
 
@@ -269,7 +272,11 @@ export function IntervencoesViewerBase({
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <span className="text-xs">📍</span>
-                        <span>{elem.km_inicial?.toFixed(3) || '-'}</span>
+                        {elem.km_final ? (
+                          <span>{elem.km_inicial?.toFixed(3)} - {elem.km_final?.toFixed(3)}</span>
+                        ) : (
+                          <span>{elem.km_inicial?.toFixed(3) || '-'}</span>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>

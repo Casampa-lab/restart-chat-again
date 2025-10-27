@@ -100,6 +100,7 @@ interface Cilindro {
 interface IntervencaoCilindro {
   id: string;
   data_intervencao: string;
+  solucao: string;
   motivo: string;
   cor_corpo: string | null;
   cor_refletivo: string | null;
@@ -973,9 +974,15 @@ export function InventarioCilindrosViewer({ loteId, rodoviaId, onRegistrarInterv
                           </div>
                           <div className="grid grid-cols-2 gap-4 mt-2">
                             <div>
-                              <span className="text-sm font-medium">Motivo:</span>
-                              <p className="text-sm">{intervencao.motivo}</p>
+                              <span className="text-sm font-medium">Solução:</span>
+                              <p className="text-sm font-semibold">{intervencao.solucao}</p>
                             </div>
+                            {intervencao.motivo && intervencao.motivo !== '-' && (
+                              <div>
+                                <span className="text-sm font-medium">Motivo:</span>
+                                <p className="text-sm">{intervencao.motivo}</p>
+                              </div>
+                            )}
                             {intervencao.cor_corpo && (
                               <div>
                                 <span className="text-sm font-medium">Cor (Corpo):</span>
