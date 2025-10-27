@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from "lucide-react";
 import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
-import IntervencoesSHContent from "@/components/IntervencoesSHContent";
-import IntervencoesSVContent from "@/components/IntervencoesSVContent";
-import IntervencoesInscricoesContent from "@/components/IntervencoesInscricoesContent";
-import IntervencoesTachaContent from "@/components/IntervencoesTachaContent";
-import IntervencoesCilindrosContent from "@/components/IntervencoesCilindrosContent";
-import IntervencoesPorticosContent from "@/components/IntervencoesPorticosContent";
-import IntervencoesDefensasContent from "@/components/IntervencoesDefensasContent";
+import IntervencoesExecucaoMarcasSHContent from "@/components/intervencoes/execucao/IntervencoesExecucaoMarcasSHContent";
+import IntervencoesExecucaoPlacasSVContent from "@/components/intervencoes/execucao/IntervencoesExecucaoPlacasSVContent";
+import IntervencoesExecucaoInscricoesContent from "@/components/intervencoes/execucao/IntervencoesExecucaoInscricoesContent";
+import IntervencoesExecucaoTachasContent from "@/components/intervencoes/execucao/IntervencoesExecucaoTachasContent";
+import IntervencoesExecucaoCilindrosContent from "@/components/intervencoes/execucao/IntervencoesExecucaoCilindrosContent";
+import IntervencoesExecucaoPorticosContent from "@/components/intervencoes/execucao/IntervencoesExecucaoPorticosContent";
+import IntervencoesExecucaoDefensasContent from "@/components/intervencoes/execucao/IntervencoesExecucaoDefensasContent";
 import IntervencoesManutencaoContent from "@/components/IntervencoesManutencaoContent";
 
 const MinhasIntervencoes = () => {
@@ -79,31 +79,31 @@ const MinhasIntervencoes = () => {
           </TabsList>
           
           <TabsContent value="sh">
-            <IntervencoesSHContent />
+            <IntervencoesExecucaoMarcasSHContent />
           </TabsContent>
           
           <TabsContent value="sv">
-            <IntervencoesSVContent />
+            <IntervencoesExecucaoPlacasSVContent />
           </TabsContent>
           
           <TabsContent value="inscricoes">
-            <IntervencoesInscricoesContent />
+            <IntervencoesExecucaoInscricoesContent />
           </TabsContent>
           
           <TabsContent value="tacha">
-            <IntervencoesTachaContent />
+            <IntervencoesExecucaoTachasContent />
           </TabsContent>
           
           <TabsContent value="cilindros">
-            <IntervencoesCilindrosContent />
+            <IntervencoesExecucaoCilindrosContent />
           </TabsContent>
           
           <TabsContent value="porticos">
-            <IntervencoesPorticosContent />
+            <IntervencoesExecucaoPorticosContent />
           </TabsContent>
           
           <TabsContent value="defensas">
-            <IntervencoesDefensasContent />
+            <IntervencoesExecucaoDefensasContent />
           </TabsContent>
           
           <TabsContent value="manutencoes">
