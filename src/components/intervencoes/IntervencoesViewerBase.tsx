@@ -1,92 +1,70 @@
-// src/components/intervencoes/IntervencoesViewerBase.tsx
 import React, { useEffect, useMemo, useState } from "react";
-
-// Importa o client do seu projeto (caminho que você informou)
 import * as Supa from "../../integrations/supabase/client";
 
-// ---------------------- Tipos & Constantes ----------------------
 type TipoElemento = "placas" | "inscricoes" | "porticos" | "sh" | "defensas" | "tachas" | "cilindros";
 
 type TipoOrigem = "execucao" | "manutencao_pre_projeto";
-
 type BadgeColor = "secondary" | "destructive" | "outline" | "success" | "warning" | "default";
 
 export type IntervencoesViewerBaseProps = {
   tipoElemento: TipoElemento;
   tipoOrigem: TipoOrigem;
-  tabelaIntervencao: string; // nome da tabela no banco
+  tabelaIntervencao: string;
   titulo: string;
   badgeColor?: BadgeColor;
   badgeLabel?: string;
 
-  // Callbacks opcionais
+  // callback antigo (se algum viewer passar, usamos ele)
   onVerIntervencao?: (row: any) => void;
-  onAfterRefresh?: (rows: any[]) => void;
 
-  // Opcional: se quiser usar seu próprio fetcher (ignora supabase importado)
+  // opcional: construir URL de edição (se você tiver rota que abre form por query)
+  getEditUrl?: (ctx: { tipoElemento: string; tipoOrigem: string; row: any }) => string;
+
+  onAfterRefresh?: (rows: any[]) => void;
   loadData?: (args: { tabela: string; tipoOrigem: string }) => Promise<any[]>;
 };
 
 const PONTUAIS: readonly TipoElemento[] = ["placas", "inscricoes", "porticos"] as const;
 
-// ---------------------- Utilidades ----------------------
-/** Tenta suportar export default ou export { supabase } */
 function getSupabase(): any | null {
-  const client =
-    (Supa as any)?.supabase ?? // export nomeado
-    (Supa as any)?.default ?? // export default
-    (Supa as any);
-  // valida minimamente se é mesmo o client (precisa ter .from)
-  if (client && typeof client.from === "function") return client;
-  return null;
+  const client = (Supa as any)?.supabase ?? (Supa as any)?.default ?? (Supa as any);
+  return client && typeof client.from === "function" ? client : null;
 }
 
 function formatKm(v?: number | string | null) {
   if (v === null || v === undefined || v === "") return "—";
   const n = typeof v === "string" ? Number(v) : (v as number);
-  if (!isFinite(n)) return String(v);
-  return n.toFixed(3).replace(".", ",");
+  return isFinite(n) ? n.toFixed(3).replace(".", ",") : String(v);
 }
 
+// normalizações de campos
 function normalizeKmInicial(item: any): number | null {
   const v = item?.km_inicial ?? item?.kmInicial ?? item?.km_ini;
   return v === undefined || v === null ? null : Number(v);
 }
-
 function normalizeKmFinal(item: any, isPontual: boolean): number | null {
-  if (isPontual) return null; // para pontuais, SEMPRE nulo
-  const v = item?.km_final ?? item?.kmFinal ?? item?.km_fim;
+  if (isPontual) return null;
+  const v = item?.km_final ?? item?.kmFinal ?? item?.km_fim ?? item?.kmFim ?? null;
   return v === undefined || v === null ? null : Number(v);
 }
-
 function normalizeCodigo(item: any): string | null {
   return (item?.codigo ?? item?.sigla ?? item?.cod ?? null) as string | null;
 }
-
 function normalizeRodovia(item: any): string | null {
   return (item?.rodovia ?? item?.br ?? null) as string | null;
 }
-
 function adaptRow(item: any, isPontual: boolean) {
-  const km_inicial = normalizeKmInicial(item);
-  const km_final = normalizeKmFinal(item, isPontual);
-  const codigo = normalizeCodigo(item);
-  const rodovia = normalizeRodovia(item);
-  const enviada = Boolean(item?.enviada);
-  const id = item?.id ?? item?.uuid ?? item?.pk ?? null;
-
   return {
     ...item,
-    id,
-    rodovia,
-    km_inicial,
-    km_final,
-    codigo,
-    enviada,
+    id: item?.id ?? item?.uuid ?? item?.pk ?? null,
+    rodovia: normalizeRodovia(item),
+    km_inicial: normalizeKmInicial(item),
+    km_final: normalizeKmFinal(item, isPontual),
+    codigo: normalizeCodigo(item),
+    enviada: Boolean(item?.enviada),
   };
 }
 
-// ---------------------- Componente ----------------------
 export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProps) {
   const {
     tipoElemento,
@@ -96,16 +74,15 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
     badgeColor = "secondary",
     badgeLabel = "",
     onVerIntervencao,
+    getEditUrl,
     onAfterRefresh,
     loadData,
   } = props;
 
   const isPontual = useMemo(() => PONTUAIS.includes(tipoElemento), [tipoElemento]);
-
   const [rows, setRows] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState<string | null>(null);
-
   type Filtro = "todas" | "enviadas" | "nao_enviadas";
   const [filtro, setFiltro] = useState<Filtro>("todas");
 
@@ -129,11 +106,9 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
           .select("*")
           .eq("tipo_origem", tipoOrigem)
           .order("id", { ascending: false });
-
         if (error) throw error;
         data = Array.isArray(result) ? result : [];
       }
-
       const adapted = data.map((d) => adaptRow(d, isPontual));
       setRows(adapted);
       onAfterRefresh?.(adapted);
@@ -153,43 +128,58 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
   const filtered = useMemo(() => {
     if (filtro === "todas") return rows;
     if (filtro === "enviadas") return rows.filter((r) => r.enviada === true);
-    return rows.filter((r) => !r.enviada); // nao_enviadas
+    return rows.filter((r) => !r.enviada);
   }, [rows, filtro]);
 
   async function marcarComoEnviadas(selected: any[]) {
     const supabase = getSupabase();
-    if (!supabase) {
-      alert("Supabase indisponível. Não foi possível enviar.");
-      return;
-    }
+    if (!supabase) return alert("Supabase indisponível.");
     const ids = selected.map((r) => r.id).filter(Boolean);
     if (!ids.length) return;
-
     const { error } = await supabase.from(tabelaIntervencao).update({ enviada: true }).in("id", ids);
-
-    if (error) {
-      alert("Erro ao enviar aos coordenadores: " + error.message);
-      return;
-    }
+    if (error) return alert("Erro ao enviar: " + error.message);
     await fetchRows();
-    alert("Intervenções enviadas aos coordenadores.");
+    alert("Intervenções enviadas.");
   }
 
   async function excluir(row: any) {
     if (!row?.id) return;
     if (!confirm("Confirma excluir esta intervenção?")) return;
-
     const supabase = getSupabase();
-    if (!supabase) {
-      alert("Supabase indisponível. Não foi possível excluir.");
-      return;
-    }
+    if (!supabase) return alert("Supabase indisponível.");
     const { error } = await supabase.from(tabelaIntervencao).delete().eq("id", row.id);
-    if (error) {
-      alert("Erro ao excluir: " + error.message);
+    if (error) return alert("Erro ao excluir: " + error.message);
+    await fetchRows();
+  }
+
+  // -------- Fallback para o "olhinho" --------
+  function handleVer(row: any) {
+    if (onVerIntervencao) {
+      onVerIntervencao(row);
       return;
     }
-    await fetchRows();
+    // 1) Dispara evento global (você pode ouvir isso em qualquer lugar do app)
+    try {
+      window.dispatchEvent(
+        new CustomEvent("viewer:verIntervencao", {
+          detail: { tipoElemento, tipoOrigem, row },
+        }),
+      );
+    } catch {}
+
+    // 2) Se tiver uma rota que aceita ?edit=ID, tenta navegar
+    const url =
+      getEditUrl?.({ tipoElemento, tipoOrigem, row }) ??
+      (typeof location !== "undefined"
+        ? `${location.pathname}?tipo=${tipoElemento}&origem=${tipoOrigem}&edit=${encodeURIComponent(row?.id ?? "")}`
+        : null);
+    if (url) {
+      try {
+        history.pushState({}, "", url);
+        // alguns apps escutam mudanças de URL para abrir drawer/form
+        window.dispatchEvent(new Event("popstate"));
+      } catch {}
+    }
   }
 
   return (
@@ -201,7 +191,7 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
             style={{
               padding: "2px 8px",
               borderRadius: 12,
-              background: badgeColor === "warning" ? "#facc15" : badgeColor === "secondary" ? "#e5e7eb" : "#e5e7eb",
+              background: badgeColor === "warning" ? "#facc15" : "#e5e7eb",
               color: "#111827",
               fontSize: 12,
               fontWeight: 600,
@@ -211,7 +201,7 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
           </span>
         ) : null}
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          <select value={filtro} onChange={(e) => setFiltro(e.target.value as any)} style={{ padding: 6 }}>
+          <select value={filtro} onChange={(e) => setFiltro(e.target.value as Filtro)} style={{ padding: 6 }}>
             <option value="todas">Todas</option>
             <option value="enviadas">Enviadas</option>
             <option value="nao_enviadas">Não enviadas</option>
@@ -244,7 +234,6 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
               <th style={th}>ID</th>
               <th style={th}>Rodovia</th>
               <th style={th}>KM Inicial</th>
-              {/* KM Final só aparece para NÃO-pontuais */}
               {!isPontual && <th style={th}>KM Final</th>}
               <th style={th}>Código</th>
               <th style={th}>Enviada?</th>
@@ -271,7 +260,7 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
             {!loading &&
               filtered.map((row) => {
                 const kmIni = formatKm(row.km_inicial);
-                const kmFim = formatKm(row.km_final); // será "—" para pontuais
+                const kmFim = formatKm(row.km_final);
                 const enviadaLabel = row.enviada ? "Sim" : "Não";
                 return (
                   <tr key={row.id ?? Math.random()}>
@@ -283,15 +272,15 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
                     <td style={td}>{enviadaLabel}</td>
                     <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
                       <button
-                        onClick={() => onVerIntervencao?.(row)}
-                        style={{ marginRight: 8, padding: "4px 8px" }}
+                        onClick={() => handleVer(row)}
+                        style={{ marginRight: 8, padding: "4px 8px", cursor: "pointer" }}
                         title="Abrir/Editar"
                       >
                         👁️
                       </button>
                       <button
                         onClick={() => marcarComoEnviadas([row])}
-                        style={{ marginRight: 8, padding: "4px 8px" }}
+                        style={{ marginRight: 8, padding: "4px 8px", cursor: "pointer" }}
                         title="Enviar ao coordenador"
                         disabled={row.enviada}
                       >
@@ -299,7 +288,7 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
                       </button>
                       <button
                         onClick={() => excluir(row)}
-                        style={{ padding: "4px 8px", color: "#991b1b" }}
+                        style={{ padding: "4px 8px", color: "#991b1b", cursor: "pointer" }}
                         title="Excluir"
                       >
                         🗑️
@@ -323,7 +312,6 @@ const th: React.CSSProperties = {
   fontSize: 13,
   color: "#111827",
 };
-
 const td: React.CSSProperties = {
   padding: "10px 12px",
   borderBottom: "1px solid #f3f4f6",
