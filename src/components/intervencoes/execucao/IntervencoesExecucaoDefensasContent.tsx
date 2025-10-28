@@ -1,4 +1,4 @@
-import IntervencoesViewerBase from "../IntervencoesViewerBase";
+import { IntervencoesViewerBase } from "../IntervencoesViewerBase";
 
 export default function IntervencoesExecucaoDefensasContent(
   props: Partial<React.ComponentProps<typeof IntervencoesViewerBase>>,
