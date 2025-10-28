@@ -17,6 +17,8 @@ type Props = {
   tipoOrigem: TipoOrigem;
   tabelaIntervencao: string;
   titulo: string;
+  badgeColor?: string;
+  badgeLabel?: string;
 };
 
 const PONTUAIS: TipoElemento[] = ["placas", "inscricoes", "porticos"];
