@@ -1,20 +1,16 @@
-import { IntervencoesViewerBase } from '../IntervencoesViewerBase';
-
-interface Props {
-  onEditarElemento?: (elemento: any) => void;
-}
-
-export default function IntervencoesManutencaoMarcasSHContent({ onEditarElemento }: Props) {
+import IntervencoesViewerBase from "../IntervencoesViewerBase";
+export default function IntervencoesManutencaoMarcasSHContent(
+  props: Partial<React.ComponentProps<typeof IntervencoesViewerBase>>,
+) {
   return (
     <IntervencoesViewerBase
-      tipoElemento="marcas_longitudinais"
+      tipoElemento="sh"
       tipoOrigem="manutencao_pre_projeto"
-      titulo="🟠 Minhas Manutenções IN-3 - Marcas Longitudinais SH"
       tabelaIntervencao="ficha_marcas_longitudinais_intervencoes"
-      onEditarElemento={onEditarElemento}
-      badgeColor="bg-orange-500"
+      titulo="Minhas Manutenções IN-3 – Marcas SH"
+      badgeColor="warning"
       badgeLabel="MANUTENÇÃO"
-      usarJoinExplicito={true}
+      {...props}
     />
   );
 }
