@@ -1,397 +1,354 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Info, Plus, Eye, Send, Trash2 } from "lucide-react";
-import { format } from "date-fns";
-import { toast } from "sonner";
-import { findCoordinatorsByLoteId } from "@/lib/coordenadores";
+// src/components/intervencoes/IntervencoesViewerBase.tsx
+import React, { useEffect, useMemo, useState } from "react";
 
-interface IntervencoesViewerBaseProps {
-  tipoElemento: string;
-  tipoOrigem: 'execucao' | 'manutencao_pre_projeto';
+/**
+ * TODO (se desejar usar seu client tipado):
+ * Se você já tem um cliente do Supabase via import (ex.: src/lib/supabaseClient),
+ * pode importar aqui com caminho RELATIVO ao arquivo:
+ *
+ *   import { supabase as supabaseClient } from "../../lib/supabaseClient";
+ *
+ * e lá embaixo, no getSupabase(), retornar essa instância em vez de window.supabase.
+ */
+
+// ---------------------- Tipos & Constantes ----------------------
+type TipoElemento = "placas" | "inscricoes" | "porticos" | "sh" | "defensas" | "tachas" | "cilindros";
+
+type TipoOrigem = "execucao" | "manutencao_pre_projeto";
+
+type BadgeColor = "secondary" | "destructive" | "outline" | "success" | "warning" | "default";
+
+export type IntervencoesViewerBaseProps = {
+  tipoElemento: TipoElemento;
+  tipoOrigem: TipoOrigem;
+  tabelaIntervencao: string; // nome da tabela no banco
   titulo: string;
-  tabelaIntervencao: string;
-  onEditarElemento?: (elemento: any) => void;
-  badgeColor?: string;
+  badgeColor?: BadgeColor;
   badgeLabel?: string;
-  usarJoinExplicito?: boolean;
+
+  // Callbacks opcionais
+  onVerIntervencao?: (row: any) => void;
+  onAfterRefresh?: (rows: any[]) => void;
+
+  // Opcional: se quiser usar seu próprio fetcher (ignora supabase do window)
+  loadData?: (args: { tabela: string; tipoOrigem: string }) => Promise<any[]>;
+};
+
+const PONTUAIS: readonly TipoElemento[] = ["placas", "inscricoes", "porticos"] as const;
+
+// Campos estruturais que serão bloqueados em manutenção SE houver vínculo manual a um item de inventário.
+// (a lógica de bloqueio é tratada nos Forms; aqui é só visualização/listagem)
+const CAMPOS_ESTRUTURAIS: Record<string, readonly string[]> = {
+  placas: ["rodovia", "km_inicial", "codigo"],
+  inscricoes: ["rodovia", "km_inicial", "codigo"],
+  porticos: ["rodovia", "km_inicial", "codigo"],
+  sh: ["rodovia", "km_inicial", "km_final", "codigo"],
+  defensas: ["rodovia", "km_inicial", "km_final", "codigo"],
+  tachas: ["rodovia", "km_inicial", "km_final", "codigo"],
+  cilindros: ["rodovia", "km_inicial", "km_final", "codigo"],
+};
+
+// ---------------------- Utilidades ----------------------
+function getSupabase(): any | null {
+  // Se você importou um client acima, retorne-o aqui.
+  // return supabaseClient;
+  // Fallback: tentar usar window.supabase (em alguns ambientes como Lovable isso funciona)
+  if (typeof window !== "undefined" && (window as any).supabase) {
+    return (window as any).supabase;
+  }
+  return null;
 }
 
-export function IntervencoesViewerBase({
-  tipoElemento,
-  tipoOrigem,
-  titulo,
-  tabelaIntervencao,
-  onEditarElemento,
-  badgeColor = "bg-primary",
-  badgeLabel,
-  usarJoinExplicito = true  // ⚠️ SEGURANÇA: Sempre true por padrão
-}: IntervencoesViewerBaseProps) {
-  const { user } = useAuth();
-  const [elementos, setElementos] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [mostrarEnviadas, setMostrarEnviadas] = useState(true);
+function formatKm(v?: number | string | null) {
+  if (v === null || v === undefined || v === "") return "—";
+  const n = typeof v === "string" ? Number(v) : (v as number);
+  if (!isFinite(n)) return String(v);
+  return n.toFixed(3).replace(".", ",");
+}
 
-  // 🔒 PROTEÇÃO DUPLA: Garantir que JOIN explícito sempre seja usado
-  const joinExplicito = usarJoinExplicito ?? true;
+function normalizeKmInicial(item: any): number | null {
+  const v = item?.km_inicial ?? item?.kmInicial ?? item?.km_ini;
+  return v === undefined || v === null ? null : Number(v);
+}
 
-  const carregar = async () => {
-    if (!user) return;
-    
+function normalizeKmFinal(item: any, isPontual: boolean): number | null {
+  if (isPontual) return null; // para pontuais, SEMPRE nulo
+  const v = item?.km_final ?? item?.kmFinal ?? item?.km_fim;
+  return v === undefined || v === null ? null : Number(v);
+}
+
+function normalizeCodigo(item: any): string | null {
+  return (item?.codigo ?? item?.sigla ?? item?.cod ?? null) as string | null;
+}
+
+function normalizeRodovia(item: any): string | null {
+  return (item?.rodovia ?? item?.br ?? null) as string | null;
+}
+
+function adaptRow(item: any, isPontual: boolean) {
+  const km_inicial = normalizeKmInicial(item);
+  const km_final = normalizeKmFinal(item, isPontual);
+  const codigo = normalizeCodigo(item);
+  const rodovia = normalizeRodovia(item);
+  const enviada = Boolean(item?.enviada);
+  const id = item?.id ?? item?.uuid ?? item?.pk ?? null;
+
+  return {
+    ...item,
+    id,
+    rodovia,
+    km_inicial,
+    km_final,
+    codigo,
+    enviada,
+  };
+}
+
+// ---------------------- Componente ----------------------
+export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProps) {
+  const {
+    tipoElemento,
+    tipoOrigem,
+    tabelaIntervencao,
+    titulo,
+    badgeColor = "secondary",
+    badgeLabel = "",
+    onVerIntervencao,
+    onAfterRefresh,
+    loadData,
+  } = props;
+
+  const isPontual = useMemo(() => PONTUAIS.includes(tipoElemento), [tipoElemento]);
+
+  const [rows, setRows] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [errMsg, setErrMsg] = useState<string | null>(null);
+
+  type Filtro = "todas" | "enviadas" | "nao_enviadas";
+  const [filtro, setFiltro] = useState<Filtro>("todas");
+
+  async function fetchRows() {
     setLoading(true);
+    setErrMsg(null);
     try {
-    // Hotfix: Removido JOIN de autor até que as FKs sejam criadas no banco
-    // O campo 'autor' não é usado na UI atualmente
-    const selectQuery = '*';
+      let data: any[] = [];
+      if (typeof loadData === "function") {
+        data = await loadData({ tabela: tabelaIntervencao, tipoOrigem });
+      } else {
+        const supabase = getSupabase();
+        if (!supabase) {
+          // Sem client: apenas não dá erro de compilação; mostra aviso.
+          setErrMsg(
+            "Supabase não detectado automaticamente. Conecte seu client (ver TODO no topo do arquivo) ou injete a prop `loadData`.",
+          );
+          setRows([]);
+          setLoading(false);
+          return;
+        }
+        const { data: result, error } = await supabase
+          .from(tabelaIntervencao)
+          .select("*")
+          .eq("tipo_origem", tipoOrigem)
+          .order("id", { ascending: false });
 
-      const { data, error } = await supabase
-        .from(tabelaIntervencao as any)
-        .select(selectQuery)
-        .eq('user_id', user.id)
-        .eq('tipo_origem', tipoOrigem)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('❌ Erro ao carregar intervenções:', {
-          tabela: tabelaIntervencao,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        });
-        throw error;
+        if (error) throw error;
+        data = Array.isArray(result) ? result : [];
       }
-      setElementos(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar elementos:', error);
-      toast.error('Erro ao carregar elementos registrados');
+
+      const adapted = data.map((d) => adaptRow(d, isPontual));
+      setRows(adapted);
+      onAfterRefresh?.(adapted);
+    } catch (e: any) {
+      setErrMsg(e?.message ?? "Erro ao carregar dados");
+      setRows([]);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleEnviarParaCoordenador = async (intervencaoId: string) => {
-    try {
-      // Buscar dados da intervenção
-      const { data: intervencao, error: fetchError } = await supabase
-        .from(tabelaIntervencao as any)
-        .select('id, lote_id, km_inicial, data_intervencao, created_at, motivo, codigo, tipo')
-        .eq('id', intervencaoId)
-        .single();
-      
-      if (fetchError) throw fetchError;
-      if (!intervencao) throw new Error('Intervenção não encontrada');
-
-      const loteId = (intervencao as any).lote_id;
-      if (!loteId) {
-        toast.error('Esta intervenção não tem Lote definido. Não é possível enviar.');
-        return;
-      }
-
-      // Atualizar status
-      const { error: updateError } = await supabase
-        .from(tabelaIntervencao as any)
-        .update({
-          pendente_aprovacao_coordenador: false,
-          data_aprovacao_coordenador: new Date().toISOString(),
-          enviado_coordenador: true,
-          enviado_coordenador_em: new Date().toISOString(),
-        })
-        .eq('id', intervencaoId);
-
-      if (updateError) throw updateError;
-
-      // Buscar coordenadores
-      const destinatarios = await findCoordinatorsByLoteId(supabase as any, loteId);
-
-      if (!destinatarios.length) {
-        // Reverter status se ninguém for encontrado
-        await supabase
-          .from(tabelaIntervencao as any)
-          .update({ 
-            pendente_aprovacao_coordenador: true,
-            data_aprovacao_coordenador: null,
-            enviado_coordenador: false,
-            enviado_coordenador_em: null
-          })
-          .eq('id', intervencaoId);
-
-        toast.error(
-          'Nenhum coordenador encontrado para este Lote. Cadastre em "Configurações → Coordenações" ou defina o coordenador no cadastro do Lote.',
-        );
-        return;
-      }
-
-      // Criar identificação da intervenção
-      const intervencaoAny = intervencao as any;
-      const identificacao = intervencaoAny.motivo || intervencaoAny.codigo || intervencaoAny.tipo || 'Intervenção';
-      const kmTexto = intervencaoAny.km_inicial ? `KM ${intervencaoAny.km_inicial.toFixed(3)}` : 'localização não informada';
-      const dataTexto = intervencaoAny.data_intervencao
-        ? new Date(intervencaoAny.data_intervencao).toLocaleDateString("pt-BR")
-        : new Date(intervencaoAny.created_at).toLocaleDateString("pt-BR");
-
-      // Criar notificações
-      const notifications = destinatarios.map((uid: string) => ({
-        user_id: uid,
-        tipo: 'intervencao_pendente',
-        titulo: `Nova ${tipoOrigem === 'manutencao_pre_projeto' ? 'Manutenção' : 'Execução'} - ${tipoElemento}`,
-        mensagem: `${identificacao} (${kmTexto} / ${dataTexto}) aguarda sua validação`,
-        lida: false,
-        elemento_pendente_id: null,
-        nc_id: null,
-      }));
-
-      const { error: notifError } = await supabase.from("notificacoes").insert(notifications);
-      if (notifError) console.error("Erro ao notificar coordenadores:", notifError);
-
-      toast.success(`Intervenção enviada para ${destinatarios.length} coordenador(es)!`);
-      carregar();
-    } catch (error: any) {
-      console.error('Erro ao enviar:', error);
-      toast.error('Erro ao enviar intervenção: ' + error.message);
-    }
-  };
-
-  const handleExcluir = async (intervencaoId: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta intervenção?')) return;
-
-    try {
-      const { error } = await supabase
-        .from(tabelaIntervencao as any)
-        .delete()
-        .eq('id', intervencaoId);
-
-      if (error) throw error;
-
-      toast.success('Intervenção excluída com sucesso!');
-      carregar();
-    } catch (error: any) {
-      console.error('Erro ao excluir:', error);
-      toast.error('Erro ao excluir intervenção: ' + error.message);
-    }
-  };
-
-  useEffect(() => {
-    carregar();
-  }, [user, tipoOrigem]);
-
-  const renderTipoIdentificacao = (elem: any) => {
-    // Usado apenas como fallback quando 'solucao' não existe
-    if (elem.codigo) return elem.codigo;
-    if (elem.tipo_demarcacao) return elem.tipo_demarcacao;
-    if (elem.tipo) return elem.tipo;
-    if (elem.tipo_tacha) return elem.tipo_tacha;
-    return 'Sem identificação';
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
   }
 
-  const elementosFiltrados = mostrarEnviadas 
-    ? elementos 
-    : elementos.filter((e) => e.pendente_aprovacao_coordenador !== false && !e.enviado_coordenador);
+  useEffect(() => {
+    // carrega sempre que muda a origem ou a tabela
+    fetchRows();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabelaIntervencao, tipoOrigem, tipoElemento]);
+
+  const filtered = useMemo(() => {
+    if (filtro === "todas") return rows;
+    if (filtro === "enviadas") return rows.filter((r) => r.enviada === true);
+    return rows.filter((r) => !r.enviada); // nao_enviadas
+  }, [rows, filtro]);
+
+  async function marcarComoEnviadas(selected: any[]) {
+    const supabase = getSupabase();
+    if (!supabase) {
+      alert("Supabase indisponível. Não foi possível enviar.");
+      return;
+    }
+    const ids = selected.map((r) => r.id).filter(Boolean);
+    if (!ids.length) return;
+
+    const { error } = await supabase.from(tabelaIntervencao).update({ enviada: true }).in("id", ids);
+
+    if (error) {
+      alert("Erro ao enviar aos coordenadores: " + error.message);
+      return;
+    }
+    await fetchRows();
+    alert("Intervenções enviadas aos coordenadores.");
+  }
+
+  async function excluir(row: any) {
+    if (!row?.id) return;
+    if (!confirm("Confirma excluir esta intervenção?")) return;
+
+    const supabase = getSupabase();
+    if (!supabase) {
+      alert("Supabase indisponível. Não foi possível excluir.");
+      return;
+    }
+    const { error } = await supabase.from(tabelaIntervencao).delete().eq("id", row.id);
+    if (error) {
+      alert("Erro ao excluir: " + error.message);
+      return;
+    }
+    await fetchRows();
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              {titulo}
-              {badgeLabel && (
-                <Badge className={badgeColor}>{badgeLabel}</Badge>
-              )}
-            </CardTitle>
-            <CardDescription>
-              {elementosFiltrados.length} de {elementos.length} registro(s)
-            </CardDescription>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="mostrar-enviadas"
-              checked={mostrarEnviadas}
-              onCheckedChange={(checked) => setMostrarEnviadas(checked as boolean)}
-            />
-            <Label htmlFor="mostrar-enviadas" className="cursor-pointer text-sm font-normal">
-              Mostrar enviadas
-            </Label>
-          </div>
+    <div style={{ padding: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+        <h2 style={{ margin: 0 }}>{titulo}</h2>
+        {badgeLabel ? (
+          <span
+            style={{
+              padding: "2px 8px",
+              borderRadius: 12,
+              background: badgeColor === "warning" ? "#facc15" : badgeColor === "secondary" ? "#e5e7eb" : "#e5e7eb",
+              color: "#111827",
+              fontSize: 12,
+              fontWeight: 600,
+            }}
+          >
+            {badgeLabel}
+          </span>
+        ) : null}
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <select value={filtro} onChange={(e) => setFiltro(e.target.value as Filtro)} style={{ padding: 6 }}>
+            <option value="todas">Todas</option>
+            <option value="enviadas">Enviadas</option>
+            <option value="nao_enviadas">Não enviadas</option>
+          </select>
+          <button onClick={fetchRows} disabled={loading} style={{ padding: "6px 10px" }}>
+            Atualizar
+          </button>
         </div>
-      </CardHeader>
-      <CardContent>
-        {elementos.length === 0 ? (
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              Nenhum elemento registrado ainda para este tipo.
-            </AlertDescription>
-          </Alert>
-        ) : elementosFiltrados.length === 0 ? (
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              {mostrarEnviadas ? "Nenhum elemento registrado" : "Nenhum elemento não enviado"}
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>KM Inicial</TableHead>
-                  <TableHead>KM Final</TableHead>
-                  <TableHead>Solução</TableHead>
-                  <TableHead>Motivo</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {elementosFiltrados.map((elem) => (
-                  <TableRow key={elem.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs">📍</span>
-                        <span className="font-mono">{elem.km_inicial?.toFixed(3) || '-'}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {elem.km_final ? (
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs">📍</span>
-                          <span className="font-mono">{elem.km_final.toFixed(3)}</span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {elem.solucao ? (
-                        <Badge variant={tipoOrigem === 'execucao' ? 'default' : 'secondary'}>
-                          {elem.solucao}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">
-                          {renderTipoIdentificacao(elem)}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {elem.motivo && elem.motivo !== '-' ? (
-                        <span className="text-sm">{elem.motivo}</span>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {elem.data_intervencao 
-                        ? format(new Date(elem.data_intervencao), 'dd/MM/yyyy') 
-                        : format(new Date(elem.created_at), 'dd/MM/yyyy')}
-                    </TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant={
-                          elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
-                            ? 'default'
-                            : 'outline'
-                        }
-                      >
-                        {elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
-                          ? 'Enviada'
-                          : 'Rascunho'}
-                      </Badge>
-                      {elem.fotos_urls?.length > 0 && (
-                        <Badge variant="outline" className="ml-2">
-                          📸 {elem.fotos_urls.length}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-end gap-2">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEnviarParaCoordenador(elem.id)}
-                                disabled={elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false}
-                                title={
-                                  elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
-                                    ? "Intervenção já foi enviada"
-                                    : "Enviar para Coordenador"
-                                }
-                              >
-                                <Send className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Enviar para Coordenador</TooltipContent>
-                          </Tooltip>
-                          
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => onEditarElemento?.(elem)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Visualizar detalhes</TooltipContent>
-                          </Tooltip>
-                          
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleExcluir(elem.id)}
-                                disabled={elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false}
-                                title={
-                                  elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
-                                    ? "Não pode excluir: intervenção já enviada"
-                                    : "Excluir"
-                                }
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Excluir</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+      </div>
 
-        {/* Botão para Adicionar Novo */}
-        <Button 
-          variant="default"
-          className="w-full mt-4"
-          onClick={() => onEditarElemento?.(null)}
+      {errMsg ? (
+        <div
+          style={{
+            marginBottom: 12,
+            padding: 10,
+            background: "#FEF3C7",
+            border: "1px solid #F59E0B",
+            borderRadius: 6,
+            color: "#7C2D12",
+          }}
         >
-          <Plus className="mr-2 h-4 w-4" />
-          Registrar Novo
-        </Button>
-      </CardContent>
-    </Card>
+          {errMsg}
+        </div>
+      ) : null}
+
+      <div style={{ overflowX: "auto", border: "1px solid #e5e7eb", borderRadius: 8 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead style={{ background: "#f9fafb" }}>
+            <tr>
+              <th style={th}>ID</th>
+              <th style={th}>Rodovia</th>
+              <th style={th}>KM Inicial</th>
+              {/* KM Final só aparece para NÃO-pontuais */}
+              {!isPontual && <th style={th}>KM Final</th>}
+              <th style={th}>Código</th>
+              <th style={th}>Enviada?</th>
+              <th style={th} />
+            </tr>
+          </thead>
+          <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={isPontual ? 6 : 7} style={{ padding: 16, textAlign: "center" }}>
+                  Carregando...
+                </td>
+              </tr>
+            )}
+
+            {!loading && filtered.length === 0 && (
+              <tr>
+                <td colSpan={isPontual ? 6 : 7} style={{ padding: 16, textAlign: "center" }}>
+                  Nenhum registro.
+                </td>
+              </tr>
+            )}
+
+            {!loading &&
+              filtered.map((row) => {
+                const kmIni = formatKm(row.km_inicial);
+                const kmFim = formatKm(row.km_final); // será "—" para pontuais
+                const enviadaLabel = row.enviada ? "Sim" : "Não";
+                return (
+                  <tr key={row.id ?? Math.random()}>
+                    <td style={td}>{row.id ?? "—"}</td>
+                    <td style={td}>{row.rodovia ?? "—"}</td>
+                    <td style={td}>{kmIni}</td>
+                    {!isPontual && <td style={td}>{kmFim}</td>}
+                    <td style={td}>{row.codigo ?? "—"}</td>
+                    <td style={td}>{enviadaLabel}</td>
+                    <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
+                      <button
+                        onClick={() => onVerIntervencao?.(row)}
+                        style={{ marginRight: 8, padding: "4px 8px" }}
+                        title="Abrir/Editar"
+                      >
+                        👁️
+                      </button>
+                      <button
+                        onClick={() => marcarComoEnviadas([row])}
+                        style={{ marginRight: 8, padding: "4px 8px" }}
+                        title="Enviar ao coordenador"
+                        disabled={row.enviada}
+                      >
+                        ✉️
+                      </button>
+                      <button
+                        onClick={() => excluir(row)}
+                        style={{ padding: "4px 8px", color: "#991b1b" }}
+                        title="Excluir"
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
+
+const th: React.CSSProperties = {
+  textAlign: "left",
+  fontWeight: 600,
+  padding: "10px 12px",
+  borderBottom: "1px solid #e5e7eb",
+  fontSize: 13,
+  color: "#111827",
+};
+
+const td: React.CSSProperties = {
+  padding: "10px 12px",
+  borderBottom: "1px solid #f3f4f6",
+  fontSize: 13,
+  color: "#111827",
+};
