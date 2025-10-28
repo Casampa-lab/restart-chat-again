@@ -1,347 +1,397 @@
-import React, { useEffect, useMemo, useState } from "react";
-import * as Supa from "../../integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Info, Plus, Eye, Send, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { toast } from "sonner";
+import { findCoordinatorsByLoteId } from "@/lib/coordenadores";
 
-// ---------------- Tipos ----------------
-type TipoElemento =
-  | "placas"
-  | "inscricoes"
-  | "porticos"
-  | "sh"
-  | "defensas"
-  | "tachas"
-  | "cilindros";
-
-type TipoOrigem = "execucao" | "manutencao_pre_projeto";
-type ColumnKey = "km_inicial" | "km_final" | "codigo" | "enviada";
-
-type BadgeColor = "secondary" | "destructive" | "outline" | "success" | "warning" | "default";
-
-type Props = {
-  tipoElemento: TipoElemento;
-  tipoOrigem: TipoOrigem;
-  tabelaIntervencao: string;
+interface IntervencoesViewerBaseProps {
+  tipoElemento: string;
+  tipoOrigem: 'execucao' | 'manutencao_pre_projeto';
   titulo: string;
-
-  badgeColor?: BadgeColor;
+  tabelaIntervencao: string;
+  onEditarElemento?: (elemento: any) => void;
+  badgeColor?: string;
   badgeLabel?: string;
-
-  /** Colunas que você quer ver e na ordem que preferir */
-  columns?: ColumnKey[];
-
-  /** Abre/edita uma intervenção existente (opcional) */
-  onVerIntervencao?: (row: any) => void;
-
-  /** Constrói URL de edição (opcional) */
-  getEditUrl?: (ctx: { tipoElemento: string; tipoOrigem: string; row: any }) => string;
-
-  /** Cria uma intervenção nova (opcional) */
-  onNovo?: (ctx: { tipoElemento: string; tipoOrigem: string }) => void;
-
-  /** Constrói URL de criação (opcional) */
-  getNewUrl?: (ctx: { tipoElemento: string; tipoOrigem: string }) => string;
-};
-
-// --------------- Constantes ---------------
-const PONTUAIS: TipoElemento[] = ["placas", "inscricoes", "porticos"];
-
-// --------------- Helpers ---------------
-function getSupabase() {
-  const client =
-    (Supa as any)?.supabase ??
-    (Supa as any)?.default ??
-    (Supa as any);
-  return client && typeof client.from === "function" ? client : null;
+  usarJoinExplicito?: boolean;
 }
 
-function formatKm(v?: number | string | null) {
-  if (v === null || v === undefined || v === "") return "—";
-  const n = typeof v === "string" ? Number(v) : (v as number);
-  return isFinite(n) ? n.toFixed(3).replace(".", ",") : String(v);
-}
-
-function pick(v: any, ...keys: string[]) {
-  for (const k of keys) {
-    const val = v?.[k];
-    if (val !== undefined && val !== null && val !== "") return val;
-  }
-  return null;
-}
-
-/** tenta achar qualquer “código” possível */
-function pickCodigo(item: any): string | null {
-  const direct = pick(item, "codigo", "sigla", "cod", "codigo_elemento");
-  if (direct) return String(direct);
-  // variações por elemento
-  const variants = [
-    "codigo_cilindro",
-    "codigo_placa",
-    "codigo_portico",
-    "codigo_inscricao",
-    "codigo_sh",
-    "codigo_defensa",
-    "codigo_tacha",
-  ];
-  for (const k of variants) {
-    const v = item?.[k];
-    if (v !== undefined && v !== null && v !== "") return String(v);
-  }
-  return null;
-}
-
-function toNumberOrNull(v: any): number | null {
-  if (v === null || v === undefined || v === "") return null;
-  const n = Number(v);
-  return isFinite(n) ? n : null;
-}
-
-function deriveKmFinalIfPossible(item: any, kmInicial: number | null): number | null {
-  if (kmInicial === null) return null;
-  // tentativas de campos de extensão/comprimento
-  const len =
-    toNumberOrNull(pick(item, "extensao", "comprimento", "comprimento_m", "len_m", "length_m", "ext_m"));
-  if (len && len > 0) {
-    // se veio em metros, converte para km
-    const kmAdd = len > 50 ? len / 1000 : len; // heurística simples (se for >50, provavelmente está em metros)
-    return +(kmInicial + kmAdd).toFixed(3);
-  }
-  return null;
-}
-
-function adaptRow(item: any, isPontual: boolean) {
-  const id = pick(item, "id", "uuid", "pk");
-  const kmIni = toNumberOrNull(pick(item, "km_inicial", "kmInicial", "km_ini"));
-  // km_final explícito
-  let kmFim = isPontual
-    ? null
-    : toNumberOrNull(pick(item, "km_final", "kmFinal", "km_fim", "kmFim"));
-  // se não veio do banco e for linear, tenta derivar
-  if (!isPontual && (kmFim === null || kmFim === undefined)) {
-    kmFim = deriveKmFinalIfPossible(item, kmIni);
-  }
-  const codigo = pickCodigo(item);
-  const enviada = Boolean(pick(item, "enviada"));
-
-  return {
-    ...item,
-    id,
-    km_inicial: kmIni,
-    km_final: kmFim,
-    codigo: codigo ?? null,
-    enviada,
-  };
-}
-
-function badgeStyle(color: BadgeColor | undefined): React.CSSProperties {
-  let bg = "#e5e7eb"; // secondary/default
-  let fg = "#111827";
-  if (color === "warning") bg = "#facc15";
-  if (color === "success") bg = "#86efac";
-  if (color === "destructive") { bg = "#fecaca"; fg = "#7f1d1d"; }
-  if (color === "outline") { bg = "transparent"; fg = "#111827"; }
-  return {
-    padding: "2px 8px",
-    borderRadius: 12,
-    background: bg,
-    color: fg,
-    fontSize: 12,
-    fontWeight: 600,
-    border: color === "outline" ? "1px solid #e5e7eb" : "none",
-  };
-}
-
-// --------------- Componente ---------------
-export default function IntervencoesViewerBase({
+export function IntervencoesViewerBase({
   tipoElemento,
   tipoOrigem,
-  tabelaIntervencao,
   titulo,
-  badgeColor = "secondary",
-  badgeLabel = "",
-  columns,
-  onVerIntervencao,
-  getEditUrl,
-  onNovo,
-  getNewUrl,
-}: Props) {
-  const isPontual = useMemo(() => PONTUAIS.includes(tipoElemento), [tipoElemento]);
+  tabelaIntervencao,
+  onEditarElemento,
+  badgeColor = "bg-primary",
+  badgeLabel,
+  usarJoinExplicito = true  // ⚠️ SEGURANÇA: Sempre true por padrão
+}: IntervencoesViewerBaseProps) {
+  const { user } = useAuth();
+  const [elementos, setElementos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [mostrarEnviadas, setMostrarEnviadas] = useState(true);
 
-  // colunas padrão
-  const cols: ColumnKey[] = useMemo(() => {
-    if (columns && columns.length) return columns;
-    return isPontual
-      ? ["km_inicial", "codigo", "enviada"]
-      : ["km_inicial", "km_final", "codigo", "enviada"];
-  }, [columns, isPontual]);
+  // 🔒 PROTEÇÃO DUPLA: Garantir que JOIN explícito sempre seja usado
+  const joinExplicito = usarJoinExplicito ?? true;
 
-  const [rows, setRows] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [errMsg, setErrMsg] = useState<string | null>(null);
-
-  async function fetchRows() {
+  const carregar = async () => {
+    if (!user) return;
+    
     setLoading(true);
-    setErrMsg(null);
     try {
-      const supabase = getSupabase();
-      if (!supabase) throw new Error("Supabase não detectado.");
+    // Hotfix: Removido JOIN de autor até que as FKs sejam criadas no banco
+    // O campo 'autor' não é usado na UI atualmente
+    const selectQuery = '*';
 
       const { data, error } = await supabase
-        .from(tabelaIntervencao)
-        .select("*")
-        .eq("tipo_origem", tipoOrigem)
-        .order("id", { ascending: false });
+        .from(tabelaIntervencao as any)
+        .select(selectQuery)
+        .eq('user_id', user.id)
+        .eq('tipo_origem', tipoOrigem)
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
-
-      const adapted = (data ?? []).map((d: any) => adaptRow(d, isPontual));
-      setRows(adapted);
-    } catch (e: any) {
-      setErrMsg(e.message ?? "Erro ao carregar dados");
-      setRows([]);
+      if (error) {
+        console.error('❌ Erro ao carregar intervenções:', {
+          tabela: tabelaIntervencao,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
+      setElementos(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar elementos:', error);
+      toast.error('Erro ao carregar elementos registrados');
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  const handleEnviarParaCoordenador = async (intervencaoId: string) => {
+    try {
+      // Buscar dados da intervenção
+      const { data: intervencao, error: fetchError } = await supabase
+        .from(tabelaIntervencao as any)
+        .select('id, lote_id, km_inicial, data_intervencao, created_at, motivo, codigo, tipo')
+        .eq('id', intervencaoId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      if (!intervencao) throw new Error('Intervenção não encontrada');
+
+      const loteId = (intervencao as any).lote_id;
+      if (!loteId) {
+        toast.error('Esta intervenção não tem Lote definido. Não é possível enviar.');
+        return;
+      }
+
+      // Atualizar status
+      const { error: updateError } = await supabase
+        .from(tabelaIntervencao as any)
+        .update({
+          pendente_aprovacao_coordenador: false,
+          data_aprovacao_coordenador: new Date().toISOString(),
+          enviado_coordenador: true,
+          enviado_coordenador_em: new Date().toISOString(),
+        })
+        .eq('id', intervencaoId);
+
+      if (updateError) throw updateError;
+
+      // Buscar coordenadores
+      const destinatarios = await findCoordinatorsByLoteId(supabase as any, loteId);
+
+      if (!destinatarios.length) {
+        // Reverter status se ninguém for encontrado
+        await supabase
+          .from(tabelaIntervencao as any)
+          .update({ 
+            pendente_aprovacao_coordenador: true,
+            data_aprovacao_coordenador: null,
+            enviado_coordenador: false,
+            enviado_coordenador_em: null
+          })
+          .eq('id', intervencaoId);
+
+        toast.error(
+          'Nenhum coordenador encontrado para este Lote. Cadastre em "Configurações → Coordenações" ou defina o coordenador no cadastro do Lote.',
+        );
+        return;
+      }
+
+      // Criar identificação da intervenção
+      const intervencaoAny = intervencao as any;
+      const identificacao = intervencaoAny.motivo || intervencaoAny.codigo || intervencaoAny.tipo || 'Intervenção';
+      const kmTexto = intervencaoAny.km_inicial ? `KM ${intervencaoAny.km_inicial.toFixed(3)}` : 'localização não informada';
+      const dataTexto = intervencaoAny.data_intervencao
+        ? new Date(intervencaoAny.data_intervencao).toLocaleDateString("pt-BR")
+        : new Date(intervencaoAny.created_at).toLocaleDateString("pt-BR");
+
+      // Criar notificações
+      const notifications = destinatarios.map((uid: string) => ({
+        user_id: uid,
+        tipo: 'intervencao_pendente',
+        titulo: `Nova ${tipoOrigem === 'manutencao_pre_projeto' ? 'Manutenção' : 'Execução'} - ${tipoElemento}`,
+        mensagem: `${identificacao} (${kmTexto} / ${dataTexto}) aguarda sua validação`,
+        lida: false,
+        elemento_pendente_id: null,
+        nc_id: null,
+      }));
+
+      const { error: notifError } = await supabase.from("notificacoes").insert(notifications);
+      if (notifError) console.error("Erro ao notificar coordenadores:", notifError);
+
+      toast.success(`Intervenção enviada para ${destinatarios.length} coordenador(es)!`);
+      carregar();
+    } catch (error: any) {
+      console.error('Erro ao enviar:', error);
+      toast.error('Erro ao enviar intervenção: ' + error.message);
+    }
+  };
+
+  const handleExcluir = async (intervencaoId: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta intervenção?')) return;
+
+    try {
+      const { error } = await supabase
+        .from(tabelaIntervencao as any)
+        .delete()
+        .eq('id', intervencaoId);
+
+      if (error) throw error;
+
+      toast.success('Intervenção excluída com sucesso!');
+      carregar();
+    } catch (error: any) {
+      console.error('Erro ao excluir:', error);
+      toast.error('Erro ao excluir intervenção: ' + error.message);
+    }
+  };
 
   useEffect(() => {
-    fetchRows();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tabelaIntervencao, tipoOrigem, tipoElemento]);
+    carregar();
+  }, [user, tipoOrigem]);
 
-  function abrirForm(row: any) {
-    if (onVerIntervencao) {
-      onVerIntervencao(row);
-      return;
-    }
-    const g: any = window as any;
-    if (typeof g.__openIntervencao === "function") {
-      try { g.__openIntervencao({ tipoElemento, tipoOrigem, row }); return; } catch {}
-    }
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.set("edit", row?.id ?? "");
-      const finalUrl = getEditUrl?.({ tipoElemento, tipoOrigem, row }) ?? url.toString();
-      window.location.assign(finalUrl); // assign para evitar “piscar e voltar”
-    } catch {
-      window.location.assign(`${window.location.pathname}?edit=${encodeURIComponent(row?.id ?? "")}`);
-    }
+  const renderTipoIdentificacao = (elem: any) => {
+    // Usado apenas como fallback quando 'solucao' não existe
+    if (elem.codigo) return elem.codigo;
+    if (elem.tipo_demarcacao) return elem.tipo_demarcacao;
+    if (elem.tipo) return elem.tipo;
+    if (elem.tipo_tacha) return elem.tipo_tacha;
+    return 'Sem identificação';
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
-  function criarNovo() {
-    if (onNovo) {
-      onNovo({ tipoElemento, tipoOrigem });
-      return;
-    }
-    const g: any = window as any;
-    if (typeof g.__newIntervencao === "function") {
-      try { g.__newIntervencao({ tipoElemento, tipoOrigem }); return; } catch {}
-    }
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.set("new", "1");
-      url.searchParams.set("tipo", String(tipoElemento));
-      url.searchParams.set("origem", String(tipoOrigem));
-      const finalUrl = getNewUrl?.({ tipoElemento, tipoOrigem }) ?? url.toString();
-      window.location.assign(finalUrl);
-    } catch {
-      window.location.assign(`${window.location.pathname}?new=1&tipo=${tipoElemento}&origem=${tipoOrigem}`);
-    }
-  }
-
-  async function excluir(row: any) {
-    if (!row?.id) return;
-    if (!confirm("Confirma excluir esta intervenção?")) return;
-    const supabase = getSupabase();
-    if (!supabase) return alert("Supabase indisponível.");
-    const { error } = await supabase.from(tabelaIntervencao).delete().eq("id", row.id);
-    if (error) return alert("Erro ao excluir: " + error.message);
-    await fetchRows();
-  }
+  const elementosFiltrados = mostrarEnviadas 
+    ? elementos 
+    : elementos.filter((e) => e.pendente_aprovacao_coordenador !== false && !e.enviado_coordenador);
 
   return (
-    <div style={{ padding: 16 }}>
-      <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 8 }}>
-        <h2 style={{ margin: 0 }}>{titulo}</h2>
-        {badgeLabel ? <span style={badgeStyle(badgeColor)}>{badgeLabel}</span> : null}
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          <button onClick={criarNovo} style={btnPrimary} title="Registrar nova intervenção">+ Novo</button>
-          <button onClick={fetchRows} style={btn} title="Atualizar">↻</button>
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              {titulo}
+              {badgeLabel && (
+                <Badge className={badgeColor}>{badgeLabel}</Badge>
+              )}
+            </CardTitle>
+            <CardDescription>
+              {elementosFiltrados.length} de {elementos.length} registro(s)
+            </CardDescription>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="mostrar-enviadas"
+              checked={mostrarEnviadas}
+              onCheckedChange={(checked) => setMostrarEnviadas(checked as boolean)}
+            />
+            <Label htmlFor="mostrar-enviadas" className="cursor-pointer text-sm font-normal">
+              Mostrar enviadas
+            </Label>
+          </div>
         </div>
-      </div>
+      </CardHeader>
+      <CardContent>
+        {elementos.length === 0 ? (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Nenhum elemento registrado ainda para este tipo.
+            </AlertDescription>
+          </Alert>
+        ) : elementosFiltrados.length === 0 ? (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              {mostrarEnviadas ? "Nenhum elemento registrado" : "Nenhum elemento não enviado"}
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>KM Inicial</TableHead>
+                  <TableHead>KM Final</TableHead>
+                  <TableHead>Solução</TableHead>
+                  <TableHead>Motivo</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {elementosFiltrados.map((elem) => (
+                  <TableRow key={elem.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs">📍</span>
+                        <span className="font-mono">{elem.km_inicial?.toFixed(3) || '-'}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {elem.km_final ? (
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs">📍</span>
+                          <span className="font-mono">{elem.km_final.toFixed(3)}</span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {elem.solucao ? (
+                        <Badge variant={tipoOrigem === 'execucao' ? 'default' : 'secondary'}>
+                          {elem.solucao}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline">
+                          {renderTipoIdentificacao(elem)}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {elem.motivo && elem.motivo !== '-' ? (
+                        <span className="text-sm">{elem.motivo}</span>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {elem.data_intervencao 
+                        ? format(new Date(elem.data_intervencao), 'dd/MM/yyyy') 
+                        : format(new Date(elem.created_at), 'dd/MM/yyyy')}
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={
+                          elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
+                            ? 'default'
+                            : 'outline'
+                        }
+                      >
+                        {elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
+                          ? 'Enviada'
+                          : 'Rascunho'}
+                      </Badge>
+                      {elem.fotos_urls?.length > 0 && (
+                        <Badge variant="outline" className="ml-2">
+                          📸 {elem.fotos_urls.length}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEnviarParaCoordenador(elem.id)}
+                                disabled={elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false}
+                                title={
+                                  elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
+                                    ? "Intervenção já foi enviada"
+                                    : "Enviar para Coordenador"
+                                }
+                              >
+                                <Send className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Enviar para Coordenador</TooltipContent>
+                          </Tooltip>
+                          
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => onEditarElemento?.(elem)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Visualizar detalhes</TooltipContent>
+                          </Tooltip>
+                          
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleExcluir(elem.id)}
+                                disabled={elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false}
+                                title={
+                                  elem.enviado_coordenador || elem.pendente_aprovacao_coordenador === false
+                                    ? "Não pode excluir: intervenção já enviada"
+                                    : "Excluir"
+                                }
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Excluir</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
-      {errMsg && <div style={warn}>{errMsg}</div>}
-
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead style={{ background: "#f9fafb" }}>
-          <tr>
-            {cols.includes("km_inicial") && <th style={th}>KM Inicial</th>}
-            {!isPontual && cols.includes("km_final") && <th style={th}>KM Final</th>}
-            {cols.includes("codigo") && <th style={th}>Código</th>}
-            {cols.includes("enviada") && <th style={th}>Enviada?</th>}
-            <th style={th} />
-          </tr>
-        </thead>
-        <tbody>
-          {loading && (
-            <tr>
-              <td colSpan={cols.length + 1} style={tdCenter}>Carregando...</td>
-            </tr>
-          )}
-          {!loading && rows.length === 0 && (
-            <tr>
-              <td colSpan={cols.length + 1} style={tdCenter}>Nenhum registro.</td>
-            </tr>
-          )}
-          {!loading && rows.map((r) => (
-            <tr key={r.id ?? Math.random()}>
-              {cols.includes("km_inicial") && <td style={td}>{formatKm(r.km_inicial)}</td>}
-              {!isPontual && cols.includes("km_final") && <td style={td}>{formatKm(r.km_final)}</td>}
-              {cols.includes("codigo") && <td style={td}>{r.codigo ?? "—"}</td>}
-              {cols.includes("enviada") && <td style={td}>{r.enviada ? "Sim" : "Não"}</td>}
-              <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
-                <button onClick={() => abrirForm(r)} style={btn} title="Abrir/Editar">👁️</button>
-                <button onClick={() => excluir(r)} style={{ ...btn, color: "#991b1b" }} title="Excluir">🗑️</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        {/* Botão para Adicionar Novo */}
+        <Button 
+          variant="default"
+          className="w-full mt-4"
+          onClick={() => onEditarElemento?.(null)}
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Registrar Novo
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
-
-// ---------------- estilos mínimos ----------------
-const th: React.CSSProperties = {
-  textAlign: "left",
-  fontWeight: 600,
-  padding: "8px 10px",
-  borderBottom: "1px solid #e5e7eb",
-  fontSize: 13,
-};
-const td: React.CSSProperties = {
-  padding: "8px 10px",
-  borderBottom: "1px solid #f3f4f6",
-  fontSize: 13,
-};
-const tdCenter: React.CSSProperties = { ...td, textAlign: "center" };
-const btn: React.CSSProperties = {
-  cursor: "pointer",
-  background: "none",
-  border: "1px solid #d1d5db",
-  borderRadius: 6,
-  padding: "6px 10px",
-  fontSize: 14,
-};
-const btnPrimary: React.CSSProperties = {
-  ...btn,
-  background: "#2563eb",
-  color: "#fff",
-  borderColor: "#2563eb",
-};
-const warn: React.CSSProperties = {
-  background: "#FEF3C7",
-  border: "1px solid #F59E0B",
-  borderRadius: 6,
-  padding: 8,
-  color: "#7C2D12",
-  margin: "0 0 10px",
-};

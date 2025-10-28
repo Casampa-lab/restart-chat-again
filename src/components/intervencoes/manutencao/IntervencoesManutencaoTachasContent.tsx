@@ -1,17 +1,20 @@
-import IntervencoesViewerBase from "../IntervencoesViewerBase";
+import { IntervencoesViewerBase } from '../IntervencoesViewerBase';
 
-export default function IntervencoesManutencaoTachasContent(
-  props: Partial<React.ComponentProps<typeof IntervencoesViewerBase>>,
-) {
+interface Props {
+  onEditarElemento?: (elemento: any) => void;
+}
+
+export default function IntervencoesManutencaoTachasContent({ onEditarElemento }: Props) {
   return (
     <IntervencoesViewerBase
       tipoElemento="tachas"
       tipoOrigem="manutencao_pre_projeto"
+      titulo="🟠 Minhas Manutenções IN-3 - Tachas"
       tabelaIntervencao="ficha_tachas_intervencoes"
-      titulo="Minhas Manutenções IN-3 – Tachas"
-      badgeColor="warning"
+      onEditarElemento={onEditarElemento}
+      badgeColor="bg-orange-500"
       badgeLabel="MANUTENÇÃO"
-      {...props}
+      usarJoinExplicito={true}
     />
   );
 }

@@ -1,13 +1,20 @@
-import IntervencoesViewerBase from "../IntervencoesViewerBase";
+import { IntervencoesViewerBase } from '../IntervencoesViewerBase';
 
-export default function IntervencoesManutencaoCilindrosContent() {
+interface Props {
+  onEditarElemento?: (elemento: any) => void;
+}
+
+export default function IntervencoesManutencaoCilindrosContent({ onEditarElemento }: Props) {
   return (
     <IntervencoesViewerBase
       tipoElemento="cilindros"
       tipoOrigem="manutencao_pre_projeto"
+      titulo="🟠 Minhas Manutenções IN-3 - Cilindros"
       tabelaIntervencao="ficha_cilindros_intervencoes"
-      titulo="Minhas Manutenções – Cilindros (IN-3)"
-      columns={["km_inicial", "km_final", "codigo", "enviada"]}
+      onEditarElemento={onEditarElemento}
+      badgeColor="bg-orange-500"
+      badgeLabel="MANUTENÇÃO"
+      usarJoinExplicito={true}
     />
   );
 }

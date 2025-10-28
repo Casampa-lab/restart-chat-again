@@ -1,17 +1,20 @@
-import IntervencoesViewerBase from "../IntervencoesViewerBase";
+import { IntervencoesViewerBase } from '../IntervencoesViewerBase';
 
-export default function IntervencoesExecucaoDefensasContent(
-  props: Partial<React.ComponentProps<typeof IntervencoesViewerBase>>,
-) {
+interface Props {
+  onEditarElemento?: (elemento: any) => void;
+}
+
+export default function IntervencoesExecucaoDefensasContent({ onEditarElemento }: Props) {
   return (
     <IntervencoesViewerBase
       tipoElemento="defensas"
       tipoOrigem="execucao"
+      titulo="🔵 Minhas Intervenções - Defensas"
       tabelaIntervencao="defensas_intervencoes"
-      titulo="Minhas Intervenções – Defensas (Execução)"
-      badgeColor="secondary"
+      onEditarElemento={onEditarElemento}
+      badgeColor="bg-blue-500"
       badgeLabel="EXECUÇÃO"
-      {...props}
+      usarJoinExplicito={true}
     />
   );
 }

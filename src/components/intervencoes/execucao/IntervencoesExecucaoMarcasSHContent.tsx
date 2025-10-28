@@ -1,16 +1,20 @@
-import IntervencoesViewerBase from "../IntervencoesViewerBase";
-export default function IntervencoesExecucaoMarcasSHContent(
-  props: Partial<React.ComponentProps<typeof IntervencoesViewerBase>>,
-) {
+import { IntervencoesViewerBase } from '../IntervencoesViewerBase';
+
+interface Props {
+  onEditarElemento?: (elemento: any) => void;
+}
+
+export default function IntervencoesExecucaoMarcasSHContent({ onEditarElemento }: Props) {
   return (
     <IntervencoesViewerBase
-      tipoElemento="sh"
+      tipoElemento="marcas_longitudinais"
       tipoOrigem="execucao"
+      titulo="🔵 Minhas Intervenções - Marcas Longitudinais SH"
       tabelaIntervencao="ficha_marcas_longitudinais_intervencoes"
-      titulo="Minhas Intervenções – Marcas SH (Execução)"
-      badgeColor="secondary"
+      onEditarElemento={onEditarElemento}
+      badgeColor="bg-blue-500"
       badgeLabel="EXECUÇÃO"
-      {...props}
+      usarJoinExplicito={true}
     />
   );
 }
