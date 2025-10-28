@@ -35,7 +35,6 @@ interface IntervencoesTachaFormProps {
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
-  solucao: z.string().default("-"),
   motivo: z.string().default("-"),
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   km_final: z.string().min(1, "KM final é obrigatório"),
@@ -74,7 +73,6 @@ export function IntervencoesTachaForm({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
-      solucao: "-",
       motivo: "-",
       km_inicial: "",
       km_final: "",
@@ -97,7 +95,6 @@ export function IntervencoesTachaForm({
     if (tachaSelecionada && modo === 'normal') {
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
-        solucao: "-",
         motivo: "-",
         km_inicial: tachaSelecionada.km_inicial?.toString() || "",
         km_final: tachaSelecionada.km_final?.toString() || "",
@@ -139,10 +136,23 @@ export function IntervencoesTachaForm({
     }
 
     try {
+      // Obter usuário autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('Você precisa estar autenticado para registrar uma intervenção');
+        return;
+      }
+
+      // Validar lote e rodovia
+      if (!loteId || !rodoviaId) {
+        toast.error('Lote e rodovia são obrigatórios');
+        return;
+      }
+
       const { error } = await supabase.from("ficha_tachas_intervencoes").insert({
         ficha_tachas_id: tachaSelecionada?.id || null,
         data_intervencao: values.data_intervencao,
-        solucao: values.solucao,
         motivo: values.motivo,
         km_inicial: values.km_inicial ? parseFloat(values.km_inicial) : null,
         km_final: values.km_final ? parseFloat(values.km_final) : null,
@@ -158,6 +168,9 @@ export function IntervencoesTachaForm({
         longitude_inicial: values.longitude_inicial ? parseFloat(values.longitude_inicial) : null,
         observacao: values.observacao || null,
         tipo_origem: tipoOrigem,
+        user_id: user.id,
+        lote_id: loteId,
+        rodovia_id: rodoviaId
       });
 
       if (error) throw error;

@@ -63,7 +63,6 @@ const TIPOS_INSCRICAO = [
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
-  solucao: z.string().default("-"),
   motivo: z.string().default("-"),
   km_inicial: z.string().min(1, "KM inicial é obrigatório"),
   snv: z.string().optional(),
@@ -102,7 +101,6 @@ export function IntervencoesInscricoesForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       data_intervencao: new Date().toISOString().split('T')[0],
-      solucao: "-",
       motivo: "-",
     km_inicial: "",
       sigla: "",
@@ -124,7 +122,6 @@ export function IntervencoesInscricoesForm({
     if (inscricaoSelecionada && modo === 'normal') {
       form.reset({
         data_intervencao: new Date().toISOString().split('T')[0],
-        solucao: "-",
         motivo: "-",
         sigla: (inscricaoSelecionada as any).sigla || "",
         tipo_inscricao: (inscricaoSelecionada as any).tipo_inscricao || "",
@@ -163,12 +160,25 @@ export function IntervencoesInscricoesForm({
     }
 
     try {
+      // Obter usuário autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('Você precisa estar autenticado para registrar uma intervenção');
+        return;
+      }
+
+      // Validar lote e rodovia
+      if (!loteId || !rodoviaId) {
+        toast.error('Lote e rodovia são obrigatórios');
+        return;
+      }
+
       const { error } = await supabase
         .from("ficha_inscricoes_intervencoes")
         .insert({
           ficha_inscricoes_id: inscricaoSelecionada.id,
           data_intervencao: data.data_intervencao,
-          solucao: data.solucao,
           motivo: data.motivo,
         km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
           snv: data.snv || null,
@@ -184,6 +194,9 @@ export function IntervencoesInscricoesForm({
         longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
           observacao: data.observacao || null,
           tipo_origem: tipoOrigem,
+          user_id: user.id,
+          lote_id: loteId,
+          rodovia_id: rodoviaId
         });
 
       if (error) throw error;
