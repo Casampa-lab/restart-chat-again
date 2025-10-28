@@ -1,20 +1,17 @@
-import { IntervencoesViewerBase } from '../IntervencoesViewerBase';
+import IntervencoesViewerBase from "../IntervencoesViewerBase";
 
-interface Props {
-  onEditarElemento?: (elemento: any) => void;
-}
-
-export default function IntervencoesManutencaoDefensasContent({ onEditarElemento }: Props) {
+export default function IntervencoesManutencaoDefensasContent(
+  props: Partial<React.ComponentProps<typeof IntervencoesViewerBase>>,
+) {
   return (
     <IntervencoesViewerBase
       tipoElemento="defensas"
       tipoOrigem="manutencao_pre_projeto"
-      titulo="🟠 Minhas Manutenções IN-3 - Defensas"
       tabelaIntervencao="defensas_intervencoes"
-      onEditarElemento={onEditarElemento}
-      badgeColor="bg-orange-500"
+      titulo="Minhas Manutenções IN-3 – Defensas"
+      badgeColor="warning"
       badgeLabel="MANUTENÇÃO"
-      usarJoinExplicito={true}
+      {...props}
     />
   );
 }
