@@ -22,22 +22,23 @@ type Props = {
   tabelaIntervencao: string;
   titulo: string;
 
-  /** Mantidos para compatibilidade com seus viewers */
   badgeColor?: BadgeColor;
   badgeLabel?: string;
 
-  /** Quais colunas exibir (ordem respeitada).
-   *  Default:
-   *   - pontuais: ["km_inicial","codigo","enviada"]
-   *   - lineares: ["km_inicial","km_final","codigo","enviada"]
-   */
+  /** Colunas que você quer ver e na ordem que preferir */
   columns?: ColumnKey[];
 
-  /** Callback para abrir/editar (opcional) */
+  /** Abre/edita uma intervenção existente (opcional) */
   onVerIntervencao?: (row: any) => void;
 
   /** Constrói URL de edição (opcional) */
   getEditUrl?: (ctx: { tipoElemento: string; tipoOrigem: string; row: any }) => string;
+
+  /** Cria uma intervenção nova (opcional) */
+  onNovo?: (ctx: { tipoElemento: string; tipoOrigem: string }) => void;
+
+  /** Constrói URL de criação (opcional) */
+  getNewUrl?: (ctx: { tipoElemento: string; tipoOrigem: string }) => string;
 };
 
 // --------------- Constantes ---------------
@@ -61,24 +62,70 @@ function formatKm(v?: number | string | null) {
 function pick(v: any, ...keys: string[]) {
   for (const k of keys) {
     const val = v?.[k];
-    if (val !== undefined && val !== null) return val;
+    if (val !== undefined && val !== null && val !== "") return val;
+  }
+  return null;
+}
+
+/** tenta achar qualquer “código” possível */
+function pickCodigo(item: any): string | null {
+  const direct = pick(item, "codigo", "sigla", "cod", "codigo_elemento");
+  if (direct) return String(direct);
+  // variações por elemento
+  const variants = [
+    "codigo_cilindro",
+    "codigo_placa",
+    "codigo_portico",
+    "codigo_inscricao",
+    "codigo_sh",
+    "codigo_defensa",
+    "codigo_tacha",
+  ];
+  for (const k of variants) {
+    const v = item?.[k];
+    if (v !== undefined && v !== null && v !== "") return String(v);
+  }
+  return null;
+}
+
+function toNumberOrNull(v: any): number | null {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return isFinite(n) ? n : null;
+}
+
+function deriveKmFinalIfPossible(item: any, kmInicial: number | null): number | null {
+  if (kmInicial === null) return null;
+  // tentativas de campos de extensão/comprimento
+  const len =
+    toNumberOrNull(pick(item, "extensao", "comprimento", "comprimento_m", "len_m", "length_m", "ext_m"));
+  if (len && len > 0) {
+    // se veio em metros, converte para km
+    const kmAdd = len > 50 ? len / 1000 : len; // heurística simples (se for >50, provavelmente está em metros)
+    return +(kmInicial + kmAdd).toFixed(3);
   }
   return null;
 }
 
 function adaptRow(item: any, isPontual: boolean) {
   const id = pick(item, "id", "uuid", "pk");
-  const kmIni = Number(pick(item, "km_inicial", "kmInicial", "km_ini"));
-  const kmFim = isPontual
+  const kmIni = toNumberOrNull(pick(item, "km_inicial", "kmInicial", "km_ini"));
+  // km_final explícito
+  let kmFim = isPontual
     ? null
-    : Number(pick(item, "km_final", "kmFinal", "km_fim", "kmFim"));
-  const codigo = pick(item, "codigo", "sigla", "cod");
+    : toNumberOrNull(pick(item, "km_final", "kmFinal", "km_fim", "kmFim"));
+  // se não veio do banco e for linear, tenta derivar
+  if (!isPontual && (kmFim === null || kmFim === undefined)) {
+    kmFim = deriveKmFinalIfPossible(item, kmIni);
+  }
+  const codigo = pickCodigo(item);
   const enviada = Boolean(pick(item, "enviada"));
+
   return {
     ...item,
     id,
-    km_inicial: isNaN(kmIni) ? null : kmIni,
-    km_final: kmFim !== null && !isNaN(kmFim) ? kmFim : null,
+    km_inicial: kmIni,
+    km_final: kmFim,
     codigo: codigo ?? null,
     enviada,
   };
@@ -113,6 +160,8 @@ export default function IntervencoesViewerBase({
   columns,
   onVerIntervencao,
   getEditUrl,
+  onNovo,
+  getNewUrl,
 }: Props) {
   const isPontual = useMemo(() => PONTUAIS.includes(tipoElemento), [tipoElemento]);
 
@@ -163,18 +212,38 @@ export default function IntervencoesViewerBase({
       onVerIntervencao(row);
       return;
     }
-    // função global (se existir)
     const g: any = window as any;
     if (typeof g.__openIntervencao === "function") {
       try { g.__openIntervencao({ tipoElemento, tipoOrigem, row }); return; } catch {}
     }
-    // fallback por URL (?edit=)
     try {
       const url = new URL(window.location.href);
       url.searchParams.set("edit", row?.id ?? "");
-      window.location.href = getEditUrl?.({ tipoElemento, tipoOrigem, row }) ?? url.toString();
+      const finalUrl = getEditUrl?.({ tipoElemento, tipoOrigem, row }) ?? url.toString();
+      window.location.assign(finalUrl); // assign para evitar “piscar e voltar”
     } catch {
-      window.location.href = `${window.location.pathname}?edit=${encodeURIComponent(row?.id ?? "")}`;
+      window.location.assign(`${window.location.pathname}?edit=${encodeURIComponent(row?.id ?? "")}`);
+    }
+  }
+
+  function criarNovo() {
+    if (onNovo) {
+      onNovo({ tipoElemento, tipoOrigem });
+      return;
+    }
+    const g: any = window as any;
+    if (typeof g.__newIntervencao === "function") {
+      try { g.__newIntervencao({ tipoElemento, tipoOrigem }); return; } catch {}
+    }
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("new", "1");
+      url.searchParams.set("tipo", String(tipoElemento));
+      url.searchParams.set("origem", String(tipoOrigem));
+      const finalUrl = getNewUrl?.({ tipoElemento, tipoOrigem }) ?? url.toString();
+      window.location.assign(finalUrl);
+    } catch {
+      window.location.assign(`${window.location.pathname}?new=1&tipo=${tipoElemento}&origem=${tipoOrigem}`);
     }
   }
 
@@ -193,11 +262,13 @@ export default function IntervencoesViewerBase({
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 8 }}>
         <h2 style={{ margin: 0 }}>{titulo}</h2>
         {badgeLabel ? <span style={badgeStyle(badgeColor)}>{badgeLabel}</span> : null}
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <button onClick={criarNovo} style={btnPrimary} title="Registrar nova intervenção">+ Novo</button>
+          <button onClick={fetchRows} style={btn} title="Atualizar">↻</button>
+        </div>
       </div>
 
-      {errMsg && (
-        <div style={warn}>{errMsg}</div>
-      )}
+      {errMsg && <div style={warn}>{errMsg}</div>}
 
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead style={{ background: "#f9fafb" }}>
@@ -255,9 +326,16 @@ const tdCenter: React.CSSProperties = { ...td, textAlign: "center" };
 const btn: React.CSSProperties = {
   cursor: "pointer",
   background: "none",
-  border: "none",
-  padding: "4px 6px",
-  fontSize: 16,
+  border: "1px solid #d1d5db",
+  borderRadius: 6,
+  padding: "6px 10px",
+  fontSize: 14,
+};
+const btnPrimary: React.CSSProperties = {
+  ...btn,
+  background: "#2563eb",
+  color: "#fff",
+  borderColor: "#2563eb",
 };
 const warn: React.CSSProperties = {
   background: "#FEF3C7",
