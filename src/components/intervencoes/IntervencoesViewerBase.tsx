@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import * as Supa from "../../integrations/supabase/client";
 
+// ---------------- Tipos ----------------
 type TipoElemento =
   | "placas"
   | "inscricoes"
@@ -11,8 +12,9 @@ type TipoElemento =
   | "cilindros";
 
 type TipoOrigem = "execucao" | "manutencao_pre_projeto";
-
 type ColumnKey = "km_inicial" | "km_final" | "codigo" | "enviada";
+
+type BadgeColor = "secondary" | "destructive" | "outline" | "success" | "warning" | "default";
 
 type Props = {
   tipoElemento: TipoElemento;
@@ -20,22 +22,28 @@ type Props = {
   tabelaIntervencao: string;
   titulo: string;
 
-  /** Quais colunas exibir (ordem respeitada). Se nada for passado:
-   *  - pontuais: ["km_inicial","codigo","enviada"]
-   *  - lineares: ["km_inicial","km_final","codigo","enviada"]
+  /** Mantidos para compatibilidade com seus viewers */
+  badgeColor?: BadgeColor;
+  badgeLabel?: string;
+
+  /** Quais colunas exibir (ordem respeitada).
+   *  Default:
+   *   - pontuais: ["km_inicial","codigo","enviada"]
+   *   - lineares: ["km_inicial","km_final","codigo","enviada"]
    */
   columns?: ColumnKey[];
 
-  /** Callback para abrir/editar intervenção (opcional) */
+  /** Callback para abrir/editar (opcional) */
   onVerIntervencao?: (row: any) => void;
 
   /** Constrói URL de edição (opcional) */
   getEditUrl?: (ctx: { tipoElemento: string; tipoOrigem: string; row: any }) => string;
 };
 
+// --------------- Constantes ---------------
 const PONTUAIS: TipoElemento[] = ["placas", "inscricoes", "porticos"];
 
-// ---------- helpers ----------
+// --------------- Helpers ---------------
 function getSupabase() {
   const client =
     (Supa as any)?.supabase ??
@@ -50,7 +58,7 @@ function formatKm(v?: number | string | null) {
   return isFinite(n) ? n.toFixed(3).replace(".", ",") : String(v);
 }
 
-function norm(v: any, ...keys: string[]) {
+function pick(v: any, ...keys: string[]) {
   for (const k of keys) {
     const val = v?.[k];
     if (val !== undefined && val !== null) return val;
@@ -59,39 +67,56 @@ function norm(v: any, ...keys: string[]) {
 }
 
 function adaptRow(item: any, isPontual: boolean) {
-  const id = norm(item, "id", "uuid", "pk");
-  const km_inicial = Number(norm(item, "km_inicial", "kmInicial", "km_ini"));
-  const km_final = isPontual
+  const id = pick(item, "id", "uuid", "pk");
+  const kmIni = Number(pick(item, "km_inicial", "kmInicial", "km_ini"));
+  const kmFim = isPontual
     ? null
-    : Number(
-        norm(item, "km_final", "kmFinal", "km_fim", "kmFim")
-      );
-  const codigo = norm(item, "codigo", "sigla", "cod");
-  const enviada = Boolean(norm(item, "enviada"));
-
+    : Number(pick(item, "km_final", "kmFinal", "km_fim", "kmFim"));
+  const codigo = pick(item, "codigo", "sigla", "cod");
+  const enviada = Boolean(pick(item, "enviada"));
   return {
     ...item,
     id,
-    km_inicial: isNaN(km_inicial) ? null : km_inicial,
-    km_final: km_final !== null && !isNaN(km_final) ? km_final : null,
+    km_inicial: isNaN(kmIni) ? null : kmIni,
+    km_final: kmFim !== null && !isNaN(kmFim) ? kmFim : null,
     codigo: codigo ?? null,
     enviada,
   };
 }
 
-// ---------- componente ----------
+function badgeStyle(color: BadgeColor | undefined): React.CSSProperties {
+  let bg = "#e5e7eb"; // secondary/default
+  let fg = "#111827";
+  if (color === "warning") bg = "#facc15";
+  if (color === "success") bg = "#86efac";
+  if (color === "destructive") { bg = "#fecaca"; fg = "#7f1d1d"; }
+  if (color === "outline") { bg = "transparent"; fg = "#111827"; }
+  return {
+    padding: "2px 8px",
+    borderRadius: 12,
+    background: bg,
+    color: fg,
+    fontSize: 12,
+    fontWeight: 600,
+    border: color === "outline" ? "1px solid #e5e7eb" : "none",
+  };
+}
+
+// --------------- Componente ---------------
 export default function IntervencoesViewerBase({
   tipoElemento,
   tipoOrigem,
   tabelaIntervencao,
   titulo,
+  badgeColor = "secondary",
+  badgeLabel = "",
   columns,
   onVerIntervencao,
   getEditUrl,
 }: Props) {
   const isPontual = useMemo(() => PONTUAIS.includes(tipoElemento), [tipoElemento]);
 
-  // default columns
+  // colunas padrão
   const cols: ColumnKey[] = useMemo(() => {
     if (columns && columns.length) return columns;
     return isPontual
@@ -134,27 +159,21 @@ export default function IntervencoesViewerBase({
   }, [tabelaIntervencao, tipoOrigem, tipoElemento]);
 
   function abrirForm(row: any) {
-    // 1) Se o viewer pai passou um callback, usamos
     if (onVerIntervencao) {
       onVerIntervencao(row);
       return;
     }
-    // 2) Se existir uma função global definida em alguma página/rota
+    // função global (se existir)
     const g: any = window as any;
     if (typeof g.__openIntervencao === "function") {
-      try {
-        g.__openIntervencao({ tipoElemento, tipoOrigem, row });
-        return;
-      } catch {}
+      try { g.__openIntervencao({ tipoElemento, tipoOrigem, row }); return; } catch {}
     }
-    // 3) Fallback: navegamos adicionando ?edit=<id> à URL atual
+    // fallback por URL (?edit=)
     try {
       const url = new URL(window.location.href);
       url.searchParams.set("edit", row?.id ?? "");
-      // (se sua rota depende de outros params, mantemos todos)
-      window.location.href = url.toString();
+      window.location.href = getEditUrl?.({ tipoElemento, tipoOrigem, row }) ?? url.toString();
     } catch {
-      // último recurso
       window.location.href = `${window.location.pathname}?edit=${encodeURIComponent(row?.id ?? "")}`;
     }
   }
@@ -171,20 +190,20 @@ export default function IntervencoesViewerBase({
 
   return (
     <div style={{ padding: 16 }}>
-      <h2 style={{ marginBottom: 8 }}>{titulo}</h2>
+      <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 8 }}>
+        <h2 style={{ margin: 0 }}>{titulo}</h2>
+        {badgeLabel ? <span style={badgeStyle(badgeColor)}>{badgeLabel}</span> : null}
+      </div>
 
       {errMsg && (
-        <div style={warn}>
-          {errMsg}
-        </div>
+        <div style={warn}>{errMsg}</div>
       )}
 
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead style={{ background: "#f9fafb" }}>
           <tr>
             {cols.includes("km_inicial") && <th style={th}>KM Inicial</th>}
-            {/* km_final só faz sentido para NÃO-pontuais */}
-            {(!isPontual && cols.includes("km_final")) && <th style={th}>KM Final</th>}
+            {!isPontual && cols.includes("km_final") && <th style={th}>KM Final</th>}
             {cols.includes("codigo") && <th style={th}>Código</th>}
             {cols.includes("enviada") && <th style={th}>Enviada?</th>}
             <th style={th} />
@@ -204,7 +223,7 @@ export default function IntervencoesViewerBase({
           {!loading && rows.map((r) => (
             <tr key={r.id ?? Math.random()}>
               {cols.includes("km_inicial") && <td style={td}>{formatKm(r.km_inicial)}</td>}
-              {(!isPontual && cols.includes("km_final")) && <td style={td}>{formatKm(r.km_final)}</td>}
+              {!isPontual && cols.includes("km_final") && <td style={td}>{formatKm(r.km_final)}</td>}
               {cols.includes("codigo") && <td style={td}>{r.codigo ?? "—"}</td>}
               {cols.includes("enviada") && <td style={td}>{r.enviada ? "Sim" : "Não"}</td>}
               <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
@@ -219,7 +238,7 @@ export default function IntervencoesViewerBase({
   );
 }
 
-// ---------- estilos mínimos ----------
+// ---------------- estilos mínimos ----------------
 const th: React.CSSProperties = {
   textAlign: "left",
   fontWeight: 600,
