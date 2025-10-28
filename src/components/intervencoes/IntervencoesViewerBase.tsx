@@ -1,15 +1,8 @@
 // src/components/intervencoes/IntervencoesViewerBase.tsx
 import React, { useEffect, useMemo, useState } from "react";
 
-/**
- * TODO (se desejar usar seu client tipado):
- * Se você já tem um cliente do Supabase via import (ex.: src/lib/supabaseClient),
- * pode importar aqui com caminho RELATIVO ao arquivo:
- *
- *   import { supabase as supabaseClient } from "../../lib/supabaseClient";
- *
- * e lá embaixo, no getSupabase(), retornar essa instância em vez de window.supabase.
- */
+// Importa o client do seu projeto (caminho que você informou)
+import * as Supa from "../../integrations/supabase/client";
 
 // ---------------------- Tipos & Constantes ----------------------
 type TipoElemento = "placas" | "inscricoes" | "porticos" | "sh" | "defensas" | "tachas" | "cilindros";
@@ -30,32 +23,21 @@ export type IntervencoesViewerBaseProps = {
   onVerIntervencao?: (row: any) => void;
   onAfterRefresh?: (rows: any[]) => void;
 
-  // Opcional: se quiser usar seu próprio fetcher (ignora supabase do window)
+  // Opcional: se quiser usar seu próprio fetcher (ignora supabase importado)
   loadData?: (args: { tabela: string; tipoOrigem: string }) => Promise<any[]>;
 };
 
 const PONTUAIS: readonly TipoElemento[] = ["placas", "inscricoes", "porticos"] as const;
 
-// Campos estruturais que serão bloqueados em manutenção SE houver vínculo manual a um item de inventário.
-// (a lógica de bloqueio é tratada nos Forms; aqui é só visualização/listagem)
-const CAMPOS_ESTRUTURAIS: Record<string, readonly string[]> = {
-  placas: ["rodovia", "km_inicial", "codigo"],
-  inscricoes: ["rodovia", "km_inicial", "codigo"],
-  porticos: ["rodovia", "km_inicial", "codigo"],
-  sh: ["rodovia", "km_inicial", "km_final", "codigo"],
-  defensas: ["rodovia", "km_inicial", "km_final", "codigo"],
-  tachas: ["rodovia", "km_inicial", "km_final", "codigo"],
-  cilindros: ["rodovia", "km_inicial", "km_final", "codigo"],
-};
-
 // ---------------------- Utilidades ----------------------
+/** Tenta suportar export default ou export { supabase } */
 function getSupabase(): any | null {
-  // Se você importou um client acima, retorne-o aqui.
-  // return supabaseClient;
-  // Fallback: tentar usar window.supabase (em alguns ambientes como Lovable isso funciona)
-  if (typeof window !== "undefined" && (window as any).supabase) {
-    return (window as any).supabase;
-  }
+  const client =
+    (Supa as any)?.supabase ?? // export nomeado
+    (Supa as any)?.default ?? // export default
+    (Supa as any);
+  // valida minimamente se é mesmo o client (precisa ter .from)
+  if (client && typeof client.from === "function") return client;
   return null;
 }
 
@@ -137,10 +119,7 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
       } else {
         const supabase = getSupabase();
         if (!supabase) {
-          // Sem client: apenas não dá erro de compilação; mostra aviso.
-          setErrMsg(
-            "Supabase não detectado automaticamente. Conecte seu client (ver TODO no topo do arquivo) ou injete a prop `loadData`.",
-          );
+          setErrMsg("Supabase não detectado. Confira o import de src/integrations/supabase/client.ts.");
           setRows([]);
           setLoading(false);
           return;
@@ -167,7 +146,6 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
   }
 
   useEffect(() => {
-    // carrega sempre que muda a origem ou a tabela
     fetchRows();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabelaIntervencao, tipoOrigem, tipoElemento]);
@@ -233,7 +211,7 @@ export default function IntervencoesViewerBase(props: IntervencoesViewerBaseProp
           </span>
         ) : null}
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          <select value={filtro} onChange={(e) => setFiltro(e.target.value as Filtro)} style={{ padding: 6 }}>
+          <select value={filtro} onChange={(e) => setFiltro(e.target.value as any)} style={{ padding: 6 }}>
             <option value="todas">Todas</option>
             <option value="enviadas">Enviadas</option>
             <option value="nao_enviadas">Não enviadas</option>
