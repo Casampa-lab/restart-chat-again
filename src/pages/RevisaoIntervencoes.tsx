@@ -262,7 +262,7 @@ export default function RevisaoIntervencoes() {
                     <TableHead>Tipo</TableHead>
                     <TableHead>Origem</TableHead>
                     <TableHead>Motivo</TableHead>
-                    <TableHead>KM</TableHead>
+                    <TableHead>Tipo da Placa</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -289,7 +289,9 @@ export default function RevisaoIntervencoes() {
                         )}
                       </TableCell>
                       <TableCell>{int.motivo}</TableCell>
-                      <TableCell>{int.km.toFixed(3)}</TableCell>
+                      <TableCell>
+                        {int.detalhes?.tipo || <span className="text-muted-foreground">-</span>}
+                      </TableCell>
                       <TableCell>
                         <Button
                           size="sm"

@@ -98,6 +98,7 @@ interface IntervencoesSVFormProps {
   snvIdentificado?: string | null;
   snvConfianca?: 'alta' | 'media' | 'baixa' | null;
   snvDistancia?: number | null;
+  mostrarCamposEstruturais?: boolean;
 }
 
 export function IntervencoesSVForm({
@@ -111,7 +112,8 @@ export function IntervencoesSVForm({
   hideSubmitButton = false,
   snvIdentificado,
   snvConfianca,
-  snvDistancia
+  snvDistancia,
+  mostrarCamposEstruturais = true,
 }: IntervencoesSVFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [codigosFiltrados, setCodigosFiltrados] = useState<readonly {codigo: string, nome: string}[]>([]);
@@ -452,7 +454,8 @@ export function IntervencoesSVForm({
             )}
           />
 
-          {!placaSelecionada && (
+          {/* KM - exibir apenas quando não tem placa selecionada */}
+          {!placaSelecionada && mostrarCamposEstruturais && (
             <FormField
               control={form.control}
               name="km_inicial"
@@ -469,7 +472,8 @@ export function IntervencoesSVForm({
           )}
         </div>
 
-        {!placaSelecionada && (
+        {/* Seletor de Tipo e Código - exibir apenas quando não tem placa selecionada */}
+        {mostrarCamposEstruturais && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-[1fr_140px] gap-4 items-start">
               <FormField
@@ -477,11 +481,11 @@ export function IntervencoesSVForm({
                 name="tipo_placa"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel className="flex items-center gap-2">
-                      Tipo de Placa *
-                      {isCampoEstruturalBloqueado('tipo') && <Lock className="h-3 w-3 text-muted-foreground" />}
-                    </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={isCampoEstruturalBloqueado('tipo')}>
+                  <FormLabel className="flex items-center gap-2">
+                    Tipo de Placa *
+                    {isCampoEstruturalBloqueado('tipo') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isCampoEstruturalBloqueado('tipo') || !!placaSelecionada}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o tipo" />
@@ -518,11 +522,11 @@ export function IntervencoesSVForm({
                       <Input placeholder="Digite o código" {...field} disabled={isCampoEstruturalBloqueado('codigo')} />
                     </FormControl>
                   ) : (
-                    <Select 
-                      onValueChange={field.onChange} 
-                      value={field.value}
-                      disabled={codigosFiltrados.length === 0 || isCampoEstruturalBloqueado('codigo')}
-                    >
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={codigosFiltrados.length === 0 || isCampoEstruturalBloqueado('codigo') || !!placaSelecionada}
+                      >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder={
