@@ -165,4 +165,86 @@ export default function IntervencoesViewerBase({
     const supabase = getSupabase();
     if (!supabase) return alert("Supabase indisponível.");
     const { error } = await supabase.from(tabelaIntervencao).delete().eq("id", row.id);
-    if (error) return alert("Erro ao excluir: " + erro
+    if (error) return alert("Erro ao excluir: " + error.message);
+    await fetchRows();
+  }
+
+  return (
+    <div style={{ padding: 16 }}>
+      <h2 style={{ marginBottom: 8 }}>{titulo}</h2>
+
+      {errMsg && (
+        <div style={warn}>
+          {errMsg}
+        </div>
+      )}
+
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead style={{ background: "#f9fafb" }}>
+          <tr>
+            {cols.includes("km_inicial") && <th style={th}>KM Inicial</th>}
+            {/* km_final só faz sentido para NÃO-pontuais */}
+            {(!isPontual && cols.includes("km_final")) && <th style={th}>KM Final</th>}
+            {cols.includes("codigo") && <th style={th}>Código</th>}
+            {cols.includes("enviada") && <th style={th}>Enviada?</th>}
+            <th style={th} />
+          </tr>
+        </thead>
+        <tbody>
+          {loading && (
+            <tr>
+              <td colSpan={cols.length + 1} style={tdCenter}>Carregando...</td>
+            </tr>
+          )}
+          {!loading && rows.length === 0 && (
+            <tr>
+              <td colSpan={cols.length + 1} style={tdCenter}>Nenhum registro.</td>
+            </tr>
+          )}
+          {!loading && rows.map((r) => (
+            <tr key={r.id ?? Math.random()}>
+              {cols.includes("km_inicial") && <td style={td}>{formatKm(r.km_inicial)}</td>}
+              {(!isPontual && cols.includes("km_final")) && <td style={td}>{formatKm(r.km_final)}</td>}
+              {cols.includes("codigo") && <td style={td}>{r.codigo ?? "—"}</td>}
+              {cols.includes("enviada") && <td style={td}>{r.enviada ? "Sim" : "Não"}</td>}
+              <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
+                <button onClick={() => abrirForm(r)} style={btn} title="Abrir/Editar">👁️</button>
+                <button onClick={() => excluir(r)} style={{ ...btn, color: "#991b1b" }} title="Excluir">🗑️</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ---------- estilos mínimos ----------
+const th: React.CSSProperties = {
+  textAlign: "left",
+  fontWeight: 600,
+  padding: "8px 10px",
+  borderBottom: "1px solid #e5e7eb",
+  fontSize: 13,
+};
+const td: React.CSSProperties = {
+  padding: "8px 10px",
+  borderBottom: "1px solid #f3f4f6",
+  fontSize: 13,
+};
+const tdCenter: React.CSSProperties = { ...td, textAlign: "center" };
+const btn: React.CSSProperties = {
+  cursor: "pointer",
+  background: "none",
+  border: "none",
+  padding: "4px 6px",
+  fontSize: 16,
+};
+const warn: React.CSSProperties = {
+  background: "#FEF3C7",
+  border: "1px solid #F59E0B",
+  borderRadius: 6,
+  padding: 8,
+  color: "#7C2D12",
+  margin: "0 0 10px",
+};
