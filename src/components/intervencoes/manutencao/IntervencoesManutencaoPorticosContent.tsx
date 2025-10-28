@@ -1,20 +1,17 @@
-import { IntervencoesViewerBase } from '../IntervencoesViewerBase';
+import IntervencoesViewerBase from "../IntervencoesViewerBase";
 
-interface Props {
-  onEditarElemento?: (elemento: any) => void;
-}
-
-export default function IntervencoesManutencaoPorticosContent({ onEditarElemento }: Props) {
+export default function IntervencoesManutencaoPorticosContent(
+  props: Partial<React.ComponentProps<typeof IntervencoesViewerBase>>,
+) {
   return (
     <IntervencoesViewerBase
       tipoElemento="porticos"
       tipoOrigem="manutencao_pre_projeto"
-      titulo="🟠 Minhas Manutenções IN-3 - Pórticos"
       tabelaIntervencao="ficha_porticos_intervencoes"
-      onEditarElemento={onEditarElemento}
-      badgeColor="bg-orange-500"
+      titulo="Minhas Manutenções IN-3 – Pórticos"
+      badgeColor="warning"
       badgeLabel="MANUTENÇÃO"
-      usarJoinExplicito={true}
+      {...props}
     />
   );
 }
