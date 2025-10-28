@@ -98,7 +98,7 @@ export default function RevisaoIntervencoes() {
               km: item.km_inicial || 0,
               tipo_origem: item.tipo_origem,
               detalhes: item,
-              foto_url: item.foto_url,
+              foto_url: item.fotos_urls?.[0],
               observacao: item.observacao,
             });
           });
