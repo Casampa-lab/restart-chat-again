@@ -1,16 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import * as Supa from "../integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 type TipoOrigem = "execucao" | "manutencao_pre_projeto";
 
-type Props = {
-  tipoOrigem: TipoOrigem;
-  loteId: string;
-  rodoviaId: string;
-  user: { id: string } | any;
-  onSubmitSuccess?: () => void;
-};
+interface IntervencoesCilindrosFormProps {
+  tipoOrigem?: TipoOrigem;
+  cilindroSelecionado?: {
+    id: string;
+    km_inicial?: number;
+    km_final?: number;
+    snv?: string;
+  };
+  onIntervencaoRegistrada?: () => void;
+  modo?: 'normal' | 'controlado';
+  onDataChange?: (data: any) => void;
+  hideSubmitButton?: boolean;
+  loteId?: string;
+  rodoviaId?: string;
+  // Props adicionais para compatibilidade com RegistrarIntervencaoCampo
+  snvIdentificado?: string | null;
+  snvConfianca?: 'alta' | 'media' | 'baixa' | null;
+  snvDistancia?: number | null;
+  placaSelecionada?: any; // Alias para cilindroSelecionado
+}
 
 type FormData = {
   km_inicial?: string;
@@ -30,35 +45,43 @@ type FormData = {
 };
 
 export default function IntervencoesCilindrosForm({
-  tipoOrigem,
+  tipoOrigem = "execucao",
+  cilindroSelecionado: cilindroSelecionadoProp,
+  placaSelecionada, // Alias para cilindroSelecionado
+  onIntervencaoRegistrada,
+  modo = 'normal',
+  onDataChange,
+  hideSubmitButton = false,
   loteId,
   rodoviaId,
-  user,
-  onSubmitSuccess,
-}: Props) {
-  const { register, handleSubmit, reset } = useForm<FormData>();
+  snvIdentificado,
+  snvConfianca,
+  snvDistancia,
+}: IntervencoesCilindrosFormProps) {
+  const { register, handleSubmit, reset, watch } = useForm<FormData>();
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
-  // supabase client (compat: default ou nomeado)
-  const supabase =
-    (Supa as any)?.supabase ??
-    (Supa as any)?.default ??
-    (Supa as any);
+  // Use cilindroSelecionado ou placaSelecionada (alias)
+  const cilindroSelecionado = cilindroSelecionadoProp || placaSelecionada;
 
   const isManutencao = tipoOrigem === "manutencao_pre_projeto";
+  
+  // Watch form changes for controlled mode
+  const formData = watch();
+  
+  useEffect(() => {
+    if (modo === 'controlado' && onDataChange) {
+      onDataChange(formData);
+    }
+  }, [formData, modo, onDataChange]);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
-      if (!supabase || typeof supabase.from !== "function") {
-        alert("Supabase não detectado.");
-        setLoading(false);
-        return;
-      }
-
       // Execução EXIGE item do inventário; Manutenção NÃO.
-      if (!isManutencao && !data.cilindroSelecionado) {
-        alert("Para Execução de Projeto, selecione um cilindro do inventário primeiro");
+      if (!isManutencao && !cilindroSelecionado) {
+        toast.error("Para Execução de Projeto, selecione um cilindro do inventário primeiro");
         setLoading(false);
         return;
       }
@@ -88,7 +111,7 @@ export default function IntervencoesCilindrosForm({
       const { error } = await supabase
         .from("ficha_cilindros_intervencoes")
         .insert({
-          ficha_cilindros_id: data.cilindroSelecionado?.id ?? null,
+          ficha_cilindros_id: cilindroSelecionado?.id ?? null,
           data_intervencao: data.data_intervencao ?? null,
           solucao: data.solucao ?? null,
           motivo: data.motivo ?? null,
@@ -110,12 +133,12 @@ export default function IntervencoesCilindrosForm({
 
       if (error) throw error;
 
-      alert("Intervenção registrada com sucesso!");
+      toast.success("Intervenção em Cilindro registrada com sucesso!");
       reset();
-      onSubmitSuccess?.();
+      onIntervencaoRegistrada?.();
     } catch (e: any) {
       console.error(e);
-      alert("Erro ao registrar intervenção: " + (e?.message || String(e)));
+      toast.error("Erro ao registrar intervenção: " + (e?.message || String(e)));
     } finally {
       setLoading(false);
     }
@@ -194,21 +217,23 @@ export default function IntervencoesCilindrosForm({
         </div>
       </div>
 
-      {!isManutencao && (
-        <div>
-          <label className="block text-sm mb-1">
-            Selecionar Cilindro do Inventário (obrigatório em Execução)
-          </label>
-          {/* Substitua este input pelo seu seletor real de inventário */}
-          <input placeholder="(seletor de inventário aqui)" {...register("cilindroSelecionado" as any)} className="border p-2 w-full rounded" />
+      {!isManutencao && cilindroSelecionado && (
+        <div className="bg-muted p-3 rounded-md">
+          <p className="text-sm font-medium">Cilindro Selecionado:</p>
+          <p className="text-sm">ID: {cilindroSelecionado.id}</p>
+          {cilindroSelecionado.km_inicial && (
+            <p className="text-sm">KM: {cilindroSelecionado.km_inicial} - {cilindroSelecionado.km_final}</p>
+          )}
         </div>
       )}
 
-      <div className="pt-2">
-        <button type="submit" disabled={loading} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50">
-          {loading ? "Salvando..." : "Salvar Intervenção"}
-        </button>
-      </div>
+      {!hideSubmitButton && (
+        <div className="pt-2">
+          <button type="submit" disabled={loading} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50">
+            {loading ? "Salvando..." : "Salvar Intervenção"}
+          </button>
+        </div>
+      )}
     </form>
   );
 }

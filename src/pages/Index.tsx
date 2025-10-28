@@ -32,7 +32,7 @@ import { useIOSDetection } from "@/hooks/useIOSDetection";
 import { IntervencoesSVForm } from "@/components/IntervencoesSVForm";
 import IntervencoesInscricoesForm from "@/components/IntervencoesInscricoesForm";
 import { IntervencoesTachaForm } from "@/components/IntervencoesTachaForm";
-import { IntervencoesCilindrosForm } from "@/components/IntervencoesCilindrosForm";
+import IntervencoesCilindrosForm from "@/components/IntervencoesCilindrosForm";
 import { IntervencoesPorticosForm } from "@/components/IntervencoesPorticosForm";
 import DefensasIntervencoesForm from "@/components/DefensasIntervencoesForm";
 import { useMarcoZeroRecente } from "@/hooks/useMarcoZeroRecente";
@@ -909,7 +909,6 @@ const Index = () => {
             {tipoIntervencao === "cilindros" && elementoParaIntervencao && (
               <IntervencoesCilindrosForm
                 cilindroSelecionado={elementoParaIntervencao}
-                modo="normal"
                 onIntervencaoRegistrada={() => {
                   setIntervencaoDialogOpen(false);
                   toast.success("Intervenção em Cilindro registrada com sucesso!");

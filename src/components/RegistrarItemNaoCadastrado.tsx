@@ -12,7 +12,7 @@ import { IntervencoesSHForm } from "./IntervencoesSHForm";
 import { IntervencoesSVForm } from "./IntervencoesSVForm";
 import { IntervencoesTachaForm } from "./IntervencoesTachaForm";
 import IntervencoesInscricoesForm from "./IntervencoesInscricoesForm";
-import { IntervencoesCilindrosForm } from "./IntervencoesCilindrosForm";
+import IntervencoesCilindrosForm from "./IntervencoesCilindrosForm";
 import { IntervencoesPorticosForm } from "./IntervencoesPorticosForm";
 import DefensasIntervencoesForm from "./DefensasIntervencoesForm";
 
@@ -190,6 +190,7 @@ export function RegistrarItemNaoCadastrado({
       hideSubmitButton: true,
       loteId,
       rodoviaId,
+      tipoOrigem: 'manutencao_pre_projeto' as const,
     };
 
     switch (tipo_elemento) {

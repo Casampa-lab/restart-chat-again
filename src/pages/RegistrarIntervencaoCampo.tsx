@@ -21,7 +21,7 @@ import { IntervencoesSVForm } from '@/components/IntervencoesSVForm';
 import { IntervencoesSHForm } from '@/components/IntervencoesSHForm';
 import { IntervencoesTachaForm } from '@/components/IntervencoesTachaForm';
 import DefensasIntervencoesForm from '@/components/DefensasIntervencoesForm';
-import { IntervencoesCilindrosForm } from '@/components/IntervencoesCilindrosForm';
+import IntervencoesCilindrosForm from '@/components/IntervencoesCilindrosForm';
 import { IntervencoesPorticosForm } from '@/components/IntervencoesPorticosForm';
 import { IntervencoesInscricoesForm } from '@/components/IntervencoesInscricoesForm';
 
