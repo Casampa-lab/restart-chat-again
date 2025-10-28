@@ -1,20 +1,16 @@
-import { IntervencoesViewerBase } from '../IntervencoesViewerBase';
-
-interface Props {
-  onEditarElemento?: (elemento: any) => void;
-}
-
-export default function IntervencoesExecucaoCilindrosContent({ onEditarElemento }: Props) {
+import IntervencoesViewerBase from "@/components/IntervencoesViewerBase";
+export default function IntervencoesExecucaoCilindrosContent(
+  props: Partial<React.ComponentProps<typeof IntervencoesViewerBase>>,
+) {
   return (
     <IntervencoesViewerBase
       tipoElemento="cilindros"
       tipoOrigem="execucao"
-      titulo="🔵 Minhas Intervenções - Cilindros"
       tabelaIntervencao="ficha_cilindros_intervencoes"
-      onEditarElemento={onEditarElemento}
-      badgeColor="bg-blue-500"
+      titulo="Minhas Intervenções – Cilindros (Execução)"
+      badgeColor="secondary"
       badgeLabel="EXECUÇÃO"
-      usarJoinExplicito={true}
+      {...props}
     />
   );
 }

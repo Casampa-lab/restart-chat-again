@@ -1,20 +1,16 @@
-import { IntervencoesViewerBase } from '../IntervencoesViewerBase';
-
-interface Props {
-  onEditarElemento?: (elemento: any) => void;
-}
-
-export default function IntervencoesManutencaoCilindrosContent({ onEditarElemento }: Props) {
+import IntervencoesViewerBase from "../IntervencoesViewerBase";
+export default function IntervencoesManutencaoCilindrosContent(
+  props: Partial<React.ComponentProps<typeof IntervencoesViewerBase>>,
+) {
   return (
     <IntervencoesViewerBase
       tipoElemento="cilindros"
       tipoOrigem="manutencao_pre_projeto"
-      titulo="🟠 Minhas Manutenções IN-3 - Cilindros"
       tabelaIntervencao="ficha_cilindros_intervencoes"
-      onEditarElemento={onEditarElemento}
-      badgeColor="bg-orange-500"
+      titulo="Minhas Manutenções IN-3 – Cilindros"
+      badgeColor="warning"
       badgeLabel="MANUTENÇÃO"
-      usarJoinExplicito={true}
+      {...props}
     />
   );
 }
