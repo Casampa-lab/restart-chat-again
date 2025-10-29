@@ -45,8 +45,6 @@ const formSchema = z.object({
   cor_refletivo: z.string().optional(),
   tipo_refletivo: z.string().optional(),
   quantidade: z.string().optional(),
-  latitude_inicial: z.string().optional(),
-  longitude_inicial: z.string().optional(),
 });
 
 export type IntervencoesCilindrosFormData = z.infer<typeof formSchema>;
@@ -112,8 +110,6 @@ export function IntervencoesCilindrosForm({
       cor_refletivo: cilindroSelecionado?.cor_refletivo || "",
       tipo_refletivo: cilindroSelecionado?.tipo_refletivo || "",
       quantidade: cilindroSelecionado?.quantidade?.toString() || "",
-      latitude_inicial: "",
-      longitude_inicial: "",
     },
   });
 
@@ -144,8 +140,6 @@ export function IntervencoesCilindrosForm({
       cor_refletivo: toStr(S.cor_refletivo),
       tipo_refletivo: toStr(S.tipo_refletivo),
       quantidade: toStr(S.quantidade),
-      latitude_inicial: toStr(S.latitude_inicial),
-      longitude_inicial: toStr(S.longitude_inicial),
     });
   }, [intervencaoSelecionada, form]);
 
@@ -406,32 +400,6 @@ export function IntervencoesCilindrosForm({
                     <FormLabel>Quantidade</FormLabel>
                     <FormControl>
                       <Input inputMode="numeric" placeholder="Ex: 25" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={(form as any).control}
-                name="latitude_inicial"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Latitude Inicial</FormLabel>
-                    <FormControl>
-                      <Input inputMode="decimal" placeholder="Ex: -19,987654" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={(form as any).control}
-                name="longitude_inicial"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Longitude Inicial</FormLabel>
-                    <FormControl>
-                      <Input inputMode="decimal" placeholder="Ex: -43,987654" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
