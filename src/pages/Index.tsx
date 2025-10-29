@@ -1,3 +1,4 @@
+// ======================================
 // Index.tsx (routerless-safe) — força remount + limpeza
 // ======================================
 import { useState } from "react";
