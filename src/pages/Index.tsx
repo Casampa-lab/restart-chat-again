@@ -39,6 +39,7 @@ import { useMarcoZeroRecente } from "@/hooks/useMarcoZeroRecente";
 import { ConsolidatedInventoryBadge } from "@/components/ConsolidatedInventoryBadge";
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isModernIOS } = useIOSDetection();
   const {
     user,
@@ -417,13 +418,7 @@ const Index = () => {
     );
   };
 
- // imports (garanta que existam no topo do arquivo)
-import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-
-// ...
-
-// Verificação de roles (admin/coordenador)
+ // Verificação de roles (admin/coordenador)
 useEffect(() => {
   let alive = true;
   const checkAdminOrCoordinator = async () => {
@@ -449,10 +444,6 @@ const handleSessionStarted = () => {
   refreshSession();
 };
 
-// Patch mínimo de navegação (não força /modo-campo nem muda lastRoute)
-const location = useLocation();
-const navigate = useNavigate();
-
 useEffect(() => {
   if (!authLoading && !user) {
     navigate("/auth", { replace: true });
@@ -477,15 +468,6 @@ useEffect(() => {
   // Limpeza leve (mantém comportamento anterior)
   sessionStorage.removeItem("vableCardHidden");
 }, [user, authLoading, location.pathname, navigate]);
-
-
-      
-      // Limpar flag de card VABLE oculto ao entrar (reaparece no próximo login)
-      sessionStorage.removeItem('vableCardHidden');
-      
-      localStorage.setItem('lastRoute', '/');
-    }
-  }, [user, authLoading, navigate, isModernIOS]);
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -507,7 +489,9 @@ useEffect(() => {
   // Determinar qual logo usar
   const logoToDisplay = supervisora?.usar_logo_customizado && supervisora?.logo_url ? supervisora.logo_url : logoOperaVia;
   const logoAlt = supervisora?.usar_logo_customizado && supervisora?.logo_url ? `${supervisora.nome_empresa} - Sistema de Supervisão` : "OperaVia - Sistema de Supervisão de Operação Rodoviária";
-  return <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10 overflow-y-auto">
+  
+  return (
+    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10 overflow-y-auto">
       <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
@@ -982,7 +966,7 @@ useEffect(() => {
         </Card>
       </div>
     </div>
+  );
 };
-);
-}
+
 export default Index;
