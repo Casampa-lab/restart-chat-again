@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, LogOut } from "lucide-react";
 import { ModulosStatus } from "@/components/ModulosStatus";
-const logoOperaVia = "/logo-operavia.png";
+import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
 
 
 const Modulos = () => {
