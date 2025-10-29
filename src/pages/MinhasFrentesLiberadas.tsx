@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
+const logoOperaVia = "/logo-operavia.png";
 import {
   Dialog,
   DialogContent,

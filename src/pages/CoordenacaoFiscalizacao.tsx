@@ -13,7 +13,7 @@ import { BarChart3, FileSpreadsheet } from "lucide-react";
 import FrenteLiberadaForm from "@/components/FrenteLiberadaForm";
 import { exportFrentesLiberadas, exportNaoConformidades, exportRetrorrefletividadeEstaticaHorizontal, exportRetrorrefletividadeEstaticaVertical, exportRetrorrefletividadeDinamica, exportDefensas, exportIntervencoesSH, exportIntervencoesInscricoes, exportIntervencoesSV, exportIntervencoesTacha, exportFichasVerificacao, exportFichasPlaca, exportRegistroNC } from "@/lib/excelExport";
 import { toast } from "sonner";
-import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
+const logoOperaVia = "/logo-operavia.png";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 const CoordenacaoFiscalizacao = () => {

@@ -14,7 +14,7 @@ import { useSupervisora } from "@/hooks/useSupervisora";
 import { useMarcoZeroRecente } from "@/hooks/useMarcoZeroRecente";
 import { useWorkSession } from "@/hooks/useWorkSession";
 import { useAuth } from "@/hooks/useAuth";
-import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
+const logoOperaVia = "/logo-operavia.png";
 import { format } from "date-fns";
 
 const TIPOS_RELATORIO = [

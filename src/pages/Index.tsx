@@ -25,7 +25,7 @@ import { InventarioInscricoesViewer } from "@/components/InventarioInscricoesVie
 import { InventarioTachasViewer } from "@/components/InventarioTachasViewer";
 import { InventarioDefensasViewer } from "@/components/InventarioDefensasViewer";
 import { toast } from "sonner";
-import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
+const logoOperaVia = "/logo-operavia.png";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import IntervencoesSHForm from "@/components/IntervencoesSHForm";
 import { useIOSDetection } from "@/hooks/useIOSDetection";

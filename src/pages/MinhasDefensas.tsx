@@ -26,7 +26,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
+const logoOperaVia = "/logo-operavia.png";
 import {
   Dialog,
   DialogContent,

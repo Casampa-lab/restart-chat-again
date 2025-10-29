@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Monitor, Smartphone } from "lucide-react";
-import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
+const logoOperaVia = "/logo-operavia.png";
 import { useIOSDetection } from "@/hooks/useIOSDetection";
 
 const Auth = () => {
