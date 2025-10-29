@@ -17,18 +17,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstruturais";
 
-const SOLUCOES_CILINDROS = [
-  "Manter",
-  "Remover", 
-  "Implantar",
-  "Substituir"
-];
+const SOLUCOES_CILINDROS = ["Manter", "Remover", "Implantar", "Substituir"];
 
 const MOTIVOS_REMOCAO_SUBSTITUICAO = [
   "1 - Material fora do padrão das soluções propostas/obsoleto",
   "2 - Material dentro do padrão das soluções, porém, sofreu atualização com os novos parâmetros levantados",
   "3 - Material danificado",
-  "4 - Encontra-se em local impróprio/indevido"
+  "4 - Encontra-se em local impróprio/indevido",
 ];
 
 const formSchema = z.object({
@@ -52,46 +47,111 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface IntervencoesCilindrosFormProps {
-  tipoOrigem?: 'manutencao_pre_projeto' | 'execucao';
+  tipoOrigem?: "manutencao_pre_projeto" | "execucao";
   cilindroSelecionado?: {
     id: string;
     km_inicial: number;
     km_final: number;
     snv?: string;
   };
-  intervencaoSelecionada?: any;
   onIntervencaoRegistrada?: () => void;
-  modo?: 'normal' | 'controlado';
+  modo?: "normal" | "controlado";
   onDataChange?: (data: any) => void;
   hideSubmitButton?: boolean;
   loteId?: string;
   rodoviaId?: string;
 }
 
-export function IntervencoesCilindrosForm({ 
+export function IntervencoesCilindrosForm({
   tipoOrigem: tipoOrigemProp,
-  cilindroSelecionado, 
+  cilindroSelecionado,
   onIntervencaoRegistrada,
-  modo = 'normal',
+  modo = "normal",
   onDataChange,
   hideSubmitButton = false,
   loteId,
   rodoviaId,
-  intervencaoSelecionada,
 }: IntervencoesCilindrosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const tipoOrigem = tipoOrigemProp || 'execucao';
-  const isManutencaoRotineira = tipoOrigem === 'manutencao_pre_projeto';
-  
+  const tipoOrigem = tipoOrigemProp || "execucao";
+  const isManutencaoRotineira = tipoOrigem === "manutencao_pre_projeto";
+  useEffect(() => {
+    // USEREFFECT
+    if (!intervencaoSelecionada) return;
+
+    // Converte valores para string, mantendo campos vazios limpos
+    const toStr = (v: any) => (v === null || v === undefined ? "" : String(v));
+    const toDateInput = (v: any) => {
+      try {
+        const d = v ? new Date(v) : new Date();
+        return isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
+      } catch {
+        return "";
+      }
+    };
+
+    // Atualiza todos os campos do formulário
+    form.reset({
+      data_intervencao: toDateInput(intervencaoSelecionada.data_intervencao || intervencaoSelecionada.created_at),
+      snv: toStr(intervencaoSelecionada.snv),
+      solucao: toStr(intervencaoSelecionada.solucao),
+      motivo: toStr(intervencaoSelecionada.motivo || "-"),
+      km_inicial: toStr(intervencaoSelecionada.km_inicial),
+      km_final: toStr(intervencaoSelecionada.km_final),
+      local_implantacao: toStr(intervencaoSelecionada.local_implantacao),
+      espacamento_m: toStr(intervencaoSelecionada.espacamento_m),
+      extensao_km: toStr(intervencaoSelecionada.extensao_km),
+      cor_corpo: toStr(intervencaoSelecionada.cor_corpo),
+      cor_refletivo: toStr(intervencaoSelecionada.cor_refletivo),
+      tipo_refletivo: toStr(intervencaoSelecionada.tipo_refletivo),
+      quantidade: toStr(intervencaoSelecionada.quantidade),
+      latitude_inicial: toStr(intervencaoSelecionada.latitude_inicial),
+      longitude_inicial: toStr(intervencaoSelecionada.longitude_inicial),
+    });
+  }, [intervencaoSelecionada, form]);
+
   const isCampoEstruturalBloqueado = (campo: string) => {
+    useEffect(() => {
+      if (!intervencaoSelecionada) return;
+
+      // Helpers de normalização
+      const toStr = (v: any) => (v === null || v === undefined ? "" : String(v));
+      const toDateInput = (v: any) => {
+        try {
+          const d = v ? new Date(v) : new Date();
+          return isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
+        } catch {
+          return "";
+        }
+      };
+
+      form.reset({
+        data_intervencao: toDateInput(intervencaoSelecionada.data_intervencao || intervencaoSelecionada.created_at),
+        snv: toStr(intervencaoSelecionada.snv),
+        solucao: toStr(intervencaoSelecionada.solucao),
+        motivo: toStr(intervencaoSelecionada.motivo || "-"),
+        km_inicial: toStr(intervencaoSelecionada.km_inicial),
+        km_final: toStr(intervencaoSelecionada.km_final),
+        local_implantacao: toStr(intervencaoSelecionada.local_implantacao),
+        espacamento_m: toStr(intervencaoSelecionada.espacamento_m),
+        extensao_km: toStr(intervencaoSelecionada.extensao_km),
+        cor_corpo: toStr(intervencaoSelecionada.cor_corpo),
+        cor_refletivo: toStr(intervencaoSelecionada.cor_refletivo),
+        tipo_refletivo: toStr(intervencaoSelecionada.tipo_refletivo),
+        quantidade: toStr(intervencaoSelecionada.quantidade),
+        latitude_inicial: toStr(intervencaoSelecionada.latitude_inicial),
+        longitude_inicial: toStr(intervencaoSelecionada.longitude_inicial),
+      });
+    }, [intervencaoSelecionada, form]);
+
     if (!isManutencaoRotineira) return false;
-    return (CAMPOS_ESTRUTURAIS['cilindros'] as readonly string[]).includes(campo);
+    return (CAMPOS_ESTRUTURAIS["cilindros"] as readonly string[]).includes(campo);
   };
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      data_intervencao: new Date().toISOString().split('T')[0],
+      data_intervencao: new Date().toISOString().split("T")[0],
       snv: "",
       solucao: "",
       motivo: "-",
@@ -104,23 +164,24 @@ export function IntervencoesCilindrosForm({
       cor_refletivo: "",
       tipo_refletivo: "",
       quantidade: "",
-    latitude_inicial: "",
-    longitude_inicial: "",
+      latitude_inicial: "",
+      longitude_inicial: "",
     },
   });
 
-  const solucaoAtual = form.watch('solucao');
-  const motivoAtual = form.watch('motivo');
-  const mostrarMotivosNumerados = solucaoAtual === 'Remover' || solucaoAtual === 'Substituir';
-  const motivoObrigatorio = mostrarMotivosNumerados && (!motivoAtual || motivoAtual === '-' || motivoAtual.trim() === '');
-  const solucaoObrigatoria = !solucaoAtual || solucaoAtual.trim() === '';
+  const solucaoAtual = form.watch("solucao");
+  const motivoAtual = form.watch("motivo");
+  const mostrarMotivosNumerados = solucaoAtual === "Remover" || solucaoAtual === "Substituir";
+  const motivoObrigatorio =
+    mostrarMotivosNumerados && (!motivoAtual || motivoAtual === "-" || motivoAtual.trim() === "");
+  const solucaoObrigatoria = !solucaoAtual || solucaoAtual.trim() === "";
 
   // Preencher formulário com dados do cilindro selecionado
   useEffect(() => {
-    if (cilindroSelecionado && modo === 'normal') {
+    if (cilindroSelecionado && modo === "normal") {
       console.log("🔄 Reset do form com cilindro selecionado:", cilindroSelecionado.id);
       form.reset({
-        data_intervencao: new Date().toISOString().split('T')[0],
+        data_intervencao: new Date().toISOString().split("T")[0],
         snv: (cilindroSelecionado as any).snv || "",
         // NÃO resetar solucao para permitir que o usuário mantenha a seleção
         motivo: "-",
@@ -142,11 +203,11 @@ export function IntervencoesCilindrosForm({
   // Resetar motivo quando solução mudar
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
-      if (name === 'solucao') {
-        if (value.solucao === 'Manter' || value.solucao === 'Implantar') {
-          form.setValue('motivo', '-');
-        } else if (value.solucao === 'Remover' || value.solucao === 'Substituir') {
-          form.setValue('motivo', '');
+      if (name === "solucao") {
+        if (value.solucao === "Manter" || value.solucao === "Implantar") {
+          form.setValue("motivo", "-");
+        } else if (value.solucao === "Remover" || value.solucao === "Substituir") {
+          form.setValue("motivo", "");
         }
       }
     });
@@ -155,7 +216,7 @@ export function IntervencoesCilindrosForm({
 
   // Propagar mudanças em tempo real no modo controlado
   useEffect(() => {
-    if (modo === 'controlado' && onDataChange) {
+    if (modo === "controlado" && onDataChange) {
       const subscription = form.watch((value) => {
         onDataChange(value);
       });
@@ -164,11 +225,11 @@ export function IntervencoesCilindrosForm({
   }, [form, modo, onDataChange]);
 
   const onSubmit = async (data: FormData) => {
-    if (modo === 'controlado') {
+    if (modo === "controlado") {
       if (onDataChange) onDataChange(data);
       return;
     }
-    
+
     // Validação: Manutenção Rotineira exige cilindro existente
     if (isManutencaoRotineira && !cilindroSelecionado) {
       toast.error("Para Manutenção Rotineira, selecione um cilindro do inventário primeiro");
@@ -176,74 +237,76 @@ export function IntervencoesCilindrosForm({
     }
 
     setIsSubmitting(true);
-    
+
     // Log de debug DETALHADO
     console.log("🔍 Estado RAW do form (getValues):", form.getValues());
     console.log("📋 Dados recebidos no onSubmit:", data);
     console.log("🎯 Campo solucao específico:", {
-      raw: form.getValues('solucao'),
+      raw: form.getValues("solucao"),
       fromData: data.solucao,
       length: data.solucao?.length,
       type: typeof data.solucao,
-      isEmpty: !data.solucao || data.solucao.trim() === ''
+      isEmpty: !data.solucao || data.solucao.trim() === "",
     });
 
     // Validar solução obrigatória
-    if (!data.solucao || data.solucao.trim() === '') {
+    if (!data.solucao || data.solucao.trim() === "") {
       toast.error("⚠️ Selecione uma Solução antes de registrar a intervenção");
       setIsSubmitting(false);
       return;
     }
 
     // Validar motivo condicional
-    if ((data.solucao === 'Remover' || data.solucao === 'Substituir') && 
-        (!data.motivo || data.motivo === '-' || data.motivo.trim() === '')) {
+    if (
+      (data.solucao === "Remover" || data.solucao === "Substituir") &&
+      (!data.motivo || data.motivo === "-" || data.motivo.trim() === "")
+    ) {
       toast.error("⚠️ Selecione um motivo específico para Remoção ou Substituição");
       setIsSubmitting(false);
       return;
     }
-    
+
     try {
       // Obter usuário autenticado
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
-        toast.error('Você precisa estar autenticado para registrar uma intervenção');
+        toast.error("Você precisa estar autenticado para registrar uma intervenção");
         setIsSubmitting(false);
         return;
       }
 
       // Validar lote e rodovia obrigatórios
       if (!loteId || !rodoviaId) {
-        toast.error('Lote e rodovia são obrigatórios');
+        toast.error("Lote e rodovia são obrigatórios");
         setIsSubmitting(false);
         return;
       }
 
-      const { error } = await supabase
-        .from("ficha_cilindros_intervencoes")
-        .insert({
-          ficha_cilindros_id: cilindroSelecionado?.id || null,
-          data_intervencao: data.data_intervencao,
-          solucao: data.solucao,
-          motivo: data.motivo,
-          km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
-          km_final: data.km_final ? parseFloat(data.km_final) : null,
-          snv: data.snv || null,
-          local_implantacao: data.local_implantacao || null,
-          espacamento_m: data.espacamento_m ? parseFloat(data.espacamento_m) : null,
-          extensao_km: data.extensao_km ? parseFloat(data.extensao_km) : null,
-          cor_corpo: data.cor_corpo || null,
-          cor_refletivo: data.cor_refletivo || null,
-          tipo_refletivo: data.tipo_refletivo || null,
-          quantidade: data.quantidade ? parseInt(data.quantidade) : null,
-          latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
-          longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
-          tipo_origem: tipoOrigem,
-          user_id: user.id,
-          lote_id: loteId,
-          rodovia_id: rodoviaId
-        });
+      const { error } = await supabase.from("ficha_cilindros_intervencoes").insert({
+        ficha_cilindros_id: cilindroSelecionado?.id || null,
+        data_intervencao: data.data_intervencao,
+        solucao: data.solucao,
+        motivo: data.motivo,
+        km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
+        km_final: data.km_final ? parseFloat(data.km_final) : null,
+        snv: data.snv || null,
+        local_implantacao: data.local_implantacao || null,
+        espacamento_m: data.espacamento_m ? parseFloat(data.espacamento_m) : null,
+        extensao_km: data.extensao_km ? parseFloat(data.extensao_km) : null,
+        cor_corpo: data.cor_corpo || null,
+        cor_refletivo: data.cor_refletivo || null,
+        tipo_refletivo: data.tipo_refletivo || null,
+        quantidade: data.quantidade ? parseInt(data.quantidade) : null,
+        latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
+        longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
+        tipo_origem: tipoOrigem,
+        user_id: user.id,
+        lote_id: loteId,
+        rodovia_id: rodoviaId,
+      });
 
       if (error) throw error;
 
@@ -263,10 +326,9 @@ export function IntervencoesCilindrosForm({
       <CardHeader>
         <CardTitle>Intervenção em Cilindros Delimitadores</CardTitle>
         <CardDescription>
-          {cilindroSelecionado 
-            ? `Registrando intervenção para cilindro entre km ${cilindroSelecionado.km_inicial} - ${cilindroSelecionado.km_final}${cilindroSelecionado.snv ? ` (SNV: ${cilindroSelecionado.snv})` : ''}`
-            : "Selecione um cilindro do inventário para registrar intervenção"
-          }
+          {cilindroSelecionado
+            ? `Registrando intervenção para cilindro entre km ${cilindroSelecionado.km_inicial} - ${cilindroSelecionado.km_final}${cilindroSelecionado.snv ? ` (SNV: ${cilindroSelecionado.snv})` : ""}`
+            : "Selecione um cilindro do inventário para registrar intervenção"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -310,13 +372,13 @@ export function IntervencoesCilindrosForm({
                     <FormLabel className={solucaoObrigatoria ? "text-destructive font-semibold" : ""}>
                       Solução <span className="text-destructive">*</span>
                     </FormLabel>
-                    <Select 
+                    <Select
                       onValueChange={(value) => {
                         console.log("✅ Solução SELECIONADA pelo usuário:", value);
-                        console.log("📊 Estado do form ANTES do onChange:", form.getValues('solucao'));
+                        console.log("📊 Estado do form ANTES do onChange:", form.getValues("solucao"));
                         field.onChange(value);
-                        console.log("📊 Estado do form DEPOIS do onChange:", form.getValues('solucao'));
-                      }} 
+                        console.log("📊 Estado do form DEPOIS do onChange:", form.getValues("solucao"));
+                      }}
                       value={field.value}
                     >
                       <FormControl>
@@ -362,11 +424,7 @@ export function IntervencoesCilindrosForm({
                       </Select>
                     ) : (
                       <FormControl>
-                        <Input 
-                          value="-" 
-                          disabled 
-                          className="bg-muted text-muted-foreground"
-                        />
+                        <Input value="-" disabled className="bg-muted text-muted-foreground" />
                       </FormControl>
                     )}
                     <FormMessage />
@@ -381,12 +439,7 @@ export function IntervencoesCilindrosForm({
                   <FormItem>
                     <FormLabel>km Inicial</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.001" 
-                        placeholder="Ex: 100.500" 
-                        {...field} 
-                      />
+                      <Input type="number" step="0.001" placeholder="Ex: 100.500" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -400,12 +453,7 @@ export function IntervencoesCilindrosForm({
                   <FormItem>
                     <FormLabel>km Final</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.001" 
-                        placeholder="Ex: 100.800" 
-                        {...field} 
-                      />
+                      <Input type="number" step="0.001" placeholder="Ex: 100.800" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -419,7 +467,7 @@ export function IntervencoesCilindrosForm({
                 <Milestone className="h-5 w-5 text-primary" />
                 <h3 className="font-semibold text-primary text-lg">Características dos Cilindros</h3>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -428,12 +476,12 @@ export function IntervencoesCilindrosForm({
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         Cor (Corpo)
-                        {isCampoEstruturalBloqueado('cor_corpo') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        {isCampoEstruturalBloqueado("cor_corpo") && <Lock className="h-3 w-3 text-muted-foreground" />}
                       </FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
+                      <Select
+                        onValueChange={field.onChange}
                         value={field.value}
-                        disabled={isCampoEstruturalBloqueado('cor_corpo')}
+                        disabled={isCampoEstruturalBloqueado("cor_corpo")}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -459,12 +507,14 @@ export function IntervencoesCilindrosForm({
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         Cor (Refletivo)
-                        {isCampoEstruturalBloqueado('cor_refletivo') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        {isCampoEstruturalBloqueado("cor_refletivo") && (
+                          <Lock className="h-3 w-3 text-muted-foreground" />
+                        )}
                       </FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
+                      <Select
+                        onValueChange={field.onChange}
                         value={field.value}
-                        disabled={isCampoEstruturalBloqueado('cor_refletivo')}
+                        disabled={isCampoEstruturalBloqueado("cor_refletivo")}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -488,12 +538,14 @@ export function IntervencoesCilindrosForm({
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         Tipo Refletivo
-                        {isCampoEstruturalBloqueado('tipo_refletivo') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        {isCampoEstruturalBloqueado("tipo_refletivo") && (
+                          <Lock className="h-3 w-3 text-muted-foreground" />
+                        )}
                       </FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
+                      <Select
+                        onValueChange={field.onChange}
                         value={field.value}
-                        disabled={isCampoEstruturalBloqueado('tipo_refletivo')}
+                        disabled={isCampoEstruturalBloqueado("tipo_refletivo")}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -517,14 +569,14 @@ export function IntervencoesCilindrosForm({
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         Quantidade (und)
-                        {isCampoEstruturalBloqueado('quantidade') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        {isCampoEstruturalBloqueado("quantidade") && <Lock className="h-3 w-3 text-muted-foreground" />}
                       </FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="Ex: 100" 
+                        <Input
+                          type="number"
+                          placeholder="Ex: 100"
                           {...field}
-                          disabled={isCampoEstruturalBloqueado('quantidade')}
+                          disabled={isCampoEstruturalBloqueado("quantidade")}
                         />
                       </FormControl>
                       <FormMessage />
@@ -539,12 +591,14 @@ export function IntervencoesCilindrosForm({
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         Local de Implantação
-                        {isCampoEstruturalBloqueado('local_implantacao') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        {isCampoEstruturalBloqueado("local_implantacao") && (
+                          <Lock className="h-3 w-3 text-muted-foreground" />
+                        )}
                       </FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
+                      <Select
+                        onValueChange={field.onChange}
                         value={field.value}
-                        disabled={isCampoEstruturalBloqueado('local_implantacao')}
+                        disabled={isCampoEstruturalBloqueado("local_implantacao")}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -570,15 +624,17 @@ export function IntervencoesCilindrosForm({
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         Espaçamento (m)
-                        {isCampoEstruturalBloqueado('espacamento_m') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        {isCampoEstruturalBloqueado("espacamento_m") && (
+                          <Lock className="h-3 w-3 text-muted-foreground" />
+                        )}
                       </FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          step="0.01" 
-                          placeholder="Ex: 4.00" 
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="Ex: 4.00"
                           {...field}
-                          disabled={isCampoEstruturalBloqueado('espacamento_m')}
+                          disabled={isCampoEstruturalBloqueado("espacamento_m")}
                         />
                       </FormControl>
                       <FormMessage />
@@ -593,15 +649,17 @@ export function IntervencoesCilindrosForm({
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         Extensão (km)
-                        {isCampoEstruturalBloqueado('extensao_km') && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        {isCampoEstruturalBloqueado("extensao_km") && (
+                          <Lock className="h-3 w-3 text-muted-foreground" />
+                        )}
                       </FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          step="0.001" 
-                          placeholder="Ex: 0.500" 
+                        <Input
+                          type="number"
+                          step="0.001"
+                          placeholder="Ex: 0.500"
                           {...field}
-                          disabled={isCampoEstruturalBloqueado('extensao_km')}
+                          disabled={isCampoEstruturalBloqueado("extensao_km")}
                         />
                       </FormControl>
                       <FormMessage />
@@ -616,9 +674,7 @@ export function IntervencoesCilindrosForm({
                 {solucaoObrigatoria && (
                   <Alert variant="destructive">
                     <Info className="h-4 w-4" />
-                    <AlertDescription>
-                      ⚠️ Selecione uma Solução antes de registrar a intervenção
-                    </AlertDescription>
+                    <AlertDescription>⚠️ Selecione uma Solução antes de registrar a intervenção</AlertDescription>
                   </Alert>
                 )}
                 {motivoObrigatorio && (
@@ -629,13 +685,13 @@ export function IntervencoesCilindrosForm({
                     </AlertDescription>
                   </Alert>
                 )}
-                <Button 
-                  type="submit" 
-                  className="w-full" 
+                <Button
+                  type="submit"
+                  className="w-full"
                   disabled={
-                    isSubmitting || 
-                    (isManutencaoRotineira && !cilindroSelecionado) || 
-                    modo === 'controlado' ||
+                    isSubmitting ||
+                    (isManutencaoRotineira && !cilindroSelecionado) ||
+                    modo === "controlado" ||
                     solucaoObrigatoria ||
                     motivoObrigatorio
                   }
