@@ -54,12 +54,12 @@ type FormData = z.infer<typeof formSchema>;
 interface IntervencoesCilindrosFormProps {
   tipoOrigem?: 'manutencao_pre_projeto' | 'execucao';
   cilindroSelecionado?: {
- intervencaoSelecionada?: any; // ✅ NOVA PROP
     id: string;
     km_inicial: number;
     km_final: number;
     snv?: string;
   };
+  intervencaoSelecionada?: any;
   onIntervencaoRegistrada?: () => void;
   modo?: 'normal' | 'controlado';
   onDataChange?: (data: any) => void;
@@ -76,8 +76,8 @@ export function IntervencoesCilindrosForm({
   onDataChange,
   hideSubmitButton = false,
   loteId,
-  rodoviaId
-  intervencaoSelecionada, // ✅ NOVA PROP
+  rodoviaId,
+  intervencaoSelecionada,
 }: IntervencoesCilindrosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const tipoOrigem = tipoOrigemProp || 'execucao';
