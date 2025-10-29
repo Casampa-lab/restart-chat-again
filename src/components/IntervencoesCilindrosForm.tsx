@@ -12,7 +12,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, Info } from "lucide-react";
-import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstruturais";
+// Fallback local — use isto se você NÃO tiver "@/constants/camposEstruturais" no projeto.
+// Se você já tiver esse arquivo, pode manter o import original e REMOVER este bloco.
+const TIPOS_ORIGEM = { manutencao_pre_projeto: "manutencao_pre_projeto", execucao: "execucao" } as const;
+const LABELS_TIPO_ORIGEM: Record<string, string> = {
+  manutencao_pre_projeto: "Manutenção (pré-projeto)",
+  execucao: "Execução",
+};
+const CAMPOS_ESTRUTURAIS: Record<string, readonly string[]> = {
+  cilindros: ["snv", "km_inicial", "km_final"], // ajuste se quiser bloquear mais campos
+};
+
 
 const SOLUCOES_CILINDROS = ["Manter", "Remover", "Implantar", "Substituir"] as const;
 const MOTIVOS_REMOCAO_SUBSTITUICAO = [
