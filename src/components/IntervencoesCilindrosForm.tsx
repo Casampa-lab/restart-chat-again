@@ -1,11 +1,12 @@
-// ==============================
-// IntervencoesCilindrosForm.tsx (routerless-safe)
-// ==============================
+// =============================================
+// 2) IntervencoesCilindrosForm.tsx — compatível com o fluxo acima
+//    (aceita props extras para evitar erro de tipos)
+// =============================================
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { Button as UIButton } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,7 +14,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { Loader2, Info } from "lucide-react";
 
-// Fallbacks locais (remova se tiver estes constantes em outro arquivo)
 const TIPOS_ORIGEM = { manutencao_pre_projeto: "manutencao_pre_projeto", execucao: "execucao" } as const;
 const LABELS_TIPO_ORIGEM: Record<string, string> = {
   manutencao_pre_projeto: "Manutenção (pré-projeto)",
@@ -49,7 +49,7 @@ const formSchema = z.object({
   longitude_inicial: z.string().optional(),
 });
 
-type FormData = z.infer<typeof formSchema>;
+export type IntervencoesCilindrosFormData = z.infer<typeof formSchema>;
 
 export interface IntervencoesCilindrosFormProps {
   tipoOrigem?: "manutencao_pre_projeto" | "execucao";
@@ -73,6 +73,12 @@ export interface IntervencoesCilindrosFormProps {
   loteId?: string;
   rodoviaId?: string;
   onIntervencaoRegistrada?: () => void;
+  // props extras para compatibilidade com chamadas genéricas
+  snvIdentificado?: string | null;
+  snvConfianca?: string | null;
+  snvDistancia?: number | null;
+  placaSelecionada?: any;
+  [key: string]: any;
 }
 
 export function IntervencoesCilindrosForm({
@@ -90,7 +96,7 @@ export function IntervencoesCilindrosForm({
   const tipoOrigem = tipoOrigemProp || "execucao";
   const isManutencaoRotineira = tipoOrigem === "manutencao_pre_projeto";
 
-  const form = useForm<FormData>({
+  const form = useForm<IntervencoesCilindrosFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       data_intervencao: new Date().toISOString().split("T")[0],
@@ -203,11 +209,11 @@ export function IntervencoesCilindrosForm({
         <CardDescription>{`Origem: ${LABELS_TIPO_ORIGEM[tipoOrigem]}`}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <Form {...(form as any)}>
+          <form onSubmit={(form as any).handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="data_intervencao"
                 render={({ field }) => (
                   <FormItem>
@@ -220,7 +226,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="snv"
                 render={({ field }) => (
                   <FormItem>
@@ -233,7 +239,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="solucao"
                 render={({ field }) => (
                   <FormItem>
@@ -259,7 +265,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="motivo"
                 render={({ field }) => (
                   <FormItem>
@@ -289,7 +295,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="km_inicial"
                 render={({ field }) => (
                   <FormItem>
@@ -302,7 +308,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="km_final"
                 render={({ field }) => (
                   <FormItem>
@@ -315,7 +321,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="local_implantacao"
                 render={({ field }) => (
                   <FormItem>
@@ -328,7 +334,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="espacamento_m"
                 render={({ field }) => (
                   <FormItem>
@@ -341,7 +347,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="extensao_km"
                 render={({ field }) => (
                   <FormItem>
@@ -354,7 +360,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="cor_corpo"
                 render={({ field }) => (
                   <FormItem>
@@ -367,7 +373,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="cor_refletivo"
                 render={({ field }) => (
                   <FormItem>
@@ -380,7 +386,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="tipo_refletivo"
                 render={({ field }) => (
                   <FormItem>
@@ -393,7 +399,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="quantidade"
                 render={({ field }) => (
                   <FormItem>
@@ -406,7 +412,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="latitude_inicial"
                 render={({ field }) => (
                   <FormItem>
@@ -419,7 +425,7 @@ export function IntervencoesCilindrosForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={(form as any).control}
                 name="longitude_inicial"
                 render={({ field }) => (
                   <FormItem>
@@ -433,7 +439,7 @@ export function IntervencoesCilindrosForm({
               />
             </div>
             {!hideSubmitButton && (
-              <Button type="submit" disabled={isSubmitting} className="w-full">
+              <UIButton type="submit" disabled={isSubmitting} className="w-full">
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando…
@@ -441,7 +447,7 @@ export function IntervencoesCilindrosForm({
                 ) : (
                   "Registrar Intervenção"
                 )}
-              </Button>
+              </UIButton>
             )}
             {motivoObrigatorio && (
               <div className="flex items-start gap-2 text-destructive text-sm">
