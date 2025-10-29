@@ -1,5 +1,4 @@
-// ==============================
-// IntervencoesCilindrosForm.tsx
+// IntervencoesCilindrosForm.tsx (routerless-safe)
 // ==============================
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -12,7 +11,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, Info } from "lucide-react";
-import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstruturais";
+
+// Fallbacks locais (remova se tiver estes constantes em outro arquivo)
+const TIPOS_ORIGEM = { manutencao_pre_projeto: "manutencao_pre_projeto", execucao: "execucao" } as const;
+const LABELS_TIPO_ORIGEM: Record<string, string> = {
+  manutencao_pre_projeto: "Manutenção (pré-projeto)",
+  execucao: "Execução",
+};
+const CAMPOS_ESTRUTURAIS: Record<string, readonly string[]> = {
+  cilindros: ["snv", "km_inicial", "km_final"],
+};
 
 const SOLUCOES_CILINDROS = ["Manter", "Remover", "Implantar", "Substituir"] as const;
 const MOTIVOS_REMOCAO_SUBSTITUICAO = [
@@ -57,16 +65,12 @@ export interface IntervencoesCilindrosFormProps {
     tipo_refletivo?: string;
     quantidade?: number;
   };
-  /** Intervenção selecionada no viewer para preencher o formulário em modo de visualização/edição controlada */
-  intervencaoSelecionada?: any;
-  /** Quando usado como formulário controlado pelo pai, não faz insert — apenas propaga mudanças */
+  intervencaoSelecionada?: any; // vinda do "olhinho"
   modo?: "normal" | "controlado";
   onDataChange?: (data: any) => void;
-  /** Esconde botão de submit quando for apenas visualização/controle externo */
   hideSubmitButton?: boolean;
   loteId?: string;
   rodoviaId?: string;
-  /** callback após insert no modo normal */
   onIntervencaoRegistrada?: () => void;
 }
 
@@ -106,10 +110,9 @@ export function IntervencoesCilindrosForm({
     },
   });
 
-  // 🔁 Quando vem uma intervenção selecionada (olhinho), preencher o form
+  // Preenche ao abrir pelo "olhinho"
   useEffect(() => {
     if (!intervencaoSelecionada) return;
-
     const toStr = (v: any) => (v === null || v === undefined ? "" : String(v));
     const toDateInput = (v: any) => {
       try {
@@ -119,36 +122,34 @@ export function IntervencoesCilindrosForm({
         return "";
       }
     };
-
+    const S = intervencaoSelecionada;
     form.reset({
-      data_intervencao: toDateInput(intervencaoSelecionada.data_intervencao || intervencaoSelecionada.created_at),
-      snv: toStr(intervencaoSelecionada.snv),
-      solucao: toStr(intervencaoSelecionada.solucao),
-      motivo: toStr(intervencaoSelecionada.motivo || "-"),
-      km_inicial: toStr(intervencaoSelecionada.km_inicial),
-      km_final: toStr(intervencaoSelecionada.km_final),
-      local_implantacao: toStr(intervencaoSelecionada.local_implantacao),
-      espacamento_m: toStr(intervencaoSelecionada.espacamento_m),
-      extensao_km: toStr(intervencaoSelecionada.extensao_km),
-      cor_corpo: toStr(intervencaoSelecionada.cor_corpo),
-      cor_refletivo: toStr(intervencaoSelecionada.cor_refletivo),
-      tipo_refletivo: toStr(intervencaoSelecionada.tipo_refletivo),
-      quantidade: toStr(intervencaoSelecionada.quantidade),
-      latitude_inicial: toStr(intervencaoSelecionada.latitude_inicial),
-      longitude_inicial: toStr(intervencaoSelecionada.longitude_inicial),
+      data_intervencao: toDateInput(S.data_intervencao || S.created_at),
+      snv: toStr(S.snv),
+      solucao: toStr(S.solucao),
+      motivo: toStr(S.motivo || "-"),
+      km_inicial: toStr(S.km_inicial),
+      km_final: toStr(S.km_final),
+      local_implantacao: toStr(S.local_implantacao),
+      espacamento_m: toStr(S.espacamento_m),
+      extensao_km: toStr(S.extensao_km),
+      cor_corpo: toStr(S.cor_corpo),
+      cor_refletivo: toStr(S.cor_refletivo),
+      tipo_refletivo: toStr(S.tipo_refletivo),
+      quantidade: toStr(S.quantidade),
+      latitude_inicial: toStr(S.latitude_inicial),
+      longitude_inicial: toStr(S.longitude_inicial),
     });
   }, [intervencaoSelecionada, form]);
 
-  // 🔄 Propaga mudanças em tempo real quando controlado
+  // Propaga mudanças quando controlado
   useEffect(() => {
     if (modo !== "controlado" || !onDataChange) return;
-    const sub = form.watch((value) => {
-      onDataChange(value);
-    });
+    const sub = form.watch((value) => onDataChange(value));
     return () => sub.unsubscribe();
   }, [form, modo, onDataChange]);
 
-  // 🔧 Se usuário preencher km_inicial/km_final, calcula extensão_km automaticamente (não sobrescreve se já houver)
+  // Calcula extensão se km_inicial/km_final mudarem
   useEffect(() => {
     const sub = form.watch((value, { name }) => {
       if (name === "km_inicial" || name === "km_final") {
@@ -165,14 +166,11 @@ export function IntervencoesCilindrosForm({
     return () => sub.unsubscribe();
   }, [form]);
 
-  const onSubmit = async (_data: FormData) => {
-    // No modo controlado, quem salva é o pai (RegistrarIntervencaoCampo)
+  const onSubmit = async () => {
     if (modo === "controlado") {
       toast.info("Dados prontos para envio pelo fluxo externo.");
       return;
     }
-
-    // Modo normal (se algum dia usar este form sozinho)
     try {
       setIsSubmitting(true);
       toast.success("Intervenção de cilindros registrada (modo normal).");
@@ -201,9 +199,7 @@ export function IntervencoesCilindrosForm({
     <Card>
       <CardHeader>
         <CardTitle>Intervenção em Cilindros Delimitadores</CardTitle>
-        <CardDescription>
-          {tipoOrigem ? `Origem: ${LABELS_TIPO_ORIGEM[tipoOrigem as keyof typeof TIPOS_ORIGEM] || tipoOrigem}` : ""}
-        </CardDescription>
+        <CardDescription>{`Origem: ${LABELS_TIPO_ORIGEM[tipoOrigem]}`}</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -222,7 +218,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="snv"
@@ -236,7 +231,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="solucao"
@@ -263,7 +257,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="motivo"
@@ -294,7 +287,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="km_inicial"
@@ -308,7 +300,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="km_final"
@@ -322,7 +313,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="local_implantacao"
@@ -336,7 +326,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="espacamento_m"
@@ -350,7 +339,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="extensao_km"
@@ -364,7 +352,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="cor_corpo"
@@ -378,7 +365,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="cor_refletivo"
@@ -392,7 +378,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="tipo_refletivo"
@@ -406,7 +391,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="quantidade"
@@ -420,7 +404,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="latitude_inicial"
@@ -434,7 +417,6 @@ export function IntervencoesCilindrosForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="longitude_inicial"
@@ -449,7 +431,6 @@ export function IntervencoesCilindrosForm({
                 )}
               />
             </div>
-
             {!hideSubmitButton && (
               <Button type="submit" disabled={isSubmitting} className="w-full">
                 {isSubmitting ? (
@@ -461,7 +442,6 @@ export function IntervencoesCilindrosForm({
                 )}
               </Button>
             )}
-
             {motivoObrigatorio && (
               <div className="flex items-start gap-2 text-destructive text-sm">
                 <Info className="h-4 w-4 mt-0.5" />
