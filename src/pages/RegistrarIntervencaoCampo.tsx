@@ -264,18 +264,45 @@ export default function RegistrarIntervencaoCampo() {
         throw new Error(`Tipo de elemento não mapeado: ${tipoSelecionado}`);
       }
 
-      // Campos permitidos em ficha_placa_intervencoes
-      const camposPermitidos = [
-        'ficha_placa_id', 'motivo', 'solucao', 'data_intervencao', 'placa_recuperada',
-        'suporte', 'substrato', 'tipo_pelicula_fundo_novo', 'retro_fundo',
-        'retro_orla_legenda', 'fora_plano_manutencao', 'justificativa_fora_plano',
-        'pendente_aprovacao_coordenador', 'coordenador_id', 'data_aprovacao_coordenador',
-        'aplicado_ao_inventario', 'observacao_coordenador', 'latitude_inicial',
-        'longitude_inicial', 'fotos_urls', 'tipo_origem', 'user_id',
-        'tipo', 'codigo', 'lado', 'material', 'largura_mm', 'altura_mm',
-        'lote_id', 'rodovia_id', 'km_inicial', 'snv', 'velocidade', 'posicao',
-        'qtde_suporte', 'tipo_secao_suporte', 'secao_suporte_mm', 'substrato_suporte',
-        'si_sinal_impresso', 'detalhamento_pagina', 'area_m2'
+   // 🔒 Campos permitidos por tipo de elemento (evita descartar dados sem querer)
+const CAMPOS_PERMITIDOS_POR_TIPO: Record<string, string[]> = {
+  // Placas (mantive sua lista original aqui)
+  'placas': [
+    'ficha_placa_id','motivo','solucao','data_intervencao','placa_recuperada',
+    'suporte','substrato','tipo_pelicula_fundo_novo','retro_fundo',
+    'retro_orla_legenda','fora_plano_manutencao','justificativa_fora_plano',
+    'pendente_aprovacao_coordenador','coordenador_id','data_aprovacao_coordenador',
+    'aplicado_ao_inventario','observacao_coordenador','latitude_inicial',
+    'longitude_inicial','fotos_urls','tipo_origem','user_id',
+    'tipo','codigo','lado','material','largura_mm','altura_mm',
+    'lote_id','rodovia_id','km_inicial','km_final','snv','velocidade','posicao',
+    'qtde_suporte','tipo_secao_suporte','secao_suporte_mm','substrato_suporte',
+    'si_sinal_impresso','detalhamento_pagina','area_m2'
+  ],
+
+  // ✅ Cilindros (principais campos usados no seu fluxo)
+  'cilindros': [
+    'ficha_cilindros_id','motivo','solucao','data_intervencao',
+    'pendente_aprovacao_coordenador','coordenador_id','data_aprovacao_coordenador',
+    'aplicado_ao_inventario','observacao_coordenador','latitude_inicial','longitude_inicial',
+    'latitude_final','longitude_final','fotos_urls','tipo_origem','user_id',
+    'lote_id','rodovia_id','snv','km_inicial','km_final',
+    // campos típicos de cilindros:
+    'cor_corpo','quantidade','espacamento_m','extensao_km','local_implantacao','posicao'
+  ],
+
+  // Outros tipos — adicione listas conforme necessidade
+  'defensas': ['defensa_id','motivo','solucao','data_intervencao','user_id','tipo_origem','lote_id','rodovia_id','km_inicial','km_final','snv','latitude_inicial','longitude_inicial','latitude_final','longitude_final','fotos_urls','pendente_aprovacao_coordenador','aplicado_ao_inventario','observacao_coordenador'],
+  'tachas':   ['ficha_tachas_id','motivo','solucao','data_intervencao','user_id','tipo_origem','lote_id','rodovia_id','km_inicial','km_final','snv','latitude_inicial','longitude_inicial','latitude_final','longitude_final','fotos_urls','pendente_aprovacao_coordenador','aplicado_ao_inventario','observacao_coordenador'],
+  'marcas_longitudinais': ['ficha_marcas_longitudinais_id','motivo','solucao','data_intervencao','user_id','tipo_origem','lote_id','rodovia_id','km_inicial','km_final','snv','latitude_inicial','longitude_inicial','latitude_final','longitude_final','fotos_urls','pendente_aprovacao_coordenador','aplicado_ao_inventario','observacao_coordenador','extensao_km'],
+  'inscricoes': ['ficha_inscricoes_id','motivo','solucao','data_intervencao','user_id','tipo_origem','lote_id','rodovia_id','km_inicial','km_final','snv','latitude_inicial','longitude_inicial','fotos_urls','pendente_aprovacao_coordenador','aplicado_ao_inventario','observacao_coordenador','area_m2'],
+  'porticos': ['ficha_porticos_id','motivo','solucao','data_intervencao','user_id','tipo_origem','lote_id','rodovia_id','km_inicial','snv','latitude_inicial','longitude_inicial','fotos_urls','pendente_aprovacao_coordenador','aplicado_ao_inventario','observacao_coordenador','posicao']
+};
+
+// Onde antes havia: const camposPermitidos = [ ... ];
+// Troque por:
+const camposPermitidos = CAMPOS_PERMITIDOS_POR_TIPO[tipoSelecionado] ?? [];
+
       ];
 
       // Mapeamento de nomes de campos: formulário → banco
