@@ -12,17 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, Info } from "lucide-react";
-// Fallback local — use isto se você NÃO tiver "@/constants/camposEstruturais" no projeto.
-// Se você já tiver esse arquivo, pode manter o import original e REMOVER este bloco.
-const TIPOS_ORIGEM = { manutencao_pre_projeto: "manutencao_pre_projeto", execucao: "execucao" } as const;
-const LABELS_TIPO_ORIGEM: Record<string, string> = {
-  manutencao_pre_projeto: "Manutenção (pré-projeto)",
-  execucao: "Execução",
-};
-const CAMPOS_ESTRUTURAIS: Record<string, readonly string[]> = {
-  cilindros: ["snv", "km_inicial", "km_final"], // ajuste se quiser bloquear mais campos
-};
-
+import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstruturais";
 
 const SOLUCOES_CILINDROS = ["Manter", "Remover", "Implantar", "Substituir"] as const;
 const MOTIVOS_REMOCAO_SUBSTITUICAO = [
@@ -199,7 +189,8 @@ export function IntervencoesCilindrosForm({
   const motivoAtual = form.watch("motivo");
   const mostrarMotivosNumerados = solucaoAtual === "Remover" || solucaoAtual === "Substituir";
   const solucaoObrigatoria = !solucaoAtual || solucaoAtual.trim() === "";
-  const motivoObrigatorio = mostrarMotivosNumerados && (!motivoAtual || motivoAtual === "-" || motivoAtual.trim() === "");
+  const motivoObrigatorio =
+    mostrarMotivosNumerados && (!motivoAtual || motivoAtual === "-" || motivoAtual.trim() === "");
 
   const isCampoEstruturalBloqueado = (campo: string) => {
     if (!isManutencaoRotineira) return false;
@@ -262,7 +253,9 @@ export function IntervencoesCilindrosForm({
                       </FormControl>
                       <SelectContent>
                         {SOLUCOES_CILINDROS.map((s) => (
-                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -287,7 +280,9 @@ export function IntervencoesCilindrosForm({
                           </SelectTrigger>
                           <SelectContent>
                             {MOTIVOS_REMOCAO_SUBSTITUICAO.map((m) => (
-                              <SelectItem key={m} value={m}>{m}</SelectItem>
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -478,7 +473,4 @@ export function IntervencoesCilindrosForm({
       </CardContent>
     </Card>
   );
-}
-
-
 }
