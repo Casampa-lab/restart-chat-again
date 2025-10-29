@@ -1,4 +1,3 @@
-// ======================================
 // RegistrarIntervencaoCampo.tsx (routerless-safe)
 // ======================================
 import { useState, useEffect, useMemo } from "react";
