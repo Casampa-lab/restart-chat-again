@@ -469,6 +469,3 @@ export function IntervencoesCilindrosForm({
     </Card>
   );
 }
-
-
-}

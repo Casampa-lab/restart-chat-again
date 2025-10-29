@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Capacitor } from "@capacitor/core";
 import { App as CapApp } from "@capacitor/app";
-import { ArrowLeft, MapPin, Camera, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
+import { ArrowLeft, MapPin, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
 import { IntervencoesCilindrosForm } from "@/components/IntervencoesCilindrosForm";
 
 const ELEMENTOS_LINEARES = ["marcas_longitudinais", "defensas", "cilindros", "tachas"] as const;
@@ -63,7 +63,6 @@ export default function RegistrarIntervencaoCampo() {
   const [dadosIntervencao, setDadosIntervencao] = useState<any | null>(null); // estado controlado pelo form
 
   const [fotos, setFotos] = useState<string[]>([]);
-  const [showCamera, setShowCamera] = useState(false);
 
   const [isConforme, setIsConforme] = useState(true);
   const [justificativaNC, setJustificativaNC] = useState("");
@@ -107,22 +106,17 @@ export default function RegistrarIntervencaoCampo() {
     }
   }, [position]);
 
-  // Tratamento do botão BACK físico durante captura de foto (evita sair para a tela anterior)
+  // Tratamento do botão BACK físico
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     const sub = CapApp.addListener("backButton", () => {
-      if (showCamera) {
-        setShowCamera(false);
-      } else {
-        // mantém o comportamento padrão (voltar para /modo-campo)
-        handleVoltar();
-      }
+      handleVoltar();
     });
     return () => {
       // @ts-ignore
       sub && sub.remove && sub.remove();
     };
-  }, [showCamera]);
+  }, []);
 
   // Helpers de normalização (ponto vs vírgula)
   const normalizeNumber = (v: any) => {
@@ -285,7 +279,7 @@ export default function RegistrarIntervencaoCampo() {
 
       console.log("📦 Payload pronto para insert:", payloadBase);
 
-      const { error } = await supabase.from(tabelaIntervencao).insert(payloadBase as any);
+      const { error } = await supabase.from(tabelaIntervencao as any).insert(payloadBase as any);
       if (error) throw error;
 
       toast.success("Intervenção registrada com sucesso!");
@@ -325,18 +319,6 @@ export default function RegistrarIntervencaoCampo() {
             Tipo selecionado a partir da necessidade: <strong>{necessidadeProp.tipo_elemento}</strong>
           </AlertDescription>
         </Alert>
-      )}
-
-      {/* Captura de fotos controlada: não muda a tela ao abrir/fechar */}
-      {showCamera && (
-        <CameraCapture
-          isOpen={showCamera}
-          onClose={() => setShowCamera(false)}
-          onCaptured={(urls) => {
-            handlePhotosChange(urls);
-            setShowCamera(false); // apenas fecha modal, não reseta a tela
-          }}
-        />
       )}
 
       <Card>
@@ -419,11 +401,23 @@ export default function RegistrarIntervencaoCampo() {
                 <MapPin className="mr-2 h-4 w-4" /> Capturar GPS final
               </Button>
             )}
-            <Button type="button" onClick={() => setShowCamera(true)}>
-              <Camera className="mr-2 h-4 w-4" /> Tirar foto
-            </Button>
-            <div className="text-sm text-muted-foreground">{fotos.length} foto(s) anexada(s)</div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Captura de fotos */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Fotos da Intervenção</CardTitle>
+          <CardDescription>Capture fotos da intervenção realizada</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CameraCapture
+            photos={fotos}
+            onPhotosChange={handlePhotosChange}
+            maxPhotos={5}
+            bucketName="intervencoes-fotos"
+          />
         </CardContent>
       </Card>
 
@@ -470,3 +464,4 @@ export default function RegistrarIntervencaoCampo() {
       </div>
     </div>
   );
+}
