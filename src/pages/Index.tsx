@@ -417,41 +417,68 @@ const Index = () => {
     );
   };
 
-  useEffect(() => {
-    const checkAdminOrCoordinator = async () => {
-      if (!user) return;
-      const {
-        data
-      } = await supabase.from("user_roles").select("role").eq("user_id", user.id).in("role", ["admin", "coordenador"]).maybeSingle();
-      setIsAdminOrCoordinator(!!data);
-    };
-    checkAdminOrCoordinator();
-  }, [user]);
-  const handleSessionStarted = () => {
-    refreshSession();
+ // imports (garanta que existam no topo do arquivo)
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
+// ...
+
+// Verificação de roles (admin/coordenador)
+useEffect(() => {
+  let alive = true;
+  const checkAdminOrCoordinator = async () => {
+    if (!user) return;
+    const { data /*, error*/ } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["admin", "coordenador"])
+      .maybeSingle();
+
+    if (!alive) return;
+    setIsAdminOrCoordinator(!!data);
   };
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    } else if (user) {
-      // Se for iOS moderno, SEMPRE ir para modo campo
-      if (isModernIOS) {
-        localStorage.setItem('modoAcesso', 'campo');
-        navigate('/modo-campo');
-        return;
-      }
-      
-      // Verificar se está no modo campo e redirecionar para /modo-campo
-      const modoAtual = localStorage.getItem('modoAcesso');
-      if (modoAtual === 'campo') {
-        navigate('/modo-campo');
-        return;
-      }
-      
-      // Só definir como 'web' se não houver modo definido
-      if (!modoAtual) {
-        localStorage.setItem('modoAcesso', 'web');
-      }
+  checkAdminOrCoordinator();
+  return () => {
+    alive = false;
+  };
+}, [user]);
+
+// callback existente
+const handleSessionStarted = () => {
+  refreshSession();
+};
+
+// Patch mínimo de navegação (não força /modo-campo nem muda lastRoute)
+const location = useLocation();
+const navigate = useNavigate();
+
+useEffect(() => {
+  if (!authLoading && !user) {
+    navigate("/auth", { replace: true });
+    return;
+  }
+  if (!user) return;
+
+  const modoAtual = localStorage.getItem("modoAcesso"); // 'campo' | 'web' | null
+  const pathname = location.pathname;
+
+  // Evita pular as telas intermediárias: só redireciona se já está em 'campo' e não estiver em /modo-campo
+  if (modoAtual === "campo" && !pathname.startsWith("/modo-campo")) {
+    navigate("/modo-campo", { replace: true });
+    return;
+  }
+
+  // Se não há modo definido, define 'web' como padrão sem redirecionar
+  if (!modoAtual) {
+    localStorage.setItem("modoAcesso", "web");
+  }
+
+  // Limpeza leve (mantém comportamento anterior)
+  sessionStorage.removeItem("vableCardHidden");
+}, [user, authLoading, location.pathname, navigate]);
+
+
       
       // Limpar flag de card VABLE oculto ao entrar (reaparece no próximo login)
       sessionStorage.removeItem('vableCardHidden');
