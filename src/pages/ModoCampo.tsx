@@ -1,15 +1,22 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Map, Wrench, AlertTriangle, Search, ChevronRight, ArrowLeft } from "lucide-react";
-import { useWorkSession } from "@/hooks/useWorkSession";
-import { useAuth } from "@/hooks/useAuth";
-import { SessionManagerMobile } from "@/components/SessionManagerMobile";
-import { Capacitor } from "@capacitor/core";
-import { App as CapApp } from "@capacitor/app";
-import { useIOSDetection } from "@/hooks/useIOSDetection";
-import SessionSelector from "@/components/SessionSelector";
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  Map, 
+  Wrench, 
+  AlertTriangle, 
+  Search,
+  ChevronRight,
+  ArrowLeft
+} from 'lucide-react';
+import { useWorkSession } from '@/hooks/useWorkSession';
+import { useAuth } from '@/hooks/useAuth';
+import { SessionManagerMobile } from '@/components/SessionManagerMobile';
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+import { useIOSDetection } from '@/hooks/useIOSDetection';
+import SessionSelector from '@/components/SessionSelector';
 
 export default function ModoCampo() {
   const navigate = useNavigate();
@@ -19,17 +26,17 @@ export default function ModoCampo() {
 
   // Salvar que o usuário está no modo campo
   useEffect(() => {
-    localStorage.setItem("modoAcesso", "campo");
-    localStorage.setItem("lastRoute", "/modo-campo");
+    localStorage.setItem('modoAcesso', 'campo');
+    localStorage.setItem('lastRoute', '/modo-campo');
   }, []);
 
   // Garantir que modo campo está ativo para iOS
   useEffect(() => {
-    const modoAtual = localStorage.getItem("modoAcesso");
-
+    const modoAtual = localStorage.getItem('modoAcesso');
+    
     // Se for iOS, sempre forçar modo campo
-    if (isModernIOS && modoAtual !== "campo") {
-      localStorage.setItem("modoAcesso", "campo");
+    if (isModernIOS && modoAtual !== 'campo') {
+      localStorage.setItem('modoAcesso', 'campo');
     }
   }, [isModernIOS]);
 
@@ -38,16 +45,18 @@ export default function ModoCampo() {
       try {
         await CapApp.minimizeApp();
       } catch (error) {
-        console.error("Erro ao minimizar app:", error);
+        console.error('Erro ao minimizar app:', error);
         await signOut();
-        navigate("/auth");
+        navigate('/auth');
       }
     } else {
-      const confirmLogout = window.confirm("Deseja sair do modo campo? Você será deslogado do sistema.");
-
+      const confirmLogout = window.confirm(
+        'Deseja sair do modo campo? Você será deslogado do sistema.'
+      );
+      
       if (confirmLogout) {
         await signOut();
-        navigate("/auth");
+        navigate('/auth');
       }
     }
   };
@@ -55,20 +64,19 @@ export default function ModoCampo() {
   const menuItems = [
     {
       icon: Wrench,
-      title: "Ações de Campo",
-      description: "Manutenção IN-3 ou Execução de Projeto",
-      path: "/modo-campo/escolher-elemento", // ← em vez de /registrar-intervencao
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
+      title: 'Ações de Campo',
+      description: 'Manutenção IN-3 ou Execução de Projeto',
+      path: '/modo-campo/registrar-intervencao',
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
     },
-
     {
       icon: Search,
-      title: "Controle de Qualidade",
-      description: "Fichas de verificação e retrorefletividade",
-      path: "/minhas-fichas-verificacao",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      title: 'Controle de Qualidade',
+      description: 'Fichas de verificação e retrorefletividade',
+      path: '/minhas-fichas-verificacao',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
     },
   ];
 
@@ -77,7 +85,12 @@ export default function ModoCampo() {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={handleVoltar} className="h-12 w-12">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleVoltar}
+            className="h-12 w-12"
+          >
             <ArrowLeft className="h-6 w-6" />
           </Button>
           <div>
@@ -88,9 +101,16 @@ export default function ModoCampo() {
 
         {/* Sessão Ativa */}
         {activeSession ? (
-          <SessionManagerMobile userId={user?.id!} activeSession={activeSession} onSessionChanged={refreshSession} />
+          <SessionManagerMobile
+            userId={user?.id!}
+            activeSession={activeSession}
+            onSessionChanged={refreshSession}
+          />
         ) : (
-          <SessionSelector userId={user?.id} onSessionStarted={refreshSession} />
+          <SessionSelector 
+            userId={user?.id} 
+            onSessionStarted={refreshSession}
+          />
         )}
 
         {/* Menu de Opções */}
