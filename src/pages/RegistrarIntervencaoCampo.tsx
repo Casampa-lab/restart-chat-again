@@ -222,70 +222,9 @@ export default function RegistrarIntervencaoCampo() {
         throw new Error(`Tipo de elemento não mapeado: ${tipoSelecionado}`);
       }
 
-      // Campos permitidos em ficha_placa_intervencoes (base existente)
-      const camposPermitidos = [
-        "ficha_placa_id",
-        "motivo",
-        "solucao",
-        "data_intervencao",
-        "placa_recuperada",
-        "suporte",
-        "substrato",
-        "tipo_pelicula_fundo_novo",
-        "retro_fundo",
-        "retro_orla_legenda",
-        "fora_plano_manutencao",
-        "justificativa_fora_plano",
-        "pendente_aprovacao_coordenador",
-        "coordenador_id",
-        "data_aprovacao_coordenador",
-        "aplicado_ao_inventario",
-        "observacao_coordenador",
-        "latitude_inicial",
-        "longitude_inicial",
-        "fotos_urls",
-        "tipo_origem",
-        "user_id",
-        "tipo",
-        "codigo",
-        "lado",
-        "material",
-        "largura_mm",
-        "altura_mm",
-        "lote_id",
-        "rodovia_id",
-        "km_inicial",
-        "snv",
-        "velocidade",
-        "posicao",
-        "qtde_suporte",
-        "tipo_secao_suporte",
-        "secao_suporte_mm",
-        "substrato_suporte",
-        "si_sinal_impresso",
-        "detalhamento_pagina",
-        "area_m2",
-      ];
-
-      // Mapeamento de nomes de campos: formulário → banco
-      const MAPEAMENTO_CAMPOS: Record<string, string> = {
-        tipo_placa: "tipo",
-        codigo_placa: "codigo",
-      };
-
-      // Filtrar apenas campos permitidos de dadosIntervencao
-      const payloadFiltrado: any = {};
-      Object.keys(dadosIntervencao).forEach((key) => {
-        const nomeCampo = MAPEAMENTO_CAMPOS[key] || key; // Mapear ou usar nome original
-
-        if (camposPermitidos.includes(nomeCampo)) {
-          payloadFiltrado[nomeCampo] = dadosIntervencao[key];
-        }
-      });
-
       // Montar payload base com campos comuns
       const payloadIntervencao: any = {
-        ...payloadFiltrado,
+        ...dadosIntervencao,
         user_id: user!.id,
         fotos_urls: fotos,
         latitude_inicial: parseFloat(manualPosition.latitude_inicial) || null,
