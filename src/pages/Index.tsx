@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {useLocation, useNavigate} from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkSession } from "@/hooks/useWorkSession";
 import { useSupervisora } from "@/hooks/useSupervisora";
@@ -39,7 +39,6 @@ import { useMarcoZeroRecente } from "@/hooks/useMarcoZeroRecente";
 import { ConsolidatedInventoryBadge } from "@/components/ConsolidatedInventoryBadge";
 const Index = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { isModernIOS } = useIOSDetection();
   const {
     user,
@@ -418,56 +417,48 @@ const Index = () => {
     );
   };
 
- // Verificação de roles (admin/coordenador)
-useEffect(() => {
-  let alive = true;
-  const checkAdminOrCoordinator = async () => {
-    if (!user) return;
-    const { data /*, error*/ } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .in("role", ["admin", "coordenador"])
-      .maybeSingle();
-
-    if (!alive) return;
-    setIsAdminOrCoordinator(!!data);
+  useEffect(() => {
+    const checkAdminOrCoordinator = async () => {
+      if (!user) return;
+      const {
+        data
+      } = await supabase.from("user_roles").select("role").eq("user_id", user.id).in("role", ["admin", "coordenador"]).maybeSingle();
+      setIsAdminOrCoordinator(!!data);
+    };
+    checkAdminOrCoordinator();
+  }, [user]);
+  const handleSessionStarted = () => {
+    refreshSession();
   };
-  checkAdminOrCoordinator();
-  return () => {
-    alive = false;
-  };
-}, [user]);
-
-// callback existente
-const handleSessionStarted = () => {
-  refreshSession();
-};
-
-useEffect(() => {
-  if (!authLoading && !user) {
-    navigate("/auth", { replace: true });
-    return;
-  }
-  if (!user) return;
-
-  const modoAtual = localStorage.getItem("modoAcesso"); // 'campo' | 'web' | null
-  const pathname = location.pathname;
-
-  // Evita pular as telas intermediárias: só redireciona se já está em 'campo' e não estiver em /modo-campo
-  if (modoAtual === "campo" && !pathname.startsWith("/modo-campo")) {
-    navigate("/modo-campo", { replace: true });
-    return;
-  }
-
-  // Se não há modo definido, define 'web' como padrão sem redirecionar
-  if (!modoAtual) {
-    localStorage.setItem("modoAcesso", "web");
-  }
-
-  // Limpeza leve (mantém comportamento anterior)
-  sessionStorage.removeItem("vableCardHidden");
-}, [user, authLoading, location.pathname, navigate]);
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    } else if (user) {
+      // Se for iOS moderno, SEMPRE ir para modo campo
+      if (isModernIOS) {
+        localStorage.setItem('modoAcesso', 'campo');
+        navigate('/modo-campo');
+        return;
+      }
+      
+      // Verificar se está no modo campo e redirecionar para /modo-campo
+      const modoAtual = localStorage.getItem('modoAcesso');
+      if (modoAtual === 'campo') {
+        navigate('/modo-campo');
+        return;
+      }
+      
+      // Só definir como 'web' se não houver modo definido
+      if (!modoAtual) {
+        localStorage.setItem('modoAcesso', 'web');
+      }
+      
+      // Limpar flag de card VABLE oculto ao entrar (reaparece no próximo login)
+      sessionStorage.removeItem('vableCardHidden');
+      
+      localStorage.setItem('lastRoute', '/');
+    }
+  }, [user, authLoading, navigate, isModernIOS]);
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -483,15 +474,13 @@ useEffect(() => {
   if (authLoading || sessionLoading) {
     return <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
+      </div>;
   }
 
   // Determinar qual logo usar
   const logoToDisplay = supervisora?.usar_logo_customizado && supervisora?.logo_url ? supervisora.logo_url : logoOperaVia;
   const logoAlt = supervisora?.usar_logo_customizado && supervisora?.logo_url ? `${supervisora.nome_empresa} - Sistema de Supervisão` : "OperaVia - Sistema de Supervisão de Operação Rodoviária";
-  
-  return (
-    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10 overflow-y-auto">
+  return <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-primary/10 via-background to-secondary/10 overflow-y-auto">
       <header className="bg-primary shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
@@ -965,8 +954,6 @@ useEffect(() => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
