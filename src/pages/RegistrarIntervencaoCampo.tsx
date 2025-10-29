@@ -62,7 +62,11 @@ export default function RegistrarIntervencaoCampo() {
   const necessidadeProp = location.state?.necessidade as any | undefined;
 
   const [modoOperacao, setModoOperacao] = useState<"manutencao" | "execucao" | null>(null);
-  const [tipoSelecionado, setTipoSelecionado] = useState<string>("");
+  const [tipoSelecionado, setTipoSelecionado] = useState<string>(() => {
+    const fromState = necessidadeProp?.tipo_elemento as string | undefined;
+    const fromQP = getQP("tipo") || undefined;
+    return fromState || fromQP || "";
+  });
   const [modoVisualizacao, setModoVisualizacao] = useState<"viewer" | "formulario">("viewer");
 
   const [elementoSelecionado, setElementoSelecionado] = useState<any>(null); // item do inventário quando for manutenção
@@ -70,7 +74,6 @@ export default function RegistrarIntervencaoCampo() {
   const [dadosIntervencao, setDadosIntervencao] = useState<any | null>(null); // estado controlado pelo form
 
   const [fotos, setFotos] = useState<string[]>([]);
-  const [showCamera, setShowCamera] = useState(false);
 
   const [isConforme, setIsConforme] = useState(true);
   const [justificativaNC, setJustificativaNC] = useState("");
@@ -88,19 +91,12 @@ export default function RegistrarIntervencaoCampo() {
     navigate("/modo-campo");
   };
 
-  // lê tipo do state ou ?tipo=cilindros
-const [tipoSelecionado, setTipoSelecionado] = useState<string>(() => {
-  const fromState = locationState?.necessidade?.tipo_elemento as string | undefined;
-  const fromQP = getQP("tipo") || undefined;
-  return fromState || fromQP || "";
-});
-
-// HOTFIX: se não tem tipo, volta para a escolha
-useEffect(() => {
-  if (!tipoSelecionado) {
-    if (typeof window !== "undefined") window.location.assign("/modo-campo/escolher-elemento");
-  }
-}, [tipoSelecionado]);
+  // HOTFIX: se não tem tipo, volta para a escolha
+  useEffect(() => {
+    if (!tipoSelecionado) {
+      if (typeof window !== "undefined") window.location.assign("/modo-campo/escolher-elemento");
+    }
+  }, [tipoSelecionado]);
 
   // Preencher tipo a partir da necessidade (quando veio da tela anterior)
   useEffect(() => {
@@ -128,22 +124,17 @@ useEffect(() => {
     }
   }, [position]);
 
-  // Tratamento do botão BACK físico durante captura de foto (evita sair para a tela anterior)
+  // Tratamento do botão BACK físico
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     const sub = CapApp.addListener("backButton", () => {
-      if (showCamera) {
-        setShowCamera(false);
-      } else {
-        // mantém o comportamento padrão (voltar para /modo-campo)
-        handleVoltar();
-      }
+      handleVoltar();
     });
     return () => {
       // @ts-ignore
       sub && sub.remove && sub.remove();
     };
-  }, [showCamera]);
+  }, []);
 
   // Helpers de normalização (ponto vs vírgula)
   const normalizeNumber = (v: any) => {
@@ -306,7 +297,7 @@ useEffect(() => {
 
       console.log("📦 Payload pronto para insert:", payloadBase);
 
-      const { error } = await supabase.from(tabelaIntervencao).insert(payloadBase as any);
+      const { error } = await supabase.from(tabelaIntervencao as any).insert(payloadBase);
       if (error) throw error;
 
       toast.success("Intervenção registrada com sucesso!");
@@ -348,17 +339,6 @@ useEffect(() => {
         </Alert>
       )}
 
-      {/* Captura de fotos controlada: não muda a tela ao abrir/fechar */}
-      {showCamera && (
-        <CameraCapture
-          isOpen={showCamera}
-          onClose={() => setShowCamera(false)}
-          onCaptured={(urls) => {
-            handlePhotosChange(urls);
-            setShowCamera(false); // apenas fecha modal, não reseta a tela
-          }}
-        />
-      )}
 
       <Card>
         <CardHeader>
@@ -440,11 +420,15 @@ useEffect(() => {
                 <MapPin className="mr-2 h-4 w-4" /> Capturar GPS final
               </Button>
             )}
-            <Button type="button" onClick={() => setShowCamera(true)}>
-              <Camera className="mr-2 h-4 w-4" /> Tirar foto
-            </Button>
-            <div className="text-sm text-muted-foreground">{fotos.length} foto(s) anexada(s)</div>
           </div>
+
+          {/* Componente de captura de fotos */}
+          <CameraCapture
+            photos={fotos}
+            onPhotosChange={setFotos}
+            maxPhotos={5}
+            bucketName="intervencoes-fotos"
+          />
         </CardContent>
       </Card>
 
@@ -491,3 +475,4 @@ useEffect(() => {
       </div>
     </div>
   );
+}
