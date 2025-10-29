@@ -223,10 +223,12 @@ export default function RegistrarIntervencaoCampo() {
       }
 
       // Montar payload base com campos comuns
+      // Remover fotos_urls de dadosIntervencao para evitar sobrescrever o array correto
+      const { fotos_urls, ...dadosSemFotos } = dadosIntervencao || {};
       const payloadIntervencao: any = {
-        ...dadosIntervencao,
+        ...dadosSemFotos,
+        fotos_urls: fotos, // URLs corretas das fotos já enviadas ao Storage
         user_id: user!.id,
-        fotos_urls: fotos,
         latitude_inicial: parseFloat(manualPosition.latitude_inicial) || null,
         longitude_inicial: parseFloat(manualPosition.longitude_inicial) || null,
         pendente_aprovacao_coordenador: isConforme,
