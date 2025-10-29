@@ -224,20 +224,37 @@ export default function RegistrarIntervencaoCampo() {
       // Campos permitidos para cilindros — cobre km_final e GPS final
       const CAMPOS_PERMITIDOS = new Set([
         // chaves estruturais comuns
-        "user_id", "tipo_origem", "lote_id", "rodovia_id",
+        "user_id",
+        "tipo_origem",
+        "lote_id",
+        "rodovia_id",
         // FK do elemento
         campoFK,
         // localização
-        "snv", "km_inicial", "km_final",
-        "latitude_inicial", "longitude_inicial", "latitude_final", "longitude_final",
+        "snv",
+        "km_inicial",
+        "km_final",
+        "latitude_inicial",
+        "longitude_inicial",
+        "latitude_final",
+        "longitude_final",
         // fotos
         "fotos_urls",
         // conteúdo específico
-        "data_intervencao", "solucao", "motivo",
-        "local_implantacao", "espacamento_m", "extensao_km",
-        "cor_corpo", "cor_refletivo", "tipo_refletivo", "quantidade",
+        "data_intervencao",
+        "solucao",
+        "motivo",
+        "local_implantacao",
+        "espacamento_m",
+        "extensao_km",
+        "cor_corpo",
+        "cor_refletivo",
+        "tipo_refletivo",
+        "quantidade",
         // flags de fluxo
-        "pendente_aprovacao_coordenador", "aplicado_ao_inventario", "observacao_coordenador",
+        "pendente_aprovacao_coordenador",
+        "aplicado_ao_inventario",
+        "observacao_coordenador",
       ]);
 
       // Mapeia dados do form controlado + normalizações
@@ -301,7 +318,10 @@ export default function RegistrarIntervencaoCampo() {
   };
 
   // UI auxiliar
-  const isLinear = useMemo(() => (ELEMENTOS_LINEARES as readonly string[]).includes(tipoSelecionado), [tipoSelecionado]);
+  const isLinear = useMemo(
+    () => (ELEMENTOS_LINEARES as readonly string[]).includes(tipoSelecionado),
+    [tipoSelecionado],
+  );
 
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
@@ -341,7 +361,9 @@ export default function RegistrarIntervencaoCampo() {
       <Card>
         <CardHeader>
           <CardTitle>Dados de Localização</CardTitle>
-          <CardDescription>Informe o trecho e capture GPS. Para elementos lineares, preencha também o ponto final.</CardDescription>
+          <CardDescription>
+            Informe o trecho e capture GPS. Para elementos lineares, preencha também o ponto final.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
@@ -461,7 +483,9 @@ export default function RegistrarIntervencaoCampo() {
       </Card>
 
       <div className="flex items-center justify-end gap-3">
-        <Button type="button" variant="secondary" onClick={() => setModoVisualizacao("viewer")}>Cancelar</Button>
+        <Button type="button" variant="secondary" onClick={() => setModoVisualizacao("viewer")}>
+          Cancelar
+        </Button>
         <Button type="button" onClick={handleEnviar} disabled={loading}>
           {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
           <span className="ml-2">Enviar intervenção</span>
@@ -469,3 +493,4 @@ export default function RegistrarIntervencaoCampo() {
       </div>
     </div>
   );
+}
