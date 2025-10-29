@@ -299,11 +299,7 @@ const CAMPOS_PERMITIDOS_POR_TIPO: Record<string, string[]> = {
   'porticos': ['ficha_porticos_id','motivo','solucao','data_intervencao','user_id','tipo_origem','lote_id','rodovia_id','km_inicial','snv','latitude_inicial','longitude_inicial','fotos_urls','pendente_aprovacao_coordenador','aplicado_ao_inventario','observacao_coordenador','posicao']
 };
 
-// Onde antes havia: const camposPermitidos = [ ... ];
-// Troque por:
 const camposPermitidos = CAMPOS_PERMITIDOS_POR_TIPO[tipoSelecionado] ?? [];
-
-      ];
 
       // Mapeamento de nomes de campos: formulário → banco
       const MAPEAMENTO_CAMPOS: Record<string, string> = {
