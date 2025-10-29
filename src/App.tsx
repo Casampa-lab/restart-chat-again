@@ -32,6 +32,7 @@ import MeusElementosPendentes from "./pages/MeusElementosPendentes";
 import RelatorioMedicao from "./pages/RelatorioMedicao";
 import ReconciliacaoPendente from "./pages/ReconciliacaoPendente";
 import ModoCampo from "./pages/ModoCampo";
+import EscolherElemento from "./pages/EscolherElemento";
 import InventarioDinamicoComAlerta from "./pages/InventarioDinamicoComAlerta";
 import RegistrarIntervencaoCampo from "./pages/RegistrarIntervencaoCampo";
 import AuditoriaSinalizacoes from "./pages/AuditoriaSinalizacoes";
@@ -63,6 +64,7 @@ const App = () => (
         <Route path="/modulos" element={<Modulos />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/modo-campo" element={<ModoCampo />} />
+        <Route path="/modo-campo/escolher-elemento" element={<EscolherElemento />} />
         <Route path="/minhas-ncs" element={<MinhasNCs />} />
         <Route path="/meus-registros-nc" element={<MeusRegistrosNC />} />
         <Route path="/minhas-fichas-verificacao" element={<MinhasFichasVerificacao />} />
