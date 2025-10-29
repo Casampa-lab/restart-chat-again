@@ -1,3 +1,6 @@
+// ==============================
+// IntervencoesCilindrosForm.tsx
+// ==============================
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,23 +11,16 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Milestone, Lock, Info } from "lucide-react";
-import { useTipoOrigem } from "@/hooks/useTipoOrigem";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
+import { Loader2, Info } from "lucide-react";
 import { TIPOS_ORIGEM, LABELS_TIPO_ORIGEM, CAMPOS_ESTRUTURAIS } from "@/constants/camposEstruturais";
 
-const SOLUCOES_CILINDROS = ["Manter", "Remover", "Implantar", "Substituir"];
-
+const SOLUCOES_CILINDROS = ["Manter", "Remover", "Implantar", "Substituir"] as const;
 const MOTIVOS_REMOCAO_SUBSTITUICAO = [
   "1 - Material fora do padrão das soluções propostas/obsoleto",
   "2 - Material dentro do padrão das soluções, porém, sofreu atualização com os novos parâmetros levantados",
   "3 - Material danificado",
   "4 - Encontra-se em local impróprio/indevido",
-];
+] as const;
 
 const formSchema = z.object({
   data_intervencao: z.string().min(1, "Data é obrigatória"),
@@ -46,33 +42,44 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-interface IntervencoesCilindrosFormProps {
+export interface IntervencoesCilindrosFormProps {
   tipoOrigem?: "manutencao_pre_projeto" | "execucao";
   cilindroSelecionado?: {
     id: string;
     km_inicial: number;
     km_final: number;
     snv?: string;
+    local_implantacao?: string;
+    espacamento_m?: number;
+    extensao_km?: number;
+    cor_corpo?: string;
+    cor_refletivo?: string;
+    tipo_refletivo?: string;
+    quantidade?: number;
   };
+  /** Intervenção selecionada no viewer para preencher o formulário em modo de visualização/edição controlada */
   intervencaoSelecionada?: any;
-  onIntervencaoRegistrada?: () => void;
+  /** Quando usado como formulário controlado pelo pai, não faz insert — apenas propaga mudanças */
   modo?: "normal" | "controlado";
   onDataChange?: (data: any) => void;
+  /** Esconde botão de submit quando for apenas visualização/controle externo */
   hideSubmitButton?: boolean;
   loteId?: string;
   rodoviaId?: string;
+  /** callback após insert no modo normal */
+  onIntervencaoRegistrada?: () => void;
 }
 
 export function IntervencoesCilindrosForm({
   tipoOrigem: tipoOrigemProp,
   cilindroSelecionado,
   intervencaoSelecionada,
-  onIntervencaoRegistrada,
-  modo = "normal",
+  modo = "controlado",
   onDataChange,
-  hideSubmitButton = false,
+  hideSubmitButton = true,
   loteId,
   rodoviaId,
+  onIntervencaoRegistrada,
 }: IntervencoesCilindrosFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const tipoOrigem = tipoOrigemProp || "execucao";
@@ -87,22 +94,22 @@ export function IntervencoesCilindrosForm({
       motivo: "-",
       km_inicial: cilindroSelecionado?.km_inicial?.toString() || "",
       km_final: cilindroSelecionado?.km_final?.toString() || "",
-      local_implantacao: "",
-      espacamento_m: "",
-      extensao_km: "",
-      cor_corpo: "",
-      cor_refletivo: "",
-      tipo_refletivo: "",
-      quantidade: "",
+      local_implantacao: cilindroSelecionado?.local_implantacao || "",
+      espacamento_m: cilindroSelecionado?.espacamento_m?.toString() || "",
+      extensao_km: cilindroSelecionado?.extensao_km?.toString() || "",
+      cor_corpo: cilindroSelecionado?.cor_corpo || "",
+      cor_refletivo: cilindroSelecionado?.cor_refletivo || "",
+      tipo_refletivo: cilindroSelecionado?.tipo_refletivo || "",
+      quantidade: cilindroSelecionado?.quantidade?.toString() || "",
       latitude_inicial: "",
       longitude_inicial: "",
     },
   });
 
+  // 🔁 Quando vem uma intervenção selecionada (olhinho), preencher o form
   useEffect(() => {
     if (!intervencaoSelecionada) return;
 
-    // Converte valores para string, mantendo campos vazios limpos
     const toStr = (v: any) => (v === null || v === undefined ? "" : String(v));
     const toDateInput = (v: any) => {
       try {
@@ -113,7 +120,6 @@ export function IntervencoesCilindrosForm({
       }
     };
 
-    // Atualiza todos os campos do formulário
     form.reset({
       data_intervencao: toDateInput(intervencaoSelecionada.data_intervencao || intervencaoSelecionada.created_at),
       snv: toStr(intervencaoSelecionada.snv),
@@ -133,161 +139,61 @@ export function IntervencoesCilindrosForm({
     });
   }, [intervencaoSelecionada, form]);
 
-  const isCampoEstruturalBloqueado = (campo: string) => {
-    if (!isManutencaoRotineira) return false;
-    return (CAMPOS_ESTRUTURAIS["cilindros"] as readonly string[]).includes(campo);
+  // 🔄 Propaga mudanças em tempo real quando controlado
+  useEffect(() => {
+    if (modo !== "controlado" || !onDataChange) return;
+    const sub = form.watch((value) => {
+      onDataChange(value);
+    });
+    return () => sub.unsubscribe();
+  }, [form, modo, onDataChange]);
+
+  // 🔧 Se usuário preencher km_inicial/km_final, calcula extensão_km automaticamente (não sobrescreve se já houver)
+  useEffect(() => {
+    const sub = form.watch((value, { name }) => {
+      if (name === "km_inicial" || name === "km_final") {
+        const ki = Number(String(value.km_inicial || "").replace(",", "."));
+        const kf = Number(String(value.km_final || "").replace(",", "."));
+        if (!isNaN(ki) && !isNaN(kf) && kf >= ki) {
+          const ext = (kf - ki).toFixed(3);
+          if (!value.extensao_km || value.extensao_km.trim() === "") {
+            form.setValue("extensao_km", ext, { shouldDirty: true, shouldValidate: false });
+          }
+        }
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [form]);
+
+  const onSubmit = async (_data: FormData) => {
+    // No modo controlado, quem salva é o pai (RegistrarIntervencaoCampo)
+    if (modo === "controlado") {
+      toast.info("Dados prontos para envio pelo fluxo externo.");
+      return;
+    }
+
+    // Modo normal (se algum dia usar este form sozinho)
+    try {
+      setIsSubmitting(true);
+      toast.success("Intervenção de cilindros registrada (modo normal).");
+      onIntervencaoRegistrada?.();
+      form.reset();
+    } catch (e: any) {
+      toast.error(e?.message || "Erro ao registrar intervenção.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const solucaoAtual = form.watch("solucao");
   const motivoAtual = form.watch("motivo");
   const mostrarMotivosNumerados = solucaoAtual === "Remover" || solucaoAtual === "Substituir";
-  const motivoObrigatorio =
-    mostrarMotivosNumerados && (!motivoAtual || motivoAtual === "-" || motivoAtual.trim() === "");
   const solucaoObrigatoria = !solucaoAtual || solucaoAtual.trim() === "";
+  const motivoObrigatorio = mostrarMotivosNumerados && (!motivoAtual || motivoAtual === "-" || motivoAtual.trim() === "");
 
-  // Preencher formulário com dados do cilindro selecionado
-  useEffect(() => {
-    if (cilindroSelecionado && modo === "normal") {
-      console.log("🔄 Reset do form com cilindro selecionado:", cilindroSelecionado.id);
-      form.reset({
-        data_intervencao: new Date().toISOString().split("T")[0],
-        snv: (cilindroSelecionado as any).snv || "",
-        // NÃO resetar solucao para permitir que o usuário mantenha a seleção
-        motivo: "-",
-        km_inicial: cilindroSelecionado.km_inicial?.toString() || "",
-        km_final: cilindroSelecionado.km_final?.toString() || "",
-        local_implantacao: (cilindroSelecionado as any).local_implantacao || "",
-        espacamento_m: (cilindroSelecionado as any).espacamento_m?.toString() || "",
-        extensao_km: (cilindroSelecionado as any).extensao_km?.toString() || "",
-        cor_corpo: (cilindroSelecionado as any).cor_corpo || "",
-        cor_refletivo: (cilindroSelecionado as any).cor_refletivo || "",
-        tipo_refletivo: (cilindroSelecionado as any).tipo_refletivo || "",
-        quantidade: (cilindroSelecionado as any).quantidade?.toString() || "",
-        latitude_inicial: "",
-        longitude_inicial: "",
-      });
-    }
-  }, [cilindroSelecionado, modo, form]);
-
-  // Resetar motivo quando solução mudar
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === "solucao") {
-        if (value.solucao === "Manter" || value.solucao === "Implantar") {
-          form.setValue("motivo", "-");
-        } else if (value.solucao === "Remover" || value.solucao === "Substituir") {
-          form.setValue("motivo", "");
-        }
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form]);
-
-  // Propagar mudanças em tempo real no modo controlado
-  useEffect(() => {
-    if (modo === "controlado" && onDataChange) {
-      const subscription = form.watch((value) => {
-        onDataChange(value);
-      });
-      return () => subscription.unsubscribe();
-    }
-  }, [form, modo, onDataChange]);
-
-  const onSubmit = async (data: FormData) => {
-    if (modo === "controlado") {
-      if (onDataChange) onDataChange(data);
-      return;
-    }
-
-    // Validação: Manutenção Rotineira exige cilindro existente
-    if (isManutencaoRotineira && !cilindroSelecionado) {
-      toast.error("Para Manutenção Rotineira, selecione um cilindro do inventário primeiro");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    // Log de debug DETALHADO
-    console.log("🔍 Estado RAW do form (getValues):", form.getValues());
-    console.log("📋 Dados recebidos no onSubmit:", data);
-    console.log("🎯 Campo solucao específico:", {
-      raw: form.getValues("solucao"),
-      fromData: data.solucao,
-      length: data.solucao?.length,
-      type: typeof data.solucao,
-      isEmpty: !data.solucao || data.solucao.trim() === "",
-    });
-
-    // Validar solução obrigatória
-    if (!data.solucao || data.solucao.trim() === "") {
-      toast.error("⚠️ Selecione uma Solução antes de registrar a intervenção");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Validar motivo condicional
-    if (
-      (data.solucao === "Remover" || data.solucao === "Substituir") &&
-      (!data.motivo || data.motivo === "-" || data.motivo.trim() === "")
-    ) {
-      toast.error("⚠️ Selecione um motivo específico para Remoção ou Substituição");
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      // Obter usuário autenticado
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Você precisa estar autenticado para registrar uma intervenção");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Validar lote e rodovia obrigatórios
-      if (!loteId || !rodoviaId) {
-        toast.error("Lote e rodovia são obrigatórios");
-        setIsSubmitting(false);
-        return;
-      }
-
-      const { error } = await supabase.from("ficha_cilindros_intervencoes").insert({
-        ficha_cilindros_id: cilindroSelecionado?.id || null,
-        data_intervencao: data.data_intervencao,
-        solucao: data.solucao,
-        motivo: data.motivo,
-        km_inicial: data.km_inicial ? parseFloat(data.km_inicial) : null,
-        km_final: data.km_final ? parseFloat(data.km_final) : null,
-        snv: data.snv || null,
-        local_implantacao: data.local_implantacao || null,
-        espacamento_m: data.espacamento_m ? parseFloat(data.espacamento_m) : null,
-        extensao_km: data.extensao_km ? parseFloat(data.extensao_km) : null,
-        cor_corpo: data.cor_corpo || null,
-        cor_refletivo: data.cor_refletivo || null,
-        tipo_refletivo: data.tipo_refletivo || null,
-        quantidade: data.quantidade ? parseInt(data.quantidade) : null,
-        latitude_inicial: data.latitude_inicial ? parseFloat(data.latitude_inicial) : null,
-        longitude_inicial: data.longitude_inicial ? parseFloat(data.longitude_inicial) : null,
-        tipo_origem: tipoOrigem,
-        user_id: user.id,
-        lote_id: loteId,
-        rodovia_id: rodoviaId,
-      });
-
-      if (error) throw error;
-
-      toast.success("Intervenção registrada com sucesso!");
-      form.reset();
-      onIntervencaoRegistrada?.();
-    } catch (error: any) {
-      console.error("Erro ao registrar intervenção:", error);
-      toast.error("Erro ao registrar intervenção: " + error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const isCampoEstruturalBloqueado = (campo: string) => {
+    if (!isManutencaoRotineira) return false;
+    return (CAMPOS_ESTRUTURAIS["cilindros"] as readonly string[]).includes(campo);
   };
 
   return (
@@ -295,15 +201,12 @@ export function IntervencoesCilindrosForm({
       <CardHeader>
         <CardTitle>Intervenção em Cilindros Delimitadores</CardTitle>
         <CardDescription>
-          {cilindroSelecionado
-            ? `Registrando intervenção para cilindro entre km ${cilindroSelecionado.km_inicial} - ${cilindroSelecionado.km_final}${cilindroSelecionado.snv ? ` (SNV: ${cilindroSelecionado.snv})` : ""}`
-            : "Selecione um cilindro do inventário para registrar intervenção"}
+          {tipoOrigem ? `Origem: ${LABELS_TIPO_ORIGEM[tipoOrigem as keyof typeof TIPOS_ORIGEM] || tipoOrigem}` : ""}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Dados Básicos da Intervenção */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -341,25 +244,15 @@ export function IntervencoesCilindrosForm({
                     <FormLabel className={solucaoObrigatoria ? "text-destructive font-semibold" : ""}>
                       Solução <span className="text-destructive">*</span>
                     </FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        console.log("✅ Solução SELECIONADA pelo usuário:", value);
-                        console.log("📊 Estado do form ANTES do onChange:", form.getValues("solucao"));
-                        field.onChange(value);
-                        console.log("📊 Estado do form DEPOIS do onChange:", form.getValues("solucao"));
-                      }}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione a solução" />
+                          <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {SOLUCOES_CILINDROS.map((sol) => (
-                          <SelectItem key={sol} value={sol}>
-                            {sol}
-                          </SelectItem>
+                        {SOLUCOES_CILINDROS.map((s) => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -373,29 +266,25 @@ export function IntervencoesCilindrosForm({
                 name="motivo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className={mostrarMotivosNumerados ? "text-destructive font-semibold" : ""}>
+                    <FormLabel className={motivoObrigatorio ? "text-destructive font-semibold" : ""}>
                       Motivo {mostrarMotivosNumerados && <span className="text-destructive">*</span>}
                     </FormLabel>
-                    {mostrarMotivosNumerados ? (
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
+                    <FormControl>
+                      {mostrarMotivosNumerados ? (
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione o motivo" />
                           </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {MOTIVOS_REMOCAO_SUBSTITUICAO.map((motivo) => (
-                            <SelectItem key={motivo} value={motivo}>
-                              {motivo}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <FormControl>
-                        <Input value="-" disabled className="bg-muted text-muted-foreground" />
-                      </FormControl>
-                    )}
+                          <SelectContent>
+                            {MOTIVOS_REMOCAO_SUBSTITUICAO.map((m) => (
+                              <SelectItem key={m} value={m}>{m}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input placeholder="-" {...field} />
+                      )}
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -408,7 +297,7 @@ export function IntervencoesCilindrosForm({
                   <FormItem>
                     <FormLabel>km Inicial</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.001" placeholder="Ex: 100.500" {...field} />
+                      <Input inputMode="decimal" placeholder="Ex: 12,345" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -422,7 +311,133 @@ export function IntervencoesCilindrosForm({
                   <FormItem>
                     <FormLabel>km Final</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.001" placeholder="Ex: 100.800" {...field} />
+                      <Input inputMode="decimal" placeholder="Ex: 12,900" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="local_implantacao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Local de Implantação</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Acostamento direito" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="espacamento_m"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Espaçamento (m)</FormLabel>
+                    <FormControl>
+                      <Input inputMode="decimal" placeholder="Ex: 10" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="extensao_km"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Extensão (km)</FormLabel>
+                    <FormControl>
+                      <Input inputMode="decimal" placeholder="(auto se km inicial/final)" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cor_corpo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cor do corpo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Amarelo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cor_refletivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cor do refletivo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Branco" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tipo_refletivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo do refletivo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Prismático" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="quantidade"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantidade</FormLabel>
+                    <FormControl>
+                      <Input inputMode="numeric" placeholder="Ex: 25" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="latitude_inicial"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Latitude Inicial</FormLabel>
+                    <FormControl>
+                      <Input inputMode="decimal" placeholder="Ex: -19,987654" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="longitude_inicial"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Longitude Inicial</FormLabel>
+                    <FormControl>
+                      <Input inputMode="decimal" placeholder="Ex: -43,987654" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -430,249 +445,30 @@ export function IntervencoesCilindrosForm({
               />
             </div>
 
-            {/* Características dos Cilindros */}
-            <div className="space-y-4 border-l-4 border-primary pl-4 bg-primary/5 py-4 rounded-r-lg">
-              <div className="flex items-center gap-2">
-                <Milestone className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-primary text-lg">Características dos Cilindros</h3>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="cor_corpo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Cor (Corpo)
-                        {isCampoEstruturalBloqueado("cor_corpo") && <Lock className="h-3 w-3 text-muted-foreground" />}
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isCampoEstruturalBloqueado("cor_corpo")}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Amarela">Amarela</SelectItem>
-                          <SelectItem value="Branca">Branca</SelectItem>
-                          <SelectItem value="Preta">Preta</SelectItem>
-                          <SelectItem value="Laranja">Laranja</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="cor_refletivo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Cor (Refletivo)
-                        {isCampoEstruturalBloqueado("cor_refletivo") && (
-                          <Lock className="h-3 w-3 text-muted-foreground" />
-                        )}
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isCampoEstruturalBloqueado("cor_refletivo")}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Amarela">Amarela</SelectItem>
-                          <SelectItem value="Branca">Branca</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tipo_refletivo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Tipo Refletivo
-                        {isCampoEstruturalBloqueado("tipo_refletivo") && (
-                          <Lock className="h-3 w-3 text-muted-foreground" />
-                        )}
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isCampoEstruturalBloqueado("tipo_refletivo")}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="III">III</SelectItem>
-                          <SelectItem value="X">X</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="quantidade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Quantidade (und)
-                        {isCampoEstruturalBloqueado("quantidade") && <Lock className="h-3 w-3 text-muted-foreground" />}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Ex: 100"
-                          {...field}
-                          disabled={isCampoEstruturalBloqueado("quantidade")}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="local_implantacao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Local de Implantação
-                        {isCampoEstruturalBloqueado("local_implantacao") && (
-                          <Lock className="h-3 w-3 text-muted-foreground" />
-                        )}
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isCampoEstruturalBloqueado("local_implantacao")}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Eixo">Eixo</SelectItem>
-                          <SelectItem value="Bordo">Bordo</SelectItem>
-                          <SelectItem value="Canteiro Central">Canteiro Central</SelectItem>
-                          <SelectItem value="Acostamento">Acostamento</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="espacamento_m"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Espaçamento (m)
-                        {isCampoEstruturalBloqueado("espacamento_m") && (
-                          <Lock className="h-3 w-3 text-muted-foreground" />
-                        )}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="Ex: 4.00"
-                          {...field}
-                          disabled={isCampoEstruturalBloqueado("espacamento_m")}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="extensao_km"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Extensão (km)
-                        {isCampoEstruturalBloqueado("extensao_km") && (
-                          <Lock className="h-3 w-3 text-muted-foreground" />
-                        )}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.001"
-                          placeholder="Ex: 0.500"
-                          {...field}
-                          disabled={isCampoEstruturalBloqueado("extensao_km")}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
             {!hideSubmitButton && (
-              <>
-                {solucaoObrigatoria && (
-                  <Alert variant="destructive">
-                    <Info className="h-4 w-4" />
-                    <AlertDescription>⚠️ Selecione uma Solução antes de registrar a intervenção</AlertDescription>
-                  </Alert>
+              <Button type="submit" disabled={isSubmitting} className="w-full">
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando…
+                  </>
+                ) : (
+                  "Registrar Intervenção"
                 )}
-                {motivoObrigatorio && (
-                  <Alert variant="destructive">
-                    <Info className="h-4 w-4" />
-                    <AlertDescription>
-                      ⚠️ Selecione um motivo específico antes de registrar a intervenção
-                    </AlertDescription>
-                  </Alert>
-                )}
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={
-                    isSubmitting ||
-                    (isManutencaoRotineira && !cilindroSelecionado) ||
-                    modo === "controlado" ||
-                    solucaoObrigatoria ||
-                    motivoObrigatorio
-                  }
-                >
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Registrar Intervenção
-                </Button>
-              </>
+              </Button>
+            )}
+
+            {motivoObrigatorio && (
+              <div className="flex items-start gap-2 text-destructive text-sm">
+                <Info className="h-4 w-4 mt-0.5" />
+                <span>Motivo é obrigatório quando a solução for Remover ou Substituir.</span>
+              </div>
             )}
           </form>
         </Form>
       </CardContent>
     </Card>
   );
+}
+
+
 }
