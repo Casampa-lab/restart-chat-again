@@ -54,6 +54,7 @@ interface IntervencoesCilindrosFormProps {
     km_final: number;
     snv?: string;
   };
+  intervencaoSelecionada?: any;
   onIntervencaoRegistrada?: () => void;
   modo?: "normal" | "controlado";
   onDataChange?: (data: any) => void;
@@ -65,6 +66,7 @@ interface IntervencoesCilindrosFormProps {
 export function IntervencoesCilindrosForm({
   tipoOrigem: tipoOrigemProp,
   cilindroSelecionado,
+  intervencaoSelecionada,
   onIntervencaoRegistrada,
   modo = "normal",
   onDataChange,
@@ -75,8 +77,29 @@ export function IntervencoesCilindrosForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const tipoOrigem = tipoOrigemProp || "execucao";
   const isManutencaoRotineira = tipoOrigem === "manutencao_pre_projeto";
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      data_intervencao: new Date().toISOString().split("T")[0],
+      snv: cilindroSelecionado?.snv || "",
+      solucao: "",
+      motivo: "-",
+      km_inicial: cilindroSelecionado?.km_inicial?.toString() || "",
+      km_final: cilindroSelecionado?.km_final?.toString() || "",
+      local_implantacao: "",
+      espacamento_m: "",
+      extensao_km: "",
+      cor_corpo: "",
+      cor_refletivo: "",
+      tipo_refletivo: "",
+      quantidade: "",
+      latitude_inicial: "",
+      longitude_inicial: "",
+    },
+  });
+
   useEffect(() => {
-    // USEREFFECT
     if (!intervencaoSelecionada) return;
 
     // Converte valores para string, mantendo campos vazios limpos
@@ -111,63 +134,9 @@ export function IntervencoesCilindrosForm({
   }, [intervencaoSelecionada, form]);
 
   const isCampoEstruturalBloqueado = (campo: string) => {
-    useEffect(() => {
-      if (!intervencaoSelecionada) return;
-
-      // Helpers de normalização
-      const toStr = (v: any) => (v === null || v === undefined ? "" : String(v));
-      const toDateInput = (v: any) => {
-        try {
-          const d = v ? new Date(v) : new Date();
-          return isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
-        } catch {
-          return "";
-        }
-      };
-
-      form.reset({
-        data_intervencao: toDateInput(intervencaoSelecionada.data_intervencao || intervencaoSelecionada.created_at),
-        snv: toStr(intervencaoSelecionada.snv),
-        solucao: toStr(intervencaoSelecionada.solucao),
-        motivo: toStr(intervencaoSelecionada.motivo || "-"),
-        km_inicial: toStr(intervencaoSelecionada.km_inicial),
-        km_final: toStr(intervencaoSelecionada.km_final),
-        local_implantacao: toStr(intervencaoSelecionada.local_implantacao),
-        espacamento_m: toStr(intervencaoSelecionada.espacamento_m),
-        extensao_km: toStr(intervencaoSelecionada.extensao_km),
-        cor_corpo: toStr(intervencaoSelecionada.cor_corpo),
-        cor_refletivo: toStr(intervencaoSelecionada.cor_refletivo),
-        tipo_refletivo: toStr(intervencaoSelecionada.tipo_refletivo),
-        quantidade: toStr(intervencaoSelecionada.quantidade),
-        latitude_inicial: toStr(intervencaoSelecionada.latitude_inicial),
-        longitude_inicial: toStr(intervencaoSelecionada.longitude_inicial),
-      });
-    }, [intervencaoSelecionada, form]);
-
     if (!isManutencaoRotineira) return false;
     return (CAMPOS_ESTRUTURAIS["cilindros"] as readonly string[]).includes(campo);
   };
-
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      data_intervencao: new Date().toISOString().split("T")[0],
-      snv: "",
-      solucao: "",
-      motivo: "-",
-      km_inicial: "",
-      km_final: "",
-      local_implantacao: "",
-      espacamento_m: "",
-      extensao_km: "",
-      cor_corpo: "",
-      cor_refletivo: "",
-      tipo_refletivo: "",
-      quantidade: "",
-      latitude_inicial: "",
-      longitude_inicial: "",
-    },
-  });
 
   const solucaoAtual = form.watch("solucao");
   const motivoAtual = form.watch("motivo");
