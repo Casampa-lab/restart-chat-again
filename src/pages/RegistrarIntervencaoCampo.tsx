@@ -1,458 +1,457 @@
-// RegistrarIntervencaoCampo.tsx (routerless-safe)
-// ======================================
-import { useState, useEffect, useMemo } from "react";
-// Routerless: sem react-router-dom; navegação simples
-const navigate = (path: string) => {
-  if (typeof window !== "undefined") window.location.assign(path);
-};
-const locationState: any = (typeof window !== "undefined" && (window.history?.state as any)?.usr) || undefined;
-
-import { useAuth } from "@/hooks/useAuth";
-import { useWorkSession } from "@/hooks/useWorkSession";
-import { useGPSTracking } from "@/hooks/useGPSTracking";
-import { CameraCapture } from "@/components/CameraCapture";
+// ==============================
+// IntervencoesCilindrosForm.tsx (routerless-safe)
+// ==============================
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-// Capacitor opcional (não quebra no web)
-let Capacitor: any = { isNativePlatform: () => false };
-let CapApp: any = { addListener: () => ({ remove: () => {} }) };
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  Capacitor = require("@capacitor/core").Capacitor;
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  CapApp = require("@capacitor/app").App;
-} catch {}
-import { ArrowLeft, MapPin, Camera, CheckCircle2, RefreshCw } from "lucide-react";
-import { IntervencoesCilindrosForm } from "@/components/IntervencoesCilindrosForm";
+import { Loader2, Info } from "lucide-react";
 
-const ELEMENTOS_LINEARES = ["marcas_longitudinais", "defensas", "cilindros", "tachas"] as const;
-
-const TABELAS_INTERVENCAO: Record<string, string> = {
-  marcas_longitudinais: "ficha_marcas_longitudinais_intervencoes",
-  inscricoes: "ficha_inscricoes_intervencoes",
-  tachas: "ficha_tachas_intervencoes",
-  cilindros: "ficha_cilindros_intervencoes",
-  porticos: "ficha_porticos_intervencoes",
-  defensas: "defensas_intervencoes",
-  placas: "ficha_placa_intervencoes",
+// Fallbacks locais (remova se tiver estes constantes em outro arquivo)
+const TIPOS_ORIGEM = { manutencao_pre_projeto: "manutencao_pre_projeto", execucao: "execucao" } as const;
+const LABELS_TIPO_ORIGEM: Record<string, string> = {
+  manutencao_pre_projeto: "Manutenção (pré-projeto)",
+  execucao: "Execução",
+};
+const CAMPOS_ESTRUTURAIS: Record<string, readonly string[]> = {
+  cilindros: ["snv", "km_inicial", "km_final"],
 };
 
-const CAMPOS_FK: Record<string, string> = {
-  marcas_longitudinais: "ficha_marcas_longitudinais_id",
-  inscricoes: "ficha_inscricoes_id",
-  tachas: "ficha_tachas_id",
-  cilindros: "ficha_cilindros_id",
-  porticos: "ficha_porticos_id",
-  defensas: "defensa_id",
-  placas: "ficha_placa_id",
-};
+const SOLUCOES_CILINDROS = ["Manter", "Remover", "Implantar", "Substituir"] as const;
+const MOTIVOS_REMOCAO_SUBSTITUICAO = [
+  "1 - Material fora do padrão das soluções propostas/obsoleto",
+  "2 - Material dentro do padrão das soluções, porém, sofreu atualização com os novos parâmetros levantados",
+  "3 - Material danificado",
+  "4 - Encontra-se em local impróprio/indevido",
+] as const;
 
-export default function RegistrarIntervencaoCampo() {
-  const { user } = useAuth();
-  const { activeSession } = useWorkSession(user?.id);
-  const { position, getCurrentPosition, snvIdentificado } = useGPSTracking();
+const formSchema = z.object({
+  data_intervencao: z.string().min(1, "Data é obrigatória"),
+  snv: z.string().optional(),
+  solucao: z.string().min(1, "Solução é obrigatória"),
+  motivo: z.string().default("-"),
+  km_inicial: z.string().min(1, "km Inicial é obrigatório"),
+  km_final: z.string().min(1, "km Final é obrigatório"),
+  local_implantacao: z.string().optional(),
+  espacamento_m: z.string().optional(),
+  extensao_km: z.string().optional(),
+  cor_corpo: z.string().min(1, "Cor do corpo é obrigatória"),
+  cor_refletivo: z.string().optional(),
+  tipo_refletivo: z.string().optional(),
+  quantidade: z.string().optional(),
+  latitude_inicial: z.string().optional(),
+  longitude_inicial: z.string().optional(),
+});
 
-  const necessidadeProp = locationState?.necessidade as any | undefined;
+type FormData = z.infer<typeof formSchema>;
 
-  const [modoOperacao, setModoOperacao] = useState<"manutencao" | "execucao" | null>(null);
-  const [tipoSelecionado, setTipoSelecionado] = useState<string>("");
-  const [modoVisualizacao, setModoVisualizacao] = useState<"viewer" | "formulario">("viewer");
+export interface IntervencoesCilindrosFormProps {
+  tipoOrigem?: "manutencao_pre_projeto" | "execucao";
+  cilindroSelecionado?: {
+    id: string;
+    km_inicial: number;
+    km_final: number;
+    snv?: string;
+    local_implantacao?: string;
+    espacamento_m?: number;
+    extensao_km?: number;
+    cor_corpo?: string;
+    cor_refletivo?: string;
+    tipo_refletivo?: string;
+    quantidade?: number;
+  };
+  intervencaoSelecionada?: any; // vinda do "olhinho"
+  modo?: "normal" | "controlado";
+  onDataChange?: (data: any) => void;
+  hideSubmitButton?: boolean;
+  loteId?: string;
+  rodoviaId?: string;
+  onIntervencaoRegistrada?: () => void;
+}
 
-  const [elementoSelecionado, setElementoSelecionado] = useState<any>(null);
-  const [intervencaoSelecionada, setIntervencaoSelecionada] = useState<any>(null);
-  const [dadosIntervencao, setDadosIntervencao] = useState<any | null>(null);
+export function IntervencoesCilindrosForm({
+  tipoOrigem: tipoOrigemProp,
+  cilindroSelecionado,
+  intervencaoSelecionada,
+  modo = "controlado",
+  onDataChange,
+  hideSubmitButton = true,
+  loteId,
+  rodoviaId,
+  onIntervencaoRegistrada,
+}: IntervencoesCilindrosFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const tipoOrigem = tipoOrigemProp || "execucao";
+  const isManutencaoRotineira = tipoOrigem === "manutencao_pre_projeto";
 
-  const [fotos, setFotos] = useState<string[]>([]);
-  const [showCamera, setShowCamera] = useState(false);
-
-  const [isConforme, setIsConforme] = useState(true);
-  const [justificativaNC, setJustificativaNC] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const [manualPosition, setManualPosition] = useState({
-    latitude_inicial: "",
-    longitude_inicial: "",
-    latitude_final: "",
-    longitude_final: "",
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      data_intervencao: new Date().toISOString().split("T")[0],
+      snv: cilindroSelecionado?.snv || "",
+      solucao: "",
+      motivo: "-",
+      km_inicial: cilindroSelecionado?.km_inicial?.toString() || "",
+      km_final: cilindroSelecionado?.km_final?.toString() || "",
+      local_implantacao: cilindroSelecionado?.local_implantacao || "",
+      espacamento_m: cilindroSelecionado?.espacamento_m?.toString() || "",
+      extensao_km: cilindroSelecionado?.extensao_km?.toString() || "",
+      cor_corpo: cilindroSelecionado?.cor_corpo || "",
+      cor_refletivo: cilindroSelecionado?.cor_refletivo || "",
+      tipo_refletivo: cilindroSelecionado?.tipo_refletivo || "",
+      quantidade: cilindroSelecionado?.quantidade?.toString() || "",
+      latitude_inicial: "",
+      longitude_inicial: "",
+    },
   });
 
-  const handleVoltar = () => {
-    navigate("/modo-campo");
-  };
-
+  // Preenche ao abrir pelo "olhinho"
   useEffect(() => {
-    if (necessidadeProp?.tipo_elemento) {
-      setTipoSelecionado(necessidadeProp.tipo_elemento);
-    }
-  }, [necessidadeProp]);
-
-  useEffect(() => {
-    setModoVisualizacao("viewer");
-    setElementoSelecionado(null);
-    setIntervencaoSelecionada(null);
-    setDadosIntervencao(null);
-  }, [tipoSelecionado, modoOperacao]);
-
-  useEffect(() => {
-    if (position) {
-      setManualPosition((prev) => ({
-        ...prev,
-        latitude_inicial: position.latitude?.toString?.() || "",
-        longitude_inicial: position.longitude?.toString?.() || "",
-      }));
-    }
-  }, [position]);
-
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
-    const sub = CapApp.addListener("backButton", () => {
-      if (showCamera) setShowCamera(false);
-      else handleVoltar();
-    });
-    return () => {
-      sub && sub.remove && sub.remove();
+    if (!intervencaoSelecionada) return;
+    const toStr = (v: any) => (v === null || v === undefined ? "" : String(v));
+    const toDateInput = (v: any) => {
+      try {
+        const d = v ? new Date(v) : new Date();
+        return isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
+      } catch {
+        return "";
+      }
     };
-  }, [showCamera]);
+    const S = intervencaoSelecionada;
+    form.reset({
+      data_intervencao: toDateInput(S.data_intervencao || S.created_at),
+      snv: toStr(S.snv),
+      solucao: toStr(S.solucao),
+      motivo: toStr(S.motivo || "-"),
+      km_inicial: toStr(S.km_inicial),
+      km_final: toStr(S.km_final),
+      local_implantacao: toStr(S.local_implantacao),
+      espacamento_m: toStr(S.espacamento_m),
+      extensao_km: toStr(S.extensao_km),
+      cor_corpo: toStr(S.cor_corpo),
+      cor_refletivo: toStr(S.cor_refletivo),
+      tipo_refletivo: toStr(S.tipo_refletivo),
+      quantidade: toStr(S.quantidade),
+      latitude_inicial: toStr(S.latitude_inicial),
+      longitude_inicial: toStr(S.longitude_inicial),
+    });
+  }, [intervencaoSelecionada, form]);
 
-  const normalizeNumber = (v: any) => {
-    if (v === null || v === undefined) return null;
-    if (typeof v === "number") return v;
-    if (typeof v === "string") {
-      const t = v.replace(".", "").replace(",", ".");
-      const n = Number(t);
-      return isNaN(n) ? null : n;
-    }
-    return null;
-  };
+  // Propaga mudanças quando controlado
+  useEffect(() => {
+    if (modo !== "controlado" || !onDataChange) return;
+    const sub = form.watch((value) => onDataChange(value));
+    return () => sub.unsubscribe();
+  }, [form, modo, onDataChange]);
 
-  const onFormDataChange = (value: any) => {
-    setDadosIntervencao(value);
-  };
-  const handlePhotosChange = (urls: string[]) => {
-    setFotos(urls);
-  };
-
-  const capturarGPSInicial = async () => {
-    try {
-      const pos = await getCurrentPosition();
-      if (pos) {
-        setManualPosition((p) => ({
-          ...p,
-          latitude_inicial: pos.latitude.toString(),
-          longitude_inicial: pos.longitude.toString(),
-        }));
-        toast.success("GPS Inicial capturado!");
+  // Calcula extensão se km_inicial/km_final mudarem
+  useEffect(() => {
+    const sub = form.watch((value, { name }) => {
+      if (name === "km_inicial" || name === "km_final") {
+        const ki = Number(String(value.km_inicial || "").replace(",", "."));
+        const kf = Number(String(value.km_final || "").replace(",", "."));
+        if (!isNaN(ki) && !isNaN(kf) && kf >= ki) {
+          const ext = (kf - ki).toFixed(3);
+          if (!value.extensao_km || value.extensao_km.trim() === "") {
+            form.setValue("extensao_km", ext, { shouldDirty: true, shouldValidate: false });
+          }
+        }
       }
-    } catch {
-      toast.error("Erro ao capturar GPS inicial");
-    }
-  };
-  const capturarGPSFinal = async () => {
-    try {
-      const pos = await getCurrentPosition();
-      if (pos) {
-        setManualPosition((p) => ({
-          ...p,
-          latitude_final: pos.latitude.toString(),
-          longitude_final: pos.longitude.toString(),
-        }));
-        toast.success("GPS Final capturado!");
-      }
-    } catch {
-      toast.error("Erro ao capturar GPS final");
-    }
-  };
+    });
+    return () => sub.unsubscribe();
+  }, [form]);
 
-  const handleVisualizarIntervencao = (intervencao: any) => {
-    setIntervencaoSelecionada(intervencao);
-    setModoVisualizacao("formulario");
-    setDadosIntervencao({ ...intervencao });
-  };
-
-  const handleEnviar = async () => {
-    if (!activeSession || !dadosIntervencao || !tipoSelecionado || !modoOperacao) {
-      toast.error("Dados incompletos");
+  const onSubmit = async () => {
+    if (modo === "controlado") {
+      toast.info("Dados prontos para envio pelo fluxo externo.");
       return;
     }
-    if (!isConforme && !String(justificativaNC || "").trim()) {
-      toast.error("Justificativa obrigatória para não conformidades");
-      return;
-    }
-
     try {
-      setLoading(true);
-
-      if (!isConforme) {
-        const { error: ncError } = await supabase.from("nao_conformidades").insert({
-          user_id: user!.id,
-          lote_id: activeSession.lote_id,
-          rodovia_id: activeSession.rodovia_id,
-          data_ocorrencia: new Date().toISOString().split("T")[0],
-          tipo_nc: "Não Conformidade de Intervenção",
-          descricao_problema: justificativaNC,
-          empresa: activeSession.lote?.empresa?.nome || "Não especificada",
-          latitude: normalizeNumber(manualPosition.latitude_inicial),
-          longitude: normalizeNumber(manualPosition.longitude_inicial),
-          status_aprovacao: "pendente",
-          deleted: false,
-        } as any);
-        if (ncError) throw ncError;
-      }
-
-      const tabelaIntervencao = TABELAS_INTERVENCAO[tipoSelecionado];
-      const campoFK = CAMPOS_FK[tipoSelecionado];
-      if (!tabelaIntervencao) throw new Error(`Tipo de elemento não mapeado: ${tipoSelecionado}`);
-
-      const CAMPOS_PERMITIDOS = new Set([
-        "user_id",
-        "tipo_origem",
-        "lote_id",
-        "rodovia_id",
-        campoFK,
-        "snv",
-        "km_inicial",
-        "km_final",
-        "latitude_inicial",
-        "longitude_inicial",
-        "latitude_final",
-        "longitude_final",
-        "fotos_urls",
-        "data_intervencao",
-        "solucao",
-        "motivo",
-        "local_implantacao",
-        "espacamento_m",
-        "extensao_km",
-        "cor_corpo",
-        "cor_refletivo",
-        "tipo_refletivo",
-        "quantidade",
-        "pendente_aprovacao_coordenador",
-        "aplicado_ao_inventario",
-        "observacao_coordenador",
-      ]);
-
-      const payloadBase: any = {};
-      Object.keys(dadosIntervencao || {}).forEach((k) => {
-        const v = (dadosIntervencao as any)[k];
-        if (!CAMPOS_PERMITIDOS.has(k)) return;
-        if (["km_inicial", "km_final", "espacamento_m", "extensao_km", "quantidade"].includes(k))
-          payloadBase[k] = normalizeNumber(v);
-        else if (["latitude_inicial", "longitude_inicial", "latitude_final", "longitude_final"].includes(k))
-          payloadBase[k] = normalizeNumber(v);
-        else if (k === "fotos_urls" && Array.isArray(v)) payloadBase[k] = v;
-        else payloadBase[k] = v === "" ? null : v;
-      });
-
-      payloadBase.user_id = user!.id;
-      payloadBase.fotos_urls = Array.isArray(payloadBase.fotos_urls) ? payloadBase.fotos_urls : fotos;
-      payloadBase.tipo_origem = modoOperacao === "manutencao" ? "manutencao_pre_projeto" : "execucao";
-      payloadBase.lote_id = activeSession.lote_id;
-      payloadBase.rodovia_id = activeSession.rodovia_id;
-      payloadBase.snv = payloadBase.snv || snvIdentificado || null;
-
-      if ((ELEMENTOS_LINEARES as readonly string[]).includes(tipoSelecionado)) {
-        payloadBase.latitude_final = normalizeNumber(payloadBase.latitude_final ?? manualPosition.latitude_final);
-        payloadBase.longitude_final = normalizeNumber(payloadBase.longitude_final ?? manualPosition.longitude_final);
-      }
-
-      if (payloadBase.km_final === null || payloadBase.km_final === undefined) {
-        payloadBase.km_final = normalizeNumber(dadosIntervencao?.km_final);
-      }
-
-      if (elementoSelecionado && campoFK) payloadBase[campoFK] = elementoSelecionado.id;
-
-      const { error } = await supabase.from(tabelaIntervencao as any).insert(payloadBase as any);
-      if (error) throw error;
-
-      toast.success("Intervenção registrada com sucesso!");
-      setFotos([]);
-      setDadosIntervencao(null);
-      setIntervencaoSelecionada(null);
-      setModoVisualizacao("viewer");
+      setIsSubmitting(true);
+      toast.success("Intervenção de cilindros registrada (modo normal).");
+      onIntervencaoRegistrada?.();
+      form.reset();
     } catch (e: any) {
-      console.error(e);
-      toast.error(e?.message || "Erro ao salvar intervenção");
+      toast.error(e?.message || "Erro ao registrar intervenção.");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const isLinear = useMemo(
-    () => (ELEMENTOS_LINEARES as readonly string[]).includes(tipoSelecionado),
-    [tipoSelecionado],
-  );
+  const solucaoAtual = form.watch("solucao");
+  const motivoAtual = form.watch("motivo");
+  const mostrarMotivosNumerados = solucaoAtual === "Remover" || solucaoAtual === "Substituir";
+  const solucaoObrigatoria = !solucaoAtual || solucaoAtual.trim() === "";
+  const motivoObrigatorio =
+    mostrarMotivosNumerados && (!motivoAtual || motivoAtual === "-" || motivoAtual.trim() === "");
+
+  const isCampoEstruturalBloqueado = (campo: string) => {
+    if (!isManutencaoRotineira) return false;
+    return (CAMPOS_ESTRUTURAIS["cilindros"] as readonly string[]).includes(campo);
+  };
 
   return (
-    <div className="max-w-5xl mx-auto p-4 space-y-4">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={handleVoltar}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-xl font-semibold">Registrar Intervenção em Campo</h1>
-        {modoOperacao && (
-          <Badge variant={modoOperacao === "execucao" ? "default" : "secondary"} className="ml-2">
-            {modoOperacao.toUpperCase()}
-          </Badge>
-        )}
-      </div>
-
-      {necessidadeProp?.tipo_elemento && (
-        <Alert>
-          <AlertDescription>
-            Tipo selecionado a partir da necessidade: <strong>{necessidadeProp.tipo_elemento}</strong>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {showCamera && (
-        <CameraCapture
-          onClose={() => setShowCamera(false)}
-          onCaptured={(urls) => {
-            handlePhotosChange(urls);
-            setShowCamera(false);
-          }}
-        />
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Dados de Localização</CardTitle>
-          <CardDescription>
-            Informe o trecho e capture GPS. Para elementos lineares, preencha também o ponto final.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>km inicial</Label>
-              <Input
-                inputMode="decimal"
-                placeholder="Ex: 12,345"
-                value={dadosIntervencao?.km_inicial ?? ""}
-                onChange={(e) => setDadosIntervencao((p: any) => ({ ...(p || {}), km_inicial: e.target.value }))}
+    <Card>
+      <CardHeader>
+        <CardTitle>Intervenção em Cilindros Delimitadores</CardTitle>
+        <CardDescription>{`Origem: ${LABELS_TIPO_ORIGEM[tipoOrigem]}`}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="data_intervencao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data da Intervenção</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="snv"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SNV</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: 116BMG1010" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="solucao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={solucaoObrigatoria ? "text-destructive font-semibold" : ""}>
+                      Solução <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {SOLUCOES_CILINDROS.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="motivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={motivoObrigatorio ? "text-destructive font-semibold" : ""}>
+                      Motivo {mostrarMotivosNumerados && <span className="text-destructive">*</span>}
+                    </FormLabel>
+                    <FormControl>
+                      {mostrarMotivosNumerados ? (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o motivo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MOTIVOS_REMOCAO_SUBSTITUICAO.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input placeholder="-" {...field} />
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="km_inicial"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>km Inicial</FormLabel>
+                    <FormControl>
+                      <Input inputMode="decimal" placeholder="Ex: 12,345" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="km_final"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>km Final</FormLabel>
+                    <FormControl>
+                      <Input inputMode="decimal" placeholder="Ex: 12,900" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="local_implantacao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Local de Implantação</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Acostamento direito" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="espacamento_m"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Espaçamento (m)</FormLabel>
+                    <FormControl>
+                      <Input inputMode="decimal" placeholder="Ex: 10" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="extensao_km"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Extensão (km)</FormLabel>
+                    <FormControl>
+                      <Input inputMode="decimal" placeholder="(auto se km inicial/final)" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cor_corpo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cor do corpo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Amarelo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cor_refletivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cor do refletivo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Branco" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tipo_refletivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo do refletivo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Prismático" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="quantidade"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantidade</FormLabel>
+                    <FormControl>
+                      <Input inputMode="numeric" placeholder="Ex: 25" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="latitude_inicial"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Latitude Inicial</FormLabel>
+                    <FormControl>
+                      <Input inputMode="decimal" placeholder="Ex: -19,987654" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="longitude_inicial"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Longitude Inicial</FormLabel>
+                    <FormControl>
+                      <Input inputMode="decimal" placeholder="Ex: -43,987654" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-            <div>
-              <Label>km final</Label>
-              <Input
-                inputMode="decimal"
-                placeholder="Ex: 12,900"
-                value={dadosIntervencao?.km_final ?? ""}
-                onChange={(e) => setDadosIntervencao((p: any) => ({ ...(p || {}), km_final: e.target.value }))}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Latitude inicial</Label>
-              <Input
-                inputMode="decimal"
-                placeholder="-19,987654"
-                value={manualPosition.latitude_inicial}
-                onChange={(e) => setManualPosition((pr) => ({ ...pr, latitude_inicial: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label>Longitude inicial</Label>
-              <Input
-                inputMode="decimal"
-                placeholder="-43,987654"
-                value={manualPosition.longitude_inicial}
-                onChange={(e) => setManualPosition((pr) => ({ ...pr, longitude_inicial: e.target.value }))}
-              />
-            </div>
-          </div>
-          {isLinear && (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Latitude final</Label>
-                <Input
-                  inputMode="decimal"
-                  placeholder="-19,999000"
-                  value={manualPosition.latitude_final}
-                  onChange={(e) => setManualPosition((pr) => ({ ...pr, latitude_final: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label>Longitude final</Label>
-                <Input
-                  inputMode="decimal"
-                  placeholder="-43,999000"
-                  value={manualPosition.longitude_final}
-                  onChange={(e) => setManualPosition((pr) => ({ ...pr, longitude_final: e.target.value }))}
-                />
-              </div>
-            </div>
-          )}
-          <div className="flex items-center gap-2">
-            <Button type="button" variant="secondary" onClick={capturarGPSInicial}>
-              <MapPin className="mr-2 h-4 w-4" /> Capturar GPS inicial
-            </Button>
-            {isLinear && (
-              <Button type="button" variant="secondary" onClick={capturarGPSFinal}>
-                <MapPin className="mr-2 h-4 w-4" /> Capturar GPS final
+            {!hideSubmitButton && (
+              <Button type="submit" disabled={isSubmitting} className="w-full">
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando…
+                  </>
+                ) : (
+                  "Registrar Intervenção"
+                )}
               </Button>
             )}
-            <Button type="button" onClick={() => setShowCamera(true)}>
-              <Camera className="mr-2 h-4 w-4" /> Tirar foto
-            </Button>
-            <div className="text-sm text-muted-foreground">{fotos.length} foto(s) anexada(s)</div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Registry para aplicar o padrão de limpeza/remount em todos os tipos */}
-      {tipoSelecionado === "cilindros" && (
-        <IntervencoesCilindrosForm
-          key={`cil-${intervencaoSelecionada?.id ?? elementoSelecionado?.id ?? "new"}-${modoOperacao ?? ""}-${modoVisualizacao}`}
-          tipoOrigem={modoOperacao === "manutencao" ? "manutencao_pre_projeto" : "execucao"}
-          cilindroSelecionado={modoOperacao === "manutencao" ? elementoSelecionado || undefined : undefined}
-          intervencaoSelecionada={intervencaoSelecionada || undefined}
-          modo="controlado"
-          onDataChange={onFormDataChange}
-          hideSubmitButton
-          loteId={activeSession?.lote_id}
-          rodoviaId={activeSession?.rodovia_id}
-        />
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Qualidade e aprovação</CardTitle>
-          <CardDescription>Marque Não Conforme se a intervenção requer NC e preencha a justificativa.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Checkbox checked={isConforme} onCheckedChange={(v) => setIsConforme(Boolean(v))} id="conforme" />
-            <Label htmlFor="conforme">Conforme</Label>
-          </div>
-          {!isConforme && (
-            <div>
-              <Label>Justificativa da Não Conformidade</Label>
-              <Textarea value={justificativaNC} onChange={(e) => setJustificativaNC(e.target.value)} />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="flex items-center justify-end gap-3">
-        <Button type="button" variant="secondary" onClick={() => setModoVisualizacao("viewer")}>
-          Cancelar
-        </Button>
-        <Button type="button" onClick={handleEnviar} disabled={loading}>
-          {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-          <span className="ml-2">Enviar intervenção</span>
-        </Button>
-      </div>
-    </div>
+            {motivoObrigatorio && (
+              <div className="flex items-start gap-2 text-destructive text-sm">
+                <Info className="h-4 w-4 mt-0.5" />
+                <span>Motivo é obrigatório quando a solução for Remover ou Substituir.</span>
+              </div>
+            )}
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }
