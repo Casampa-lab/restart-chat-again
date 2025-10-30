@@ -168,7 +168,7 @@ export const NecessidadesMap = ({ necessidades, tipo, rodoviaId, loteId, rodovia
       } else {
         // Se não, buscar do arquivo público
         toast.loading("Carregando SNV Brasil completo...", { id: 'snv-completo' });
-        const response = await fetch('/geojson/snv-brasil-completo.geojson');
+        const response = await fetch('/geojson/snv-mg.geojson');
         
         if (!response.ok) {
           throw new Error(`Erro HTTP: ${response.status}`);
