@@ -5,6 +5,7 @@ verify_jwt = true
 
 [functions.process-snv-shapefile]
 verify_jwt = true
+timeout = 300  # ⏱️ Timeout em segundos (300s = 5 minutos)
 
 [functions.reset-database]
 verify_jwt = false
