@@ -8,7 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && git add dist -f && git commit -m \"Deploy automático\" && git subtree push --prefix dist origin gh-pages"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
