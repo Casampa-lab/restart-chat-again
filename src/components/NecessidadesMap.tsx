@@ -5,10 +5,6 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { supabase } from "@/integrations/supabase/client";
 
-/**
- * Aceita apenas LineString e MultiLineString válidas.
- * Remove Polygon, MultiPolygon, Point etc.
- */
 function onlyLineFeatures(fc: any) {
   if (!fc || !fc.features || !Array.isArray(fc.features)) return fc;
 
@@ -20,7 +16,6 @@ function onlyLineFeatures(fc: any) {
       const g = feat.geometry;
       const t = g.type;
 
-      // elimina tudo que não seja linha
       if (
         t === "Polygon" ||
         t === "MultiPolygon" ||
@@ -32,7 +27,6 @@ function onlyLineFeatures(fc: any) {
         return false;
       }
 
-      // mantém só linhas com coordenadas
       if (t === "LineString" || t === "MultiLineString") {
         if (!g.coordinates || g.coordinates.length === 0) return false;
         return true;
@@ -45,20 +39,18 @@ function onlyLineFeatures(fc: any) {
   return filtered;
 }
 
-// helper pra não mostrar null/undefined/""
 function safe(v: any) {
   if (v === null || v === undefined || v === "") return "—";
   return v;
 }
 
-// Paleta centralizada para manter padrão visual
 const LAYER_STYLES = {
   snv: {
-    color: "#d32f2f", // vermelho contínuo (oficial DNIT / SNV)
+    color: "#d32f2f",
     weight: 2,
   },
   vgeo: {
-    color: "#0066cc", // azul tracejado (camada referência VGeo)
+    color: "#0066cc",
     weight: 2,
     dashArray: "4 2",
   },
@@ -77,12 +69,10 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
   rodovia,
   rodoviaId,
 }) => {
-  // refs de objetos Leaflet que não devem disparar rerender do React
   const mapRef = useRef<L.Map | null>(null);
   const snvGroupRef = useRef<L.LayerGroup | null>(null);
   const vgeoGroupRef = useRef<L.LayerGroup | null>(null);
 
-  // mensagens ao usuário (overlay no mapa)
   const [snvStatus, setSnvStatus] = useState<{
     type: "ok" | "warn" | "error";
     msg: string;
@@ -93,22 +83,20 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
     msg: string;
   } | null>(null);
 
-  // rodovia alvo (fallback BR-040)
   const targetRodovia =
-    rodovia?.codigo?.trim() ||
-    rodoviaId?.trim() ||
-    "BR-040"; // fallback inteligente
+    rodovia?.codigo?.trim() || rodoviaId?.trim() || "BR-040";
+
+  // flag pra logar só uma vez as props da VGeo
+  const vgeoLoggedRef = useRef(false);
 
   useEffect(() => {
-    // impede execução em SSR/build
     if (typeof window === "undefined" || typeof document === "undefined") {
       return;
     }
 
-    // se mapa ainda não foi criado, cria
     if (!mapRef.current) {
       const map = L.map("necessidades-map", {
-        center: [-18.5, -44.0], // centro aproximado MG
+        center: [-18.5, -44.0],
         zoom: 6,
         minZoom: 5,
         maxZoom: 18,
@@ -125,17 +113,14 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
         }
       ).addTo(map);
 
-      // cria LayerGroups vazios e guarda nas refs
       const snvLayerGroup = L.layerGroup();
       const vgeoLayerGroup = L.layerGroup();
 
       snvGroupRef.current = snvLayerGroup;
       vgeoGroupRef.current = vgeoLayerGroup;
 
-      // SNV começa ligado
       snvLayerGroup.addTo(map);
 
-      // controle de camadas
       const overlays: Record<string, L.Layer> = {
         "SNV DNIT 202501A (BRs federais/MG)": snvLayerGroup,
         "Malha Federal (VGeo MG)": vgeoLayerGroup,
@@ -152,15 +137,10 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
         .addTo(map);
     }
 
-    // a partir daqui podemos assumir que:
-    // - mapRef.current existe
-    // - snvGroupRef.current e vgeoGroupRef.current existem
-
     const map = mapRef.current!;
     const snvLayerGroup = snvGroupRef.current!;
     const vgeoLayerGroup = vgeoGroupRef.current!;
 
-    // função para ajustar o enquadramento de todas as camadas visíveis
     function fitToVisibleLayers() {
       const bounds = L.latLngBounds([]);
 
@@ -187,16 +167,16 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
       }
     }
 
-    // sempre que trocar de rodovia, limpamos as camadas antigas
+    // limpa as camadas anteriores antes de recarregar
     snvLayerGroup.clearLayers();
     vgeoLayerGroup.clearLayers();
 
-    // zera status pra evitar "alerta velho" ficar na tela
     setSnvStatus(null);
     setVgeoStatus(null);
+    vgeoLoggedRef.current = false;
 
     // ===============================
-    // 1) Carregar SNV do Supabase
+    // SNV
     // ===============================
     (async () => {
       try {
@@ -264,7 +244,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
                   km inicial: ${safe(kmInicial)}<br/>
                   km final: ${safe(kmFinal)}<br/>
                   UL responsável: ${safe(ul)}<br/>
-                  Jurisdição: ${safe(jurisdiçãoFormat(jurisdicao))}<br/>
+                  Jurisdição: ${safe(jurisdicao)}<br/>
                   Situação: ${safe(legenda)}<br/>
                   <hr style="border:none;border-top:1px solid #ccc;margin:6px 0;" />
                   <div style="font-size:11px; line-height:1.4; color:#555;">
@@ -296,7 +276,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
     })();
 
     // ===============================
-    // 2) Carregar VGeo do Supabase
+    // VGEO
     // ===============================
     (async () => {
       try {
@@ -343,33 +323,75 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
             layer.on("click", () => {
               const p = feature?.properties || {};
 
-              const rodovia = p.vl_br
-                ? `BR-${p.vl_br}`
-                : p.RODOVIA || p.rodovia || p.SIGLA || "—";
+              // log de inspeção só na primeira vez
+              if (!vgeoLoggedRef.current) {
+                console.log("🔎 Propriedades VGeo recebidas:", p);
+                vgeoLoggedRef.current = true;
+              }
 
-              const jurisdicao =
-                p.ds_jurisdi ||
-                p.JURISDICAO ||
-                p.ADMIN ||
+              // Tentativa de mapear campos comuns
+              const rodoviaGuess =
+                (p.vl_br ? `BR-${p.vl_br}` : null) ||
+                p.RODOVIA ||
+                p.rodovia ||
+                p.SIGLA ||
+                p.sigla ||
+                p.br ||
                 "—";
 
-              const ul = p.ul || p.UL || "—";
+              const jurisdicaoGuess =
+                p.ds_jurisdi ||
+                p.JURISDICAO ||
+                p.jurisdicao ||
+                p.ADMIN ||
+                p.admin ||
+                "—";
 
-              const extensaoKm =
+              const ulGuess = p.ul || p.UL || p.ul_responsavel || "—";
+
+              const extensaoGuess =
                 p.vl_extensa ||
                 p.EXTENSAO ||
                 p.EXT_KM ||
+                p.ext_km ||
+                p.extensao ||
                 "—";
+
+              // Se tudo der "—", vamos montar uma listinha debug pro fiscal inspecionar
+              const tudoVazio =
+                safe(rodoviaGuess) === "—" &&
+                safe(jurisdicaoGuess) === "—" &&
+                safe(ulGuess) === "—" &&
+                safe(extensaoGuess) === "—";
+
+              let extraDebug = "";
+              if (tudoVazio) {
+                // mostra algumas chaves e valores crus pra ajudar você a identificar
+                const previewPairs = Object.entries(p || {})
+                  .slice(0, 6)
+                  .map(([k, v]) => `${k}: ${v}`)
+                  .join("<br/>");
+
+                extraDebug = `
+                  <hr style="border:none;border-top:1px solid #ccc;margin:6px 0;" />
+                  <div style="font-size:11px; line-height:1.4; color:#555;">
+                    <b>Debug (primeiros campos brutos):</b><br/>
+                    ${previewPairs || "sem propriedades"}
+                  </div>
+                `;
+              }
 
               const htmlPopup = `
                 <div style="font-size:13px; line-height:1.4;">
                   <b>VGeo / Malha Federal MG</b><br/>
-                  Rodovia: ${safe(rodovia)}<br/>
-                  Jurisdição: ${safe(jurisdiçãoFormat(jurisdiçãoNormalize(jurisdicao)))}<br/>
-                  UL responsável: ${safe(ul)}<br/>
-                  Extensão aprox (km): ${safe(extensaoKm)}
+                  Rodovia: ${safe(rodoviaGuess)}<br/>
+                  Jurisdição: ${safe(jurisdicaoGuess)}<br/>
+                  UL responsável: ${safe(ulGuess)}<br/>
+                  Extensão aprox (km): ${safe(extensaoGuess)}
+                  ${extraDebug}
                 </div>
               `;
+
               (layer as any).bindPopup(htmlPopup).openPopup();
             });
           },
@@ -392,23 +414,17 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
       }
     })();
 
-    // cleanup no unmount (só quando o componente realmente sai da tela)
     return () => {
-      // se a página mudar e desmontar o componente, remover o mapa
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
-  }, [targetRodovia]); // <-- recarrega quando muda rodovia
+  }, [targetRodovia]);
 
-  // Overlay de status dentro do container do mapa.
-  // Mostra SNV e VGeo separadamente.
   function renderStatusOverlay() {
-    // nada pra mostrar
     if (!snvStatus && !vgeoStatus) return null;
 
-    // estilização simples e neutra
     const baseBoxStyle: React.CSSProperties = {
       fontSize: "12px",
       lineHeight: 1.4,
@@ -422,11 +438,10 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
       maxWidth: "260px",
     };
 
-    // corzinha sutil de fundo conforme status
     function bgFor(type: "ok" | "warn" | "error") {
-      if (type === "ok") return "#e8f5e9"; // verde claro
-      if (type === "warn") return "#fffde7"; // amarelo claro
-      return "#ffebee"; // vermelho claro
+      if (type === "ok") return "#e8f5e9";
+      if (type === "warn") return "#fffde7";
+      return "#ffebee";
     }
 
     return (
@@ -438,7 +453,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
           zIndex: 9999,
           display: "flex",
           flexDirection: "column",
-          pointerEvents: "none", // não bloquear clique no mapa
+          pointerEvents: "none",
         }}
       >
         {snvStatus && (
@@ -467,7 +482,6 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
-      {/* overlay de status carregamento/erro */}
       {renderStatusOverlay()}
 
       <div
@@ -483,21 +497,5 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
     </div>
   );
 };
-
-/**
- * Pequena normalização da grafia de "jurisdição". Evita undefined e padroniza acento.
- * Se vier algo bizarro em caps lock, você pode melhorar aqui futuramente.
- */
-function jurisdiçãoFormat(text: any) {
-  if (!text || typeof text !== "string") return "—";
-  return text;
-}
-
-// Caso VGeo venha com formas diferentes de campo de jurisdição (ADMIN, etc.),
-// este helper permite ajustar se você quiser padronizar para "Federal", "Estadual", etc.
-// Por enquanto só retorna como veio.
-function jurisdiçãoNormalize(text: any) {
-  return text;
-}
 
 export default NecessidadesMap;
