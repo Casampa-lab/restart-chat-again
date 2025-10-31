@@ -1,28 +1,26 @@
-// Imports necessários
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-
-// CORS liberado (ajuste depois se precisar restringir)
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
-// Lê variáveis de ambiente definidas via `supabase secrets set`
+// Lê variáveis de ambiente que você já definiu com `supabase secrets set`
+// Na CLI nova, não pode usar prefixo SUPABASE_. Por isso usamos PROJECT_URL e SERVICE_ROLE_KEY.
+// Também deixo fallback pra SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY caso um dia você rode local.
 const SUPABASE_URL =
   Deno.env.get("PROJECT_URL") ?? Deno.env.get("SUPABASE_URL")
-
 const SUPABASE_SERVICE_ROLE_KEY =
   Deno.env.get("SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error(
-    "PROJECT_URL / SERVICE_ROLE_KEY ausentes. Rode 'supabase secrets set' antes do deploy."
+    "PROJECT_URL / SERVICE_ROLE_KEY ausentes. Rode 'supabase secrets set' com nomes válidos."
   )
 }
 
-// Cliente administrativo (service_role). NÃO expor isso em front-end.
+// Cliente admin (service_role). Isso roda só no backend.
 const supabaseAdmin = createClient(
   SUPABASE_URL,
   SUPABASE_SERVICE_ROLE_KEY,
@@ -31,21 +29,18 @@ const supabaseAdmin = createClient(
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
+  },
 )
 
-// Handler HTTP da função Edge
 serve(async (req) => {
-  // Pré-resposta para OPTIONS (CORS preflight)
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders })
   }
 
   try {
-    // Lê o corpo enviado no POST
     const { email, password, nome, role, supervisoraId } = await req.json()
 
-    // Validações básicas
+    // validação mínima
     if (!email || !password || !nome || !role) {
       throw new Error("Email, senha, nome e perfil são obrigatórios")
     }
@@ -54,9 +49,7 @@ serve(async (req) => {
       throw new Error("A senha deve ter pelo menos 6 caracteres")
     }
 
-    // =========================================
-    // 1. Criar (ou recuperar) usuário no Auth
-    // =========================================
+    // 1. Criar usuário no Auth (ou reaproveitar se já existir)
     let userId: string
 
     const { data: userData, error: createError } =
@@ -68,11 +61,12 @@ serve(async (req) => {
       })
 
     if (createError && createError.message.includes("already been registered")) {
-      // Usuário já existe
+      // usuário já existe -> pegar ID existente e atualizar senha
       console.log("Usuário já existe, buscando ID...")
 
       const { data: usersList, error: listErr } =
         await supabaseAdmin.auth.admin.listUsers()
+
       if (listErr) {
         throw new Error("Não foi possível listar usuários existentes")
       }
@@ -84,7 +78,6 @@ serve(async (req) => {
 
       userId = existingUser.id
 
-      // Atualizar senha do usuário existente
       const { error: pwErr } = await supabaseAdmin.auth.admin.updateUserById(
         userId,
         { password },
@@ -95,29 +88,23 @@ serve(async (req) => {
         console.log("Senha atualizada para usuário existente")
       }
     } else if (createError) {
-      // Erro real de criação
       throw createError
     } else {
-      // Criado agora
       userId = userData.user.id
     }
 
-    // =========================================
     // 2. Sincronizar tabela profiles
-    // =========================================
     const { data: existingProfile, error: profileCheckErr } = await supabaseAdmin
       .from("profiles")
       .select("id")
       .eq("id", userId)
-      .single()
+      .maybeSingle()
 
-    if (profileCheckErr && profileCheckErr.code !== "PGRST116") {
-      // PGRST116 = no rows found (PostgREST "not found" comum do .single())
+    if (profileCheckErr) {
       console.warn("Aviso ao consultar profile:", profileCheckErr)
     }
 
     if (existingProfile) {
-      // Atualizar profile existente
       const { error: updateError } = await supabaseAdmin
         .from("profiles")
         .update({
@@ -129,7 +116,6 @@ serve(async (req) => {
 
       if (updateError) throw updateError
     } else {
-      // Criar profile novo
       const { error: profileError } = await supabaseAdmin
         .from("profiles")
         .insert({
@@ -142,10 +128,7 @@ serve(async (req) => {
       if (profileError) throw profileError
     }
 
-    // =========================================
-    // 3. Atualizar papel (user_roles)
-    // =========================================
-    // Remove papéis antigos
+    // 3. Atualizar papel em user_roles
     const { error: delRoleErr } = await supabaseAdmin
       .from("user_roles")
       .delete()
@@ -153,7 +136,6 @@ serve(async (req) => {
 
     if (delRoleErr) throw delRoleErr
 
-    // Define o novo papel
     const { error: roleError } = await supabaseAdmin
       .from("user_roles")
       .insert({
@@ -163,13 +145,10 @@ serve(async (req) => {
 
     if (roleError) throw roleError
 
-    // =========================================
-    // 4. Se for coordenador, monta os assignments
-    // =========================================
+    // 4. Se for coordenador, fazer assignments automáticos
     if (role === "coordenador" && supervisoraId) {
       console.log("🔗 Coordenador detectado, criando assignments automáticos...")
 
-      // Buscar lotes da supervisora
       const { data: lotesData, error: lotesError } = await supabaseAdmin
         .from("lotes")
         .select("id")
@@ -185,7 +164,6 @@ serve(async (req) => {
           lote_id: lote.id,
         }))
 
-        // Limpa assignments antigos desse coordenador
         const { error: delAssignErr } = await supabaseAdmin
           .from("coordinator_assignments")
           .delete()
@@ -195,7 +173,6 @@ serve(async (req) => {
           console.error("Erro ao limpar assignments antigos:", delAssignErr)
         }
 
-        // Cria novos assignments
         const { error: assignError } = await supabaseAdmin
           .from("coordinator_assignments")
           .insert(assignments)
@@ -210,9 +187,7 @@ serve(async (req) => {
       }
     }
 
-    // =========================================
-    // 5. Resposta final OK
-    // =========================================
+    // 5. Resposta final
     return new Response(
       JSON.stringify({
         message: "Usuário criado/atualizado com sucesso",
