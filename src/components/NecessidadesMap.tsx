@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Filtro de features para evitar desenhar retângulos/bbox/etc
@@ -16,33 +17,29 @@ function onlyLineFeatures(fc: any) {
     type: "FeatureCollection",
     features: fc.features.filter((feat: any) => {
       if (!feat || !feat.geometry) return false;
+
       const g = feat.geometry;
       const t = g.type;
 
-      // remove polígonos, multipolígonos e coleções genéricas
+      // 🔴 Elimina qualquer geometria que não seja linha
       if (
         t === "Polygon" ||
         t === "MultiPolygon" ||
-        t === "GeometryCollection"
+        t === "GeometryCollection" ||
+        t === "Point" ||
+        t === "MultiPoint" ||
+        t === null
       ) {
         return false;
       }
 
-      // só aceitamos linhas
-      if (t !== "LineString" && t !== "MultiLineString") {
-        return false;
+      // ✅ Mantém apenas linhas válidas
+      if (t === "LineString" || t === "MultiLineString") {
+        if (!g.coordinates || g.coordinates.length === 0) return false;
+        return true;
       }
 
-      // coordenadas mínimas
-      if (!g.coordinates) return false;
-      if (
-        (t === "LineString" && g.coordinates.length < 2) ||
-        (t === "MultiLineString" && g.coordinates.length === 0)
-      ) {
-        return false;
-      }
-
-      return true;
+      return false;
     }),
   };
 
@@ -55,7 +52,16 @@ function safe(v: any) {
   return v;
 }
 
-const NecessidadesMap: React.FC = () => {
+interface NecessidadesMapProps {
+  necessidades?: any[];
+  tipo?: string;
+  rodoviaId?: string;
+  loteId?: string;
+  rodovia?: { codigo: string };
+  lote?: { numero: string; empresa?: { nome: string } };
+}
+
+const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
   const mapRef = useRef<L.Map | null>(null);
   // vamos guardar os layerGroups pra poder dar fitBounds com o conjunto visível
   const snvGroupRef = useRef<L.LayerGroup | null>(null);
@@ -150,33 +156,41 @@ const NecessidadesMap: React.FC = () => {
     }
 
     // =========================================
-    // 3. Carregar SNV (snv_br_mg_202501A.geojson)
-    // Propriedades esperadas:
-    // vl_br, sg_uf, vl_codigo, vl_km_inic, vl_km_fina,
-    // ul, ds_jurisdi, ds_legenda, sg_legenda,
-    // latitude_inicial, longitude_inicial, latitude_final, longitude_final
+    // 3. Carregar SNV via Edge Function
     // =========================================
     (async () => {
       try {
-        const resp = await fetch("/geojson/snv_br_mg_202501A.geojson", {
-          cache: "no-store",
+        console.log("🔄 Carregando SNV via edge function...");
+        
+        const { data, error } = await supabase.functions.invoke('download-vgeo-layer', {
+          body: {
+            codigo_rodovia: 'BR-040',
+            layer_type: 'snv'
+          }
         });
 
-        if (!resp.ok) {
-          console.error(
-            "Falha ao carregar snv_br_mg_202501A.geojson:",
-            resp.status,
-            resp.statusText
-          );
+        if (error) {
+          console.error("❌ Erro ao carregar SNV:", error);
           return;
         }
 
-        let snvData = await resp.json();
-        snvData = onlyLineFeatures(snvData); // remove polígonos/bbox
+        console.log("📦 Resposta SNV:", data);
+
+        const geojsonData = data?.geojson || data;
+        
+        if (!geojsonData?.features || geojsonData.features.length === 0) {
+          console.warn("⚠️ SNV não retornou features");
+          return;
+        }
+
+        console.log(`✅ SNV carregado: ${geojsonData.features.length} features`);
+
+        const snvData = onlyLineFeatures(geojsonData);
+        console.log(`🔍 SNV após filtro: ${snvData.features.length} features`);
 
         const snvGeo = L.geoJSON(snvData as any, {
           style: {
-            color: "#d32f2f", // vermelho
+            color: "#d32f2f",
             weight: 2,
           },
           onEachFeature: (feature: any, layer: L.Layer) => {
@@ -185,14 +199,12 @@ const NecessidadesMap: React.FC = () => {
 
               const brNumero = p.vl_br ? `BR-${p.vl_br}` : "BR-—";
               const uf = p.sg_uf ?? "MG";
-
               const codigoSNV = p.vl_codigo;
               const kmInicial = p.vl_km_inic;
               const kmFinal = p.vl_km_fina;
               const ul = p.ul;
-              const jurisdicao = p.ds_jurisdi; // << correto, com D
+              const jurisdicao = p.ds_jurisdi;
               const legenda = p.ds_legenda || p.sg_legenda;
-
               const latIni = p.latitude_inicial;
               const lonIni = p.longitude_inicial;
               const latFim = p.latitude_final;
@@ -221,37 +233,47 @@ const NecessidadesMap: React.FC = () => {
         });
 
         snvGeo.addTo(snvLayerGroup);
-
-        // após carregar SNV, tenta ajustar o mapa
         fitToVisibleLayers();
+        
       } catch (err) {
-        console.error("Erro carregando SNV BR/MG:", err);
+        console.error("💥 Erro carregando SNV:", err);
       }
     })();
 
     // =========================================
-    // 4. Carregar VGeo (vgeo_mg_federal_2025.geojson)
-    // Propriedades comuns: vl_br, ds_jurisdi, ul, vl_extensa etc
+    // 4. Carregar VGeo via Edge Function
     // =========================================
     (async () => {
       try {
-        const resp = await fetch("/geojson/vgeo_mg_federal_2025.geojson", {
-          cache: "no-store",
+        console.log("🔄 Carregando VGeo via edge function...");
+        
+        const { data, error } = await supabase.functions.invoke('download-vgeo-layer', {
+          body: {
+            codigo_rodovia: 'BR-040',
+            layer_type: 'vgeo'
+          }
         });
 
-        if (!resp.ok) {
-          console.warn(
-            "vgeo_mg_federal_2025.geojson não encontrado (tudo bem se ainda não gerou)."
-          );
+        if (error) {
+          console.warn("⚠️ VGeo não disponível:", error);
           return;
         }
 
-        let vgeoData = await resp.json();
-        vgeoData = onlyLineFeatures(vgeoData); // remove bbox/retângulo
+        const geojsonData = data?.geojson || data;
+        
+        if (!geojsonData?.features || geojsonData.features.length === 0) {
+          console.warn("⚠️ VGeo não retornou features");
+          return;
+        }
+
+        console.log(`✅ VGeo carregado: ${geojsonData.features.length} features`);
+
+        const vgeoData = onlyLineFeatures(geojsonData);
+        console.log(`🔍 VGeo após filtro: ${vgeoData.features.length} features`);
 
         const vgeoGeo = L.geoJSON(vgeoData as any, {
           style: {
-            color: "#0066cc", // azul tracejado
+            color: "#0066cc",
             weight: 2,
             dashArray: "4 2",
           },
@@ -292,11 +314,10 @@ const NecessidadesMap: React.FC = () => {
         });
 
         vgeoGeo.addTo(vgeoLayerGroup);
-
-        // tenta ajustar de novo incluindo VGeo
         fitToVisibleLayers();
+        
       } catch (err) {
-        console.error("Erro carregando VGeo MG:", err);
+        console.error("💥 Erro carregando VGeo:", err);
       }
     })();
 
