@@ -132,7 +132,7 @@ const MinhasNecessidades = () => {
   const [filtroServico, setFiltroServico] = useState<string>("todos");
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [busca, setBusca] = useState("");
-  const [visualizacao, setVisualizacao] = useState<"tabela" | "mapa">("tabela");
+  const [visualizacao, setVisualizacao] = useState<"tabela" | "mapa">("mapa");
   const [verTodasRodovias, setVerTodasRodovias] = useState(false);
 
   useEffect(() => {
