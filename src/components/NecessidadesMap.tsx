@@ -1,32 +1,22 @@
+"use client";
+
 import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-interface NecessidadesMapProps {
-  necessidades?: any[];
-  tipo?: string;
-  rodoviaId?: string | null;
-  loteId?: string | null;
-  rodovia?: { codigo?: string; nome?: string } | null;
-  lote?: { numero?: string } | null;
-}
-
-const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
+const NecessidadesMap: React.FC = () => {
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    // bloqueia execução no SSR / build
+    // Evita rodar no SSR / build
     if (typeof window === "undefined" || typeof document === "undefined") {
       return;
     }
 
-    // evita recriar o mapa se ele já existe
+    // Não recria o mapa se já existe
     if (mapRef.current) {
       return;
     }
-
-    // variável local para sabermos se inicializou o mapa com sucesso
-    let mapInstance: L.Map | null = null;
 
     try {
       // === 1. Inicializa mapa base ===
@@ -37,9 +27,8 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
         maxZoom: 18,
       });
       mapRef.current = map;
-      mapInstance = map;
 
-      // Base visual cinza claro
+      // Camada base visual (cinza claro)
       const baseTiles = L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
         {
@@ -53,10 +42,10 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
       const snvLayerGroup = L.layerGroup();   // SNV DNIT BR/MG
       const vgeoLayerGroup = L.layerGroup();  // Malha Federal (VGeo)
 
-      // SNV começa ligado
+      // SNV começa ligado por padrão
       snvLayerGroup.addTo(map);
 
-      // Controle de camadas
+      // Controle de layers para usuário ligar/desligar
       const overlays: Record<string, L.Layer> = {
         "SNV DNIT 202501A (BRs federais/MG)": snvLayerGroup,
         "Malha Federal (VGeo MG)": vgeoLayerGroup,
@@ -72,7 +61,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
         )
         .addTo(map);
 
-      // função helper p/ popup
+      // Função helper para popup seguro
       function safe(v: any) {
         if (v === null || v === undefined || v === "") return "—";
         return v;
@@ -80,10 +69,18 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
 
       // ==========================================================
       // 3. Carregar SNV (snv_br_mg_202501A.geojson)
-      // Esperado em properties:
-      //  vl_br, sg_uf, vl_codigo, vl_km_inic, vl_km_fina,
-      //  ul, ds_jurisdi, ds_legenda, sg_legenda,
-      //  latitude_inicial, longitude_inicial, latitude_final, longitude_final
+      //
+      // Campos esperados em feature.properties:
+      //  - vl_br
+      //  - sg_uf
+      //  - vl_codigo
+      //  - vl_km_inic
+      //  - vl_km_fina
+      //  - ul
+      //  - ds_jurisdi
+      //  - ds_legenda / sg_legenda
+      //  - latitude_inicial / longitude_inicial
+      //  - latitude_final / longitude_final
       // ==========================================================
       (async () => {
         try {
@@ -102,34 +99,19 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
 
           const snvData = await resp.json();
 
-          // MUITO IMPORTANTE:
-          // alguns trechos do seu arquivo original vieram com "geometry": null
-          // + um array "c" dentro de properties com coordenadas [lon,lat].
-          // Se isso ainda existir no arquivo final, Leaflet vai ignorar essas features.
-          // Se você ainda ver polígonos/retângulos estranhos ou nada renderizando,
-          // precisamos reconstruir geometry = { type:"LineString", coordinates: p.c }
-          // antes de passar pro L.geoJSON.
-          //
-          // Aqui já aplico essa correção automaticamente:
-          if (snvData && Array.isArray(snvData.features)) {
-            snvData.features = snvData.features
-              .map((f: any) => {
-                if (!f) return null;
-                if ((!f.geometry || !f.geometry.coordinates) && f.properties?.c) {
-                  return {
-                    ...f,
-                    geometry: {
-                      type: "LineString",
-                      coordinates: f.properties.c,
-                    },
-                  };
-                }
-                return f;
-              })
-              .filter(Boolean);
-          }
+          // Mantém apenas geometrias do tipo linha
+          const snvOnlyLines = {
+            type: "FeatureCollection",
+            features: (snvData.features || []).filter(
+              (f: any) =>
+                f &&
+                f.geometry &&
+                (f.geometry.type === "LineString" ||
+                  f.geometry.type === "MultiLineString")
+            ),
+          };
 
-          const snvGeo = L.geoJSON(snvData as any, {
+          const snvGeo = L.geoJSON(snvOnlyLines as any, {
             style: {
               color: "#d32f2f", // vermelho
               weight: 2,
@@ -161,7 +143,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
                     km inicial: ${safe(kmInicial)}<br/>
                     km final: ${safe(kmFinal)}<br/>
                     UL responsável: ${safe(ul)}<br/>
-                    Jurisdição: ${safe(juriscricao)}<br/>
+                    Jurisdição: ${safe(jurisdicao)}<br/>
                     Situação: ${safe(legenda)}<br/>
                     <hr style="border:none;border-top:1px solid #ccc;margin:6px 0;" />
                     <div style="font-size:11px; line-height:1.4; color:#555;">
@@ -177,7 +159,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
 
           snvGeo.addTo(snvLayerGroup);
 
-          // enquadra o mapa nos trechos SNV
+          // Ajusta visual para caber nessa malha filtrada
           try {
             map.fitBounds(snvGeo.getBounds(), { padding: [20, 20] });
           } catch (fitErr) {
@@ -190,9 +172,12 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
 
       // ==========================================================
       // 4. Carregar VGeo (vgeo_mg_federal_2025.geojson)
-      // Esperados em properties (usa o que tiver):
-      //  vl_br, ds_jurisdi, ul, vl_extensa, etc.
-      // Também aplicamos a mesma correção de geometry, se necessário.
+      //
+      // Campos esperados em feature.properties (o que existir):
+      //  - vl_br
+      //  - ds_jurisdi / JURISDICAO / ADMIN
+      //  - ul / UL
+      //  - vl_extensa / EXTENSAO / EXT_KM
       // ==========================================================
       (async () => {
         try {
@@ -209,25 +194,19 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
 
           const vgeoData = await resp.json();
 
-          if (vgeoData && Array.isArray(vgeoData.features)) {
-            vgeoData.features = vgeoData.features
-              .map((f: any) => {
-                if (!f) return null;
-                if ((!f.geometry || !f.geometry.coordinates) && f.properties?.c) {
-                  return {
-                    ...f,
-                    geometry: {
-                      type: "LineString",
-                      coordinates: f.properties.c,
-                    },
-                  };
-                }
-                return f;
-              })
-              .filter(Boolean);
-          }
+          // Mantém só linhas
+          const vgeoOnlyLines = {
+            type: "FeatureCollection",
+            features: (vgeoData.features || []).filter(
+              (f: any) =>
+                f &&
+                f.geometry &&
+                (f.geometry.type === "LineString" ||
+                  f.geometry.type === "MultiLineString")
+            ),
+          };
 
-          const vgeoGeo = L.geoJSON(vgeoData as any, {
+          const vgeoGeo = L.geoJSON(vgeoOnlyLines as any, {
             style: {
               color: "#0066cc", // azul tracejado
               weight: 2,
@@ -274,18 +253,15 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = () => {
           console.error("Erro carregando VGeo MG:", err);
         }
       })();
+
+      // Cleanup ao desmontar o componente
+      return () => {
+        map.remove();
+        mapRef.current = null;
+      };
     } catch (outerErr) {
       console.error("Falha inicializando o mapa Leaflet:", outerErr);
     }
-
-    // cleanup seguro no unmount
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-      mapInstance = null;
-    };
   }, []);
 
   return (
