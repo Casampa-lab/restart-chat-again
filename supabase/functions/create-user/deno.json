@@ -1,3 +1,6 @@
 {
-  "imports": {}
+  "importMap": "./import_map.json",
+  "compilerOptions": {
+    "strict": true
+  }
 }
