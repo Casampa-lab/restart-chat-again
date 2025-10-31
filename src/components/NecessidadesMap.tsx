@@ -8,27 +8,24 @@ const NecessidadesMap: React.FC = () => {
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    // Evita rodar no SSR / build
     if (typeof window === "undefined" || typeof document === "undefined") {
       return;
     }
 
-    // Não recria o mapa se já existe
     if (mapRef.current) {
       return;
     }
 
     try {
-      // === 1. Inicializa mapa base ===
+      // === 1. Inicializa o mapa ===
       const map = L.map("necessidades-map", {
-        center: [-18.5, -44.0], // Centro aproximado MG
+        center: [-18.5, -44.0],
         zoom: 6,
         minZoom: 5,
         maxZoom: 18,
       });
       mapRef.current = map;
 
-      // Camada base visual (cinza claro)
       const baseTiles = L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
         {
@@ -38,14 +35,11 @@ const NecessidadesMap: React.FC = () => {
         }
       ).addTo(map);
 
-      // === 2. Grupos de camadas ===
-      const snvLayerGroup = L.layerGroup();   // SNV DNIT BR/MG
-      const vgeoLayerGroup = L.layerGroup();  // Malha Federal (VGeo)
+      const snvLayerGroup = L.layerGroup();
+      const vgeoLayerGroup = L.layerGroup();
 
-      // SNV começa ligado por padrão
       snvLayerGroup.addTo(map);
 
-      // Controle de layers para usuário ligar/desligar
       const overlays: Record<string, L.Layer> = {
         "SNV DNIT 202501A (BRs federais/MG)": snvLayerGroup,
         "Malha Federal (VGeo MG)": vgeoLayerGroup,
@@ -61,27 +55,32 @@ const NecessidadesMap: React.FC = () => {
         )
         .addTo(map);
 
-      // Função helper para popup seguro
       function safe(v: any) {
         if (v === null || v === undefined || v === "") return "—";
         return v;
       }
 
-      // ==========================================================
-      // 3. Carregar SNV (snv_br_mg_202501A.geojson)
-      //
-      // Campos esperados em feature.properties:
-      //  - vl_br
-      //  - sg_uf
-      //  - vl_codigo
-      //  - vl_km_inic
-      //  - vl_km_fina
-      //  - ul
-      //  - ds_jurisdi
-      //  - ds_legenda / sg_legenda
-      //  - latitude_inicial / longitude_inicial
-      //  - latitude_final / longitude_final
-      // ==========================================================
+      // 🧹 Filtro para limpar geometrias inválidas
+      function filtrarLinhasValidas(data: any) {
+        const features = (data.features || []).filter((f: any) => {
+          if (!f || !f.geometry) return false;
+          const tipo = f.geometry.type;
+          if (tipo !== "LineString" && tipo !== "MultiLineString") return false;
+
+          const coords =
+            tipo === "LineString" ? [f.geometry.coordinates] : f.geometry.coordinates;
+          const dentro = coords.some((segmento: any) =>
+            segmento.some(([lon, lat]: [number, number]) => {
+              return lat >= -35 && lat <= 6 && lon >= -75 && lon <= -30;
+            })
+          );
+          return dentro;
+        });
+
+        return { type: "FeatureCollection", features };
+      }
+
+      // === 3. SNV ===
       (async () => {
         try {
           const resp = await fetch("/geojson/snv_br_mg_202501A.geojson", {
@@ -98,22 +97,11 @@ const NecessidadesMap: React.FC = () => {
           }
 
           const snvData = await resp.json();
-
-          // Mantém apenas geometrias do tipo linha
-          const snvOnlyLines = {
-            type: "FeatureCollection",
-            features: (snvData.features || []).filter(
-              (f: any) =>
-                f &&
-                f.geometry &&
-                (f.geometry.type === "LineString" ||
-                  f.geometry.type === "MultiLineString")
-            ),
-          };
+          const snvOnlyLines = filtrarLinhasValidas(snvData);
 
           const snvGeo = L.geoJSON(snvOnlyLines as any, {
             style: {
-              color: "#d32f2f", // vermelho
+              color: "#d32f2f",
               weight: 2,
             },
             onEachFeature: (feature: any, layer: L.Layer) => {
@@ -158,8 +146,6 @@ const NecessidadesMap: React.FC = () => {
           });
 
           snvGeo.addTo(snvLayerGroup);
-
-          // Ajusta visual para caber nessa malha filtrada
           try {
             map.fitBounds(snvGeo.getBounds(), { padding: [20, 20] });
           } catch (fitErr) {
@@ -170,15 +156,7 @@ const NecessidadesMap: React.FC = () => {
         }
       })();
 
-      // ==========================================================
-      // 4. Carregar VGeo (vgeo_mg_federal_2025.geojson)
-      //
-      // Campos esperados em feature.properties (o que existir):
-      //  - vl_br
-      //  - ds_jurisdi / JURISDICAO / ADMIN
-      //  - ul / UL
-      //  - vl_extensa / EXTENSAO / EXT_KM
-      // ==========================================================
+      // === 4. VGeo ===
       (async () => {
         try {
           const resp = await fetch("/geojson/vgeo_mg_federal_2025.geojson", {
@@ -193,22 +171,11 @@ const NecessidadesMap: React.FC = () => {
           }
 
           const vgeoData = await resp.json();
-
-          // Mantém só linhas
-          const vgeoOnlyLines = {
-            type: "FeatureCollection",
-            features: (vgeoData.features || []).filter(
-              (f: any) =>
-                f &&
-                f.geometry &&
-                (f.geometry.type === "LineString" ||
-                  f.geometry.type === "MultiLineString")
-            ),
-          };
+          const vgeoOnlyLines = filtrarLinhasValidas(vgeoData);
 
           const vgeoGeo = L.geoJSON(vgeoOnlyLines as any, {
             style: {
-              color: "#0066cc", // azul tracejado
+              color: "#0066cc",
               weight: 2,
               dashArray: "4 2",
             },
@@ -221,18 +188,12 @@ const NecessidadesMap: React.FC = () => {
                   : p.RODOVIA || p.rodovia || p.SIGLA || "—";
 
                 const jurisdicao =
-                  p.ds_jurisdi ||
-                  p.JURISDICAO ||
-                  p.ADMIN ||
-                  "—";
+                  p.ds_jurisdi || p.JURISDICAO || p.ADMIN || "—";
 
                 const ul = p.ul || p.UL || "—";
 
                 const extensaoKm =
-                  p.vl_extensa ||
-                  p.EXTENSAO ||
-                  p.EXT_KM ||
-                  "—";
+                  p.vl_extensa || p.EXTENSAO || p.EXT_KM || "—";
 
                 const htmlPopup = `
                   <div style="font-size:13px; line-height:1.4;">
@@ -254,7 +215,6 @@ const NecessidadesMap: React.FC = () => {
         }
       })();
 
-      // Cleanup ao desmontar o componente
       return () => {
         map.remove();
         mapRef.current = null;
