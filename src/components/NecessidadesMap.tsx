@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { supabase } from "@/integrations/supabase/client";
 
 const NecessidadesMap: React.FC = () => {
   const mapRef = useRef<L.Map | null>(null);
@@ -83,9 +84,20 @@ const NecessidadesMap: React.FC = () => {
       // ========== 5. Carregar SNV ==========
       (async () => {
         try {
-          const resp = await fetch("/geojson/snv_br_mg_202501A.geojson", {
-            cache: "no-store",
-          });
+        const { data, error } = await supabase.functions.invoke('download-vgeo-layer', {
+  body: {
+    codigo_rodovia: 'MG',
+    layer_type: 'vgeo'
+  }
+});
+
+if (error || !data) {
+  console.warn("VGeo não disponível via edge function (ok se ainda não configurado).");
+  return;
+}
+
+const vgeoData = onlyLineFeatures(data);
+
 
           if (!resp.ok) {
             console.error(
@@ -208,7 +220,7 @@ const NecessidadesMap: React.FC = () => {
                   <div style="font-size:13px; line-height:1.4;">
                     <b>VGeo / Malha Federal MG</b><br/>
                     Rodovia: ${safe(rodovia)}<br/>
-                    Jurisdição: ${safe(juriscricao)}<br/>
+                    Jurisdição: ${safe(jurisdicao)}<br/>
                     UL responsável: ${safe(ul)}<br/>
                     Extensão aprox (km): ${safe(extensaoKm)}
                   </div>
