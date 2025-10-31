@@ -5,6 +5,8 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { supabase } from "@/integrations/supabase/client";
 
+// Filtra apenas LineString / MultiLineString válidas.
+// Remove Polygon, MultiPolygon, Point etc. para evitar caixas gigantes.
 function onlyLineFeatures(fc: any) {
   if (!fc || !fc.features || !Array.isArray(fc.features)) return fc;
 
@@ -39,18 +41,20 @@ function onlyLineFeatures(fc: any) {
   return filtered;
 }
 
+// Evita "undefined", "null" etc no HTML do popup
 function safe(v: any) {
   if (v === null || v === undefined || v === "") return "—";
   return v;
 }
 
+// Estilos centralizados para manter consistência visual
 const LAYER_STYLES = {
   snv: {
-    color: "#d32f2f",
+    color: "#d32f2f", // vermelho contínuo (SNV oficial DNIT)
     weight: 2,
   },
   vgeo: {
-    color: "#0066cc",
+    color: "#0066cc", // azul tracejado (VGeo / referência)
     weight: 2,
     dashArray: "4 2",
   },
@@ -69,10 +73,12 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
   rodovia,
   rodoviaId,
 }) => {
+  // refs Leaflet (não disparam render React)
   const mapRef = useRef<L.Map | null>(null);
   const snvGroupRef = useRef<L.LayerGroup | null>(null);
   const vgeoGroupRef = useRef<L.LayerGroup | null>(null);
 
+  // Status visível na tela (barrinhas SNV / VGeo canto superior esquerdo do mapa)
   const [snvStatus, setSnvStatus] = useState<{
     type: "ok" | "warn" | "error";
     msg: string;
@@ -83,61 +89,69 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
     msg: string;
   } | null>(null);
 
+  // Define qual rodovia consultar. Se nada vier por props, fallback BR-040.
   const targetRodovia =
     rodovia?.codigo?.trim() || rodoviaId?.trim() || "BR-040";
 
   useEffect(() => {
+    // Segurança contra SSR
     if (typeof window === "undefined" || typeof document === "undefined") {
       return;
     }
 
+    // Criar o mapa apenas uma vez
     if (!mapRef.current) {
-        const map = L.map("necessidades-map", {
-          center: [-18.5, -44.0],
-          zoom: 6,
-          minZoom: 5,
-          maxZoom: 18,
-        });
+      const map = L.map("necessidades-map", {
+        center: [-18.5, -44.0], // centro aproximado MG
+        zoom: 6,
+        minZoom: 5,
+        maxZoom: 18,
+      });
 
-        mapRef.current = map;
+      mapRef.current = map;
 
-        const baseTiles = L.tileLayer(
-          "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+      const baseTiles = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
+            'contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        }
+      ).addTo(map);
+
+      // LayerGroups vazios
+      const snvLayerGroup = L.layerGroup();
+      const vgeoLayerGroup = L.layerGroup();
+
+      snvGroupRef.current = snvLayerGroup;
+      vgeoGroupRef.current = vgeoLayerGroup;
+
+      // SNV começa ligado
+      snvLayerGroup.addTo(map);
+
+      // Controle de camadas (checkbox)
+      const overlays: Record<string, L.Layer> = {
+        "SNV DNIT 202501A (BRs federais/MG)": snvLayerGroup,
+        "Malha Federal (VGeo MG)": vgeoLayerGroup,
+      };
+
+      L.control
+        .layers(
           {
-            attribution:
-              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
-              'contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-          }
-        ).addTo(map);
-
-        const snvLayerGroup = L.layerGroup();
-        const vgeoLayerGroup = L.layerGroup();
-
-        snvGroupRef.current = snvLayerGroup;
-        vgeoGroupRef.current = vgeoLayerGroup;
-
-        snvLayerGroup.addTo(map);
-
-        const overlays: Record<string, L.Layer> = {
-          "SNV DNIT 202501A (BRs federais/MG)": snvLayerGroup,
-          "Malha Federal (VGeo MG)": vgeoLayerGroup,
-        };
-
-        L.control
-          .layers(
-            {
-              "Mapa Base": baseTiles,
-            },
-            overlays,
-            { collapsed: false }
-          )
-          .addTo(map);
+            "Mapa Base": baseTiles,
+          },
+          overlays,
+          { collapsed: false }
+        )
+        .addTo(map);
     }
 
+    // A partir daqui o mapa e os grupos já existem
     const map = mapRef.current!;
     const snvLayerGroup = snvGroupRef.current!;
     const vgeoLayerGroup = vgeoGroupRef.current!;
 
+    // Ajusta o enquadramento com base nas camadas visíveis
     function fitToVisibleLayers() {
       const bounds = L.latLngBounds([]);
 
@@ -164,15 +178,16 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
       }
     }
 
-    // limpa camadas antigas
+    // Antes de recarregar a BR alvo, limpamos camadas antigas
     snvLayerGroup.clearLayers();
     vgeoLayerGroup.clearLayers();
 
+    // Limpa status antigo
     setSnvStatus(null);
     setVgeoStatus(null);
 
     // ===============================
-    // SNV
+    // 1) Carregar SNV
     // ===============================
     (async () => {
       try {
@@ -208,59 +223,60 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
             type: "error",
             msg: `Sem dados SNV para ${targetRodovia}.`,
           });
-          return;
+          // Não faz return aqui: deixa continuar o VGeo normalmente
+        } else {
+          const snvData = onlyLineFeatures(geojsonData);
+
+          const snvGeo = L.geoJSON(snvData as any, {
+            style: LAYER_STYLES.snv as any,
+            onEachFeature: (feature: any, layer: L.Layer) => {
+              layer.on("click", () => {
+                const p = feature?.properties || {};
+
+                const brNumero = p.vl_br ? `BR-${p.vl_br}` : "BR-—";
+                const uf = p.sg_uf ?? "MG";
+                const codigoSNV = p.vl_codigo;
+                const kmInicial = p.vl_km_inic;
+                const kmFinal = p.vl_km_fina;
+                const ul = p.ul;
+                const jurisdicao = p.ds_jurisdi;
+                const legenda = p.ds_legenda || p.sg_legenda;
+                const latIni = p.latitude_inicial;
+                const lonIni = p.longitude_inicial;
+                const latFim = p.latitude_final;
+                const lonFim = p.longitude_final;
+
+                const htmlPopup = `
+                  <div style="font-size:13px; line-height:1.4;">
+                    <b>SNV / DNIT 202501A</b><br/>
+                    Rodovia: ${safe(brNumero)} / ${safe(uf)}<br/>
+                    Código SNV: ${safe(codigoSNV)}<br/>
+                    km inicial: ${safe(kmInicial)}<br/>
+                    km final: ${safe(kmFinal)}<br/>
+                    UL responsável: ${safe(ul)}<br/>
+                    Jurisdição: ${safe(jurisdicao)}<br/>
+                    Situação: ${safe(legenda)}<br/>
+                    <hr style="border:none;border-top:1px solid #ccc;margin:6px 0;" />
+                    <div style="font-size:11px; line-height:1.4; color:#555;">
+                      Início: ${safe(latIni)}, ${safe(lonIni)}<br/>
+                      Fim: ${safe(latFim)}, ${safe(lonFim)}
+                    </div>
+                  </div>
+                `;
+                (layer as any).bindPopup(htmlPopup).openPopup();
+              });
+            },
+          });
+
+          snvGeo.addTo(snvLayerGroup);
+
+          setSnvStatus({
+            type: "ok",
+            msg: `SNV carregado (${snvData.features.length} trechos).`,
+          });
         }
 
-        const snvData = onlyLineFeatures(geojsonData);
-
-        const snvGeo = L.geoJSON(snvData as any, {
-          style: LAYER_STYLES.snv as any,
-          onEachFeature: (feature: any, layer: L.Layer) => {
-            layer.on("click", () => {
-              const p = feature?.properties || {};
-
-              const brNumero = p.vl_br ? `BR-${p.vl_br}` : "BR-—";
-              const uf = p.sg_uf ?? "MG";
-              const codigoSNV = p.vl_codigo;
-              const kmInicial = p.vl_km_inic;
-              const kmFinal = p.vl_km_fina;
-              const ul = p.ul;
-              const jurisdicao = p.ds_jurisdi;
-              const legenda = p.ds_legenda || p.sg_legenda;
-              const latIni = p.latitude_inicial;
-              const lonIni = p.longitude_inicial;
-              const latFim = p.latitude_final;
-              const lonFim = p.longitude_final;
-
-              const htmlPopup = `
-                <div style="font-size:13px; line-height:1.4;">
-                  <b>SNV / DNIT 202501A</b><br/>
-                  Rodovia: ${safe(brNumero)} / ${safe(uf)}<br/>
-                  Código SNV: ${safe(codigoSNV)}<br/>
-                  km inicial: ${safe(kmInicial)}<br/>
-                  km final: ${safe(kmFinal)}<br/>
-                  UL responsável: ${safe(ul)}<br/>
-                  Jurisdição: ${safe(jurisdicao)}<br/>
-                  Situação: ${safe(legenda)}<br/>
-                  <hr style="border:none;border-top:1px solid #ccc;margin:6px 0;" />
-                  <div style="font-size:11px; line-height:1.4; color:#555;">
-                    Início: ${safe(latIni)}, ${safe(lonIni)}<br/>
-                    Fim: ${safe(latFim)}, ${safe(lonFim)}
-                  </div>
-                </div>
-              `;
-              (layer as any).bindPopup(htmlPopup).openPopup();
-            });
-          },
-        });
-
-        snvGeo.addTo(snvLayerGroup);
-
-        setSnvStatus({
-          type: "ok",
-          msg: `SNV carregado (${snvData.features.length} trechos).`,
-        });
-
+        // fit depois de tentar SNV também (caso VGeo não venha)
         fitToVisibleLayers();
       } catch (err) {
         console.error("💥 Erro inesperado carregando SNV:", err);
@@ -272,7 +288,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
     })();
 
     // ===============================
-    // VGEO
+    // 2) Carregar VGeo
     // ===============================
     (async () => {
       try {
@@ -319,66 +335,51 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
             layer.on("click", () => {
               const p = feature?.properties || {};
 
-              // NOVO: captura propriedades brutas da feature
-              try {
-                const raw = JSON.stringify(p, null, 2);
-                console.log("📌 PROPRIEDADES VGeo (raw):", raw);
-                alert(raw); // <- copia isso pra mim
-              } catch (e) {
-                console.log("📌 PROPRIEDADES VGeo (raw) [nao serializavel]:", p);
-                alert("Não consegui serializar as propriedades dessa linha.");
-              }
+              // Mapeamento com base no dump real que você me mandou:
+              // codigo_rod: "267"
+              // unidade_fe: "MG"
+              // jurisdicao: "Estadual"
+              // extensao: 17.3
+              // local_inic: "ENTR BR383(B)"
+              // local_fim: "ACESSO CONCEI"
+              // tipo_trecho: "Eixo Principal"
+              const rodovia = p.codigo_rod
+                ? `BR-${p.codigo_rod}/${p.unidade_fe || ""}`.trim()
+                : "—";
 
-              // tentativa atual de adivinhar os campos
-              const rodoviaGuess =
-                (p.vl_br ? `BR-${p.vl_br}` : null) ||
-                p.RODOVIA ||
-                p.rodovia ||
-                p.SIGLA ||
-                p.sigla ||
-                p.br ||
-                "—";
-
-              const jurisdicaoGuess =
-                p.ds_jurisdi ||
-                p.JURISDICAO ||
-                p.jurisdicao ||
-                p.ADMIN ||
-                p.admin ||
-                "—";
-
-              const ulGuess = p.ul || p.UL || p.UL_RESP || p.ul_responsavel || "—";
-
-              const extensaoGuess =
-                p.vl_extensa ||
-                p.EXTENSAO ||
-                p.EXT_KM ||
-                p.ext_km ||
-                p.extensao ||
-                "—";
+              const jurisdicao = p.jurisdicao || "—";
+              const extensaoKm = p.extensao || "—";
+              const localIni = p.local_inic || "—";
+              const localFim = p.local_fim || "—";
+              const tipoTrecho = p.tipo_trecho || "—";
 
               const htmlPopup = `
                 <div style="font-size:13px; line-height:1.4;">
                   <b>VGeo / Malha Federal MG</b><br/>
-                  Rodovia: ${safe(rodoviaGuess)}<br/>
-                  Jurisdição: ${safe(jurisdicaoGuess)}<br/>
-                  UL responsável: ${safe(ulGuess)}<br/>
-                  Extensão aprox (km): ${safe(extensaoGuess)}
+                  Rodovia: ${safe(rodovia)}<br/>
+                  Jurisdição: ${safe(jurisdicao)}<br/>
+                  Tipo de Trecho: ${safe(tipoTrecho)}<br/>
+                  Extensão aprox (km): ${safe(extensaoKm)}<br/>
+                  <hr style="border:none;border-top:1px solid #ccc;margin:6px 0;" />
+                  <div style="font-size:11px; line-height:1.4; color:#555;">
+                    Início: ${safe(localIni)}<br/>
+                    Fim: ${safe(localFim)}
+                  </div>
                 </div>
               `;
-
               (layer as any).bindPopup(htmlPopup).openPopup();
             });
           },
         });
 
-        vgeoGeo.addTo(vgeoLayerGroup);
+        vgeoGeo.addTo(vgeoGroupRef.current!);
 
         setVgeoStatus({
           type: "ok",
           msg: `VGeo carregado (${vgeoData.features.length} trechos).`,
         });
 
+        // Ajuste final de enquadramento considerando agora também o VGeo
         fitToVisibleLayers();
       } catch (err) {
         console.error("💥 Erro inesperado carregando VGeo:", err);
@@ -389,14 +390,16 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
       }
     })();
 
+    // limpar no unmount total do componente
     return () => {
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
-  }, [rodovia?.codigo, rodoviaId]);
+  }, [targetRodovia]); // recarrega se mudar BR
 
+  // Overlay de status (SNV / VGeo) no canto do mapa
   function renderStatusOverlay() {
     if (!snvStatus && !vgeoStatus) return null;
 
@@ -414,9 +417,9 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
     };
 
     function bgFor(type: "ok" | "warn" | "error") {
-      if (type === "ok") return "#e8f5e9";
-      if (type === "warn") return "#fffde7";
-      return "#ffebee";
+      if (type === "ok") return "#e8f5e9"; // verde leve
+      if (type === "warn") return "#fffde7"; // amarelo leve
+      return "#ffebee"; // vermelho leve
     }
 
     return (
@@ -428,7 +431,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
           zIndex: 9999,
           display: "flex",
           flexDirection: "column",
-          pointerEvents: "none",
+          pointerEvents: "none", // não rouba o clique do mapa
         }}
       >
         {snvStatus && (
