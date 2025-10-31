@@ -8,19 +8,18 @@ const NecessidadesMap: React.FC = () => {
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
+    // não roda no SSR
     if (typeof window === "undefined" || typeof document === "undefined") {
       return;
     }
 
-    // evita recriar em hot reload
+    // evita recriar mapa se já existe
     if (mapRef.current) {
       return;
     }
 
     try {
-      // ======================
-      // 1. Inicializa mapa base
-      // ======================
+      // === 1. Inicializa mapa base ===
       const map = L.map("necessidades-map", {
         center: [-18.5, -44.0], // MG aproximado
         zoom: 6,
@@ -29,6 +28,7 @@ const NecessidadesMap: React.FC = () => {
       });
       mapRef.current = map;
 
+      // fundo claro
       const baseTiles = L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
         {
@@ -38,14 +38,14 @@ const NecessidadesMap: React.FC = () => {
         }
       ).addTo(map);
 
-      // grupos de camadas
-      const snvLayerGroup = L.layerGroup();
-      const vgeoLayerGroup = L.layerGroup();
+      // grupos de camada
+      const snvLayerGroup = L.layerGroup();   // SNV DNIT BRs/MG
+      const vgeoLayerGroup = L.layerGroup();  // Malha Federal (VGeo MG)
 
-      // SNV começa ligado
+      // SNV começa visível
       snvLayerGroup.addTo(map);
 
-      // controle de layers
+      // controle para ligar/desligar
       const overlays: Record<string, L.Layer> = {
         "SNV DNIT 202501A (BRs federais/MG)": snvLayerGroup,
         "Malha Federal (VGeo MG)": vgeoLayerGroup,
@@ -59,196 +59,56 @@ const NecessidadesMap: React.FC = () => {
         )
         .addTo(map);
 
-      // util: não imprimir undefined
+      // helper pra evitar "undefined" no popup
       function safe(v: any) {
         if (v === null || v === undefined || v === "") return "—";
         return v;
       }
 
-      // -------------------------------------------------
-      // Função auxiliar 1:
-      // normaliza coords como lista de LineString(s)
-      // -------------------------------------------------
-      function getLineSegments(geometry: any): number[][][] {
-        if (!geometry) return [];
-
-        if (geometry.type === "LineString") {
-          // vira lista de 1 segmento
-          return [geometry.coordinates];
-        }
-
-        if (geometry.type === "MultiLineString") {
-          // já é lista de segmentos
-          return geometry.coordinates;
-        }
-
-        // outros tipos descartados
-        return [];
-      }
-
-      // -------------------------------------------------
-      // Função auxiliar 2:
-      // checa se um array de [lon,lat] parece ser "caixa"
-      // (quatro cantos retos formando bounding box)
-      //
-      // Heurística:
-      // - precisa ter pelo menos 4 pontos
-      // - pega min/max lon/lat
-      // - conta quantos pontos batem exatamente nesses extremos
-      // - se muitos pontos estão exatamente nesses retângulos alinhados,
-      //   e a forma é "retinha", tratamos como lixo.
-      // -------------------------------------------------
-      function isBoundingBoxLike(coords: number[][]): boolean {
-        if (!coords || coords.length < 4) return false;
-
-        // pega apenas valores únicos aproximados
-        const lats = coords.map(c => c[1]);
-        const lons = coords.map(c => c[0]);
-
-        const minLat = Math.min(...lats);
-        const maxLat = Math.max(...lats);
-        const minLon = Math.min(...lons);
-        const maxLon = Math.max(...lons);
-
-        // largura / altura em graus
-        const widthDeg = maxLon - minLon;
-        const heightDeg = maxLat - minLat;
-
-        // se for MUITO grande (cobre meio país), provavelmente é bbox
-        // regra: largura > 1 grau OU altura > 1 grau já é bem suspeito
-        if (widthDeg > 1 || heightDeg > 1) {
-          // agora verifica se praticamente todos os pontos
-          // estão só em linhas retas desses limites
-          const alignedPoints = coords.filter(([lon, lat]) => {
-            const onVertical =
-              Math.abs(lon - minLon) < 1e-9 || Math.abs(lon - maxLon) < 1e-9;
-            const onHorizontal =
-              Math.abs(lat - minLat) < 1e-9 || Math.abs(lat - maxLat) < 1e-9;
-            return onVertical || onHorizontal;
-          });
-
-          // se 90% dos pontos estão nas bordas -> é retângulo
-          if (alignedPoints.length / coords.length > 0.9) {
-            return true;
-          }
-        }
-
-        return false;
-      }
-
-      // -------------------------------------------------
-      // Função auxiliar 3:
-      // valida se coordenadas estão dentro do Brasil aprox
-      // e descarta segmentos curtos/deterministicamente ruins
-      // -------------------------------------------------
-      function segmentoEhValido(coords: number[][]): boolean {
-        if (!coords || coords.length < 3) {
-          // menos de 3 vértices => não é trecho rodoviário real
-          return false;
-        }
-
-        // bounding box aproximada Brasil
-        const dentroBrasil = coords.some(([lon, lat]) => {
-          return lat >= -35 && lat <= 6 && lon >= -75 && lon <= -30;
-        });
-        if (!dentroBrasil) return false;
-
-        // descarta segmentos que parecem bounding box
-        if (isBoundingBoxLike(coords)) return false;
-
-        return true;
-      }
-
-      // -------------------------------------------------
-      // Função principal de limpeza do GeoJSON
-      // Mantém só LineString/MultiLineString "legítimos"
-      // -------------------------------------------------
-      function limparGeoJSON(data: any) {
-        const saidaFeatures: any[] = [];
-
-        for (const f of data.features || []) {
-          const segs = getLineSegments(f.geometry);
-          if (!segs.length) continue;
-
-          // mantém apenas os segmentos válidos
-          const segsValidos = segs.filter(segmentoEhValido);
-
-          if (!segsValidos.length) {
-            continue;
-          }
-
-          // se sobrou só 1 segmento válido => LineString
-          if (segsValidos.length === 1) {
-            saidaFeatures.push({
-              type: "Feature",
-              geometry: {
-                type: "LineString",
-                coordinates: segsValidos[0],
-              },
-              properties: f.properties || {},
-            });
-          } else {
-            // se sobrou mais de 1 => MultiLineString
-            saidaFeatures.push({
-              type: "Feature",
-              geometry: {
-                type: "MultiLineString",
-                coordinates: segsValidos,
-              },
-              properties: f.properties || {},
-            });
-          }
-        }
-
-        return {
+      // 🔎 helper que filtra só geometria de linha
+      function onlyLineFeatures(fc: any) {
+        if (!fc || !fc.features || !Array.isArray(fc.features)) return fc;
+        const filtered = {
           type: "FeatureCollection",
-          features: saidaFeatures,
+          features: fc.features.filter((feat: any) => {
+            if (!feat || !feat.geometry) return false;
+
+            const g = feat.geometry;
+            const t = g.type;
+
+            // a gente quer só linha (rodovia)
+            if (t !== "LineString" && t !== "MultiLineString") {
+              return false;
+            }
+
+            // coordinates precisam existir
+            if (!g.coordinates) return false;
+            if (
+              (t === "LineString" && g.coordinates.length < 2) ||
+              (t === "MultiLineString" && g.coordinates.length === 0)
+            ) {
+              return false;
+            }
+
+            return true;
+          }),
         };
+        return filtered;
       }
 
-      // -------------------------------------------------
-      // Função segura pra dar fitBounds
-      // - só tenta se realmente tem bounds "com área"
-      // -------------------------------------------------
-      function tentarFitBounds(layerGroup: L.LayerGroup) {
-        try {
-          const bounds = (layerGroup as any).getBounds?.();
-          if (!bounds) return;
-
-          // bounds é válido se SW != NE
-          const sw = bounds.getSouthWest?.();
-          const ne = bounds.getNorthEast?.();
-
-          if (!sw || !ne) return;
-
-          const latDiff = Math.abs(ne.lat - sw.lat);
-          const lonDiff = Math.abs(ne.lng - sw.lng);
-
-          // se é minúsculo demais, ignora (pode ser lixo)
-          // se é gigante demais (mais de ~40 graus), ignora
-          if (
-            latDiff < 0.01 ||
-            lonDiff < 0.01 ||
-            latDiff > 40 ||
-            lonDiff > 40
-          ) {
-            return;
-          }
-
-          map.fitBounds(bounds, { padding: [20, 20] });
-        } catch (err) {
-          console.warn("fitBounds falhou:", err);
-        }
-      }
-
-      // ==========================
-      // 2. Carregar camada SNV
-      // ==========================
+      // ==========================================================
+      // 3. Carregar SNV (snv_br_mg_202501A.geojson)
+      // Campos esperados em feature.properties:
+      // vl_br, sg_uf, vl_codigo, vl_km_inic, vl_km_fina,
+      // ul, ds_jurisdi, ds_legenda, sg_legenda,
+      // latitude_inicial, longitude_inicial, latitude_final, longitude_final
+      // ==========================================================
       (async () => {
         try {
           const resp = await fetch("/geojson/snv_br_mg_202501A.geojson", {
             cache: "no-store",
           });
+
           if (!resp.ok) {
             console.error(
               "Falha ao carregar snv_br_mg_202501A.geojson:",
@@ -258,12 +118,14 @@ const NecessidadesMap: React.FC = () => {
             return;
           }
 
-          const bruto = await resp.json();
-          const limpo = limparGeoJSON(bruto);
+          // lê json bruto
+          const rawData = await resp.json();
+          // remove polígonos/retângulos/bbox e lixo
+          const snvData = onlyLineFeatures(rawData);
 
-          const snvGeo = L.geoJSON(limpo as any, {
+          const snvGeo = L.geoJSON(snvData as any, {
             style: {
-              color: "#d32f2f", // vermelho
+              color: "#d32f2f",
               weight: 2,
             },
             onEachFeature: (feature: any, layer: L.Layer) => {
@@ -276,7 +138,7 @@ const NecessidadesMap: React.FC = () => {
                 const codigoSNV = p.vl_codigo;
                 const kmInicial = p.vl_km_inic;
                 const kmFinal = p.vl_km_fina;
-                const ulResp = p.ul;
+                const ul = p.ul;
                 const jurisdicao = p.ds_jurisdi;
                 const legenda = p.ds_legenda || p.sg_legenda;
 
@@ -292,8 +154,8 @@ const NecessidadesMap: React.FC = () => {
                     Código SNV: ${safe(codigoSNV)}<br/>
                     km inicial: ${safe(kmInicial)}<br/>
                     km final: ${safe(kmFinal)}<br/>
-                    UL responsável: ${safe(ulResp)}<br/>
-                    Jurisdição: ${safe(juriscricao)}<br/>
+                    UL responsável: ${safe(ul)}<br/>
+                    Jurisdição: ${safe(jurisdicao)}<br/>
                     Situação: ${safe(legenda)}<br/>
                     <hr style="border:none;border-top:1px solid #ccc;margin:6px 0;" />
                     <div style="font-size:11px; line-height:1.4; color:#555;">
@@ -309,21 +171,28 @@ const NecessidadesMap: React.FC = () => {
 
           snvGeo.addTo(snvLayerGroup);
 
-          // tenta focar nessa camada
-          tentarFitBounds(snvLayerGroup);
+          // tenta enquadrar no conteúdo limpinho (sem bbox fake)
+          try {
+            map.fitBounds(snvGeo.getBounds(), { padding: [20, 20] });
+          } catch (fitErr) {
+            console.warn("Não consegui dar fitBounds no SNV:", fitErr);
+          }
         } catch (err) {
           console.error("Erro carregando SNV BR/MG:", err);
         }
       })();
 
-      // ==========================
-      // 3. Carregar camada VGeo
-      // ==========================
+      // ==========================================================
+      // 4. Carregar VGeo (vgeo_mg_federal_2025.geojson)
+      // Campos esperados em properties (o que existir):
+      // vl_br, ds_jurisdi, ul, vl_extensa, ...
+      // ==========================================================
       (async () => {
         try {
           const resp = await fetch("/geojson/vgeo_mg_federal_2025.geojson", {
             cache: "no-store",
           });
+
           if (!resp.ok) {
             console.warn(
               "vgeo_mg_federal_2025.geojson não encontrado (ok se ainda não gerou)."
@@ -331,12 +200,14 @@ const NecessidadesMap: React.FC = () => {
             return;
           }
 
-          const bruto = await resp.json();
-          const limpo = limparGeoJSON(bruto);
+          // lê json bruto
+          const rawData = await resp.json();
+          // remove polígonos/bbox
+          const vgeoData = onlyLineFeatures(rawData);
 
-          const vgeoGeo = L.geoJSON(limpo as any, {
+          const vgeoGeo = L.geoJSON(vgeoData as any, {
             style: {
-              color: "#0066cc", // azul tracejado
+              color: "#0066cc",
               weight: 2,
               dashArray: "4 2",
             },
@@ -354,7 +225,7 @@ const NecessidadesMap: React.FC = () => {
                   p.ADMIN ||
                   "—";
 
-                const ulResp = p.ul || p.UL || "—";
+                const ul = p.ul || p.UL || "—";
 
                 const extensaoKm =
                   p.vl_extensa ||
@@ -367,7 +238,7 @@ const NecessidadesMap: React.FC = () => {
                     <b>VGeo / Malha Federal MG</b><br/>
                     Rodovia: ${safe(rodovia)}<br/>
                     Jurisdição: ${safe(juriscricao)}<br/>
-                    UL responsável: ${safe(ulResp)}<br/>
+                    UL responsável: ${safe(ul)}<br/>
                     Extensão aprox (km): ${safe(extensaoKm)}
                   </div>
                 `;
@@ -377,16 +248,12 @@ const NecessidadesMap: React.FC = () => {
           });
 
           vgeoGeo.addTo(vgeoLayerGroup);
-
-          // se SNV não deu bounds válidos (por ex, não carregou),
-          // tenta enquadrar pelo VGeo
-          tentarFitBounds(vgeoLayerGroup);
         } catch (err) {
           console.error("Erro carregando VGeo MG:", err);
         }
       })();
 
-      // desmontagem
+      // cleanup ao desmontar
       return () => {
         map.remove();
         mapRef.current = null;
