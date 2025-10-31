@@ -15,7 +15,10 @@ import { ArrowLeft, FileText, ExternalLink, Trash2, Filter, FileSpreadsheet, Map
 import { toast } from "sonner";
 import logoOperaVia from "@/assets/logo-operavia-optimized.webp";
 
-const NecessidadesMap = lazy(() => import("@/components/NecessidadesMap"));
+// const NecessidadesMap = lazy(() => import("@/components/NecessidadesMap"));
+import NecessidadesMap from "@/components/NecessidadesMap";
+
+
 
 interface Necessidade {
   id: string;
