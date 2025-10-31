@@ -16,33 +16,29 @@ function onlyLineFeatures(fc: any) {
     type: "FeatureCollection",
     features: fc.features.filter((feat: any) => {
       if (!feat || !feat.geometry) return false;
+
       const g = feat.geometry;
       const t = g.type;
 
-      // remove polígonos, multipolígonos e coleções genéricas
+      // 🔴 Elimina qualquer geometria que não seja linha
       if (
         t === "Polygon" ||
         t === "MultiPolygon" ||
-        t === "GeometryCollection"
+        t === "GeometryCollection" ||
+        t === "Point" ||
+        t === "MultiPoint" ||
+        t === null
       ) {
         return false;
       }
 
-      // só aceitamos linhas
-      if (t !== "LineString" && t !== "MultiLineString") {
-        return false;
+      // ✅ Mantém apenas linhas válidas
+      if (t === "LineString" || t === "MultiLineString") {
+        if (!g.coordinates || g.coordinates.length === 0) return false;
+        return true;
       }
 
-      // coordenadas mínimas
-      if (!g.coordinates) return false;
-      if (
-        (t === "LineString" && g.coordinates.length < 2) ||
-        (t === "MultiLineString" && g.coordinates.length === 0)
-      ) {
-        return false;
-      }
-
-      return true;
+      return false;
     }),
   };
 
