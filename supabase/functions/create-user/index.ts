@@ -3,12 +3,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 }
 
-// Lê variáveis de ambiente que você já definiu com `supabase secrets set`
-// Na CLI nova, não pode usar prefixo SUPABASE_. Por isso usamos PROJECT_URL e SERVICE_ROLE_KEY.
-// Também deixo fallback pra SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY caso um dia você rode local.
+// 1. Lê variáveis de ambiente
 const SUPABASE_URL =
   Deno.env.get("PROJECT_URL") ?? Deno.env.get("SUPABASE_URL")
 const SUPABASE_SERVICE_ROLE_KEY =
@@ -16,11 +15,11 @@ const SUPABASE_SERVICE_ROLE_KEY =
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error(
-    "PROJECT_URL / SERVICE_ROLE_KEY ausentes. Rode 'supabase secrets set' com nomes válidos."
+    "PROJECT_URL / SERVICE_ROLE_KEY ausentes. Rode 'supabase secrets set' antes do deploy.",
   )
 }
 
-// Cliente admin (service_role). Isso roda só no backend.
+// 2. Cria cliente admin (service_role)
 const supabaseAdmin = createClient(
   SUPABASE_URL,
   SUPABASE_SERVICE_ROLE_KEY,
@@ -32,24 +31,53 @@ const supabaseAdmin = createClient(
   },
 )
 
+// 3. Função auxiliar p/ padronizar erro 400 já com ponto de falha
+function fail(where: string, message: string) {
+  console.log(`[FAIL] ${where}: ${message}`)
+  return new Response(
+    JSON.stringify({
+      error: message,
+      where,
+    }),
+    {
+      status: 400,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+      },
+    },
+  )
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders })
   }
 
   try {
+    // ======================================================
+    // [0] Ler e validar entrada
+    // ======================================================
     const { email, password, nome, role, supervisoraId } = await req.json()
 
-    // validação mínima
     if (!email || !password || !nome || !role) {
-      throw new Error("Email, senha, nome e perfil são obrigatórios")
+      return fail(
+        "VALIDACAO_INICIAL",
+        "Email, senha, nome e perfil são obrigatórios",
+      )
     }
 
     if (password.length < 6) {
-      throw new Error("A senha deve ter pelo menos 6 caracteres")
+      return fail(
+        "VALIDACAO_SENHA",
+        "A senha deve ter pelo menos 6 caracteres",
+      )
     }
 
-    // 1. Criar usuário no Auth (ou reaproveitar se já existir)
+    // ======================================================
+    // [1] Criar ou recuperar usuário no Auth
+    // ======================================================
+    console.log("[1] Tentando criar usuário no auth.admin.createUser")
     let userId: string
 
     const { data: userData, error: createError } =
@@ -60,40 +88,64 @@ serve(async (req) => {
         user_metadata: { nome },
       })
 
-    if (createError && createError.message.includes("already been registered")) {
-      // usuário já existe -> pegar ID existente e atualizar senha
-      console.log("Usuário já existe, buscando ID...")
+    if (createError && createError.message?.includes("already been registered")) {
+      console.log("[1] Usuário já existe. Vou buscar ID e atualizar senha")
 
       const { data: usersList, error: listErr } =
         await supabaseAdmin.auth.admin.listUsers()
 
       if (listErr) {
-        throw new Error("Não foi possível listar usuários existentes")
+        return fail(
+          "AUTH_LIST_USERS",
+          `Não foi possível listar usuários existentes: ${listErr.message ?? listErr}`,
+        )
       }
 
       const existingUser = usersList.users.find((u) => u.email === email)
       if (!existingUser) {
-        throw new Error("Não foi possível encontrar o usuário existente")
+        return fail(
+          "AUTH_EXISTING_LOOKUP",
+          "Não foi possível encontrar o usuário existente pelo e-mail",
+        )
       }
 
       userId = existingUser.id
+
+      console.log(`[1] Atualizando senha do usuário existente ${userId}`)
 
       const { error: pwErr } = await supabaseAdmin.auth.admin.updateUserById(
         userId,
         { password },
       )
       if (pwErr) {
-        console.error("Erro atualizando senha:", pwErr)
-      } else {
-        console.log("Senha atualizada para usuário existente")
+        console.log("[1] Erro ao atualizar senha:", pwErr)
+        return fail(
+          "AUTH_UPDATE_PASSWORD",
+          `Erro atualizando senha: ${pwErr.message ?? pwErr}`,
+        )
       }
     } else if (createError) {
-      throw createError
+      console.log("[1] Erro ao criar usuário NOVO:", createError)
+      return fail(
+        "AUTH_CREATE_USER",
+        createError.message ?? String(createError),
+      )
     } else {
+      if (!userData || !userData.user || !userData.user.id) {
+        return fail(
+          "AUTH_RETURN_EMPTY",
+          "Supabase criou usuário mas não retornou ID",
+        )
+      }
       userId = userData.user.id
+      console.log(`[1] Usuário novo criado com ID ${userId}`)
     }
 
-    // 2. Sincronizar tabela profiles
+    // ======================================================
+    // [2] Garantir registro / atualização na tabela profiles
+    // ======================================================
+    console.log("[2] Sincronizando profiles")
+
     const { data: existingProfile, error: profileCheckErr } = await supabaseAdmin
       .from("profiles")
       .select("id")
@@ -101,10 +153,12 @@ serve(async (req) => {
       .maybeSingle()
 
     if (profileCheckErr) {
-      console.warn("Aviso ao consultar profile:", profileCheckErr)
+      console.log("[2] Aviso ao consultar profile:", profileCheckErr)
+      // não dou fail aqui porque é apenas um aviso de "not found" em alguns casos
     }
 
     if (existingProfile) {
+      console.log("[2] Profile existe, atualizando")
       const { error: updateError } = await supabaseAdmin
         .from("profiles")
         .update({
@@ -114,8 +168,15 @@ serve(async (req) => {
         })
         .eq("id", userId)
 
-      if (updateError) throw updateError
+      if (updateError) {
+        console.log("[2] Erro ao atualizar profile:", updateError)
+        return fail(
+          "PROFILE_UPDATE",
+          updateError.message ?? String(updateError),
+        )
+      }
     } else {
+      console.log("[2] Profile não existe, criando")
       const { error: profileError } = await supabaseAdmin
         .from("profiles")
         .insert({
@@ -125,16 +186,31 @@ serve(async (req) => {
           supervisora_id: supervisoraId || null,
         })
 
-      if (profileError) throw profileError
+      if (profileError) {
+        console.log("[2] Erro ao inserir profile:", profileError)
+        return fail(
+          "PROFILE_INSERT",
+          profileError.message ?? String(profileError),
+        )
+      }
     }
 
-    // 3. Atualizar papel em user_roles
+    // ======================================================
+    // [3] Atualizar papel em user_roles
+    // ======================================================
+    console.log("[3] Atualizando user_roles")
     const { error: delRoleErr } = await supabaseAdmin
       .from("user_roles")
       .delete()
       .eq("user_id", userId)
 
-    if (delRoleErr) throw delRoleErr
+    if (delRoleErr) {
+      console.log("[3] Erro deletando roles antigas:", delRoleErr)
+      return fail(
+        "ROLES_DELETE",
+        delRoleErr.message ?? String(delRoleErr),
+      )
+    }
 
     const { error: roleError } = await supabaseAdmin
       .from("user_roles")
@@ -143,55 +219,81 @@ serve(async (req) => {
         role,
       })
 
-    if (roleError) throw roleError
+    if (roleError) {
+      console.log("[3] Erro inserindo novo role:", roleError)
+      return fail(
+        "ROLES_INSERT",
+        roleError.message ?? String(roleError),
+      )
+    }
 
-    // 4. Se for coordenador, fazer assignments automáticos
+    // ======================================================
+    // [4] Se for coordenador, criar assignments automáticos
+    // ======================================================
     if (role === "coordenador" && supervisoraId) {
-      console.log("🔗 Coordenador detectado, criando assignments automáticos...")
+      console.log("[4] Coordenador detectado, criando assignments automáticos")
 
+      // pegar lotes daquela supervisora
       const { data: lotesData, error: lotesError } = await supabaseAdmin
         .from("lotes")
         .select("id")
         .eq("supervisora_id", supervisoraId)
 
       if (lotesError) {
-        console.error("Erro ao buscar lotes:", lotesError)
-      } else if (lotesData && lotesData.length > 0) {
-        console.log(`📦 Encontrados ${lotesData.length} lotes para associar`)
+        console.log("[4] Erro buscando lotes:", lotesError)
+        return fail(
+          "LOTES_SELECT",
+          lotesError.message ?? String(lotesError),
+        )
+      }
+
+      if (lotesData && lotesData.length > 0) {
+        console.log(`[4] Encontrados ${lotesData.length} lotes`)
 
         const assignments = lotesData.map((lote) => ({
           user_id: userId,
           lote_id: lote.id,
         }))
 
+        console.log("[4] Limpando assignments antigos")
         const { error: delAssignErr } = await supabaseAdmin
           .from("coordinator_assignments")
           .delete()
           .eq("user_id", userId)
 
         if (delAssignErr) {
-          console.error("Erro ao limpar assignments antigos:", delAssignErr)
+          console.log("[4] Erro limpando assignments antigos:", delAssignErr)
+          return fail(
+            "ASSIGN_DELETE",
+            delAssignErr.message ?? String(delAssignErr),
+          )
         }
 
+        console.log("[4] Inserindo novos assignments")
         const { error: assignError } = await supabaseAdmin
           .from("coordinator_assignments")
           .insert(assignments)
 
         if (assignError) {
-          console.error("Erro ao criar assignments:", assignError)
-        } else {
-          console.log(`✅ ${assignments.length} assignments criados com sucesso`)
+          console.log("[4] Erro inserindo assignments:", assignError)
+          return fail(
+            "ASSIGN_INSERT",
+            assignError.message ?? String(assignError),
+          )
         }
       } else {
-        console.log("⚠️ Nenhum lote encontrado para esta supervisora")
+        console.log("[4] Nenhum lote encontrado para essa supervisoraId")
       }
     }
 
-    // 5. Resposta final
+    // ======================================================
+    // [5] Sucesso total
+    // ======================================================
+    console.log("[5] Sucesso total para usuário", userId)
     return new Response(
       JSON.stringify({
         message: "Usuário criado/atualizado com sucesso",
-        userId: userId,
+        userId,
       }),
       {
         status: 200,
@@ -201,14 +303,31 @@ serve(async (req) => {
         },
       },
     )
-  } catch (error) {
-    console.error("Erro ao criar usuário:", error)
-    const errorMessage = error instanceof Error
-      ? error.message
-      : "Erro desconhecido"
+  } catch (err) {
+    console.error("[X] ERRO GERAL CATCH", err)
+
+    let details = "Erro desconhecido"
+    if (err && typeof err === "object") {
+      // @ts-ignore
+      if (err.message) {
+        // @ts-ignore
+        details = err.message
+      } else {
+        try {
+          details = JSON.stringify(err)
+        } catch {
+          details = String(err)
+        }
+      }
+    } else {
+      details = String(err)
+    }
 
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({
+        error: details,
+        where: "ERRO_DESCONHECIDO",
+      }),
       {
         status: 400,
         headers: {
