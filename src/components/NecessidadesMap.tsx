@@ -8,18 +8,16 @@ const NecessidadesMap: React.FC = () => {
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    // não roda no SSR
     if (typeof window === "undefined" || typeof document === "undefined") {
       return;
     }
 
-    // evita recriar mapa se já existe
     if (mapRef.current) {
       return;
     }
 
     try {
-      // === 1. Inicializa mapa base ===
+      // === 1. Cria o mapa base ===
       const map = L.map("necessidades-map", {
         center: [-18.5, -44.0], // MG aproximado
         zoom: 6,
@@ -28,7 +26,6 @@ const NecessidadesMap: React.FC = () => {
       });
       mapRef.current = map;
 
-      // fundo claro
       const baseTiles = L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
         {
@@ -38,71 +35,52 @@ const NecessidadesMap: React.FC = () => {
         }
       ).addTo(map);
 
-      // grupos de camada
-      const snvLayerGroup = L.layerGroup();   // SNV DNIT BRs/MG
-      const vgeoLayerGroup = L.layerGroup();  // Malha Federal (VGeo MG)
+      // === 2. Prepara os grupos de camada ===
+      const snvLayerGroup = L.layerGroup();
+      const vgeoLayerGroup = L.layerGroup();
 
-      // SNV começa visível
+      // SNV começa ligado
       snvLayerGroup.addTo(map);
 
-      // controle para ligar/desligar
+      // Controle de camadas
       const overlays: Record<string, L.Layer> = {
         "SNV DNIT 202501A (BRs federais/MG)": snvLayerGroup,
         "Malha Federal (VGeo MG)": vgeoLayerGroup,
       };
 
       L.control
-        .layers(
-          { "Mapa Base": baseTiles },
-          overlays,
-          { collapsed: false }
-        )
+        .layers({ "Mapa Base": baseTiles }, overlays, { collapsed: false })
         .addTo(map);
 
-      // helper pra evitar "undefined" no popup
+      // ========== 3. Helper seguro p/ popup ==========
       function safe(v: any) {
         if (v === null || v === undefined || v === "") return "—";
         return v;
       }
 
-      // 🔎 helper que filtra só geometria de linha
+      // ========== 4. Função para filtrar SOMENTE linhas ==========
       function onlyLineFeatures(fc: any) {
         if (!fc || !fc.features || !Array.isArray(fc.features)) return fc;
-        const filtered = {
+        return {
           type: "FeatureCollection",
           features: fc.features.filter((feat: any) => {
             if (!feat || !feat.geometry) return false;
-
-            const g = feat.geometry;
-            const t = g.type;
-
-            // a gente quer só linha (rodovia)
+            const t = feat.geometry.type;
             if (t !== "LineString" && t !== "MultiLineString") {
+              // joga fora Polygon, MultiPolygon, bbox etc
               return false;
             }
-
-            // coordinates precisam existir
-            if (!g.coordinates) return false;
-            if (
-              (t === "LineString" && g.coordinates.length < 2) ||
-              (t === "MultiLineString" && g.coordinates.length === 0)
-            ) {
-              return false;
-            }
-
+            // coord tem que existir e ter conteúdo
+            const coords = feat.geometry.coordinates;
+            if (!coords) return false;
+            if (t === "LineString" && coords.length < 2) return false;
+            if (t === "MultiLineString" && coords.length === 0) return false;
             return true;
           }),
         };
-        return filtered;
       }
 
-      // ==========================================================
-      // 3. Carregar SNV (snv_br_mg_202501A.geojson)
-      // Campos esperados em feature.properties:
-      // vl_br, sg_uf, vl_codigo, vl_km_inic, vl_km_fina,
-      // ul, ds_jurisdi, ds_legenda, sg_legenda,
-      // latitude_inicial, longitude_inicial, latitude_final, longitude_final
-      // ==========================================================
+      // ========== 5. Carregar SNV ==========
       (async () => {
         try {
           const resp = await fetch("/geojson/snv_br_mg_202501A.geojson", {
@@ -118,9 +96,7 @@ const NecessidadesMap: React.FC = () => {
             return;
           }
 
-          // lê json bruto
           const rawData = await resp.json();
-          // remove polígonos/retângulos/bbox e lixo
           const snvData = onlyLineFeatures(rawData);
 
           const snvGeo = L.geoJSON(snvData as any, {
@@ -171,22 +147,19 @@ const NecessidadesMap: React.FC = () => {
 
           snvGeo.addTo(snvLayerGroup);
 
-          // tenta enquadrar no conteúdo limpinho (sem bbox fake)
-          try {
-            map.fitBounds(snvGeo.getBounds(), { padding: [20, 20] });
-          } catch (fitErr) {
-            console.warn("Não consegui dar fitBounds no SNV:", fitErr);
-          }
+          // IMPORTANTE: NÃO vamos dar fitBounds automático,
+          // porque se o bounds estiver vindo "zoado", ele desenha o retângulo.
+          // // try {
+          // //   map.fitBounds(snvGeo.getBounds(), { padding: [20, 20] });
+          // // } catch (fitErr) {
+          // //   console.warn("Não consegui dar fitBounds no SNV:", fitErr);
+          // // }
         } catch (err) {
           console.error("Erro carregando SNV BR/MG:", err);
         }
       })();
 
-      // ==========================================================
-      // 4. Carregar VGeo (vgeo_mg_federal_2025.geojson)
-      // Campos esperados em properties (o que existir):
-      // vl_br, ds_jurisdi, ul, vl_extensa, ...
-      // ==========================================================
+      // ========== 6. Carregar VGeo ==========
       (async () => {
         try {
           const resp = await fetch("/geojson/vgeo_mg_federal_2025.geojson", {
@@ -200,9 +173,7 @@ const NecessidadesMap: React.FC = () => {
             return;
           }
 
-          // lê json bruto
           const rawData = await resp.json();
-          // remove polígonos/bbox
           const vgeoData = onlyLineFeatures(rawData);
 
           const vgeoGeo = L.geoJSON(vgeoData as any, {
@@ -253,7 +224,37 @@ const NecessidadesMap: React.FC = () => {
         }
       })();
 
-      // cleanup ao desmontar
+      // ========== 7. Mata retângulos que alguém tente adicionar ==========
+      // Se em algum lugar alguém estiver criando L.rectangle(bounds),
+      // vamos interceptar depois que qualquer layer entrar no mapa.
+      // Ideia: ouvir 'layeradd' e, se for um Rectangle, remover.
+      map.on("layeradd", (e: any) => {
+        // e.layer pode ser qualquer coisa: TileLayer, Polyline, Rectangle, etc.
+        // Rectangle em Leaflet é uma subclasse de Polygon com opção 'bounding box'.
+        // A gente detecta por getBounds + getLatLngs formato retângulo.
+        if (e.layer instanceof L.Rectangle) {
+          console.warn("[DEBUG] Removendo Rectangle fantasma (bbox).");
+          map.removeLayer(e.layer);
+        } else if (e.layer instanceof L.Polygon && !(e.layer instanceof L.Polyline)) {
+          // Isso pega polígonos não-lineares.
+          // Se for aquele quadrado azul/vermelho, cai aqui.
+          const latlngs = (e.layer as any).getLatLngs?.();
+          if (latlngs) {
+            // heurística: se tiver 1 anel fechado com 4/5 pontos = bbox típico
+            const ring =
+              Array.isArray(latlngs) && latlngs.length === 1 && Array.isArray(latlngs[0])
+                ? latlngs[0]
+                : null;
+
+            if (ring && ring.length <= 6) {
+              console.warn("[DEBUG] Removendo Polygon suspeito (provável bbox).");
+              map.removeLayer(e.layer);
+            }
+          }
+        }
+      });
+
+      // ========== 8. Cleanup no unmount ==========
       return () => {
         map.remove();
         mapRef.current = null;
