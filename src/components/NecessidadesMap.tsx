@@ -5,8 +5,92 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { supabase } from "@/integrations/supabase/client";
 
-// Filtra apenas LineString / MultiLineString válidas.
-// Remove Polygon, MultiPolygon, Point etc. para evitar caixas gigantes.
+/**
+ * Calcula distância "plana" aproximada entre dois pontos (lat/lng),
+ * bom o bastante pra interpolar fração ao longo da linha.
+ */
+function dist2D(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number }
+) {
+  const dx = a.lat - b.lat;
+  const dy = a.lng - b.lng;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+/**
+ * Dado um conjunto de vértices da polyline e o ponto clicado,
+ * retorna qual fração [0..1] do comprimento total da linha
+ * corresponde ao ponto de clique projetado no segmento mais próximo.
+ */
+function fractionAlongLine(latlngs: L.LatLng[], clickLatLng: L.LatLng) {
+  if (latlngs.length < 2) return 0;
+
+  let bestSegIndex = 0;
+  let bestDist = Infinity;
+  let bestT = 0; // posição dentro do segmento [0..1]
+
+  for (let i = 0; i < latlngs.length - 1; i++) {
+    const p1 = latlngs[i];
+    const p2 = latlngs[i + 1];
+
+    const vx = p2.lat - p1.lat;
+    const vy = p2.lng - p1.lng;
+
+    const wx = clickLatLng.lat - p1.lat;
+    const wy = clickLatLng.lng - p1.lng;
+
+    const segLen2 = vx * vx + vy * vy || 1e-12;
+    let t = (vx * wx + vy * wy) / segLen2;
+    if (t < 0) t = 0;
+    if (t > 1) t = 1;
+
+    const projLat = p1.lat + t * vx;
+    const projLng = p1.lng + t * vy;
+
+    const dClickProj = Math.sqrt(
+      (clickLatLng.lat - projLat) * (clickLatLng.lat - projLat) +
+        (clickLatLng.lng - projLng) * (clickLatLng.lng - projLng)
+    );
+
+    if (dClickProj < bestDist) {
+      bestDist = dClickProj;
+      bestSegIndex = i;
+      bestT = t;
+    }
+  }
+
+  // comprimento total da linha
+  let totalLen = 0;
+  for (let i = 0; i < latlngs.length - 1; i++) {
+    totalLen += dist2D(latlngs[i], latlngs[i + 1]);
+  }
+  if (totalLen === 0) return 0;
+
+  // comprimento até o início do segmento "vencedor"
+  let lenBefore = 0;
+  for (let i = 0; i < bestSegIndex; i++) {
+    lenBefore += dist2D(latlngs[i], latlngs[i + 1]);
+  }
+
+  // comprimento parcial dentro do segmento vencedor
+  const segStart = latlngs[bestSegIndex];
+  const segEnd = latlngs[bestSegIndex + 1];
+  const segLen = dist2D(segStart, segEnd);
+  const lenInSeg = segLen * bestT;
+
+  const totalAtClick = lenBefore + lenInSeg;
+  const frac = totalAtClick / totalLen;
+
+  if (frac < 0) return 0;
+  if (frac > 1) return 1;
+  return frac;
+}
+
+/**
+ * Filtra apenas geometrias lineares (LineString / MultiLineString)
+ * e descarta Polygon, Point, etc. pra não sujar o mapa.
+ */
 function onlyLineFeatures(fc: any) {
   if (!fc || !fc.features || !Array.isArray(fc.features)) return fc;
 
@@ -41,13 +125,13 @@ function onlyLineFeatures(fc: any) {
   return filtered;
 }
 
-// Evita "undefined", "null" etc no HTML do popup
+/** Evita null/undefined/vazio em popup */
 function safe(v: any) {
   if (v === null || v === undefined || v === "") return "—";
   return v;
 }
 
-// Estilos centralizados para manter consistência visual
+/** Estilos das camadas */
 const LAYER_STYLES = {
   snv: {
     color: "#d32f2f", // vermelho contínuo (SNV oficial DNIT)
@@ -73,12 +157,12 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
   rodovia,
   rodoviaId,
 }) => {
-  // refs Leaflet (não disparam render React)
+  // refs do Leaflet
   const mapRef = useRef<L.Map | null>(null);
   const snvGroupRef = useRef<L.LayerGroup | null>(null);
   const vgeoGroupRef = useRef<L.LayerGroup | null>(null);
 
-  // Status visível na tela (barrinhas SNV / VGeo canto superior esquerdo do mapa)
+  // mensagens de status (SNV / VGeo) mostradas sobre o mapa
   const [snvStatus, setSnvStatus] = useState<{
     type: "ok" | "warn" | "error";
     msg: string;
@@ -89,20 +173,20 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
     msg: string;
   } | null>(null);
 
-  // Define qual rodovia consultar. Se nada vier por props, fallback BR-040.
+  // rodovia alvo (fallback BR-040)
   const targetRodovia =
     rodovia?.codigo?.trim() || rodoviaId?.trim() || "BR-040";
 
   useEffect(() => {
-    // Segurança contra SSR
+    // evitar SSR
     if (typeof window === "undefined" || typeof document === "undefined") {
       return;
     }
 
-    // Criar o mapa apenas uma vez
+    // cria o mapa só uma vez
     if (!mapRef.current) {
       const map = L.map("necessidades-map", {
-        center: [-18.5, -44.0], // centro aproximado MG
+        center: [-18.5, -44.0], // MG aproximado
         zoom: 6,
         minZoom: 5,
         maxZoom: 18,
@@ -119,7 +203,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
         }
       ).addTo(map);
 
-      // LayerGroups vazios
+      // grupos de camadas
       const snvLayerGroup = L.layerGroup();
       const vgeoLayerGroup = L.layerGroup();
 
@@ -129,7 +213,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
       // SNV começa ligado
       snvLayerGroup.addTo(map);
 
-      // Controle de camadas (checkbox)
+      // controle de visibilidade
       const overlays: Record<string, L.Layer> = {
         "SNV DNIT 202501A (BRs federais/MG)": snvLayerGroup,
         "Malha Federal (VGeo MG)": vgeoLayerGroup,
@@ -146,12 +230,12 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
         .addTo(map);
     }
 
-    // A partir daqui o mapa e os grupos já existem
+    // agora que o mapa já existe:
     const map = mapRef.current!;
     const snvLayerGroup = snvGroupRef.current!;
     const vgeoLayerGroup = vgeoGroupRef.current!;
 
-    // Ajusta o enquadramento com base nas camadas visíveis
+    // função pra enquadrar o que estiver visível
     function fitToVisibleLayers() {
       const bounds = L.latLngBounds([]);
 
@@ -160,7 +244,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
           const snvBounds = (snvLayerGroup as any).getBounds?.();
           if (snvBounds && snvBounds.isValid()) bounds.extend(snvBounds);
         } catch {
-          /* ignore */
+          // ignore
         }
       }
 
@@ -169,7 +253,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
           const vgeoBounds = (vgeoLayerGroup as any).getBounds?.();
           if (vgeoBounds && vgeoBounds.isValid()) bounds.extend(vgeoBounds);
         } catch {
-          /* ignore */
+          // ignore
         }
       }
 
@@ -178,17 +262,17 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
       }
     }
 
-    // Antes de recarregar a BR alvo, limpamos camadas antigas
+    // limpa camadas antigas quando troca rodovia
     snvLayerGroup.clearLayers();
     vgeoLayerGroup.clearLayers();
 
-    // Limpa status antigo
+    // reseta status
     setSnvStatus(null);
     setVgeoStatus(null);
 
-    // ===============================
-    // 1) Carregar SNV
-    // ===============================
+    // ======================================================
+    // 1) SNV
+    // ======================================================
     (async () => {
       try {
         setSnvStatus({
@@ -223,14 +307,14 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
             type: "error",
             msg: `Sem dados SNV para ${targetRodovia}.`,
           });
-          // Não faz return aqui: deixa continuar o VGeo normalmente
+          // continua pro VGeo
         } else {
           const snvData = onlyLineFeatures(geojsonData);
 
           const snvGeo = L.geoJSON(snvData as any, {
             style: LAYER_STYLES.snv as any,
             onEachFeature: (feature: any, layer: L.Layer) => {
-              layer.on("click", () => {
+              layer.on("click", (e: L.LeafletMouseEvent) => {
                 const p = feature?.properties || {};
 
                 const brNumero = p.vl_br ? `BR-${p.vl_br}` : "BR-—";
@@ -246,6 +330,37 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
                 const latFim = p.latitude_final;
                 const lonFim = p.longitude_final;
 
+                // 1. pegar vértices da linha
+                let latlngs: L.LatLng[] = [];
+                if (layer instanceof L.Polyline) {
+                  const raw = layer.getLatLngs() as any;
+                  if (Array.isArray(raw) && raw.length > 0) {
+                    if (Array.isArray(raw[0])) {
+                      // MultiLineString -> usa primeiro subtrecho
+                      latlngs = raw[0] as L.LatLng[];
+                    } else {
+                      // LineString
+                      latlngs = raw as L.LatLng[];
+                    }
+                  }
+                }
+
+                // 2. fração ao longo da linha perto do clique
+                const frac = fractionAlongLine(latlngs, e.latlng);
+
+                // 3. interpolar km exato
+                let kmExato: string | number = "—";
+                if (
+                  typeof kmInicial === "number" &&
+                  typeof kmFinal === "number" &&
+                  !isNaN(kmInicial) &&
+                  !isNaN(kmFinal)
+                ) {
+                  const kmCalc =
+                    kmInicial + frac * (kmFinal - kmInicial);
+                  kmExato = kmCalc.toFixed(1); // uma casa decimal
+                }
+
                 const htmlPopup = `
                   <div style="font-size:13px; line-height:1.4;">
                     <b>SNV / DNIT 202501A</b><br/>
@@ -253,13 +368,14 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
                     Código SNV: ${safe(codigoSNV)}<br/>
                     km inicial: ${safe(kmInicial)}<br/>
                     km final: ${safe(kmFinal)}<br/>
+                    <b>Km (ponto clicado): ${safe(kmExato)}</b><br/>
                     UL responsável: ${safe(ul)}<br/>
                     Jurisdição: ${safe(jurisdicao)}<br/>
                     Situação: ${safe(legenda)}<br/>
                     <hr style="border:none;border-top:1px solid #ccc;margin:6px 0;" />
                     <div style="font-size:11px; line-height:1.4; color:#555;">
-                      Início: ${safe(latIni)}, ${safe(lonIni)}<br/>
-                      Fim: ${safe(latFim)}, ${safe(lonFim)}
+                      Início geom.: ${safe(latIni)}, ${safe(lonIni)}<br/>
+                      Fim geom.: ${safe(latFim)}, ${safe(lonFim)}
                     </div>
                   </div>
                 `;
@@ -276,7 +392,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
           });
         }
 
-        // fit depois de tentar SNV também (caso VGeo não venha)
+        // faz um fit mesmo se só SNV carregou
         fitToVisibleLayers();
       } catch (err) {
         console.error("💥 Erro inesperado carregando SNV:", err);
@@ -287,9 +403,9 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
       }
     })();
 
-    // ===============================
-    // 2) Carregar VGeo
-    // ===============================
+    // ======================================================
+    // 2) VGeo
+    // ======================================================
     (async () => {
       try {
         setVgeoStatus({
@@ -335,14 +451,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
             layer.on("click", () => {
               const p = feature?.properties || {};
 
-              // Mapeamento com base no dump real que você me mandou:
-              // codigo_rod: "267"
-              // unidade_fe: "MG"
-              // jurisdicao: "Estadual"
-              // extensao: 17.3
-              // local_inic: "ENTR BR383(B)"
-              // local_fim: "ACESSO CONCEI"
-              // tipo_trecho: "Eixo Principal"
+              // campos reais da tua base VGeo
               const rodovia = p.codigo_rod
                 ? `BR-${p.codigo_rod}/${p.unidade_fe || ""}`.trim()
                 : "—";
@@ -351,14 +460,12 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
               const extensaoKm = p.extensao || "—";
               const localIni = p.local_inic || "—";
               const localFim = p.local_fim || "—";
-              const tipoTrecho = p.tipo_trecho || "—";
 
               const htmlPopup = `
                 <div style="font-size:13px; line-height:1.4;">
                   <b>VGeo / Malha Federal MG</b><br/>
                   Rodovia: ${safe(rodovia)}<br/>
                   Jurisdição: ${safe(jurisdicao)}<br/>
-                  Tipo de Trecho: ${safe(tipoTrecho)}<br/>
                   Extensão aprox (km): ${safe(extensaoKm)}<br/>
                   <hr style="border:none;border-top:1px solid #ccc;margin:6px 0;" />
                   <div style="font-size:11px; line-height:1.4; color:#555;">
@@ -367,6 +474,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
                   </div>
                 </div>
               `;
+
               (layer as any).bindPopup(htmlPopup).openPopup();
             });
           },
@@ -379,7 +487,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
           msg: `VGeo carregado (${vgeoData.features.length} trechos).`,
         });
 
-        // Ajuste final de enquadramento considerando agora também o VGeo
+        // fit final incluindo VGeo
         fitToVisibleLayers();
       } catch (err) {
         console.error("💥 Erro inesperado carregando VGeo:", err);
@@ -390,16 +498,16 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
       }
     })();
 
-    // limpar no unmount total do componente
+    // limpeza geral se componente desmontar
     return () => {
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
-  }, [targetRodovia]); // recarrega se mudar BR
+  }, [targetRodovia]);
 
-  // Overlay de status (SNV / VGeo) no canto do mapa
+  // Caixinhas SNV / VGeo no canto do mapa
   function renderStatusOverlay() {
     if (!snvStatus && !vgeoStatus) return null;
 
@@ -417,9 +525,9 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
     };
 
     function bgFor(type: "ok" | "warn" | "error") {
-      if (type === "ok") return "#e8f5e9"; // verde leve
-      if (type === "warn") return "#fffde7"; // amarelo leve
-      return "#ffebee"; // vermelho leve
+      if (type === "ok") return "#e8f5e9"; // verde claro
+      if (type === "warn") return "#fffde7"; // amarelo claro
+      return "#ffebee"; // vermelho claro
     }
 
     return (
@@ -431,7 +539,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
           zIndex: 9999,
           display: "flex",
           flexDirection: "column",
-          pointerEvents: "none", // não rouba o clique do mapa
+          pointerEvents: "none", // não intercepta clique no mapa
         }}
       >
         {snvStatus && (
