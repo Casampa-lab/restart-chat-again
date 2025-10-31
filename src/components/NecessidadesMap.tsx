@@ -130,7 +130,7 @@ const NecessidadesMap: React.FC = () => {
                   km inicial: ${safe(kmInicial)}<br/>
                   km final: ${safe(kmFinal)}<br/>
                   UL responsável: ${safe(ul)}<br/>
-                  Jurisdição: ${safe(juriscricao)}<br/>
+                  Jurisdição: ${safe(jurisdicao)}<br/>
                   Situação: ${safe(legenda)}<br/>
                   <hr style="border:none;border-top:1px solid #ccc;margin:6px 0;" />
                   <div style="font-size:11px; line-height:1.4; color:#555;">
