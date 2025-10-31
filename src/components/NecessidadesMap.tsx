@@ -86,55 +86,52 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
   const targetRodovia =
     rodovia?.codigo?.trim() || rodoviaId?.trim() || "BR-040";
 
-  // flag pra logar só uma vez as props da VGeo
-  const vgeoLoggedRef = useRef(false);
-
   useEffect(() => {
     if (typeof window === "undefined" || typeof document === "undefined") {
       return;
     }
 
     if (!mapRef.current) {
-      const map = L.map("necessidades-map", {
-        center: [-18.5, -44.0],
-        zoom: 6,
-        minZoom: 5,
-        maxZoom: 18,
-      });
+        const map = L.map("necessidades-map", {
+          center: [-18.5, -44.0],
+          zoom: 6,
+          minZoom: 5,
+          maxZoom: 18,
+        });
 
-      mapRef.current = map;
+        mapRef.current = map;
 
-      const baseTiles = L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-        {
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
-            'contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        }
-      ).addTo(map);
-
-      const snvLayerGroup = L.layerGroup();
-      const vgeoLayerGroup = L.layerGroup();
-
-      snvGroupRef.current = snvLayerGroup;
-      vgeoGroupRef.current = vgeoLayerGroup;
-
-      snvLayerGroup.addTo(map);
-
-      const overlays: Record<string, L.Layer> = {
-        "SNV DNIT 202501A (BRs federais/MG)": snvLayerGroup,
-        "Malha Federal (VGeo MG)": vgeoLayerGroup,
-      };
-
-      L.control
-        .layers(
+        const baseTiles = L.tileLayer(
+          "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
           {
-            "Mapa Base": baseTiles,
-          },
-          overlays,
-          { collapsed: false }
-        )
-        .addTo(map);
+            attribution:
+              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
+              'contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          }
+        ).addTo(map);
+
+        const snvLayerGroup = L.layerGroup();
+        const vgeoLayerGroup = L.layerGroup();
+
+        snvGroupRef.current = snvLayerGroup;
+        vgeoGroupRef.current = vgeoLayerGroup;
+
+        snvLayerGroup.addTo(map);
+
+        const overlays: Record<string, L.Layer> = {
+          "SNV DNIT 202501A (BRs federais/MG)": snvLayerGroup,
+          "Malha Federal (VGeo MG)": vgeoLayerGroup,
+        };
+
+        L.control
+          .layers(
+            {
+              "Mapa Base": baseTiles,
+            },
+            overlays,
+            { collapsed: false }
+          )
+          .addTo(map);
     }
 
     const map = mapRef.current!;
@@ -167,13 +164,12 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
       }
     }
 
-    // limpa as camadas anteriores antes de recarregar
+    // limpa camadas antigas
     snvLayerGroup.clearLayers();
     vgeoLayerGroup.clearLayers();
 
     setSnvStatus(null);
     setVgeoStatus(null);
-    vgeoLoggedRef.current = false;
 
     // ===============================
     // SNV
@@ -323,13 +319,17 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
             layer.on("click", () => {
               const p = feature?.properties || {};
 
-              // log de inspeção só na primeira vez
-              if (!vgeoLoggedRef.current) {
-                console.log("🔎 Propriedades VGeo recebidas:", p);
-                vgeoLoggedRef.current = true;
+              // NOVO: captura propriedades brutas da feature
+              try {
+                const raw = JSON.stringify(p, null, 2);
+                console.log("📌 PROPRIEDADES VGeo (raw):", raw);
+                alert(raw); // <- copia isso pra mim
+              } catch (e) {
+                console.log("📌 PROPRIEDADES VGeo (raw) [nao serializavel]:", p);
+                alert("Não consegui serializar as propriedades dessa linha.");
               }
 
-              // Tentativa de mapear campos comuns
+              // tentativa atual de adivinhar os campos
               const rodoviaGuess =
                 (p.vl_br ? `BR-${p.vl_br}` : null) ||
                 p.RODOVIA ||
@@ -347,7 +347,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
                 p.admin ||
                 "—";
 
-              const ulGuess = p.ul || p.UL || p.ul_responsavel || "—";
+              const ulGuess = p.ul || p.UL || p.UL_RESP || p.ul_responsavel || "—";
 
               const extensaoGuess =
                 p.vl_extensa ||
@@ -357,30 +357,6 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
                 p.extensao ||
                 "—";
 
-              // Se tudo der "—", vamos montar uma listinha debug pro fiscal inspecionar
-              const tudoVazio =
-                safe(rodoviaGuess) === "—" &&
-                safe(jurisdicaoGuess) === "—" &&
-                safe(ulGuess) === "—" &&
-                safe(extensaoGuess) === "—";
-
-              let extraDebug = "";
-              if (tudoVazio) {
-                // mostra algumas chaves e valores crus pra ajudar você a identificar
-                const previewPairs = Object.entries(p || {})
-                  .slice(0, 6)
-                  .map(([k, v]) => `${k}: ${v}`)
-                  .join("<br/>");
-
-                extraDebug = `
-                  <hr style="border:none;border-top:1px solid #ccc;margin:6px 0;" />
-                  <div style="font-size:11px; line-height:1.4; color:#555;">
-                    <b>Debug (primeiros campos brutos):</b><br/>
-                    ${previewPairs || "sem propriedades"}
-                  </div>
-                `;
-              }
-
               const htmlPopup = `
                 <div style="font-size:13px; line-height:1.4;">
                   <b>VGeo / Malha Federal MG</b><br/>
@@ -388,7 +364,6 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
                   Jurisdição: ${safe(jurisdicaoGuess)}<br/>
                   UL responsável: ${safe(ulGuess)}<br/>
                   Extensão aprox (km): ${safe(extensaoGuess)}
-                  ${extraDebug}
                 </div>
               `;
 
@@ -420,7 +395,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
         mapRef.current = null;
       }
     };
-  }, [targetRodovia]);
+  }, [rodovia?.codigo, rodoviaId]);
 
   function renderStatusOverlay() {
     if (!snvStatus && !vgeoStatus) return null;
@@ -461,6 +436,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
             style={{
               ...baseBoxStyle,
               background: bgFor(snvStatus.type),
+              borderColor: "#b71c1c",
             }}
           >
             <b>SNV:</b> {snvStatus.msg}
@@ -471,6 +447,7 @@ const NecessidadesMap: React.FC<NecessidadesMapProps> = ({
             style={{
               ...baseBoxStyle,
               background: bgFor(vgeoStatus.type),
+              borderColor: "#1a237e",
             }}
           >
             <b>VGeo:</b> {vgeoStatus.msg}
