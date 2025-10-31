@@ -22,16 +22,22 @@ serve(async (req) => {
       throw new Error('A senha deve ter pelo menos 6 caracteres')
     }
 
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    )
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+     throw new Error('Variáveis de ambiente SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configuradas.')
+    }
+
+export const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+})
+
 
     let userId: string;
 
