@@ -37,14 +37,19 @@ export const UsuariosManager = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [supervisoras, setSupervisoras] = useState<Supervisora[]>([]);
   const [loading, setLoading] = useState(false);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
+
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
+
   const [selectedSupervisora, setSelectedSupervisora] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedEmail, setSelectedEmail] = useState("");
+
   const [newPassword, setNewPassword] = useState("");
+
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
@@ -109,6 +114,7 @@ export const UsuariosManager = () => {
 
   const handleSalvar = async () => {
     if (!editingProfile) return;
+
     if (!selectedRole) {
       toast.error("Selecione um perfil");
       return;
@@ -121,21 +127,31 @@ export const UsuariosManager = () => {
 
     setLoading(true);
     try {
-      // Verificar limites por supervisora
+      //
+      // 1. Verificar limites por supervisora (5 técnicos, 1 coordenador)
+      //
       if (selectedSupervisora) {
-        // Buscar todos os profiles da supervisora
-        const { data: existingProfiles } = await supabase
+        // Buscar todos os profiles desta supervisora
+        const { data: existingProfiles, error: existingProfilesError } = await supabase
           .from("profiles")
-          .select("id")
+          .select("id, supervisora_id")
           .eq("supervisora_id", selectedSupervisora);
 
+        if (existingProfilesError) {
+          throw new Error("Falha ao validar limites de equipe: " + existingProfilesError.message);
+        }
+
         if (existingProfiles && existingProfiles.length > 0) {
-          // Buscar os roles de todos os usuários da supervisora
+          // Buscar os roles de todos esses usuários
           const userIds = existingProfiles.map(p => p.id);
-          const { data: existingRoles } = await supabase
+          const { data: existingRoles, error: existingRolesError } = await supabase
             .from("user_roles")
             .select("user_id, role")
             .in("user_id", userIds);
+
+          if (existingRolesError) {
+            throw new Error("Falha ao validar perfis existentes: " + existingRolesError.message);
+          }
 
           const currentRoleCounts = existingRoles?.reduce((acc: any, userRole: any) => {
             const role = userRole.role;
@@ -145,25 +161,27 @@ export const UsuariosManager = () => {
             return acc;
           }, {}) || {};
 
-          // Verificar se está mudando a supervisora ou o role
-          const isChangingSupervisora = editingProfile.supervisora_id !== selectedSupervisora;
           const currentUserRole = editingProfile.user_roles?.[0]?.role;
+          const isChangingSupervisora = editingProfile.supervisora_id !== selectedSupervisora;
           const isChangingRole = currentUserRole !== selectedRole;
 
-          // Se estiver adicionando um novo usuário nessa supervisora OU mudando o role
           if (isChangingSupervisora || isChangingRole) {
-            // Ajustar contagem: remover o role antigo se existir na mesma supervisora
+            // se ele já tinha uma role nessa mesma supervisora, desconta da contagem
             if (!isChangingSupervisora && currentUserRole) {
-              currentRoleCounts[currentUserRole] = Math.max(0, (currentRoleCounts[currentUserRole] || 0) - 1);
+              currentRoleCounts[currentUserRole] = Math.max(
+                0,
+                (currentRoleCounts[currentUserRole] || 0) - 1
+              );
             }
 
-            // Limites: 5 técnicos, 1 coordenador
+            // Limite: até 5 técnicos por supervisora
             if (selectedRole === "tecnico" && (currentRoleCounts?.tecnico || 0) >= 5) {
               toast.error("Esta supervisora já atingiu o limite de 5 técnicos de campo");
               setLoading(false);
               return;
             }
 
+            // Limite: exatamente 1 coordenador por supervisora
             if (selectedRole === "coordenador" && (currentRoleCounts?.coordenador || 0) >= 1) {
               toast.error("Esta supervisora já possui 1 coordenador. Apenas 1 coordenador é permitido por supervisora");
               setLoading(false);
@@ -173,84 +191,85 @@ export const UsuariosManager = () => {
         }
       }
 
-      // Atualizar email no auth.users via edge function
-      if (selectedEmail !== editingProfile.email) {
-        const { data: emailData, error: emailError } = await supabase.functions.invoke('update-user-email', {
-          body: { userId: editingProfile.id, newEmail: selectedEmail }
-        });
-        
-        if (emailError) {
-          const errorMessage = emailData?.error || emailError.message || 'Erro ao atualizar email';
-          throw new Error(errorMessage);
-        }
-      }
-      
-      // Atualizar supervisora e email no profiles
+      //
+      // 2. Atualizar supervisora e email diretamente no profiles
+      //
       const { error: profileError } = await supabase
         .from("profiles")
         .update({ 
           supervisora_id: selectedSupervisora || null,
-          email: selectedEmail 
+          email: selectedEmail
         })
         .eq("id", editingProfile.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        throw new Error("Falha ao atualizar dados do usuário: " + profileError.message);
+      }
 
-      // Atualizar role apenas se mudou
+      //
+      // 3. Atualizar role do usuário (tabela user_roles)
+      //
       const currentUserRole = editingProfile.user_roles?.[0]?.role;
       if (currentUserRole !== selectedRole) {
-        // Remover role existente
-        await supabase
+        // Remove role anterior
+        const { error: deleteRoleError } = await supabase
           .from("user_roles")
           .delete()
           .eq("user_id", editingProfile.id);
 
-        // Inserir novo role
-        const { error: roleError } = await supabase
+        if (deleteRoleError) {
+          throw new Error("Falha ao remover perfil antigo: " + deleteRoleError.message);
+        }
+
+        // Insere a role nova
+        const { error: insertRoleError } = await supabase
           .from("user_roles")
           .insert([{ user_id: editingProfile.id, role: selectedRole as any }]);
 
-        if (roleError) throw roleError;
+        if (insertRoleError) {
+          throw new Error("Falha ao definir novo perfil: " + insertRoleError.message);
+        }
       }
 
-      // Se mudou para coordenador E tem supervisora, criar assignments automáticos
+      //
+      // 4. Se for coordenador e tiver supervisora, sincronizar assignments com os lotes
+      //
       if (selectedRole === 'coordenador' && selectedSupervisora) {
-        console.log('🔗 Atualizando assignments do coordenador...')
-        
-        // Buscar lotes da supervisora
-        const { data: lotesData } = await supabase
+        const { data: lotesData, error: lotesError } = await supabase
           .from('lotes')
           .select('id')
-          .eq('supervisora_id', selectedSupervisora)
-        
-        if (lotesData && lotesData.length > 0) {
-          // Remover assignments antigos
+          .eq('supervisora_id', selectedSupervisora);
+
+        if (!lotesError && lotesData && lotesData.length > 0) {
+          // Limpar assignments antigos
           await supabase
             .from('coordinator_assignments')
             .delete()
-            .eq('user_id', editingProfile.id)
-          
-          // Criar novos assignments
+            .eq('user_id', editingProfile.id);
+
+          // Criar os novos assignments
           const assignments = lotesData.map(lote => ({
             user_id: editingProfile.id,
             lote_id: lote.id
-          }))
-          
+          }));
+
           const { error: assignError } = await supabase
             .from('coordinator_assignments')
-            .insert(assignments)
-          
+            .insert(assignments);
+
           if (assignError) {
-            console.error('Erro ao criar assignments:', assignError)
-          } else {
-            console.log(`✅ ${assignments.length} assignments criados`)
+            console.warn("Falha ao atualizar assignments do coordenador:", assignError.message);
           }
         }
       }
 
+      //
+      // 5. Feedback, fechar diálogo e recarregar lista
+      //
       toast.success("Usuário atualizado com sucesso!");
       handleCloseDialog();
       await loadProfiles();
+
     } catch (error: any) {
       toast.error("Erro ao atualizar: " + error.message);
     } finally {
@@ -710,6 +729,7 @@ export const UsuariosManager = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
       </CardContent>
     </Card>
   );
