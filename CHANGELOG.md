@@ -21,6 +21,8 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - `inventario_dinamico_tachas` - Cadastro dinâmico de tachas refletivas
 - `inventario_dinamico_inscricoes` - Sinalização horizontal especial (setas, símbolos, legendas)
 - `inventario_dinamico_marcas_longitudinais` - Marcas viárias longitudinais
+- `inventario_dinamico_placas` - Placas de sinalização vertical
+- `inventario_dinamico_cilindros` - Cilindros delimitadores
 
 **Funcionalidade:**
 - Campo `status_reconciliacao` calculado automaticamente em todas as views
@@ -84,6 +86,8 @@ Cadastro Original → Necessidades Executadas → Inventário Dinâmico (Estado 
 - `src/components/InventarioTachasViewer.tsx` (query principal)
 - `src/components/InventarioInscricoesViewer.tsx` (linhas 18, query principal)
 - `src/components/InventarioMarcasLongitudinaisViewer.tsx` (query + badge)
+- `src/components/InventarioPlacasViewer.tsx` 
+- `src/components/InventarioCilindrosViewer.tsx` 
 
 **Compatibilidade:**
 - ✅ Backward compatible - Sem breaking changes
@@ -239,11 +243,11 @@ Para cada intervenção em elemento existente:
 
 **Tabelas de Inventário:**
 - `ficha_placa` - Cadastro atual de placas
-- `cilindros_inventario` - Cadastro de cilindros
-- `defensas_inventario` - Cadastro de defensas
-- `marcas_inventario` - Cadastro de marcas viárias
-- `porticos_inventario` - Cadastro de pórticos
-- `tachas_inventario` - Cadastro de tachas
+- `ficha_cilindros` - Cadastro de cilindros
+- `defensas` - Cadastro de defensas
+- `ficha_inscrcoes` - Cadastro de marcas viárias
+- `ficha_porticos` - Cadastro de pórticos
+- `ficha_tachas` - Cadastro de tachas
 
 **Tabelas de Necessidades (Importação):**
 - `necessidades_placas`
@@ -268,7 +272,8 @@ Para cada intervenção em elemento existente:
 - `intervencoes_sh` - Marcas longitudinais
 - `intervencoes_inscricoes` - Setas, símbolos e legendas
 - `intervencoes_tacha` - Tachas refletivas
-- `defensas_intervencoes` - Defensas metálicas
+- `intervencoes_cilindros` - Cilindros
+- 'intervencoes_porticos` - Tachas refletivas
 
 **Tabelas de Histórico:**
 - `ficha_placa_intervencoes` - Timeline de mudanças em placas
